@@ -37,6 +37,7 @@ jobs:
         working-directory: native
         run: |
           brew install xcodegen
+          sed -i '' 's/getAllCookies(completionHandler: callback)/getAllCookies(callback)/' Sources/Store.swift
           xcodegen generate
       - name: Test su simulatore iPhone
         working-directory: native
