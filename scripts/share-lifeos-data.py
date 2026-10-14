@@ -49,6 +49,19 @@ export default { async fetch(request, env, ctx) {
     p.api(f'/workers/scripts/{p.TARGET}','PUT',raw=body,content_type=kind)
 
 
+def verify_shared(password):
+    for attempt in range(20):
+        try:
+            req=urllib.request.Request(URL+'/login',headers={'User-Agent':'LifeOS-Native-Check/1.0','Cache-Control':'no-cache'})
+            with urllib.request.urlopen(req,timeout=45) as response:
+                if response.headers.get('X-LifeOS-Data-Source')=='shared': break
+        except urllib.error.URLError: pass
+        if attempt==19: raise p.SetupError('Binding condiviso impostato; propagazione da verificare.')
+        time.sleep(2)
+    try:p.verify(URL,password)
+    except p.SetupError:raise p.SetupError('Verifica API del collegamento condiviso non completata; controllare propagazione e accesso.') from None
+
+
 def main():
     password=os.environ['LIFEOS_TEST_PASSWORD']
     p.require(len(password)>=24,'Password non valida.')
@@ -62,7 +75,7 @@ def main():
     p.require(hashlib.sha256(original).hexdigest()=='c8a655fa87f37e27655ecbdf8e452703a871dac7709c1343586e5affeb4e8387','Il codice principale è cambiato: revisione necessaria.')
     if native_db==p.SOURCE_DB:
         upload(p.SOURCE_DB,password,original)
-        p.verify(URL,password)
+        verify_shared(password)
         print('DATI_CONDIVISI_VERIFICATI (configurazione già attiva)',flush=True)
         return
     p.require(native_db==clone['uuid'],'Il server app non usa la copia attesa.')
@@ -103,7 +116,7 @@ def main():
             p.wrangler(folder,'d1','execute','SHARED','--remote','--file',str(folder/'merge.sql'),'--yes')
             print('Modifiche app riconciliate nel principale con precondizioni sulle righe.',flush=True)
             upload(p.SOURCE_DB,password,original);locked=False
-        p.verify(URL,password)
+        verify_shared(password)
         primary_settings=p.api(f'/workers/scripts/{p.SOURCE_WORKER}/settings')
         app_settings=p.api(f'/workers/scripts/{p.TARGET}/settings')
         a=next(x['id'] for x in primary_settings['bindings'] if x['name']=='DB')
