@@ -42,7 +42,7 @@ jobs:
           import hashlib, pathlib, zipfile
           source = pathlib.Path('lifeos-native.zip')
           if source.is_file():
-              assert hashlib.sha256(source.read_bytes()).hexdigest() == '8559f9b33d272717c83f0e74c2dac3b2214c1bbf4045f034cb9471b135526e8e', 'ZIP sorgenti diverso da quello previsto'
+              assert hashlib.sha256(source.read_bytes()).hexdigest() == '3c5efe2f02309eb9652d2d64034b822903401916b2f40de5bc936b68444da248', 'ZIP sorgenti diverso da quello previsto'
               with zipfile.ZipFile(source) as archive:
                   for name in archive.namelist():
                       p = pathlib.PurePosixPath(name)
@@ -102,6 +102,13 @@ jobs:
           if [ -d build/Compact.xcresult ]; then
             xcrun xcresulttool export attachments --path build/Compact.xcresult --output-path build/compact-screenshots
           fi
+      - name: Verifica e aggiorna impostazioni condivise
+        if: github.repository == 'azeroualit-cloud/LifeOS'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          python3 -m unittest discover -s scripts -p 'test_upgrade_finance.py' -v
+          python3 scripts/upgrade-finance.py
       - name: Verifica contratto nativo sul database condiviso
         if: github.repository == 'azeroualit-cloud/LifeOS'
         working-directory: app
@@ -137,6 +144,10 @@ jobs:
                   life = json.loads(request('/api/getLifeData',[now.strftime('%Y-%m')]))
                   assert isinstance(life['tasks'],list) and isinstance(life['categories'],list)
                   assert isinstance(json.loads(finance)['extraPlan']['allocations'],list)
+                  assert len(json.loads(finance)['forecastHistory']) == 6
+                  full = json.loads(request('/api/getFinanceData', [now.year, now.month]))
+                  assert isinstance(full['forecastPlan']['allocations'], list)
+                  assert isinstance(full['planning'], dict)
                   print('Contratto condiviso verificato; riepilogo: %.3f secondi, %d byte.' % (elapsed,len(finance)))
           except Exception:
               raise SystemExit('Verifica del contratto condiviso non completata. Nessun dato o credenziale pubblicato.')
