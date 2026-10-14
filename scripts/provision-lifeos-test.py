@@ -198,9 +198,9 @@ def verify(url, password):
             with browser.open(request, timeout=45) as response:
                 require(response.status == 200 and 'json' in response.headers.get('Content-Type', ''), 'Accesso copia non riuscito.')
             break
-        except urllib.error.URLError:
+        except urllib.error.URLError as error:
             if attempt == 11:
-                raise SetupError('Worker distribuito; accesso non ancora disponibile (controllare propagazione o protezione Access).') from None
+                raise SetupError(f'Worker distribuito; accesso fallito (HTTP {getattr(error, "code", "rete")}).') from None
             time.sleep(5)
     require(any(c.name == 'liquidita_session' and c.secure for c in cookies), 'Cookie di accesso sicuro non ricevuto.')
     now = datetime.datetime.now(datetime.timezone.utc)
