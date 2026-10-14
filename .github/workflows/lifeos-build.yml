@@ -42,7 +42,7 @@ jobs:
           import hashlib, pathlib, zipfile
           source = pathlib.Path('lifeos-native.zip')
           if source.is_file():
-              assert hashlib.sha256(source.read_bytes()).hexdigest() == '21ce1aaf4b8bc56c1f91fec8f76edd3f9ce83629a7a6bfc756eb788d8507b21a', 'ZIP sorgenti diverso da quello previsto'
+              assert hashlib.sha256(source.read_bytes()).hexdigest() == '2064858c3d9c43487c72d838e3696cbfa242e29abb73123d46dbd4d6cfb33adc', 'ZIP sorgenti diverso da quello previsto'
               with zipfile.ZipFile(source) as archive:
                   for name in archive.namelist():
                       p = pathlib.PurePosixPath(name)
@@ -71,6 +71,13 @@ jobs:
           xcodebuild -version
           DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,re,sys; d=json.load(sys.stdin); keys=sorted((k for k in d["devices"] if "iOS" in k),key=lambda k:tuple(map(int,re.findall(r"\d+",k))),reverse=True); print(next(x["udid"] for k in keys for x in d["devices"][k] if "iPhone" in x["name"]))')
           xcodebuild test -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -parallel-testing-enabled NO -resultBundlePath build/Tests.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/tests.log
+      - name: Verifica interfaccia su iPhone compatto
+        working-directory: app
+        run: |
+          set -euo pipefail
+          RUNTIME=$(xcrun simctl list runtimes -j | python3 -c 'import json,sys; r=[x for x in json.load(sys.stdin)["runtimes"] if x.get("isAvailable") and x["name"].startswith("iOS")]; print(sorted(r,key=lambda x:tuple(map(int,x["version"].split("."))),reverse=True)[0]["identifier"])')
+          COMPACT=$(xcrun simctl create 'LifeOS compact' 'com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation' "$RUNTIME")
+          xcodebuild test -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFourSectionsInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarEventCanBeCreatedAfterBoundaryScroll -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testLargeTextAndSixWeekCalendar -resultBundlePath build/Compact.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compact.log
       - name: Esporta schermate del simulatore
         if: always()
         continue-on-error: true
@@ -78,6 +85,9 @@ jobs:
         run: |
           if [ -d build/Tests.xcresult ]; then
             xcrun xcresulttool export attachments --path build/Tests.xcresult --output-path build/screenshots
+          fi
+          if [ -d build/Compact.xcresult ]; then
+            xcrun xcresulttool export attachments --path build/Compact.xcresult --output-path build/compact-screenshots
           fi
       - name: Verifica contratto nativo sul database condiviso
         if: github.repository == 'azeroualit-cloud/LifeOS'
@@ -138,6 +148,8 @@ jobs:
           path: |
             app/build/screenshots/*.png
             app/build/screenshots/manifest.json
+            app/build/compact-screenshots/*.png
+            app/build/compact-screenshots/manifest.json
           retention-days: 1
           if-no-files-found: ignore
       - name: IPA unica per Signulous
@@ -155,5 +167,6 @@ jobs:
           path: |
             app/build/*.log
             app/build/Tests.xcresult
+            app/build/Compact.xcresult
           retention-days: 1
           if-no-files-found: ignore
