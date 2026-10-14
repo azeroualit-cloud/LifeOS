@@ -42,7 +42,7 @@ jobs:
           import hashlib, pathlib, zipfile
           source = pathlib.Path('lifeos-native.zip')
           if source.is_file():
-              assert hashlib.sha256(source.read_bytes()).hexdigest() == '954de3e33e20973e247a1bc78d642935a46827643b94b3017e5ee55e4d881bad', 'ZIP sorgenti diverso da quello previsto'
+              assert hashlib.sha256(source.read_bytes()).hexdigest() == '8c774cf8b19159b532e0548dce3fa49a5e0cc2ca7074687d886dcb6ae6b5aea0', 'ZIP sorgenti diverso da quello previsto'
               with zipfile.ZipFile(source) as archive:
                   for name in archive.namelist():
                       p = pathlib.PurePosixPath(name)
@@ -71,7 +71,14 @@ jobs:
           xcodebuild -version
           DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,re,sys; d=json.load(sys.stdin); keys=sorted((k for k in d["devices"] if "iOS" in k),key=lambda k:tuple(map(int,re.findall(r"\d+",k))),reverse=True); print(next(x["udid"] for k in keys for x in d["devices"][k] if "iPhone" in x["name"]))')
           xcodebuild test -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -parallel-testing-enabled NO -resultBundlePath build/Tests.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/tests.log
-          xcrun xcresulttool export attachments --path build/Tests.xcresult --output-path build/screenshots
+      - name: Esporta schermate del simulatore
+        if: always()
+        continue-on-error: true
+        working-directory: app
+        run: |
+          if [ -d build/Tests.xcresult ]; then
+            xcrun xcresulttool export attachments --path build/Tests.xcresult --output-path build/screenshots
+          fi
       - name: Crea una sola IPA per iPhone
         working-directory: app
         run: |
@@ -84,6 +91,16 @@ jobs:
           zip -qr ../download/LifeOS-unsigned.ipa Payload
           cd ../download
           shasum -a 256 LifeOS-unsigned.ipa > SHA256.txt
+      - name: Schermate della demo per revisione visiva
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: LifeOS-anteprima
+          path: |
+            app/build/screenshots/*.png
+            app/build/screenshots/manifest.json
+          retention-days: 1
+          if-no-files-found: ignore
       - name: IPA unica per Signulous
         uses: actions/upload-artifact@v5
         with:
@@ -99,6 +116,5 @@ jobs:
           path: |
             app/build/*.log
             app/build/Tests.xcresult
-            app/build/screenshots/
           retention-days: 1
           if-no-files-found: ignore
