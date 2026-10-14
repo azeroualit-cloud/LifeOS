@@ -42,7 +42,7 @@ jobs:
           import hashlib, pathlib, zipfile
           source = pathlib.Path('lifeos-native.zip')
           if source.is_file():
-              assert hashlib.sha256(source.read_bytes()).hexdigest() == 'a7ceb1f370034c9d19752046bbd010cfb8011c3f22fb142245be9ca7c783b462', 'ZIP sorgenti diverso da quello previsto'
+              assert hashlib.sha256(source.read_bytes()).hexdigest() == '8c2d7a77c283e17c08d8c3e3b684fb41467634dc04ee9f3c2186be3960083718', 'ZIP sorgenti diverso da quello previsto'
               with zipfile.ZipFile(source) as archive:
                   for name in archive.namelist():
                       p = pathlib.PurePosixPath(name)
@@ -71,6 +71,22 @@ jobs:
           xcodebuild -version
           DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,re,sys; d=json.load(sys.stdin); keys=sorted((k for k in d["devices"] if "iOS" in k),key=lambda k:tuple(map(int,re.findall(r"\d+",k))),reverse=True); print(next(x["udid"] for k in keys for x in d["devices"][k] if "iPhone" in x["name"]))')
           xcodebuild test -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -parallel-testing-enabled NO -resultBundlePath build/Tests.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/tests.log
+      - name: Esporta anteprima principale
+        if: always()
+        continue-on-error: true
+        working-directory: app
+        run: |
+          if [ -d build/Tests.xcresult ]; then
+            xcrun xcresulttool export attachments --path build/Tests.xcresult --output-path build/screenshots
+          fi
+      - name: Anteprima principale durante la verifica compatta
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: LifeOS-anteprima-principale
+          path: app/build/screenshots/
+          retention-days: 1
+          if-no-files-found: ignore
       - name: Verifica interfaccia su iPhone compatto
         working-directory: app
         run: |
@@ -83,9 +99,6 @@ jobs:
         continue-on-error: true
         working-directory: app
         run: |
-          if [ -d build/Tests.xcresult ]; then
-            xcrun xcresulttool export attachments --path build/Tests.xcresult --output-path build/screenshots
-          fi
           if [ -d build/Compact.xcresult ]; then
             xcrun xcresulttool export attachments --path build/Compact.xcresult --output-path build/compact-screenshots
           fi
@@ -157,7 +170,7 @@ jobs:
         with:
           name: LifeOS-IPA-per-Signulous
           path: app/download/
-          retention-days: 1
+          retention-days: 7
           if-no-files-found: error
       - name: Log e risultati anche in caso di errore
         if: always()
