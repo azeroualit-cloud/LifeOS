@@ -1,0 +1,30 @@
+name: Life OS - Unica fonte dati
+on:
+  workflow_dispatch:
+  push:
+    paths: ['scripts/share-lifeos-data.py', 'scripts/shared-merge.py', '.github/workflows/lifeos-shared-data.yml']
+permissions:
+  contents: read
+concurrency:
+  group: lifeos-test-server
+  cancel-in-progress: false
+jobs:
+  unify:
+    if: github.repository == 'azeroualit-cloud/LifeOS' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verifica riconciliazione e conflitti
+        run: python3 -m unittest discover -s scripts -p 'test_shared_merge.py' -v
+      - name: Backup, riconciliazione e collegamento condiviso
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          LIFEOS_TEST_PASSWORD: ${{ secrets.LIFEOS_TEST_PASSWORD }}
+          CLOUDFLARE_ACCOUNT_ID: '1728c3b1b852eb6285646842db7256de'
+          WRANGLER_SEND_METRICS: 'false'
+          CI: 'true'
+        run: python3 scripts/share-lifeos-data.py
