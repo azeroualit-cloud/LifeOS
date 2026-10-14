@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import sqlite3
 import tempfile
+import time
 import urllib.error
 import urllib.request
 
@@ -68,11 +69,14 @@ def main():
     locked=False
     try:
         upload(clone['uuid'],password,original,maintenance=True);locked=True
-        try:
-            urllib.request.urlopen(p.public_request(URL,'/api/getLifeData',[]),timeout=45)
-            raise p.SetupError('Il blocco temporaneo delle scritture non è attivo.')
-        except urllib.error.HTTPError as error:
-            p.require(error.code==503,'Esito inatteso della pausa temporanea.')
+        for attempt in range(15):
+            try:
+                urllib.request.urlopen(p.public_request(URL,'/api/getLifeData',[]),timeout=45)
+            except urllib.error.HTTPError as error:
+                if error.code==503: break
+                p.require(error.code in [401,403,502,504],'Esito inatteso della pausa temporanea.')
+            if attempt==14: raise p.SetupError('Pausa temporanea non propagata: riprova più tardi.')
+            time.sleep(2)
         with tempfile.TemporaryDirectory(prefix='lifeos-shared-') as directory:
             folder=Path(directory)
             primary=d.export(folder,p.SOURCE_DB,'liquidita-4-prova')
