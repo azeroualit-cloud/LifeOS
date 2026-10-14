@@ -189,12 +189,18 @@ def deploy(database, password):
     return f'https://{TARGET}.a-zeroual-it.workers.dev'
 
 
+def public_request(origin, path, payload):
+    require(origin == f'https://{TARGET}.a-zeroual-it.workers.dev', 'Verifica consentita solo sul server di test.')
+    return urllib.request.Request(origin + path, data=json.dumps(payload).encode(),
+        headers={'Origin': origin, 'Content-Type': 'application/json', 'User-Agent': 'LifeOS-Native-Check/1.0'}, method='POST')
+
+
 def verify(url, password):
     cookies = http.cookiejar.CookieJar()
     browser = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookies))
     for attempt in range(12):
         try:
-            request = urllib.request.Request(url + '/auth/login', data=json.dumps({'user': 'nas', 'password': password}).encode(), headers={'Origin': url, 'Content-Type': 'application/json'}, method='POST')
+            request = public_request(url, '/auth/login', {'user': 'nas', 'password': password})
             with browser.open(request, timeout=45) as response:
                 require(response.status == 200 and 'json' in response.headers.get('Content-Type', ''), 'Accesso copia non riuscito.')
             break
@@ -208,7 +214,7 @@ def verify(url, password):
     methods = [('getLifeData', [month], 'tasks'), ('getFinanceData', [now.year, now.month], 'summary'), ('getExtraPlan', [now.year], 'allocations')]
     # Verify the exact three reads used by the installed IPA, on the clone only.
     for method, args, key in methods:
-        request = urllib.request.Request(url + '/api/' + method, data=json.dumps(args).encode(), headers={'Origin': url, 'Content-Type': 'application/json'}, method='POST')
+        request = public_request(url, '/api/' + method, args)
         try:
             with browser.open(request, timeout=90) as response:
                 require('json' in response.headers.get('Content-Type', ''), 'Risposta API non JSON sulla copia.')
@@ -218,7 +224,7 @@ def verify(url, password):
             raise SetupError(f'Verifica {method} fallita sulla copia (HTTP {getattr(error, "code", "rete")}). Il principale non è stato modificato.') from None
         print(method + ': risposta verificata.', flush=True)
     # An unauthenticated request must never expose financial data.
-    request = urllib.request.Request(url + '/api/getFinanceData', data=b'[]', headers={'Origin': url, 'Content-Type': 'application/json'}, method='POST')
+    request = public_request(url, '/api/getFinanceData', [])
     try:
         with urllib.request.urlopen(request, timeout=45) as response:
             raise SetupError('Controllo accesso anonimo fallito: verificare la protezione della copia.')

@@ -11,6 +11,14 @@ spec.loader.exec_module(p)
 
 
 class IsolationTests(unittest.TestCase):
+    def test_public_check_uses_own_client_identity_and_cannot_target_production(self):
+        url = f'https://{p.TARGET}.a-zeroual-it.workers.dev'
+        request = p.public_request(url, '/auth/login', {'user': 'nas', 'password': 'dummy'})
+        self.assertEqual(request.get_header('User-agent'), 'LifeOS-Native-Check/1.0')
+        self.assertEqual(request.get_header('Origin'), url)
+        self.assertNotIn('dummy', request.full_url)
+        with self.assertRaises(p.SetupError):
+            p.public_request('https://lifeos.a-zeroual-it.workers.dev', '/api/getFinanceData', [])
     def test_production_mutations_and_sql_cannot_reach_network(self):
         paths = [f'/d1/database/{p.SOURCE_DB}/query', f'/workers/scripts/{p.SOURCE_WORKER}',
                  f'/workers/scripts/{p.SOURCE_WORKER}/subdomain', '/workers/subdomain']
