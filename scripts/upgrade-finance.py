@@ -22,7 +22,7 @@ def once(source, old, new):
     return source.replace(old, new, 1)
 
 def transform(source):
-    if MARKER in source: return source
+    if MARKER in source: return planning_patch(source)
     if hashlib.sha256(source.encode()).hexdigest() != BASE:
         raise RuntimeError('Worker cambiato: necessario confronto prima della distribuzione.')
     # The setting lives in the same existing source_rows table as the legacy
@@ -81,7 +81,32 @@ function forecastCashHistory(movements, plan, today) {
     html = once(html, '              updateProjection();\n              const status', '              if (args.length > 2) state.data.planning.savingsTarget = Number(args[2]);\n              updateProjection();\n              const status')
     html = html.replace('e.target.id === "goal-input" || e.target.id === "saving-input"', 'e.target.id === "goal-input" || e.target.id === "saving-input" || e.target.id === "target-input"')
     source = source[:match.start(1)] + json.dumps(html, ensure_ascii=False) + source[match.end(1):]
-    return source
+    return planning_patch(source)
+
+def planning_patch(source):
+    if '// LifeOS lightweight planning v2' in source: return source
+    old = '  const nativeSettings = c.results.find(r => r.sheet === "LifeOS Settings" && r.row_number === 1);\n  const savingsTarget = nativeSettings ? JSON.parse(nativeSettings.values_json)[0] : null;\n  if (Number.isFinite(savingsTarget) && savingsTarget > 0) result.planning.savingsTarget = savingsTarget;'
+    source = once(source, old, '  attachSavingsPlanning(result, c.results, nowDay());')
+    helper = r'''// LifeOS lightweight planning v2
+function attachSavingsPlanning(result, config, day) {
+  const cell = row => {
+    const record = config.find(r => r.sheet === "Budget" && Number(r.row_number) === row);
+    return record ? JSON.parse(record.values_json)[14] : null;
+  };
+  const rawGoal = cell(13), saving = Number(cell(14));
+  result.planning ||= {
+    year: Number(day.slice(0,4)),
+    goal: rawGoal === null || rawGoal === "" || rawGoal === undefined ? null : Number(rawGoal),
+    monthlySaving: Number.isFinite(saving) ? Math.max(0,saving) : 0,
+    now: result.summary.budget,
+  };
+  const setting = config.find(r => r.sheet === "LifeOS Settings" && Number(r.row_number) === 1);
+  const target = setting ? JSON.parse(setting.values_json)[0] : null;
+  if (Number.isFinite(target) && target > 0) result.planning.savingsTarget = target;
+  return result;
+}
+'''
+    return once(source, 'function forecastCashHistory(', helper + 'function forecastCashHistory(')
 
 def check(source):
     with tempfile.TemporaryDirectory() as folder:

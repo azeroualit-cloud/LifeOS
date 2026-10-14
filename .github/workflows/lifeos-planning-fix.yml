@@ -1,0 +1,52 @@
+name: Life OS - Correggi impostazioni condivise
+on:
+  workflow_dispatch:
+  push:
+    paths: ['scripts/upgrade-finance.py', 'scripts/test_upgrade_finance.py', '.github/workflows/lifeos-planning-fix.yml']
+permissions:
+  contents: read
+concurrency:
+  group: lifeos-test-server
+  cancel-in-progress: false
+jobs:
+  repair:
+    if: github.repository == 'azeroualit-cloud/LifeOS'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verifica e correggi risposta delle impostazioni
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          python3 -m unittest discover -s scripts -p 'test_upgrade_finance.py' -v
+          python3 scripts/upgrade-finance.py
+      - name: Verifica API condivise senza cambiare dati utente
+        env:
+          LIFEOS_TEST_PASSWORD: ${{ secrets.LIFEOS_TEST_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import datetime,http.cookiejar,json,os,time,urllib.request
+          origin='https://lifeos-native-test.a-zeroual-it.workers.dev'
+          client=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+          def call(path,args):
+              r=urllib.request.Request(origin+path,data=json.dumps(args).encode(),headers={'Origin':origin,'Content-Type':'application/json','User-Agent':'LifeOS-Contract-Check/1.0'})
+              with client.open(r,timeout=90) as response:
+                  assert response.status==200 and response.headers.get('X-LifeOS-Data-Source')=='shared'
+                  return json.load(response)
+          call('/auth/login',{'user':'nas','password':os.environ['LIFEOS_TEST_PASSWORD']})
+          now=datetime.datetime.now(datetime.timezone.utc)
+          for attempt in range(10):
+              try:
+                  light=call('/api/getFinanceOverview',[now.year,now.month])
+                  full=call('/api/getFinanceData',[now.year,now.month])
+                  assert isinstance(light['planning'],dict) and isinstance(full['planning'],dict)
+                  assert light['planning']['goal']==full['planning']['goal']
+                  assert light['planning'].get('savingsTarget')==full['planning'].get('savingsTarget')
+                  assert len(light['forecastHistory'])==6 and isinstance(full['forecastPlan']['allocations'],list)
+                  print('PLANNING_LIGHT_AND_FULL_CONSISTENT; no user settings or movements modified.')
+                  break
+              except Exception:
+                  if attempt==9:raise SystemExit('Contract not verified; no private response printed.')
+                  time.sleep(3)
+          PY
