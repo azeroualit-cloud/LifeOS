@@ -42,7 +42,7 @@ jobs:
           import hashlib, pathlib, zipfile
           source = pathlib.Path('lifeos-native.zip')
           if source.is_file():
-              assert hashlib.sha256(source.read_bytes()).hexdigest() == '8c774cf8b19159b532e0548dce3fa49a5e0cc2ca7074687d886dcb6ae6b5aea0', 'ZIP sorgenti diverso da quello previsto'
+              assert hashlib.sha256(source.read_bytes()).hexdigest() == '21ce1aaf4b8bc56c1f91fec8f76edd3f9ce83629a7a6bfc756eb788d8507b21a', 'ZIP sorgenti diverso da quello previsto'
               with zipfile.ZipFile(source) as archive:
                   for name in archive.namelist():
                       p = pathlib.PurePosixPath(name)
@@ -79,6 +79,45 @@ jobs:
           if [ -d build/Tests.xcresult ]; then
             xcrun xcresulttool export attachments --path build/Tests.xcresult --output-path build/screenshots
           fi
+      - name: Verifica contratto nativo sul database condiviso
+        if: github.repository == 'azeroualit-cloud/LifeOS'
+        working-directory: app
+        env:
+          LIFEOS_TEST_PASSWORD: ${{ secrets.LIFEOS_TEST_PASSWORD }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime, http.cookiejar, json, os, pathlib, subprocess, tempfile, time, urllib.request
+          origin = 'https://lifeos-native-test.a-zeroual-it.workers.dev'
+          client = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+          def request(path, value):
+              r = urllib.request.Request(origin + path, data=json.dumps(value).encode(), method='POST', headers={'Origin':origin,'Content-Type':'application/json','User-Agent':'LifeOS-Native-Check/1.0'})
+              with client.open(r, timeout=90) as response:
+                  assert response.status == 200 and response.headers.get('X-LifeOS-Data-Source') == 'shared'
+                  return response.read()
+          try:
+              password = os.environ['LIFEOS_TEST_PASSWORD']
+              assert password
+              request('/auth/login', {'user':'nas','password':password})
+              now = datetime.datetime.now(datetime.timezone.utc)
+              with tempfile.TemporaryDirectory(prefix='lifeos-contract-') as tmp:
+                  folder = pathlib.Path(tmp)
+                  start = time.monotonic()
+                  finance = request('/api/getFinanceOverview', [now.year, now.month])
+                  elapsed = time.monotonic()-start
+                  (folder/'finance.json').write_bytes(finance)
+                  (folder/'Verify.swift').write_text('import Foundation\n@main struct Verify { static func main() { do { _ = try NativeValidation.snapshot(Data(contentsOf: URL(fileURLWithPath: CommandLine.arguments[1]))); print("NATIVE_FINANCE_CONTRACT_OK") } catch { print("NATIVE_FINANCE_CONTRACT_FAILED"); exit(1) } } }')
+                  clean = dict(os.environ); clean.pop('LIFEOS_TEST_PASSWORD', None)
+                  result = subprocess.run(['swiftc','-swift-version','5','-parse-as-library','Sources/Models.swift','Sources/NativeModels.swift',str(folder/'Verify.swift'),'-o',str(folder/'verify')],env=clean,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                  assert result.returncode == 0, 'Compilazione validatore non riuscita'
+                  subprocess.run([str(folder/'verify'),str(folder/'finance.json')],env=clean,check=True)
+                  life = json.loads(request('/api/getLifeData',[now.strftime('%Y-%m')]))
+                  assert isinstance(life['tasks'],list) and isinstance(life['categories'],list)
+                  assert isinstance(json.loads(finance)['extraPlan']['allocations'],list)
+                  print('Contratto condiviso verificato; riepilogo: %.3f secondi, %d byte.' % (elapsed,len(finance)))
+          except Exception:
+              raise SystemExit('Verifica del contratto condiviso non completata. Nessun dato o credenziale pubblicato.')
+          PY
       - name: Crea una sola IPA per iPhone
         working-directory: app
         run: |
