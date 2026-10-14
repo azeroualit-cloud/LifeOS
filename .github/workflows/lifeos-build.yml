@@ -1,86 +1,84 @@
-name: Life OS - Genera IPA
+name: Life OS - App nativa
 on:
   workflow_dispatch:
   push:
-    paths: ['.github/workflows/lifeos-build.yml', 'lifeos-native.zip']
+    paths: ['lifeos-native.zip', '.github/workflows/lifeos-build.yml', '.github/workflows/ios.yml', 'Sources/**', 'Tests/**', 'Assets.xcassets/**', 'project.yml']
 permissions:
   contents: read
 concurrency:
-  group: lifeos-build-${{ github.ref }}
+  group: lifeos-native-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   build:
     if: github.event.repository.private == false
     runs-on: macos-15
-    timeout-minutes: 35
+    timeout-minutes: 40
     defaults:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@v4
-      - name: Ripristina il prototipo originale
+      - uses: actions/checkout@v5
+      - name: Prepara progetto
         run: |
+          set -euo pipefail
           python3 - <<'PY'
-          import hashlib, io, pathlib, zipfile
+          import hashlib, pathlib, zipfile
           source = pathlib.Path('lifeos-native.zip')
-          if not source.is_file():
-              raise SystemExit('Carica lifeos-native.zip nella radice del repository, senza estrarlo.')
-          payload = source.read_bytes()
-          assert hashlib.sha256(payload).hexdigest() == '5264ef96a60f63ce94738ef91fbbb4928ebbd05761d010fabbf31acf3d400594', 'Pacchetto non integro'
-          with zipfile.ZipFile(io.BytesIO(payload)) as archive:
-              for name in archive.namelist():
-                  path = pathlib.PurePosixPath(name)
-                  assert not path.is_absolute() and '..' not in path.parts
-              archive.extractall('native')
+          if source.is_file():
+              assert hashlib.sha256(source.read_bytes()).hexdigest() == 'ad05c613288d582efc9ff1e31f53ee0decd9e70a3e6bc92c57eee5b633d4f979', 'ZIP sorgenti diverso da quello previsto'
+              with zipfile.ZipFile(source) as archive:
+                  for name in archive.namelist():
+                      p = pathlib.PurePosixPath(name)
+                      assert not p.is_absolute() and '..' not in p.parts
+                  archive.extractall('app')
+          elif pathlib.Path('project.yml').is_file():
+              import shutil
+              pathlib.Path('app').mkdir()
+              for name in ['Sources', 'Tests', 'Assets.xcassets']:
+                  shutil.copytree(name, 'app/' + name)
+              shutil.copy2('project.yml', 'app/project.yml')
+          else:
+              raise SystemExit('Manca lifeos-native.zip nella radice del repository.')
           PY
       - name: Genera progetto Xcode
-        working-directory: native
+        working-directory: app
         run: |
+          set -euo pipefail
           brew install xcodegen
-          sed -i '' 's/getAllCookies(completionHandler: callback)/getAllCookies(callback)/' Sources/Store.swift
           xcodegen generate
-      - name: Test su simulatore iPhone
-        working-directory: native
-        run: |
-          set -euo pipefail
           mkdir -p build
-          DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(x["udid"] for k,v in d["devices"].items() if "iOS" in k for x in v if "iPhone" in x["name"]))')
-          xcodebuild test -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -resultBundlePath build/Tests.xcresult CODE_SIGNING_ALLOWED=NO
-      - name: Compila per iPhone e crea IPA per Signulous
-        working-directory: native
+      - name: Compila ed esegui tutti i test
+        working-directory: app
         run: |
           set -euo pipefail
-          xcodebuild archive -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -configuration Release -destination 'generic/platform=iOS' -archivePath build/LifeOSProbe.xcarchive CODE_SIGNING_ALLOWED=NO
-          test -d build/LifeOSProbe.xcarchive/Products/Applications/LifeOSProbe.app
-          mkdir -p build/Payload
-          cp -R build/LifeOSProbe.xcarchive/Products/Applications/LifeOSProbe.app build/Payload/
-          cd build
-          zip -qr LifeOS-Test-unsigned.ipa Payload
-          shasum -a 256 LifeOS-Test-unsigned.ipa > SHA256.txt
-      - name: Prepara download
+          DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(x["udid"] for k,v in d["devices"].items() if "iOS" in k for x in v if "iPhone" in x["name"]))')
+          xcodebuild test -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -resultBundlePath build/Tests.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/tests.log
+      - name: Crea una sola IPA per iPhone
+        working-directory: app
         run: |
-          mkdir -p download
-          cp native/build/LifeOS-Test-unsigned.ipa native/build/SHA256.txt native/sample-snapshot.json download/
-          cat > download/LEGGIMI.txt <<'TXT'
-          Life OS Test: prototipo SwiftUI iOS 17+, non app completa.
-          L'IPA non e' firmata: caricala nel tuo account Signulous attivo, poi firma e installa.
-          sample-snapshot.json contiene soltanto dati simulati.
-          Prima prova: importa questo JSON da Impostazioni nell'app.
-          Il saldo simulato non cambia con le spese locali non sincronizzate.
-          Per sincronizzare usa esclusivamente una copia di test di Worker e D1.
-          TXT
-      - name: Scarica IPA e snapshot di prova
-        uses: actions/upload-artifact@v4
+          set -euo pipefail
+          xcodebuild archive -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -configuration Release -destination 'generic/platform=iOS' -archivePath build/LifeOS.xcarchive CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/archive.log
+          test -d build/LifeOS.xcarchive/Products/Applications/LifeOSProbe.app
+          mkdir -p build/Payload download
+          cp -R build/LifeOS.xcarchive/Products/Applications/LifeOSProbe.app build/Payload/
+          cd build
+          zip -qr ../download/LifeOS-unsigned.ipa Payload
+          cd ../download
+          shasum -a 256 LifeOS-unsigned.ipa > SHA256.txt
+      - name: IPA unica per Signulous
+        uses: actions/upload-artifact@v5
         with:
           name: LifeOS-IPA-per-Signulous
-          path: download/
+          path: app/download/
+          retention-days: 1
           if-no-files-found: error
-          retention-days: 1
-      - name: Conserva esito dei test
+      - name: Log e risultati anche in caso di errore
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
-          name: LifeOS-test-results
-          path: native/build/Tests.xcresult
-          if-no-files-found: ignore
+          name: LifeOS-diagnostica
+          path: |
+            app/build/*.log
+            app/build/Tests.xcresult
           retention-days: 1
+          if-no-files-found: ignore
