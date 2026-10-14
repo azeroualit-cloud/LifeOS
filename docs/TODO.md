@@ -1,3 +1,16 @@
+# Revisione grafica 0.3.1 build 8
+
+- [x] Revisione delle quattro sezioni dalla referenza di Nas, palette originale dei turni.
+- [x] Navigazione stabile, calendario eager, pulsanti sopra la barra, ricerca nel contenuto.
+- [x] Temi, testo grande, importi negativi e grafici ispezionati.
+- [x] 43 esecuzioni di test su due simulatori, contratto API e archive riusciti.
+- [x] IPA scaricata e verificata, artefatto 11897507875 del run 38567922673.
+- [ ] Aggiornamento Signulous e conferma sul telefono di fluidità, eventi e leggibilità.
+
+Prova mirata in docs/PROVA-0.3.1.md su GitHub. Le verifiche precedenti delle operazioni dati non richiedono un nuovo giro completo per questa revisione grafica.
+
+---
+
 # Life OS — controlli residui
 
 ## Implementato

@@ -1,3 +1,15 @@
+# Revisione grafica 0.3.1 build 8 — 14 ottobre 2026
+
+Richiesta: riferimento visivo di Nas, correzione del tremolio e del lag durante l’overscroll, aggiunta eventi raggiungibile, palette dei turni originale moderatamente più satura e una sola IPA finale.
+
+Implementati: tab bar sempre espansa, titoli inline e toolbar stabile; ricerca attività nel contenuto; nessun pull-to-refresh nelle quattro sezioni. Calendario eager separato dalla List, griglia e menu divisi in componenti, margine inferiore per liberare i comandi. Dashboard con settimana e schede compatte, righe allineate a sinistra, tipografia di sistema; Finanza più compatta con andamento giornaliero su asse numerico, importi raggruppati e budget negativo verificabile. Testo grande e temi ispezionati sui due formati.
+
+Build di consegna: run https://github.com/azeroualit-cloud/LifeOS/actions/runs/38567922673 . Build riuscita: 31 test unitari e 12 esecuzioni UI sui due simulatori, tutti senza errori. Contratto API condiviso e archive iPhone riusciti. IPA scaricata e verificata: versione 0.3.1 build 8, bundle com.nas.lifeos.probe, piattaforma iPhoneOS e arm64. SHA-256: 8fef697f684ee25082c433fdbc980ac290b7aa75fdf5d058df88590a7ac161c7. Artefatto 11897507875, disponibile fino al 21 ottobre. La build 6 aveva già superato 31 test unitari, 9 UI principali e 3 UI compatti; le build 7/8 correggono soltanto le etichette del grafico. Nessuna installazione intermedia richiesta all’utente.
+
+Scorrimento e comandi verificati nei simulatori; fluidità e vibrazioni sul telefono fisico restano da confermare. Prova mirata: docs/PROVA-0.3.1.md nel repository GitHub. La revisione non distribuisce modifiche al Worker e non muta dati reali nei test UI.
+
+---
+
 # Life OS nativa — 14 ottobre 2026
 
 La richiesta corrente autorizza un'unica fonte dati per app e sito, sincronizzazione più rapida e revisione grafica completa. Sostituisce la precedente limitazione alla sola copia di test. Nessun nuovo servizio a pagamento.
@@ -26,6 +38,6 @@ Demo isolata, archivio reale conservato separatamente; migrazione della coda SQL
 
 La versione precedente 0.2.1 è stata installata e l'utente ha confermato accesso ai dati e operazioni. I test automatici comprendono modelli, coda persistente, retry, scopi del refresh, autenticazione e interfaccia. La build definitiva e il controllo del contratto API reale sono nel run: https://github.com/azeroualit-cloud/LifeOS/actions/runs/38548668497
 
-Superati 30 test unitari e 4 test di interfaccia, oltre alla validazione del contratto JSON sul servizio condiviso. IPA e firma esterna restano soggette ai controlli di consegna e dispositivo. Checklist dispositivo: `docs/PROVA-0.3.md` nel repository GitHub. Aggiornare tramite Signulous senza disinstallare, preservando identità e dati locali.
+Esito definitivo e IPA vanno verificati nel run prima di dichiarare la consegna completata. Checklist dispositivo: `docs/PROVA-0.3.md` nel repository GitHub. Aggiornare tramite Signulous senza disinstallare, preservando identità e dati locali.
 
-Build definitiva riuscita: 34 test iOS senza errori, contratto condiviso valido, archive riuscito. IPA scaricata e verificata per SHA-256, versione 0.3.0 build 5, bundle invariato, piattaforma iPhoneOS e arm64. Riepilogo reale: 25.324 byte in 2,372 s dal runner; non una misura dell'iPhone. SHA-256 IPA: `5d5676bcfe3d975e36c658e6dc22357e7bcc1ed0764e4b40511126358f6fc9e2`.
+Consegna verificata: run 38548668497 riuscito, 34 test e contratto condiviso superati, IPA 0.3.0 build 5 arm64 scaricata e hash verificato. Artefatto 11886162086. Documentazione GitHub aggiornata nel commit 3f9e4e5d2cce05d91b7ece1f974e22651a71415f.
