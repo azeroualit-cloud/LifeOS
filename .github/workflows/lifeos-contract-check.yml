@@ -1,0 +1,38 @@
+name: Life OS - Verifica API in lettura
+on:
+  workflow_dispatch:
+  push:
+    paths: ['.github/workflows/lifeos-contract-check.yml']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verifica risposte senza modificare impostazioni o movimenti
+        env:
+          LIFEOS_TEST_PASSWORD: ${{ secrets.LIFEOS_TEST_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import datetime, http.cookiejar, json, os, urllib.request, urllib.error
+          origin='https://lifeos-native-test.a-zeroual-it.workers.dev'
+          client=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+          now=datetime.datetime.now(datetime.timezone.utc)
+          calls=[('/auth/login',{'user':'nas','password':os.environ['LIFEOS_TEST_PASSWORD']}),('/api/getFinanceOverview',[now.year,now.month]),('/api/getLifeData',[now.strftime('%Y-%m')]),('/api/getFinanceData',[now.year,now.month])]
+          for path,args in calls:
+              req=urllib.request.Request(origin+path,data=json.dumps(args).encode(),headers={'Origin':origin,'Content-Type':'application/json','User-Agent':'LifeOS-Read-Check/1.0'})
+              try:
+                  with client.open(req,timeout=90) as r:
+                      raw=r.read();data=json.loads(raw)
+                      fields={k:type(data.get(k)).__name__ for k in ['summary','planning','forecastHistory','forecastPlan','tasks','categories','extraPlan'] if isinstance(data,dict) and k in data}
+                      print(path,'HTTP',r.status,'fields',fields,flush=True)
+                      if isinstance(data,dict) and 'forecastHistory' in data:print('history_count',len(data['forecastHistory']),flush=True)
+              except urllib.error.HTTPError as e:
+                  body=e.read().decode(errors='replace')
+                  patterns=['Cannot set properties of undefined','Cannot read properties of undefined','UNIQUE constraint failed','FOREIGN KEY constraint failed','CPU time limit','D1_ERROR','SQLITE_ERROR']
+                  print(path,'HTTP',e.code,'known_error',[p for p in patterns if p in body],flush=True)
+                  raise SystemExit(1)
+              except Exception as e:
+                  print(path,'error_class',type(e).__name__,flush=True);raise SystemExit(1)
+          PY
