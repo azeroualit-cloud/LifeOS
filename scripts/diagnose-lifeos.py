@@ -40,6 +40,10 @@ def main():
         folder = Path(directory)
         primary = export(folder, p.SOURCE_DB, 'liquidita-4-prova')
         copy = export(folder, clone['uuid'], p.TARGET)
+        copied_at = datetime.datetime.fromisoformat(copy.execute(f'SELECT copied_at FROM {p.quoted(p.MARKER)}').fetchone()[0])
+        def moment(value):
+            parsed = datetime.datetime.fromisoformat(str(value).replace('Z', '+00:00'))
+            return parsed.replace(tzinfo=datetime.timezone.utc) if parsed.tzinfo is None else parsed
         tables = [x[0] for x in primary.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_cf_%'")]
         for table in tables:
             a, b = records(primary, table), records(copy, table)
@@ -47,7 +51,18 @@ def main():
             changed = [k for k in a.keys() & b.keys() if a[k] != b[k]]
             if added or removed or changed:
                 print(f'DIFF {table}: solo_copia={len(added)} solo_principale={len(removed)} diversi={len(changed)}', flush=True)
+            for key in changed:
+                fields = [field for field in a[key] if a[key][field] != b[key].get(field)]
+                print('CHANGED_FIELDS', table, ','.join(fields), flush=True)
+                if 'updated_at' in a[key]:
+                    print('AFTER_SNAPSHOT', table, 'primary='+str(moment(a[key]['updated_at'])>copied_at), 'copy='+str(moment(b[key]['updated_at'])>copied_at), flush=True)
+            if table == 'os_tasks':
+                for key in removed:
+                    row = a[key]
+                    expired = row.get('status') == 'done' and row.get('completed_at') and moment(row['completed_at']) <= datetime.datetime.now(datetime.timezone.utc)-datetime.timedelta(days=5)
+                    print('MISSING_TASK_EXPIRED', bool(expired), flush=True)
         print('CONFRONTO_COMPLETATO', flush=True)
+    if os.environ.get('DIAGNOSTICS_COMPARE_ONLY') == 'true': return
     source = p.api(f'/workers/scripts/{p.SOURCE_WORKER}/content/v2')
     _, modules = p.downloaded_modules(*source)
     import hashlib

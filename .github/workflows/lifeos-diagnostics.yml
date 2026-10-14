@@ -22,4 +22,5 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: '1728c3b1b852eb6285646842db7256de'
           WRANGLER_SEND_METRICS: 'false'
           CI: 'true'
+          DIAGNOSTICS_COMPARE_ONLY: 'true'
         run: python3 scripts/diagnose-lifeos.py
