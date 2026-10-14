@@ -168,7 +168,7 @@ def deploy(database, password):
     db = next((x for x in bindings if x.get('name') == 'DB'), {})
     require(db.get('type') == 'd1' and db.get('id') == SOURCE_DB, 'Il Worker principale non è associato al database atteso.')
     require(all(x.get('name') in ['DB', 'ACCESS_EMAIL', 'APP_PASSWORD'] for x in bindings), 'Il Worker ha altri binding: occorre verificarli prima della copia.')
-    download = api(f'/workers/scripts/{SOURCE_WORKER}/content')
+    download = api(f'/workers/scripts/{SOURCE_WORKER}/content/v2')
     require(isinstance(download, tuple), 'Download del codice non valido.')
     entry, modules = downloaded_modules(*download)
     previous = api(f'/workers/scripts/{TARGET}/settings', allow404=True)
