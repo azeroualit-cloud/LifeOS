@@ -1,3 +1,11 @@
+## Build 50 — causa verificata, controllo toolbar da 44 punti
+
+Diagnosi Apple run 38967287251: la prova con tocchi reali fallisce a offset (0,-21.5) dal centro di primary-add, AX frame (334,66,48,36). L’area estesa ipotizzata non è sufficiente: è un problema concreto di tocco, non soltanto di misura del test. Non è stato abbassato il requisito.
+
+I pulsanti + e Impostazioni riusano ora NativeIconButton (44×44, NativePressStyle) dentro NativeToolbarButton, un contenitore di dimensione intrinseca che evita la conversione del Button automatico nel piccolo bar item UIKit. TabView e toolbar restano di sistema. Nessuna dimensione aggiunta ai token e nessun backend modificato.
+
+Ripristinata l’asserzione geometrica di almeno 44 punti sul + in tutti i tab e aggiunta anche a entrambi i controlli nella prova dei bordi. Restano i tocchi a coordinate indipendenti nei due temi e nel compatto, con apertura e chiusura degli editor. La diagnosi è verificata; la correzione attende esito Apple. Parsing Swift, design system e integrità ZIP superati localmente. IPA ancora pendente.
+
 ## Build 49 — diagnosi funzionale del bersaglio toolbar
 
 Build 48: native + AX frame (334,66,48,36); controlSize(.large) non modifica l’altezza. Fallisce il confronto geometrico, non la compilazione. I tentativi sulla label non hanno risolto; nessuna IPA.
