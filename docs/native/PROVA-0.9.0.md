@@ -8,3 +8,7 @@ Installare una sola IPA finale con Signulous sopra l’app esistente, senza disi
 - Navigazione: quattro tab Apple, effetti Liquid Glass su iOS 26 e + contestuale in alto. Aprire e annullare più volte gli editor, verificando che resti selezionata la sezione corretta.
 - Calendario: nessuna modifica alla griglia o ai badge rispetto alla build 38. Verificare soltanto la convivenza con la barra di sistema ripristinata.
 - Controllare tema scuro/chiaro, VoiceOver, Riduci movimento, testo grande, schermo compatto e visibilità dell’ultima riga sopra la tab bar.
+
+## Microinterazioni — build 41
+
+Verificare che pressione e selezione siano percepibili ma discrete, che ogni tocco esegua una sola azione, e che completare una riga non apra l’editor. Confrontare Riduci movimento attivo/disattivo: nessuna rotazione/sostituzione animata delle spunte o scorrimento dei numeri con l’opzione attiva. Nascondere gli importi anche durante una transizione deve mascherarli immediatamente. Nessun feedback tattile deve partire al caricamento, nel refresh automatico o scorrendo. Controllare sul dispositivo gli effetti aptici e le animazioni native della tab bar; il simulatore non ne dimostra la qualità fisica.

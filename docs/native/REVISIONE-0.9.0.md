@@ -1,3 +1,17 @@
+# LifeOS 0.9.0 build 41 — microinterazioni moderate
+
+Intervento sui componenti UI condivisi: feedback di pressione già esistente esteso a icone, selettori mese/categoria e controlli Home; sostituzione breve del simbolo di completamento; dissolvenza di sfondo/bordo nella selezione dei chip; transizione numerica per MoneyText e budget in Home/Finanza. Durate condivise esistenti: 0,16–0,18 secondi. Feedback tattile di selezione soltanto sul tocco delle spunte e sul cambio esplicito di categoria; non su refresh o caricamenti. La spunta cambia solo con lo stato effettivo, senza simulare il successo della scrittura. Il feedback di successo delle abitudini rimane quello precedente e non è duplicato.
+
+Nessuna animazione globale, ritardo nelle azioni, ripetizione decorativa, movimento della griglia, transizione delle liste o sostituzione delle animazioni native di tab, fogli, tastiera e controlli dei Form. I pulsanti indipendenti delle checklist mantengono lo stile borderless per evitare di coinvolgere l’intera riga. Riduci movimento disabilita le animazioni custom spaziali, dei simboli, dei numeri e dei colori; la pressione conserva soltanto il feedback di opacità immediato. I feedback aptici sono affidati alle API di sistema. Quando gli importi sono nascosti la transizione è disabilitata immediatamente.
+
+Aggiunta una modalità DEBUG --reduce-motion che imposta solo l’ambiente SwiftUI e non altera le preferenze del dispositivo; le altre esecuzioni e la release rispettano le impostazioni reali. Nuovo test UI per cambio categoria, completamento separato dall’apertura, navigazione e inserimento spesa con l’override attivo. Non equivale a una prova fisica delle animazioni native o dell’aptica.
+
+Verifiche eseguite: parser Swift su tutti i sorgenti e test, controllo design system e integrità ZIP. Test UI aggiunto ma non ancora eseguito; build Apple e IPA non ancora verificate. La precedente suite locale di 53 test riguarda modelli rimasti invariati, non verifica queste animazioni. Layout, colori, badge del Calendario e sincronizzazione invariati rispetto alla build 40; non è stato implementato un nuovo effetto vetro sui badge.
+
+Il fallimento Apple della build 39 rimane da diagnosticare dai log: non è dichiarato risolto da questa modifica. L’accesso API resta un prerequisito per leggere log e artefatti da questa macchina.
+
+---
+
 # LifeOS 0.9.0 build 40 — settimana Home allineata al Calendario
 
 La settimana della Home riusa direttamente CalendarDayCell e CalendarDayPresentation: badge pieni dei turni, colori, sfondi weekend, bordo del giorno corrente, puntini e opacità tra mesi sono gli stessi del Calendario. Conserva sette giorni con oggi al centro e il tocco per aprire il giorno nel Calendario. Nessun nuovo stile parallelo.
