@@ -1,3 +1,11 @@
+## Build 49 — diagnosi funzionale del bersaglio toolbar
+
+Build 48: native + AX frame (334,66,48,36); controlSize(.large) non modifica l’altezza. Fallisce il confronto geometrico, non la compilazione. I tentativi sulla label non hanno risolto; nessuna IPA.
+
+La sola geometria AX di un UIBarButtonItem non prova la sua hit area. Il test dei quattro tab ora apre e annulla ogni editor in entrambi i temi. Un nuovo test verifica realmente il requisito 44 punti con tocchi a coordinate assolute a 21,5 punti dal centro nelle quattro direzioni, per + e Impostazioni e per entrambi i temi. Ogni tocco deve aprire la destinazione corretta e consentire il ritorno. XCTest non sceglie il punto centrale del controllo. Nessuna riduzione della soglia per i componenti personalizzati. Il nuovo test gira anche su dispositivo compatto. La diagnosi dell’area estesa resta da confermare su Apple: un mancato tocco sarà un fallimento reale da correggere.
+
+CI conserva prova toolbar e screenshot anche in caso di blocco iniziale, espone gli errori Swift/XCTest come annotazioni standard e prosegue alla suite completa, al compatto e all’archivio solo se le prove passano. Verificati localmente parsing, design system e integrità ZIP; verifiche Apple e IPA ancora pendenti.
+
 ## Build 48 — verifica mirata della dimensione toolbar
 
 Il log completo della build 47 (logs_105592146763.zip) conferma compilazione riuscita, 74 unit test superati e 28/29 UI test superati. Il test home-next-time ora passa. Unico fallimento: testFourSectionsInBothThemes, area accessibile del + pari a 108 pixel (36 punti) anziché almeno 132 pixel (44 punti alla scala 3).

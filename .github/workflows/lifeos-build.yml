@@ -42,7 +42,7 @@ jobs:
           import hashlib, pathlib, zipfile
           source = pathlib.Path('lifeos-native.zip')
           if source.is_file():
-              assert hashlib.sha256(source.read_bytes()).hexdigest() == '5f7d677f92c3d79fb1501af31228732e2f6c713c55047f86f5894ec8b68e4323', 'ZIP sorgenti diverso da quello previsto'
+              assert hashlib.sha256(source.read_bytes()).hexdigest() == 'a636a97cab05c2e3ec5f5171b5d659699bc24cb8bccc7d9c0d0006946c996047', 'ZIP sorgenti diverso da quello previsto'
               with zipfile.ZipFile(source) as archive:
                   for name in archive.namelist():
                       p = pathlib.PurePosixPath(name)
@@ -127,8 +127,22 @@ jobs:
           set -euo pipefail
           xcodebuild -version
           DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,re,sys; d=json.load(sys.stdin); keys=sorted((k for k in d["devices"] if "iOS" in k),key=lambda k:tuple(map(int,re.findall(r"\d+",k))),reverse=True); print(next(x["udid"] for k in keys for x in d["devices"][k] if "iPhone" in x["name"]))')
-          xcodebuild test -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFourSectionsInBothThemes -resultBundlePath build/Toolbar.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/toolbar-tests.log
+          xcodebuild test -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFourSectionsInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testNativeToolbarRespondsAcross44PointTouchRegion -resultBundlePath build/Toolbar.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/toolbar-tests.log
           xcodebuild test -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -parallel-testing-enabled NO -resultBundlePath build/Tests.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/tests.log
+      - name: Errori XCTest in annotazioni
+        if: failure()
+        working-directory: app
+        run: |
+          python3 - <<'PYLOG'
+          import pathlib, re
+          for name in ['toolbar-tests.log', 'tests.log']:
+              path = pathlib.Path('build') / name
+              if not path.exists(): continue
+              errors = [line for line in path.read_text(errors='replace').splitlines() if re.search(r'\.swift:\d+:\d+: error:', line)]
+              for line in errors[:12]:
+                  message = line.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+                  print('::error::' + message)
+          PYLOG
       - name: Esporta anteprima principale
         if: always()
         continue-on-error: true
@@ -136,6 +150,8 @@ jobs:
         run: |
           if [ -d build/Tests.xcresult ]; then
             xcrun xcresulttool export attachments --path build/Tests.xcresult --output-path build/screenshots
+          elif [ -d build/Toolbar.xcresult ]; then
+            xcrun xcresulttool export attachments --path build/Toolbar.xcresult --output-path build/screenshots
           fi
       - name: Anteprima principale durante la verifica compatta
         if: always()
@@ -151,7 +167,7 @@ jobs:
           set -euo pipefail
           RUNTIME=$(xcrun simctl list runtimes -j | python3 -c 'import json,sys; r=[x for x in json.load(sys.stdin)["runtimes"] if x.get("isAvailable") and x["name"].startswith("iOS")]; print(sorted(r,key=lambda x:tuple(map(int,x["version"].split("."))),reverse=True)[0]["identifier"])')
           COMPACT=$(xcrun simctl create 'LifeOS compact' 'com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation' "$RUNTIME")
-          xcodebuild test -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFourSectionsInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarEventCanBeCreatedAfterBoundaryScroll -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testLargeTextAndSixWeekCalendar -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeSummaryAndVerticalRoutinesInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarSelectionUpdatesImmediatelyAndKeepsEventIndex -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeEmptyStatesRemainActionable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeManyEventsAndTasksStayBoundedAndReachable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testSharedRowsAndCategoryChoicesKeepAccessibleTargets -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testNavigationKeepsSelectionAndGeometryWhenChangingTabs -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFinanceOverviewSupportsLargeTextAndEmptySnapshot -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeRestoresNeutralNextTimeWithoutArabicNames -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testReducedMotionKeepsChecklistAndFinanceActionsFunctional -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarTodayRestoresMonthAndSelection -resultBundlePath build/Compact.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compact.log
+          xcodebuild test -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFourSectionsInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarEventCanBeCreatedAfterBoundaryScroll -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testLargeTextAndSixWeekCalendar -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeSummaryAndVerticalRoutinesInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarSelectionUpdatesImmediatelyAndKeepsEventIndex -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeEmptyStatesRemainActionable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeManyEventsAndTasksStayBoundedAndReachable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testSharedRowsAndCategoryChoicesKeepAccessibleTargets -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testNavigationKeepsSelectionAndGeometryWhenChangingTabs -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFinanceOverviewSupportsLargeTextAndEmptySnapshot -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeRestoresNeutralNextTimeWithoutArabicNames -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testReducedMotionKeepsChecklistAndFinanceActionsFunctional -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarTodayRestoresMonthAndSelection -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testNativeToolbarRespondsAcross44PointTouchRegion -resultBundlePath build/Compact.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compact.log
       - name: Esporta schermate del simulatore
         if: always()
         continue-on-error: true
