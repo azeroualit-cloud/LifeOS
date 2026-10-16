@@ -1,3 +1,9 @@
+# Aggiornamento 16 ottobre 2026 — 0.9.0 build 39 in verifica
+
+Ultima consegna indicata nel passaggio di chat: 0.8.2 build 38 (commit 83ff3f3). La nuova modifica implementa Finanza senza card nel design corrente, Spesa a destra, prossimo orario neutro in Home e tab bar Apple. Calendario invariato. Dettagli e verifiche correnti in docs/native/REVISIONE-0.9.0.md; prova dispositivo in docs/native/PROVA-0.9.0.md. Build Apple e IPA ancora da verificare: non presentare questa revisione come consegnata.
+
+---
+
 # Life OS 0.4.0 build 11 — consegna verificata
 
 Revisione del PDF di Nas del 14 ottobre 2026. Un'unica app con Dashboard, Attività, Calendario e Finanza, stesso bundle `com.nas.lifeos.probe` e archivio locale precedente. Aggiornamento tramite Signulous sopra l'app esistente, senza disinstallarla.
