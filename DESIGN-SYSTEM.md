@@ -45,3 +45,5 @@ Attività usa NativeChecklistListAppearance e NativeChecklistListRow: stesso rag
 ## Riepilogo Home — 0.8.2
 
 Turni descritti per nome, senza orari abituali; gli appuntamenti conservano il proprio orario se presente. NativeTypingSummary rivela il riepilogo in0,65s una volta per avvio del processo, senza replay al cambio scheda o sincronizzazione. Mantiene testo e font completi nel layout, nascondendo soltanto i glifi successivi: nessun salto delle sezioni. Testo accessibile subito; effetto saltato per Reduce Motion e VoiceOver. Cancellazione, uscita e aggiornamento contenuti mostrano subito il testo completo. I token di durata/cadenza sono in NativeDesign.Motion.
+
+Navigazione0.8.2: GlassEffectContainer coordina barra e azione separata su iOS26+. Il vetro della barra non è un unico grande controllo interattivo; il più mantiene il proprio vetro interattivo. Indicatore di selezione unico che scorre su quattro colonne uguali con molla0,30s, feedback di pressione locale; nessuna animazione implicita sul cambio pagina. Geometria fissa e controlli44pt, Reduce Motion rispettato, fallback materiale nativo su sistemi precedenti.

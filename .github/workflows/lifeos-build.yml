@@ -42,7 +42,7 @@ jobs:
           import hashlib, pathlib, zipfile
           source = pathlib.Path('lifeos-native.zip')
           if source.is_file():
-              assert hashlib.sha256(source.read_bytes()).hexdigest() == '34b259f2feec98617eb955f6c4b60770f43aed1fd37696b953edc2dd46de22bc', 'ZIP sorgenti diverso da quello previsto'
+              assert hashlib.sha256(source.read_bytes()).hexdigest() == 'd71180efd49a4ed148237a85eede04ec20ac80fffa6584d2b96ebed3262991ca', 'ZIP sorgenti diverso da quello previsto'
               with zipfile.ZipFile(source) as archive:
                   for name in archive.namelist():
                       p = pathlib.PurePosixPath(name)
@@ -150,7 +150,7 @@ jobs:
           set -euo pipefail
           RUNTIME=$(xcrun simctl list runtimes -j | python3 -c 'import json,sys; r=[x for x in json.load(sys.stdin)["runtimes"] if x.get("isAvailable") and x["name"].startswith("iOS")]; print(sorted(r,key=lambda x:tuple(map(int,x["version"].split("."))),reverse=True)[0]["identifier"])')
           COMPACT=$(xcrun simctl create 'LifeOS compact' 'com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation' "$RUNTIME")
-          xcodebuild test -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFourSectionsInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarEventCanBeCreatedAfterBoundaryScroll -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testLargeTextAndSixWeekCalendar -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeSummaryAndVerticalRoutinesInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarSelectionUpdatesImmediatelyAndKeepsEventIndex -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeEmptyStatesRemainActionable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeManyEventsAndTasksStayBoundedAndReachable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testSharedRowsAndCategoryChoicesKeepAccessibleTargets -resultBundlePath build/Compact.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compact.log
+          xcodebuild test -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFourSectionsInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarEventCanBeCreatedAfterBoundaryScroll -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testLargeTextAndSixWeekCalendar -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeSummaryAndVerticalRoutinesInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarSelectionUpdatesImmediatelyAndKeepsEventIndex -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeEmptyStatesRemainActionable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeManyEventsAndTasksStayBoundedAndReachable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testSharedRowsAndCategoryChoicesKeepAccessibleTargets -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testNavigationKeepsSelectionAndGeometryWhenChangingTabs -resultBundlePath build/Compact.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compact.log
       - name: Esporta schermate del simulatore
         if: always()
         continue-on-error: true
