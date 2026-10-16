@@ -1,3 +1,11 @@
+## Consegna verificata — 0.9.0 build 51
+
+**Build Apple riuscita, IPA unica disponibile.** [Pacchetto Signulous](https://github.com/azeroualit-cloud/LifeOS/actions/runs/38978815976/artifacts/12081542774) · [esecuzione CI](https://github.com/azeroualit-cloud/LifeOS/actions/runs/38978815976) · [istruzioni e prove](native/CONSEGNA-0.9.0.md).
+
+Superate le suite: 74 unitari, 30 UI principali, 14 UI compatti (118 esecuzioni, zero fallimenti), oltre alla regressione isolata di Finanza. Archivio Release iOS e upload IPA riusciti. Codice verificato: `850862bea86cb6dc22ce057874e3057585883c24`; backend immutato. Aggiornare via Signulous senza disinstallare. Prova fisica ancora da confermare.
+
+Le sezioni successive documentano le revisioni precedenti e i loro esiti intermedi.
+
 ## Build 51 — suite principale superata, verifica compatta di Finanza
 
 Run 38973693215 sul commit 70787bb: compilazione Apple e prova geometria/tocchi toolbar superate; suite UI principale 30/30 superata e fase completa verde. Compatto: 13/14 superati; fallisce testFinanceOverviewSupportsLargeTextAndEmptySnapshot sull’assert expense.isHittable dopo sei swipe sempre verso l’alto. IPA correttamente non prodotta.

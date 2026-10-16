@@ -1,0 +1,29 @@
+{
+  "version": "0.9.0",
+  "build": 51,
+  "bundle_identifier": "com.nas.lifeos.probe",
+  "source_commit": "850862bea86cb6dc22ce057874e3057585883c24",
+  "source_archive_sha256": "dd90cdc78d87be0afea5ce909782a8ec85204f895b50dc4d2e3025a26490a8d8",
+  "run_url": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/38978815976",
+  "job_id": "117234584776",
+  "result": "success",
+  "suite_executions": {
+    "unit": 74,
+    "main_ui": 30,
+    "compact_ui": 14,
+    "total": 118
+  },
+  "focused_finance_regression": "passed",
+  "archive_destination": "generic/platform=iOS",
+  "ipa_file": "LifeOS-unsigned.ipa",
+  "ipa_available": true,
+  "artifact": {
+    "name": "LifeOS-IPA-per-Signulous",
+    "id": "12081542774",
+    "artifact_zip_sha256": "0bc28974e61760941a1b4a5c5947b08d38191fe0546500f68f12a85d1adedde9",
+    "url": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/38978815976/artifacts/12081542774"
+  },
+  "ipa_sha256_location": "SHA256.txt inside the artifact",
+  "local_ipa_inspection": false,
+  "physical_installation_and_fluency": "pending user verification"
+}

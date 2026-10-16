@@ -1,3 +1,7 @@
+## IPA disponibile — build 51
+
+[Scarica il pacchetto](https://github.com/azeroualit-cloud/LifeOS/actions/runs/38978815976/artifacts/12081542774). Le verifiche Apple complete e compatte sono passate; la lista seguente serve alla prova sul telefono fisico.
+
 # Prova su iPhone — dopo una build Apple verificata
 
 Installare una sola IPA finale con Signulous sopra l’app esistente, senza disinstallare. Usare il bundle com.nas.lifeos.probe.
