@@ -1,3 +1,11 @@
+## Build 51 — suite principale superata, verifica compatta di Finanza
+
+Run 38973693215 sul commit 70787bb: compilazione Apple e prova geometria/tocchi toolbar superate; suite UI principale 30/30 superata e fase completa verde. Compatto: 13/14 superati; fallisce testFinanceOverviewSupportsLargeTextAndEmptySnapshot sull’assert expense.isHittable dopo sei swipe sempre verso l’alto. IPA correttamente non prodotta.
+
+La nuova revisione modifica soltanto la prova di scorrimento e la priorità diagnostica CI: trascinamenti brevi, direzione scelta dal frame del controllo rispetto a navbar/tabbar, inversione se già superato. Un controllo visibile ma non premibile continua a fallire; restano premibilità, target minimo e verifica dell’editor aperto. Gli errori riportano argomenti e frame. L’ipotesi di overscroll resta da confermare con il test, non viene dichiarata una correzione del layout.
+
+Verificato byte per byte: Sources, assets e project.yml identici al pacchetto della suite principale passata. Versione app invariata 0.9.0 build 51. La CI esegue prima questa regressione su SE 3, poi la suite completa e tutti i 14 test compatti, infine l’archivio/IPA. Nessuna asserzione tolta, nessuna modifica finanziaria, backend o Calendario. Conteggi XCTest normalizzati nelle annotazioni. Parsing e integrità ZIP superati; esito della revisione del test ancora pendente.
+
 ## Build 51 — contenitore toolbar e hit region reale
 
 Seconda esecuzione isolata della build 50, run 38972277972: compilazione build-for-testing riuscita in 64 secondi. Il test dei bordi fallisce in 12,672 secondi sul primo punto superiore: primary-add AX frame (338,62,44,44), offset (0,-21.5). Quindi il frame minimo è rispettato, ma quel punto non esegue l’azione. L’ipotesi che il solo contenuto intrinseco da 44 punti bastasse è smentita. La prima esecuzione su main è rimasta nella fase combinata senza risultato; non se ne attribuisce la durata al codice senza log.

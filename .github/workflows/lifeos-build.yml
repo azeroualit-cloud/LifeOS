@@ -42,7 +42,7 @@ jobs:
           import hashlib, pathlib, zipfile
           source = pathlib.Path('lifeos-native.zip')
           if source.is_file():
-              assert hashlib.sha256(source.read_bytes()).hexdigest() == '2eab2ed876f123ddc07519ca4d3cfb64abc75ccbc52becd5103a1ec7ce76541e', 'ZIP sorgenti diverso da quello previsto'
+              assert hashlib.sha256(source.read_bytes()).hexdigest() == 'dd90cdc78d87be0afea5ce909782a8ec85204f895b50dc4d2e3025a26490a8d8', 'ZIP sorgenti diverso da quello previsto'
               with zipfile.ZipFile(source) as archive:
                   for name in archive.namelist():
                       p = pathlib.PurePosixPath(name)
@@ -121,21 +121,22 @@ jobs:
           except Exception as error:
               raise SystemExit('Verifica contratto fallita: stage=%s class=%s HTTP=%s. Nessun dato o credenziale pubblicato.' % (stage,type(error).__name__,getattr(error,'code','n/a')))
           PY
-      - name: Compilazione per diagnostica toolbar
+      - name: Compila app e test Apple
         timeout-minutes: 12
         working-directory: app
         run: |
           set -euo pipefail
           DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,re,sys; d=json.load(sys.stdin); keys=sorted((k for k in d["devices"] if "iOS" in k),key=lambda k:tuple(map(int,re.findall(r"\d+",k))),reverse=True); print(next(x["udid"] for k in keys for x in d["devices"][k] if "iPhone" in x["name"]))')
           xcodebuild build-for-testing -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compile.log
-      - name: Verifica mirata toolbar nativa
+      - name: Verifica mirata Finanza su compatto
         timeout-minutes: 15
         working-directory: app
         run: |
           set -euo pipefail
-          xcodebuild -version
-          DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,re,sys; d=json.load(sys.stdin); keys=sorted((k for k in d["devices"] if "iOS" in k),key=lambda k:tuple(map(int,re.findall(r"\d+",k))),reverse=True); print(next(x["udid"] for k in keys for x in d["devices"][k] if "iPhone" in x["name"]))')
-          xcodebuild test-without-building -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFourSectionsInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testNativeToolbarRespondsAcross44PointTouchRegion -resultBundlePath build/Toolbar.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/toolbar-tests.log
+          RUNTIME=$(xcrun simctl list runtimes -j | python3 -c 'import json,sys; r=[x for x in json.load(sys.stdin)["runtimes"] if x.get("isAvailable") and x["name"].startswith("iOS")]; print(sorted(r,key=lambda x:tuple(map(int,x["version"].split("."))),reverse=True)[0]["identifier"])')
+          COMPACT=$(xcrun simctl create 'LifeOS compact' 'com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation' "$RUNTIME")
+          echo "COMPACT=$COMPACT" >> "$GITHUB_ENV"
+          xcodebuild test-without-building -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT" -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFinanceOverviewSupportsLargeTextAndEmptySnapshot -resultBundlePath build/Focused.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/focused-tests.log
       - name: Compila ed esegui tutti i test
         timeout-minutes: 35
         working-directory: app
@@ -150,8 +151,8 @@ jobs:
         run: |
           if [ -d build/Tests.xcresult ]; then
             xcrun xcresulttool export attachments --path build/Tests.xcresult --output-path build/screenshots
-          elif [ -d build/Toolbar.xcresult ]; then
-            xcrun xcresulttool export attachments --path build/Toolbar.xcresult --output-path build/screenshots
+          elif [ -d build/Focused.xcresult ]; then
+            xcrun xcresulttool export attachments --path build/Focused.xcresult --output-path build/screenshots
           fi
       - name: Anteprima principale durante la verifica compatta
         if: always()
@@ -166,8 +167,6 @@ jobs:
         working-directory: app
         run: |
           set -euo pipefail
-          RUNTIME=$(xcrun simctl list runtimes -j | python3 -c 'import json,sys; r=[x for x in json.load(sys.stdin)["runtimes"] if x.get("isAvailable") and x["name"].startswith("iOS")]; print(sorted(r,key=lambda x:tuple(map(int,x["version"].split("."))),reverse=True)[0]["identifier"])')
-          COMPACT=$(xcrun simctl create 'LifeOS compact' 'com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation' "$RUNTIME")
           xcodebuild test -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFourSectionsInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarEventCanBeCreatedAfterBoundaryScroll -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testLargeTextAndSixWeekCalendar -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeSummaryAndVerticalRoutinesInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarSelectionUpdatesImmediatelyAndKeepsEventIndex -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeEmptyStatesRemainActionable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeManyEventsAndTasksStayBoundedAndReachable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testSharedRowsAndCategoryChoicesKeepAccessibleTargets -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testNavigationKeepsSelectionAndGeometryWhenChangingTabs -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFinanceOverviewSupportsLargeTextAndEmptySnapshot -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeRestoresNeutralNextTimeWithoutArabicNames -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testReducedMotionKeepsChecklistAndFinanceActionsFunctional -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarTodayRestoresMonthAndSelection -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testNativeToolbarRespondsAcross44PointTouchRegion -resultBundlePath build/Compact.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compact.log
       - name: Esporta schermate del simulatore
         if: always()
@@ -195,7 +194,7 @@ jobs:
         run: |
           python3 - <<'PYLOG'
           import pathlib, re
-          for name in ['compile.log', 'toolbar-tests.log', 'tests.log', 'compact.log', 'archive.log']:
+          for name in ['compile.log', 'focused-tests.log', 'tests.log', 'compact.log', 'archive.log']:
               path = pathlib.Path('build') / name
               if not path.exists(): continue
               lines = path.read_text(errors='replace').splitlines()
@@ -203,7 +202,7 @@ jobs:
               for line in errors[:12]:
                   message = line.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
                   print('::error::' + message)
-              outcomes = list(dict.fromkeys(line.strip() for line in lines if re.search(r'Executed \d+ tests, with', line)))
+              outcomes = list(dict.fromkeys(match.group(0) for line in lines if (match := re.search(r'Executed \d+ tests, with \d+ failures(?: \(\d+ unexpected\))?', line))))
               for outcome in outcomes[-3:]:
                   print('::notice::' + name + ': ' + outcome.replace('%', '%25'))
               if not errors and lines:
@@ -237,7 +236,7 @@ jobs:
           path: |
             app/build/*.log
             app/build/Tests.xcresult
-            app/build/Toolbar.xcresult
+            app/build/Focused.xcresult
             app/build/Compact.xcresult
           retention-days: 1
           if-no-files-found: ignore
