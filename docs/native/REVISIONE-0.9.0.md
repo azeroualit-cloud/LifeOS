@@ -1,3 +1,7 @@
+# Build 42 — rimozione Investimenti storici
+
+Rimossa esclusivamente la sezione Investimenti storici da Analisi finanziaria. Dati, API, altre sezioni e funzionalità finanziarie invariati. Controllo sintattico Swift e design system eseguiti; verifica Apple e consegna IPA ancora pendenti, con il precedente errore da diagnosticare.
+
 # LifeOS 0.9.0 build 41 — microinterazioni moderate
 
 Intervento sui componenti UI condivisi: feedback di pressione già esistente esteso a icone, selettori mese/categoria e controlli Home; sostituzione breve del simbolo di completamento; dissolvenza di sfondo/bordo nella selezione dei chip; transizione numerica per MoneyText e budget in Home/Finanza. Durate condivise esistenti: 0,16–0,18 secondi. Feedback tattile di selezione soltanto sul tocco delle spunte e sul cambio esplicito di categoria; non su refresh o caricamenti. La spunta cambia solo con lo stato effettivo, senza simulare il successo della scrittura. Il feedback di successo delle abitudini rimane quello precedente e non è duplicato.
