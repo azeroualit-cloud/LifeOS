@@ -12,7 +12,7 @@ Home: giorni → riepilogo → abitudini → todo≤3 → budget. Attività: cat
 
 ## Regole del sistema
 
-- Spaziatura: scala4pt (2pt soltanto microseparazioni). Gutter schermo20, inset lista16, gap sezioni24, gap lista16. Nessun padding numerico nelle schermate.
+- Spaziatura: scala4pt (2pt soltanto microseparazioni). Gutter schermo20, inset lista16, gap sezioni24, gap lista16. Clearance finale condivisa48 per mantenere gli ultimi comandi sopra la barra flottante. Nessun padding numerico nelle schermate.
 - Card: normale padding20/gap16; compatta padding16/gap12; gruppo di righe inset16 e separatori allineati al testo. Raggio24 per card custom; gruppi List/Form conservano il trattamento nativo iOS. Controlli raggio12, badge6, giorni12, capsule soltanto navigazione e stati.
 - Tipografia: Body17 per contenuto, Headline17 per titoli sezione, Subheadline15 per azioni secondarie, Footnote13 per metadati, Caption11–12 per assi/legende e calendario denso. Valori Title/Title2; Dynamic Type di sistema. Non ridurre indiscriminatamente il testo per farlo entrare.
 - Colori: accento platino per interazione/icone; testo primario e secondario; verde/rosso desaturati soltanto per direzione finanziaria; warning/danger/success per stato. Turni con palette esistente. Nessun colore inventato per categoria.
