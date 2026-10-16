@@ -35,3 +35,9 @@ Usare prima un componente esistente. Aggiungere un token o una variante solo per
 ## Verifica e file
 
 Token: Sources/NativeDesign.swift. Primitive/compositi: NativeComponents.swift. Navigazione: NativeNavigation.swift. Catalogo: NativeCategoryCatalog.swift. Contenuti finanziari: NativeFinanceViews.swift. Check stile: scripts/check-design-system.py, eseguito anche in CI. Quattro test catalogo e controllo UI condiviso per categorie/checkbox; suite funzionale esistente conservata. 60 test locali passati; sintassi Swift verificata. Esito Apple e screenshot da registrare dopo la build. I dieci file core di modelli, persistenza e sincronizzazione sono identici alla baseline.
+
+## Checklist — 0.8.1
+
+NativeChecklistRow è il pattern condiviso di Home, Attività ed eventi/attività del Calendario: checkbox44, Body17, metadati13 solo quando presenti, stessa distanza8 tra controllo e testo, apertura separata dal completamento e chevron nel target di apertura. Le routine Home conservano il proprio pulsante a riga intera con stato busy.
+
+Attività usa NativeChecklistListAppearance e NativeChecklistListRow: stesso raggio24, superficie, inset16 e separatori allineati al testo di NativeGroupedCard. Intestazioni Headline come Home, In attesa attenuato. Primo/ultimo elemento definiscono gli angoli del gruppo; completate e comando eliminazione sono un solo gruppo. List conserva swipe e riordino nativi, nessuna conversione in ScrollView o perdita di azioni.
