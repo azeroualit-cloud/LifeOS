@@ -1,3 +1,11 @@
+## Build 51 — contenitore toolbar e hit region reale
+
+Seconda esecuzione isolata della build 50, run 38972277972: compilazione build-for-testing riuscita in 64 secondi. Il test dei bordi fallisce in 12,672 secondi sul primo punto superiore: primary-add AX frame (338,62,44,44), offset (0,-21.5). Quindi il frame minimo è rispettato, ma quel punto non esegue l’azione. L’ipotesi che il solo contenuto intrinseco da 44 punti bastasse è smentita. La prima esecuzione su main è rimasta nella fase combinata senza risultato; non se ne attribuisce la durata al codice senza log.
+
+Build 51: i ToolbarItem su iOS 26 nascondono lo shared background; il pulsante usa stile plain, frame e contentShape espliciti da 44 punti e NativeGlass con il materiale interattivo Apple. Rimossa la misura intrinseca fixedSize e la scala custom da questi due controlli. TabView e navigazione rimangono nativi. La rimozione del contenitore condiviso è da confermare mediante la stessa prova, non assunta come risolutiva.
+
+Le coordinate sintetizzate sono ora confrontate anche con screenPoint per escludere errori del riferimento del test. Conservati requisito geometrico, tocchi a ±21,5 punti, apertura/annullamento nei quattro tab, entrambi i temi e compatto. Su main viene integrata anche la diagnostica isolata: compilazione separata (limite 12 minuti), prova UI con timeout (limite fase 15 minuti), log e annotazioni sempre conservati. Suite completa, compatto e IPA restano obbligatori. Parsing, design system e integrità ZIP superati localmente; build Apple 51 ancora da verificare.
+
 ## Build 50 — causa verificata, controllo toolbar da 44 punti
 
 Diagnosi Apple run 38967287251: la prova con tocchi reali fallisce a offset (0,-21.5) dal centro di primary-add, AX frame (334,66,48,36). L’area estesa ipotizzata non è sufficiente: è un problema concreto di tocco, non soltanto di misura del test. Non è stato abbassato il requisito.
