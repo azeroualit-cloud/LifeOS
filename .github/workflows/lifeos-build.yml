@@ -121,13 +121,18 @@ jobs:
           except Exception as error:
               raise SystemExit('Verifica contratto fallita: stage=%s class=%s HTTP=%s. Nessun dato o credenziale pubblicato.' % (stage,type(error).__name__,getattr(error,'code','n/a')))
           PY
-      - name: Compila ed esegui tutti i test
+      - name: Verifica mirata toolbar nativa
         working-directory: app
         run: |
           set -euo pipefail
           xcodebuild -version
           DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,re,sys; d=json.load(sys.stdin); keys=sorted((k for k in d["devices"] if "iOS" in k),key=lambda k:tuple(map(int,re.findall(r"\d+",k))),reverse=True); print(next(x["udid"] for k in keys for x in d["devices"][k] if "iPhone" in x["name"]))')
           xcodebuild test -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFourSectionsInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testNativeToolbarRespondsAcross44PointTouchRegion -resultBundlePath build/Toolbar.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/toolbar-tests.log
+      - name: Compila ed esegui tutti i test
+        working-directory: app
+        run: |
+          set -euo pipefail
+          DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,re,sys; d=json.load(sys.stdin); keys=sorted((k for k in d["devices"] if "iOS" in k),key=lambda k:tuple(map(int,re.findall(r"\d+",k))),reverse=True); print(next(x["udid"] for k in keys for x in d["devices"][k] if "iPhone" in x["name"]))')
           xcodebuild test -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -parallel-testing-enabled NO -resultBundlePath build/Tests.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/tests.log
       - name: Errori XCTest in annotazioni
         if: failure()
@@ -138,7 +143,7 @@ jobs:
           for name in ['toolbar-tests.log', 'tests.log']:
               path = pathlib.Path('build') / name
               if not path.exists(): continue
-              errors = [line for line in path.read_text(errors='replace').splitlines() if re.search(r'\.swift:\d+:\d+: error:', line)]
+              errors = [line for line in path.read_text(errors='replace').splitlines() if ' error:' in line or ('Test Case ' in line and ' failed ' in line)]
               for line in errors[:12]:
                   message = line.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
                   print('::error::' + message)
