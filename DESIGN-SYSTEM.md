@@ -41,3 +41,7 @@ Token: Sources/NativeDesign.swift. Primitive/compositi: NativeComponents.swift. 
 NativeChecklistRow è il pattern condiviso di Home, Attività ed eventi/attività del Calendario: checkbox44, Body17, metadati13 solo quando presenti, stessa distanza8 tra controllo e testo, apertura separata dal completamento e chevron nel target di apertura. Le routine Home conservano il proprio pulsante a riga intera con stato busy.
 
 Attività usa NativeChecklistListAppearance e NativeChecklistListRow: stesso raggio24, superficie, inset16 e separatori allineati al testo di NativeGroupedCard. Intestazioni Headline come Home, In attesa attenuato. Primo/ultimo elemento definiscono gli angoli del gruppo; completate e comando eliminazione sono un solo gruppo. List conserva swipe e riordino nativi, nessuna conversione in ScrollView o perdita di azioni.
+
+## Riepilogo Home — 0.8.2
+
+Turni descritti per nome, senza orari abituali; gli appuntamenti conservano il proprio orario se presente. NativeTypingSummary rivela il riepilogo in0,65s una volta per avvio del processo, senza replay al cambio scheda o sincronizzazione. Mantiene testo e font completi nel layout, nascondendo soltanto i glifi successivi: nessun salto delle sezioni. Testo accessibile subito; effetto saltato per Reduce Motion e VoiceOver. Cancellazione, uscita e aggiornamento contenuti mostrano subito il testo completo. I token di durata/cadenza sono in NativeDesign.Motion.
