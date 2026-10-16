@@ -1,3 +1,13 @@
+# LifeOS 0.9.0 build 40 — settimana Home allineata al Calendario
+
+La settimana della Home riusa direttamente CalendarDayCell e CalendarDayPresentation: badge pieni dei turni, colori, sfondi weekend, bordo del giorno corrente, puntini e opacità tra mesi sono gli stessi del Calendario. Conserva sette giorni con oggi al centro e il tocco per aprire il giorno nel Calendario. Nessun nuovo stile parallelo.
+
+Il file CalendarScreen.swift cambia soltanto due dichiarazioni da private a internal per rendere riusabili i tipi: layout e comportamento del Calendario restano invariati. Il controllo di packaging confronta il file con la base normalizzando esclusivamente queste due dichiarazioni. NativeStore e NativeDesign restano identici.
+
+Verifiche specifiche: parser Swift su tutti i sorgenti e test, controllo design system e integrità dell’archivio. Nessuna modifica ai modelli coperti dai 53 test locali precedentemente superati. La verifica iOS della build 40 resta da eseguire. Il fallimento della build 39 sotto documentato rimane da diagnosticare: non attribuire a questa modifica una correzione non dimostrata.
+
+---
+
 # LifeOS 0.9.0 build 39 — verifica Apple fallita, nessuna IPA
 
 Base: 0.8.2 build 38, main 83ff3f35789b2906b7c090292e92575f29f5211c. Richiesta del 16 ottobre 2026.
@@ -10,7 +20,7 @@ La barra inferiore è il TabView Apple a quattro destinazioni, con effetti di si
 
 Home recupera una riga discreta con nome italiano e ora (es. Pomeriggio · 16:42); dopo l’ultimo orario mostra Domani. Nessun riferimento religioso o nome arabo nell’interfaccia. Il dettaglio Orari mostra i cinque orari locali di Empoli, escludendo l’alba. Riusa senza variazioni il calcolo locale già presente; non introduce servizi, posizione GPS o costi. Il dato rimane indicativo, non una nuova certificazione del metodo astronomico.
 
-CalendarScreen.swift è identico alla build 38; NativeStore.swift e i contratti di sincronizzazione sono identici. La barra globale nativa sostituisce quella personalizzata anche quando è aperto il Calendario.
+Nella build 39 CalendarScreen.swift era identico alla build 38; NativeStore.swift e i contratti di sincronizzazione sono identici. La barra globale nativa sostituisce quella personalizzata anche quando è aperto il Calendario.
 
 ## Verifiche della sessione
 
