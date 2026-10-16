@@ -1,4 +1,4 @@
-# LifeOS 0.9.0 build 39 — modifica in verifica
+# LifeOS 0.9.0 build 39 — verifica Apple fallita, nessuna IPA
 
 Base: 0.8.2 build 38, main 83ff3f35789b2906b7c090292e92575f29f5211c. Richiesta del 16 ottobre 2026.
 
@@ -18,4 +18,8 @@ CalendarScreen.swift è identico alla build 38; NativeStore.swift e i contratti 
 
 Parser Swift eseguito su tutti i sorgenti e test; controllo design system passato. Archivio verificato con SHA-256 e CRC; CalendarScreen e NativeStore confrontati byte per byte con la base. UI test aggiornati ai nuovi percorsi, con casi Dynamic Type, snapshot vuoto, azione Spesa a destra, tab bar nativa e aggiunta ripetuta.
 
-Compilazione Apple, unit test completi, UI test sui simulatori, schermate e IPA: ancora da verificare tramite il workflow macOS. Nessun risultato storico viene attribuito a questa build. Installazione e animazioni fisiche richiedono successivamente la prova su iPhone.
+Run Apple: https://github.com/azeroualit-cloud/LifeOS/actions/runs/38908116463, codice 10c8dd1099fa6a2a806dbaaada304537c09aaf33. Preparazione, design system, generazione Xcode e contratto API condiviso riusciti. La fase Compila ed esegui tutti i test è fallita con exit code 65 dopo circa 24 minuti; la pagina pubblica non identifica la verifica fallita. Schermate e diagnostica sono state caricate (LifeOS-anteprima, LifeOS-anteprima-principale, LifeOS-diagnostica). Test compatti, archive e caricamento IPA saltati: nessuna nuova IPA consegnabile.
+
+Il dettaglio del fallimento non è diagnosticato: i log richiedono autenticazione GitHub e api.github.com è escluso dalla policy di rete dell’ambiente. Git read e push funzionano tramite il proxy, ma non provano accesso API. L’aggiunta del dominio è salvata nella bozza; non è applicata al runtime. Dopo l’applicazione nelle impostazioni, ritestare l’accesso esistente prima di chiedere nuove credenziali. In alternativa il tests.log nell’artefatto diagnostico consente la diagnosi se fornito dall’utente. Non alterare le asserzioni né indovinare una correzione senza il risultato preciso. Non avviare la stessa build senza cambiamenti giustificati.
+
+La versione installabile di riferimento resta 0.8.2 build 38. Nessun risultato storico viene attribuito a questa build. Installazione e animazioni fisiche richiedono comunque la prova su iPhone dopo una nuova build verificata.
