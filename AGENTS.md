@@ -20,3 +20,5 @@ L’utente chiede di conservare sorgenti e modifiche nel progetto e di non richi
 - Preferenza esplicita dell’utente: IPA solo tramite download GitHub; non caricare IPA su Drive. Il backup privato dei sorgenti resta autorizzato.
 
 - Correzioni Finanza/salute 17 ottobre: `backend/plans/FINANCE-HEALTH-FIXES.md`. Il Worker originale resta immutabile; `worker-runtime.mjs` nel repository privato contiene le correzioni delle letture SQL e viene impacchettato da build.mjs. Non ricompilare dalla sola baseline annullando questi fix.
+
+- Build corretta 0.9.4/55: `backend/plans/IPA-build55.json`; sorgente iOS ba929a5b7ea5803d5a3ae23214908b2fda6345103f0215defda592fbc87c0322. Il run 39043117966 verifica la revisione finale con 115 unit test e due flussi UI; il Worker ottimizzato è pronto per il caricamento manuale nell’archivio privato.

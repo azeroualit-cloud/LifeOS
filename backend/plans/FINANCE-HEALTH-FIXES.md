@@ -15,4 +15,8 @@ Il modulo completo aggiornato è conservato solo nel repository e nell’archivi
 
 96 test dei modelli Swift; 34 test server, incluso Worker completo e controllo del numero di query per ogni lettura provata. Inizializzazione categorie: 30 query; lettura corrente completa: 27; lettura storica: 39; lettura storica dopo cold start: 43; anno precedente dopo cold start: 47; configurazione con affitto già separato dal condominio: 48. Riclassificazione di 300 nuovi movimenti: 4 query. Nessun dato reale modificato.
 
-Verifica iOS in corso: workflow `lifeos-plans-tests.yml`, modalità `regressions`, run 39042248365.
+Verifica iOS finale riuscita: workflow `lifeos-plans-tests.yml`, modalità `regressions`, run 39043117966, sorgenti fd06e9d. Compilazione, 115 test unitari e due flussi UI passati: Analisi con intervalli 3/6/12 mesi e navigazione mesi avanti/indietro con etichette salute aggiornate.
+
+IPA 0.9.4 build 55 verificata per iPhoneOS arm64: run 39043121169, artifact 12104892606. SHA-256 e provenienza in IPA-build55.json. Consegna soltanto GitHub; nessun binario IPA nel backup Drive.
+
+Controllo visivo aggiuntivo dell’intera scheda: primo tentativo 39043315482 fermato da un timeout durante app.launch, prima delle verifiche della scheda. Ripetizione 39043992563 con un test di riscaldamento del simulatore, in corso.
