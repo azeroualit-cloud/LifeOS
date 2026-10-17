@@ -32,3 +32,6 @@ L’utente chiede di conservare sorgenti e modifiche nel progetto e di non richi
 - Worker Raw: sorgente pubblico sanificato in backend/worker/runtime.mjs, entry in backend/worker/entry.mjs. Rigenerare con node backend/worker/build.mjs dopo modifiche a runtime o backend/plans. Eseguire --check. lifeos-worker.yml blocca bundle obsoleti e verifica il worker.js realmente consegnato. Non ricreare il runtime pubblico dal bundle né pubblicare il runtime privato.
 
 - Il web è aggiornato a Piani v2 tramite backend/worker/plans-web.js incorporato dal build. Non consegnare un Worker con il solo backend aggiornato e il vecchio modulo Nuova straordinaria. Il workflow verifica anche l’HTML reale in Chromium (plans-web.test.mjs), oltre a TypeScript e ai test D1.
+
+- Revisione di coerenza del 17 ottobre: `docs/PLATFORM-PARITY.md`. Fonte HTML pubblica ora in `backend/worker/app.html`; contratto categorie/etichette in `shared/platform-contract.json`. Dopo modifiche al contratto rigenerare con `python3 scripts/platform-contract.py <estrazione-native>` e reimpacchettare lo ZIP; `--check` verifica i file generati. Il Worker va rigenerato con `node backend/worker/build.mjs`.
+- La coda spese web è locale all’origine e conserva payload/ID prima dell’invio. Non cancellarla per risolvere errori: preservare backup e identità, come nella coda nativa.

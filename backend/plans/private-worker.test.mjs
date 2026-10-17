@@ -39,6 +39,14 @@ test('Worker completo: autenticazione, adozione, pagamento, saldo e mesi storici
   assert.equal(sql.prepare('SELECT COUNT(*) n FROM movements').get().n,0);
   const legacyBefore=sql.prepare('SELECT * FROM extraordinary').all();
   const overview=await api('getFinanceOverview',[2026,10]);
+  // This is the exact route used by the failing native Plans screen.
+  const plansResponse=await worker.fetch(request('getFinancePlans',['2026-10']),env,{});
+  assert.equal(plansResponse.status,200);
+  assert.equal(plansResponse.headers.get('X-LifeOS-Plans-Version'),'2');
+  const plans=await plansResponse.json();
+  assert.equal(plans.version,2);assert.equal(plans.month,'2026-10');
+  assert.deepEqual(plans.plans,overview.plansV2.plans);
+  assert.ok(Array.isArray(plans.payments));
   assert.equal(overview.summary.monthlyRemaining,oldOverview.summary.monthlyRemaining);
   assert.deepEqual(sql.prepare('SELECT * FROM extraordinary').all(),legacyBefore);
   assert.equal(sql.prepare('SELECT COUNT(*) n FROM account_balance_events').get().n,0);

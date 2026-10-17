@@ -1,3 +1,7 @@
+# Revisione coerenza web / iOS — 17 ottobre 2026
+
+Lavoro nel ramo fix/platform-parity, basato sulla versione Piani v2 effettivamente installata. Diagnosi, flussi modificati e limiti in [PLATFORM-PARITY.md](PLATFORM-PARITY.md). 34 test server, 99 Foundation e confronto diretto JS/Swift superati localmente; due suite browser verificano il bundle realmente servito. Sorgenti 0.9.5/56 nello ZIP, nessun nuovo IPA. Test Apple e distribuzione manuale da registrare separatamente. L’errore della foto è riproducibile sul Worker precedente: anche il gateway configurato nell’app deve includere Piani v2, non basta aggiornare il Worker web.
+
 ## Build 51 — suite principale superata, verifica compatta di Finanza
 
 Run 38973693215 sul commit 70787bb: compilazione Apple e prova geometria/tocchi toolbar superate; suite UI principale 30/30 superata e fase completa verde. Compatto: 13/14 superati; fallisce testFinanceOverviewSupportsLargeTextAndEmptySnapshot sull’assert expense.isHittable dopo sei swipe sempre verso l’alto. IPA correttamente non prodotta.

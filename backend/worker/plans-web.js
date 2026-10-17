@@ -1,7 +1,8 @@
 /* Web Piani v2. Runs after the original UI; uses the same authenticated transport. */
+import {newPlan,contribution,months,addMonth} from '../plans/engine.mjs';
 (() => {
-  const kinds={goal:'Obiettivo',fund:'Fondo',fixed:'Ricorrenza fissa',estimated:'Utenza stimata',advance:'Anticipo budget',recovery:'Recupero spesa'};
-  const statuses={active:'Attivo',stopped:'Interrotto',closed:'Completato',cancelled:'Annullato',pendingPayment:'Pagamento da completare'};
+  const kinds=lifeOSContract.planKinds;
+  const statuses=lifeOSContract.planStatuses;
   const today=()=>new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Rome'});
   const current=()=>today().slice(0,7);
   const next=m=>{const [y,n]=m.split('-').map(Number);return new Date(Date.UTC(y,n,1)).toISOString().slice(0,7);};
@@ -10,25 +11,31 @@
   const plan=id=>view()?.plans.find(p=>p.id===id);
   const field=(label,name,type,value='',attrs='')=>`<label class="${name==='name'?'full':''}">${label}<input name="${name}" type="${type}" value="${safe(value)}" ${attrs}></label>`;
   const amount=(label,value='')=>field(label,'amount','number',value,'required min="0.01" max="1000000" step="0.01"');
-  const monthField=(label,name,value)=>field(label,name,'month',value,'required');
+  const monthField=(label,name,value)=>field(label,name,'month',value,'required min="'+current()+'" max="2099-12"');
   const oldActions=osPageActions;
   osPageActions=function(){oldActions();document.querySelectorAll('[data-new-extra]').forEach(b=>{b.setAttribute('aria-label','Nuovo piano');b.setAttribute('title','Nuovo piano');if(!b.classList.contains('fab-button'))b.textContent='+ Piano';});};
   const oldSetView=setView;
-  setView=function(v){oldSetView(v);if(v==='extras')document.getElementById('page-title').textContent='Piani';};
+  setView=function(v){if(v!=='extras')activePlan=null;oldSetView(v);if(v==='extras')document.getElementById('page-title').textContent=activePlan?'Dettagli piano':'Piani';};
   const oldOverview=overview;
   overview=function(d){return oldOverview(d).replace('>Extra</button>','>Piani</button>');};
+  let activePlan=null;
   extrasView=function(d){
     const v=d.plansV2;
-    if(!v)return '<p role="status">Caricamento Piani…</p><button data-plans-refresh>Riprova</button>';
-    const pending=v.payments.filter(p=>p.status==='pending');
-    return `<div class="plans-web"><div class="card-title"><div><h2>Piani</h2><p class="hint">Quote e anticipi organizzano il budget. Il saldo cambia solo con un pagamento.</p></div><button class="save" data-new-extra>Nuovo piano</button></div>${pending.map(p=>`<div class="errorbox">Pagamento da completare · ${safe(plan(p.planId)?.name||'Piano')} <button data-plans-resume="${safe(p.id)}">Riprendi senza duplicare</button></div>`).join('')}<div class="extra-grid">${v.plans.map(p=>{
-      const payable=p.status==='active'&&!['advance','recovery'].includes(p.kind)&&p.startMonth<=current();
-      let cycle=v.month;
-      if(p.kind==='fixed'&&p.intervalMonths>1){const anchor=p.intervalAnchor||p.startMonth,[y,m]=anchor.split('-').map(Number),delta=(Number(cycle.slice(0,4))-y)*12+Number(cycle.slice(-2))-m;cycle=new Date(Date.UTC(y,m-1+Math.floor(delta/p.intervalMonths)*p.intervalMonths,1)).toISOString().slice(0,7);}
-      const paid=p.kind!=='fund'&&v.payments.some(x=>x.planId===p.id&&x.status==='posted'&&(p.kind==='goal'||x.settlementKey===cycle));
-      return `<article class="extra-card"><div class="extra-card-head"><h3>${safe(p.name)}</h3><strong>${money(p.contributionCents)}<small> / mese</small></strong></div><p>${safe(kinds[p.kind])} · ${safe(statuses[p.status]||p.status)}</p><p class="hint">${safe(p.startMonth)}${p.endMonth?' → '+safe(p.endMonth):' · Senza scadenza'}</p>${p.kind==='advance'?`<p class="hint">Budget anticipato a ${safe(p.beneficiaryMonth)} · ${money(p.amountCents)}</p>`:`<div class="kv"><span>Accumulato</span><strong>${money(p.fundCents)}</strong></div><div class="kv"><span>Pagato</span><strong>${money(p.paidCents)}</strong></div>`}${p.kind==='goal'?`<p class="hint">Obiettivo ${money(p.amountCents)} · residuo ${money(p.outstandingCents)}</p>`:''}<div class="extra-card-controls">${payable&&!paid?`<button data-plans-pay="${safe(p.id)}">Paga o collega</button>`:paid?'<span class="state-tag">Pagamento registrato</span>':''}${p.status==='active'?`${!['advance','recovery'].includes(p.kind)?`<button data-plans-edit="${safe(p.id)}">Modifica quote future</button>`:''}<button data-plans-stop="${safe(p.id)}">${p.kind==='advance'?'Annulla anticipo':'Interrompi'}</button>`:''}</div></article>`;
-    }).join('')||'<p class="empty">Nessun piano. Crea un obiettivo, un fondo o una ricorrenza.</p>'}</div></div>`;
+    if(!v||v.version!==2||!Array.isArray(v.plans)||!Array.isArray(v.payments))return `<p role="alert">${safe(lifeOSContract.plansUnavailable)}</p><button data-plans-refresh>Riprova</button>`;
+    const p=v.plans.find(p=>p.id===activePlan);
+    if(p){document.getElementById('page-title').textContent='Dettagli piano';return detail(p,v);}
+    activePlan=null;document.getElementById('page-title').textContent='Piani';
+    const legacy=[...new Map((d.extraPlan?.allocations||[]).map(r=>[r.cycle_id,r])).values()];
+    return `<div class="plans-web"><div class="card-title"><div><h2>Piani</h2><p class="hint">Tutti i piani · impatto su ${safe(titleMonth(state.year,state.month))}</p></div><div class="actions"><button data-plans-info aria-label="Come funzionano i piani">ⓘ</button><button class="save" data-new-extra>Nuovo piano</button></div></div><div class="extra-grid">${v.plans.map(p=>`<button class="extra-card plan-list-row" data-plans-detail="${safe(p.id)}"><span><strong>${safe(p.name)}</strong><small>${safe(kinds[p.kind])} · ${safe(statuses[p.status]||p.status)}</small><span>Budget del mese: ${money(-p.contributionCents)}</span></span><span aria-hidden="true">›</span></button>`).join('')||'<p class="empty">Anticipa budget, metti da parte o distribuisci una spesa sui mesi scelti.</p>'}</div>${legacy.length?`<section class="card pad"><h2>Piani precedenti</h2><p class="hint">Le voci storiche non adottate sono conservate. Non duplicarle con un nuovo piano.</p>${legacy.map(r=>`<button class="plan-list-row" data-plans-legacy="${Number(r.extraordinary_source_row)}"><span>${safe(r.name)}<small>${safe(NativeExtraTitle(r.status))}</small></span><span aria-hidden="true">›</span></button>`).join('')}</section>`:''}</div>`;
   };
+  function NativeExtraTitle(status){return {Pagato:'Pagata',Programmato:'In corso',Previsto:'Da valutare',Annullato:'Annullata'}[status]||status;}
+  function detail(p,v){
+    let cycle=v.month;
+    if(p.kind==='fixed'&&p.intervalMonths>1){const anchor=p.intervalAnchor||p.startMonth,[y,m]=anchor.split('-').map(Number),delta=(Number(cycle.slice(0,4))-y)*12+Number(cycle.slice(-2))-m;cycle=addMonth(anchor,Math.floor(delta/p.intervalMonths)*p.intervalMonths);}
+    const payments=v.payments.filter(x=>x.planId===p.id),paid=p.kind!=='fund'&&payments.some(x=>x.status==='posted'&&(p.kind==='goal'||x.settlementKey===cycle));
+    const payable=p.status==='active'&&!['advance','recovery'].includes(p.kind)&&p.startMonth<=current();
+    return `<div class="plans-web"><button data-plans-back>‹ Piani</button><section class="card pad"><h2>${safe(p.name)}</h2><p>${safe(kinds[p.kind])} · ${safe(statuses[p.status]||p.status)}</p><p class="hint">${safe(p.startMonth)}${p.endMonth?' → '+safe(p.endMonth):' · Senza scadenza'}</p><div class="kv"><span>Categoria della spesa</span><strong>${safe(p.category||'Altro')}</strong></div><div class="kv"><span>Budget di ${safe(shortMonth(v.month))}</span><strong>${money(-p.contributionCents)}</strong></div>${p.kind==='advance'?`<div class="kv"><span>Mese beneficiario</span><strong>${safe(shortMonth(p.beneficiaryMonth))}</strong></div>`:p.kind!=='recovery'?`<div class="kv"><span>Destinato al fondo nel mese consultato</span><strong>${money(p.fundCents)}</strong></div>${p.fromGeneralSavingsCents>0?`<div class="kv"><span>Pagato dagli altri risparmi</span><strong>${money(p.fromGeneralSavingsCents)}</strong></div>`:''}`:''}${p.kind==='goal'?`<div class="kv"><span>Obiettivo</span><strong>${money(p.amountCents)}</strong></div><div class="kv"><span>Residuo</span><strong>${money(p.outstandingCents)}</strong></div>`:''}${payable&&!paid?`<button data-plans-pay="${safe(p.id)}">${p.kind==='goal'?'Paga dai risparmi e chiudi il piano':'Registra un pagamento'}</button>`:paid?'<p>Pagamento registrato</p>':''}</section><section class="card pad"><h2>Pagamenti</h2>${payments.map(p=>`<div class="kv"><span>${safe(p.date||'')}<small>${p.status==='posted'?'Pagato · movimento collegato':'Da completare · non registrare una nuova spesa'}</small></span><strong>${money(p.amountCents)}</strong></div>${p.status==='pending'?`<button data-plans-resume="${safe(p.id)}">Completa questa registrazione</button>`:''}`).join('')||'<p class="empty">Nessun pagamento registrato</p>'}</section>${p.status==='active'?`<section class="card pad">${!['advance','recovery'].includes(p.kind)?`<button data-plans-edit="${safe(p.id)}">Modifica le quote future</button>`:''}<button class="danger" data-plans-stop="${safe(p.id)}">${p.kind==='advance'?'Annulla l’intero anticipo':'Interrompi le quote future'}</button></section>`:''}</div>`;
+  }
   function modal(title,body,method,makePayload){
     const host=document.getElementById('dialog');
     host.innerHTML=`<div class="modal" role="dialog" aria-modal="true" aria-label="${safe(title)}"><div class="modal-top"><h2>${safe(title)}</h2><button type="button" data-plans-close aria-label="Chiudi">×</button></div><form id="plans-web-form" class="form-grid">${body}<p class="os-form-error full" role="alert"></p><div class="form-actions full"><button type="button" data-plans-close>Annulla</button><button class="save" type="submit">Salva</button></div></form></div>`;
@@ -39,56 +46,90 @@
       const error=form.querySelector('[role=alert]'),button=form.querySelector('[type=submit]');
       try {
         if(!payload)payload={requestId,...makePayload(new FormData(form))};
-        busy=true;button.disabled=true;button.textContent='Salvataggio…';error.textContent='';
+        busy=true;form.dataset.submitted='true';host.querySelectorAll('[data-plans-close]').forEach(b=>b.disabled=true);button.disabled=true;button.textContent='Salvataggio…';error.textContent='';
         // Freeze values once submitted. A retry must use the same payload and ID.
         form.querySelectorAll('input,select').forEach(x=>x.disabled=true);
-        await workerRequest(method,[payload]);
+        const result=await workerRequest(method,[payload]);
+        if(result===false)throw Error('Il server non ha confermato la modifica.');
         host.classList.add('hidden');state.data=null;state.loadedDetail=false;load();osLoadHomeFinance();
       }catch(err){error.textContent=err.message+' Puoi riprovare la stessa operazione senza duplicarla.';button.textContent='Riprova';}
-      finally{busy=false;button.disabled=false;}
+      finally{busy=false;button.disabled=false;host.querySelectorAll('[data-plans-close]').forEach(b=>b.disabled=false);}
     });return form;
   }
   const cents=f=>{const n=Number(f.get('amount'));if(!Number.isFinite(n)||n<=0||Math.abs(n*100-Math.round(n*100))>1e-6)throw Error('Usa un importo positivo con massimo due decimali.');return Math.round(n*100);};
   openExtra=function(){
-    const form=modal('Nuovo piano',`<label class="full">Tipo<select name="kind">${Object.entries(kinds).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></label>${field('Nome','name','text','','required maxlength="120" class="full"')}<div class="full" data-plan-fields></div>`,'saveFinancePlan',f=>{
-      const kind=String(f.get('kind')),p={kind,name:String(f.get('name')),amountCents:cents(f),startMonth:String(f.get('startMonth')),category:'Altro'};
+    const form=modal('Nuovo piano',`<label class="full">Tipo<select name="kind">${Object.entries(kinds).map(([k,v])=>`<option value="${k}" ${k==='goal'?'selected':''}>${v}</option>`).join('')}</select></label>${field('Nome','name','text','','required maxlength="120" class="full"')}<div class="full" data-plan-fields></div>`,'saveFinancePlan',f=>{
+      const kind=String(f.get('kind')),p={kind,name:String(f.get('name')).trim(),amountCents:cents(f),startMonth:String(f.get('startMonth')),category:String(f.get('category')||'Altro')};
       if(['goal','advance','recovery'].includes(kind))p.endMonth=String(f.get('endMonth'));
       if(kind==='advance')p.beneficiaryMonth=String(f.get('beneficiaryMonth'));
       if(kind==='fixed')p.intervalMonths=Number(f.get('intervalMonths'));
       if(kind==='recovery'){p.paymentDate=String(f.get('date'));if(f.get('movementId'))p.movementId=Number(f.get('movementId'));}
-      return p;
+      newPlan(p,today(),'preview');return p;
     });
     const update=()=>{
       const kind=form.elements.kind.value,start=kind==='advance'?next(current()):current();
       const labels={goal:'Totale obiettivo €',fund:'Quota mensile €',fixed:'Importo per scadenza €',estimated:'Stima mensile €',advance:'Budget da anticipare €',recovery:'Spesa da recuperare €'};
-      form.querySelector('[data-plan-fields]').innerHTML=`<div class="form-grid">${amount(labels[kind])}${monthField(kind==='advance'?'Primo mese di recupero':'Dal mese','startMonth',start)}${['goal','advance','recovery'].includes(kind)?monthField('Ultimo mese','endMonth',start):'<p class="hint">Senza scadenza: continua finché non lo interrompi.</p>'}${kind==='advance'?monthField('Mese beneficiario','beneficiaryMonth',current()):''}${kind==='fixed'?'<label>Ogni quanti mesi<select name="intervalMonths"><option value="1">Ogni mese</option><option value="2">Ogni 2 mesi</option><option value="3">Ogni 3 mesi</option><option value="6">Ogni 6 mesi</option><option value="12">Ogni anno</option></select></label>':''}${kind==='recovery'?`${field('Data della spesa','date','date',today(),'required max="'+today()+'"')}<label class="full">Movimento<select name="movementId"><option value="">Registra una nuova spesa</option></select></label><p class="hint full">Collega una spesa già registrata per recuperarla senza un secondo addebito.</p>`:''}<p class="hint full">${kind==='advance'?'Non sposta denaro tra conti: aumenta il budget del mese beneficiario e lo recupera nei mesi scelti.':kind==='recovery'?'La spesa incide sul saldo una sola volta; le quote recuperano il budget nei mesi scelti.':'Creare il piano non registra un pagamento.'}</p></div>`;
+      form.querySelector('[data-plan-fields]').innerHTML=`<div class="form-grid">${kind!=='advance'?`<label>Categoria della spesa<select name="category">${lifeOSContract.expenseCategories.map(c=>`<option ${c==='Altro'?'selected':''}>${safe(c)}</option>`).join('')}</select></label>`:''}${amount(labels[kind])}${monthField(kind==='advance'?'Primo mese di recupero':'Dal mese','startMonth',start)}${['goal','advance','recovery'].includes(kind)?monthField('Ultimo mese','endMonth',start):'<p class="hint">Senza scadenza: continua finché non lo interrompi.</p>'}${kind==='advance'?monthField('Mese beneficiario','beneficiaryMonth',current()):''}${kind==='fixed'?`<label>Ogni quanti mesi<select name="intervalMonths">${Array.from({length:12},(_,i)=>`<option value="${i+1}">Ogni ${i+1} ${i===0?'mese':'mesi'}</option>`).join('')}</select></label>`:''}${kind==='recovery'?`${field('Data della spesa','date','date',today(),'required max="'+today()+'"')}<label class="full">Movimento<select name="movementId"><option value="">Registra una nuova spesa</option></select></label><p class="hint full">Collega una spesa già registrata per recuperarla senza un secondo addebito.</p>`:''}<p class="hint full">${kind==='advance'?'Non sposta denaro tra conti: aumenta il budget del mese beneficiario e lo recupera nei mesi scelti.':kind==='recovery'?'La spesa incide sul saldo una sola volta; le quote recuperano il budget nei mesi scelti.':'Creare il piano non registra un pagamento.'}</p><section class="full" data-plan-preview aria-live="polite"></section></div>`;
+      preview();
       if(kind==='recovery')loadMovements(form);
-    };form.elements.kind.addEventListener('change',update);update();
+    };
+    function preview(){
+      const target=form.querySelector('[data-plan-preview]');if(!target)return;
+      const save=form.querySelector('[type=submit]');save.disabled=true;
+      try {
+        const f=new FormData(form),kind=String(f.get('kind'));
+        if(!f.get('amount')){target.textContent='Inserisci importo e mesi per vedere l’anteprima budget.';return;}
+        const p=newPlan({kind,name:f.get('name')||'Anteprima',category:f.get('category')||'Altro',amountCents:cents(f),startMonth:f.get('startMonth'),endMonth:f.get('endMonth'),beneficiaryMonth:f.get('beneficiaryMonth'),intervalMonths:Number(f.get('intervalMonths')||1),paymentDate:f.get('date')},today(),'preview');
+        p.status='active';
+        const range=p.endMonth?months(p.startMonth,p.endMonth):[0,1,2].map(i=>addMonth(p.startMonth,i));
+        if(kind==='advance')range.unshift(p.beneficiaryMonth);
+        save.disabled=state.data?.plansV2?.version!==2;
+        if(save.disabled)form.querySelector('[role=alert]').textContent=lifeOSContract.plansUnavailable;
+        target.innerHTML='<h3>Anteprima budget'+(p.endMonth?'':' · primi tre mesi')+'</h3>'+range.map(m=>`<div class="kv"><span>${safe(shortMonth(m))}</span><strong>${money(-contribution(p,m))}</strong></div>`).join('');
+      }catch(error){target.textContent=error.message;}
+    }
+    form.addEventListener('input',preview);form.addEventListener('change',preview);
+    form.elements.kind.addEventListener('change',update);update();
   };
   async function loadMovements(form){
     const select=form.elements.movementId;if(!select)return;
-    const date=form.elements.date;
+    const date=form.elements.date;let revision=0;
     const refresh=async()=>{
-      try{const d=await workerRequest('getFinancePlanMovements',[date.value.slice(0,7)]);if(!form.isConnected)return;select.innerHTML='<option value="">Registra una nuova spesa</option>'+d.movements.map(m=>`<option value="${m.row}" data-cents="${m.amountCents}" data-date="${safe(m.date)}">${safe(m.name)} · ${money(m.amountCents)}</option>`).join('');}
-      catch(err){form.querySelector('[role=alert]').textContent='Movimenti non disponibili: '+err.message;}
+      const token=++revision;select.disabled=true;
+      try{const d=await workerRequest('getFinancePlanMovements',[date.value.slice(0,7)]);if(!form.isConnected||!select.isConnected||token!==revision)return;select.innerHTML='<option value="">Registra una nuova spesa</option>'+d.movements.map(m=>`<option value="${m.row}" data-cents="${m.amountCents}" data-date="${safe(m.date)}">${safe(m.name)} · ${money(m.amountCents)}</option>`).join('');}
+      catch(err){if(token===revision&&select.isConnected)form.querySelector('[role=alert]').textContent='Movimenti non disponibili: '+err.message;}
+      finally{if(token===revision&&select.isConnected&&!form.dataset.submitted)select.disabled=false;}
     };
-    select.addEventListener('change',()=>{const o=select.selectedOptions[0];if(o?.dataset.cents){form.elements.amount.value=Number(o.dataset.cents)/100;date.value=o.dataset.date;}});
+    select.addEventListener('change',()=>{const o=select.selectedOptions[0];if(o?.dataset.cents){form.elements.amount.value=Number(o.dataset.cents)/100;date.value=o.dataset.date;}form.elements.amount.readOnly=!!o?.dataset.cents;date.readOnly=!!o?.dataset.cents;form.dispatchEvent(new Event('input'));});
     date.addEventListener('change',refresh);await refresh();
   }
   function pay(id){
     const p=plan(id);if(!p)return;
     const m=view().month<=current()?view().month:current();
-    const form=modal('Paga o collega · '+p.name,`${amount('Importo effettivo €',(p.kind==='goal'?p.outstandingCents:p.kind==='fixed'?p.amountCents:Math.max(p.contributionCents,1))/100)}${field('Data pagamento','date','date',today(),'required max="'+today()+'"')}${monthField('Scadenza di riferimento','cycleMonth',m)}${field('Mesi coperti','competenceMonths','number',1,'required min="1" max="12"')}<label class="full">Movimento<select name="movementId"><option value="">Registra un nuovo pagamento</option></select></label><p class="hint full">Collegare un movimento esistente non genera un nuovo addebito.${p.kind==='goal'?' Il pagamento chiude l’obiettivo e libera le quote future.':''}</p>${p.kind==='goal'?`<label class="full">Eccedenza<select name="recoverDifference"><option value="">Usa i risparmi</option><option value="yes">Recupera solo l’eccedenza nei mesi successivi</option></select></label>${monthField('Recupero dal mese','recoveryStartMonth',next(current()))}${monthField('Recupero fino al mese','recoveryEndMonth',next(current()))}`:''}`,'recordFinancePlanPayment',f=>{
-      const out={planId:id,amountCents:cents(f),date:String(f.get('date')),cycleMonth:String(f.get('cycleMonth')),competenceMonths:Number(f.get('competenceMonths'))};
+    const form=modal('Paga o collega · '+p.name,`${amount('Importo effettivo €',(p.kind==='goal'?p.outstandingCents:['fixed','fund','estimated'].includes(p.kind)?(p.rateChanges||[]).filter(r=>r.fromMonth<=current()).sort((a,b)=>a.fromMonth.localeCompare(b.fromMonth)).at(-1)?.amountCents??p.amountCents:Math.max(p.contributionCents,1))/100)}${field('Data pagamento','date','date',today(),'required max="'+today()+'"')}${['fixed','estimated'].includes(p.kind)?monthField('Scadenza pagata','cycleMonth',m):''}${p.kind==='estimated'?field('Mesi coperti dalla bolletta','competenceMonths','number',1,'required min="1" max="12"'):''}<label class="full">Movimento<select name="movementId"><option value="">Registra un nuovo pagamento</option></select></label><p class="hint full">Collegare un movimento esistente non genera un nuovo addebito.${p.kind==='goal'?' Il pagamento chiude l’obiettivo e libera le quote future.':''}</p>${p.kind==='goal'?`<section class="full hidden" data-overage><label class="full">Eccedenza<select name="recoverDifference"><option value="">Usa i risparmi</option><option value="yes">Recupera solo l’eccedenza nei mesi successivi</option></select></label><div class="full hidden" data-excess-recovery>${monthField('Primo mese','recoveryStartMonth',next(current()))}${monthField('Ultimo mese','recoveryEndMonth',next(current()))}</div></section>`:''}`,'recordFinancePlanPayment',f=>{
+      const out={planId:id,amountCents:cents(f),date:String(f.get('date')),cycleMonth:String(f.get('cycleMonth')||current()),competenceMonths:Number(f.get('competenceMonths')||1)};
       if(f.get('movementId'))out.movementId=Number(f.get('movementId'));
       if(f.get('recoverDifference')==='yes')Object.assign(out,{recoverDifference:true,recoveryStartMonth:String(f.get('recoveryStartMonth')),recoveryEndMonth:String(f.get('recoveryEndMonth'))});return out;
-    });loadMovements(form);
+    });if(form.elements.cycleMonth)form.elements.cycleMonth.min='2024-01';
+    if(form.elements.recoverDifference){const update=()=>{const extra=Number(form.elements.amount.value)*100>(p.outstandingCents??p.amountCents);form.querySelector('[data-overage]').classList.toggle('hidden',!extra);if(!extra)form.elements.recoverDifference.value='';};form.addEventListener('input',update);update();}
+    form.elements.recoverDifference?.addEventListener('change',()=>form.querySelector('[data-excess-recovery]').classList.toggle('hidden',form.elements.recoverDifference.value!=='yes'));
+    loadMovements(form);
   }
-  function edit(id){const p=plan(id);if(!p)return;modal('Modifica quote future · '+p.name,`${amount(p.kind==='goal'?'Nuovo totale obiettivo €':'Nuova quota / scadenza €',p.amountCents/100)}${monthField('Decorrenza','fromMonth',next(current()))}${p.kind==='goal'?monthField('Nuova scadenza','endMonth',p.endMonth<next(current())?next(current()):p.endMonth):''}<p class="hint full">Il mese corrente e le quote precedenti restano invariati.</p>`,'editFinancePlan',f=>({planId:id,amountCents:cents(f),fromMonth:String(f.get('fromMonth')),...(p.kind==='goal'?{endMonth:String(f.get('endMonth'))}:{})}));}
+  function edit(id){const p=plan(id);if(!p)return;modal('Modifica quote future · '+p.name,`${amount(p.kind==='goal'?'Nuovo totale obiettivo €':'Nuova quota / scadenza €',(p.kind==='goal'?p.amountCents:(p.rateChanges||[]).filter(r=>r.fromMonth<=next(current())).sort((a,b)=>a.fromMonth.localeCompare(b.fromMonth)).at(-1)?.amountCents??p.amountCents)/100)}${monthField('Decorrenza','fromMonth',next(current()))}${p.kind==='goal'?monthField('Nuova scadenza','endMonth',p.endMonth<next(current())?next(current()):p.endMonth):''}<p class="hint full">Il mese corrente e le quote precedenti restano invariati.</p>`,'editFinancePlan',f=>({planId:id,amountCents:cents(f),fromMonth:String(f.get('fromMonth')),...(p.kind==='goal'?{endMonth:String(f.get('endMonth'))}:{})}));}
+  function showInfo(){
+    const host=document.getElementById('dialog');
+    const sections=[["La regola di base", ["Il budget indica quanto puoi destinare ai mesi. Il saldo è il denaro reale sul conto. Accantonare modifica il budget, pagare registra una sola uscita reale."]], ["+ · Scegli cosa vuoi fare", ["Il + è indipendente dal mese che stai consultando. Prima scegli l’intento, poi nome, importo e mesi. Il giorno serve soltanto per il pagamento."]], ["Anticipa budget", ["250 € su ottobre, recuperati da novembre e dicembre: ottobre +250 €, novembre −125 €, dicembre −125 €. Il saldo non cambia. Non puoi cancellare solo le quote future mantenendo l’anticipo di un mese chiuso."]], ["Obiettivo finito", ["Distribuisci il totale sui mesi scelti. Quando paghi, confermi l’importo effettivo e chiudi le quote future. Le quote maturate restano nello storico.", "Previsti 600 €, pagati 500 €: il residuo rimane nei risparmi. Pagati 700 €: puoi recuperare i soli 100 € in più nei budget futuri; altrimenti restano a carico dei risparmi."]], ["Fondo senza scadenza · manutenzione auto", ["Scegli una quota mensile. Il fondo accumula nel tempo. Un pagamento riduce il fondo e il saldo una sola volta; il piano continua. Interrompi ferma le quote future senza generare una spesa e libera l’eventuale residuo nei risparmi generali."]], ["Affitto e utenze", ["Affitto: importo e periodicità fissi. Il pagamento chiude una scadenza, non il piano. Utenze: quota stimata dai pagamenti e dai mesi coperti. Una bolletta di 160 € per due mesi vale 80 €/mese. La media aggiorna soltanto le quote dal prossimo mese."]], ["Rateizza una spesa", ["Il pagamento è una sola uscita dai risparmi. Nei mesi scelti riduci il budget per ricostituirli. Questo piano non ha un secondo pulsante Paga. Se la registrazione è rimasta in sospeso, usa Completa questa registrazione, senza creare un altro pagamento."]], ["Piani precedenti e modifiche", ["Affitto, utenze e accantonamenti esistenti vengono adottati una sola volta, senza creare movimenti bancari né riscrivere i mesi chiusi. Il pagamento può essere nuovo oppure collegato a una spesa già registrata. Le modifiche alle quote decorrono da un mese futuro."]], ["Spesa rapida", ["Automatico applica le regole ordinarie. Da risparmi evita un nuovo addebito al budget. I piani, i recuperi e i pagamenti pianificati si gestiscono qui."]], ["Prima di confermare", ["Controlla l’anteprima mese per mese. Le quote sono esatte al centesimo. Un anticipo non è un’entrata bancaria. Un piano interrotto non cancella pagamenti già effettuati. L’adozione conserva le identità delle voci esistenti e sostituisce le loro quote dal mese corrente, senza duplicarle. Gli anticipi storici restano consultabili."]]];
+    host.innerHTML=`<div class="modal" role="dialog" aria-modal="true" aria-label="Come funzionano i piani"><div class="modal-top"><h2>Come funzionano i piani</h2><button data-plans-close aria-label="Chiudi">×</button></div>${sections.map(([title,texts])=>`<section class="os-task-section"><h3>${safe(title)}</h3>${texts.map(t=>`<p>${safe(t)}</p>`).join('')}</section>`).join('')}<button data-plans-close>Fine</button></div>`;
+    host.classList.remove('hidden');host.querySelector('button').focus();
+  }
   document.addEventListener('click',e=>{
-    const b=e.target.closest('[data-new-extra],[data-plans-pay],[data-plans-edit],[data-plans-stop],[data-plans-close],[data-plans-refresh],[data-plans-resume]');if(!b)return;
+    const b=e.target.closest('[data-new-extra],[data-plans-pay],[data-plans-edit],[data-plans-stop],[data-plans-close],[data-plans-refresh],[data-plans-resume],[data-plans-info],[data-plans-detail],[data-plans-back],[data-plans-legacy]');if(!b)return;
     e.preventDefault();e.stopImmediatePropagation();
-    if(b.hasAttribute('data-new-extra'))openExtra();
+    if(b.hasAttribute('data-plans-detail')){activePlan=b.dataset.plansDetail;render();}
+    if(b.hasAttribute('data-plans-back')){activePlan=null;render();}
+    if(b.hasAttribute('data-plans-legacy'))openExtraEdit(Number(b.dataset.plansLegacy));
+    if(b.hasAttribute('data-plans-info'))showInfo();
+    if(b.hasAttribute('data-new-extra')){activePlan=null;openExtra();}
     if(b.hasAttribute('data-plans-close'))document.getElementById('dialog').classList.add('hidden');
     if(b.hasAttribute('data-plans-pay'))pay(b.dataset.plansPay);
     if(b.hasAttribute('data-plans-edit'))edit(b.dataset.plansEdit);

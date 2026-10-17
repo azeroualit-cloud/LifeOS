@@ -6,7 +6,7 @@ const readMethods=new Set(['getFinanceOverview','getFinanceData']);
 const protectedCash=new Set(['editMovement','deleteMovement']);
 const quickWrites=new Set(['saveTransaction','saveRecurringPayment','saveEstimate']);
 const legacyWrites=new Set(['recordExtraPayment','markExtraPaid','cancelExtraCycle','deleteExtraPlan','updateExtraPlan','setExtraStatus','linkExtraMovement','unlinkExtraMovement']);
-function json(value,status=200,extra={}) {return new Response(JSON.stringify(value),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store',...extra}});}
+function json(value,status=200,extra={}) {return new Response(JSON.stringify(value),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-LifeOS-Plans-Version':'2',...extra}});}
 async function existingMovement(db,p,current) {
           const row=await db.prepare('SELECT m.*,p.treatment FROM movements m LEFT JOIN movement_budget_policies p ON p.movement_source_row=m.source_row WHERE m.source_row=?').bind(p.existingMovementId).first();
           const linked=await db.prepare('SELECT 1 FROM extraordinary_movement_links WHERE movement_source_row=? LIMIT 1').bind(p.existingMovementId).first();

@@ -8,7 +8,7 @@ on:
         options: [all, fund, regressions, visual]
         default: all
   push:
-    branches: ['feature/plans-v2']
+    branches: ['feature/plans-v2', 'fix/platform-parity']
     paths: ['lifeos-native.zip', 'backend/plans/**/*.mjs', '.github/workflows/lifeos-plans-tests.yml']
 permissions:
   contents: read

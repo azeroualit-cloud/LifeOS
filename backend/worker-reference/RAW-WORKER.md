@@ -8,7 +8,7 @@ Include l’integrazione Piani e le correzioni delle letture SQL per Analisi. Le
 
 Verifica: 34 test server superati sul bundle completo con SQLite sintetico; decifratura verificata contro la configurazione originale privata; 48 confronti delle riconciliazioni con risultati identici. Scansione del bundle senza identificativi bancari in chiaro o seed personali.
 
-SHA-256: `1523de704f03f158f4cfcf0489e79ccbc9924905e07fd22bc1a180b3fac0a531`.
+SHA-256: `c3ba3f1c68ba5e04f5307f35c8c6be9f065eda5e468b820100cbfc98be08f89a`.
 
 Il sorgente originale integrale e la procedura di generazione restano nell’archivio privato indicato in AGENTS.md. Nessun deploy Cloudflare eseguito: caricamento manuale scelto dall’utente.
 
@@ -21,3 +21,5 @@ Build pubblica riproducibile: `node backend/worker/build.mjs`. Il runtime sanifi
 Il frontend servito dal Worker ora usa Piani v2: Obiettivo, Fondo, Ricorrenza fissa, Utenza stimata, Anticipo budget, Recupero spesa. Il build incorpora `backend/worker/plans-web.js` e abilita il contratto versione 2 nelle richieste. Il modulo Nuova straordinaria è sostituito dal modulo Nuovo piano; le letture Extra passano all’overview v2 per adottare le voci esistenti senza quote duplicate. Pagamento, collegamento, modifica futura, interruzione e ripresa usano gli endpoint v2. Ogni tentativo dopo un errore conserva lo stesso ID e payload.
 
 Il test `backend/worker/plans-web.test.mjs` apre in Chromium l’HTML realmente restituito dal Worker (dati API sintetici), verifica i sei tipi, l’assenza di chiamate legacy, retry, collegamento, modifica, stop, fondi con pagamenti ripetuti, ripresa e layout mobile. Il workflow esegue questa prova e salva screenshot desktop e mobile. I test SQLite separati verificano il registro reale sul bundle completo con dati sintetici.
+
+Revisione di coerenza web/iOS: vedere `docs/PLATFORM-PARITY.md`. Le categorie derivano dal contratto condiviso; Home, Budget, Analisi, Piani e coda spese web sono verificati sul bundle servito. Anche il Worker collegato all’app deve includere Piani v2.

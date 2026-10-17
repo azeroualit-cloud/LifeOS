@@ -1,3 +1,56 @@
+// backend/worker/platform-contract.mjs
+var platformContract = {
+  "version": 2,
+  "expenseCategories": [
+    "Alimentari",
+    "Ristorazione",
+    "Casa",
+    "Affitto",
+    "Condominio",
+    "Arredamento e casa",
+    "Utenze",
+    "Elettricit\xE0",
+    "Gas",
+    "Acqua",
+    "Abbonamenti",
+    "Auto",
+    "Assicurazione",
+    "Bollo",
+    "Manutenzione auto",
+    "Benzina",
+    "Shopping",
+    "Salute",
+    "Palestra",
+    "Dentista",
+    "Farmaci e visite",
+    "Svago",
+    "Viaggi",
+    "Altro"
+  ],
+  "incomeCategories": [
+    "Stipendio",
+    "Interessi",
+    "Rimborsi",
+    "Altro"
+  ],
+  "planKinds": {
+    "advance": "Anticipa budget",
+    "goal": "Obiettivo finito",
+    "fund": "Fondo senza scadenza",
+    "fixed": "Spesa ricorrente fissa",
+    "estimated": "Utenza con quota stimata",
+    "recovery": "Rateizza una spesa"
+  },
+  "planStatuses": {
+    "active": "In corso",
+    "stopped": "Interrotto",
+    "closed": "Concluso",
+    "cancelled": "Annullato",
+    "pendingPayment": "Pagamento da completare"
+  },
+  "plansUnavailable": "Il server collegato non supporta Piani v2. Aggiorna il Worker usato da questa piattaforma e riprova. I piani precedenti sono conservati."
+};
+
 // backend/worker/runtime.generated.mjs
 function attachSavingsPlanning(result, config, day2) {
   const cell = (row) => {
@@ -37,7 +90,7 @@ var APP_HTML = `<!-- Life OS 11.46. Source of truth for UI; build.py embeds this
 One design system owns layout and components. Finance and Life OS logic are preserved. -->
 <!doctype html>
 <html lang="it">
-  <head>
+  <head><script>const lifeOSContract = {"version":2,"expenseCategories":["Alimentari","Ristorazione","Casa","Affitto","Condominio","Arredamento e casa","Utenze","Elettricit\xE0","Gas","Acqua","Abbonamenti","Auto","Assicurazione","Bollo","Manutenzione auto","Benzina","Shopping","Salute","Palestra","Dentista","Farmaci e visite","Svago","Viaggi","Altro"],"incomeCategories":["Stipendio","Interessi","Rimborsi","Altro"],"planKinds":{"advance":"Anticipa budget","goal":"Obiettivo finito","fund":"Fondo senza scadenza","fixed":"Spesa ricorrente fissa","estimated":"Utenza con quota stimata","recovery":"Rateizza una spesa"},"planStatuses":{"active":"In corso","stopped":"Interrotto","closed":"Concluso","cancelled":"Annullato","pendingPayment":"Pagamento da completare"},"plansUnavailable":"Il server collegato non supporta Piani v2. Aggiorna il Worker usato da questa piattaforma e riprova. I piani precedenti sono conservati."}<\/script>
     <meta charset="utf-8" />
     <script>
       try {
@@ -157,13 +210,16 @@ html:not([data-theme="light"]) [data-kind="holiday"] {--shift-color:#d7bf52;}
 
 .os-day[data-kind="night"] .os-shift,.os-day .os-shift[data-kind="night"] {color:#fff;}
 @media(max-width:760px) {.overview-analysis-grid {grid-template-columns:minmax(0,1fr);}.overview-analysis-grid > .annual-card,.overview-analysis-grid > .integrated-chart {grid-column:auto;}}
+.plans-web {display:grid;gap:var(--space);}.plan-list-row {display:flex;justify-content:space-between;text-align:left;width:100%;gap:var(--space);}.plan-list-row > span:first-child {min-width:0;overflow-wrap:anywhere;}.plan-list-row small,.plan-list-row strong,.plan-list-row span span {display:block;}.plans-web button,input,select {min-height:44px;}.plans-web .kv strong {white-space:normal;}.budget-flow .kv strong small {display:block;white-space:normal;}.budget-flow > section {min-width:0;}.budget-flow svg {width:100%;height:auto;}[data-plan-preview] {max-height:280px;overflow:auto;}@media(max-width:420px){.plans-web .card-title{flex-wrap:wrap;}.budget-flow .kv {grid-template-columns:minmax(0,1fr) minmax(0,1fr);}.budget-flow .kv strong {white-space:normal;overflow-wrap:anywhere;}}
+.home-native {display:grid;gap:24px;max-width:680px;margin:auto;}.home-week-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;text-align:center;}.home-week-grid .os-day{width:100%;}.home-week-grid small{display:block;margin-bottom:4px;}.home-summary{font-size:20px;line-height:1.55;}.home-next-time{display:flex;justify-content:space-between;width:100%;border:0;padding:12px 0;}.home-habit{display:flex;width:100%;justify-content:flex-start;border:0;border-radius:0;border-bottom:1px solid var(--line);padding:14px 0;}.home-habit span{font-size:22px;}.os-category-navigation{grid-template-columns:minmax(0,1fr);}.header-tools button,.card-title button,.period button{min-height:44px;min-width:44px;}
+.page-heading{display:grid;grid-template-columns:44px minmax(0,1fr) auto;}.page-heading h1{font-size:20px;text-align:center;}.page-heading>.theme-toggle{width:44px;height:44px;min-height:44px;}
 </style>
   <style id="native-web-parity">
 /* Web parity with native 0.9.0. Shift palette and data contracts are unchanged. */
 :root {--os-bg:#0b0b0b;--os-panel:#1c1c1e;--os-panel-2:#272729;--ink:#f4f4f5;--muted:#adadad;--os-accent:#dedede;--os-focus:#dedede;--green:#8cbaa1;--red:#d4928f;--card-radius:24px;font-size:17px;}
 html[data-theme="light"] {--os-accent:#3b3b3b;--os-focus:#3b3b3b;--green:#387354;--red:#a14947;}
 button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {font-size:17px;}button {transition:opacity .18s,background-color .16s,transform .18s;}button:active:not(:disabled) {transform:scale(.985);opacity:.75;}
-.finance-tabs {display:none!important;}.finance-open {max-width:720px;margin-inline:auto;}.finance-heading {display:flex;align-items:center;justify-content:space-between;gap:16px;}.finance-heading>button {border:0;}.finance-hero {padding:32px 0 24px;text-align:center;}.finance-hero h2 {color:var(--muted);font-weight:500;}.finance-value {display:block;font-size:clamp(32px,7vw,56px);line-height:1.2;letter-spacing:-1.5px;margin:12px 0;overflow-wrap:anywhere;}.finance-hero p {font-size:15px;}.finance-account {display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:16px 0 24px;}.finance-account>div {flex:1;min-width:0;}.finance-account h2 {color:var(--muted);font-size:15px;font-weight:500;}.finance-account strong {font-size:28px;overflow-wrap:anywhere;}.finance-account>small {flex-basis:100%;}.finance-actions {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;padding:8px 0 32px;}.finance-actions button {display:flex;flex-direction:column;border:0;padding:0;min-width:0;background:transparent;}.finance-actions span {display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--os-panel-2);font-size:28px;border:1px solid var(--line);}.finance-recent {padding-top:16px;}.finance-movement {display:flex;width:100%;justify-content:space-between;gap:16px;text-align:left;border:0;border-radius:0;border-bottom:1px solid var(--line);padding:16px 0;background:transparent;}.finance-movement>span {min-width:0;}.finance-movement strong {display:block;overflow-wrap:anywhere;}.finance-movement small {display:block;}.finance-movement>b {flex-shrink:0;font-size:15px;}
+.finance-tabs:not(.hidden) {display:flex;background:transparent;border:0;padding:0;}.finance-tabs:not(.hidden) button{flex:none;}.finance-open {max-width:720px;margin-inline:auto;}.finance-heading {display:flex;align-items:center;justify-content:space-between;gap:16px;}.finance-heading>button {border:0;}.finance-hero {padding:32px 0 24px;text-align:center;}.finance-hero h2 {color:var(--muted);font-weight:500;}.finance-value {display:block;font-size:clamp(32px,7vw,56px);line-height:1.2;letter-spacing:-1.5px;margin:12px 0;overflow-wrap:anywhere;}.finance-hero p {font-size:15px;}.finance-account {display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:16px 0 24px;}.finance-account>div {flex:1;min-width:0;}.finance-account h2 {color:var(--muted);font-size:15px;font-weight:500;}.finance-account strong {font-size:28px;overflow-wrap:anywhere;}.finance-account>small {flex-basis:100%;}.finance-actions {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;padding:8px 0 32px;}.finance-actions button {display:flex;flex-direction:column;border:0;padding:0;min-width:0;background:transparent;}.finance-actions span {display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--os-panel-2);font-size:28px;border:1px solid var(--line);}.finance-recent {padding-top:16px;}.finance-movement {display:flex;width:100%;justify-content:space-between;gap:16px;text-align:left;border:0;border-radius:0;border-bottom:1px solid var(--line);padding:16px 0;background:transparent;}.finance-movement>span {min-width:0;}.finance-movement strong {display:block;overflow-wrap:anywhere;}.finance-movement small {display:block;}.finance-movement>b {flex-shrink:0;font-size:15px;}
 :is(#budget,#analysis,#extras,#movements) .card {background:transparent;border:0;border-radius:0;padding:20px 0;border-bottom:1px solid var(--line);}.overview-analysis-grid,.chart-pair {gap:24px;}.os-calendar-week {background:transparent;border:0;border-top:1px solid var(--line);border-radius:0;padding:8px 0;gap:0;}.os-days {gap:0;}.os-day {height:64px;min-height:64px;background:transparent;border-radius:0;}.os-calendar-week>.os-day:nth-child(n+6),.os-calendar-week>.os-day:nth-child(n+6).selected,.os-day.selected {background:transparent;box-shadow:none;}.os-day b {width:26px;height:26px;border-radius:50%;font-size:15px;}.os-day.today b {background:transparent;color:var(--ink);outline:1px solid var(--muted);}.os-day.selected b {background:var(--os-accent);color:var(--os-bg);outline:0;}.os-day .os-shift {border-radius:6px;height:20px;}.os-day-mark {color:var(--shift-color,var(--muted));}.os-calendar-week>.os-day:nth-child(n+6):not(.selected) b {color:var(--muted);}#calendar>.os-card {background:transparent;border:0;padding:0;}.os-calendar-details {padding-top:24px;}.os-month-header h2 {font-size:26px;}.os-home-week .os-day {background:transparent;}
 @supports ((backdrop-filter:blur(20px)) or (-webkit-backdrop-filter:blur(20px))) {.theme-toggle,.fab-button {background:color-mix(in srgb,var(--os-panel-2) 72%,transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}}
 @media(max-width:760px) {.nav {background:color-mix(in srgb,var(--os-panel) 90%,transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}main {padding-inline:20px;}.overview-analysis-grid,.chart-pair {grid-template-columns:minmax(0,1fr);}.finance-hero {padding-top:24px;}.os-day {min-height:58px;height:58px;}}
@@ -246,7 +302,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
       </aside>
       <main>
         <header class="top">
-          <div class="page-heading"><h1 id="page-title">Life OS</h1><div class="header-tools"><div id="page-actions" class="page-actions" aria-label="Azioni pagina"></div><div id="page-fab" class="page-fab"></div><button class="theme-toggle" type="button" aria-label="Cambia tema" title="Cambia tema"></button></div></div>
+          <div class="page-heading"><button class="theme-toggle" type="button" aria-label="Impostazioni" title="Impostazioni"></button><h1 id="page-title">Dashboard</h1><div class="header-tools"><div id="page-actions" class="page-actions" aria-label="Azioni pagina"></div><div id="page-fab" class="page-fab"></div></div></div>
           <div class="header-meta"><div class="home-context"><span id="home-weather">Meteo \u2014</span></div><div class="top-right hidden"><div class="period"><button id="prev-month" aria-label="Mese precedente">\u2039</button><strong id="period-label">...</strong><button id="next-month" aria-label="Mese successivo">\u203A</button></div><div class="sync" id="sync-top"></div></div></div>
         </header>
         <nav
@@ -254,7 +310,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
           class="finance-tabs hidden"
           aria-label="Sezioni finanza"
         >
-          <button data-view="overview">Finanza</button><button data-view="analysis">Analisi</button>
+          <button data-view="overview" aria-label="Torna a Finanza">\u2039 Finanza</button>
         </nav>
         <div id="error" class="errorbox hidden" role="alert"></div>
         <div
@@ -293,12 +349,13 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
             body: JSON.stringify(args),
             signal: controller.signal,
           });
-          if (!r.ok)
-            throw Error(
-              r.status === 401
-                ? "Sessione scaduta. Riapri l\u2019app e accedi."
-                : (await r.text()).slice(0, 400),
-            );
+          if (!r.ok) {
+            const raw = (await r.text()).slice(0, 500);
+            let message = raw;
+            try { message = JSON.parse(raw).error || raw; } catch {}
+            if (method.includes("FinancePlan") && (r.status === 404 || message.trim() === "Operazione non disponibile.")) message = lifeOSContract.plansUnavailable;
+            throw Error(r.status === 401 ? "Sessione scaduta. Riapri l\u2019app e accedi." : message);
+          }
           if (
             !(r.headers.get("content-type") || "").includes("application/json")
           )
@@ -612,12 +669,12 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         let action = 'data-new-transaction="Spesa"', label = 'Aggiungi spesa', secondary = '';
         if (view === 'tasks') {
           action = 'data-life-task="new"'; label = 'Aggiungi attivit\xE0';
-          secondary = \`<details class="os-more-menu"><summary aria-label="Opzioni categoria" title="Opzioni categoria"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg></summary><div><button data-life-rename-category="\${osSafe(active?.key || "action")}">Rinomina categoria</button><button data-life-reorder aria-pressed="\${life.reorder}">\${life.reorder ? "Fine riordino" : "Riordina attivit\xE0"}</button><button data-life-category>Gestisci categorie</button></div></details>\`;
+          secondary = '';
         } else if (view === 'calendar') {
           action = 'data-life-event="new"'; label = 'Aggiungi evento';
         } else if (['overview','movements','budget','extras'].includes(view)) {
           if (view === 'extras') { action = 'data-new-extra="1"'; label = 'Aggiungi straordinaria'; }
-          secondary = '<details class="os-more-menu"><summary aria-label="Altre azioni" title="Altre azioni"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg></summary><div><button data-new-transaction="Entrata">+ Entrata</button><button data-new-extra="1">+ Straordinaria</button><button data-new-transaction="Trasferimento">Trasferimento finale da Revolut</button></div></details>';
+          secondary = '';
         }
         document.getElementById('page-actions').innerHTML = secondary;
         document.getElementById('page-fab').innerHTML = \`<button type="button" class="os-button primary fab-button" \${action} aria-label="\${label}" title="\${label}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>\`;
@@ -855,7 +912,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
           todo = items.filter((t) => t.status === "todo"),
           waiting = items.filter((t) => t.status === "waiting"),
           done = items.filter((t) => t.status === "done");
-        return \`<div class="os-category-navigation"><nav class="os-category-tabs" aria-label="Categorie attivit\xE0">\${d.categories.map((c) => \`<button data-life-select-category="\${osSafe(c.key)}" class="\${life.category === c.key ? "active" : ""}" aria-current="\${life.category === c.key ? "page" : "false"}">\${osSafe(c.label)}</button>\`).join("")}</nav><button data-life-category class="os-category-add" aria-label="Aggiungi e ordina categorie">+</button></div><div class="os-card os-category-page \${life.reorder ? "is-reordering" : ""}">\${todo.length ? todo.map(osTaskRow).join("") : !waiting.length ? '<p class="os-task-empty">Nessuna attivit\xE0.</p>' : ""}\${waiting.length ? \`<section class="os-task-section"><h3>In attesa</h3>\${waiting.map(osTaskRow).join("")}</section>\` : ""}\${done.length ? \`<details class="os-completed"><summary>Completate \xB7 \${done.length}</summary>\${done.map(osTaskRow).join("")}<button class="os-delete-completed" data-life-delete-completed="\${osSafe(life.category)}">Elimina completate</button></details>\` : ""}</div>\`;
+        return \`<div class="card-title"><h2>Categorie</h2><div class="actions"><button data-life-reorder aria-pressed="\${life.reorder}">\${life.reorder?"Fine":"Riordina"}</button><button data-life-category aria-label="Gestisci categorie">\u25B1</button></div></div><div class="os-category-navigation"><nav class="os-category-tabs" aria-label="Categorie attivit\xE0">\${d.categories.map((c) => \`<button data-life-select-category="\${osSafe(c.key)}" class="\${life.category === c.key ? "active" : ""}" aria-current="\${life.category === c.key ? "page" : "false"}">\${osSafe(c.label)}</button>\`).join("")}</nav></div><div class="os-card os-category-page \${life.reorder ? "is-reordering" : ""}"><h3 class="details-label">Da fare</h3>\${todo.length ? todo.map(osTaskRow).join("") : '<p class="os-task-empty">Nessuna attivit\xE0 da fare</p>'}\${waiting.length ? \`<section class="os-task-section"><h3>In attesa</h3>\${waiting.map(osTaskRow).join("")}</section>\` : ""}\${done.length ? \`<section class="os-completed"><h3>Completate \xB7 \${done.length}</h3>\${done.map(osTaskRow).join("")}<button class="os-delete-completed" data-life-delete-completed="\${osSafe(life.category)}">Elimina tutte le completate</button></section>\` : ""}</div>\`;
       }
 
       /** Editor evento o serie; una modifica da qui passa split_from al server. */
@@ -1583,12 +1640,16 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
 
       /** Carica dati finanziari leggeri o completi in base alla vista; protegge da risposte obsolete. */
       function load() {
+        if (state.data && (state.data.year !== state.year || state.data.month !== state.month)) {
+          state.data = null; state.loadedDetail = false;
+          for (const id of ["overview", "movements", "budget", "analysis", "extras"]) document.getElementById(id).replaceChildren();
+        }
         document.getElementById("period-label").textContent = titleMonth(
           state.year,
           state.month,
         );
         const revision = ++state.loadRevision,
-          detail = ["overview", "movements", "budget", "analysis"].includes(state.view),
+          detail = ["movements", "budget", "analysis"].includes(state.view),
           method = detail
             ? "getFinanceData"
             : state.view === "extras"
@@ -1596,8 +1657,9 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
               : "getFinanceOverview";
         document.getElementById("error").classList.add("hidden");
         document.getElementById("loading").classList.remove("hidden");
-        workerRequest(method, [state.year, state.month])
-          .then((data) => {
+        const args = [state.year, state.month];
+        const request = detail ? workerRequest("getFinanceCategoryOptions", []).then(() => workerRequest(method, args)) : workerRequest(method, args);
+        request.then((data) => {
             if (revision !== state.loadRevision) return;
             state.data = data;
             state.loadedDetail = detail;
@@ -1612,7 +1674,9 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
             if (revision !== state.loadRevision) return;
             document.getElementById("loading").classList.add("hidden");
             const box = document.getElementById("error");
-            box.textContent = "Lettura non riuscita: " + err.message;
+            const message=document.createElement("span");message.textContent="Lettura non riuscita: "+err.message;
+            const retry=document.createElement("button");retry.textContent="Riprova";retry.dataset.financeRetry="";retry.onclick=load;
+            box.replaceChildren(message,retry);
             box.classList.remove("hidden");
           });
       }
@@ -1650,20 +1714,20 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
             x.classList.toggle("active", x.dataset.view === view),
           );
         document.getElementById("page-title").textContent = {
-          today: "Life OS",
+          today: "Dashboard",
           tasks: "Attivit\xE0",
           calendar: "Calendario",
           overview: "Finanza",
           movements: "Movimenti",
           budget: "Budget",
           analysis: "Analisi",
-          extras: "Straordinarie",
+          extras: "Piani",
         }[view];
         document
           .getElementById("finance-tabs")
           .classList.toggle(
             "hidden",
-            !["overview", "movements", "budget", "analysis", "budget", "extras", "analysis"].includes(view),
+            !["movements", "budget", "analysis", "budget", "extras", "analysis"].includes(view),
           );
         document
           .querySelector(".top-right")
@@ -1678,7 +1742,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
             !state.data ||
             state.data.year !== state.year ||
             state.data.month !== state.month ||
-            (["overview", "movements", "budget", "analysis"].includes(view) && !state.loadedDetail)
+            (["movements", "budget", "analysis"].includes(view) && !state.loadedDetail)
           )
             load();
           else render();
@@ -1725,7 +1789,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
           document.getElementById("budget").innerHTML = monthlyBudgetDetails(d.summary) + overviewAnalysis(d);
           updateProjection();
         }
-        if (state.view === "analysis" && state.loadedDetail) document.getElementById("analysis").innerHTML = categoryCard(d) + cashFlowChart(d);
+        if (state.view === "analysis" && state.loadedDetail) document.getElementById("analysis").innerHTML = platformAnalysis(d);
         if (state.view === "extras")
           document.getElementById("extras").innerHTML = extrasView(d);
         if (state.view === "movements" && state.loadedDetail) renderMovements();
@@ -2279,26 +2343,19 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
       });
 
       // Compact manual catalog. Legacy values remain intact until explicitly reclassified.
-      const financeManualCategories = ["Alimentari", "Ristorazione", "Casa", "Utenze", "Abbonamenti", "Auto", "Benzina", "Shopping", "Salute", "Svago", "Viaggi", "Altro"];
-      const financeIncomeCategories = ["Stipendio", "Interessi", "Rimborsi", "Altro"];
+      const financeManualCategories = lifeOSContract.expenseCategories;
+      const financeIncomeCategories = lifeOSContract.incomeCategories;
       function financialCommittedCategories() {
         const recurring=state.data?.recurring || life.finance?.recurring || [];
         return [...new Set(["Affitto", ...recurring.filter(r=>r.treatment==="Vincolata" && r.name!=="Benzina").map(r=>r.name).filter(Boolean)])];
       }
-      function financeCategoryLabel(value) {
-        if(financialCommittedCategories().includes(value) || Object.values(financeDetailGroups).flat().includes(value))return value;
-        const key = String(value || "").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").trim().toLowerCase();
-        const aliases = {"affitto": "Casa", "affitto e ingresso casa": "Casa", "arredamento e casa": "Casa", "casa": "Casa", "acqua": "Utenze", "elettricita": "Utenze", "gas": "Utenze", "trasporti": "Auto", "pedaggi": "Auto", "elettronica": "Shopping", "palestra": "Salute", "sport": "Salute", "cura personale": "Salute", "famiglia": "Altro", "trasferimenti a terzi": "Altro", "imposte": "Altro", "imposte e servizi": "Altro", "commissioni": "Altro", "imposte e commissioni": "Altro", "da classificare": "Altro", "pagamenti non dettagliati": "Altro", "contanti": "Altro", "altre spese": "Altro", "altri movimenti": "Altro"};
-        return aliases[key] || [...financeManualCategories, ...financeIncomeCategories].find(x => x.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase() === key) || value;
-      }
-      const financeDetailGroups = {Casa:["Affitto","Condominio","Arredamento e casa"],Utenze:["Elettricit\xE0","Gas","Acqua"],Auto:["Assicurazione","Bollo","Manutenzione auto"],Salute:["Palestra","Dentista","Farmaci e visite"]};
-      function categoryOptionsHtml(values,value=""){
-        const current=financeCategoryLabel(value), option=x=>\`<option value="\${escapeHtml(x===current && value?value:x)}" \${x===current?"selected":""}>\${escapeHtml(financeCategoryLabel(x))}</option>\`;
-        const details=new Set(Object.values(financeDetailGroups).flat());
-        return values.filter(x=>!details.has(x)).map(option).join("")+Object.entries(financeDetailGroups).map(([group,names])=>{const active=names.filter(x=>values.includes(x));return active.length?\`<optgroup label="\${escapeHtml(group)}">\${active.map(option).join("")}</optgroup>\`:"";}).join("");
+      function financeCategoryLabel(value) { return String(value || ""); }
+      function categoryOptionsHtml(values,value="") {
+        const choices=[...new Set([...values,...(value?[value]:[])])];
+        return choices.map(x=>\`<option value="\${escapeHtml(x)}" \${x===value?"selected":""}>\${escapeHtml(x)}</option>\`).join("");
       }
       function financialCategoryOptions(type = "Spesa") {
-        return type === "Entrata" ? [...financeIncomeCategories] : [...new Set([...financeManualCategories,...financialCommittedCategories(),...Object.values(financeDetailGroups).flat()])];
+        return [...(type === "Entrata" ? financeIncomeCategories : financeManualCategories)];
       }
       document.addEventListener("change", (e) => {
         if (e.target.name !== "type" || !e.target.closest("#entry-form")) return;
@@ -2538,7 +2595,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         const s = d.summary, daily = dailyBudgetRange(s);
         const recent = (d.transactions || []).slice(0, 3);
         return \`<div class="finance-open"><div class="finance-heading"><span></span><button data-view="analysis">Analisi</button></div>
-        <section class="finance-hero"><h2>Budget rimanente</h2><strong class="finance-value \${amountClass(s.monthlyRemaining)}">\${state.assetsVisible ? exactEuro(s.monthlyRemaining) : "\u2022\u2022\u2022\u2022 \u20AC"}</strong><p class="muted">Al giorno \xB7 \${state.assetsVisible ? exactEuro(daily.low) + " \u2013 " + exactEuro(daily.high) : "\u2022\u2022\u2022\u2022 \u20AC"}</p><small>\${daily.days} giorni, oggi incluso</small></section>
+        <section class="finance-hero"><h2>Budget rimanente</h2><strong class="finance-value \${amountClass(s.monthlyRemaining)}">\${state.assetsVisible ? exactEuro(s.monthlyRemaining) : "\u2022\u2022\u2022\u2022 \u20AC"}</strong><p class="muted">\${daily.days ? (state.assetsVisible ? exactEuro(daily.low) : "\u2022\u2022\u2022\u2022 \u20AC")+" al giorno" : "Mese concluso \xB7 riepilogo del budget"}</p>\${daily.days?\`<small>\${daily.days} giorni\${d.key===todayIso().slice(0,7)?", incluso oggi":" del mese selezionato"}</small>\`:""}</section>
         <section class="finance-account"><div><h2>Saldo attuale</h2><strong>\${state.assetsVisible ? exactEuro(s.budget) : "\u2022\u2022\u2022\u2022 \u20AC"}</strong></div>\${privacyButton()}<small>Saldo dell\u2019ultima sincronizzazione, distinto dal mese selezionato.</small></section>
         <div class="finance-actions"><button data-view="budget"><span aria-hidden="true">\u25F7</span>Budget</button><button data-view="extras"><span aria-hidden="true">\u22EF</span>Extra</button><button data-new-transaction="Spesa"><span aria-hidden="true">\uFF0B</span>Spesa</button></div>
         <section class="finance-recent"><div class="finance-heading"><h2>Ultimi movimenti</h2><button data-view="movements">Vedi tutti</button></div>\${recent.length ? recent.map(t => \`<button class="finance-movement" data-edit-movement="\${Number(t.row)}"><span><strong>\${escapeHtml(t.name)}</strong><small>\${escapeHtml(t.date || '')} \xB7 \${escapeHtml(t.category || t.type || '')}</small></span><b class="\${amountClass(t.amount)}">\${state.assetsVisible ? exactEuro(t.amount) : '\u2022\u2022\u2022\u2022 \u20AC'}</b></button>\`).join('') : '<p class="empty">Nessun movimento nel mese.</p>'}</section></div>\`;
@@ -2613,16 +2670,10 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
        * Include oggi: l\u2019ultimo giorno il divisore \xE8 1, mai zero. Il mese \xE8 quello attuale a Roma.
        */
       function dailyBudgetRange(summary, day = todayIso()) {
-        const [year, month, date] = day.split("-").map(Number);
-        const days = Math.max(
-          1,
-          new Date(Date.UTC(year, month, 0)).getUTCDate() - date + 1,
-        );
-        return {
-          days,
-          low: summary.monthlyRemaining / days,
-          high: (summary.monthlySalary - summary.monthlySpent) / days,
-        };
+        const selected=String(state.year)+'-'+String(state.month).padStart(2,'0');
+        const count=new Date(Date.UTC(state.year,state.month,0)).getUTCDate();
+        const days=selected<day.slice(0,7)?0:selected>day.slice(0,7)?count:Math.max(1,count-Number(day.slice(-2))+1);
+        return {days,low:days?summary.monthlyRemaining/days:0,high:days?(summary.monthlySalary-summary.monthlySpent)/days:0};
       }
 
       /** Storico dettagliato in fondo a Budget, dopo grafici e impostazioni. */
@@ -2796,7 +2847,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
 
       function budgetPolicyFields(r={}) {
         const mode=r.budgetTreatment || "auto";
-        return \`<div id="budget-policy-fields" class="full form-grid"><label class="full">Trattamento budget<select name="budgetTreatment">\${[["auto","Automatico dalla categoria"],["ordinary","Spesa ordinaria \xB7 budget libero"],["planned","Pagamento pianificato \xB7 gi\xE0 impegnato"],["savings","Risparmi \xB7 nessun recupero"],["recovery","Risparmi \xB7 recupera nei mesi scelti"]].map(([v,l])=>\`<option value="\${v}" \${v===mode?"selected":""}>\${l}</option>\`).join("")}</select></label><label class="full \${mode==="recovery"?"":"hidden"}" data-recovery-field>Mesi di recupero<input name="recoveryMonths" value="\${escapeHtml(r.recoveryMonths||"")}" placeholder="2026-11, 2026-12, 2027-01" \${mode==="recovery"?"required":"disabled"}></label><label class="full \${mode==="recovery"?"":"hidden"}" data-recovery-field>Importo da recuperare \u20AC (vuoto = tutta la spesa)<input name="recoveryAmount" type="number" min="0.01" step="0.01" value="\${r.recoveryAmount||""}" \${mode==="recovery"?"":"disabled"}></label><p class="hint full" id="recovery-preview"></p><p class="hint full">Il saldo registra sempre l\u2019intera uscita. Il budget libero pu\xF2 diventare negativo. Per una spesa annuale usa Segna pagato nel suo piano; per un movimento gi\xE0 registrato usa Collega movimento.</p></div>\`;
+        return \`<div id="budget-policy-fields" class="full form-grid"><label class="full">Trattamento budget<select name="budgetTreatment">\${[["auto","Automatico"],["savings","Da risparmi"],...(!["auto","savings"].includes(mode)?[[mode,"Gestito dal piano esistente"]]:[])].map(([v,l])=>\`<option value="\${v}" \${v===mode?"selected":""}>\${l}</option>\`).join("")}</select></label><label class="full \${mode==="recovery"?"":"hidden"}" data-recovery-field>Mesi di recupero<input name="recoveryMonths" value="\${escapeHtml(r.recoveryMonths||"")}" placeholder="2026-11, 2026-12, 2027-01" \${mode==="recovery"?"required":"disabled"}></label><label class="full \${mode==="recovery"?"":"hidden"}" data-recovery-field>Importo da recuperare \u20AC (vuoto = tutta la spesa)<input name="recoveryAmount" type="number" min="0.01" step="0.01" value="\${r.recoveryAmount||""}" \${mode==="recovery"?"":"disabled"}></label><p class="hint full" id="recovery-preview"></p><p class="hint full">Il saldo registra sempre l\u2019intera uscita. Il budget libero pu\xF2 diventare negativo. Per una spesa annuale usa Segna pagato nel suo piano; per un movimento gi\xE0 registrato usa Collega movimento.</p></div>\`;
       }
       function syncBudgetPolicyFields(){
         const f=document.getElementById("entry-form"),box=document.getElementById("budget-policy-fields");if(!box)return;
@@ -2870,14 +2921,10 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
               "Categoria",
               "category",
               category,
-              type === "Entrata"
-                ? "Stipendio"
-                : type === "Rimborso"
-                  ? "Trasferimenti a terzi"
-                  : "Altro",
+              "Altro",
             ) +
-            field("Data effettiva", "date", "date", chosen) +
-            utilityFields() + commitmentHint() + budgetPolicyFields() +
+            field("Data effettiva", "date", "date", chosen, 'max="'+todayIso()+'"') +
+            field("Mesi coperti", "months", "number", 1, 'min="1" max="12" step="1"') + budgetPolicyFields() + field("Note", "note", "text", "", 'maxlength="1000"', "full") +
 
             '<label id="counterpart-box" class="' +
             (type === "Trasferimento" ? "" : "hidden") +
@@ -2938,7 +2985,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
               alert("Questa tipologia storica non \xE8 ancora modificabile.");
               return;
             }
-            const accounts = ["Revolut", "Trade Republic", "IsyBank"];
+            const accounts = ["Trade Republic", "Revolut", "IsyBank"];
             modal(
               "Modifica movimento",
               '<input type="hidden" name="row" value="' +
@@ -2962,7 +3009,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
                 ) +
                 select("Conto", "account", accounts, r.account) +
                 select("Categoria", "category", categories, r.category) +
-                utilityFields(r.category,r.competence_months) + commitmentHint(r.category) + budgetPolicyFields(r) +
+                budgetPolicyFields(r) +
                 field(
                   "Data effettiva",
                   "date",
@@ -3632,7 +3679,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
           return;
         }
         if((kind==="transaction"||kind==="movement-edit") && d.type!=="Spesa"){d.budgetTreatment="auto";delete d.recoveryMonths;delete d.recoveryAmount;}
-        if(isUtilityCategory(d.category)){if(d.category==="Utenze")d.category=d.utilityKind;d.months=d.utilityMonths;}
+
         if (kind === "extra-payment") return submit("recordExtraPayment", [d]);
         if (kind === "extra-link") return submit("linkExtraMovement", [d]);
         submit(
@@ -3717,7 +3764,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
           if (e.key === "Escape") {
             e.preventDefault();
             activeSheet
-              .querySelector("[data-close],[data-life-close]")
+              .querySelector("[data-close],[data-life-close],[data-plans-close]")
               ?.click();
             return;
           }
@@ -3929,104 +3976,750 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         document.addEventListener("touchcancel", reset, { passive: true });
       })();
     <\/script>
-  <script>/* Web Piani v2. Runs after the original UI; uses the same authenticated transport. */
+  <script>/* Home follows the native order: rolling week, day summary, next time, habits. */
 (() => {
-  const kinds={goal:'Obiettivo',fund:'Fondo',fixed:'Ricorrenza fissa',estimated:'Utenza stimata',advance:'Anticipo budget',recovery:'Recupero spesa'};
-  const statuses={active:'Attivo',stopped:'Interrotto',closed:'Completato',cancelled:'Annullato',pendingPayment:'Pagamento da completare'};
-  const today=()=>new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Rome'});
-  const current=()=>today().slice(0,7);
-  const next=m=>{const [y,n]=m.split('-').map(Number);return new Date(Date.UTC(y,n,1)).toISOString().slice(0,7);};
-  const safe=osSafe, money=c=>exactEuro(Number(c||0)/100);
-  const view=()=>state.data?.plansV2;
-  const plan=id=>view()?.plans.find(p=>p.id===id);
-  const field=(label,name,type,value='',attrs='')=>\`<label class="\${name==='name'?'full':''}">\${label}<input name="\${name}" type="\${type}" value="\${safe(value)}" \${attrs}></label>\`;
-  const amount=(label,value='')=>field(label,'amount','number',value,'required min="0.01" max="1000000" step="0.01"');
-  const monthField=(label,name,value)=>field(label,name,'month',value,'required');
-  const oldActions=osPageActions;
-  osPageActions=function(){oldActions();document.querySelectorAll('[data-new-extra]').forEach(b=>{b.setAttribute('aria-label','Nuovo piano');b.setAttribute('title','Nuovo piano');if(!b.classList.contains('fab-button'))b.textContent='+ Piano';});};
-  const oldSetView=setView;
-  setView=function(v){oldSetView(v);if(v==='extras')document.getElementById('page-title').textContent='Piani';};
-  const oldOverview=overview;
-  overview=function(d){return oldOverview(d).replace('>Extra</button>','>Piani</button>');};
-  extrasView=function(d){
-    const v=d.plansV2;
-    if(!v)return '<p role="status">Caricamento Piani\u2026</p><button data-plans-refresh>Riprova</button>';
-    const pending=v.payments.filter(p=>p.status==='pending');
-    return \`<div class="plans-web"><div class="card-title"><div><h2>Piani</h2><p class="hint">Quote e anticipi organizzano il budget. Il saldo cambia solo con un pagamento.</p></div><button class="save" data-new-extra>Nuovo piano</button></div>\${pending.map(p=>\`<div class="errorbox">Pagamento da completare \xB7 \${safe(plan(p.planId)?.name||'Piano')} <button data-plans-resume="\${safe(p.id)}">Riprendi senza duplicare</button></div>\`).join('')}<div class="extra-grid">\${v.plans.map(p=>{
-      const payable=p.status==='active'&&!['advance','recovery'].includes(p.kind)&&p.startMonth<=current();
-      let cycle=v.month;
-      if(p.kind==='fixed'&&p.intervalMonths>1){const anchor=p.intervalAnchor||p.startMonth,[y,m]=anchor.split('-').map(Number),delta=(Number(cycle.slice(0,4))-y)*12+Number(cycle.slice(-2))-m;cycle=new Date(Date.UTC(y,m-1+Math.floor(delta/p.intervalMonths)*p.intervalMonths,1)).toISOString().slice(0,7);}
-      const paid=p.kind!=='fund'&&v.payments.some(x=>x.planId===p.id&&x.status==='posted'&&(p.kind==='goal'||x.settlementKey===cycle));
-      return \`<article class="extra-card"><div class="extra-card-head"><h3>\${safe(p.name)}</h3><strong>\${money(p.contributionCents)}<small> / mese</small></strong></div><p>\${safe(kinds[p.kind])} \xB7 \${safe(statuses[p.status]||p.status)}</p><p class="hint">\${safe(p.startMonth)}\${p.endMonth?' \u2192 '+safe(p.endMonth):' \xB7 Senza scadenza'}</p>\${p.kind==='advance'?\`<p class="hint">Budget anticipato a \${safe(p.beneficiaryMonth)} \xB7 \${money(p.amountCents)}</p>\`:\`<div class="kv"><span>Accumulato</span><strong>\${money(p.fundCents)}</strong></div><div class="kv"><span>Pagato</span><strong>\${money(p.paidCents)}</strong></div>\`}\${p.kind==='goal'?\`<p class="hint">Obiettivo \${money(p.amountCents)} \xB7 residuo \${money(p.outstandingCents)}</p>\`:''}<div class="extra-card-controls">\${payable&&!paid?\`<button data-plans-pay="\${safe(p.id)}">Paga o collega</button>\`:paid?'<span class="state-tag">Pagamento registrato</span>':''}\${p.status==='active'?\`\${!['advance','recovery'].includes(p.kind)?\`<button data-plans-edit="\${safe(p.id)}">Modifica quote future</button>\`:''}<button data-plans-stop="\${safe(p.id)}">\${p.kind==='advance'?'Annulla anticipo':'Interrompi'}</button>\`:''}</div></article>\`;
-    }).join('')||'<p class="empty">Nessun piano. Crea un obiettivo, un fondo o una ricorrenza.</p>'}</div></div>\`;
-  };
-  function modal(title,body,method,makePayload){
-    const host=document.getElementById('dialog');
-    host.innerHTML=\`<div class="modal" role="dialog" aria-modal="true" aria-label="\${safe(title)}"><div class="modal-top"><h2>\${safe(title)}</h2><button type="button" data-plans-close aria-label="Chiudi">\xD7</button></div><form id="plans-web-form" class="form-grid">\${body}<p class="os-form-error full" role="alert"></p><div class="form-actions full"><button type="button" data-plans-close>Annulla</button><button class="save" type="submit">Salva</button></div></form></div>\`;
+  const safe=osSafe;
+  const shiftNames={morning:'di mattina',afternoon:'di pomeriggio',night:'di notte',rest:'di riposo',holiday:'in ferie'};
+  const labels=[['fajr','Prima dell\u2019alba'],['sunrise','Alba'],['dhuhr','Mezzogiorno'],['asr','Pomeriggio'],['maghrib','Tramonto'],['isha','Notte']];
+  const addDay=(day,n)=>{const d=new Date(day+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10);};
+  let agenda=[];
+  function sheet(title,body){
+    const host=document.getElementById('life-dialog');
+    host.innerHTML=\`<div class="modal os-dialog" role="dialog" aria-modal="true" aria-label="\${safe(title)}"><div class="modal-top"><h2>\${safe(title)}</h2><button data-life-close aria-label="Chiudi">\xD7</button></div>\${body}</div>\`;
     host.classList.remove('hidden');
-    const form=host.querySelector('form'),requestId=crypto.randomUUID();let payload=null,busy=false;
-    form.addEventListener('submit',async e=>{
-      e.preventDefault();if(busy||!form.reportValidity())return;
-      const error=form.querySelector('[role=alert]'),button=form.querySelector('[type=submit]');
-      try {
-        if(!payload)payload={requestId,...makePayload(new FormData(form))};
-        busy=true;button.disabled=true;button.textContent='Salvataggio\u2026';error.textContent='';
-        // Freeze values once submitted. A retry must use the same payload and ID.
-        form.querySelectorAll('input,select').forEach(x=>x.disabled=true);
-        await workerRequest(method,[payload]);
-        host.classList.add('hidden');state.data=null;state.loadedDetail=false;load();osLoadHomeFinance();
-      }catch(err){error.textContent=err.message+' Puoi riprovare la stessa operazione senza duplicarla.';button.textContent='Riprova';}
-      finally{busy=false;button.disabled=false;}
-    });return form;
   }
-  const cents=f=>{const n=Number(f.get('amount'));if(!Number.isFinite(n)||n<=0||Math.abs(n*100-Math.round(n*100))>1e-6)throw Error('Usa un importo positivo con massimo due decimali.');return Math.round(n*100);};
-  openExtra=function(){
-    const form=modal('Nuovo piano',\`<label class="full">Tipo<select name="kind">\${Object.entries(kinds).map(([k,v])=>\`<option value="\${k}">\${v}</option>\`).join('')}</select></label>\${field('Nome','name','text','','required maxlength="120" class="full"')}<div class="full" data-plan-fields></div>\`,'saveFinancePlan',f=>{
-      const kind=String(f.get('kind')),p={kind,name:String(f.get('name')),amountCents:cents(f),startMonth:String(f.get('startMonth')),category:'Altro'};
-      if(['goal','advance','recovery'].includes(kind))p.endMonth=String(f.get('endMonth'));
-      if(kind==='advance')p.beneficiaryMonth=String(f.get('beneficiaryMonth'));
-      if(kind==='fixed')p.intervalMonths=Number(f.get('intervalMonths'));
-      if(kind==='recovery'){p.paymentDate=String(f.get('date'));if(f.get('movementId'))p.movementId=Number(f.get('movementId'));}
-      return p;
-    });
-    const update=()=>{
-      const kind=form.elements.kind.value,start=kind==='advance'?next(current()):current();
-      const labels={goal:'Totale obiettivo \u20AC',fund:'Quota mensile \u20AC',fixed:'Importo per scadenza \u20AC',estimated:'Stima mensile \u20AC',advance:'Budget da anticipare \u20AC',recovery:'Spesa da recuperare \u20AC'};
-      form.querySelector('[data-plan-fields]').innerHTML=\`<div class="form-grid">\${amount(labels[kind])}\${monthField(kind==='advance'?'Primo mese di recupero':'Dal mese','startMonth',start)}\${['goal','advance','recovery'].includes(kind)?monthField('Ultimo mese','endMonth',start):'<p class="hint">Senza scadenza: continua finch\xE9 non lo interrompi.</p>'}\${kind==='advance'?monthField('Mese beneficiario','beneficiaryMonth',current()):''}\${kind==='fixed'?'<label>Ogni quanti mesi<select name="intervalMonths"><option value="1">Ogni mese</option><option value="2">Ogni 2 mesi</option><option value="3">Ogni 3 mesi</option><option value="6">Ogni 6 mesi</option><option value="12">Ogni anno</option></select></label>':''}\${kind==='recovery'?\`\${field('Data della spesa','date','date',today(),'required max="'+today()+'"')}<label class="full">Movimento<select name="movementId"><option value="">Registra una nuova spesa</option></select></label><p class="hint full">Collega una spesa gi\xE0 registrata per recuperarla senza un secondo addebito.</p>\`:''}<p class="hint full">\${kind==='advance'?'Non sposta denaro tra conti: aumenta il budget del mese beneficiario e lo recupera nei mesi scelti.':kind==='recovery'?'La spesa incide sul saldo una sola volta; le quote recuperano il budget nei mesi scelti.':'Creare il piano non registra un pagamento.'}</p></div>\`;
-      if(kind==='recovery')loadMovements(form);
-    };form.elements.kind.addEventListener('change',update);update();
+  function nextTime(now=new Date()){
+    const today=todayIso(),clock=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Rome',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(now);
+    const times=osPrayerTimes(today),found=labels.find(([key])=>times[key].label>clock);
+    const day=found?today:addDay(today,1),entry=found||labels[0],schedule=found?times:osPrayerTimes(day);
+    return {day,label:entry[1],time:schedule[entry[0]].label};
+  }
+  osToday=function(){
+    const d=life.data,today=d.today,tomorrow=addDay(today,1),end=addDay(today,7),seen=new Set();
+    const hour=Number(new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Rome',hour:'2-digit',hourCycle:'h23'}).format(new Date()));
+    const clock=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Rome',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date());
+    agenda=[...(d.upcomingEvents||[]),...(d.events||[])].filter(e=>{
+      const key=\`\${e.id}:\${e.day}\`;
+      if(e.day<today||e.day>=end||(e.occurrence_status||'open')!=='open'||e.day===today&&e.start_time&&e.start_time<clock||seen.has(key))return false;
+      seen.add(key);return true;
+    }).sort((a,b)=>\`\${a.day}|\${a.start_time||''}|\${String(a.id).padStart(10,'0')}\`.localeCompare(\`\${b.day}|\${b.start_time||''}|\${String(b.id).padStart(10,'0')}\`));
+    const shifts=new Map((d.shifts||[]).map(s=>[s.day,s.kind]));
+    const mark=new Set([...(d.events||[]).map(e=>e.day),...(d.tasks||[]).map(t=>t.scheduled_date)]);
+    const week=Array.from({length:7},(_,i)=>addDay(today,i-3)).map(day=>{
+      const date=new Date(day+'T12:00:00Z'),kind=shifts.get(day);
+      return \`<div><small>\${['D','L','M','M','G','V','S'][date.getUTCDay()]}</small><button class="os-day \${day===today?'today selected':''}" data-home-day="\${day}" data-kind="\${kind||''}" aria-label="\${safe(osDate(day))}\${kind?' \xB7 '+safe(osShift[kind]):''}"><b>\${date.getUTCDate()}</b><span class="os-shift \${kind?'':'no-shift'}">\${kind?osShiftInitial[kind]:''}</span><span class="os-day-mark \${mark.has(day)?'dot':''}"></span></button></div>\`;
+    }).join('');
+    const parts=[];
+    if(life.weather){const w=life.weather,c=w.code===0?'sereno':w.code<=3?'cielo nuvoloso':w.code<50?'nebbia':w.code<70?'pioggia':w.code<80?'neve':w.code<95?'rovesci':'temporali';parts.push(\`A Empoli, \${Math.round(w.temp)}\xB0 e \${c}.\`);}
+    const shift=shifts.get(today),next=shifts.get(tomorrow);
+    if(shifts.get(addDay(today,-1))==='night'&&hour<6)parts.push('Stai terminando il turno di notte.');
+    const phrase=(kind,when)=>\`\${when} \${['rest','holiday'].includes(kind)?'sei':'lavori'} \${shiftNames[kind]}.\`;
+    if(shift&&shift===next)parts.push(phrase(shift,'Oggi e domani'));
+    else {if(shift)parts.push(phrase(shift,'Oggi'));if(next)parts.push(phrase(next,'Domani'));}
+    if(!shift&&!next)parts.push('Turni non disponibili.');
+    if(agenda.length){const e=agenda[0],when=e.day===today?'Oggi':e.day===tomorrow?'Domani':osDate(e.day);parts.push(\`\${when}: \${String(e.title||'Appuntamento').replace(/\\s+/g,' ').slice(0,70)}\${e.start_time?' alle '+e.start_time:''}.\`);}
+    else parts.push('Nessun appuntamento nei prossimi 7 giorni.');
+    const nextSolar=nextTime(),habits=d.routines||[];
+    return \`<div class="home-native"><section class="home-week"><div class="card-title"><span>\${safe(titleMonth(Number(today.slice(0,4)),Number(today.slice(5,7))))}</span><button data-home-day="\${today}" aria-label="Apri calendario">\u25A6</button></div><div class="home-week-grid">\${week}</div></section><section><p class="hint">\${hour<12?'Buongiorno':hour<18?'Buon pomeriggio':'Buonasera'}, Anass.</p><p class="home-summary">\${safe(parts.join(' '))}</p>\${agenda.length?\`<button data-home-agenda>\${agenda.length===1?'Dettagli appuntamento':'Tutti i '+agenda.length+' appuntamenti'}</button>\`:''}</section><button class="home-next-time" data-home-times-sheet aria-label="Prossimo orario, \${safe(nextSolar.label)}, \${safe(nextSolar.time)}"><span>\${safe(nextSolar.label)}</span><strong>\${safe(nextSolar.time)}</strong></button><section class="os-card"><div class="card-title"><h2>Abitudini</h2><button data-life-routine-manage>Gestisci</button></div>\${habits.map(h=>\`<button class="home-habit" data-life-routine="\${h.id}" aria-pressed="\${!!h.checked}"><span aria-hidden="true">\${h.checked?'\u2713':'\u25CB'}</span>\${safe(h.title)}</button>\`).join('')||'<button data-life-routine-manage>Aggiungi la prima abitudine</button>'}</section></div>\`;
   };
-  async function loadMovements(form){
-    const select=form.elements.movementId;if(!select)return;
-    const date=form.elements.date;
-    const refresh=async()=>{
-      try{const d=await workerRequest('getFinancePlanMovements',[date.value.slice(0,7)]);if(!form.isConnected)return;select.innerHTML='<option value="">Registra una nuova spesa</option>'+d.movements.map(m=>\`<option value="\${m.row}" data-cents="\${m.amountCents}" data-date="\${safe(m.date)}">\${safe(m.name)} \xB7 \${money(m.amountCents)}</option>\`).join('');}
-      catch(err){form.querySelector('[role=alert]').textContent='Movimenti non disponibili: '+err.message;}
+  document.addEventListener('click',async e=>{
+    const b=e.target.closest('[data-home-day],[data-home-times-sheet],[data-home-agenda]');if(!b)return;
+    if(b.hasAttribute('data-home-day')){
+      const day=b.dataset.homeDay,month=day.slice(0,7),changed=life.month!==month;
+      life.month=month;life.selected=day;setView('calendar');if(changed)await loadLifeOS();
+    }
+    if(b.hasAttribute('data-home-times-sheet')){const next=nextTime(),times=osPrayerTimes(next.day);sheet('Empoli \xB7 '+osDate(next.day),labels.map(([key,label])=>\`<div class="kv"><span>\${label}</span><strong>\${safe(times[key].label)}</strong></div>\`).join(''));}
+    if(b.hasAttribute('data-home-agenda'))sheet('Appuntamenti',agenda.map(ev=>\`<div class="os-agenda-entry"><button class="os-agenda-row" data-life-event="\${ev.id}"><span>\${safe(ev.title)}<small>\${safe(osDate(ev.day))} \xB7 \${safe(ev.start_time||'Tutto il giorno')}</small></span></button><button data-life-occurrence="\${ev.id}:\${ev.day}:done" aria-label="Segna fatto \${safe(ev.title)}">Fatto</button></div>\`).join(''));
+  });
+})();
+<\/script><script>(() => {
+  const safe=escapeHtml;
+  function progress(goal=state.data?.planning?.goal,target=state.data?.planning?.savingsTarget){
+    const assets=Number(state.data?.summary?.budget)||0,emergency=Math.max(0,Number(goal)||0);
+    target=Number(target)>0?Number(target):Math.max(5000,(Math.floor(Math.max(assets,emergency)/5000)+1)*5000);
+    const months=Math.max(1,13-Number(todayIso().slice(5,7))),reserved=Math.min(Math.max(0,assets),emergency),missing=Math.max(0,target-assets);
+    return {assets,emergency,target,months,reserved,other:Math.max(0,assets-reserved),missing,monthly:missing/months};
+  }
+  const line=(label,n)=>\`<div class="kv"><span>\${label}</span><strong>\${state.assetsVisible?exactEuro(n):'\u2022\u2022\u2022\u2022'}</strong></div>\`;
+  planningCard=function(){
+    const p=progress();
+    return \`<section class="card pad planning-card"><h2>Obiettivo di risparmio</h2>\${line('Patrimonio totale',p.assets)}\${line('Fondo emergenza',p.emergency)}\${line('Fondo emergenza coperto',p.reserved)}\${line('Altri risparmi',p.other)}\${line('Prossimo traguardo',p.target)}\${line('Manca',p.missing)}\${line('Da risparmiare al mese',p.monthly)}<p class="hint">Cifra mancante divisa per \${p.months} mesi fino a dicembre, incluso quello corrente.</p><button data-edit-planning>Obiettivo e fondo emergenza</button></section>\`;
+  };
+  overviewAnalysis=function(d){return \`<div class="budget-flow"><section class="card pad"><h2>Ricorrenti</h2>\${(d.recurring||[]).map((r,i)=>\`<button class="plan-list-row" data-budget-recurring="\${i}"><span>\${safe(r.name)}</span><strong>\${state.assetsVisible?exactEuro(r.estimate):'\u2022\u2022\u2022\u2022'}</strong></button>\`).join('')||'<p class="empty">Nessuna voce ricorrente</p>'}</section>\${planningCard(d)}</div>\`;};
+  function sheet(title,body){
+    const host=document.getElementById('dialog');
+    host.innerHTML=\`<div class="modal" role="dialog" aria-modal="true" aria-label="\${safe(title)}"><div class="modal-top"><h2>\${safe(title)}</h2><button data-close aria-label="Chiudi">\xD7</button></div>\${body}</div>\`;host.classList.remove('hidden');return host;
+  }
+  function settings(){
+    const p=progress(),host=sheet('Obiettivo e fondo',\`<form id="platform-planning-form" class="form-grid"><label>Fondo emergenza \u20AC<input name="goal" type="number" min="0" max="1000000" step="0.01" value="\${p.emergency}" required></label><label>Obiettivo di risparmio \u20AC<input name="target" type="number" min="0.01" max="1000000" step="0.01" value="\${p.target}" required></label><div class="full" data-saving-preview></div><p role="alert" class="os-form-error full"></p><div class="form-actions"><button type="button" data-close>Annulla</button><button class="save" type="submit">Salva</button></div></form>\`);
+    const form=host.querySelector('form');
+    const preview=()=>{const p=progress(form.elements.goal.value,form.elements.target.value);form.querySelector('[data-saving-preview]').innerHTML=line('Da risparmiare',p.missing)+\`<p>Mesi fino a dicembre: \${p.months}</p>\`+line('Al mese',p.monthly);};
+    form.addEventListener('input',preview);preview();
+    form.addEventListener('submit',async e=>{
+      e.preventDefault();if(!form.reportValidity()||form.dataset.busy)return;
+      const p=progress(form.elements.goal.value,form.elements.target.value),button=form.querySelector('[type=submit]');form.dataset.busy='true';button.disabled=true;
+      try{
+        const result=await workerRequest('savePlanningSettings',[p.emergency,p.monthly,p.target]);if(result===false)throw Error('Il server non ha confermato la modifica.');
+        const fresh=await workerRequest('getFinanceOverview',[state.year,state.month],{fresh:true});
+        if(Math.abs(Number(fresh.planning?.goal)-p.emergency)>0.005||Math.abs(Number(fresh.planning?.savingsTarget)-p.target)>0.005||!Number.isFinite(fresh.planning?.goal)||!Number.isFinite(fresh.planning?.savingsTarget))throw Error('Impostazioni inviate ma non ancora verificate. Aggiorna prima di riprovare.');
+        state.data={...state.data,...fresh};closeDialog();render();
+      }catch(error){form.querySelector('[role=alert]').textContent=error.message;}
+      finally{delete form.dataset.busy;button.disabled=false;}
+    });
+  }
+  function recurring(index){
+    const r=state.data?.recurring?.[index];if(!r)return;
+    const host=sheet(r.name,\`<form id="platform-recurring-form" class="form-grid"><label class="full">Stima mensile \u20AC<input name="estimate" type="number" min="0.01" max="1000000" step="0.01" value="\${r.estimate}"></label>\${Number.isFinite(r.nextEstimate)?\`<p>Stima mese successivo: \${state.assetsVisible?exactEuro(r.nextEstimate):'\u2022\u2022\u2022\u2022'}</p>\`:''}<button type="button" data-recurring-estimate>Salva stima</button><h3 class="full">Registra pagamento</h3><label>Importo \u20AC<input name="amount" type="number" min="0.01" max="1000000" step="0.01"></label><label>Data<input name="date" type="date" value="\${todayIso()}" max="\${todayIso()}"></label><label>Mesi coperti<input name="months" type="number" min="1" max="12" step="1" value="1"></label><p class="os-form-error full" role="alert"></p><div class="form-actions"><button type="button" data-close>Fine</button><button class="save" type="submit">Registra</button></div></form>\`);
+    const form=host.querySelector('form'),requestId=crypto.randomUUID();let submitted=null;
+    async function send(method,args){
+      if(form.dataset.busy)return;form.dataset.busy='true';const controls=[...form.querySelectorAll('button')];controls.forEach(b=>b.disabled=true);
+      try{const result=await workerRequest(method,args);if(result===false)throw Error('Il server non ha confermato la modifica.');closeDialog();load();}
+      catch(error){form.querySelector('[role=alert]').textContent=error.message;}
+      finally{delete form.dataset.busy;controls.forEach(b=>b.disabled=false);}
+    }
+    form.querySelector('[data-recurring-estimate]').onclick=()=>{const input=form.elements.estimate;if(!input.value||!input.reportValidity())return;send('saveEstimate',[r.name,Number(input.value)]);};
+    form.onsubmit=e=>{e.preventDefault();if(!form.elements.amount.value||!form.reportValidity())return;submitted??={requestId,type:'Spesa',name:r.name,category:r.name,account:'Trade Republic',date:form.elements.date.value,months:Number(form.elements.months.value),amount:Number(form.elements.amount.value),budgetTreatment:'auto'};send('saveTransaction',[submitted]);};
+  }
+  document.addEventListener('click',e=>{const b=e.target.closest('[data-edit-planning],[data-budget-recurring]');if(!b)return;if(b.hasAttribute('data-edit-planning'))settings();else recurring(Number(b.dataset.budgetRecurring));});
+})();
+<\/script><script>(() => {
+  // backend/worker/finance-model.mjs
+  function addMonth(value, count) {
+    const [y, m, d = 1] = value.split("-").map(Number);
+    const first = new Date(Date.UTC(y, m - 1 + count, 1));
+    const last = new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth() + 1, 0)).getUTCDate();
+    first.setUTCDate(Math.min(d, last));
+    return first.toISOString().slice(0, value.length);
+  }
+  var endOfMonth = (m) => new Date(Date.UTC(Number(m.slice(0, 4)), Number(m.slice(-2)), 0)).toISOString().slice(0, 10);
+  var sum = (rows) => rows.reduce((a, b) => a + b, 0);
+  var median = (rows) => rows.length ? (rows[Math.floor((rows.length - 1) / 2)] + rows[Math.floor(rows.length / 2)]) / 2 : 0;
+  var monthDelta = (a, b) => (Number(a.slice(0, 4)) - Number(b.slice(0, 4))) * 12 + Number(a.slice(5, 7)) - Number(b.slice(5, 7));
+  function wealthForecast(finance, plan = {}, day) {
+    const month = day.slice(0, 7), earliest = addMonth(month, -6);
+    const source = (finance.forecastHistory || []).filter((r) => r.month >= earliest && r.month < month && r.observed).sort((a, b) => a.month.localeCompare(b.month));
+    const grouped = /* @__PURE__ */ new Map(), actual = {};
+    for (const link of plan.links || []) if (link.role === "payment" && link.account === "Trade Republic") {
+      const rows = grouped.get(link.movement_source_row) || [];
+      rows.push(link);
+      grouped.set(link.movement_source_row, rows);
+    }
+    for (const links of grouped.values()) {
+      const first = links[0], attributed = sum(links.map((link) => ((plan.settlements || []).find((s) => s.cycle_id === link.cycle_id && s.movement_source_row === link.movement_source_row)?.actual_cents ?? link.attributed_cents) / 100));
+      const m = first.actual_date.slice(0, 7);
+      actual[m] = (actual[m] || 0) + Math.min(Math.max(0, -first.amount), attributed);
+    }
+    const plans = finance.plansV2?.plans || [], posted = (finance.plansV2?.payments || []).filter((p) => p.status === "posted");
+    for (const p of posted) if (!p.legacy) {
+      const linked = plans.find((r) => r.id === p.planId);
+      if (linked && (["goal", "fund", "recovery"].includes(linked.kind) || linked.kind === "fixed" && linked.intervalMonths > 1)) {
+        const m = p.date.slice(0, 7);
+        actual[m] = (actual[m] || 0) + p.amountCents / 100;
+      }
+    }
+    const nets = source.map((r) => (r.ordinaryNet || 0) + Math.max(0, (actual[r.month] || 0) - (r.extraPaid || 0))).filter(Number.isFinite).sort((a, b) => a - b);
+    const center = median(nets), mad = median(nets.map((v) => Math.abs(v - center)).sort((a, b) => a - b));
+    const spread = mad > 0 ? 3 * 1.4826 * mad : Math.max(0, nets.length >= 4 ? nets.at(-2) - nets[1] : 0);
+    const robust = nets.map((v) => Math.min(center + spread, Math.max(center - spread, v)));
+    const normalizedNet = robust.length ? sum(robust) / robust.length : 0, assets = finance.summary?.budget || 0;
+    const balances = /* @__PURE__ */ new Map();
+    for (const row of [...finance.lifetime?.series || [], ...finance.wealthHistory || []]) balances.set(row.month, { ...balances.get(row.month), ...row });
+    const history = [...balances.values()].filter((r) => r.month >= earliest && r.month < month).map((r) => ({ day: endOfMonth(r.month), value: [r.measured, r.estimated, r.wealth].find(Number.isFinite) })).filter((p) => Number.isFinite(p.value)).sort((a, b) => a.day.localeCompare(b.day));
+    history.push({ day, value: assets });
+    const payments = [], cycles = /* @__PURE__ */ new Map();
+    for (const row of plan.allocations || []) if (row.kind === "expense" && (row.payment_account || "Trade Republic") === "Trade Republic" && !["Pagato", "Annullato", "Previsto"].includes(row.status) && !cycles.has(row.cycle_id)) cycles.set(row.cycle_id, row);
+    for (const row of cycles.values()) if (row.end_month) {
+      const linked = sum((plan.links || []).filter((l) => l.cycle_id === row.cycle_id && l.role === "payment").map((l) => l.attributed_cents));
+      payments.push({ day: [day, endOfMonth(row.end_month.slice(0, 7))].sort().at(-1), amount: Math.max(0, row.total_cents - linked) / 100 });
+    }
+    for (const row of plans.filter((r) => r.status === "active")) {
+      if (row.kind === "goal" && /^20\\d\\d-\\d\\d$/.test(row.endMonth)) payments.push({ day: [day, endOfMonth(row.endMonth)].sort().at(-1), amount: (row.outstandingCents ?? row.amountCents) / 100 });
+      if (row.kind === "fixed" && row.intervalMonths > 1) for (let offset = 0; offset <= 6; offset++) {
+        const m = addMonth(month, offset);
+        if (m < row.startMonth) continue;
+        const anchor = row.intervalAnchor || row.startMonth, cycle = addMonth(anchor, Math.floor(monthDelta(m, anchor) / row.intervalMonths) * row.intervalMonths);
+        if (addMonth(cycle, row.intervalMonths - 1) !== m) continue;
+        let amount = row.amountCents;
+        for (const rate of [...row.rateChanges || []].sort((a, b) => a.fromMonth.localeCompare(b.fromMonth))) if (rate.fromMonth <= m) amount = rate.amountCents;
+        const paid = sum(posted.filter((p) => p.planId === row.id && p.settlementKey === cycle).map((p) => p.amountCents));
+        payments.push({ day: [day, endOfMonth(m)].sort().at(-1), amount: Math.max(0, amount - paid) / 100 });
+      }
+    }
+    const horizon = addMonth(day, 6), knownExtra = sum(payments.filter((p) => p.day <= horizon).map((p) => p.amount));
+    if (robust.length < 4) return { history, prediction: [], samples: source.length, normalizedNet, knownExtra };
+    let seed = 0x4C6966654F53n;
+    const draw = () => {
+      seed = BigInt.asUintN(64, seed * 6364136223846793005n + 1442695040888963407n);
+      return robust[Number((seed >> 32n) % BigInt(robust.length))];
     };
-    select.addEventListener('change',()=>{const o=select.selectedOptions[0];if(o?.dataset.cents){form.elements.amount.value=Number(o.dataset.cents)/100;date.value=o.dataset.date;}});
-    date.addEventListener('change',refresh);await refresh();
+    const paths = Array(2e3).fill(assets), prediction = [{ day, value: assets, lower: assets, upper: assets }];
+    let previous = day;
+    for (let step = 1; step <= 6; step++) {
+      const date = addMonth(day, step), payment = sum(payments.filter((p) => p.day <= date && (p.day > previous || step === 1 && p.day === day)).map((p) => p.amount));
+      for (let i = 0; i < paths.length; i++) paths[i] += draw() - payment;
+      const sorted = [...paths].sort((a, b) => a - b), expected = assets + step * normalizedNet - sum(payments.filter((p) => p.day <= date).map((p) => p.amount));
+      prediction.push({ day: date, value: expected, lower: Math.min(expected, sorted[199]), upper: Math.max(expected, sorted[1799]) });
+      previous = date;
+    }
+    return { history, prediction, samples: source.length, normalizedNet, knownExtra };
   }
-  function pay(id){
-    const p=plan(id);if(!p)return;
-    const m=view().month<=current()?view().month:current();
-    const form=modal('Paga o collega \xB7 '+p.name,\`\${amount('Importo effettivo \u20AC',(p.kind==='goal'?p.outstandingCents:p.kind==='fixed'?p.amountCents:Math.max(p.contributionCents,1))/100)}\${field('Data pagamento','date','date',today(),'required max="'+today()+'"')}\${monthField('Scadenza di riferimento','cycleMonth',m)}\${field('Mesi coperti','competenceMonths','number',1,'required min="1" max="12"')}<label class="full">Movimento<select name="movementId"><option value="">Registra un nuovo pagamento</option></select></label><p class="hint full">Collegare un movimento esistente non genera un nuovo addebito.\${p.kind==='goal'?' Il pagamento chiude l\u2019obiettivo e libera le quote future.':''}</p>\${p.kind==='goal'?\`<label class="full">Eccedenza<select name="recoverDifference"><option value="">Usa i risparmi</option><option value="yes">Recupera solo l\u2019eccedenza nei mesi successivi</option></select></label>\${monthField('Recupero dal mese','recoveryStartMonth',next(current()))}\${monthField('Recupero fino al mese','recoveryEndMonth',next(current()))}\`:''}\`,'recordFinancePlanPayment',f=>{
-      const out={planId:id,amountCents:cents(f),date:String(f.get('date')),cycleMonth:String(f.get('cycleMonth')),competenceMonths:Number(f.get('competenceMonths'))};
-      if(f.get('movementId'))out.movementId=Number(f.get('movementId'));
-      if(f.get('recoverDifference')==='yes')Object.assign(out,{recoverDifference:true,recoveryStartMonth:String(f.get('recoveryStartMonth')),recoveryEndMonth:String(f.get('recoveryEndMonth'))});return out;
-    });loadMovements(form);
+  function aggregateCategories(snapshots, months) {
+    if (!months.length || new Set(months).size !== months.length) throw Error("Dati incompleti per il periodo selezionato.");
+    const totals = /* @__PURE__ */ new Map();
+    for (const month of months) {
+      const rows = snapshots.get(month);
+      if (!Array.isArray(rows)) throw Error("Dati incompleti per il periodo selezionato.");
+      for (const row of rows) {
+        const name = String(row.name || "").trim(), cents = Math.sign(row.amount) * Math.round(Math.abs(row.amount) * 100);
+        if (!name || typeof row.amount !== "number" || !Number.isSafeInteger(cents)) throw Error("Dati categoria non validi.");
+        const total = (totals.get(name) || 0) + cents;
+        if (!Number.isSafeInteger(total)) throw Error("Totale categoria non valido.");
+        totals.set(name, total);
+      }
+    }
+    return [...totals].filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1)).map(([name, cents]) => ({ name, amount: cents / 100 }));
   }
-  function edit(id){const p=plan(id);if(!p)return;modal('Modifica quote future \xB7 '+p.name,\`\${amount(p.kind==='goal'?'Nuovo totale obiettivo \u20AC':'Nuova quota / scadenza \u20AC',p.amountCents/100)}\${monthField('Decorrenza','fromMonth',next(current()))}\${p.kind==='goal'?monthField('Nuova scadenza','endMonth',p.endMonth<next(current())?next(current()):p.endMonth):''}<p class="hint full">Il mese corrente e le quote precedenti restano invariati.</p>\`,'editFinancePlan',f=>({planId:id,amountCents:cents(f),fromMonth:String(f.get('fromMonth')),...(p.kind==='goal'?{endMonth:String(f.get('endMonth'))}:{})}));}
-  document.addEventListener('click',e=>{
-    const b=e.target.closest('[data-new-extra],[data-plans-pay],[data-plans-edit],[data-plans-stop],[data-plans-close],[data-plans-refresh],[data-plans-resume]');if(!b)return;
-    e.preventDefault();e.stopImmediatePropagation();
-    if(b.hasAttribute('data-new-extra'))openExtra();
-    if(b.hasAttribute('data-plans-close'))document.getElementById('dialog').classList.add('hidden');
-    if(b.hasAttribute('data-plans-pay'))pay(b.dataset.plansPay);
-    if(b.hasAttribute('data-plans-edit'))edit(b.dataset.plansEdit);
-    if(b.hasAttribute('data-plans-stop')){const id=b.dataset.plansStop,p=plan(id);modal('Interrompi \xB7 '+p.name,'<p class="full">Conserva i pagamenti e lo storico. Le quote successive al mese corrente si interrompono. Gli anticipi di mesi chiusi non possono essere annullati.</p>','stopFinancePlan',()=>({planId:id}));}
-    if(b.hasAttribute('data-plans-resume'))modal('Riprendi pagamento','<p class="full">Completa la conferma del movimento gi\xE0 avviato, senza creare un secondo addebito.</p>','resumeFinancePlanPayment',()=>({paymentId:b.dataset.plansResume}));
-    if(b.hasAttribute('data-plans-refresh'))load();
-  },true);
+
+  // backend/worker/analysis-web.js
+  (() => {
+    let range = 3, cache = /* @__PURE__ */ new Map(), active = "", generation = 0, lastFinance = null;
+    const safe = escapeHtml;
+    const selectedMonth = () => \`\${state.year}-\${String(state.month).padStart(2, "0")}\`;
+    const monthList = (last, count) => Array.from({ length: count }, (_, i) => addMonth(last, i - count + 1));
+    function chart(rows, label, bar = false, directional = false) {
+      if (!rows.length) return '<p class="empty">Nessun dato disponibile nel periodo.</p>';
+      if (!state.assetsVisible) return "<button data-toggle-assets>Mostra importi</button>";
+      const values = rows.flatMap((p) => [p.value, p.lower, p.upper, p.base, p.additional].filter(Number.isFinite)), low = Math.min(0, ...values), high = Math.max(1, ...values), W = 640, H = 250;
+      const x = (i) => rows.length === 1 ? 320 : 48 + i * 560 / Math.max(1, rows.length - 1), y = (v) => 205 - (v - low) / (high - low) * 180;
+      const path = rows.map((p, i) => \`\${i ? "L" : "M"}\${x(i)},\${y(p.value)}\`).join(" ");
+      const bandRows = rows.map((p, i) => ({ p, i })).filter(({ p }) => Number.isFinite(p.lower) && Number.isFinite(p.upper));
+      const band = bandRows.length ? \`<path fill="var(--os-accent)" opacity=".15" d="\${bandRows.map(({ p, i }, n) => \`\${n ? "L" : "M"}\${x(i)},\${y(p.upper)}\`).join(" ")} \${[...bandRows].reverse().map(({ p, i }) => \`L\${x(i)},\${y(p.lower)}\`).join(" ")} Z"/>\` : "";
+      const rectangle = (i, a, b, color) => \`<rect x="\${x(i) - 8}" y="\${Math.min(y(a), y(b))}" width="16" height="\${Math.abs(y(a) - y(b))}" fill="\${color}"><title>\${safe(rows[i].label)}: \${safe(exactEuro(b - a))}</title></rect>\`;
+      const shapes = bar ? rows.map((p, i) => rectangle(i, 0, p.base ?? p.value, "var(--os-accent)") + (p.additional ? rectangle(i, Math.sign(p.base) === Math.sign(p.additional) ? p.base : 0, (Math.sign(p.base) === Math.sign(p.additional) ? p.base : 0) + p.additional, "var(--muted)") : "")).join("") : \`\${band}\${directional ? rows.slice(1).map((p, i) => \`<path d="M\${x(i)},\${y(rows[i].value)} L\${x(i + 1)},\${y(p.value)}" fill="none" stroke="\${p.value < rows[i].value ? "var(--red)" : "var(--green)"}" stroke-width="2"/>\`).join("") : \`<path d="\${path}" fill="none" stroke="var(--os-accent)" stroke-width="2"/>\`}\${rows.map((p, i) => \`<circle cx="\${x(i)}" cy="\${y(p.value)}" r="3" fill="var(--os-accent)"><title>\${safe(p.label)}: \${safe(exactEuro(p.value))}</title></circle>\`).join("")}\`;
+      return \`<svg class="trend-svg" viewBox="0 0 \${W} \${H}" role="img" aria-label="\${safe(label)}"><line class="grid-line" x1="40" x2="620" y1="205" y2="205"/>\${shapes}\${rows.map((p, i) => i % Math.max(1, Math.ceil(rows.length / 6)) && i !== rows.length - 1 ? "" : \`<text style="font-size:20px" x="\${x(i)}" y="235" text-anchor="middle">\${safe(p.label)}</text>\`).join("")}</svg><details><summary>Valori del grafico</summary>\${rows.map((p) => \`<div class="kv"><span>\${safe(p.label)}</span><strong>\${safe(exactEuro(p.value))}\${Number.isFinite(p.lower) ? \`<small> \${safe(exactEuro(p.lower))} \\u2013 \${safe(exactEuro(p.upper))}</small>\` : ""}</strong></div>\`).join("")}</details>\`;
+    }
+    const card = (title, body) => \`<section class="card pad"><h2>\${title}</h2>\${body}</section>\`;
+    globalThis.platformAnalysis = function(d) {
+      if (lastFinance !== d) {
+        cache.clear();
+        lastFinance = d;
+      }
+      const month = selectedMonth(), period = monthList(month, 12), first = period[0];
+      const model = wealthForecast(d, d.forecastPlan || d.extraPlan, todayIso());
+      const wealth = /* @__PURE__ */ new Map();
+      for (const row of [...d.lifetime?.series || [], ...d.wealthHistory || []]) wealth.set(row.month, { ...wealth.get(row.month), ...row });
+      const wealthRows = [...wealth.values()].filter((r) => r.month >= first && r.month <= month).sort((a, b) => a.month.localeCompare(b.month)).map((r) => ({ label: shortMonth(r.month), value: [r.measured, r.estimated, r.wealth].find(Number.isFinite) })).filter((r) => Number.isFinite(r.value));
+      const salary = (d.lifetime?.salaryHistory || []).filter((r) => r.month >= first && r.month <= month).sort((a, b) => a.month.localeCompare(b.month));
+      const forecast = model.prediction.length ? chart([...model.history.slice(0, -1), ...model.prediction].map((p) => ({ ...p, label: p.day.slice(0, 7) })), "Previsione patrimonio") : \`<p class="empty">Servono almeno 4 mesi completi osservati sui 6 precedenti. Disponibili: \${model.samples}.</p>\`;
+      const html = \`<div class="budget-flow">\${card("Spese per categoria", \`<div class="chart-range" role="group" aria-label="Periodo categorie">\${[3, 6, 12].map((n) => \`<button data-category-period="\${n}" class="\${n === range ? "active" : ""}" aria-pressed="\${n === range}">\${n} mesi</button>\`).join("")}</div><p class="hint" data-category-interval></p><div data-period-categories role="status">Caricamento categorie\\u2026</div><button data-refresh-categories>Aggiorna categorie</button>\`)}\${card("Previsione patrimonio", \`<p class="hint">6 mesi precedenti \\xB7 6 mesi successivi</p>\${forecast}<details><summary>Come viene calcolata</summary><p>Fascia centrale dell\\u201980% di 2.000 simulazioni dei flussi osservati, con valori anomali limitati tramite mediana e deviazione assoluta mediana. Sono sottratti i pagamenti futuri pianificati, senza sottrarre gli accantonamenti una seconda volta.</p><p>Pagamenti noti nei prossimi 6 mesi: \${state.assetsVisible ? exactEuro(model.knownExtra) : "\\u2022\\u2022\\u2022\\u2022"}</p><p>Scenario indicativo sul conto principale, non garantito.</p></details>\`)}\${card("Patrimonio", \`<p class="hint">12 mesi fino a \${safe(titleMonth(state.year, state.month))}</p>\${chart(wealthRows, "Patrimonio", false, true)}\`)}\${card("Stipendi per competenza", \`<p class="hint">12 mesi fino a \${safe(titleMonth(state.year, state.month))}</p>\${chart(salary.map((r) => ({ label: shortMonth(r.month), value: (r.base || 0) + (r.additional || 0), base: r.base || 0, additional: r.additional || 0 })), "Stipendi per competenza", true)}\${salary.length ? \`<details><summary>Base e aggiuntive</summary>\${salary.map((r) => \`<div class="kv"><span>\${safe(shortMonth(r.month))}</span><strong>\${state.assetsVisible ? \`Base \${exactEuro(r.base || 0)} \\xB7 Aggiuntive \${exactEuro(r.additional || 0)}\` : "\\u2022\\u2022\\u2022\\u2022"}</strong></div>\`).join("")}</details>\` : ""}\`)}</div>\`;
+      if (Array.isArray(d.categories)) cache.set(month, d.categories);
+      queueMicrotask(() => loadCategories(d));
+      return html;
+    };
+    async function loadCategories(d) {
+      const month = selectedMonth(), requested = monthList(month, range), token = \`\${month}|\${range}|\${++generation}\`;
+      active = token;
+      const target = document.querySelector("[data-period-categories]");
+      if (!target) return;
+      const interval = document.querySelector("[data-category-interval]");
+      interval.textContent = shortMonth(requested[0]) + " \\u2013 " + shortMonth(month);
+      const refresh = document.querySelector("[data-refresh-categories]");
+      refresh.disabled = true;
+      const current = () => active === token && state.view === "analysis" && selectedMonth() === month && target.isConnected;
+      try {
+        for (const m of [...requested].reverse()) if (!cache.has(m)) {
+          if (!current()) return;
+          target.textContent = \`Categorie: \${requested.filter((m2) => cache.has(m2)).length} di \${requested.length} mesi\\u2026\`;
+          const data = await workerRequest("getFinanceData", [Number(m.slice(0, 4)), Number(m.slice(-2))]);
+          if (!current()) return;
+          aggregateCategories(/* @__PURE__ */ new Map([[m, data.categories]]), [m]);
+          cache.set(m, data.categories);
+        }
+        if (!current()) return;
+        const rows = aggregateCategories(cache, requested);
+        const colors = ["var(--os-accent)", "#6e9cc1", "#c79a58", "#a788b8", "#b9777b", "#8b929b"], total = rows.reduce((s, r) => s + r.amount, 0);
+        let offset = 0;
+        const segments = rows.map((r, i) => {
+          const share = r.amount / total * 100, shape = \`<circle cx="60" cy="60" r="48" pathLength="100" fill="none" stroke="\${colors[i % colors.length]}" stroke-width="12" stroke-dasharray="\${share} \${100 - share}" stroke-dashoffset="\${-offset}" transform="rotate(-90 60 60)"/>\`;
+          offset += share;
+          return shape;
+        }).join("");
+        target.innerHTML = rows.length ? \`<div class="breakdown"><div class="category-ring"><svg viewBox="0 0 120 120" role="img" aria-label="Spese per categoria">\${segments}</svg><div class="category-ring-label"><small>Spese</small><strong>\${state.assetsVisible ? exactEuro(total) : "\\u2022\\u2022\\u2022\\u2022"}</strong></div></div><div>\${rows.map((r, i) => \`<div class="kv"><span><i class="category-swatch" style="background:\${colors[i % colors.length]}"></i>\${safe(r.name)}</span><strong>\${state.assetsVisible ? exactEuro(r.amount) : "\\u2022\\u2022\\u2022\\u2022"}</strong></div>\`).join("")}</div></div>\` : '<p class="empty">Nessuna spesa nel periodo</p>';
+        refresh.textContent = "Aggiorna categorie";
+      } catch (error) {
+        if (current()) {
+          target.textContent = \`Caricati \${requested.filter((m) => cache.has(m)).length} di \${requested.length} mesi. \${error.message} Riprova riprende dai mesi mancanti.\`;
+          refresh.textContent = "Riprova";
+        }
+      } finally {
+        if (current()) refresh.disabled = false;
+      }
+    }
+    document.addEventListener("click", (e) => {
+      const period = e.target.closest("[data-category-period]"), refresh = e.target.closest("[data-refresh-categories]");
+      if (period) {
+        range = Number(period.dataset.categoryPeriod);
+        render();
+      }
+      if (refresh) {
+        if (refresh.textContent !== "Riprova") cache.clear();
+        loadCategories(state.data);
+      }
+    });
+  })();
+})();
+<\/script><script>(() => {
+  // backend/plans/engine.mjs
+  var PlanError = class extends Error {
+    constructor(message, status = 422) {
+      super(message);
+      this.status = status;
+    }
+  };
+  var fail = (message) => {
+    throw new PlanError(message);
+  };
+  var kinds = ["advance", "goal", "fund", "fixed", "estimated", "recovery"];
+  function month(value) {
+    if (typeof value !== "string" || !/^20\\d\\d-(0[1-9]|1[0-2])$/.test(value)) fail("Scegli mese e anno validi.");
+    return value;
+  }
+  function addMonth(value, count) {
+    month(value);
+    const [y, m] = value.split("-").map(Number), date = new Date(Date.UTC(y, m - 1 + count, 1));
+    return date.toISOString().slice(0, 7);
+  }
+  function months(first, last, limit = 240) {
+    month(first);
+    month(last);
+    if (last < first) fail("L\\u2019ultimo mese precede il primo.");
+    const count = (Number(last.slice(0, 4)) - Number(first.slice(0, 4))) * 12 + Number(last.slice(-2)) - Number(first.slice(-2)) + 1;
+    if (count > limit) fail("Il piano finito pu\\xF2 coprire al massimo 240 mesi; per un fondo usa Senza scadenza.");
+    return Array.from({ length: count }, (_, i) => addMonth(first, i));
+  }
+  function cents(value) {
+    if (!Number.isSafeInteger(value) || value <= 0 || value > 1e8) fail("Importo non valido.");
+    return value;
+  }
+  function split(total, count) {
+    cents(total);
+    if (!Number.isInteger(count) || count < 1 || count > 240) fail("Numero di mesi non valido.");
+    return Array.from({ length: count }, (_, i) => Math.floor(total / count) + (i < total % count ? 1 : 0));
+  }
+  function day(value, today) {
+    if (typeof value !== "string" || !/^20\\d\\d-(0[1-9]|1[0-2])-\\d\\d$/.test(value)) fail("Data del pagamento non valida.");
+    const parsed = /* @__PURE__ */ new Date(value + "T12:00:00Z");
+    if (!Number.isFinite(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== value || value > today) fail("La data deve essere valida e non futura.");
+    return value;
+  }
+  function newPlan(input, today, id) {
+    const kind = input.kind, current = month(today.slice(0, 7));
+    if (!kinds.includes(kind)) fail("Scegli il tipo di piano.");
+    const name = String(input.name ?? "").trim();
+    if (!name || name.length > 120) fail("Inserisci un nome di massimo 120 caratteri.");
+    const first = month(input.startMonth);
+    if (first < current) fail("Le quote nuove possono iniziare dal mese corrente.");
+    const finite = ["advance", "goal", "recovery"].includes(kind), last = finite ? month(input.endMonth) : null;
+    const amount = cents(input.amountCents), interval = Number(input.intervalMonths ?? 1);
+    const category = String(input.category ?? "Altro").trim();
+    if (!category || category.length > 60) fail("Categoria non valida.");
+    if (!Number.isInteger(interval) || interval < 1 || interval > 12) fail("Periodicit\\xE0 non valida.");
+    if (finite) months(first, last);
+    const plan = {
+      id,
+      name,
+      category,
+      kind,
+      amountCents: amount,
+      startMonth: first,
+      endMonth: last,
+      intervalMonths: interval,
+      createdDay: today,
+      status: "active",
+      stopAfter: null,
+      closedMonth: null,
+      rateChanges: []
+    };
+    if (kind === "advance") {
+      plan.beneficiaryMonth = month(input.beneficiaryMonth);
+      if (plan.beneficiaryMonth < current || plan.beneficiaryMonth >= first) fail("Il mese beneficiario deve essere aperto e precedere i mesi di recupero.");
+    }
+    if (kind === "recovery") {
+      plan.paymentDate = day(input.paymentDate, today);
+      if (first < plan.paymentDate.slice(0, 7)) fail("Il recupero non pu\\xF2 precedere il pagamento.");
+      plan.status = "pendingPayment";
+    }
+    return plan;
+  }
+  function contribution(plan, m) {
+    month(m);
+    if (plan.status === "cancelled" || plan.status === "pendingPayment") return 0;
+    if (plan.kind === "advance") {
+      if (m === plan.beneficiaryMonth) return -plan.amountCents;
+    }
+    if (m < plan.startMonth || plan.endMonth && m > plan.endMonth || plan.stopAfter && m > plan.stopAfter || plan.closedMonth && m > plan.closedMonth) return 0;
+    if (plan.legacySchedule) return Number(plan.legacySchedule[m] ?? 0);
+    if (["advance", "goal", "recovery"].includes(plan.kind)) {
+      const range = months(plan.startMonth, plan.endMonth), i = range.indexOf(m);
+      return i < 0 ? 0 : split(plan.amountCents, range.length)[i];
+    }
+    if (plan.kind === "fixed") {
+      const anchor = plan.intervalAnchor ?? plan.startMonth;
+      const delta = (Number(m.slice(0, 4)) - Number(anchor.slice(0, 4))) * 12 + Number(m.slice(-2)) - Number(anchor.slice(-2));
+      let amount = plan.amountCents;
+      for (const rate2 of plan.rateChanges ?? []) if (rate2.fromMonth <= m) amount = rate2.amountCents;
+      return amount === 0 ? 0 : split(amount, plan.intervalMonths)[(delta % plan.intervalMonths + plan.intervalMonths) % plan.intervalMonths];
+    }
+    let rate = plan.amountCents;
+    for (const change of plan.rateChanges ?? []) if (change.fromMonth <= m) rate = change.amountCents;
+    return rate;
+  }
+
+  // backend/worker/plans-web.js
+  (() => {
+    const kinds2 = lifeOSContract.planKinds;
+    const statuses = lifeOSContract.planStatuses;
+    const today = () => (/* @__PURE__ */ new Date()).toLocaleDateString("sv-SE", { timeZone: "Europe/Rome" });
+    const current = () => today().slice(0, 7);
+    const next = (m) => {
+      const [y, n] = m.split("-").map(Number);
+      return new Date(Date.UTC(y, n, 1)).toISOString().slice(0, 7);
+    };
+    const safe = osSafe, money = (c) => exactEuro(Number(c || 0) / 100);
+    const view = () => state.data?.plansV2;
+    const plan = (id) => view()?.plans.find((p) => p.id === id);
+    const field = (label, name, type, value = "", attrs = "") => \`<label class="\${name === "name" ? "full" : ""}">\${label}<input name="\${name}" type="\${type}" value="\${safe(value)}" \${attrs}></label>\`;
+    const amount = (label, value = "") => field(label, "amount", "number", value, 'required min="0.01" max="1000000" step="0.01"');
+    const monthField = (label, name, value) => field(label, name, "month", value, 'required min="' + current() + '" max="2099-12"');
+    const oldActions = osPageActions;
+    osPageActions = function() {
+      oldActions();
+      document.querySelectorAll("[data-new-extra]").forEach((b) => {
+        b.setAttribute("aria-label", "Nuovo piano");
+        b.setAttribute("title", "Nuovo piano");
+        if (!b.classList.contains("fab-button")) b.textContent = "+ Piano";
+      });
+    };
+    const oldSetView = setView;
+    setView = function(v) {
+      if (v !== "extras") activePlan = null;
+      oldSetView(v);
+      if (v === "extras") document.getElementById("page-title").textContent = activePlan ? "Dettagli piano" : "Piani";
+    };
+    const oldOverview = overview;
+    overview = function(d) {
+      return oldOverview(d).replace(">Extra</button>", ">Piani</button>");
+    };
+    let activePlan = null;
+    extrasView = function(d) {
+      const v = d.plansV2;
+      if (!v || v.version !== 2 || !Array.isArray(v.plans) || !Array.isArray(v.payments)) return \`<p role="alert">\${safe(lifeOSContract.plansUnavailable)}</p><button data-plans-refresh>Riprova</button>\`;
+      const p = v.plans.find((p2) => p2.id === activePlan);
+      if (p) {
+        document.getElementById("page-title").textContent = "Dettagli piano";
+        return detail(p, v);
+      }
+      activePlan = null;
+      document.getElementById("page-title").textContent = "Piani";
+      const legacy = [...new Map((d.extraPlan?.allocations || []).map((r) => [r.cycle_id, r])).values()];
+      return \`<div class="plans-web"><div class="card-title"><div><h2>Piani</h2><p class="hint">Tutti i piani \\xB7 impatto su \${safe(titleMonth(state.year, state.month))}</p></div><div class="actions"><button data-plans-info aria-label="Come funzionano i piani">\\u24D8</button><button class="save" data-new-extra>Nuovo piano</button></div></div><div class="extra-grid">\${v.plans.map((p2) => \`<button class="extra-card plan-list-row" data-plans-detail="\${safe(p2.id)}"><span><strong>\${safe(p2.name)}</strong><small>\${safe(kinds2[p2.kind])} \\xB7 \${safe(statuses[p2.status] || p2.status)}</small><span>Budget del mese: \${money(-p2.contributionCents)}</span></span><span aria-hidden="true">\\u203A</span></button>\`).join("") || '<p class="empty">Anticipa budget, metti da parte o distribuisci una spesa sui mesi scelti.</p>'}</div>\${legacy.length ? \`<section class="card pad"><h2>Piani precedenti</h2><p class="hint">Le voci storiche non adottate sono conservate. Non duplicarle con un nuovo piano.</p>\${legacy.map((r) => \`<button class="plan-list-row" data-plans-legacy="\${Number(r.extraordinary_source_row)}"><span>\${safe(r.name)}<small>\${safe(NativeExtraTitle(r.status))}</small></span><span aria-hidden="true">\\u203A</span></button>\`).join("")}</section>\` : ""}</div>\`;
+    };
+    function NativeExtraTitle(status) {
+      return { Pagato: "Pagata", Programmato: "In corso", Previsto: "Da valutare", Annullato: "Annullata" }[status] || status;
+    }
+    function detail(p, v) {
+      let cycle = v.month;
+      if (p.kind === "fixed" && p.intervalMonths > 1) {
+        const anchor = p.intervalAnchor || p.startMonth, [y, m] = anchor.split("-").map(Number), delta = (Number(cycle.slice(0, 4)) - y) * 12 + Number(cycle.slice(-2)) - m;
+        cycle = addMonth(anchor, Math.floor(delta / p.intervalMonths) * p.intervalMonths);
+      }
+      const payments = v.payments.filter((x) => x.planId === p.id), paid = p.kind !== "fund" && payments.some((x) => x.status === "posted" && (p.kind === "goal" || x.settlementKey === cycle));
+      const payable = p.status === "active" && !["advance", "recovery"].includes(p.kind) && p.startMonth <= current();
+      return \`<div class="plans-web"><button data-plans-back>\\u2039 Piani</button><section class="card pad"><h2>\${safe(p.name)}</h2><p>\${safe(kinds2[p.kind])} \\xB7 \${safe(statuses[p.status] || p.status)}</p><p class="hint">\${safe(p.startMonth)}\${p.endMonth ? " \\u2192 " + safe(p.endMonth) : " \\xB7 Senza scadenza"}</p><div class="kv"><span>Categoria della spesa</span><strong>\${safe(p.category || "Altro")}</strong></div><div class="kv"><span>Budget di \${safe(shortMonth(v.month))}</span><strong>\${money(-p.contributionCents)}</strong></div>\${p.kind === "advance" ? \`<div class="kv"><span>Mese beneficiario</span><strong>\${safe(shortMonth(p.beneficiaryMonth))}</strong></div>\` : p.kind !== "recovery" ? \`<div class="kv"><span>Destinato al fondo nel mese consultato</span><strong>\${money(p.fundCents)}</strong></div>\${p.fromGeneralSavingsCents > 0 ? \`<div class="kv"><span>Pagato dagli altri risparmi</span><strong>\${money(p.fromGeneralSavingsCents)}</strong></div>\` : ""}\` : ""}\${p.kind === "goal" ? \`<div class="kv"><span>Obiettivo</span><strong>\${money(p.amountCents)}</strong></div><div class="kv"><span>Residuo</span><strong>\${money(p.outstandingCents)}</strong></div>\` : ""}\${payable && !paid ? \`<button data-plans-pay="\${safe(p.id)}">\${p.kind === "goal" ? "Paga dai risparmi e chiudi il piano" : "Registra un pagamento"}</button>\` : paid ? "<p>Pagamento registrato</p>" : ""}</section><section class="card pad"><h2>Pagamenti</h2>\${payments.map((p2) => \`<div class="kv"><span>\${safe(p2.date || "")}<small>\${p2.status === "posted" ? "Pagato \\xB7 movimento collegato" : "Da completare \\xB7 non registrare una nuova spesa"}</small></span><strong>\${money(p2.amountCents)}</strong></div>\${p2.status === "pending" ? \`<button data-plans-resume="\${safe(p2.id)}">Completa questa registrazione</button>\` : ""}\`).join("") || '<p class="empty">Nessun pagamento registrato</p>'}</section>\${p.status === "active" ? \`<section class="card pad">\${!["advance", "recovery"].includes(p.kind) ? \`<button data-plans-edit="\${safe(p.id)}">Modifica le quote future</button>\` : ""}<button class="danger" data-plans-stop="\${safe(p.id)}">\${p.kind === "advance" ? "Annulla l\\u2019intero anticipo" : "Interrompi le quote future"}</button></section>\` : ""}</div>\`;
+    }
+    function modal(title, body, method, makePayload) {
+      const host = document.getElementById("dialog");
+      host.innerHTML = \`<div class="modal" role="dialog" aria-modal="true" aria-label="\${safe(title)}"><div class="modal-top"><h2>\${safe(title)}</h2><button type="button" data-plans-close aria-label="Chiudi">\\xD7</button></div><form id="plans-web-form" class="form-grid">\${body}<p class="os-form-error full" role="alert"></p><div class="form-actions full"><button type="button" data-plans-close>Annulla</button><button class="save" type="submit">Salva</button></div></form></div>\`;
+      host.classList.remove("hidden");
+      const form = host.querySelector("form"), requestId = crypto.randomUUID();
+      let payload = null, busy = false;
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (busy || !form.reportValidity()) return;
+        const error = form.querySelector("[role=alert]"), button = form.querySelector("[type=submit]");
+        try {
+          if (!payload) payload = { requestId, ...makePayload(new FormData(form)) };
+          busy = true;
+          form.dataset.submitted = "true";
+          host.querySelectorAll("[data-plans-close]").forEach((b) => b.disabled = true);
+          button.disabled = true;
+          button.textContent = "Salvataggio\\u2026";
+          error.textContent = "";
+          form.querySelectorAll("input,select").forEach((x) => x.disabled = true);
+          const result = await workerRequest(method, [payload]);
+          if (result === false) throw Error("Il server non ha confermato la modifica.");
+          host.classList.add("hidden");
+          state.data = null;
+          state.loadedDetail = false;
+          load();
+          osLoadHomeFinance();
+        } catch (err) {
+          error.textContent = err.message + " Puoi riprovare la stessa operazione senza duplicarla.";
+          button.textContent = "Riprova";
+        } finally {
+          busy = false;
+          button.disabled = false;
+          host.querySelectorAll("[data-plans-close]").forEach((b) => b.disabled = false);
+        }
+      });
+      return form;
+    }
+    const cents2 = (f) => {
+      const n = Number(f.get("amount"));
+      if (!Number.isFinite(n) || n <= 0 || Math.abs(n * 100 - Math.round(n * 100)) > 1e-6) throw Error("Usa un importo positivo con massimo due decimali.");
+      return Math.round(n * 100);
+    };
+    openExtra = function() {
+      const form = modal("Nuovo piano", \`<label class="full">Tipo<select name="kind">\${Object.entries(kinds2).map(([k, v]) => \`<option value="\${k}" \${k === "goal" ? "selected" : ""}>\${v}</option>\`).join("")}</select></label>\${field("Nome", "name", "text", "", 'required maxlength="120" class="full"')}<div class="full" data-plan-fields></div>\`, "saveFinancePlan", (f) => {
+        const kind = String(f.get("kind")), p = { kind, name: String(f.get("name")).trim(), amountCents: cents2(f), startMonth: String(f.get("startMonth")), category: String(f.get("category") || "Altro") };
+        if (["goal", "advance", "recovery"].includes(kind)) p.endMonth = String(f.get("endMonth"));
+        if (kind === "advance") p.beneficiaryMonth = String(f.get("beneficiaryMonth"));
+        if (kind === "fixed") p.intervalMonths = Number(f.get("intervalMonths"));
+        if (kind === "recovery") {
+          p.paymentDate = String(f.get("date"));
+          if (f.get("movementId")) p.movementId = Number(f.get("movementId"));
+        }
+        newPlan(p, today(), "preview");
+        return p;
+      });
+      const update = () => {
+        const kind = form.elements.kind.value, start = kind === "advance" ? next(current()) : current();
+        const labels = { goal: "Totale obiettivo \\u20AC", fund: "Quota mensile \\u20AC", fixed: "Importo per scadenza \\u20AC", estimated: "Stima mensile \\u20AC", advance: "Budget da anticipare \\u20AC", recovery: "Spesa da recuperare \\u20AC" };
+        form.querySelector("[data-plan-fields]").innerHTML = \`<div class="form-grid">\${kind !== "advance" ? \`<label>Categoria della spesa<select name="category">\${lifeOSContract.expenseCategories.map((c) => \`<option \${c === "Altro" ? "selected" : ""}>\${safe(c)}</option>\`).join("")}</select></label>\` : ""}\${amount(labels[kind])}\${monthField(kind === "advance" ? "Primo mese di recupero" : "Dal mese", "startMonth", start)}\${["goal", "advance", "recovery"].includes(kind) ? monthField("Ultimo mese", "endMonth", start) : '<p class="hint">Senza scadenza: continua finch\\xE9 non lo interrompi.</p>'}\${kind === "advance" ? monthField("Mese beneficiario", "beneficiaryMonth", current()) : ""}\${kind === "fixed" ? \`<label>Ogni quanti mesi<select name="intervalMonths">\${Array.from({ length: 12 }, (_, i) => \`<option value="\${i + 1}">Ogni \${i + 1} \${i === 0 ? "mese" : "mesi"}</option>\`).join("")}</select></label>\` : ""}\${kind === "recovery" ? \`\${field("Data della spesa", "date", "date", today(), 'required max="' + today() + '"')}<label class="full">Movimento<select name="movementId"><option value="">Registra una nuova spesa</option></select></label><p class="hint full">Collega una spesa gi\\xE0 registrata per recuperarla senza un secondo addebito.</p>\` : ""}<p class="hint full">\${kind === "advance" ? "Non sposta denaro tra conti: aumenta il budget del mese beneficiario e lo recupera nei mesi scelti." : kind === "recovery" ? "La spesa incide sul saldo una sola volta; le quote recuperano il budget nei mesi scelti." : "Creare il piano non registra un pagamento."}</p><section class="full" data-plan-preview aria-live="polite"></section></div>\`;
+        preview();
+        if (kind === "recovery") loadMovements(form);
+      };
+      function preview() {
+        const target = form.querySelector("[data-plan-preview]");
+        if (!target) return;
+        const save = form.querySelector("[type=submit]");
+        save.disabled = true;
+        try {
+          const f = new FormData(form), kind = String(f.get("kind"));
+          if (!f.get("amount")) {
+            target.textContent = "Inserisci importo e mesi per vedere l\\u2019anteprima budget.";
+            return;
+          }
+          const p = newPlan({ kind, name: f.get("name") || "Anteprima", category: f.get("category") || "Altro", amountCents: cents2(f), startMonth: f.get("startMonth"), endMonth: f.get("endMonth"), beneficiaryMonth: f.get("beneficiaryMonth"), intervalMonths: Number(f.get("intervalMonths") || 1), paymentDate: f.get("date") }, today(), "preview");
+          p.status = "active";
+          const range = p.endMonth ? months(p.startMonth, p.endMonth) : [0, 1, 2].map((i) => addMonth(p.startMonth, i));
+          if (kind === "advance") range.unshift(p.beneficiaryMonth);
+          save.disabled = state.data?.plansV2?.version !== 2;
+          if (save.disabled) form.querySelector("[role=alert]").textContent = lifeOSContract.plansUnavailable;
+          target.innerHTML = "<h3>Anteprima budget" + (p.endMonth ? "" : " \\xB7 primi tre mesi") + "</h3>" + range.map((m) => \`<div class="kv"><span>\${safe(shortMonth(m))}</span><strong>\${money(-contribution(p, m))}</strong></div>\`).join("");
+        } catch (error) {
+          target.textContent = error.message;
+        }
+      }
+      form.addEventListener("input", preview);
+      form.addEventListener("change", preview);
+      form.elements.kind.addEventListener("change", update);
+      update();
+    };
+    async function loadMovements(form) {
+      const select = form.elements.movementId;
+      if (!select) return;
+      const date = form.elements.date;
+      let revision = 0;
+      const refresh = async () => {
+        const token = ++revision;
+        select.disabled = true;
+        try {
+          const d = await workerRequest("getFinancePlanMovements", [date.value.slice(0, 7)]);
+          if (!form.isConnected || !select.isConnected || token !== revision) return;
+          select.innerHTML = '<option value="">Registra una nuova spesa</option>' + d.movements.map((m) => \`<option value="\${m.row}" data-cents="\${m.amountCents}" data-date="\${safe(m.date)}">\${safe(m.name)} \\xB7 \${money(m.amountCents)}</option>\`).join("");
+        } catch (err) {
+          if (token === revision && select.isConnected) form.querySelector("[role=alert]").textContent = "Movimenti non disponibili: " + err.message;
+        } finally {
+          if (token === revision && select.isConnected && !form.dataset.submitted) select.disabled = false;
+        }
+      };
+      select.addEventListener("change", () => {
+        const o = select.selectedOptions[0];
+        if (o?.dataset.cents) {
+          form.elements.amount.value = Number(o.dataset.cents) / 100;
+          date.value = o.dataset.date;
+        }
+        form.elements.amount.readOnly = !!o?.dataset.cents;
+        date.readOnly = !!o?.dataset.cents;
+        form.dispatchEvent(new Event("input"));
+      });
+      date.addEventListener("change", refresh);
+      await refresh();
+    }
+    function pay(id) {
+      const p = plan(id);
+      if (!p) return;
+      const m = view().month <= current() ? view().month : current();
+      const form = modal("Paga o collega \\xB7 " + p.name, \`\${amount("Importo effettivo \\u20AC", (p.kind === "goal" ? p.outstandingCents : ["fixed", "fund", "estimated"].includes(p.kind) ? (p.rateChanges || []).filter((r) => r.fromMonth <= current()).sort((a, b) => a.fromMonth.localeCompare(b.fromMonth)).at(-1)?.amountCents ?? p.amountCents : Math.max(p.contributionCents, 1)) / 100)}\${field("Data pagamento", "date", "date", today(), 'required max="' + today() + '"')}\${["fixed", "estimated"].includes(p.kind) ? monthField("Scadenza pagata", "cycleMonth", m) : ""}\${p.kind === "estimated" ? field("Mesi coperti dalla bolletta", "competenceMonths", "number", 1, 'required min="1" max="12"') : ""}<label class="full">Movimento<select name="movementId"><option value="">Registra un nuovo pagamento</option></select></label><p class="hint full">Collegare un movimento esistente non genera un nuovo addebito.\${p.kind === "goal" ? " Il pagamento chiude l\\u2019obiettivo e libera le quote future." : ""}</p>\${p.kind === "goal" ? \`<section class="full hidden" data-overage><label class="full">Eccedenza<select name="recoverDifference"><option value="">Usa i risparmi</option><option value="yes">Recupera solo l\\u2019eccedenza nei mesi successivi</option></select></label><div class="full hidden" data-excess-recovery>\${monthField("Primo mese", "recoveryStartMonth", next(current()))}\${monthField("Ultimo mese", "recoveryEndMonth", next(current()))}</div></section>\` : ""}\`, "recordFinancePlanPayment", (f) => {
+        const out = { planId: id, amountCents: cents2(f), date: String(f.get("date")), cycleMonth: String(f.get("cycleMonth") || current()), competenceMonths: Number(f.get("competenceMonths") || 1) };
+        if (f.get("movementId")) out.movementId = Number(f.get("movementId"));
+        if (f.get("recoverDifference") === "yes") Object.assign(out, { recoverDifference: true, recoveryStartMonth: String(f.get("recoveryStartMonth")), recoveryEndMonth: String(f.get("recoveryEndMonth")) });
+        return out;
+      });
+      if (form.elements.cycleMonth) form.elements.cycleMonth.min = "2024-01";
+      if (form.elements.recoverDifference) {
+        const update = () => {
+          const extra = Number(form.elements.amount.value) * 100 > (p.outstandingCents ?? p.amountCents);
+          form.querySelector("[data-overage]").classList.toggle("hidden", !extra);
+          if (!extra) form.elements.recoverDifference.value = "";
+        };
+        form.addEventListener("input", update);
+        update();
+      }
+      form.elements.recoverDifference?.addEventListener("change", () => form.querySelector("[data-excess-recovery]").classList.toggle("hidden", form.elements.recoverDifference.value !== "yes"));
+      loadMovements(form);
+    }
+    function edit(id) {
+      const p = plan(id);
+      if (!p) return;
+      modal("Modifica quote future \\xB7 " + p.name, \`\${amount(p.kind === "goal" ? "Nuovo totale obiettivo \\u20AC" : "Nuova quota / scadenza \\u20AC", (p.kind === "goal" ? p.amountCents : (p.rateChanges || []).filter((r) => r.fromMonth <= next(current())).sort((a, b) => a.fromMonth.localeCompare(b.fromMonth)).at(-1)?.amountCents ?? p.amountCents) / 100)}\${monthField("Decorrenza", "fromMonth", next(current()))}\${p.kind === "goal" ? monthField("Nuova scadenza", "endMonth", p.endMonth < next(current()) ? next(current()) : p.endMonth) : ""}<p class="hint full">Il mese corrente e le quote precedenti restano invariati.</p>\`, "editFinancePlan", (f) => ({ planId: id, amountCents: cents2(f), fromMonth: String(f.get("fromMonth")), ...p.kind === "goal" ? { endMonth: String(f.get("endMonth")) } : {} }));
+    }
+    function showInfo() {
+      const host = document.getElementById("dialog");
+      const sections = [["La regola di base", ["Il budget indica quanto puoi destinare ai mesi. Il saldo \\xE8 il denaro reale sul conto. Accantonare modifica il budget, pagare registra una sola uscita reale."]], ["+ \\xB7 Scegli cosa vuoi fare", ["Il + \\xE8 indipendente dal mese che stai consultando. Prima scegli l\\u2019intento, poi nome, importo e mesi. Il giorno serve soltanto per il pagamento."]], ["Anticipa budget", ["250 \\u20AC su ottobre, recuperati da novembre e dicembre: ottobre +250 \\u20AC, novembre \\u2212125 \\u20AC, dicembre \\u2212125 \\u20AC. Il saldo non cambia. Non puoi cancellare solo le quote future mantenendo l\\u2019anticipo di un mese chiuso."]], ["Obiettivo finito", ["Distribuisci il totale sui mesi scelti. Quando paghi, confermi l\\u2019importo effettivo e chiudi le quote future. Le quote maturate restano nello storico.", "Previsti 600 \\u20AC, pagati 500 \\u20AC: il residuo rimane nei risparmi. Pagati 700 \\u20AC: puoi recuperare i soli 100 \\u20AC in pi\\xF9 nei budget futuri; altrimenti restano a carico dei risparmi."]], ["Fondo senza scadenza \\xB7 manutenzione auto", ["Scegli una quota mensile. Il fondo accumula nel tempo. Un pagamento riduce il fondo e il saldo una sola volta; il piano continua. Interrompi ferma le quote future senza generare una spesa e libera l\\u2019eventuale residuo nei risparmi generali."]], ["Affitto e utenze", ["Affitto: importo e periodicit\\xE0 fissi. Il pagamento chiude una scadenza, non il piano. Utenze: quota stimata dai pagamenti e dai mesi coperti. Una bolletta di 160 \\u20AC per due mesi vale 80 \\u20AC/mese. La media aggiorna soltanto le quote dal prossimo mese."]], ["Rateizza una spesa", ["Il pagamento \\xE8 una sola uscita dai risparmi. Nei mesi scelti riduci il budget per ricostituirli. Questo piano non ha un secondo pulsante Paga. Se la registrazione \\xE8 rimasta in sospeso, usa Completa questa registrazione, senza creare un altro pagamento."]], ["Piani precedenti e modifiche", ["Affitto, utenze e accantonamenti esistenti vengono adottati una sola volta, senza creare movimenti bancari n\\xE9 riscrivere i mesi chiusi. Il pagamento pu\\xF2 essere nuovo oppure collegato a una spesa gi\\xE0 registrata. Le modifiche alle quote decorrono da un mese futuro."]], ["Spesa rapida", ["Automatico applica le regole ordinarie. Da risparmi evita un nuovo addebito al budget. I piani, i recuperi e i pagamenti pianificati si gestiscono qui."]], ["Prima di confermare", ["Controlla l\\u2019anteprima mese per mese. Le quote sono esatte al centesimo. Un anticipo non \\xE8 un\\u2019entrata bancaria. Un piano interrotto non cancella pagamenti gi\\xE0 effettuati. L\\u2019adozione conserva le identit\\xE0 delle voci esistenti e sostituisce le loro quote dal mese corrente, senza duplicarle. Gli anticipi storici restano consultabili."]]];
+      host.innerHTML = \`<div class="modal" role="dialog" aria-modal="true" aria-label="Come funzionano i piani"><div class="modal-top"><h2>Come funzionano i piani</h2><button data-plans-close aria-label="Chiudi">\\xD7</button></div>\${sections.map(([title, texts]) => \`<section class="os-task-section"><h3>\${safe(title)}</h3>\${texts.map((t) => \`<p>\${safe(t)}</p>\`).join("")}</section>\`).join("")}<button data-plans-close>Fine</button></div>\`;
+      host.classList.remove("hidden");
+      host.querySelector("button").focus();
+    }
+    document.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-new-extra],[data-plans-pay],[data-plans-edit],[data-plans-stop],[data-plans-close],[data-plans-refresh],[data-plans-resume],[data-plans-info],[data-plans-detail],[data-plans-back],[data-plans-legacy]");
+      if (!b) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      if (b.hasAttribute("data-plans-detail")) {
+        activePlan = b.dataset.plansDetail;
+        render();
+      }
+      if (b.hasAttribute("data-plans-back")) {
+        activePlan = null;
+        render();
+      }
+      if (b.hasAttribute("data-plans-legacy")) openExtraEdit(Number(b.dataset.plansLegacy));
+      if (b.hasAttribute("data-plans-info")) showInfo();
+      if (b.hasAttribute("data-new-extra")) {
+        activePlan = null;
+        openExtra();
+      }
+      if (b.hasAttribute("data-plans-close")) document.getElementById("dialog").classList.add("hidden");
+      if (b.hasAttribute("data-plans-pay")) pay(b.dataset.plansPay);
+      if (b.hasAttribute("data-plans-edit")) edit(b.dataset.plansEdit);
+      if (b.hasAttribute("data-plans-stop")) {
+        const id = b.dataset.plansStop, p = plan(id);
+        modal("Interrompi \\xB7 " + p.name, '<p class="full">Conserva i pagamenti e lo storico. Le quote successive al mese corrente si interrompono. Gli anticipi di mesi chiusi non possono essere annullati.</p>', "stopFinancePlan", () => ({ planId: id }));
+      }
+      if (b.hasAttribute("data-plans-resume")) modal("Riprendi pagamento", '<p class="full">Completa la conferma del movimento gi\\xE0 avviato, senza creare un secondo addebito.</p>', "resumeFinancePlanPayment", () => ({ paymentId: b.dataset.plansResume }));
+      if (b.hasAttribute("data-plans-refresh")) load();
+    }, true);
+  })();
+})();
+<\/script><script>/* Shared controls retain browser/OS storage on their respective devices. */
+(() => {
+  const control=document.querySelector('.theme-toggle');
+  function theme(value){
+    try{if(value==='system')localStorage.removeItem('life-theme');else localStorage.setItem('life-theme',value);}catch{}
+    document.documentElement.dataset.theme=value==='system'?(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'):value;
+    document.querySelector('meta[name="theme-color"]').content=document.documentElement.dataset.theme==='light'?'#f3f3f5':'#0c0c0e';
+  }
+  const draw=()=>{control.textContent='\u2699\uFE0E';control.setAttribute('aria-label','Impostazioni');control.title='Impostazioni';};
+  matchMedia('(prefers-color-scheme: light)').addEventListener('change',draw);draw();
+  control.onclick=()=>{
+    let selected='system';try{selected=localStorage.getItem('life-theme')||'system';}catch{}
+    const host=document.getElementById('dialog');
+    host.innerHTML=\`<div class="modal" role="dialog" aria-modal="true" aria-label="Impostazioni"><div class="modal-top"><h2>Impostazioni</h2><button data-close aria-label="Chiudi">\xD7</button></div><section class="os-task-section"><h3>Aspetto</h3><label>Tema<select data-settings-theme>\${[['system','Automatico'],['light','Chiaro'],['dark','Scuro']].map(([key,label])=>\`<option value="\${key}" \${key===selected?'selected':''}>\${label}</option>\`).join('')}</select></label></section><section class="os-task-section"><h3>Connessione Life OS</h3><p>\${escapeHtml(location.host)}</p><button data-settings-sync>Sincronizza</button><p role="status" aria-live="polite" data-settings-status></p></section><section class="os-task-section"><h3>Importazione e backup</h3><button data-settings-export>Esporta backup completo</button><p class="hint">Il backup contiene i dati gi\xE0 caricati su questo dispositivo. Le modifiche restano sullo stesso database usato dall\u2019app.</p></section><button data-close>Fine</button></div>\`;
+    host.classList.remove('hidden');
+    host.querySelector('[data-settings-theme]').onchange=e=>{theme(e.target.value);draw();};
+    host.querySelector('[data-settings-sync]').onclick=async e=>{
+      const button=e.currentTarget,status=host.querySelector('[data-settings-status]');button.disabled=true;status.textContent='Aggiornamento\u2026';
+      try{
+        const d=await workerRequest('getFinanceOverview',[state.year,state.month],{fresh:true});
+        const current=await workerRequest('getLifeData',[life.month],{fresh:true});
+        state.data=d;state.loadedDetail=false;life.data=current;renderLifeOS();if(['overview','extras'].includes(state.view))render();else if(['budget','analysis','movements'].includes(state.view))load();
+        const pending=globalThis.lifeOSDeviceBackup?.().pending.length||0;
+        status.textContent=pending?\`\${pending} movimenti ancora in attesa di sincronizzazione.\`:'Aggiornamento completato.';
+      }catch(error){status.textContent=error.message;}
+      finally{button.disabled=false;}
+    };
+    host.querySelector('[data-settings-export]').onclick=()=>{
+      const pending=(globalThis.lifeOSDeviceBackup?.().pending||[]).map(w=>({id:w.id,method:'saveTransaction',payload:w.payload}));
+      const current={life:life.data||{},finance:state.data||{},plan:state.data?.extraPlan||{},pending,demo:false,imported:false,financeMonth:\`\${state.year}-\${String(state.month).padStart(2,'0')}\`,calendarMonth:life.month,routineDay:life.data?.today||''};
+      const blob=new Blob([JSON.stringify({format:'LifeOS-native-backup-v2',current},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');
+      link.href=url;link.download='LifeOS-backup-'+todayIso()+'.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    };
+  };
+})();
+<\/script><script>/* Same quick-movement contract as NativeStore: durable payload first, then sync. */
+(() => {
+  const transport=workerRequest,key='lifeos-web-device-v2';
+  let device={pending:[],cache:{}},draining=null,offline=false,corrupt=false,lastFailure='';
+  try{const saved=JSON.parse(localStorage.getItem(key)||'null');if(saved){if(!Array.isArray(saved.pending)||!saved.pending.every(w=>w&&typeof w.id==='string'&&w.payload&&w.payload.requestId===w.id)||!saved.cache||Array.isArray(saved.cache))throw Error('Archivio non valido.');device=saved;}}catch{corrupt=true;}
+  const status=document.createElement('div');status.id='platform-sync-status';status.className='hint';status.setAttribute('role','status');document.getElementById('error').before(status);
+  function persist(){
+    if(corrupt)throw Error('Archivio locale non leggibile. I dati originali sono conservati.');
+    // Remote read caches are replaceable; pending financial writes never are.
+    while(true){
+      try{localStorage.setItem(key,JSON.stringify(device));return;}
+      catch(error){const oldest=Object.keys(device.cache)[0];if(error.name!=='QuotaExceededError'||!oldest)throw error;delete device.cache[oldest];}
+    }
+  }
+  function draw(){status.textContent=corrupt?'Archivio locale non leggibile. I dati originali sono conservati.':device.pending.length?\`\${device.pending.length} movimenti salvati sul dispositivo. In attesa di sincronizzazione. Il saldo mostra l\u2019ultimo dato del server. \${lastFailure}\`:offline?'Dati locali \xB7 connessione non disponibile. Sincronizza per aggiornare.':'';}
+  const cacheKey=(method,args)=>\`\${method}:\${JSON.stringify(args)}\`;
+  async function drain(){
+    if(draining)return draining;
+    draining=(async()=>{
+      for(const write of [...device.pending]){
+        try{
+          const result=await transport('saveTransaction',[write.payload]);if(result!==true)throw Error('Movimento non confermato.');lastFailure='';
+          const previous=device.pending;device.pending=device.pending.filter(p=>p.id!==write.id);
+          try{persist();}catch(error){device.pending=previous;throw error;}
+        }catch(error){lastFailure=String(error.message||error).slice(0,200);break;}
+      }
+      draw();
+    })();
+    try{await draining;}finally{draining=null;}
+  }
+  workerRequest=async function(method,args,{fresh=false}={}){
+    if(method==='saveTransaction'){
+      if(corrupt)throw Error('Archivio locale non leggibile. I dati originali sono conservati.');
+      const payload=structuredClone(args[0]),id=payload.requestId||crypto.randomUUID();payload.requestId=id;
+      const previous=device.pending.find(w=>w.id===id);
+      if(previous&&JSON.stringify(previous.payload)!==JSON.stringify(payload))throw Error('Operazione gi\xE0 salvata con dati diversi. Sincronizza prima di riprovare.');
+      if(!previous){device.pending.push({id,payload});try{persist();}catch(error){device.pending=device.pending.filter(w=>w.id!==id);throw Error('Impossibile conservare il movimento sul dispositivo. Nessuna richiesta inviata.');}}
+      draw();await drain();return true;
+    }
+    const cached=['getFinanceOverview','getFinanceData','getLifeData'].includes(method),slot=cacheKey(method,args);
+    if(cached&&device.pending.length)await drain();
+    try{
+      const result=await transport(method,args);
+      if(cached){device.cache[slot]=result;try{persist();}catch{}offline=false;draw();}
+      return result;
+    }catch(error){
+      // Never substitute a different month's data or an expired authorization.
+      if(!fresh&&cached&&device.cache[slot]&&!/sessione|accedi/i.test(error.message)){
+        offline=true;draw();return structuredClone(device.cache[slot]);
+      }
+      throw error;
+    }
+  };
+  window.addEventListener('online',async()=>{await drain();if(state.data)load();});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')drain();});
+  globalThis.lifeOSDeviceBackup=()=>structuredClone(device);
+  const movementRender=renderMovements;
+  renderMovements=function(){
+    movementRender();
+    if(device.pending.length)document.getElementById('movements').insertAdjacentHTML('afterbegin',\`<section class="card pad"><h2>Salvati sul dispositivo</h2>\${device.pending.map(w=>\`<div class="kv"><span>\${escapeHtml(w.payload.name)}<small>In attesa di sincronizzazione</small></span><strong>\${state.assetsVisible?exactEuro(Number(w.payload.amount)):'\u2022\u2022\u2022\u2022'}</strong></div>\`).join('')}</section>\`);
+  };
+  draw();
 })();
 <\/script></body>
 </html>
@@ -5144,7 +5837,7 @@ async function ensureTrStatement(env) {
     throw error;
   }
 }
-var FINANCE_MANUAL_CATEGORIES = ["Alimentari", "Ristorazione", "Casa", "Affitto", "Condominio", "Arredamento e casa", "Utenze", "Elettricit\xE0", "Gas", "Acqua", "Abbonamenti", "Auto", "Assicurazione", "Bollo", "Manutenzione auto", "Benzina", "Shopping", "Salute", "Palestra", "Dentista", "Farmaci e visite", "Svago", "Viaggi", "Altro", "Stipendio", "Interessi", "Rimborsi"];
+var FINANCE_MANUAL_CATEGORIES = [.../* @__PURE__ */ new Set([...platformContract.expenseCategories, ...platformContract.incomeCategories])];
 var FINANCE_CATEGORY_SEED = {
   categories: [
     {
@@ -7898,7 +8591,7 @@ var protectedCash = /* @__PURE__ */ new Set(["editMovement", "deleteMovement"]);
 var quickWrites = /* @__PURE__ */ new Set(["saveTransaction", "saveRecurringPayment", "saveEstimate"]);
 var legacyWrites = /* @__PURE__ */ new Set(["recordExtraPayment", "markExtraPaid", "cancelExtraCycle", "deleteExtraPlan", "updateExtraPlan", "setExtraStatus", "linkExtraMovement", "unlinkExtraMovement"]);
 function json(value, status = 200, extra = {}) {
-  return new Response(JSON.stringify(value), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store", ...extra } });
+  return new Response(JSON.stringify(value), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store", "X-LifeOS-Plans-Version": "2", ...extra } });
 }
 async function existingMovement(db, p, current) {
   const row = await db.prepare("SELECT m.*,p.treatment FROM movements m LEFT JOIN movement_budget_policies p ON p.movement_source_row=m.source_row WHERE m.source_row=?").bind(p.existingMovementId).first();

@@ -4,6 +4,7 @@ import {createServer} from 'node:http';
 import {readFile,mkdir} from 'node:fs/promises';
 import {pathToFileURL} from 'node:url';
 import worker from '../../worker.js';
+import {platformContract} from './platform-contract.mjs';
 const {chromium}=await import(pathToFileURL(process.env.LIFEOS_PLAYWRIGHT_MODULE));
 const password='synthetic-browser-fixture-password';
 const response=await worker.fetch(new Request('https://fixture.test/',{headers:{Authorization:'Basic '+btoa('nas:'+password)}}),{APP_PASSWORD:password,DB:{}},{});
@@ -43,12 +44,23 @@ try{
   await page.locator('#plans-web-form [name=kind]').selectOption(kind);
   await page.locator('#plans-web-form [name=name]').fill('Piano '+kind);
   await page.locator('#plans-web-form [name=amount]').fill('250');
+  if(kind!=='advance'){
+    assert.deepEqual(await page.locator('#plans-web-form [name=category] option').allTextContents(),platformContract.expenseCategories);
+    await page.locator('#plans-web-form [name=category]').selectOption('Casa');
+  }
+  if(kind==='fixed'){
+    assert.equal(await page.locator('[name=intervalMonths] option').count(),12);
+    await page.locator('[name=intervalMonths]').selectOption('5');
+  }
+  await page.locator('[data-plan-preview] .kv').first().waitFor();
   if(kind==='recovery')await page.locator('#plans-web-form [name=movementId] option[value="9"]').waitFor({state:'attached'});
   if(kind==='advance'&&shot)await page.screenshot({path:shot+'/new-advance-desktop.png'});
   await page.locator('#plans-web-form [type=submit]').click();
   await page.waitForFunction(()=>document.getElementById('dialog').classList.contains('hidden'));
   const call=calls.filter(x=>x.method==='saveFinancePlan').at(-1);
   assert.equal(call.args[0].kind,kind);assert.equal(call.args[0].amountCents,25000);assert.equal(call.version,'2');
+  if(kind!=='advance')assert.equal(call.args[0].category,'Casa');
+  if(kind==='fixed')assert.equal(call.args[0].intervalMonths,5);
   await page.locator('#extras [data-new-extra]').waitFor();
  }
  // Retry after an ambiguous response keeps both operation ID and exact payload.
@@ -60,6 +72,7 @@ try{
  await page.waitForFunction(()=>document.getElementById('dialog').classList.contains('hidden'));
  const retries=calls.filter(c=>c.method==='saveFinancePlan').slice(-2);assert.deepEqual(retries[0].args,retries[1].args);
  // Linking an existing movement uses the v2 payment endpoint, never saveTransaction.
+ await page.locator('[data-plans-detail="synthetic-goal"]').click();
  await page.locator('[data-plans-pay]').click();
  await page.locator('#plans-web-form [name=movementId] option[value="9"]').waitFor({state:'attached'});
  await page.locator('#plans-web-form [name=movementId]').selectOption('9');
@@ -74,13 +87,16 @@ try{
  assert.ok(calls.some(c=>c.method==='stopFinancePlan'));
  finance.plansV2.plans.push({...plan,id:'synthetic-fund',kind:'fund',name:'Fondo sintetico',endMonth:null});
  finance.plansV2.payments.push({id:'fund-paid',planId:'synthetic-fund',status:'posted',cycleMonth:month,settlementKey:'fund-paid'});
- await page.evaluate(()=>load());await page.locator('[data-plans-pay="synthetic-fund"]').waitFor();
+ await page.locator('[data-plans-back]').click();
+ await page.evaluate(()=>load());await page.locator('[data-plans-detail="synthetic-fund"]').click();await page.locator('[data-plans-pay="synthetic-fund"]').waitFor();
  finance.plansV2.payments.push({id:'payment-pending',planId:plan.id,status:'pending',cycleMonth:month});
- await page.evaluate(()=>load());await page.locator('[data-plans-resume]').click();
+ await page.locator('[data-plans-back]').click();
+ await page.evaluate(()=>load());await page.locator('[data-plans-detail="synthetic-goal"]').click();await page.locator('[data-plans-resume]').click();
  await page.locator('#plans-web-form [type=submit]').click();
  await page.waitForFunction(()=>document.getElementById('dialog').classList.contains('hidden'));
  assert.ok(calls.some(c=>c.method==='resumeFinancePlanPayment'&&c.args[0].paymentId==='payment-pending'));
  await page.setViewportSize({width:390,height:844});
+ await page.locator('[data-plans-back]').click();
  await page.locator('#extras [data-new-extra]').click();
  assert.equal(await page.getByRole('heading',{name:'Nuova straordinaria'}).count(),0);
  assert.equal(await page.locator('#plans-web-form [name=kind] option').count(),6);
