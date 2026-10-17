@@ -4,7 +4,9 @@ Provenienza: Worker LifeOS 11.63 incollato e poi fornito come allegato `Testo in
 
 Il sorgente integrale è conservato nel repository Git privato **locale** `/workspace/LifeOS-worker-private`, file `worker.mjs`; il commit iniziale conserva i byte originali, con hash e provenienza in `provenance.json`. SHA-256 originale: `f40e23d3a0e8131c68db8a4962d33002c6d5fce17214e5d3d87019beb10232ce`. Archivio locale comprensivo di Git bundle: `/workspace/work/worker-archive-check/LifeOS-Worker-privato.zip`.
 
-La copia remota privata non è ancora disponibile: GitHub non consente alla connessione attuale di creare repository; il controllo automatico ha respinto l’upload a Google Drive senza autorizzazione specifica alla destinazione per questo contenuto bancario/personale. Non affermare che il backup remoto sia stato completato. Dopo un upload autorizzato e verificato, annotare qui il file ID per le sessioni future.
+Backup remoto completo autorizzato dall’utente e verificato su Google Drive: [LifeOS-Worker-privato.zip](https://drive.google.com/file/d/1-P5BQ7XNiSizY_NF368BG61fyiZa4T7q/view). File ID: `1-P5BQ7XNiSizY_NF368BG61fyiZa4T7q`; dimensione dopo l’aggiornamento delle istruzioni: 241784 byte. La verifica dei metadati conferma `shared=false` e il solo permesso owner. L’archivio contiene sorgente integrale, provenienza, istruzioni e bundle Git; il commit iniziale conserva i byte originali.
+
+Nelle prossime sessioni recuperare lo ZIP tramite Drive. Per modifiche future: aggiornare il sorgente nel Git privato, creare un nuovo bundle e ZIP e sostituire i byte dello stesso file Drive, mantenendo privati i permessi. Non richiedere all’utente di incollare di nuovo il codice. La creazione di un nuovo repository privato GitHub resta non disponibile con i permessi attuali; questo non impedisce di usare la cronologia Git contenuta nell’archivio.
 
 Questo repository pubblico conserva soltanto il contratto e gli estratti privi di movimenti personali. Il Worker completo non va aggiunto al repository pubblico. Non richiedere nuovamente all’utente lo stesso codice se è ancora accessibile nel repository locale o nel futuro archivio remoto autorizzato.
 
