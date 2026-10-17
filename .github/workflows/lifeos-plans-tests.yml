@@ -5,7 +5,7 @@ on:
       focus:
         description: Ripeti tutti i controlli o il solo flusso fondo
         type: choice
-        options: [all, fund, regressions]
+        options: [all, fund, regressions, visual]
         default: all
   push:
     branches: ['feature/plans-v2']
@@ -13,11 +13,11 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: plans-tests-${{ github.ref }}
+  group: plans-tests-${{ github.ref }}-${{ inputs.focus }}
   cancel-in-progress: false
 jobs:
   server:
-    if: inputs.focus != 'fund'
+    if: inputs.focus != 'fund' && inputs.focus != 'visual'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -49,6 +49,7 @@ jobs:
             assert all(not pathlib.PurePosixPath(n).is_absolute() and '..' not in pathlib.PurePosixPath(n).parts for n in z.namelist())
             z.extractall('app')
           PY
+          cp verification/HealthChartVisualTests.swift app/UITests/
           python3 app/scripts/check-design-system.py
           brew install xcodegen
           cd app
@@ -78,7 +79,7 @@ jobs:
           set -euo pipefail
           xcodebuild build-for-testing -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$PLAN_SIMULATOR" -derivedDataPath build/Derived CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compile.log
       - name: Unit tests
-        if: inputs.focus != 'fund'
+        if: inputs.focus != 'fund' && inputs.focus != 'visual'
         timeout-minutes: 10
         working-directory: app
         run: |
@@ -91,6 +92,8 @@ jobs:
           set -euo pipefail
           if [ "${{ inputs.focus }}" = fund ]; then
             FILTERS="-only-testing:LifeOSProbeUITests/NativeInterfaceTests/testPlansFundCanEditFutureQuotaAndLinkAnExistingMovement"
+          elif [ "${{ inputs.focus }}" = visual ]; then
+            FILTERS="-only-testing:LifeOSProbeUITests/HealthChartVisualTests/testEntireHomeHealthChartIsVisible"
           elif [ "${{ inputs.focus }}" = regressions ]; then
             FILTERS="-only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHealthChartTransitionAndFinanceMonthRoundTrip -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testAnalysisShowsFourChartsAndCategoryPeriods"
           else
