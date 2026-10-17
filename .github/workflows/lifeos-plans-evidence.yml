@@ -5,10 +5,6 @@ on:
       run_id:
         description: Esecuzione da cui recuperare le schermate
         required: true
-        default: '39034285367'
-  push:
-    branches: ['feature/plans-v2']
-    paths: ['.github/workflows/lifeos-plans-evidence.yml']
 permissions:
   contents: read
   actions: read
@@ -19,7 +15,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: Plans-test-results-no-IPA
-          run-id: ${{ inputs.run_id || '39034285367' }}
+          run-id: ${{ inputs.run_id }}
           github-token: ${{ github.token }}
           path: evidence
       - name: Select PNG attachments

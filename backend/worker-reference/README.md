@@ -51,6 +51,6 @@ Preservare Cloudflare Access (ACCESS_EMAIL e ctx.access) oppure APP_PASSWORD, co
 
 Le scritture dirette si chiamano editMovement e deleteMovement. I pagamenti Piani v2 collegati sono protetti dall’adapter. I pagamenti legacy restano gestiti dalle tabelle extraordinary_movement_links e extraordinary_settlements.
 
-Il codice ricevuto non è stato distribuito e il database reale non è stato modificato. Per distribuire serve il packaging del Worker completo privato con l’entrypoint withFinancePlans, oltre al completamento dell’adozione legacy.
+Il codice ricevuto non è stato distribuito e il database reale non è stato modificato. Il packaging del Worker completo privato con l’entrypoint withFinancePlans e l’adozione legacy sono pronti; la distribuzione resta a carico dell’utente, come concordato.
 
 Il pacchetto privato aggiornato contiene `worker-plans.mjs` (modulo completo), `worker.mjs` (baseline originale), entrypoint/moduli sorgente, Git bundle, test sintetico e `lifeos-native-source.zip`. L’utente ha scelto il caricamento manuale sul Worker Cloudflare esistente: non richiedere ulteriormente credenziali o autorizzazione alla stessa distribuzione. Lo stato effettivo va confermato dal caricamento dell’utente o da una verifica autorizzata del servizio; non dichiararlo già distribuito.

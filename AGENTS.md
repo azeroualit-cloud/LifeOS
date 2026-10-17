@@ -12,3 +12,5 @@ L’utente chiede di conservare sorgenti e modifiche nel progetto e di non richi
 - L’adozione legacy è implementata in backend/plans/legacy.mjs e viene attivata dal client Piani v2. Sostituisce le quote dalla decorrenza senza modificare le tabelle originali; non duplicare affitto, utenze o accantonamenti. Il Worker completo impacchettato va conservato solo nel repository/archivio privato. Il deployment richiede accesso Cloudflare effettivamente configurato: non considerare i test locali un’attivazione del server reale.
 
 - L’utente ha scelto di caricare manualmente `worker-plans.mjs` su Cloudflare. Il file completo si trova nell’archivio Drive privato già indicato. Non richiedere ancora l’accesso Cloudflare per questo passaggio; non dichiarare eseguito il deploy prima di conferma/verifica.
+
+- Risultati e limiti della verifica Piani del 2026-10-17: `backend/plans/VERIFICATION.md`. Le prove server usano il Worker completo con dati sintetici; i sette flussi UI sono documentati con le rispettive esecuzioni. La distribuzione manuale resta distinta dalla verifica del codice.
