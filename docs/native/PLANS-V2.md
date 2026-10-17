@@ -22,3 +22,11 @@ L'estensione server è separata dal Worker legacy: autenticazione delegata al Wo
 2. Persistenza/idempotenza/autorizzazione con adapter al Worker e test SQLite in memoria.
 3. Form e lista nativi, anteprime, pagamenti, info e riduzione trattamenti spesa rapida.
 4. Test dei calcoli Swift e del motore server, regressioni esistenti, controlli sintattici/design e integrità ZIP. CI iOS e integrazione sul Worker reale distinte dai controlli locali. Nessuna IPA richiesta.
+
+## Stato della verifica
+
+I test locali del motore passano su SQLite in memoria e adapter HTTP: anticipi +250/-250, quote -125/-125, centesimi residui, chiusura obiettivo, differenza 100 €, fondo continuativo, affitto, media per competenza utenze, errore dopo scrittura, richieste concorrenti, idempotenza, persistenza, autenticazione, protezione movimenti collegati e nomi legacy duplicati. Il percorso di errore in cui il Worker conferma solo true senza movementId è testato e resta bloccante per l'integrazione reale, non viene dichiarato un pagamento riuscito.
+
+Suite Foundation locale: 90 test passati. Motore server: 22 test passati. Parsing di tutti i sorgenti/test e controllo design passati. Verifica Apple senza archive/IPA nel workflow `lifeos-plans-tests.yml`: esito da registrare dopo il completamento. Nessuna scrittura sul database reale o distribuzione del Worker.
+
+Il ramo feature/plans-v2 esclude intenzionalmente il workflow di creazione IPA e usa solo il workflow di test. Il sorgente reale del Worker e l'adozione degli accantonamenti legacy rimangono da collegare/verificare; i relativi record non vengono cancellati o convertiti automaticamente. La UI reale mostra la necessità dell'aggiornamento server e disabilita il salvataggio v2 finché non riceve un contratto versione 2 valido.

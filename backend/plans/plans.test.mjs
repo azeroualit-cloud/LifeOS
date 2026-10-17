@@ -146,3 +146,38 @@ test('wrapper preserva autenticazione e route esistenti, aggiorna overview e ris
   assert.equal(await (await wrapper.fetch(request('unrelated',[]),{},{})).text(),'legacy-route');
   assert.equal(romeToday(new Date('2026-10-17T22:30:00Z')),'2026-10-18');
 });
+test('un nome legacy non viene ricreato e addebitato due volte',async()=>{
+  const {repo,cash}=await setup();
+  const base={async fetch(){return new Response(JSON.stringify({summary:{budget:1000},transactions:[],extraPlan:{allocations:[{name:'Manutenzione auto',status:'Programmato'}]}}),{headers:{'Content-Type':'application/json'}});}};
+  const wrapper=withFinancePlans(base,{repositoryFactory:()=>repo,cashFactory:()=>cash,clock:()=>today});
+  const response=await wrapper.fetch(new Request('https://lifeos.invalid/api/saveFinancePlan',{method:'POST',headers:{Origin:'https://lifeos.invalid'},body:JSON.stringify([input('duplicate-001','fund',{name:'Manutenzione auto'})])}),{},{});
+  assert.equal(response.status,422);assert.equal(Object.keys((await repo.read()).state.plans).length,0);assert.equal(cash.calls,0);
+});
+test('un pagamento collegato non può essere modificato o cancellato dalla spesa rapida',async()=>{
+  const {repo,cash,service}=await setup();await service.execute('create',input('linked-goal1'));
+  await service.execute('pay',{requestId:'linked-pay01',planId:'linked-goal1',amountCents:60000,date:today});
+  let edits=0;const base={async fetch(request){if(new URL(request.url).pathname==='/api/editMovement')edits++;
+    return new Response(JSON.stringify({summary:{budget:1000},transactions:[]}),{headers:{'Content-Type':'application/json'}});}};
+  const wrapper=withFinancePlans(base,{repositoryFactory:()=>repo,cashFactory:()=>cash,clock:()=>today});
+  const response=await wrapper.fetch(new Request('https://lifeos.invalid/api/editMovement',{method:'POST',headers:{Origin:'https://lifeos.invalid'},body:JSON.stringify([{row:1,amount:1}])}),{},{});
+  assert.equal(response.status,409);assert.equal(edits,0);
+});
+test('risposta legacy true senza identità non viene spacciata per pagamento confermato',async()=>{
+  const {repo}=await setup();const rows=new Map();
+  const base={async fetch(request){const method=new URL(request.url).pathname;
+    if(method==='/api/saveTransaction') {const [p]=await request.json();rows.set(p.requestId,p);return new Response('true',{headers:{'Content-Type':'application/json'}});}
+    return new Response(JSON.stringify({summary:{budget:1000},transactions:[]}),{headers:{'Content-Type':'application/json'}});
+  }};
+  const wrapper=withFinancePlans(base,{repositoryFactory:()=>repo,clock:()=>today});
+  const operation=input('legacy-bool1','recovery',{paymentDate:today});
+  for(let i=0;i<2;i++) {
+    const response=await wrapper.fetch(new Request('https://lifeos.invalid/api/saveFinancePlan',{method:'POST',headers:{Origin:'https://lifeos.invalid'},body:JSON.stringify([operation])}),{},{});
+    assert.equal(response.status,502);
+  }
+  assert.equal(rows.size,1);assert.equal((await repo.read()).state.payments['legacy-bool1'].status,'pending');
+});
+test('due dispositivi non possono pagare lo stesso obiettivo con identificatori diversi',async()=>{
+  const {service,cash}=await setup();await service.execute('create',input('concurrent-goal'));
+  const results=await Promise.allSettled(['concurrent-pay1','concurrent-pay2'].map(requestId=>service.execute('pay',{requestId,planId:'concurrent-goal',amountCents:60000,date:today})));
+  assert.equal(results.filter(r=>r.status==='fulfilled').length,1);assert.equal(cash.rows.size,1);
+});

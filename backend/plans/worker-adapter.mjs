@@ -2,6 +2,7 @@ import {PlanError} from './engine.mjs';
 import {D1PlanRepository,PlanService} from './service.mjs';
 const METHODS={saveFinancePlan:'create',recordFinancePlanPayment:'pay',stopFinancePlan:'stop'};
 const readMethods=new Set(['getFinanceOverview','getFinanceData']);
+const protectedCash=new Set(['editMovement','deleteMovement']);
 function json(value,status=200,extra={}) {return new Response(JSON.stringify(value),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store',...extra}});}
 export function romeToday(now=new Date()) {
   const parts=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(now).map(p=>[p.type,p.value]));
@@ -24,11 +25,12 @@ export function augmentFinance(base,view,currentView) {
 export function withFinancePlans(base,{repositoryFactory=env=>new D1PlanRepository(env.DB),clock=romeToday,cashFactory}={}) {
   return {async fetch(request,env,ctx) {
     const url=new URL(request.url), method=url.pathname.startsWith('/api/')?url.pathname.slice(5):'';
-    if(!METHODS[method]&&method!=='getFinancePlans'&&method!=='resumeFinancePlanPayment'&&!readMethods.has(method))return base.fetch(request,env,ctx);
+    if(!METHODS[method]&&method!=='getFinancePlans'&&method!=='resumeFinancePlanPayment'&&!readMethods.has(method)&&!protectedCash.has(method))return base.fetch(request,env,ctx);
     if(request.method!=='POST')return json({error:'Metodo non consentito.'},405);
     if(request.headers.get('Origin')!==url.origin)return json({error:'Origine non consentita.'},403);
     try {
-      const args=await request.clone().json();if(!Array.isArray(args))throw new PlanError('Parametri non validi.');
+      const body=await request.clone().text();if(body.length>65536)throw new PlanError('Richiesta troppo grande.',413);
+      const args=JSON.parse(body);if(!Array.isArray(args))throw new PlanError('Parametri non validi.');
       const today=clock(), current=today.slice(0,7);
       const forward=async (name,values)=> {
         const headers=new Headers(request.headers);headers.delete('Content-Length');headers.set('Content-Type','application/json');
@@ -36,12 +38,12 @@ export function withFinancePlans(base,{repositoryFactory=env=>new D1PlanReposito
       };
       // Ask the existing protected read endpoint to authorize this exact cookie,
       // origin and user. Fail closed on redirects, HTML, errors and invalid JSON.
-      const auth=await forward('getFinanceOverview',[Number(current.slice(0,4)),Number(current.slice(-2))]);
+      const auth=readMethods.has(method)?await base.fetch(request,env,ctx):await forward('getFinanceOverview',[Number(current.slice(0,4)),Number(current.slice(-2))]);
       if(auth.status!==200||!(auth.headers.get('Content-Type')??'').includes('application/json'))return new Response(auth.body,{status:auth.status===200?401:auth.status,headers:auth.headers});
       const authorized=await auth.json();if(!authorized.summary||!Array.isArray(authorized.transactions))throw new PlanError('Sessione non confermata.',401);
       const repository=repositoryFactory(env);await repository.initialize();
       const cash=cashFactory?cashFactory({forward}):{async record(p) {
-        const response=await forward('saveTransaction',[{requestId:p.requestId,name:p.name,amount:p.amountCents/100,type:'Spesa',category:'Straordinarie',
+        const response=await forward('saveTransaction',[{requestId:p.requestId,name:p.name,amount:p.amountCents/100,type:'Spesa',category:p.category??'Altro',
           date:p.date,account:'Trade Republic',months:p.competenceMonths,budgetTreatment:'savings',note:'Piano '+p.planId}]);
         if(response.status!==200)throw new PlanError('Pagamento non confermato. Riprova dalla stessa operazione.',503);
         const result=await response.json();
@@ -52,13 +54,25 @@ export function withFinancePlans(base,{repositoryFactory=env=>new D1PlanReposito
         return id;
       }};
       const service=new PlanService(repository,cash,today);
+      if(protectedCash.has(method)) {
+        const movementId=Number(method==='deleteMovement'?args[0]:args[0]?.row), {state}=await repository.read();
+        if(Object.values(state.payments).some(p=>p.movementId===movementId))throw new PlanError('Questo movimento è collegato a un piano. Conserva il collegamento e gestisci il pagamento da Piani.',409);
+        return base.fetch(request,env,ctx);
+      }
+      if(method==='saveFinancePlan') {
+        const name=String(args[0]?.name??'').trim().toLocaleLowerCase('it');
+        const existing=[...(authorized.extraPlan?.allocations??[]),...(authorized.recurring??[])];
+        if(existing.some(p=>String(p.name??'').trim().toLocaleLowerCase('it')===name&&!['Pagato','Annullato'].includes(p.status)))
+          throw new PlanError('Esiste già un accantonamento precedente con questo nome. Gestiscilo da Piani precedenti: non verrà duplicato.');
+      }
       if(method==='resumeFinancePlanPayment') { await service.finish(args[0]?.paymentId);return json({ok:true}); }
       if(METHODS[method]) { await service.execute(METHODS[method],args[0]??{});return json({ok:true}); }
       if(method==='getFinancePlans')return json(await service.view(args[0]??current));
       const selected=`${args[0]??current.slice(0,4)}-${String(args[1]??current.slice(-2)).padStart(2,'0')}`;
-      const raw=selected===current&&method==='getFinanceOverview'?authorized:await (async()=>{const response=await base.fetch(request,env,ctx);if(response.status!==200)throw new PlanError('Analisi non disponibile.',response.status);return response.json();})();
+      const raw=authorized;
       const view=await service.view(selected), currentView=selected===current?view:await service.view(current);
-      return json(augmentFinance(raw,view,currentView),200,{'X-LifeOS-Data-Source':auth.headers.get('X-LifeOS-Data-Source')??'shared'});
+      const source=auth.headers.get('X-LifeOS-Data-Source');
+      return json(augmentFinance(raw,view,currentView),200,source?{'X-LifeOS-Data-Source':source}:{});
     } catch(error) {
       return json({error:error instanceof PlanError?error.message:'Piani momentaneamente non disponibili.'},error instanceof PlanError?error.status:503);
     }

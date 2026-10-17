@@ -34,9 +34,10 @@ export function newPlan(input,today,id) {
   const first=month(input.startMonth); if(first<current) fail('Le quote nuove possono iniziare dal mese corrente.');
   const finite=['advance','goal','recovery'].includes(kind), last=finite?month(input.endMonth):null;
   const amount=cents(input.amountCents), interval=Number(input.intervalMonths??1);
+  const category=String(input.category??'Altro').trim();if(!category||category.length>120)fail('Categoria non valida.');
   if(!Number.isInteger(interval)||interval<1||interval>12) fail('Periodicità non valida.');
   if(finite) months(first,last);
-  const plan={id,name,kind,amountCents:amount,startMonth:first,endMonth:last,intervalMonths:interval,
+  const plan={id,name,category,kind,amountCents:amount,startMonth:first,endMonth:last,intervalMonths:interval,
     createdDay:today,status:'active',stopAfter:null,closedMonth:null,rateChanges:[]};
   if(kind==='advance') {
     plan.beneficiaryMonth=month(input.beneficiaryMonth);
