@@ -38,8 +38,8 @@ export class PlanService {
     const plan=state.plans[p.planId];
     // Stable requestId is shared across retries/crashes. The legacy cash adapter MUST
     // implement idempotent saveTransaction, not an unprotected insert.
-    const movementId=await this.cash.record({requestId:p.requestId,name:plan.name,category:plan.category,amountCents:p.amountCents,
-      date:p.date,competenceMonths:p.competenceMonths,planId:p.planId});
+    const movementId=await this.cash.record({requestId:p.requestId,name:p.cashName||plan.name,category:plan.category,amountCents:p.amountCents,
+      date:p.date,competenceMonths:p.competenceMonths,planId:p.planId,existingMovementId:p.existingMovementId});
     await this.change(current=>({state:completePayment(current,paymentId,movementId,this.today),result:{}}));
   }
   async view(month) { const {state}=await this.repository.read();return project(state,month); }

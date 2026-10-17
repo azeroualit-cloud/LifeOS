@@ -1,24 +1,37 @@
 # Piani finanziari v2
 
-Moduli aggiuntivi per il Worker esistente. Non sostituiscono il registro bancario.
+Estensione del Worker LifeOS 11.63 e client iOS. Saldo reale e budget mensile restano distinti.
 
-- `engine.mjs`: regole in centesimi, quote, anticipi, fondi, ricorrenze, recuperi.
-- `service.mjs`: archivio D1 separato con controllo versione e pagamenti riprendibili.
-- `worker-adapter.mjs`: integrazione con l'autenticazione e gli endpoint legacy.
-- `plans.test.mjs`: test su SQLite in memoria e adapter HTTP; nessun dato reale.
+- `engine.mjs`: regole in centesimi, quote, anticipi, fondi, ricorrenze, recuperi e modifiche future.
+- `legacy.mjs`: adozione idempotente di affitto, utenze e straordinarie esistenti; sostituzione delle quote dalla decorrenza, senza cancellare righe legacy o movimenti.
+- `service.mjs`: archivio D1 con controllo versione e pagamenti riprendibili.
+- `worker-adapter.mjs`: autenticazione legacy, integrazione dei budget e del registro bancario, collegamento a movimenti esistenti e compatibilità con spesa rapida.
+- `build-worker.mjs`: packaging del Worker completo in un solo modulo, fuori dal repository pubblico.
+- `plans.test.mjs`: regole e API su SQLite sintetico.
+- `private-worker.test.mjs`: integrazione col Worker completo privato, su un database esclusivamente sintetico.
 
-Esecuzione: `node --test --test-isolation=none backend/plans/plans.test.mjs` (Node 24).
+## Comportamenti
 
-Per il packaging del Worker utilizzare come entrypoint un modulo che importa il suo export originale e fa `export default withFinancePlans(original)`. Conservare tutti i binding e i secret esistenti. Il wrapper inizializza soltanto la propria tabella `finance_plans_v2_state`; nessuna migrazione di piani o movimenti legacy.
+Anticipo: somma zero fra mesi, nessun movimento bancario. Obiettivo: quote finite, pagamento effettivo e chiusura delle sole quote future; recupero facoltativo della sola eccedenza. Fondo: accumulo continuo e pagamenti senza chiusura. Ricorrenza fissa: una scadenza per intervallo, con quote mensili esatte. Utenza: importi normalizzati per mesi coperti, nuova stima dal mese successivo. Recupero: una spesa e quote future, senza un secondo Paga.
 
-## Condizioni necessarie prima della distribuzione
+Un movimento già registrato può essere collegato senza un nuovo addebito. Sono disponibili quelli dai risparmi e quelli del mese corrente non già collegati. Una spesa ordinaria di un mese chiuso non viene riclassificata retroattivamente. La modifica delle quote decorre da un mese futuro; per gli obiettivi conserva le quote precedenti e distribuisce solo il residuo rispetto al nuovo totale.
 
-Il contratto del Worker 11.63 è conservato in [worker-reference](../worker-reference/README.md). `saveTransaction` restituisce true e usa `APP-<requestId>` come import_id: l’adapter legge la riga effettiva da D1 e verifica importo, conto, tipo, stato e data. Una risposta true senza riga compatibile conserva il pagamento in sospeso. Il replay usa lo stesso identificatore e non aggiunge un secondo evento saldo.
+## Adozione e compatibilità
 
-L'autenticazione è verificata attraverso una chiamata interna al read endpoint già protetto del Worker; per le letture finanziarie si riusa direttamente la risposta autenticata. Origine e metodo sono verificati prima di ogni operazione nuova. Le modifiche o eliminazioni dirette di movimenti collegati a questi piani sono bloccate per evitare incoerenze; i movimenti precedenti restano gestiti dal Worker originale.
+La nuova app invia `X-LifeOS-Plans-Version: 2`. Solo quel segnale, o una richiesta esplicita a un endpoint Piani, attiva l’adozione. Le sole letture dei vecchi client non la avviano. I nomi/sorgenti esistenti hanno identità stabili, senza una seconda quota; il codice conserva la separazione affitto/condominio già presente. I mesi precedenti alla decorrenza usano il motore storico.
 
-La risposta finanziaria comprende `plansV2`; budget mensile e ripartizione sono corretti con le quote del mese richiesto, saldo bancario invariato per quote e anticipi, riserva corrente incrementata soltanto dei fondi effettivamente maturati e non spesi. I pagamenti sono registrati una sola volta dal registro originale con trattamento savings. Gli obiettivi v2 sono inclusi nella previsione del patrimonio del client.
+Manutenzione annuale diventa un fondo senza scadenza conservando l’accumulato verificabile. Le altre ricorrenze annuali mantengono periodo e quote al centesimo. Gli obiettivi pagati in parte espongono solo il residuo da saldare. Gli anticipi storici rimangono nel motore legacy perché non se ne inventa un mese beneficiario.
 
-I piani precedenti non sono migrati automaticamente. Un nome già usato dagli accantonamenti legacy viene rifiutato in creazione per ridurre duplicazioni. L'adozione di affitto, utenze e accantonamenti esistenti richiede ancora la sostituzione esplicita delle singole quote legacy con una decorrenza verificata; non cancellare né ricreare quei piani automaticamente.
+L’adapter legge `APP-<requestId>` dopo `saveTransaction`, che nel Worker originale restituisce true. Verifica riga, importo, conto, stato e data prima di confermare il collegamento. Un errore dopo il salvataggio si riprende con lo stesso ID. Le scritture dirette che altererebbero un pagamento collegato sono bloccate, anche mentre la conferma è in sospeso.
 
-Nessun deployment o migrazione di dati reali è stato eseguito da questi test. Prima di abilitarlo, completare l’adozione dei piani esistenti e verificare il packaging con il Worker completo. Il successivo allegato completo è conservato nel repository Git privato locale indicato in worker-reference. Questo repository pubblico mantiene soltanto estratti e contratto; il backup remoto completo è autorizzato e verificato su Google Drive, con file ID e istruzioni di aggiornamento in worker-reference.
+## Verifica e packaging
+
+```sh
+node --test --test-isolation=none backend/plans/*.test.mjs
+node backend/plans/build-worker.mjs /private/worker.mjs /private/worker-plans.mjs
+LIFEOS_PRIVATE_WORKER=/private/worker-plans.mjs node --test --test-isolation=none backend/plans/private-worker.test.mjs
+```
+
+Node 24. Il build usa esbuild 0.25.12. Il sorgente completo privato e la sua cronologia sono indicati in [worker-reference](../worker-reference/README.md); non copiarli nel repository pubblico. Il modulo risultante conserva frontend, autenticazione, binding `DB`, secret, migrazioni e marcatori originali. Non creare un nuovo D1 né azzerare marcatori durante la distribuzione.
+
+Il workflow `lifeos-plans-tests.yml` compila app e test per simulatore e verifica i flussi senza archivio né IPA. Il test col Worker completo è eseguito localmente: il repository pubblico non contiene i dati privati necessari al suo caricamento.

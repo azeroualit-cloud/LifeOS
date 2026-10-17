@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: ['feature/plans-v2']
-    paths: ['lifeos-native.zip', 'backend/plans/**', '.github/workflows/lifeos-plans-tests.yml']
+    paths: ['lifeos-native.zip', 'backend/plans/**/*.mjs', '.github/workflows/lifeos-plans-tests.yml']
 permissions:
   contents: read
 concurrency:
@@ -17,7 +17,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - run: node --test --test-isolation=none backend/plans/plans.test.mjs
+      - run: node --test --test-isolation=none backend/plans/*.test.mjs
   ios:
     runs-on: macos-15
     timeout-minutes: 45
@@ -46,25 +46,42 @@ jobs:
           brew install xcodegen
           cd app
           xcodegen generate
-      - name: Unit and flow tests, without archive or IPA
+      - name: Select latest available iOS simulator
+        timeout-minutes: 3
         working-directory: app
         run: |
           set -euo pipefail
           mkdir -p build
           xcrun simctl list devices available -j > build/devices.json
           python3 - <<'PY'
-          import json,os
+          import json,os,re
           data=json.load(open('build/devices.json'))
-          devices=[d for group in data['devices'].values() for d in group if d.get('isAvailable') and d['name'].startswith('iPhone')]
+          runtimes=sorted((k for k in data['devices'] if 'iOS' in k),key=lambda k:tuple(map(int,re.findall(r'\d+',k))),reverse=True)
+          devices=[d for runtime in runtimes for d in data['devices'][runtime] if d.get('isAvailable') and d['name'].startswith('iPhone')]
           assert devices
-          preferred=next((d for d in devices if d['name']=='iPhone 17 Pro'),devices[0])
+          preferred=devices[0]
+          print('Simulator:',preferred['name'],preferred['udid'])
           with open(os.environ['GITHUB_ENV'],'a') as f:f.write('PLAN_SIMULATOR='+preferred['udid']+'\n')
           open('build/simulator-id','w').write(preferred['udid'])
           PY
-          PLAN_SIMULATOR=$(cat build/simulator-id)
-          xcrun simctl boot "$PLAN_SIMULATOR" || true
-          xcrun simctl bootstatus "$PLAN_SIMULATOR" -b
-          xcodebuild test -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$PLAN_SIMULATOR" -derivedDataPath build/Derived -resultBundlePath build/Plans.xcresult -parallel-testing-enabled NO -only-testing:LifeOSProbeTests -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testPlansInfoAndMonthOnlyAdvanceFlow -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testPlansGoalPaymentWithOptionalOverageRecovery -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHealthScenarioCanBeEditedWithoutAddingNavigationTab -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testAnalysisShowsFourChartsAndCategoryPeriods -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testExtraActualPaymentUsesSavingsAndKeepsMonthlyBudget -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testNegativeBudgetAndGroupedAmounts -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 240 CODE_SIGNING_ALLOWED=NO > build/plans-tests.log 2>&1
+      - name: Compile app and tests for simulator, without archive
+        timeout-minutes: 15
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcodebuild build-for-testing -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$PLAN_SIMULATOR" -derivedDataPath build/Derived CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compile.log
+      - name: Unit tests
+        timeout-minutes: 10
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcodebuild test-without-building -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$PLAN_SIMULATOR" -derivedDataPath build/Derived -resultBundlePath build/Unit.xcresult -parallel-testing-enabled NO -only-testing:LifeOSProbeTests -test-timeouts-enabled YES -default-test-execution-time-allowance 60 -maximum-test-execution-time-allowance 90 CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/unit-tests.log
+      - name: Plan flows and regressions, without IPA
+        timeout-minutes: 20
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcodebuild test-without-building -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$PLAN_SIMULATOR" -derivedDataPath build/Derived -resultBundlePath build/Plans.xcresult -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testPlansInfoAndMonthOnlyAdvanceFlow -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testPlansGoalPaymentWithOptionalOverageRecovery -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testPlansFundCanEditFutureQuotaAndLinkAnExistingMovement -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHealthScenarioCanBeEditedWithoutAddingNavigationTab -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testAnalysisShowsFourChartsAndCategoryPeriods -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testExtraActualPaymentUsesSavingsAndKeepsMonthlyBudget -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testNegativeBudgetAndGroupedAmounts -test-timeouts-enabled YES -default-test-execution-time-allowance 120 -maximum-test-execution-time-allowance 180 CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/plans-tests.log
       - name: Verification summary
         if: always()
         run: |
@@ -83,5 +100,9 @@ jobs:
           name: Plans-test-results-no-IPA
           path: |
             app/build/Plans.xcresult
+            app/build/Unit.xcresult
             app/build/plans-tests.log
+            app/build/unit-tests.log
+            app/build/compile.log
+            app/build/devices.json
           retention-days: 7

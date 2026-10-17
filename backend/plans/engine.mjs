@@ -52,12 +52,15 @@ export function contribution(plan,m) {
     if(m===plan.beneficiaryMonth) return -plan.amountCents;
   }
   if(m<plan.startMonth||(plan.endMonth&&m>plan.endMonth)||(plan.stopAfter&&m>plan.stopAfter)||(plan.closedMonth&&m>plan.closedMonth)) return 0;
+  if(plan.legacySchedule) return Number(plan.legacySchedule[m]??0);
   if(['advance','goal','recovery'].includes(plan.kind)) {
     const range=months(plan.startMonth,plan.endMonth), i=range.indexOf(m); return i<0?0:split(plan.amountCents,range.length)[i];
   }
   if(plan.kind==='fixed') {
-    const delta=(Number(m.slice(0,4))-Number(plan.startMonth.slice(0,4)))*12+Number(m.slice(-2))-Number(plan.startMonth.slice(-2));
-    return split(plan.amountCents,plan.intervalMonths)[delta%plan.intervalMonths];
+    const anchor=plan.intervalAnchor??plan.startMonth;
+    const delta=(Number(m.slice(0,4))-Number(anchor.slice(0,4)))*12+Number(m.slice(-2))-Number(anchor.slice(-2));
+    let amount=plan.amountCents;for(const rate of plan.rateChanges??[])if(rate.fromMonth<=m)amount=rate.amountCents;
+    return amount===0?0:split(amount,plan.intervalMonths)[((delta%plan.intervalMonths)+plan.intervalMonths)%plan.intervalMonths];
   }
   let rate=plan.amountCents;
   for(const change of plan.rateChanges??[]) if(change.fromMonth<=m) rate=change.amountCents;
@@ -86,6 +89,23 @@ export function command(state,action,input,today) {
       if(['advance','recovery'].includes(plan.kind)) fail('Questo piano non prevede un nuovo pagamento.');
       if(plan.status!=='active') fail('Il piano non è attivo.');
       reservePayment(next,plan,input,today,key); result={planId:plan.id,paymentId:key};
+    } else if(action==='edit') {
+      if(plan.status!=='active'||['advance','recovery'].includes(plan.kind))fail('Questo piano non è modificabile.');
+      const amount=plan.kind==='goal'?cents(input.amountCents):input.amountCents, first=month(input.fromMonth??addMonth(today.slice(0,7),1));
+      if(!Number.isSafeInteger(amount)||amount<0||amount>100000000)fail('Quota non valida.');
+      if(first<=today.slice(0,7)||first<plan.startMonth)fail('Le modifiche possono decorrere soltanto da un mese futuro del piano.');
+      if(plan.kind==='goal') {
+        const last=month(input.endMonth), future=months(first,last);
+        const oldFuture=plan.endMonth>=first?months(first,plan.endMonth).reduce((n,m)=>n+contribution(plan,m),0):0;
+        const matured=plan.amountCents-oldFuture, rest=Math.max(0,amount-matured);
+        const schedule={...(plan.legacySchedule??Object.fromEntries(months(plan.startMonth,plan.endMonth).map(m=>[m,contribution(plan,m)])))};
+        for(const m of Object.keys(schedule))if(m>=first)delete schedule[m];
+        const shares=rest?split(rest,future.length):future.map(()=>0);
+        future.forEach((m,i)=>schedule[m]=shares[i]);plan.legacySchedule=schedule;plan.endMonth=last;plan.amountCents=amount;
+      } else {
+        plan.rateChanges=(plan.rateChanges??[]).filter(c=>c.fromMonth!==first);plan.rateChanges.push({fromMonth:first,amountCents:amount});plan.rateChanges.sort((a,b)=>a.fromMonth.localeCompare(b.fromMonth));
+      }
+      result={planId:plan.id};
     } else if(action==='stop') {
       if(plan.status!=='active') fail('Il piano non è attivo.');
       if(Object.values(next.payments).some(p=>p.planId===plan.id&&p.status==='pending')) fail('Completa il pagamento in sospeso prima di interrompere.');
@@ -104,17 +124,20 @@ function reservePayment(state,plan,input,today,id) {
   const cycle=month(input.cycleMonth??date.slice(0,7));
   if(cycle>today.slice(0,7)) fail('Non puoi segnare pagata una scadenza futura.');
   if(['fixed','estimated'].includes(plan.kind)&&cycle<plan.startMonth) fail('La scadenza precede l’inizio del piano.');
-  const settlement=['goal','recovery'].includes(plan.kind)?'once':['fixed','estimated'].includes(plan.kind)?cycle:id;
+  const settlement=['goal','recovery'].includes(plan.kind)?'once':['fixed','estimated'].includes(plan.kind)?cycleKey(plan,cycle):id;
+  const existingMovementId=input.movementId===undefined?null:Number(input.movementId);
+  if(existingMovementId!==null&&(!Number.isSafeInteger(existingMovementId)||existingMovementId<2))fail('Movimento non valido.');
+  if(existingMovementId&&Object.values(state.payments).some(p=>p.movementId===existingMovementId||p.existingMovementId===existingMovementId))fail('Questo movimento è già collegato a un piano.');
   if(Object.values(state.payments).some(p=>p.planId===plan.id&&p.settlementKey===settlement)) fail('Pagamento già registrato o in completamento.');
   let recovery=null;
   if(input.recoverDifference) {
-    if(plan.kind!=='goal'||amount<=plan.amountCents) fail('Il recupero riguarda soltanto l’eccedenza di un obiettivo finito.');
-    recovery=newPlan({kind:'goal',name:'Recupero eccedenza · '+plan.name,amountCents:amount-plan.amountCents,
+    if(plan.kind!=='goal'||amount+Object.values(state.payments).filter(p=>p.planId===plan.id&&p.status==='posted').reduce((n,p)=>n+p.amountCents,0)<=plan.amountCents) fail('Il recupero riguarda soltanto l’eccedenza di un obiettivo finito.');
+    recovery=newPlan({kind:'goal',name:('Recupero eccedenza · '+plan.name).slice(0,120),amountCents:amount+Object.values(state.payments).filter(p=>p.planId===plan.id&&p.status==='posted').reduce((n,p)=>n+p.amountCents,0)-plan.amountCents,
       startMonth:input.recoveryStartMonth,endMonth:input.recoveryEndMonth},today,id+'-difference');
     recovery.kind='recovery';recovery.sourcePaymentId=id;
   }
   state.payments[id]={id,planId:plan.id,settlementKey:settlement,status:'pending',amountCents:amount,date,cycleMonth:cycle,
-    competenceMonths:covered,recovery,requestId:id};
+    competenceMonths:covered,recovery,requestId:id,existingMovementId,cashName:input.originalName?String(input.originalName).trim().slice(0,120):null};
 }
 export function completePayment(state,id,movementId,today) {
   const next=structuredClone(state), payment=next.payments[id];
@@ -133,15 +156,20 @@ export function completePayment(state,id,movementId,today) {
   }
   return next;
 }
+export function cycleKey(plan,cycle) {
+  if(plan.kind!=='fixed'||plan.intervalMonths===1)return cycle;
+  const anchor=plan.intervalAnchor??plan.startMonth, delta=(Number(cycle.slice(0,4))-Number(anchor.slice(0,4)))*12+Number(cycle.slice(-2))-Number(anchor.slice(-2));
+  return addMonth(anchor,Math.floor(delta/plan.intervalMonths)*plan.intervalMonths);
+}
 export function balance(state,plan,throughMonth) {
   const last=throughMonth<plan.startMonth?null:throughMonth;
-  const saved=last?months(plan.startMonth,last,1200).reduce((n,m)=>n+Math.max(0,contribution(plan,m)),0):0;
-  const spent=Object.values(state.payments).filter(p=>p.planId===plan.id&&p.status==='posted'&&p.date.slice(0,7)<=throughMonth).reduce((n,p)=>n+p.amountCents,0);
+  const saved=(throughMonth>=plan.startMonth?Number(plan.openingBalanceCents??0):0)+(last?months(plan.startMonth,last,1200).reduce((n,m)=>n+Math.max(0,contribution(plan,m)),0):0);
+  const spent=Object.values(state.payments).filter(p=>p.planId===plan.id&&p.status==='posted'&&p.date.slice(0,7)<=throughMonth&&p.date.slice(0,7)>=plan.startMonth).reduce((n,p)=>n+p.amountCents,0);
   return {contributedCents:saved,paidCents:spent,fundCents:plan.status==='active'&&!['advance','recovery'].includes(plan.kind)?Math.max(0,saved-spent):0,fromGeneralSavingsCents:Math.max(0,spent-saved)};
 }
 export function project(state,selectedMonth) {
   month(selectedMonth);
   return {version:2,month:selectedMonth,adjustmentCents:adjustment(state.plans,selectedMonth),
-    plans:Object.values(state.plans).map(p=>({...p,contributionCents:contribution(p,selectedMonth),...balance(state,p,selectedMonth)})),
+    plans:Object.values(state.plans).map(p=>({...p,outstandingCents:Math.max(0,p.amountCents-Object.values(state.payments).filter(x=>x.planId===p.id&&x.status==='posted').reduce((n,x)=>n+x.amountCents,0)),contributionCents:contribution(p,selectedMonth),...balance(state,p,selectedMonth)})),
     payments:Object.values(state.payments).map(({recovery,...p})=>p)};
 }

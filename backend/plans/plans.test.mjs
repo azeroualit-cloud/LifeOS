@@ -248,3 +248,67 @@ test('funzione saveTransaction originale conservata: timeout dopo commit, ripres
   assert.deepEqual({...db.sqlite.prepare('SELECT COUNT(*) n,SUM(delta_cents) delta FROM account_balance_events').get()},{n:1,delta:-60000});
   assert.equal((await repo.read()).state.payments['original-sql-01'].movementId,2);
 });
+
+// Legacy fixtures are synthetic. Adoption leaves original tables untouched.
+const {adoptLegacy,replacement}=await import('./legacy.mjs');
+function legacyContext() {
+  return {overview:{summary:{budget:4000,committedCurrent:650,monthlyRemaining:1000,monthlyCommitted:800,monthlyBudgetBreakdown:[{name:'Affitto',amount:550},{name:'Condominio',amount:25},{name:'Gas',amount:50},{name:'Accantonamenti e straordinarie',amount:25}],recurringCommitments:[{name:'Affitto',remaining:550},{name:'Condominio',remaining:25},{name:'Gas',remaining:50},{name:'Straordinarie e auto',remaining:25}]},recurring:[{name:'Condominio',estimate:25,treatment:'Vincolata'},{name:'Gas',estimate:50,nextEstimate:80,treatment:'Vincolata'}],extraPlan:{allocations:[]}},cycles:[],allocations:[],links:[],movements:[]};
+}
+test('adozione affitto, condominio e utenze mantiene una sola quota e il saldo',()=>{
+  const context=legacyContext(),state=adoptLegacy(initialState(),context,today),view=project(state,'2026-10');
+  assert.equal(Object.keys(state.plans).length,3);assert.equal(replacement(context.overview,view),62500);
+  const result=augmentFinance(context.overview,view,view);
+  assert.equal(result.summary.monthlyCommitted,800);assert.equal(result.summary.monthlyRemaining,1000);assert.equal(result.summary.committedCurrent,650);assert.equal(result.summary.budget,4000);
+  assert.equal(result.summary.monthlyBudgetBreakdown.filter(r=>r.name==='Affitto').length,1);
+  assert.equal(project(state,'2026-11').plans.find(p=>p.name==='Gas').contributionCents,8000);
+  assert.deepEqual(adoptLegacy(state,context,today),state);
+});
+test('adozione non riscrive mesi precedenti e interruzione non riattiva la quota legacy',()=>{
+  const context=legacyContext();let state=adoptLegacy(initialState(),context,today);
+  assert.equal(replacement(context.overview,project(state,'2026-09')),0);assert.equal(project(state,'2026-09').adjustmentCents,0);
+  state=command(state,'stop',{requestId:'stop-legacy-rent',planId:'legacy-recurring-0'},today).state;
+  const november={...context.overview,extraPlan:{allocations:[]}};
+  const result=augmentFinance(november,project(state,'2026-11'),project(state,'2026-10'),context.overview);
+  assert.equal(result.summary.monthlyRemaining,1520); // rent released, gas +30 from normalized bills
+});
+test('pagamento affitto già presente viene adottato senza nuovo addebito',()=>{
+  const context=legacyContext();context.movements=[{source_row:42,amount:-550,actual_date:today,account:'Trade Republic',movement_type:'Spesa',status:'Eseguito',category:'Affitto',competence_months:1}];
+  const state=adoptLegacy(initialState(),context,today);
+  assert.equal(state.payments['legacy-cash-42'].movementId,42);assert.equal(project(state,'2026-10').plans.find(p=>p.name==='Affitto').fundCents,0);
+  assert.deepEqual(adoptLegacy(state,context,today),state);
+  assert.throws(()=>command(state,'pay',{requestId:'rent-paid-again',planId:'legacy-recurring-0',amountCents:55000,date:today},today));
+});
+test('manutenzione annuale diventa un fondo che conserva l’accumulato e continua dopo il pagamento',()=>{
+  const context=legacyContext();context.cycles=[{id:1,extraordinary_source_row:4,name:'Manutenzione auto',kind:'expense',status:'Programmato',repeat_rule:'Annuale',start_month:'2026-01',end_month:'2026-12',total_cents:60000}];
+  context.allocations=Array.from({length:12},(_,i)=>({cycle_id:1,month:'2026-'+String(i+1).padStart(2,'0'),amount_cents:5000}));
+  let state=adoptLegacy(initialState(),context,today);
+  assert.equal(project(state,'2026-10').plans.find(p=>p.id==='legacy-extra-4').fundCents,50000);
+  state=command(state,'pay',{requestId:'maintenance-pay1',planId:'legacy-extra-4',amountCents:30000,date:today},today).state;
+  state=completePayment(state,'maintenance-pay1',50,today);
+  assert.equal(state.plans['legacy-extra-4'].status,'active');assert.equal(project(state,'2026-11').plans.find(p=>p.id==='legacy-extra-4').fundCents,25000);
+  assert.equal(project(state,'2027-01').plans.find(p=>p.id==='legacy-extra-4').contributionCents,5000);
+});
+test('obiettivo legacy con pagamento parziale può saldare solo il residuo e chiudere le quote future',()=>{
+  const context=legacyContext();context.cycles=[{id:1,extraordinary_source_row:4,name:'Progetto casa',kind:'expense',status:'Programmato',repeat_rule:'No',start_month:'2026-09',end_month:'2026-12',total_cents:60000}];
+  context.allocations=['09','10','11','12'].map(m=>({cycle_id:1,month:'2026-'+m,amount_cents:15000}));
+  context.links=[{cycle_id:1,movement_source_row:10,attributed_cents:50000,actual_date:'2026-09-20'}];
+  let state=adoptLegacy(initialState(),context,today);
+  assert.equal(project(state,'2026-10').plans.find(p=>p.id==='legacy-extra-4').outstandingCents,10000);
+  state=command(state,'pay',{requestId:'legacy-remainder',planId:'legacy-extra-4',amountCents:10000,date:today},today).state;
+  state=completePayment(state,'legacy-remainder',50,today);
+  assert.equal(project(state,'2026-11').plans.find(p=>p.id==='legacy-extra-4').contributionCents,0);assert.equal(project(state,'2026-10').plans.find(p=>p.id==='legacy-extra-4').contributionCents,15000);
+});
+test('pagamento annuale non ripetibile spostando il mese dentro la stessa ricorrenza',()=>{
+  let state=make(initialState(),'annual-rent1','fixed',{intervalMonths:12});
+  state=pay(state,'annual-pay1','annual-rent1',60000);
+  assert.throws(()=>command(state,'pay',{requestId:'annual-pay2',planId:'annual-rent1',amountCents:60000,date:'2026-11-17',cycleMonth:'2026-11'},'2026-11-17'));
+});
+test('modifica di quota e obiettivo decorre dal futuro e conserva il mese corrente',()=>{
+  let state=make(initialState(),'edited-fund','fund',{amountCents:5000});
+  state=command(state,'edit',{requestId:'edit-fund-01',planId:'edited-fund',amountCents:8000,fromMonth:'2026-11'},today).state;
+  assert.equal(project(state,'2026-10').adjustmentCents,-5000);assert.equal(project(state,'2026-11').adjustmentCents,-8000);
+  assert.throws(()=>command(state,'edit',{requestId:'edit-fund-02',planId:'edited-fund',amountCents:8000,fromMonth:'2026-10'},today));
+  state=make(initialState(),'edited-goal');
+  state=command(state,'edit',{requestId:'edit-goal-01',planId:'edited-goal',amountCents:80000,fromMonth:'2026-11',endMonth:'2026-12'},today).state;
+  assert.equal(project(state,'2026-10').adjustmentCents,-20000);assert.equal(project(state,'2026-11').adjustmentCents,-30000);assert.equal(project(state,'2026-12').adjustmentCents,-30000);
+});
