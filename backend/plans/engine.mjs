@@ -30,11 +30,11 @@ export function day(value,today) {
 export function newPlan(input,today,id) {
   const kind=input.kind, current=month(today.slice(0,7));
   if(!kinds.includes(kind)) fail('Scegli il tipo di piano.');
-  const name=String(input.name??'').trim(); if(!name||name.length>160) fail('Inserisci un nome di massimo 160 caratteri.');
+  const name=String(input.name??'').trim(); if(!name||name.length>120) fail('Inserisci un nome di massimo 120 caratteri.');
   const first=month(input.startMonth); if(first<current) fail('Le quote nuove possono iniziare dal mese corrente.');
   const finite=['advance','goal','recovery'].includes(kind), last=finite?month(input.endMonth):null;
   const amount=cents(input.amountCents), interval=Number(input.intervalMonths??1);
-  const category=String(input.category??'Altro').trim();if(!category||category.length>120)fail('Categoria non valida.');
+  const category=String(input.category??'Altro').trim();if(!category||category.length>60)fail('Categoria non valida.');
   if(!Number.isInteger(interval)||interval<1||interval>12) fail('Periodicità non valida.');
   if(finite) months(first,last);
   const plan={id,name,category,kind,amountCents:amount,startMonth:first,endMonth:last,intervalMonths:interval,
@@ -65,7 +65,7 @@ export function contribution(plan,m) {
 }
 export function adjustment(plans,m) { return -Object.values(plans).reduce((sum,p)=>sum+contribution(p,m),0)||0; }
 export function requestKey(value) {
-  if(typeof value!=='string'||!/^[a-zA-Z0-9-]{8,100}$/.test(value)) fail('Identificatore operazione non valido.'); return value;
+  if(typeof value!=='string'||!/^[a-zA-Z0-9-]{8,80}$/.test(value)) fail('Identificatore operazione non valido.'); return value;
 }
 export function initialState() { return {version:1,plans:{},payments:{},commands:{}}; }
 function fingerprint(input) { return JSON.stringify(Object.fromEntries(Object.entries(input).filter(([k])=>k!=='requestId').sort(([a],[b])=>a.localeCompare(b)))); }

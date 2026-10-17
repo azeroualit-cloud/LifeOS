@@ -47,9 +47,15 @@ export function withFinancePlans(base,{repositoryFactory=env=>new D1PlanReposito
           date:p.date,account:'Trade Republic',months:p.competenceMonths,budgetTreatment:'savings',note:'Piano '+p.planId}]);
         if(response.status!==200)throw new PlanError('Pagamento non confermato. Riprova dalla stessa operazione.',503);
         const result=await response.json();
-        // This adapter intentionally fails closed unless the live Worker confirms
-        // the actual stable movement identity. Validate against its source before deployment.
-        const id=typeof result==='number'?result:result?.movementId??result?.row;
+        // Worker 11.63 returns true and persists APP-<requestId>. Resolve the
+        // committed ledger row, including after an idempotent replay.
+        let id=typeof result==='number'?result:result?.movementId??result?.row;
+        if(result===true) {
+          const row=env.DB?await env.DB.prepare('SELECT source_row,amount,actual_date,account,movement_type,status FROM movements WHERE import_id=?').bind('APP-'+p.requestId).first():null;
+          if(!row||row.account!=='Trade Republic'||row.movement_type!=='Spesa'||row.status!=='Eseguito'||String(row.actual_date).slice(0,10)!==p.date||Math.round(Number(row.amount)*100)!==-p.amountCents)
+            throw new PlanError('Movimento non verificato nel registro. Riprendi questa operazione senza crearne una nuova.',502);
+          id=row.source_row;
+        }
         if(!Number.isSafeInteger(id)||id<=0)throw new PlanError('Il server deve confermare l’identificatore del pagamento. Non ripetere con una nuova operazione.',502);
         return id;
       }};

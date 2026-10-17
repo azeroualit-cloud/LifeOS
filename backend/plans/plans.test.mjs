@@ -181,3 +181,70 @@ test('due dispositivi non possono pagare lo stesso obiettivo con identificatori 
   const results=await Promise.allSettled(['concurrent-pay1','concurrent-pay2'].map(requestId=>service.execute('pay',{requestId,planId:'concurrent-goal',amountCents:60000,date:today})));
   assert.equal(results.filter(r=>r.status==='fulfilled').length,1);assert.equal(cash.rows.size,1);
 });
+
+test('Worker 11.63: true risolto mediante APP-requestId, una riga reale anche dopo replay',async()=>{
+  const {repo,db}=await setup();
+  db.sqlite.exec('CREATE TABLE movements(source_row INTEGER PRIMARY KEY,import_id TEXT UNIQUE,amount REAL,actual_date TEXT,account TEXT,movement_type TEXT,status TEXT)');
+  const base={async fetch(request){
+    if(new URL(request.url).pathname==='/api/saveTransaction') {
+      const [p]=await request.json();
+      db.sqlite.prepare("INSERT OR IGNORE INTO movements VALUES (42,?,?,?,'Trade Republic','Spesa','Eseguito')").run('APP-'+p.requestId,-p.amount,p.date);
+      return new Response('true',{headers:{'Content-Type':'application/json'}});
+    }
+    return Response.json({summary:{budget:1000},transactions:[]});
+  }};
+  const wrapper=withFinancePlans(base,{repositoryFactory:()=>repo,clock:()=>today});
+  const operation=input('actual-ledger-01','recovery',{paymentDate:today});
+  for(let i=0;i<2;i++) {
+    const response=await wrapper.fetch(new Request('https://lifeos.invalid/api/saveFinancePlan',{method:'POST',headers:{Origin:'https://lifeos.invalid'},body:JSON.stringify([operation])}),{DB:db},{});
+    assert.equal(response.status,200,await response.text());
+  }
+  assert.equal(db.sqlite.prepare('SELECT COUNT(*) n FROM movements').get().n,1);
+  assert.equal((await repo.read()).state.payments['actual-ledger-01'].movementId,42);
+  assert.equal((await repo.read()).state.payments['actual-ledger-01'].status,'posted');
+});
+
+test('Worker 11.63: riga con import_id corretto ma importo errato non conferma il pagamento',async()=>{
+  const {repo,db}=await setup();
+  db.sqlite.exec("CREATE TABLE movements(source_row INTEGER,import_id TEXT,amount REAL,actual_date TEXT,account TEXT,movement_type TEXT,status TEXT); INSERT INTO movements VALUES(42,'APP-wrong-ledger-01',-1,'2026-10-17','Trade Republic','Spesa','Eseguito')");
+  const base={async fetch(request){return new URL(request.url).pathname==='/api/saveTransaction'?Response.json(true):Response.json({summary:{budget:1000},transactions:[]});}};
+  const wrapper=withFinancePlans(base,{repositoryFactory:()=>repo,clock:()=>today});
+  const response=await wrapper.fetch(new Request('https://lifeos.invalid/api/saveFinancePlan',{method:'POST',headers:{Origin:'https://lifeos.invalid'},body:JSON.stringify([input('wrong-ledger-01','recovery',{paymentDate:today})])}),{DB:db},{});
+  assert.equal(response.status,502);assert.equal((await repo.read()).state.payments['wrong-ledger-01'].status,'pending');
+});
+
+test('funzione saveTransaction originale conservata: timeout dopo commit, ripresa e un solo delta saldo',async()=>{
+  const {readFile}=await import('node:fs/promises');
+  const source=await readFile(new URL('../worker-reference/save-transaction.mjs',import.meta.url),'utf8');
+  const columns='source_row budget_date actual_date description amount account category movement_type status competence_months baseline counterparty_account notes merchant source_name import_id budget_month competence_end monthly_share actual_month transfer_id'.split(' ');
+  const {repo,db}=await setup();
+  db.sqlite.exec(`CREATE TABLE movements(${columns.map(c=>c==='source_row'?'source_row INTEGER PRIMARY KEY':c==='amount'?'amount REAL':c+' TEXT').join(',')});
+    CREATE UNIQUE INDEX unique_import ON movements(import_id);
+    CREATE TABLE finance_write_requests(id TEXT PRIMARY KEY,fingerprint TEXT);
+    CREATE TABLE account_balance_events(id INTEGER PRIMARY KEY,account TEXT,day TEXT,delta_cents INTEGER,movement_source_row INTEGER,absorbed_snapshot_id INTEGER);
+    CREATE TABLE movement_budget_policies(movement_source_row INTEGER PRIMARY KEY,treatment TEXT,recovery_json TEXT);`);
+  db.batch=async statements=>{
+    db.sqlite.exec('BEGIN');
+    try {const result=[];for(const statement of statements)result.push(await statement.run());db.sqlite.exec('COMMIT');return result;}
+    catch(error){db.sqlite.exec('ROLLBACK');throw error;}
+  };
+  const original=new Function('ensureBudgetPolicies','validCents','validDate','nowDay','validatedBudgetPolicy','MOVEMENT_COLUMNS','crypto',source+'\nreturn saveTransaction;')(
+    async()=>{},amount=>Math.round(amount*100),value=>value,()=>today,()=>({treatment:'savings',recovery:[]}),columns,globalThis.crypto);
+  let loseResponse=true;
+  const base={async fetch(request){
+    if(new URL(request.url).pathname==='/api/saveTransaction') {
+      const [p]=await request.json();const result=await original({DB:db},p);
+      if(loseResponse){loseResponse=false;return new Response('Synthetic response loss',{status:503});}
+      return Response.json(result);
+    }
+    return Response.json({summary:{budget:1000},transactions:[]});
+  }};
+  const wrapper=withFinancePlans(base,{repositoryFactory:()=>repo,clock:()=>today});
+  const request=()=>new Request('https://lifeos.invalid/api/saveFinancePlan',{method:'POST',headers:{Origin:'https://lifeos.invalid'},body:JSON.stringify([input('original-sql-01','recovery',{paymentDate:today})])});
+  assert.equal((await wrapper.fetch(request(),{DB:db},{})).status,503);
+  assert.equal((await repo.read()).state.payments['original-sql-01'].status,'pending');
+  assert.equal((await wrapper.fetch(request(),{DB:db},{})).status,200);
+  assert.equal(db.sqlite.prepare('SELECT COUNT(*) n FROM movements').get().n,1);
+  assert.deepEqual({...db.sqlite.prepare('SELECT COUNT(*) n,SUM(delta_cents) delta FROM account_balance_events').get()},{n:1,delta:-60000});
+  assert.equal((await repo.read()).state.payments['original-sql-01'].movementId,2);
+});
