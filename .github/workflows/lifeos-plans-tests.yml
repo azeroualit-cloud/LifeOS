@@ -79,12 +79,16 @@ jobs:
           set -euo pipefail
           xcodebuild build-for-testing -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$PLAN_SIMULATOR" -derivedDataPath build/Derived CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compile.log
       - name: Unit tests
-        if: inputs.focus != 'fund' && inputs.focus != 'visual'
+        if: inputs.focus != 'fund'
         timeout-minutes: 10
         working-directory: app
         run: |
           set -euo pipefail
-          xcodebuild test-without-building -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$PLAN_SIMULATOR" -derivedDataPath build/Derived -resultBundlePath build/Unit.xcresult -parallel-testing-enabled NO -only-testing:LifeOSProbeTests -test-timeouts-enabled YES -default-test-execution-time-allowance 60 -maximum-test-execution-time-allowance 90 CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/unit-tests.log
+          UNIT_FILTERS="-only-testing:LifeOSProbeTests"
+          if [ "${{ inputs.focus }}" = visual ]; then
+            UNIT_FILTERS="-only-testing:LifeOSProbeTests/NativeHealthTests/testMaintenanceRecoversRecordedIntake"
+          fi
+          xcodebuild test-without-building -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$PLAN_SIMULATOR" -derivedDataPath build/Derived -resultBundlePath build/Unit.xcresult -parallel-testing-enabled NO $UNIT_FILTERS -test-timeouts-enabled YES -default-test-execution-time-allowance 60 -maximum-test-execution-time-allowance 90 CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/unit-tests.log
       - name: Plan flows and regressions, without IPA
         timeout-minutes: 20
         working-directory: app
