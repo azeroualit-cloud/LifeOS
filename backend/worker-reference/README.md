@@ -4,7 +4,7 @@ Provenienza: Worker LifeOS 11.63 incollato e poi fornito come allegato `Testo in
 
 Il sorgente integrale è conservato nel repository Git privato **locale** `/workspace/LifeOS-worker-private`, file `worker.mjs`; il commit iniziale conserva i byte originali, con hash e provenienza in `provenance.json`. SHA-256 originale: `f40e23d3a0e8131c68db8a4962d33002c6d5fce17214e5d3d87019beb10232ce`. Archivio locale comprensivo di Git bundle: `/workspace/work/worker-archive-check/LifeOS-Worker-privato.zip`.
 
-Backup remoto completo autorizzato dall’utente e verificato su Google Drive: [LifeOS-Worker-privato.zip](https://drive.google.com/file/d/1-P5BQ7XNiSizY_NF368BG61fyiZa4T7q/view). File ID: `1-P5BQ7XNiSizY_NF368BG61fyiZa4T7q`; dimensione dopo l’aggiornamento delle istruzioni: 241784 byte. La verifica dei metadati conferma `shared=false` e il solo permesso owner. L’archivio contiene sorgente integrale, provenienza, istruzioni e bundle Git; il commit iniziale conserva i byte originali.
+Backup remoto completo autorizzato dall’utente e verificato su Google Drive: [LifeOS-Worker-privato.zip](https://drive.google.com/file/d/1-P5BQ7XNiSizY_NF368BG61fyiZa4T7q/view). File ID: `1-P5BQ7XNiSizY_NF368BG61fyiZa4T7q`; dimensione della prima copia con istruzioni: 241784 byte; l’archivio viene aggiornato con le revisioni successive. La verifica dei metadati conferma `shared=false` e il solo permesso owner. L’archivio contiene sorgente integrale, provenienza, istruzioni e bundle Git; il commit iniziale conserva i byte originali.
 
 Nelle prossime sessioni recuperare lo ZIP tramite Drive. Per modifiche future: aggiornare il sorgente nel Git privato, creare un nuovo bundle e ZIP e sostituire i byte dello stesso file Drive, mantenendo privati i permessi. Non richiedere all’utente di incollare di nuovo il codice. La creazione di un nuovo repository privato GitHub resta non disponibile con i permessi attuali; questo non impedisce di usare la cronologia Git contenuta nell’archivio.
 
@@ -43,7 +43,7 @@ Affitto e utenze sono già voci del budget. Il codice mantiene la separazione st
 
 Le stime utenze sono aggiornate dai pagamenti precedenti normalizzati per mesi coperti e dalle modifiche manuali con mese di decorrenza. `utility_estimates_v1` e `condominium_estimates_v1` sono metadati esistenti da conservare.
 
-Adottare i piani precedenti richiede una decorrenza e la sostituzione esplicita della relativa quota legacy; la sola creazione di un nuovo piano non realizza un’adozione. Attualmente l’adapter blocca nomi legacy duplicati e la UI conserva Piani precedenti; l’adozione completa non è implementata.
+Adottare i piani precedenti richiede una decorrenza e la sostituzione esplicita della relativa quota legacy; la sola creazione di un nuovo piano non realizza un’adozione. L’adozione è ora implementata in backend/plans/legacy.mjs: attivazione dal client Piani v2, identità per sorgente, decorrenza dal mese corrente e sostituzione delle quote legacy. Gli anticipi storici non vengono ricostruiti senza un beneficiario verificabile.
 
 ## Autenticazione, schema e distribuzione
 
@@ -52,3 +52,5 @@ Preservare Cloudflare Access (ACCESS_EMAIL e ctx.access) oppure APP_PASSWORD, co
 Le scritture dirette si chiamano editMovement e deleteMovement. I pagamenti Piani v2 collegati sono protetti dall’adapter. I pagamenti legacy restano gestiti dalle tabelle extraordinary_movement_links e extraordinary_settlements.
 
 Il codice ricevuto non è stato distribuito e il database reale non è stato modificato. Per distribuire serve il packaging del Worker completo privato con l’entrypoint withFinancePlans, oltre al completamento dell’adozione legacy.
+
+Il pacchetto privato aggiornato contiene `worker-plans.mjs` (modulo completo), `worker.mjs` (baseline originale), entrypoint/moduli sorgente, Git bundle, test sintetico e `lifeos-native-source.zip`. L’utente ha scelto il caricamento manuale sul Worker Cloudflare esistente: non richiedere ulteriormente credenziali o autorizzazione alla stessa distribuzione. Lo stato effettivo va confermato dal caricamento dell’utente o da una verifica autorizzata del servizio; non dichiararlo già distribuito.

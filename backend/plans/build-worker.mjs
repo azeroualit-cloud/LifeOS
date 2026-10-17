@@ -15,8 +15,9 @@ if(!text.includes('export default')||!text.includes('async function saveTransact
 await mkdir(dirname(target),{recursive:true});
 const temp=await mkdtemp(join(tmpdir(),'lifeos-plans-'));
 try {
-  const entry=join(temp,'entry.mjs');
-  await writeFile(entry,`import original from ${JSON.stringify(source)};\nimport {withFinancePlans} from ${JSON.stringify(module)};\nexport default withFinancePlans(original);\n`,{mode:0o600});
+  const entry=join(temp,'entry.mjs'), adaptable=join(temp,'legacy.mjs');
+  await writeFile(adaptable,text+'\nexport { saveTransaction };\n',{mode:0o600});
+  await writeFile(entry,`import original,{saveTransaction} from ${JSON.stringify(adaptable)};\nimport {withFinancePlans} from ${JSON.stringify(module)};\nexport default withFinancePlans(original,{recordTransaction:(env,input)=>saveTransaction(env,input)});\n`,{mode:0o600});
   const build=spawnSync('npx',['--yes','esbuild@0.25.12',entry,'--bundle','--format=esm','--target=es2022','--log-level=warning','--outfile='+target],{stdio:'inherit',env:{...process.env,npm_config_cache:process.env.npm_config_cache??join(tmpdir(),'lifeos-npm-cache')}});
   if(build.status!==0)throw Error('Packaging Worker non riuscito.');
 } finally {await rm(temp,{recursive:true,force:true});}

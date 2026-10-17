@@ -1,11 +1,15 @@
 import {PlanError,initialState,command,completePayment,project} from './engine.mjs';
 
-// Repository owns optimistic concurrency. No user financial records are migrated.
+// Repository owns optimistic concurrency. Adoption is additive and never rewrites legacy rows.
+const schemaJobs=new WeakMap();
 export class D1PlanRepository {
   constructor(db) { this.db=db; }
   async initialize() {
+    if(!schemaJobs.has(this.db))schemaJobs.set(this.db,(async()=>{
     await this.db.prepare('CREATE TABLE IF NOT EXISTS finance_plans_v2_state (id INTEGER PRIMARY KEY CHECK(id=1), revision INTEGER NOT NULL, document TEXT NOT NULL)').run();
     await this.db.prepare('INSERT OR IGNORE INTO finance_plans_v2_state(id,revision,document) VALUES(1,0,?)').bind(JSON.stringify(initialState())).run();
+    })());
+    try {await schemaJobs.get(this.db);}catch(error){schemaJobs.delete(this.db);throw error;}
   }
   async read() {
     const row=await this.db.prepare('SELECT revision,document FROM finance_plans_v2_state WHERE id=1').first();
@@ -22,6 +26,7 @@ export class PlanService {
   async change(transform) {
     for(let attempt=0;attempt<5;attempt++) {
       const {revision,state}=await this.repository.read(), next=transform(state);
+      if(JSON.stringify(next.state)===JSON.stringify(state))return next.result;
       if(await this.repository.compareAndSet(revision,next.state))return next.result;
     }
     throw new PlanError('Un altro dispositivo sta aggiornando i piani. Riprova.',409);

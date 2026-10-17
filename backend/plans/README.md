@@ -35,3 +35,5 @@ LIFEOS_PRIVATE_WORKER=/private/worker-plans.mjs node --test --test-isolation=non
 Node 24. Il build usa esbuild 0.25.12. Il sorgente completo privato e la sua cronologia sono indicati in [worker-reference](../worker-reference/README.md); non copiarli nel repository pubblico. Il modulo risultante conserva frontend, autenticazione, binding `DB`, secret, migrazioni e marcatori originali. Non creare un nuovo D1 né azzerare marcatori durante la distribuzione.
 
 Il workflow `lifeos-plans-tests.yml` compila app e test per simulatore e verifica i flussi senza archivio né IPA. Il test col Worker completo è eseguito localmente: il repository pubblico non contiene i dati privati necessari al suo caricamento.
+
+Il packaging collega direttamente la funzione originale `saveTransaction` dopo l’autenticazione. Il pagamento conserva la transazione bancaria e l’idempotenza originali e rinvia il ricalcolo delle categorie alla lettura Analisi: il test sul Worker completo verifica 32 query per la prima registrazione e 39 dopo un cold start, entro 50. Non usare un wrapper privo di questo collegamento per il pacchetto distribuito.

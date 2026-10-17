@@ -43,7 +43,7 @@ export function augmentFinance(base,view,currentView,currentBase=base) {
 }
 // Install around the existing Worker export; preserve its authentication, cash
 // ledger and existing API routes. Do not expose a new unauthenticated handler.
-export function withFinancePlans(base,{repositoryFactory=env=>new D1PlanRepository(env.DB),clock=romeToday,cashFactory}={}) {
+export function withFinancePlans(base,{repositoryFactory=env=>new D1PlanRepository(env.DB),clock=romeToday,cashFactory,recordTransaction}={}) {
   return {async fetch(request,env,ctx) {
     const url=new URL(request.url), method=url.pathname.startsWith('/api/')?url.pathname.slice(5):'';
     if(!METHODS[method]&&method!=='getFinancePlans'&&method!=='resumeFinancePlanPayment'&&!readMethods.has(method)&&!protectedCash.has(method)&&!legacyWrites.has(method)&&method!=='getFinancePlanMovements'&&!quickWrites.has(method))return base.fetch(request,env,ctx);
@@ -74,10 +74,15 @@ export function withFinancePlans(base,{repositoryFactory=env=>new D1PlanReposito
           await env.DB.prepare("INSERT INTO movement_budget_policies(movement_source_row,treatment,recovery_json) VALUES (?,'savings','[]') ON CONFLICT(movement_source_row) DO UPDATE SET treatment='savings',recovery_json='[]'").bind(row.source_row).run();
           return row.source_row;
         }
-        const response=await forward('saveTransaction',[{requestId:p.requestId,name:p.name,amount:p.amountCents/100,type:'Spesa',category:p.category??'Altro',
-          date:p.date,account:'Trade Republic',months:p.competenceMonths,budgetTreatment:'savings',note:'Piano '+p.planId}]);
-        if(response.status!==200)throw new PlanError('Pagamento non confermato. Riprova dalla stessa operazione.',503);
-        const result=await response.json();
+        const input={requestId:p.requestId,name:p.name,amount:p.amountCents/100,type:'Spesa',category:p.category??'Altro',
+          date:p.date,account:'Trade Republic',months:p.competenceMonths,budgetTreatment:'savings',note:'Piano '+p.planId};
+        let result;
+        if(recordTransaction)result=await recordTransaction(env,input);
+        else {
+          const response=await forward('saveTransaction',[input]);
+          if(response.status!==200)throw new PlanError('Pagamento non confermato. Riprova dalla stessa operazione.',503);
+          result=await response.json();
+        }
         // Worker 11.63 returns true and persists APP-<requestId>. Resolve the
         // committed ledger row, including after an idempotent replay.
         let id=typeof result==='number'?result:result?.movementId??result?.row;
@@ -113,6 +118,10 @@ export function withFinancePlans(base,{repositoryFactory=env=>new D1PlanReposito
             const old=Object.values(state.plans).find(p=>p.legacy?.type==='recurring'&&p.category===category);
             if(old&&old.stopAfter&&String(input.date).slice(0,7)>old.stopAfter&&method==='saveTransaction')return forward(method,[{...input,budgetTreatment:'ordinary'}]);
           }
+        }
+        if(recordTransaction&&method==='saveTransaction')return json(await recordTransaction(env,args[0]));
+        if(recordTransaction&&method==='saveRecurringPayment'&&['Condominio','Elettricità','Gas','Acqua','Palestra','Abbonamenti','Benzina'].includes(args[0]?.name)) {
+          const x=args[0];return json(await recordTransaction(env,{type:'Spesa',account:x.account||'Trade Republic',amount:x.amount,name:x.name,category:x.name,date:x.date,note:x.note,months:x.months??1,requestId:x.requestId}));
         }
         return base.fetch(request,env,ctx);
       }

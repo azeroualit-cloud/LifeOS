@@ -312,3 +312,18 @@ test('modifica di quota e obiettivo decorre dal futuro e conserva il mese corren
   state=command(state,'edit',{requestId:'edit-goal-01',planId:'edited-goal',amountCents:80000,fromMonth:'2026-11',endMonth:'2026-12'},today).state;
   assert.equal(project(state,'2026-10').adjustmentCents,-20000);assert.equal(project(state,'2026-11').adjustmentCents,-30000);assert.equal(project(state,'2026-12').adjustmentCents,-30000);
 });
+
+test('packaging collega il registro originale direttamente dopo autenticazione, senza riclassificazione HTTP',async()=>{
+  const {repo,db}=await setup();
+  db.sqlite.exec('CREATE TABLE movements(source_row INTEGER PRIMARY KEY,import_id TEXT UNIQUE,amount REAL,actual_date TEXT,account TEXT,movement_type TEXT,status TEXT)');
+  let legacyWrites=0, directWrites=0;
+  const base={async fetch(request){if(new URL(request.url).pathname==='/api/saveTransaction'){legacyWrites++;return new Response('Not expected',{status:500});}return Response.json({summary:{budget:1000},transactions:[]});}};
+  const wrapper=withFinancePlans(base,{repositoryFactory:()=>repo,clock:()=>today,recordTransaction:async(env,p)=>{
+    directWrites++;env.DB.sqlite.prepare("INSERT OR IGNORE INTO movements VALUES(42,?,?,?,'Trade Republic','Spesa','Eseguito')").run('APP-'+p.requestId,-p.amount,p.date);return true;
+  }});
+  const operation=input('direct-ledger-01','recovery',{paymentDate:today});
+  const request=()=>new Request('https://lifeos.invalid/api/saveFinancePlan',{method:'POST',headers:{Origin:'https://lifeos.invalid'},body:JSON.stringify([operation])});
+  assert.equal((await wrapper.fetch(request(),{DB:db},{})).status,200);
+  assert.equal((await wrapper.fetch(request(),{DB:db},{})).status,200);
+  assert.equal(directWrites,1);assert.equal(legacyWrites,0);assert.equal((await repo.read()).state.payments['direct-ledger-01'].movementId,42);
+});

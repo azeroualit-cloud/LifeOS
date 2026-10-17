@@ -8,7 +8,7 @@ permissions:
   contents: read
 concurrency:
   group: plans-tests-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   server:
     runs-on: ubuntu-latest
@@ -94,6 +94,12 @@ jobs:
             for line in text.splitlines():
               if re.search(r'error:|failed|Executed .* tests|Test Suite .*passed|TEST SUCCEEDED',line):print(line[:1000])
           PY
+      - name: Export interface screenshots
+        if: always()
+        run: |
+          if [ -d app/build/Plans.xcresult ]; then
+            xcrun xcresulttool export attachments --path app/build/Plans.xcresult --output-path app/build/screenshots || true
+          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -105,4 +111,5 @@ jobs:
             app/build/unit-tests.log
             app/build/compile.log
             app/build/devices.json
+            app/build/screenshots
           retention-days: 7

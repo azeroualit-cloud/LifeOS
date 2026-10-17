@@ -10,3 +10,5 @@ L’utente chiede di conservare sorgenti e modifiche nel progetto e di non richi
 - Non generare IPA per il lavoro Piani senza una nuova istruzione dell’utente. Il workflow `lifeos-plans-tests.yml` compila e verifica sul simulatore senza archivio/IPA.
 - Saldo bancario e budget sono distinti. Non azzerare marcatori os_meta né creare una seconda spesa per una quota, un anticipo o un replay.
 - L’adozione legacy è implementata in backend/plans/legacy.mjs e viene attivata dal client Piani v2. Sostituisce le quote dalla decorrenza senza modificare le tabelle originali; non duplicare affitto, utenze o accantonamenti. Il Worker completo impacchettato va conservato solo nel repository/archivio privato. Il deployment richiede accesso Cloudflare effettivamente configurato: non considerare i test locali un’attivazione del server reale.
+
+- L’utente ha scelto di caricare manualmente `worker-plans.mjs` su Cloudflare. Il file completo si trova nell’archivio Drive privato già indicato. Non richiedere ancora l’accesso Cloudflare per questo passaggio; non dichiarare eseguito il deploy prima di conferma/verifica.
