@@ -1,4 +1,4 @@
-// runtime-export.mjs
+// backend/worker/runtime.mjs
 function attachSavingsPlanning(result, config, day2) {
   const cell = (row) => {
     const record = config.find((r) => r.sheet === "Budget" && Number(r.row_number) === row);
@@ -3237,7 +3237,7 @@ async function writeAction(env, method, args) {
       throw Error("Operazione non disponibile.");
   }
 }
-var runtime_export_default = {
+var runtime_default = {
   async fetch(request, env, ctx) {
     const url = new URL(request.url), path = url.pathname;
     if (request.method === "GET" && path === "/apple-touch-icon.png")
@@ -3420,7 +3420,7 @@ var runtime_export_default = {
   }
 };
 
-// plans/engine.mjs
+// backend/plans/engine.mjs
 var PlanError = class extends Error {
   constructor(message, status = 422) {
     super(message);
@@ -3681,7 +3681,7 @@ function project(state, selectedMonth) {
   };
 }
 
-// plans/legacy.mjs
+// backend/plans/legacy.mjs
 var money = (n) => Math.round(Number(n || 0) * 100);
 var utility = /* @__PURE__ */ new Set(["Elettricit\xE0", "Gas", "Acqua"]);
 var active = (p) => p.status !== "Annullato";
@@ -3819,7 +3819,7 @@ function hideAdoptedLegacy(base, view) {
   for (const key of ["extraPlan", "forecastPlan"]) if (base[key]) base[key].allocations = base[key].allocations.filter((a) => !sources.has(Number(a.extraordinary_source_row)));
 }
 
-// plans/service.mjs
+// backend/plans/service.mjs
 var schemaJobs = /* @__PURE__ */ new WeakMap();
 var D1PlanRepository = class {
   constructor(db) {
@@ -3894,7 +3894,7 @@ var PlanService = class {
   }
 };
 
-// plans/worker-adapter.mjs
+// backend/plans/worker-adapter.mjs
 var METHODS = { saveFinancePlan: "create", recordFinancePlanPayment: "pay", stopFinancePlan: "stop", editFinancePlan: "edit" };
 var readMethods = /* @__PURE__ */ new Set(["getFinanceOverview", "getFinanceData"]);
 var protectedCash = /* @__PURE__ */ new Set(["editMovement", "deleteMovement"]);
@@ -4085,8 +4085,8 @@ function withFinancePlans(base, { repositoryFactory = (env) => new D1PlanReposit
   } };
 }
 
-// entry.mjs
-var entry_default = withFinancePlans(runtime_export_default, { recordTransaction: (env, input) => saveTransaction(env, input) });
+// backend/worker/entry.mjs
+var entry_default = withFinancePlans(runtime_default, { recordTransaction: (env, input) => saveTransaction(env, input) });
 export {
   entry_default as default
 };
