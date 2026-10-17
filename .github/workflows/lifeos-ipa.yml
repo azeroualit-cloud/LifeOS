@@ -1,0 +1,95 @@
+name: Life OS - IPA verificata
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: lifeos-ipa-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  ipa:
+    runs-on: macos-15
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - name: Select Xcode 26
+        run: |
+          python3 - <<'PY'
+          import pathlib,re,os
+          choices=[]
+          for p in pathlib.Path('/Applications').glob('Xcode_*.app'):
+            m=re.fullmatch(r'Xcode_([0-9.]+).app',p.name)
+            if m and int(m[1].split('.')[0])>=26: choices.append((tuple(map(int,m[1].split('.'))),p))
+          assert choices
+          with open(os.environ['GITHUB_ENV'],'a') as f:f.write('DEVELOPER_DIR='+str(max(choices)[1]/'Contents/Developer')+'\n')
+          PY
+      - name: Unpack verified source
+        run: |
+          python3 - <<'PY'
+          import hashlib,pathlib,zipfile
+          p=pathlib.Path('lifeos-native.zip')
+          assert hashlib.sha256(p.read_bytes()).hexdigest()=='a59829f42ec1944dcc30e42c50878adf9292c57aff93c7d63396b4390b7de15f'
+          with zipfile.ZipFile(p) as z:
+            assert all(not pathlib.PurePosixPath(n).is_absolute() and '..' not in pathlib.PurePosixPath(n).parts for n in z.namelist())
+            z.extractall('app')
+          PY
+          python3 app/scripts/check-design-system.py
+          brew install xcodegen
+          cd app
+          xcodegen generate
+      - name: Archive iPhone build 54
+        working-directory: app
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          xcodebuild archive -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -configuration Release -destination 'generic/platform=iOS' -archivePath build/LifeOS.xcarchive MARKETING_VERSION=0.9.3 CURRENT_PROJECT_VERSION=54 CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/archive.log
+      - name: Verify and package unsigned IPA for Signulous
+        working-directory: app
+        run: |
+          set -euo pipefail
+          mkdir -p build/Payload download
+          cp -R build/LifeOS.xcarchive/Products/Applications/LifeOSProbe.app build/Payload/
+          cp LifeOS.entitlements download/LifeOS.entitlements
+          python3 - <<'PY'
+          import pathlib,plistlib,hashlib,json,subprocess
+          app=pathlib.Path('build/Payload/LifeOSProbe.app')
+          info=plistlib.loads((app/'Info.plist').read_bytes())
+          assert info['CFBundleShortVersionString']=='0.9.3'
+          assert info['CFBundleVersion']=='54'
+          assert info['CFBundleIdentifier']=='com.nas.lifeos.probe'
+          assert info['CFBundleSupportedPlatforms']==['iPhoneOS']
+          assert info.get('NSHealthShareUsageDescription') and info.get('NSHealthUpdateUsageDescription')
+          assert plistlib.loads(pathlib.Path('LifeOS.entitlements').read_bytes())['com.apple.developer.healthkit'] is True
+          executable=app/info['CFBundleExecutable']
+          assert 'arm64' in subprocess.check_output(['lipo','-archs',str(executable)],text=True)
+          assert 'IOSSIMULATOR' not in subprocess.check_output(['vtool','-show-build',str(executable)],text=True)
+          binary=executable.read_bytes()
+          markers=['plan-record-payment','plan-payment-confirm','plan-link-movement-','X-LifeOS-Plans-Version']
+          for marker in markers: assert marker.encode() in binary,marker
+          metadata={'version':'0.9.3','build':'54','bundle_id':info['CFBundleIdentifier'],'platform':'iPhoneOS','architecture':'arm64','signing':'unsigned; sign with Signulous','source_commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'source_zip_sha256':hashlib.sha256(pathlib.Path('../lifeos-native.zip').read_bytes()).hexdigest(),'plans_binary_markers':markers}
+          pathlib.Path('download/BUILD-INFO.json').write_text(json.dumps(metadata,indent=2)+'\n')
+          PY
+          cd build
+          zip -qr ../download/LifeOS-0.9.3-build54-unsigned.ipa Payload
+          cd ../download
+          shasum -a 256 LifeOS-0.9.3-build54-unsigned.ipa > SHA256.txt
+          python3 - <<'PY'
+          import zipfile,plistlib
+          with zipfile.ZipFile('LifeOS-0.9.3-build54-unsigned.ipa') as z:
+            assert z.testzip() is None
+            info=plistlib.loads(z.read('Payload/LifeOSProbe.app/Info.plist'))
+            assert info['CFBundleVersion']=='54'
+          print('IPA_VERIFIED: Life OS 0.9.3 build 54, iPhoneOS arm64, Piani v2')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LifeOS-0.9.3-build54-per-Signulous
+          path: app/download/
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: LifeOS-build54-diagnostic
+          path: app/build/archive.log
+          retention-days: 7
