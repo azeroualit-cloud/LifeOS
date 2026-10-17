@@ -1,0 +1,40 @@
+name: Life OS - Piani, schermate dei test
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Esecuzione da cui recuperare le schermate
+        required: true
+        default: '39034285367'
+  push:
+    branches: ['feature/plans-v2']
+    paths: ['.github/workflows/lifeos-plans-evidence.yml']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: Plans-test-results-no-IPA
+          run-id: ${{ inputs.run_id || '39034285367' }}
+          github-token: ${{ github.token }}
+          path: evidence
+      - name: Select PNG attachments
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import shutil
+          out=Path('screenshots');out.mkdir()
+          for f in Path('evidence').rglob('*'):
+            if f.is_file() and (f.suffix.lower()=='.png' or f.name=='manifest.json'):
+              shutil.copyfile(f,out/f.name)
+          print('Files:',len(list(out.iterdir())))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Plans-interface-screenshots
+          path: screenshots
+          retention-days: 7
