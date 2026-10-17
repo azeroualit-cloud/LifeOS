@@ -1,6 +1,12 @@
 # Worker Life OS 11.63 — riferimento conservato
 
-Provenienza: codice incollato dall’utente il 17 ottobre 2026. Il testo ricevuto contiene un tratto esplicitamente troncato nella parte APP_HTML/motore finanziario. Questo archivio conserva il contratto verificabile e gli estratti disponibili; **non è una copia integrale né un Worker distribuibile**. Non inventare le parti mancanti. Non richiedere nuovamente il medesimo incolla come passaggio ordinario delle modifiche.
+Provenienza: Worker LifeOS 11.63 incollato e poi fornito come allegato `Testo incollato.txt` il 17 ottobre 2026. L’allegato successivo è completo (468291 byte), privo dei troncamenti presenti nel messaggio precedente e sintatticamente valido con `node --check`.
+
+Il sorgente integrale è conservato nel repository Git privato **locale** `/workspace/LifeOS-worker-private`, file `worker.mjs`; il commit iniziale conserva i byte originali, con hash e provenienza in `provenance.json`. SHA-256 originale: `f40e23d3a0e8131c68db8a4962d33002c6d5fce17214e5d3d87019beb10232ce`. Archivio locale comprensivo di Git bundle: `/workspace/work/worker-archive-check/LifeOS-Worker-privato.zip`.
+
+La copia remota privata non è ancora disponibile: GitHub non consente alla connessione attuale di creare repository; il controllo automatico ha respinto l’upload a Google Drive senza autorizzazione specifica alla destinazione per questo contenuto bancario/personale. Non affermare che il backup remoto sia stato completato. Dopo un upload autorizzato e verificato, annotare qui il file ID per le sessioni future.
+
+Questo repository pubblico conserva soltanto il contratto e gli estratti privi di movimenti personali. Il Worker completo non va aggiunto al repository pubblico. Non richiedere nuovamente all’utente lo stesso codice se è ancora accessibile nel repository locale o nel futuro archivio remoto autorizzato.
 
 La funzione originale di registrazione è in `save-transaction.mjs`; il test in `plans.test.mjs` la esegue su SQLite simulando una risposta persa dopo il commit e verifica un solo movimento e un solo delta saldo.
 
@@ -43,4 +49,4 @@ Preservare Cloudflare Access (ACCESS_EMAIL e ctx.access) oppure APP_PASSWORD, co
 
 Le scritture dirette si chiamano editMovement e deleteMovement. I pagamenti Piani v2 collegati sono protetti dall’adapter. I pagamenti legacy restano gestiti dalle tabelle extraordinary_movement_links e extraordinary_settlements.
 
-Il codice ricevuto non è stato distribuito e il database reale non è stato modificato. Per distribuire serve il Worker completo disponibile in un archivio privato persistente e il packaging dell’entrypoint con withFinancePlans.
+Il codice ricevuto non è stato distribuito e il database reale non è stato modificato. Per distribuire serve il packaging del Worker completo privato con l’entrypoint withFinancePlans, oltre al completamento dell’adozione legacy.
