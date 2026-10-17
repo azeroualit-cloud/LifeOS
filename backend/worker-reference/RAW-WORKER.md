@@ -8,10 +8,16 @@ Include l’integrazione Piani e le correzioni delle letture SQL per Analisi. Le
 
 Verifica: 34 test server superati sul bundle completo con SQLite sintetico; decifratura verificata contro la configurazione originale privata; 48 confronti delle riconciliazioni con risultati identici. Scansione del bundle senza identificativi bancari in chiaro o seed personali.
 
-SHA-256: `b9e50b2b3e68c31f431209c2dc7e62cb4a8d488f57fc1f87649a24f69711bcaf`.
+SHA-256: `1523de704f03f158f4cfcf0489e79ccbc9924905e07fd22bc1a180b3fac0a531`.
 
 Il sorgente originale integrale e la procedura di generazione restano nell’archivio privato indicato in AGENTS.md. Nessun deploy Cloudflare eseguito: caricamento manuale scelto dall’utente.
 
 Editor correction: all seven reported diagnostics reproduced with TypeScript 5.9.3, then resolved. `tsc --allowJs --checkJs --noEmit --target es2022 --module esnext --lib es2022,webworker worker.js` passes without diagnostics. Map grouping uses a compatible loop; optional integration callbacks default to null; monthly calculated fields are declared when each record is created. All 34 server tests and 48 private reconciliation comparisons pass.
 
 Build pubblica riproducibile: `node backend/worker/build.mjs`. Il runtime sanificato è versionato in `backend/worker/runtime.mjs`; le integrazioni provengono direttamente da `backend/plans/`. Il workflow `lifeos-worker.yml` ricompila e confronta byte per byte con worker.js, controlla TypeScript e prova il bundle consegnato contro D1 sintetico. Se i sorgenti cambiano senza rigenerare worker.js, la verifica fallisce. Il workflow produce una copia verificata, senza modificare Cloudflare.
+
+## Interfaccia web Piani v2
+
+Il frontend servito dal Worker ora usa Piani v2: Obiettivo, Fondo, Ricorrenza fissa, Utenza stimata, Anticipo budget, Recupero spesa. Il build incorpora `backend/worker/plans-web.js` e abilita il contratto versione 2 nelle richieste. Il modulo Nuova straordinaria è sostituito dal modulo Nuovo piano; le letture Extra passano all’overview v2 per adottare le voci esistenti senza quote duplicate. Pagamento, collegamento, modifica futura, interruzione e ripresa usano gli endpoint v2. Ogni tentativo dopo un errore conserva lo stesso ID e payload.
+
+Il test `backend/worker/plans-web.test.mjs` apre in Chromium l’HTML realmente restituito dal Worker (dati API sintetici), verifica i sei tipi, l’assenza di chiamate legacy, retry, collegamento, modifica, stop, fondi con pagamenti ripetuti, ripresa e layout mobile. Il workflow esegue questa prova e salva screenshot desktop e mobile. I test SQLite separati verificano il registro reale sul bundle completo con dati sintetici.

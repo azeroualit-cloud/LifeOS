@@ -24,6 +24,21 @@ jobs:
         env:
           LIFEOS_PRIVATE_WORKER: ${{ github.workspace }}/worker.js
         run: node --test --test-isolation=none backend/plans/*.test.mjs
+      - name: Install browser for web regressions
+        run: |
+          npm install --prefix "$RUNNER_TEMP/lifeos-web" --no-save playwright@1.56.1
+          "$RUNNER_TEMP/lifeos-web/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Verify actual embedded web interface on desktop and mobile
+        env:
+          LIFEOS_PLAYWRIGHT_MODULE: ${{ runner.temp }}/lifeos-web/node_modules/playwright/index.mjs
+          LIFEOS_WEB_SCREENSHOTS: ${{ runner.temp }}/lifeos-web/screenshots
+        run: node backend/worker/plans-web.test.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: worker-web-screenshots
+          path: ${{ runner.temp }}/lifeos-web/screenshots
+          if-no-files-found: ignore
       - name: Publish verified copy and checksum
         run: sha256sum worker.js > worker.js.sha256
       - uses: actions/upload-artifact@v4

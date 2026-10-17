@@ -30,3 +30,5 @@ L’utente chiede di conservare sorgenti e modifiche nel progetto e di non richi
 - Preferenza persistente: ogni consegna futura di worker.js deve essere un link GitHub Raw verificato, come richiesto il 17 ottobre 2026. Verificare anche `tsc --allowJs --checkJs --noEmit --target es2022 --module esnext --lib es2022,webworker worker.js` prima di consegnare.
 
 - Worker Raw: sorgente pubblico sanificato in backend/worker/runtime.mjs, entry in backend/worker/entry.mjs. Rigenerare con node backend/worker/build.mjs dopo modifiche a runtime o backend/plans. Eseguire --check. lifeos-worker.yml blocca bundle obsoleti e verifica il worker.js realmente consegnato. Non ricreare il runtime pubblico dal bundle né pubblicare il runtime privato.
+
+- Il web è aggiornato a Piani v2 tramite backend/worker/plans-web.js incorporato dal build. Non consegnare un Worker con il solo backend aggiornato e il vecchio modulo Nuova straordinaria. Il workflow verifica anche l’HTML reale in Chromium (plans-web.test.mjs), oltre a TypeScript e ai test D1.
