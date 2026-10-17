@@ -95,6 +95,11 @@ test('Worker completo: autenticazione, adozione, pagamento, saldo e mesi storici
   const maintenance=analysis.plansV2.plans.find(p=>p.name==='Manutenzione auto');
   await api('recordFinancePlanPayment',[{requestId:'cold-maintenance-01',planId:maintenance.id,amountCents:2500,date:'2026-10-17'}]);
   assert.equal(sql.prepare('SELECT COUNT(*) n FROM account_balance_events').get().n,4);
+  sql.prepare("DELETE FROM os_meta WHERE key='rent_condominium_split_v1158'").run();
+  sql.prepare("UPDATE source_rows SET values_json=json_set(values_json,'$[14]',550) WHERE sheet='Budget' AND row_number=3").run();
+  worker=(await import(pathToFileURL(process.env.LIFEOS_PRIVATE_WORKER).href+'?cold-rent-already-separated')).default;
+  await api('getFinanceData',[2025,12]);
+  assert.equal(sql.prepare("SELECT value FROM os_meta WHERE key='rent_condominium_split_v1158'").get(),undefined);
   // Many changed classifications must stay one bulk write, not one query per movement.
   const historicalInsert=sql.prepare("INSERT INTO movements(source_row,actual_date,budget_date,description,amount,account,category,movement_type,status,notes) VALUES(?, '2024-01-15','2024-01-15','Fixture alimentari',-1,'Trade Republic','Alimentari','Spesa','Eseguito','[Categoria manuale]')");
   for(let i=0;i<300;i++)historicalInsert.run(10000+i);
