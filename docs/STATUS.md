@@ -1,3 +1,9 @@
+## Webapp — revisione locale 17 ottobre 2026
+
+Sorgente completo recuperato dal file allegato e versionato in `web/worker.mjs`, HTML leggibile in `web/app.html`. Palette platino, Finanza aperta senza card, Budget/Extra/Spesa (Spesa a destra), Budget separato, grafici esistenti in Analisi; calendario uniforme senza fondi weekend e selezione sul numero; più contestuale nell’intestazione e microanimazioni con Riduci movimento. Rimossi dalla UI il Sankey storico e il riepilogo annuale. Backend identico alla baseline allegata.
+
+Build JavaScript/HTML e verifica Playwright su Chromium passate a 320, 375 e 1280 px senza errori JS o overflow nelle viste esercitate. Fixture locali, nessun test su dati reali. Screenshot dark in `web/previews`. Dettagli e limiti in `web/README.md`: parità funzionale completa Analisi ancora da implementare. **Non distribuito su Cloudflare**: token runtime assente; necessario confronto baseline/live prima del deploy. IPA 0.9.0 build 51 invariata.
+
 ## Consegna verificata — 0.9.0 build 51
 
 **Build Apple riuscita, IPA unica disponibile.** [Pacchetto Signulous](https://github.com/azeroualit-cloud/LifeOS/actions/runs/38978815976/artifacts/12081542774) · [esecuzione CI](https://github.com/azeroualit-cloud/LifeOS/actions/runs/38978815976) · [istruzioni e prove](native/CONSEGNA-0.9.0.md).
