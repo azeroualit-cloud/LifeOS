@@ -31,7 +31,7 @@ test('Worker completo: autenticazione, adozione, pagamento, saldo e mesi storici
   const db={prepare(query){let args=[];return {bind(...values){args=values;return this;},async run(){queryCount++;const r=sql.prepare(query).run(...args);return {meta:{changes:Number(r.changes),last_row_id:Number(r.lastInsertRowid)}};},async first(){queryCount++;return sql.prepare(query).get(...args)??null;},async all(){queryCount++;return {results:sql.prepare(query).all(...args)};}};},async batch(statements){sql.exec('BEGIN');try{const result=[];for(const s of statements)result.push(await s.run());sql.exec('COMMIT');return result;}catch(error){sql.exec('ROLLBACK');throw error;}}};
   const env={DB:db,APP_PASSWORD:'synthetic-test-password-at-least-24-chars'};
   const request=(method,args=[],authorized=true)=>new Request('https://test.invalid/api/'+method,{method:'POST',headers:{Origin:'https://test.invalid','X-LifeOS-Plans-Version':'2',...(authorized?{Authorization:'Basic '+Buffer.from('nas:'+env.APP_PASSWORD).toString('base64')}:{})},body:JSON.stringify(args)});
-  async function api(method,args=[]){queryCount=0;const response=await worker.fetch(request(method,args),env,{});const value=await response.text();assert.equal(response.status,200,method+': '+value.slice(0,300));if(method==='recordFinancePlanPayment'){paymentQueries.push(queryCount);assert.ok(queryCount<=50,'Pagamento esegue '+queryCount+' query SQL');}return JSON.parse(value);}
+  async function api(method,args=[]){queryCount=0;const response=await worker.fetch(request(method,args),env,{});const value=await response.text();assert.equal(response.status,200,method+': '+value.slice(0,300));if(['getFinanceCategoryOptions','getFinanceData','getFinanceOverview'].includes(method)){assert.ok(queryCount<=50,method+' esegue '+queryCount+' query SQL');t.diagnostic(method+' SQL: '+queryCount);}if(method==='recordFinancePlanPayment'){paymentQueries.push(queryCount);assert.ok(queryCount<=50,'Pagamento esegue '+queryCount+' query SQL');}return JSON.parse(value);}
   assert.equal((await worker.fetch(request('getFinancePlans',[],false),env,{})).status,401);
   const oldRequest=request('getFinanceOverview',[2026,10]);oldRequest.headers.delete('X-LifeOS-Plans-Version');
   const oldResponse=await worker.fetch(oldRequest,env,{});assert.equal(oldResponse.status,200);
@@ -82,11 +82,14 @@ test('Worker completo: autenticazione, adozione, pagamento, saldo e mesi storici
   assert.equal(sql.prepare('SELECT COUNT(*) n FROM account_balance_events').get().n,3);
   const historicalAgain=(await api('getFinanceOverview',[2026,9])).summary.monthlyRemaining;
   assert.equal(historicalAgain,historical);
+  await api('getFinanceCategoryOptions');
   const analysis=await api('getFinanceData',[2026,10]);
+  await api('getFinanceData',[2026,9]);
   assert.equal(analysis.summary.budget,afterBill.summary.budget);
   assert.equal(analysis.forecastPlan.allocations.filter(r=>r.extraordinary_source_row===2).length,0);
   assert.equal(analysis.plansV2.plans.filter(p=>p.name==='Manutenzione auto').length,1);
   worker=(await import(pathToFileURL(process.env.LIFEOS_PRIVATE_WORKER).href+'?cold-start')).default;
+  await api('getFinanceData',[2026,9]);
   const maintenance=analysis.plansV2.plans.find(p=>p.name==='Manutenzione auto');
   await api('recordFinancePlanPayment',[{requestId:'cold-maintenance-01',planId:maintenance.id,amountCents:2500,date:'2026-10-17'}]);
   assert.equal(sql.prepare('SELECT COUNT(*) n FROM account_balance_events').get().n,4);

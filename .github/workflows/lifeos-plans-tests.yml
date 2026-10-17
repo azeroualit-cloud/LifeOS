@@ -5,7 +5,7 @@ on:
       focus:
         description: Ripeti tutti i controlli o il solo flusso fondo
         type: choice
-        options: [all, fund]
+        options: [all, fund, regressions]
         default: all
   push:
     branches: ['feature/plans-v2']
@@ -91,6 +91,8 @@ jobs:
           set -euo pipefail
           if [ "${{ inputs.focus }}" = fund ]; then
             FILTERS="-only-testing:LifeOSProbeUITests/NativeInterfaceTests/testPlansFundCanEditFutureQuotaAndLinkAnExistingMovement"
+          elif [ "${{ inputs.focus }}" = regressions ]; then
+            FILTERS="-only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHealthChartTransitionAndFinanceMonthRoundTrip -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testAnalysisShowsFourChartsAndCategoryPeriods"
           else
             FILTERS="-only-testing:LifeOSProbeUITests/NativeInterfaceTests/testPlansInfoAndMonthOnlyAdvanceFlow -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testPlansGoalPaymentWithOptionalOverageRecovery -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testPlansFundCanEditFutureQuotaAndLinkAnExistingMovement -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHealthScenarioCanBeEditedWithoutAddingNavigationTab -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testAnalysisShowsFourChartsAndCategoryPeriods -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testExtraActualPaymentUsesSavingsAndKeepsMonthlyBudget -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testNegativeBudgetAndGroupedAmounts"
           fi

@@ -32,7 +32,7 @@ jobs:
           python3 - <<'PY'
           import hashlib,pathlib,zipfile
           p=pathlib.Path('lifeos-native.zip')
-          assert hashlib.sha256(p.read_bytes()).hexdigest()=='a59829f42ec1944dcc30e42c50878adf9292c57aff93c7d63396b4390b7de15f'
+          assert hashlib.sha256(p.read_bytes()).hexdigest()=='658e2fbca3b653bf70a342c688d941028f608d298204d093d8abb429e3c2db7d'
           with zipfile.ZipFile(p) as z:
             assert all(not pathlib.PurePosixPath(n).is_absolute() and '..' not in pathlib.PurePosixPath(n).parts for n in z.namelist())
             z.extractall('app')

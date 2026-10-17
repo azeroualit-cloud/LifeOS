@@ -6,6 +6,8 @@ export class D1PlanRepository {
   constructor(db) { this.db=db; }
   async initialize() {
     if(!schemaJobs.has(this.db))schemaJobs.set(this.db,(async()=>{
+    try { if(await this.db.prepare('SELECT id FROM finance_plans_v2_state WHERE id=1').first())return; }
+    catch(error) { if(!String(error.message).includes('no such table'))throw error; }
     await this.db.prepare('CREATE TABLE IF NOT EXISTS finance_plans_v2_state (id INTEGER PRIMARY KEY CHECK(id=1), revision INTEGER NOT NULL, document TEXT NOT NULL)').run();
     await this.db.prepare('INSERT OR IGNORE INTO finance_plans_v2_state(id,revision,document) VALUES(1,0,?)').bind(JSON.stringify(initialState())).run();
     })());
