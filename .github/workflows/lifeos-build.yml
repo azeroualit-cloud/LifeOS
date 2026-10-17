@@ -48,7 +48,7 @@ jobs:
           import hashlib, pathlib, zipfile
           source = pathlib.Path('lifeos-native.zip')
           if source.is_file():
-              assert hashlib.sha256(source.read_bytes()).hexdigest() == 'f71e38f3953e7febfb1258654245cbf51bf1e8de06d41b9e2c6229ddc72e5f97', 'ZIP sorgenti diverso da quello previsto'
+              assert hashlib.sha256(source.read_bytes()).hexdigest() == 'd5645eab2e5c6d4f190fa759a027fc6fecb1a9dba16e605d15c783d84606592c', 'ZIP sorgenti diverso da quello previsto'
               with zipfile.ZipFile(source) as archive:
                   for name in archive.namelist():
                       p = pathlib.PurePosixPath(name)
@@ -200,10 +200,25 @@ jobs:
           mkdir -p build/Payload download
           cp -R build/LifeOS.xcarchive/Products/Applications/LifeOSProbe.app build/Payload/
           cp LifeOS.entitlements download/LifeOS.entitlements
+          python3 - <<'PYVERIFY'
+          import pathlib, plistlib
+          app = pathlib.Path('build/Payload/LifeOSProbe.app')
+          info = plistlib.loads((app / 'Info.plist').read_bytes())
+          assert info['CFBundleShortVersionString'] == '0.9.1', 'Versione IPA errata'
+          assert info['CFBundleVersion'] == '52', 'Build IPA errata'
+          assert info['CFBundleIdentifier'] == 'com.nas.lifeos.probe', 'Bundle IPA errato'
+          assert info.get('NSHealthShareUsageDescription'), 'Privacy HealthKit mancante'
+          assert info['CFBundleSupportedPlatforms'] == ['iPhoneOS'], 'Piattaforma errata'
+          ent = plistlib.loads(pathlib.Path('LifeOS.entitlements').read_bytes())
+          assert ent.get('com.apple.developer.healthkit') is True
+          text = 'Life OS 0.9.1 (52) · iPhoneOS · com.nas.lifeos.probe · HealthKit sola lettura'
+          pathlib.Path('download/BUILD-INFO.txt').write_text(text + '\n')
+          print('::notice::ARCHIVE_VERIFIED: ' + text)
+          PYVERIFY
           cd build
-          zip -qr ../download/LifeOS-unsigned.ipa Payload
+          zip -qr ../download/LifeOS-0.9.1-build52-unsigned.ipa Payload
           cd ../download
-          shasum -a 256 LifeOS-unsigned.ipa > SHA256.txt
+          shasum -a 256 LifeOS-0.9.1-build52-unsigned.ipa > SHA256.txt
       - name: Errori XCTest in annotazioni
         if: always()
         working-directory: app
@@ -240,7 +255,7 @@ jobs:
       - name: IPA unica per Signulous
         uses: actions/upload-artifact@v5
         with:
-          name: LifeOS-IPA-per-Signulous
+          name: LifeOS-0.9.1-build52-per-Signulous
           path: app/download/
           retention-days: 7
           if-no-files-found: error
