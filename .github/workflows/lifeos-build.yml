@@ -2,6 +2,10 @@ name: Life OS - App nativa
 on:
   workflow_dispatch:
     inputs:
+      publish_existing:
+        description: Pubblica il solo IPA verificato della build 52 come download diretto
+        type: boolean
+        default: false
       verify_scope:
         description: Verifica completa o mirata a dashboard e HealthKit
         type: choice
@@ -16,7 +20,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   build:
-    if: github.event.repository.private == false
+    if: github.event.repository.private == false && inputs.publish_existing != true
     runs-on: macos-15
     timeout-minutes: 75
     defaults:
@@ -271,3 +275,35 @@ jobs:
             app/build/Compact.xcresult
           retention-days: 1
           if-no-files-found: ignore
+
+  publish-verified-ipa:
+    if: github.event_name == 'workflow_dispatch' && inputs.publish_existing == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Scarica e controlla il pacchetto verificato
+        run: |
+          gh run download 38998944242 --name LifeOS-0.9.1-build52-per-Signulous --dir download
+          cd download
+          sha256sum -c SHA256.txt
+          python3 - <<'PYVERIFY'
+          import zipfile, plistlib
+          path = 'LifeOS-0.9.1-build52-unsigned.ipa'
+          with zipfile.ZipFile(path) as archive:
+              assert archive.testzip() is None
+              info = plistlib.loads(archive.read('Payload/LifeOSProbe.app/Info.plist'))
+              assert info['CFBundleShortVersionString'] == '0.9.1'
+              assert info['CFBundleVersion'] == '52'
+              assert info['CFBundleIdentifier'] == 'com.nas.lifeos.probe'
+              assert info.get('NSHealthShareUsageDescription')
+          print('::notice::IPA_VERIFIED: Life OS 0.9.1 build 52, HealthKit privacy presente')
+          PYVERIFY
+      - name: Pubblica download diretto IPA
+        run: |
+          gh release create v0.9.1-build52 --target c905d0782c76ba4fb2cde0c631b455673e0117c1 --title 'Life OS 0.9.1 build 52' --notes 'IPA senza firma. Dashboard peso e calorie con HealthKit; la firma finale deve supportare HealthKit.'
+          gh release upload v0.9.1-build52 download/LifeOS-0.9.1-build52-unsigned.ipa download/SHA256.txt download/BUILD-INFO.txt
