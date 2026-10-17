@@ -19,4 +19,4 @@ Verifica iOS finale riuscita: workflow `lifeos-plans-tests.yml`, modalità `regr
 
 IPA 0.9.4 build 55 verificata per iPhoneOS arm64: run 39043121169, artifact 12104892606. SHA-256 e provenienza in IPA-build55.json. Consegna soltanto GitHub; nessun binario IPA nel backup Drive.
 
-Controllo visivo aggiuntivo dell’intera scheda: primo tentativo 39043315482 fermato da un timeout durante app.launch, prima delle verifiche della scheda. Ripetizione 39043992563 con un test di riscaldamento del simulatore, in corso.
+Controllo visivo aggiuntivo dell’intera scheda: primo tentativo 39043315482 fermato da un timeout durante app.launch, prima delle verifiche della scheda. Ripetizione 39043992563 riuscita: test breve e cattura dell’intera scheda passati. Screenshot esaminato: raccordo continuo, kcal a sinistra, kg a destra, valori superiori invertiti e testi semplificati.
