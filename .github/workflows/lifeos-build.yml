@@ -2,6 +2,10 @@ name: Life OS - App nativa
 on:
   workflow_dispatch:
     inputs:
+      inspect_release:
+        description: Controlla il binario IPA pubblicato senza ricompilare
+        type: boolean
+        default: false
       publish_existing:
         description: Pubblica il solo IPA verificato della build 52 come download diretto
         type: boolean
@@ -20,7 +24,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   build:
-    if: github.event.repository.private == false && inputs.publish_existing != true
+    if: github.event.repository.private == false && inputs.publish_existing != true && inputs.inspect_release != true
     runs-on: macos-15
     timeout-minutes: 75
     defaults:
@@ -307,3 +311,32 @@ jobs:
         run: |
           gh release view v0.9.1-build52 >/dev/null 2>&1 || gh release create v0.9.1-build52 --target c905d0782c76ba4fb2cde0c631b455673e0117c1 --title 'Life OS 0.9.1 build 52' --notes 'IPA senza firma. Dashboard peso e calorie con HealthKit; la firma finale deve supportare HealthKit.'
           gh release upload v0.9.1-build52 download/LifeOS-0.9.1-build52-unsigned.ipa download/SHA256.txt download/BUILD-INFO.txt
+
+  inspect-published-ipa:
+    if: github.event_name == 'workflow_dispatch' && inputs.inspect_release == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Controlla il file pubblico effettivo
+        run: |
+          gh release download v0.9.1-build52 --pattern '*.ipa' --pattern SHA256.txt --dir published
+          cd published
+          sha256sum -c SHA256.txt
+          python3 - <<'PYIPA'
+          import zipfile, plistlib, hashlib, pathlib
+          ipa = pathlib.Path('LifeOS-0.9.1-build52-unsigned.ipa')
+          with zipfile.ZipFile(ipa) as archive:
+              info = plistlib.loads(archive.read('Payload/LifeOSProbe.app/Info.plist'))
+              binary = archive.read('Payload/LifeOSProbe.app/' + info['CFBundleExecutable'])
+              print('::notice::PUBLISHED_IPA: version=%s build=%s bundle=%s sha256=%s' % (info['CFBundleShortVersionString'], info['CFBundleVersion'], info['CFBundleIdentifier'], hashlib.sha256(ipa.read_bytes()).hexdigest()))
+              for marker in ['home-health-heading', 'health-build-version', 'home-health-detail', 'health-intake', 'Collega o gestisci Salute', 'Esplora e simula']:
+                  found = marker.encode() in binary
+                  print('::notice::BINARY_MARKER: %s=%s' % (marker, found))
+                  assert found, 'Nuova UI assente nel binario: ' + marker
+              assert info['CFBundleShortVersionString'] == '0.9.1' and info['CFBundleVersion'] == '52'
+              print('::notice::HEALTHKIT_PRIVACY: ' + info.get('NSHealthShareUsageDescription', 'MISSING'))
+          PYIPA
