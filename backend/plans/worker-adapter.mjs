@@ -37,6 +37,8 @@ export function augmentFinance(base,view,currentView,currentBase=base) {
   const currentNames=new Set(currentView.plans.filter(p=>p.legacy?.type==='recurring').map(p=>p.name));
   const currentExtra=currentReplaced-(currentBase.summary.recurringCommitments??[]).filter(r=>currentNames.has(r.name)).reduce((n,r)=>n+Math.round(r.remaining*100),0);
   summary.recurringCommitments=[...(currentBase.summary.recurringCommitments??[]).filter(r=>!currentNames.has(r.name)).map(r=>r.name==='Straordinarie e auto'?{...r,remaining:r.remaining-currentExtra/100,estimate:r.estimate-currentExtra/100}:r),...currentView.plans.filter(p=>p.fundCents||p.contributionCents>0).map(p=>({name:p.name,estimate:p.contributionCents/100,remaining:p.fundCents/100,planId:p.id}))];
+  for(const key of ['monthlyRemaining','monthlyCommitted','committedCurrent','remainingFree'])if(Number.isFinite(summary[key]))summary[key]=Math.round(summary[key]*100)/100;
+  summary.monthlyBudgetBreakdown=summary.monthlyBudgetBreakdown.map(r=>({...r,amount:Math.round(r.amount*100)/100}));
   result.plansV2=view;return result;
 }
 // Install around the existing Worker export; preserve its authentication, cash

@@ -32,7 +32,15 @@ test('Worker completo: autenticazione, adozione, pagamento, saldo e mesi storici
   const request=(method,args=[],authorized=true)=>new Request('https://test.invalid/api/'+method,{method:'POST',headers:{Origin:'https://test.invalid','X-LifeOS-Plans-Version':'2',...(authorized?{Authorization:'Basic '+Buffer.from('nas:'+env.APP_PASSWORD).toString('base64')}:{})},body:JSON.stringify(args)});
   async function api(method,args=[]){const response=await worker.fetch(request(method,args),env,{});const value=await response.text();assert.equal(response.status,200,method+': '+value.slice(0,300));return JSON.parse(value);}
   assert.equal((await worker.fetch(request('getFinancePlans',[],false),env,{})).status,401);
+  const oldRequest=request('getFinanceOverview',[2026,10]);oldRequest.headers.delete('X-LifeOS-Plans-Version');
+  const oldResponse=await worker.fetch(oldRequest,env,{});assert.equal(oldResponse.status,200);
+  const oldOverview=await oldResponse.json();assert.equal(oldOverview.plansV2.plans.length,0);assert.ok(oldOverview.extraPlan.allocations.length>0);
+  assert.equal(sql.prepare('SELECT COUNT(*) n FROM movements').get().n,0);
+  const legacyBefore=sql.prepare('SELECT * FROM extraordinary').all();
   const overview=await api('getFinanceOverview',[2026,10]);
+  assert.equal(overview.summary.monthlyRemaining,oldOverview.summary.monthlyRemaining);
+  assert.deepEqual(sql.prepare('SELECT * FROM extraordinary').all(),legacyBefore);
+  assert.equal(sql.prepare('SELECT COUNT(*) n FROM account_balance_events').get().n,0);
   assert.equal(overview.summary.budget,4000);assert.equal(overview.plansV2.version,2);
   assert.equal(overview.plansV2.plans.filter(p=>p.name==='Affitto').length,1);
   assert.equal(overview.summary.monthlyBudgetBreakdown.filter(p=>p.name==='Affitto').length,1);
