@@ -11,3 +11,14 @@ La UI indica TDEE medio storico, date, pesate, giorni registrati/stimati e intro
 È una calibrazione del bilancio energetico, non una misura del metabolismo attuale: la conversione 7.700 kcal/kg rimane un'approssimazione e acqua, glicogeno e tessuti non sono identificabili esattamente. La spesa può essere cambiata durante i mesi osservati. Il modello dinamico approssimato dello scenario non è il modello NIH completo.
 
 Verifica locale: 70 test passati, inclusi intake variabile con TDEE noto sintetico, uso di oltre 35 giorni, calorie recenti distinte dalla calibrazione, gap espliciti, copertura insufficiente e pesata isolata anomala. Parser Swift e design system passati. Esito Apple da registrare dopo la build.
+
+## Verifica Apple e consegna
+
+Run 39003281979: compilazione riuscita; 86 test unitari e tre test UI mirati passati. Il runner compatto non aveva avviato il test per AXDisableAccessibilityOnTermination / kAXErrorCannotComplete, non per un'asserzione dell'app. Nessun cambiamento applicativo fatto per questo errore infrastrutturale.
+
+Run 39004080051: compilazione ripetuta, identità dello ZIP sorgenti verificata via SHA256 793db8f24d559fde21e45b5f8a5d94e0f69d3c99e258cfc0fba21f8a8d4fc236 prima di riusare i risultati precedenti. Simulatore compatto avviato esplicitamente; testHealthScenarioCanBeEditedWithoutAddingNavigationTab passato (45,535 secondi), un test e zero errori. Archive iPhone riuscito e Info.plist controllato direttamente: 0.9.2 (53), iPhoneOS, com.nas.lifeos.probe, descrizione privacy HealthKit presente.
+
+Artefatto originale: https://github.com/azeroualit-cloud/LifeOS/actions/runs/39004080051/artifacts/12090825594
+Release per download diretto: https://github.com/azeroualit-cloud/LifeOS/releases/tag/v0.9.2-build53
+
+Firma finale e uso su dispositivo restano separati dalla verifica Apple automatizzata. La stima è una media storica del bilancio energetico, non una misura del TDEE attuale. Nessun dato personale è incluso in sorgenti, test o release.
