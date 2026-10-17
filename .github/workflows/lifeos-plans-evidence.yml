@@ -29,7 +29,7 @@ jobs:
           import shutil
           out=Path('screenshots');out.mkdir()
           for f in Path('evidence').rglob('*'):
-            if f.is_file() and (f.suffix.lower()=='.png' or f.name=='manifest.json'):
+            if f.is_file() and (f.suffix.lower() in ('.png','.txt') or f.name=='manifest.json'):
               shutil.copyfile(f,out/f.name)
           print('Files:',len(list(out.iterdir())))
           PY
