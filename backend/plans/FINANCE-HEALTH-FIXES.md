@@ -13,6 +13,6 @@ Il modulo completo aggiornato è conservato solo nel repository e nell’archivi
 
 ## Verifica locale
 
-95 test dei modelli Swift; 34 test server, incluso Worker completo e controllo del numero di query per ogni lettura provata. Inizializzazione categorie: 30 query; lettura corrente completa: 29; lettura storica: 42; lettura storica dopo cold start: 46. Riclassificazione di 300 nuovi movimenti: 4 query. Nessun dato reale modificato.
+95 test dei modelli Swift; 34 test server, incluso Worker completo e controllo del numero di query per ogni lettura provata. Inizializzazione categorie: 30 query; lettura corrente completa: 27; lettura storica: 39; lettura storica dopo cold start: 43; anno precedente dopo cold start: 47. Riclassificazione di 300 nuovi movimenti: 4 query. Nessun dato reale modificato.
 
 Verifica iOS in corso: workflow `lifeos-plans-tests.yml`, modalità `regressions`, run 39042248365.

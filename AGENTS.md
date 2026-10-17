@@ -18,3 +18,5 @@ L’utente chiede di conservare sorgenti e modifiche nel progetto e di non richi
 - Il 2026-10-17 l’utente ha dato una nuova istruzione esplicita: «genera l’ipa». Generata e verificata Life OS 0.9.3 build 54, non firmata per Signulous, dai sorgenti Piani già verificati. Pipeline: `.github/workflows/lifeos-ipa.yml`; versioni sovrascritte nel comando archive, senza cambiare il codice/ZIP verificato. Provenienza e checksum: `backend/plans/IPA-build54.json`. La generazione non autorizza la pubblicazione di release né nuove copie esterne dell’IPA: per il caricamento su Drive è stato richiesto un consenso specifico dopo un rifiuto del controllo automatico.
 
 - Preferenza esplicita dell’utente: IPA solo tramite download GitHub; non caricare IPA su Drive. Il backup privato dei sorgenti resta autorizzato.
+
+- Correzioni Finanza/salute 17 ottobre: `backend/plans/FINANCE-HEALTH-FIXES.md`. Il Worker originale resta immutabile; `worker-runtime.mjs` nel repository privato contiene le correzioni delle letture SQL e viene impacchettato da build.mjs. Non ricompilare dalla sola baseline annullando questi fix.

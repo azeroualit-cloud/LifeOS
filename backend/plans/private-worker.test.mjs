@@ -90,6 +90,8 @@ test('Worker completo: autenticazione, adozione, pagamento, saldo e mesi storici
   assert.equal(analysis.plansV2.plans.filter(p=>p.name==='Manutenzione auto').length,1);
   worker=(await import(pathToFileURL(process.env.LIFEOS_PRIVATE_WORKER).href+'?cold-start')).default;
   await api('getFinanceData',[2026,9]);
+  worker=(await import(pathToFileURL(process.env.LIFEOS_PRIVATE_WORKER).href+'?cold-previous-year')).default;
+  await api('getFinanceData',[2025,12]);
   const maintenance=analysis.plansV2.plans.find(p=>p.name==='Manutenzione auto');
   await api('recordFinancePlanPayment',[{requestId:'cold-maintenance-01',planId:maintenance.id,amountCents:2500,date:'2026-10-17'}]);
   assert.equal(sql.prepare('SELECT COUNT(*) n FROM account_balance_events').get().n,4);
