@@ -259,6 +259,8 @@ function computeFinance(book, year, month2, extraPlan, bankSnapshots = [], bankE
     yearly: number_(r[9])
   }));
   const yearly = Array.from({ length: 12 }, (_, i) => ({
+    budgetCommitments: 0,
+    monthlyRemaining: 0,
     month: ym_(year, i + 1),
     income: 0,
     incomePayslip: 0,
@@ -1115,7 +1117,7 @@ function computeFinance(book, year, month2, extraPlan, bankSnapshots = [], bankE
     return date2 instanceof Date && !Number.isNaN(date2.getTime()) ? date2.toISOString().slice(0, 10) : "";
   }
 }
-var PRIVATE_RULES_BLOB = { "identity": "6701beea61046c84a3a74b2d1000895ae7f00c1f17180088fdae30f09318637a", "iv": "Ml3ep7181IF3J0IW", "ciphertext": "842muiK52v2BQm3EJb+MN1bbOIU+FkkSsVJrbHCl3XvlBT9n9mxZZSmsHnGi/rsqV7Sr3CC2QfWdo0iN+qTof0711yTC3InS+Tin52rxTRi/zt95+I6MApixUo9a0yTDzEjKgRWibYYCOSi7pYAjBzn2kHM5e2OB/vmAmwjhN0qzO7diMA056n4JImxlPpR86nGGuXhA0j07Bat1ANI91lIrRWBsTq76IFEUhRavuKakOZkxgKryLvYIU5E/b8oH9C04aueD41Pm200kfW2PSdn7tkQLjA72+rbqU3DcBjQlwOUfIfZI/XBHC3qbrNIYMt8i8XGnDOC4QEE7KpmYm/7NN7Lw96IJOisQxsQiuvVfqDuDd8q8RtVBC+EoRURvkjUyMdFrpY9ZdWJBL45t8NyC6UdrqLPw5gdyof5YqjlyxRBUu/2PrKaG9Vr0/T+XUKLH9bl+8DBMvT/88b/jFPko9OSz7xGNTSI2c8z8lpy1EzU6oEOjM8QjBVASmLtgC/2zcAz8NPSH0jIcf0C1bI4HK+GNf08deyXpobVlRH/Wq3j6IKer+ZLmaBxKpFtPzC6+Gq96DkQIZJWv1kXekDaUfWHZ8aEQ/1/C7c/vBAJFZmZRWWTPz7w+q77rm7y1Dm4o7LtLRtMVafegRl9ciN1uehyrtjWd5TjHgfGpfRbgrqLUsoL8Tnx1k8G5cNzFblJcFxzZLUaw3qzPheSrcrD8MDNbkGeELWedc35juIAK4MYStbnOV3kF48rb1sIF91R4AquTbhxFU4ILBFUR3W7OP7C6VN0uKYCeVMJ2prSvQvNQfrcfK4xT8g==" };
+var PRIVATE_RULES_BLOB = { "identity": "6701beea61046c84a3a74b2d1000895ae7f00c1f17180088fdae30f09318637a", "iv": "h6hG/U/LaEvMdM+S", "ciphertext": "mjug8N0UqJLg3I0fTsSEE4PvjB1ag27tqquqoqOo7Nn6zPKc8R8veQd6SF6nWexmsTYdC3nlGkY+UNB3sEmUKAwKvfWZYmmNeiWpx0Oyctb8VB71NNPA0V5CmPNIUBHFCcUw2iH73aRUaZNH9x3BD73kDd2wrfVHASL4Q0H0/YSiaYql3UOyz051dHatY/n5zx8qvwLew5iK4QL+KoBGMfyfgPj51dcaOgQTtHJpCMSyrvOSaWjtcglCSmkDZKzCtuqPt8f7oU7iRPwyiOMZGIy0W45pRHQjijyVpg8uFcC88J7K7xQa8DQXPnwmwxrzE8JIY3va5teRoJZ7yJBiCN2WTcyEiMBGItzFPRDiiHWUfq6URf7bH7vUBsDMDSZXovmS308gYQ738VOMb+NZF7zUe5qsdtt1eQbhgWj1o8FUmkV1XgtNJ02qyrD7NW/+OItxL72zlLUJe8a2KH6ba2LPO7ZDipDobiZErro2CJT2UTkiME2KpQrZRwLyUUHUyMMnCTgrD60ePKs/POMyZ2xqd3QtGQ4BUCyCdG3JIL8h1BH7JvpD+tpeOU9Cwouo5TsbNl5P6Z5BHcz0gf4M1V3MLOvVJkGYPLiNSLYJSc00ZDjt+pCcIKGDMecvDzUgra8C58y5/u82hrNZXOCtkHF7ty4vhFV/zxUtYGVCzqsnpvgLM27KHF96NwrT+etIYBx2MgTzu8M1gQmq+hsml4X1PzgBhSguX/l219roEEEyUYNa+Ik3/tim6gvmrcwiqDhne9xvTWLtgLnhHeLXyezqpSwfaK45HM4xtB5ECe/H7CpbiqljmSz7iw==" };
 var privateRulesByDB = /* @__PURE__ */ new WeakMap();
 async function privateRulesForProof(proof) {
   if (!proof.rows?.length) return {};
@@ -3711,7 +3713,13 @@ function adoptLegacy(state, context, today) {
       if (utility.has(r.name) && Number.isFinite(r.nextEstimate) && money(r.nextEstimate) !== money(r.estimate))
         next.plans[id].rateChanges.push({ fromMonth: nextMonth(current), amountCents: money(r.nextEstimate) });
     }
-    const bySource = Map.groupBy((context.cycles ?? []).filter((c) => active(c) && c.kind === "expense"), (c) => Number(c.extraordinary_source_row));
+    const bySource = /* @__PURE__ */ new Map();
+    for (const cycle of context.cycles ?? []) {
+      if (!active(cycle) || cycle.kind !== "expense") continue;
+      const source = Number(cycle.extraordinary_source_row);
+      if (!bySource.has(source)) bySource.set(source, []);
+      bySource.get(source).push(cycle);
+    }
     for (const [source, cycles] of bySource) {
       const ref = cycles.find((c) => c.start_month <= current && c.end_month >= current) ?? cycles.filter((c) => c.start_month <= current).at(-1) ?? cycles[0];
       const ids = new Set(cycles.map((c) => Number(c.id))), allocations = (context.allocations ?? []).filter((a) => ids.has(Number(a.cycle_id)));
@@ -3931,7 +3939,7 @@ function augmentFinance(base, view, currentView, currentBase = base) {
   result.plansV2 = view;
   return result;
 }
-function withFinancePlans(base, { repositoryFactory = (env) => new D1PlanRepository(env.DB), clock = romeToday, cashFactory, recordTransaction } = {}) {
+function withFinancePlans(base, { repositoryFactory = (env) => new D1PlanRepository(env.DB), clock = romeToday, cashFactory = null, recordTransaction = null } = {}) {
   return { async fetch(request, env, ctx) {
     const url = new URL(request.url), method = url.pathname.startsWith("/api/") ? url.pathname.slice(5) : "";
     if (!METHODS[method] && method !== "getFinancePlans" && method !== "resumeFinancePlanPayment" && !readMethods.has(method) && !protectedCash.has(method) && !legacyWrites.has(method) && method !== "getFinancePlanMovements" && !quickWrites.has(method)) return base.fetch(request, env, ctx);

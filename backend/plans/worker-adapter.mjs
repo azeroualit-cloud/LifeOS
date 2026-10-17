@@ -43,7 +43,13 @@ export function augmentFinance(base,view,currentView,currentBase=base) {
 }
 // Install around the existing Worker export; preserve its authentication, cash
 // ledger and existing API routes. Do not expose a new unauthenticated handler.
-export function withFinancePlans(base,{repositoryFactory=env=>new D1PlanRepository(env.DB),clock=romeToday,cashFactory,recordTransaction}={}) {
+/**
+ * @param {any} base
+ * @param {{repositoryFactory?: (env: any) => any, clock?: () => string,
+ * cashFactory?: (context: {forward: Function}) => any,
+ * recordTransaction?: (env: any, input: any) => Promise<any>}} [options]
+ */
+export function withFinancePlans(base,{repositoryFactory=env=>new D1PlanRepository(env.DB),clock=romeToday,cashFactory=null,recordTransaction=null}={}) {
   return {async fetch(request,env,ctx) {
     const url=new URL(request.url), method=url.pathname.startsWith('/api/')?url.pathname.slice(5):'';
     if(!METHODS[method]&&method!=='getFinancePlans'&&method!=='resumeFinancePlanPayment'&&!readMethods.has(method)&&!protectedCash.has(method)&&!legacyWrites.has(method)&&method!=='getFinancePlanMovements'&&!quickWrites.has(method))return base.fetch(request,env,ctx);

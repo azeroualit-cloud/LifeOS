@@ -22,7 +22,13 @@ export function adoptLegacy(state,context,today) {
       if(utility.has(r.name)&&Number.isFinite(r.nextEstimate)&&money(r.nextEstimate)!==money(r.estimate))
         next.plans[id].rateChanges.push({fromMonth:nextMonth(current),amountCents:money(r.nextEstimate)});
     }
-    const bySource=Map.groupBy((context.cycles??[]).filter(c=>active(c)&&c.kind==='expense'),c=>Number(c.extraordinary_source_row));
+    const bySource=new Map();
+    for(const cycle of context.cycles??[]) {
+      if(!active(cycle)||cycle.kind!=='expense')continue;
+      const source=Number(cycle.extraordinary_source_row);
+      if(!bySource.has(source))bySource.set(source,[]);
+      bySource.get(source).push(cycle);
+    }
     for(const [source,cycles] of bySource) {
       const ref=cycles.find(c=>c.start_month<=current&&c.end_month>=current)??cycles.filter(c=>c.start_month<=current).at(-1)??cycles[0];
       const ids=new Set(cycles.map(c=>Number(c.id))), allocations=(context.allocations??[]).filter(a=>ids.has(Number(a.cycle_id)));

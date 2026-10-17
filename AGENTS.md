@@ -26,3 +26,5 @@ L’utente chiede di conservare sorgenti e modifiche nel progetto e di non richi
 - Cattura completa del grafico salute verificata nel run 39043992563 con il test supplementare verification/HealthChartVisualTests.swift. Il primo tentativo ebbe un timeout di avvio del simulatore; il successivo con un test breve prima dell’interfaccia è riuscito.
 
 - Su richiesta esplicita dell’utente è disponibile `/worker.js` tramite GitHub Raw: variante completa per aggiornamento D1 esistente, priva di storico bancario e seed personali in chiaro. Dettagli e limiti: `backend/worker-reference/RAW-WORKER.md`. Non sostituire questo file con il bundle privato non sanificato.
+
+- Preferenza persistente: ogni consegna futura di worker.js deve essere un link GitHub Raw verificato, come richiesto il 17 ottobre 2026. Verificare anche `tsc --allowJs --checkJs --noEmit --target es2022 --module esnext --lib es2022,webworker worker.js` prima di consegnare.
