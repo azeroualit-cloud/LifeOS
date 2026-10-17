@@ -305,5 +305,5 @@ jobs:
           PYVERIFY
       - name: Pubblica download diretto IPA
         run: |
-          gh release create v0.9.1-build52 --target c905d0782c76ba4fb2cde0c631b455673e0117c1 --title 'Life OS 0.9.1 build 52' --notes 'IPA senza firma. Dashboard peso e calorie con HealthKit; la firma finale deve supportare HealthKit.'
+          gh release view v0.9.1-build52 >/dev/null 2>&1 || gh release create v0.9.1-build52 --target c905d0782c76ba4fb2cde0c631b455673e0117c1 --title 'Life OS 0.9.1 build 52' --notes 'IPA senza firma. Dashboard peso e calorie con HealthKit; la firma finale deve supportare HealthKit.'
           gh release upload v0.9.1-build52 download/LifeOS-0.9.1-build52-unsigned.ipa download/SHA256.txt download/BUILD-INFO.txt
