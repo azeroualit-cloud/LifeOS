@@ -1,0 +1,87 @@
+name: Life OS - Piani, solo test
+on:
+  workflow_dispatch:
+  push:
+    branches: ['feature/plans-v2']
+    paths: ['lifeos-native.zip', 'backend/plans/**', '.github/workflows/lifeos-plans-tests.yml']
+permissions:
+  contents: read
+concurrency:
+  group: plans-tests-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  server:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test --test-isolation=none backend/plans/plans.test.mjs
+  ios:
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+      - name: Select Xcode
+        run: |
+          python3 - <<'PY'
+          import pathlib,re,os
+          choices=[]
+          for p in pathlib.Path('/Applications').glob('Xcode_*.app'):
+            m=re.fullmatch(r'Xcode_([0-9.]+).app',p.name)
+            if m and int(m[1].split('.')[0])>=26: choices.append((tuple(map(int,m[1].split('.'))),p))
+          assert choices
+          with open(os.environ['GITHUB_ENV'],'a') as f:f.write('DEVELOPER_DIR='+str(max(choices)[1]/'Contents/Developer')+'\n')
+          PY
+      - name: Unpack source
+        run: |
+          python3 - <<'PY'
+          import zipfile,pathlib
+          with zipfile.ZipFile('lifeos-native.zip') as z:
+            assert all(not pathlib.PurePosixPath(n).is_absolute() and '..' not in pathlib.PurePosixPath(n).parts for n in z.namelist())
+            z.extractall('app')
+          PY
+          python3 app/scripts/check-design-system.py
+          brew install xcodegen
+          cd app
+          xcodegen generate
+      - name: Unit and flow tests, without archive or IPA
+        working-directory: app
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          xcrun simctl list devices available -j > build/devices.json
+          python3 - <<'PY'
+          import json,os
+          data=json.load(open('build/devices.json'))
+          devices=[d for group in data['devices'].values() for d in group if d.get('isAvailable') and d['name'].startswith('iPhone')]
+          assert devices
+          preferred=next((d for d in devices if d['name']=='iPhone 17 Pro'),devices[0])
+          with open(os.environ['GITHUB_ENV'],'a') as f:f.write('PLAN_SIMULATOR='+preferred['udid']+'\n')
+          open('build/simulator-id','w').write(preferred['udid'])
+          PY
+          PLAN_SIMULATOR=$(cat build/simulator-id)
+          xcrun simctl boot "$PLAN_SIMULATOR" || true
+          xcrun simctl bootstatus "$PLAN_SIMULATOR" -b
+          xcodebuild test -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$PLAN_SIMULATOR" -derivedDataPath build/Derived -resultBundlePath build/Plans.xcresult -parallel-testing-enabled NO -only-testing:LifeOSProbeTests -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testPlansInfoAndMonthOnlyAdvanceFlow -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testPlansGoalPaymentWithOptionalOverageRecovery -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHealthScenarioCanBeEditedWithoutAddingNavigationTab -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testAnalysisShowsFourChartsAndCategoryPeriods CODE_SIGNING_ALLOWED=NO > build/plans-tests.log 2>&1
+      - name: Verification summary
+        if: always()
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re,os
+          log=Path('app/build/plans-tests.log')
+          if log.exists():
+            text=log.read_text(errors='replace')
+            for line in text.splitlines():
+              if re.search(r'error:|failed|Executed .* tests|Test Suite .*passed|TEST SUCCEEDED',line):print(line[:1000])
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Plans-test-results-no-IPA
+          path: |
+            app/build/Plans.xcresult
+            app/build/plans-tests.log
+          retention-days: 7
