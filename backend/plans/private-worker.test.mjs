@@ -93,6 +93,11 @@ test('Worker completo: autenticazione, adozione, pagamento, saldo e mesi storici
   const maintenance=analysis.plansV2.plans.find(p=>p.name==='Manutenzione auto');
   await api('recordFinancePlanPayment',[{requestId:'cold-maintenance-01',planId:maintenance.id,amountCents:2500,date:'2026-10-17'}]);
   assert.equal(sql.prepare('SELECT COUNT(*) n FROM account_balance_events').get().n,4);
+  // Many changed classifications must stay one bulk write, not one query per movement.
+  const historicalInsert=sql.prepare("INSERT INTO movements(source_row,actual_date,budget_date,description,amount,account,category,movement_type,status,notes) VALUES(?, '2024-01-15','2024-01-15','Fixture alimentari',-1,'Trade Republic','Alimentari','Spesa','Eseguito','[Categoria manuale]')");
+  for(let i=0;i<300;i++)historicalInsert.run(10000+i);
+  await api('getFinanceCategoryOptions');
+  assert.equal(sql.prepare("SELECT COUNT(*) n FROM movement_financial_categories WHERE movement_source_row>=10000 AND detail_category='Alimentari'").get().n,300);
   t.diagnostic('Query SQL per pagamento (prima registrazione, replay, cold start): '+paymentQueries.join(', '));
 
 
