@@ -23,3 +23,15 @@ Installare come aggiornamento; aprire dashboard, consentire peso e calorie, veri
 ## Verifica
 
 Locale: parser Swift su sorgenti e test; design system; 65 test di modelli passati, inclusi 7 nuovi test Health. Build e test Apple documentati nella run finale, senza considerare il risultato locale come prova di compilazione iOS.
+
+## Esito Apple — 17 ottobre 2026
+
+Run completata con successo: https://github.com/azeroualit-cloud/LifeOS/actions/runs/38990263314
+Sorgenti compilati: commit 8d13ae4ba3a947bc297d41f07d3762ae9852b3c4, branch feature/health-dashboard-48.
+
+Compilazione iOS e archivio iPhone riusciti. Verifica mirata dei modelli e dell'interfaccia eseguita; annotazioni Apple riportano 81 test unitari senza errori e 3 test sul compatto senza errori. La prima esecuzione aveva rilevato un identificatore sul contenitore della card che interferiva con quelli dei comandi: rimosso e verifica ripetuta con successo. Il controllo automatico del design system è passato. Nessuna nuova validazione del modello fisiologico o lettura del database Salute reale è implicata da questi test.
+
+IPA senza firma per Signulous: https://github.com/azeroualit-cloud/LifeOS/actions/runs/38990263314/artifacts/12084294845
+Artefatto ZIP disponibile fino al 24 ottobre 2026. Digest dell'artefatto ZIP riportato da GitHub (non dell'IPA interna): sha256:d692067a6008394aec892affe1c498e76c11504e0ff219a5ae26604afa79be2e.
+
+La rete del workspace non permette il dominio di archiviazione verso cui GitHub reindirizza log e download: l'artefatto è stato verificato tramite stato della pipeline, annotazioni e metadati, senza estrazione locale. Screenshot non ispezionati localmente. Firma con provisioning HealthKit e funzionamento sul dispositivo restano da confermare.
