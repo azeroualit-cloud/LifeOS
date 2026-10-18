@@ -29,20 +29,20 @@ L’HTML pubblicato è `backend/worker/app.html`. `runtime.mjs` contiene esclusi
 
 La webapp può preparare peso e data senza inviare dati sanitari al Worker. Un link `lifeos://weight` apre l’editor iOS; il salvataggio richiede il pulsante Salva nell’app e usa un identificatore HealthKit stabile per i tentativi ripetuti. Non viene mostrata una falsa conferma sul browser. Servono i sorgenti 0.9.5/56 per questa apertura. La lettura Apple Health è l’eccezione web richiesta; la scrittura passa quindi dall’app installata e non può essere completata su un dispositivo privo di Life OS/HealthKit.
 
-Il parser del link e la conversione del fuso Roma sono verificati localmente. Apertura reale del link, generazione Info.plist e scrittura HealthKit richiedono ancora compilazione e prova Apple. API consultate: [Apple, Synchronize health data with HealthKit](https://developer.apple.com/videos/play/wwdc2020/10184/) e [XcodeGen ProjectSpec](https://github.com/yonaskolb/XcodeGen/blob/master/Docs/ProjectSpec.md).
+Il parser del link e la conversione del fuso Roma sono verificati localmente. La compilazione Apple e la presenza dello schema URL nell’Info.plist del pacchetto sono verificate dal run IPA `39081406881`. Apertura reale del link e scrittura HealthKit su dispositivo richiedono ancora una prova fisica. API consultate: [Apple, Synchronize health data with HealthKit](https://developer.apple.com/videos/play/wwdc2020/10184/) e [XcodeGen ProjectSpec](https://github.com/yonaskolb/XcodeGen/blob/master/Docs/ProjectSpec.md).
 
 Il Worker singolo conserva le modalità gateway `NATIVE_DATA_MODE=shared/maintenance`, l’header origine e la risposta manutenzione. I binding e l’autenticazione esistenti non devono cambiare.
 
 ## Verifiche eseguite
 
 - 34 test server, incluso Worker completo/D1 sintetico e route della schermata Piani: superati.
-- 103 test Foundation Swift su Linux: superati.
+- 103 test Foundation Swift su Linux: superati. Su Apple: 122 test unitari e 7 prove UI superati nel run `39081388601`, con compilazione simulatore riuscita.
 - Nove test dei modelli web, inclusi confronto col modello Swift compilato, demo/snapshot e trasferimento pesata: superati.
 - Due suite Chromium sull’HTML realmente servito: sei tipi di piano, categorie, pagamenti, retry/idempotenza, backup della coda locale, sette viste a 320/390/1280 px, categorie 3/6/12 mesi e recupero da errori. Verificano inoltre demo persistente isolata, importazione snapshot e link pesata con conferma nativa. Superate; nessun errore JavaScript.
 - TypeScript sul Worker consegnato, parsing Swift, controllo design system, generazione contratto e integrità ZIP: superati localmente.
 
-Le fixture sono sintetiche. Compilazione SwiftUI, prove su simulatore Apple, prova fisica e stato del servizio pubblicato sono verifiche distinte. Nessun IPA generato per questa revisione. I sorgenti sono predisposti come 0.9.5 build 56; l’ultima IPA già consegnata resta la build 55.
+Le fixture sono sintetiche. Compilazione SwiftUI/iPhone arm64 e simulatore riuscite. IPA 0.9.5 build 56 generata dal run `39081406881`, scaricata e verificata per integrità, versione, origine ZIP, privacy HealthKit e schema URL. Provenienza in `backend/plans/IPA-build56.json`. Test simulatore superati nel run `39081388601`; prova fisica e stato del servizio pubblicato restano verifiche distinte. Nessun deploy Cloudflare eseguito.
 
 ## Consegna e stato esterno
 
-Modifiche conservate localmente nel ramo `fix/platform-parity`; nessun push o deploy per questa revisione. Il controllo automatico ha rifiutato il push al repository pubblico perché la richiesta di implementazione non era stata considerata autorizzazione sufficiente alla pubblicazione dell’intero pacchetto. Prima del push occorre l’autorizzazione esplicita dell’utente. Il successivo workflow Piani verifica Apple senza produrre IPA; non sostituire queste verifiche locali con una dichiarazione di compilazione iOS riuscita. Il link Raw aggiornato potrà essere verificato solo dopo la pubblicazione.
+Il 18 ottobre l’utente ha autorizzato il push del ramo `fix/platform-parity` e richiesto IPA e GitHub Raw. Pubblicato il commit sorgente `48693689cf2449e41a85c7342022db9aa5fc9928`. Il [Raw fissato al commit](https://raw.githubusercontent.com/azeroualit-cloud/LifeOS/48693689cf2449e41a85c7342022db9aa5fc9928/worker.js) è stato riscaricato e confrontato: SHA-256 `2a3e46862dcd6ad313cc7ed6a7cd43c9d2ce2ca76031940db2f96f05c91bce46`, identico al bundle verificato. Il workflow Worker `39081388607` è riuscito, compresi i test browser su GitHub. Nessun deploy Cloudflare eseguito. I risultati Apple e la provenienza dell’IPA sono registrati separatamente in `backend/plans/IPA-build56.json` al completamento.

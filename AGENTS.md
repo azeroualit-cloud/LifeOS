@@ -35,3 +35,6 @@ L’utente chiede di conservare sorgenti e modifiche nel progetto e di non richi
 
 - Revisione di coerenza del 17 ottobre: `docs/PLATFORM-PARITY.md`. Fonte HTML pubblica ora in `backend/worker/app.html`; contratto categorie/etichette in `shared/platform-contract.json`. Dopo modifiche al contratto rigenerare con `python3 scripts/platform-contract.py <estrazione-native>` e reimpacchettare lo ZIP; `--check` verifica i file generati. Il Worker va rigenerato con `node backend/worker/build.mjs`.
 - La coda spese web è locale all’origine e conserva payload/ID prima dell’invio. Non cancellarla per risolvere errori: preservare backup e identità, come nella coda nativa.
+
+- Il 18 ottobre l’utente ha autorizzato esplicitamente la pubblicazione di fix/platform-parity e richiesto nuova IPA + GitHub Raw. Push effettuato con commit sorgente 48693689cf2449e41a85c7342022db9aa5fc9928; workflow IPA 39081406881 e test Apple 39081388601. Nessun deploy Cloudflare autorizzato o eseguito da questa istruzione; caricamento Worker resta manuale.
+- Consegna build 56 verificata: backend/plans/IPA-build56.json. Run Apple 39081388601 riuscito (122 unitari e 7 UI), IPA 39081406881 riuscita, Worker 39081388607 riuscito. SHA IPA ae799b5330f13b6c17bc3df9db973b20156d886928b981d034650b39bb524fe0; Raw SHA 2a3e46862dcd6ad313cc7ed6a7cd43c9d2ce2ca76031940db2f96f05c91bce46.

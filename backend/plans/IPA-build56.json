@@ -1,0 +1,32 @@
+{
+  "version": "0.9.5",
+  "build": "56",
+  "bundle_id": "com.nas.lifeos.probe",
+  "platform": "iPhoneOS",
+  "architecture": "arm64",
+  "signing": "unsigned; sign with Signulous",
+  "source_commit": "48693689cf2449e41a85c7342022db9aa5fc9928",
+  "source_zip_sha256": "51d513347f2e3fcab350e4de0c70fb1de100217d556524544fdbf064d30ef105",
+  "plans_binary_markers": [
+    "plan-record-payment",
+    "plan-payment-confirm",
+    "plan-link-movement-",
+    "X-LifeOS-Plans-Version"
+  ],
+  "sha256": "ae799b5330f13b6c17bc3df9db973b20156d886928b981d034650b39bb524fe0",
+  "size_bytes": 1111487,
+  "workflow_run": 39081406881,
+  "artifact_id": 12119067201,
+  "download_url": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/39081406881/artifacts/12119067201",
+  "delivery": "GitHub only, user preference",
+  "verification": {
+    "ios_tests_run": 39081388601,
+    "ios_unit_tests": 122,
+    "ios_ui_tests": 7,
+    "ios_tests_conclusion": "success",
+    "worker_tests_run": 39081388607,
+    "worker_tests_conclusion": "success",
+    "physical_healthkit_write": "not verified",
+    "cloudflare_deployment": "not performed"
+  }
+}
