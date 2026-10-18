@@ -15,6 +15,7 @@
   function draw(){status.textContent=corrupt?'Archivio locale non leggibile. I dati originali sono conservati.':device.pending.length?`${device.pending.length} movimenti salvati sul dispositivo. In attesa di sincronizzazione. Il saldo mostra l’ultimo dato del server. ${lastFailure}`:offline?'Dati locali · connessione non disponibile. Sincronizza per aggiornare.':'';}
   const cacheKey=(method,args)=>`${method}:${JSON.stringify(args)}`;
   async function drain(){
+    if(globalThis.lifeOSLocalMode&&(globalThis.lifeOSLocalMode.mode!=='server'||!globalThis.lifeOSLocalMode.isValid))return;
     if(draining)return draining;
     draining=(async()=>{
       for(const write of [...device.pending]){
@@ -51,9 +52,9 @@
       throw error;
     }
   };
-  window.addEventListener('online',async()=>{await drain();if(state.data)load();});
+  window.addEventListener('online',async()=>{if(globalThis.lifeOSLocalMode?.mode!=='server')return;await drain();if(state.data)load();});
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')drain();});
-  globalThis.lifeOSDeviceBackup=()=>structuredClone(device);
+  globalThis.lifeOSDeviceBackup=()=>({...structuredClone(device),rawArchive:corrupt?localStorage.getItem(key):null});
   const movementRender=renderMovements;
   renderMovements=function(){
     movementRender();

@@ -26,7 +26,11 @@ try {
   const budget=await readFile(root+'backend/worker/budget-web.js','utf8');
   const settings=await readFile(root+'backend/worker/settings-web.js','utf8');
   const sync=await readFile(root+'backend/worker/sync-web.js','utf8');
-  html=html.replace('</body>','<script>'+dashboard+'</script><script>'+budget+'</script><script>'+analysis+'</script><script>'+web+'</script><script>'+settings+'</script><script>'+sync+'</script></body>');
+  const localBuild=spawnSync('npx',[...(process.env.LIFEOS_ESBUILD_OFFLINE?['--offline']:[]),'--yes','esbuild@0.25.12','backend/worker/local-web.js','--bundle','--format=iife','--target=es2022','--log-level=warning'],{cwd:root,encoding:'utf8'});
+  if(localBuild.status!==0)throw Error(localBuild.stderr || 'Local mode build failed.');
+  const weightBuild=spawnSync('npx',[...(process.env.LIFEOS_ESBUILD_OFFLINE?['--offline']:[]),'--yes','esbuild@0.25.12','backend/worker/weight-web.js','--bundle','--format=iife','--target=es2022','--log-level=warning'],{cwd:root,encoding:'utf8'});
+  if(weightBuild.status!==0)throw Error(weightBuild.stderr || 'Weight handoff build failed.');
+  html=html.replace('</body>','<script>'+dashboard+'</script><script>'+budget+'</script><script>'+analysis+'</script><script>'+web+'</script><script>'+settings+'</script><script>'+sync+'</script><script>'+localBuild.stdout+'</script><script>'+weightBuild.stdout+'</script><script>window.dispatchEvent(new Event("lifeos-ready"));</script></body>');
   const generated=runtime.slice(0,start)+runtime.slice(start).replace(literal[1],()=>JSON.stringify(html));
   await writeFile(root+'backend/worker/runtime.generated.mjs',generated);
   const result=spawnSync('npx',[...(process.env.LIFEOS_ESBUILD_OFFLINE?['--offline']:[]),'--yes','esbuild@0.25.12','backend/worker/entry.mjs','--bundle','--format=esm','--target=es2022','--log-level=warning','--outfile='+target],{cwd:root,stdio:'inherit'});

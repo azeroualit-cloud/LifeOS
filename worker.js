@@ -1,3 +1,28 @@
+// backend/worker/events.mjs
+function expandEvents(rows, low, high) {
+  const out = [];
+  for (const ev of rows) {
+    const start = ev.day, base = /* @__PURE__ */ new Date(start + "T12:00:00Z");
+    for (let n = 0; n < 12e3; n++) {
+      let day2 = start;
+      if (n) {
+        if (!ev.frequency || ev.frequency === "none") break;
+        if (ev.frequency === "weekly")
+          day2 = new Date(+base + n * 7 * 864e5).toISOString().slice(0, 10);
+        else {
+          const months2 = n * (ev.frequency === "yearly" ? 12 : 1), y = base.getUTCFullYear(), m = base.getUTCMonth() + months2, last = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+          day2 = new Date(Date.UTC(y, m, Math.min(base.getUTCDate(), last), 12)).toISOString().slice(0, 10);
+        }
+      }
+      if (day2 >= high || ev.until_day && day2 > ev.until_day) break;
+      if (day2 >= low) out.push({ ...ev, day: day2, series_day: start });
+    }
+  }
+  return out.sort(
+    (a, b) => a.day.localeCompare(b.day) || (a.start_time || "").localeCompare(b.start_time || "") || a.id - b.id
+  );
+}
+
 // backend/worker/platform-contract.mjs
 var platformContract = {
   "version": 2,
@@ -213,6 +238,7 @@ html:not([data-theme="light"]) [data-kind="holiday"] {--shift-color:#d7bf52;}
 .plans-web {display:grid;gap:var(--space);}.plan-list-row {display:flex;justify-content:space-between;text-align:left;width:100%;gap:var(--space);}.plan-list-row > span:first-child {min-width:0;overflow-wrap:anywhere;}.plan-list-row small,.plan-list-row strong,.plan-list-row span span {display:block;}.plans-web button,input,select {min-height:44px;}.plans-web .kv strong {white-space:normal;}.budget-flow .kv strong small {display:block;white-space:normal;}.budget-flow > section {min-width:0;}.budget-flow svg {width:100%;height:auto;}[data-plan-preview] {max-height:280px;overflow:auto;}@media(max-width:420px){.plans-web .card-title{flex-wrap:wrap;}.budget-flow .kv {grid-template-columns:minmax(0,1fr) minmax(0,1fr);}.budget-flow .kv strong {white-space:normal;overflow-wrap:anywhere;}}
 .home-native {display:grid;gap:24px;max-width:680px;margin:auto;}.home-week-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;text-align:center;}.home-week-grid .os-day{width:100%;}.home-week-grid small{display:block;margin-bottom:4px;}.home-summary{font-size:20px;line-height:1.55;}.home-next-time{display:flex;justify-content:space-between;width:100%;border:0;padding:12px 0;}.home-habit{display:flex;width:100%;justify-content:flex-start;border:0;border-radius:0;border-bottom:1px solid var(--line);padding:14px 0;}.home-habit span{font-size:22px;}.os-category-navigation{grid-template-columns:minmax(0,1fr);}.header-tools button,.card-title button,.period button{min-height:44px;min-width:44px;}
 .page-heading{display:grid;grid-template-columns:44px minmax(0,1fr) auto;}.page-heading h1{font-size:20px;text-align:center;}.page-heading>.theme-toggle{width:44px;height:44px;min-height:44px;}
+.settings-confirm{display:flex;align-items:center;gap:var(--space);}.settings-confirm input{width:24px;min-width:24px;flex:none;}
 </style>
   <style id="native-web-parity">
 /* Web parity with native 0.9.0. Shift palette and data contracts are unchanged. */
@@ -704,6 +730,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
 
       /** Aggiorna la sintesi finanziaria della home per il mese corrente a Roma. */
       async function osLoadHomeFinance() {
+        const revision = life.homeFinanceRevision = (life.homeFinanceRevision || 0) + 1;
         try {
           const day = new Date().toLocaleDateString("sv-SE", {
             timeZone: "Europe/Rome",
@@ -713,10 +740,12 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
             Number(day.slice(0, 4)),
             Number(day.slice(5, 7)),
           );
+          if (revision !== life.homeFinanceRevision) return;
           life.finance = fresh;
           life.financeError = false;
           if (life.data) document.getElementById("today").innerHTML = osToday();
         } catch (e) {
+          if (revision !== life.homeFinanceRevision) return;
           life.financeError = true;
           if (life.data) document.getElementById("today").innerHTML = osToday();
         }
@@ -2886,13 +2915,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
           }
         }
         const category = financialCategoryOptions(type);
-        const current = todayIso(),
-          chosen =
-            state.view === "today" ||
-            current.slice(0, 7) ===
-              state.year + "-" + String(state.month).padStart(2, "0")
-              ? current
-              : state.year + "-" + String(state.month).padStart(2, "0") + "-01";
+        const chosen = todayIso();
         modal(
           "Nuovo movimento",
           select(
@@ -3698,9 +3721,9 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         state.month,
       );
       document.getElementById("loading").classList.add("hidden");
-      loadLifeOS();
-      osLoadHomeFinance();
-      osLoadWeather();
+      window.addEventListener("lifeos-ready", () => {
+        loadLifeOS(); osLoadHomeFinance(); osLoadWeather();
+      }, {once:true});
     <\/script>
 
     <script>
@@ -4227,6 +4250,17 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
       refresh.disabled = true;
       const current = () => active === token && state.view === "analysis" && selectedMonth() === month && target.isConnected;
       try {
+        const local = globalThis.lifeOSLocalMode;
+        if (local?.mode === "snapshot") throw Error("Collega il server per analizzare 3, 6 o 12 mesi. Lo snapshot locale non garantisce la copertura del periodo.");
+        if (local?.mode === "demo") {
+          const samples = new Map(requested.map((m) => [m, []]));
+          for (const row of local.archive.finance.transactions || []) {
+            const m = String(row.date || "").slice(0, 7);
+            if (samples.has(m) && ["Spesa", "Rimborso"].includes(row.type)) samples.get(m).push({ name: row.displayCategory || row.category || "Altro", amount: -row.amount });
+          }
+          if (month === todayIso().slice(0, 7) && Array.isArray(d.categories)) samples.set(month, d.categories);
+          for (const [m, rows2] of samples) cache.set(m, rows2);
+        }
         for (const m of [...requested].reverse()) if (!cache.has(m)) {
           if (!current()) return;
           target.textContent = \`Categorie: \${requested.filter((m2) => cache.has(m2)).length} di \${requested.length} mesi\\u2026\`;
@@ -4635,9 +4669,21 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
   matchMedia('(prefers-color-scheme: light)').addEventListener('change',draw);draw();
   control.onclick=()=>{
     let selected='system';try{selected=localStorage.getItem('life-theme')||'system';}catch{}
+    const local=globalThis.lifeOSLocalMode,mode=local?.mode||'server';
     const host=document.getElementById('dialog');
-    host.innerHTML=\`<div class="modal" role="dialog" aria-modal="true" aria-label="Impostazioni"><div class="modal-top"><h2>Impostazioni</h2><button data-close aria-label="Chiudi">\xD7</button></div><section class="os-task-section"><h3>Aspetto</h3><label>Tema<select data-settings-theme>\${[['system','Automatico'],['light','Chiaro'],['dark','Scuro']].map(([key,label])=>\`<option value="\${key}" \${key===selected?'selected':''}>\${label}</option>\`).join('')}</select></label></section><section class="os-task-section"><h3>Connessione Life OS</h3><p>\${escapeHtml(location.host)}</p><button data-settings-sync>Sincronizza</button><p role="status" aria-live="polite" data-settings-status></p></section><section class="os-task-section"><h3>Importazione e backup</h3><button data-settings-export>Esporta backup completo</button><p class="hint">Il backup contiene i dati gi\xE0 caricati su questo dispositivo. Le modifiche restano sullo stesso database usato dall\u2019app.</p></section><button data-close>Fine</button></div>\`;
+    host.innerHTML=\`<div class="modal" role="dialog" aria-modal="true" aria-label="Impostazioni"><div class="modal-top"><h2>Impostazioni</h2><button data-close aria-label="Chiudi">\xD7</button></div><section class="os-task-section"><h3>Aspetto</h3><label>Tema<select data-settings-theme>\${[['system','Automatico'],['light','Chiaro'],['dark','Scuro']].map(([key,label])=>\`<option value="\${key}" \${key===selected?'selected':''}>\${label}</option>\`).join('')}</select></label></section><section class="os-task-section"><h3>Modalit\xE0</h3><p>\${mode==='demo'?'Demo locale':mode==='snapshot'?'Snapshot locale':'Server collegato'}</p><button data-settings-demo \${mode==='demo'?'disabled':''}>Apri demo completa</button>\${mode!=='server'?'<button data-settings-restore>Torna ai dati precedenti</button>':'<button data-settings-disconnect>Scollega per consultare uno snapshot</button>'}<p class="hint">La demo contiene dati simulati. Non invia dati al server.</p></section><section class="os-task-section"><h3>Connessione Life OS</h3><label>Indirizzo del server<input data-settings-endpoint type="url" value="\${escapeHtml(location.origin)}" placeholder="https://lifeos-native-test.a-zeroual-it.workers.dev"></label><label class="settings-confirm"><input data-settings-confirm type="checkbox">Confermo l\u2019indirizzo del mio server Life OS</label><button data-settings-connect disabled>Collega</button><button data-settings-sync \${mode!=='server'?'disabled':''}>Sincronizza</button><a href="/login">Accedi</a><p role="status" aria-live="polite" data-settings-status></p></section><section class="os-task-section"><h3>Importazione e backup</h3><label>Importa snapshot JSON<input data-settings-import type="file" accept="application/json,.json" \${mode==='server'?'disabled':''}></label><button data-settings-paste \${mode==='server'?'disabled':''}>Incolla JSON</button><div class="hidden" data-settings-paste-area><label>Snapshot JSON<textarea name="snapshot" maxlength="5000000"></textarea></label><button data-settings-import-text>Importa snapshot</button></div><button data-settings-export>Esporta backup completo</button><p class="hint">Il backup contiene i dati gi\xE0 caricati su questo dispositivo. Le modifiche restano sullo stesso database usato dall\u2019app.</p></section><button data-close>Fine</button></div>\`;
     host.classList.remove('hidden');
+    const report=error=>{host.querySelector('[data-settings-status]').textContent=error.message||String(error);};
+    const connect=host.querySelector('[data-settings-connect]');host.querySelector('[data-settings-confirm]').onchange=e=>connect.disabled=!e.target.checked;
+    connect.onclick=()=>{try{const url=new URL(host.querySelector('[data-settings-endpoint]').value.trim());if(url.protocol!=='https:'||url.username||url.password||url.search||url.hash||url.pathname!=='/')throw Error('Inserisci l\u2019indirizzo HTTPS del server Life OS.');if((globalThis.lifeOSDeviceBackup?.().pending.length||0)&&url.origin!==location.origin)throw Error('Ci sono movimenti da conservare. Sincronizza prima di cambiare server.');if(url.origin===location.origin)local.server();else location.assign(url.origin);}catch(error){report(error);}};
+
+    host.querySelector('[data-settings-demo]').onclick=()=>{if(confirm('Aprire la demo con dati simulati? I dati attuali verranno conservati separatamente.'))try{local.demo();}catch(error){report(error);}};
+    host.querySelector('[data-settings-restore]')?.addEventListener('click',()=>{try{local.server();}catch(error){report(error);}});
+    host.querySelector('[data-settings-disconnect]')?.addEventListener('click',()=>{try{local.disconnect();}catch(error){report(error);}});
+    host.querySelector('[data-settings-paste]').onclick=()=>host.querySelector('[data-settings-paste-area]').classList.remove('hidden');
+    const importText=text=>{if(text.length>5000000)throw Error('Il file \xE8 troppo grande.');local.import(JSON.parse(text));};
+    host.querySelector('[data-settings-import-text]').onclick=()=>{try{importText(host.querySelector('[name=snapshot]').value);}catch(error){report(error);}};
+    host.querySelector('[data-settings-import]').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>5000000)throw Error('Il file \xE8 troppo grande.');importText(await file.text());}catch(error){report(error);}};
     host.querySelector('[data-settings-theme]').onchange=e=>{theme(e.target.value);draw();};
     host.querySelector('[data-settings-sync]').onclick=async e=>{
       const button=e.currentTarget,status=host.querySelector('[data-settings-status]');button.disabled=true;status.textContent='Aggiornamento\u2026';
@@ -4651,9 +4697,9 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
       finally{button.disabled=false;}
     };
     host.querySelector('[data-settings-export]').onclick=()=>{
-      const pending=(globalThis.lifeOSDeviceBackup?.().pending||[]).map(w=>({id:w.id,method:'saveTransaction',payload:w.payload}));
-      const current={life:life.data||{},finance:state.data||{},plan:state.data?.extraPlan||{},pending,demo:false,imported:false,financeMonth:\`\${state.year}-\${String(state.month).padStart(2,'0')}\`,calendarMonth:life.month,routineDay:life.data?.today||''};
-      const blob=new Blob([JSON.stringify({format:'LifeOS-native-backup-v2',current},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');
+      const pending=(mode==='server'?(globalThis.lifeOSDeviceBackup?.().pending||[]):[]).map(w=>({id:w.id,method:'saveTransaction',payload:w.payload,accepted:false}));
+      const current={...(local?.archive||{}),life:local?.archive?.life||life.data||{},finance:state.data||{},plan:state.data?.extraPlan||{},pending,demo:mode==='demo',imported:mode==='snapshot',financeMonth:\`\${state.year}-\${String(state.month).padStart(2,'0')}\`,calendarMonth:life.month,routineDay:life.data?.today||''};
+      const blob=new Blob([JSON.stringify({format:'LifeOS-native-backup-v2',current,...(mode!=='server'&&local?.previousArchive?{previous:local.previousArchive}:{}),...(local?.rawArchive?{rawLocalArchive:local.rawArchive}:{}),...(globalThis.lifeOSDeviceBackup?.().rawArchive?{rawDeviceArchive:globalThis.lifeOSDeviceBackup().rawArchive}:{})},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');
       link.href=url;link.download='LifeOS-backup-'+todayIso()+'.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
     };
   };
@@ -4675,6 +4721,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
   function draw(){status.textContent=corrupt?'Archivio locale non leggibile. I dati originali sono conservati.':device.pending.length?\`\${device.pending.length} movimenti salvati sul dispositivo. In attesa di sincronizzazione. Il saldo mostra l\u2019ultimo dato del server. \${lastFailure}\`:offline?'Dati locali \xB7 connessione non disponibile. Sincronizza per aggiornare.':'';}
   const cacheKey=(method,args)=>\`\${method}:\${JSON.stringify(args)}\`;
   async function drain(){
+    if(globalThis.lifeOSLocalMode&&(globalThis.lifeOSLocalMode.mode!=='server'||!globalThis.lifeOSLocalMode.isValid))return;
     if(draining)return draining;
     draining=(async()=>{
       for(const write of [...device.pending]){
@@ -4711,9 +4758,9 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
       throw error;
     }
   };
-  window.addEventListener('online',async()=>{await drain();if(state.data)load();});
+  window.addEventListener('online',async()=>{if(globalThis.lifeOSLocalMode?.mode!=='server')return;await drain();if(state.data)load();});
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')drain();});
-  globalThis.lifeOSDeviceBackup=()=>structuredClone(device);
+  globalThis.lifeOSDeviceBackup=()=>({...structuredClone(device),rawArchive:corrupt?localStorage.getItem(key):null});
   const movementRender=renderMovements;
   renderMovements=function(){
     movementRender();
@@ -4721,7 +4768,1267 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
   };
   draw();
 })();
-<\/script></body>
+<\/script><script>(() => {
+  // shared/demo-data.json
+  var demo_data_default = {
+    calendarMonth: "2026-10",
+    demo: true,
+    finance: {
+      categories: [
+        {
+          amount: 12.34,
+          name: "Alimentari"
+        }
+      ],
+      forecastHistory: [
+        {
+          month: "2026-04",
+          observed: true,
+          ordinaryNet: 170
+        },
+        {
+          month: "2026-05",
+          observed: true,
+          ordinaryNet: 155
+        },
+        {
+          month: "2026-06",
+          observed: true,
+          ordinaryNet: 140
+        },
+        {
+          month: "2026-07",
+          observed: true,
+          ordinaryNet: 125
+        },
+        {
+          month: "2026-08",
+          observed: true,
+          ordinaryNet: 110
+        },
+        {
+          month: "2026-09",
+          observed: true,
+          ordinaryNet: 95
+        }
+      ],
+      history: [],
+      lifetime: {
+        series: [
+          {
+            month: "2026-04",
+            observed: true,
+            ordinaryNet: 170,
+            wealth: 200
+          },
+          {
+            month: "2026-05",
+            observed: true,
+            ordinaryNet: 155,
+            wealth: 330
+          },
+          {
+            month: "2026-06",
+            observed: true,
+            ordinaryNet: 140,
+            wealth: 460
+          },
+          {
+            month: "2026-07",
+            observed: true,
+            ordinaryNet: 125,
+            wealth: 590
+          },
+          {
+            month: "2026-08",
+            observed: true,
+            ordinaryNet: 110,
+            wealth: 720
+          },
+          {
+            month: "2026-09",
+            observed: true,
+            ordinaryNet: 95,
+            wealth: 850
+          }
+        ]
+      },
+      planning: {
+        goal: 3e3,
+        monthlySaving: 150,
+        now: 1e3,
+        projection: 1450
+      },
+      recurring: [
+        {
+          estimate: 44,
+          name: "Elettricit\\xE0",
+          treatment: "Vincolata"
+        },
+        {
+          estimate: 30,
+          name: "Gas",
+          treatment: "Vincolata"
+        },
+        {
+          estimate: 20,
+          name: "Acqua",
+          treatment: "Vincolata"
+        },
+        {
+          estimate: 25,
+          name: "Condominio",
+          treatment: "Vincolata"
+        },
+        {
+          estimate: 33,
+          name: "Palestra",
+          treatment: "Vincolata"
+        },
+        {
+          estimate: 13,
+          name: "Abbonamenti",
+          treatment: "Vincolata"
+        },
+        {
+          estimate: 66,
+          name: "Benzina",
+          treatment: "Flessibile"
+        }
+      ],
+      summary: {
+        account: "Trade Republic",
+        budget: 1e3,
+        committedCurrent: 200,
+        monthlyBudgetBreakdown: [
+          {
+            amount: 550,
+            name: "Affitto"
+          },
+          {
+            amount: 100,
+            name: "Bollette e abbonamenti"
+          },
+          {
+            amount: 200,
+            name: "Accantonamenti"
+          }
+        ],
+        monthlyCommitted: 850,
+        monthlyRemaining: 837.66,
+        monthlySalary: 1800,
+        monthlySpent: 112.34,
+        remainingFree: 800,
+        revolutBalance: 0
+      },
+      transactions: [
+        {
+          account: "Trade Republic",
+          amount: -12.34,
+          category: "Alimentari",
+          date: "2026-10-18",
+          name: "Spesa alimentare",
+          row: 2,
+          type: "Spesa"
+        },
+        {
+          account: "Trade Republic",
+          amount: 1800,
+          category: "Stipendio",
+          date: "2026-10-17",
+          name: "Stipendio demo",
+          row: 3,
+          type: "Entrata"
+        }
+      ],
+      yearly: [
+        {
+          commitments: 850,
+          income: 1800,
+          month: "2026-01",
+          spent: 723
+        },
+        {
+          commitments: 850,
+          income: 1800,
+          month: "2026-02",
+          spent: 746
+        },
+        {
+          commitments: 850,
+          income: 1800,
+          month: "2026-03",
+          spent: 769
+        },
+        {
+          commitments: 850,
+          income: 1800,
+          month: "2026-04",
+          spent: 792
+        },
+        {
+          commitments: 850,
+          income: 1800,
+          month: "2026-05",
+          spent: 815
+        },
+        {
+          commitments: 850,
+          income: 1800,
+          month: "2026-06",
+          spent: 838
+        },
+        {
+          commitments: 850,
+          income: 1800,
+          month: "2026-07",
+          spent: 861
+        },
+        {
+          commitments: 850,
+          income: 1800,
+          month: "2026-08",
+          spent: 884
+        },
+        {
+          commitments: 850,
+          income: 1800,
+          month: "2026-09",
+          spent: 907
+        },
+        {
+          commitments: 850,
+          income: 1800,
+          month: "2026-10",
+          spent: 930
+        },
+        {
+          commitments: 850,
+          income: 1800,
+          month: "2026-11",
+          spent: 953
+        },
+        {
+          commitments: 850,
+          income: 1800,
+          month: "2026-12",
+          spent: 976
+        }
+      ]
+    },
+    financeMonth: "2026-10",
+    imported: false,
+    life: {
+      categories: [
+        {
+          key: "action",
+          label: "Attivit\\xE0",
+          position: 0
+        },
+        {
+          key: "wish",
+          label: "Desideri",
+          position: 1
+        },
+        {
+          key: "games",
+          label: "Giochi",
+          position: 2
+        },
+        {
+          key: "reading",
+          label: "Letture",
+          position: 3
+        }
+      ],
+      events: [
+        {
+          day: "2026-10-19",
+          end_time: "19:00",
+          frequency: "weekly",
+          id: 1,
+          location: "Palestra",
+          notes: "",
+          start_time: "18:00",
+          title: "Allenamento"
+        }
+      ],
+      month: "2026-10",
+      occurrences: {},
+      routines: [
+        {
+          checked: 0,
+          id: 1,
+          position: 0,
+          title: "Leggere"
+        },
+        {
+          checked: 0,
+          id: 2,
+          position: 1,
+          title: "Camminare"
+        }
+      ],
+      shifts: [
+        {
+          day: "2026-10-18",
+          kind: "morning"
+        },
+        {
+          day: "2026-10-19",
+          kind: "rest"
+        }
+      ],
+      tasks: [
+        {
+          id: 1,
+          list_kind: "action",
+          notes: "Esempio modificabile nella demo.",
+          sort_order: 1,
+          status: "todo",
+          title: "Organizzare la settimana"
+        },
+        {
+          id: 2,
+          list_kind: "action",
+          notes: "Esempio modificabile nella demo.",
+          sort_order: 2,
+          status: "todo",
+          title: "Prenotare il controllo auto"
+        },
+        {
+          id: 3,
+          list_kind: "reading",
+          notes: "Esempio modificabile nella demo.",
+          sort_order: 3,
+          status: "todo",
+          title: "Finire il libro"
+        }
+      ],
+      today: "2026-10-18"
+    },
+    pending: [],
+    plan: {
+      allocations: [
+        {
+          amount_cents: 5e3,
+          cycle_id: 1,
+          end_month: "2027-09",
+          extraordinary_source_row: 2,
+          kind: "expense",
+          month: "2026-10",
+          name: "Manutenzione auto",
+          payment_account: "Trade Republic",
+          repeat: "Annuale",
+          start_month: "2026-10",
+          status: "Programmato",
+          total_cents: 6e4
+        }
+      ],
+      links: []
+    },
+    refreshedAt: 8139744522970062e-7,
+    routineDay: "2026-10-18"
+  };
+
+  // backend/plans/engine.mjs
+  var PlanError = class extends Error {
+    constructor(message, status = 422) {
+      super(message);
+      this.status = status;
+    }
+  };
+  var fail = (message) => {
+    throw new PlanError(message);
+  };
+  var kinds = ["advance", "goal", "fund", "fixed", "estimated", "recovery"];
+  function month(value) {
+    if (typeof value !== "string" || !/^20\\d\\d-(0[1-9]|1[0-2])$/.test(value)) fail("Scegli mese e anno validi.");
+    return value;
+  }
+  function addMonth(value, count) {
+    month(value);
+    const [y, m] = value.split("-").map(Number), date = new Date(Date.UTC(y, m - 1 + count, 1));
+    return date.toISOString().slice(0, 7);
+  }
+  function months(first, last, limit = 240) {
+    month(first);
+    month(last);
+    if (last < first) fail("L\\u2019ultimo mese precede il primo.");
+    const count = (Number(last.slice(0, 4)) - Number(first.slice(0, 4))) * 12 + Number(last.slice(-2)) - Number(first.slice(-2)) + 1;
+    if (count > limit) fail("Il piano finito pu\\xF2 coprire al massimo 240 mesi; per un fondo usa Senza scadenza.");
+    return Array.from({ length: count }, (_, i) => addMonth(first, i));
+  }
+  function cents(value) {
+    if (!Number.isSafeInteger(value) || value <= 0 || value > 1e8) fail("Importo non valido.");
+    return value;
+  }
+  function split(total, count) {
+    cents(total);
+    if (!Number.isInteger(count) || count < 1 || count > 240) fail("Numero di mesi non valido.");
+    return Array.from({ length: count }, (_, i) => Math.floor(total / count) + (i < total % count ? 1 : 0));
+  }
+  function day(value, today) {
+    if (typeof value !== "string" || !/^20\\d\\d-(0[1-9]|1[0-2])-\\d\\d$/.test(value)) fail("Data del pagamento non valida.");
+    const parsed = /* @__PURE__ */ new Date(value + "T12:00:00Z");
+    if (!Number.isFinite(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== value || value > today) fail("La data deve essere valida e non futura.");
+    return value;
+  }
+  function newPlan(input, today, id) {
+    const kind = input.kind, current = month(today.slice(0, 7));
+    if (!kinds.includes(kind)) fail("Scegli il tipo di piano.");
+    const name = String(input.name ?? "").trim();
+    if (!name || name.length > 120) fail("Inserisci un nome di massimo 120 caratteri.");
+    const first = month(input.startMonth);
+    if (first < current) fail("Le quote nuove possono iniziare dal mese corrente.");
+    const finite = ["advance", "goal", "recovery"].includes(kind), last = finite ? month(input.endMonth) : null;
+    const amount = cents(input.amountCents), interval = Number(input.intervalMonths ?? 1);
+    const category = String(input.category ?? "Altro").trim();
+    if (!category || category.length > 60) fail("Categoria non valida.");
+    if (!Number.isInteger(interval) || interval < 1 || interval > 12) fail("Periodicit\\xE0 non valida.");
+    if (finite) months(first, last);
+    const plan = {
+      id,
+      name,
+      category,
+      kind,
+      amountCents: amount,
+      startMonth: first,
+      endMonth: last,
+      intervalMonths: interval,
+      createdDay: today,
+      status: "active",
+      stopAfter: null,
+      closedMonth: null,
+      rateChanges: []
+    };
+    if (kind === "advance") {
+      plan.beneficiaryMonth = month(input.beneficiaryMonth);
+      if (plan.beneficiaryMonth < current || plan.beneficiaryMonth >= first) fail("Il mese beneficiario deve essere aperto e precedere i mesi di recupero.");
+    }
+    if (kind === "recovery") {
+      plan.paymentDate = day(input.paymentDate, today);
+      if (first < plan.paymentDate.slice(0, 7)) fail("Il recupero non pu\\xF2 precedere il pagamento.");
+      plan.status = "pendingPayment";
+    }
+    return plan;
+  }
+  function contribution(plan, m) {
+    month(m);
+    if (plan.status === "cancelled" || plan.status === "pendingPayment") return 0;
+    if (plan.kind === "advance") {
+      if (m === plan.beneficiaryMonth) return -plan.amountCents;
+    }
+    if (m < plan.startMonth || plan.endMonth && m > plan.endMonth || plan.stopAfter && m > plan.stopAfter || plan.closedMonth && m > plan.closedMonth) return 0;
+    if (plan.legacySchedule) return Number(plan.legacySchedule[m] ?? 0);
+    if (["advance", "goal", "recovery"].includes(plan.kind)) {
+      const range = months(plan.startMonth, plan.endMonth), i = range.indexOf(m);
+      return i < 0 ? 0 : split(plan.amountCents, range.length)[i];
+    }
+    if (plan.kind === "fixed") {
+      const anchor = plan.intervalAnchor ?? plan.startMonth;
+      const delta = (Number(m.slice(0, 4)) - Number(anchor.slice(0, 4))) * 12 + Number(m.slice(-2)) - Number(anchor.slice(-2));
+      let amount = plan.amountCents;
+      for (const rate2 of plan.rateChanges ?? []) if (rate2.fromMonth <= m) amount = rate2.amountCents;
+      return amount === 0 ? 0 : split(amount, plan.intervalMonths)[(delta % plan.intervalMonths + plan.intervalMonths) % plan.intervalMonths];
+    }
+    let rate = plan.amountCents;
+    for (const change of plan.rateChanges ?? []) if (change.fromMonth <= m) rate = change.amountCents;
+    return rate;
+  }
+  function adjustment(plans, m) {
+    return -Object.values(plans).reduce((sum, p) => sum + contribution(p, m), 0) || 0;
+  }
+  function requestKey(value) {
+    if (typeof value !== "string" || !/^[a-zA-Z0-9-]{8,80}$/.test(value)) fail("Identificatore operazione non valido.");
+    return value;
+  }
+  function initialState() {
+    return { version: 1, plans: {}, payments: {}, commands: {} };
+  }
+  function fingerprint(input) {
+    return JSON.stringify(Object.fromEntries(Object.entries(input).filter(([k]) => k !== "requestId").sort(([a], [b]) => a.localeCompare(b))));
+  }
+  function command(state2, action, input, today) {
+    const next = structuredClone(state2), key = requestKey(input.requestId), signature = fingerprint({ action, ...input });
+    if (next.commands[key]) {
+      if (next.commands[key].signature !== signature) fail("Questa operazione \\xE8 gi\\xE0 stata usata con dati diversi.");
+      return { state: next, result: next.commands[key].result };
+    }
+    let result;
+    if (action === "create") {
+      const plan = newPlan(input, today, key);
+      next.plans[key] = plan;
+      if (plan.kind === "recovery") reservePayment(next, plan, { ...input, amountCents: plan.amountCents, date: plan.paymentDate }, today, key);
+      result = { planId: key, paymentId: plan.kind === "recovery" ? key : null };
+    } else {
+      const plan = next.plans[input.planId];
+      if (!plan) fail("Piano non trovato.");
+      if (action === "pay") {
+        if (["advance", "recovery"].includes(plan.kind)) fail("Questo piano non prevede un nuovo pagamento.");
+        if (plan.status !== "active") fail("Il piano non \\xE8 attivo.");
+        reservePayment(next, plan, input, today, key);
+        result = { planId: plan.id, paymentId: key };
+      } else if (action === "edit") {
+        if (plan.status !== "active" || ["advance", "recovery"].includes(plan.kind)) fail("Questo piano non \\xE8 modificabile.");
+        const amount = plan.kind === "goal" ? cents(input.amountCents) : input.amountCents, first = month(input.fromMonth ?? addMonth(today.slice(0, 7), 1));
+        if (!Number.isSafeInteger(amount) || amount < 0 || amount > 1e8) fail("Quota non valida.");
+        if (first <= today.slice(0, 7) || first < plan.startMonth) fail("Le modifiche possono decorrere soltanto da un mese futuro del piano.");
+        if (plan.kind === "goal") {
+          const last = month(input.endMonth), future = months(first, last);
+          const oldFuture = plan.endMonth >= first ? months(first, plan.endMonth).reduce((n, m) => n + contribution(plan, m), 0) : 0;
+          const matured = plan.amountCents - oldFuture, rest = Math.max(0, amount - matured);
+          const schedule = { ...plan.legacySchedule ?? Object.fromEntries(months(plan.startMonth, plan.endMonth).map((m) => [m, contribution(plan, m)])) };
+          for (const m of Object.keys(schedule)) if (m >= first) delete schedule[m];
+          const shares = rest ? split(rest, future.length) : future.map(() => 0);
+          future.forEach((m, i) => schedule[m] = shares[i]);
+          plan.legacySchedule = schedule;
+          plan.endMonth = last;
+          plan.amountCents = amount;
+        } else {
+          plan.rateChanges = (plan.rateChanges ?? []).filter((c) => c.fromMonth !== first);
+          plan.rateChanges.push({ fromMonth: first, amountCents: amount });
+          plan.rateChanges.sort((a, b) => a.fromMonth.localeCompare(b.fromMonth));
+        }
+        result = { planId: plan.id };
+      } else if (action === "stop") {
+        if (plan.status !== "active") fail("Il piano non \\xE8 attivo.");
+        if (Object.values(next.payments).some((p) => p.planId === plan.id && p.status === "pending")) fail("Completa il pagamento in sospeso prima di interrompere.");
+        if (plan.kind === "advance") {
+          if (plan.beneficiaryMonth < today.slice(0, 7)) fail("L\\u2019anticipo ha gi\\xE0 inciso su un mese chiuso: non puoi cancellarne solo il recupero.");
+          plan.status = "cancelled";
+        } else {
+          plan.status = "stopped";
+          plan.stopAfter = today.slice(0, 7);
+        }
+        result = { planId: plan.id };
+      } else fail("Operazione sconosciuta.");
+    }
+    next.commands[key] = { signature, result };
+    return { state: next, result };
+  }
+  function reservePayment(state2, plan, input, today, id) {
+    const amount = cents(input.amountCents), date = day(input.date, today), covered = Number(input.competenceMonths ?? 1);
+    if (!Number.isInteger(covered) || covered < 1 || covered > 12) fail("I mesi coperti devono essere tra 1 e 12.");
+    const cycle = month(input.cycleMonth ?? date.slice(0, 7));
+    if (cycle > today.slice(0, 7)) fail("Non puoi segnare pagata una scadenza futura.");
+    if (["fixed", "estimated"].includes(plan.kind) && cycle < plan.startMonth) fail("La scadenza precede l\\u2019inizio del piano.");
+    const settlement = ["goal", "recovery"].includes(plan.kind) ? "once" : ["fixed", "estimated"].includes(plan.kind) ? cycleKey(plan, cycle) : id;
+    const existingMovementId = input.movementId === void 0 ? null : Number(input.movementId);
+    if (existingMovementId !== null && (!Number.isSafeInteger(existingMovementId) || existingMovementId < 2)) fail("Movimento non valido.");
+    if (existingMovementId && Object.values(state2.payments).some((p) => p.movementId === existingMovementId || p.existingMovementId === existingMovementId)) fail("Questo movimento \\xE8 gi\\xE0 collegato a un piano.");
+    if (Object.values(state2.payments).some((p) => p.planId === plan.id && p.settlementKey === settlement)) fail("Pagamento gi\\xE0 registrato o in completamento.");
+    let recovery = null;
+    if (input.recoverDifference) {
+      if (plan.kind !== "goal" || amount + Object.values(state2.payments).filter((p) => p.planId === plan.id && p.status === "posted").reduce((n, p) => n + p.amountCents, 0) <= plan.amountCents) fail("Il recupero riguarda soltanto l\\u2019eccedenza di un obiettivo finito.");
+      recovery = newPlan({
+        kind: "goal",
+        name: ("Recupero eccedenza \\xB7 " + plan.name).slice(0, 120),
+        amountCents: amount + Object.values(state2.payments).filter((p) => p.planId === plan.id && p.status === "posted").reduce((n, p) => n + p.amountCents, 0) - plan.amountCents,
+        startMonth: input.recoveryStartMonth,
+        endMonth: input.recoveryEndMonth
+      }, today, id + "-difference");
+      recovery.kind = "recovery";
+      recovery.sourcePaymentId = id;
+    }
+    state2.payments[id] = {
+      id,
+      planId: plan.id,
+      settlementKey: settlement,
+      status: "pending",
+      amountCents: amount,
+      date,
+      cycleMonth: cycle,
+      competenceMonths: covered,
+      recovery,
+      requestId: id,
+      existingMovementId,
+      cashName: input.originalName ? String(input.originalName).trim().slice(0, 120) : null
+    };
+  }
+  function completePayment(state2, id, movementId, today) {
+    const next = structuredClone(state2), payment = next.payments[id];
+    if (!payment) fail("Pagamento non trovato.");
+    if (payment.status === "posted") return next;
+    if (!Number.isSafeInteger(movementId) || movementId <= 0) fail("Il movimento bancario non \\xE8 stato confermato.");
+    const plan = next.plans[payment.planId];
+    payment.status = "posted";
+    payment.movementId = movementId;
+    if (plan.kind === "goal") {
+      plan.status = "closed";
+      plan.closedMonth = today.slice(0, 7);
+    }
+    if (plan.kind === "recovery") plan.status = "active";
+    if (payment.recovery) next.plans[payment.recovery.id] = payment.recovery;
+    if (plan.kind === "estimated") {
+      const history = Object.values(next.payments).filter((p) => p.planId === plan.id && p.status === "posted").sort((a, b) => a.date.localeCompare(b.date)).slice(-12);
+      const amount = Math.round(history.reduce((sum, p) => sum + p.amountCents, 0) / history.reduce((sum, p) => sum + p.competenceMonths, 0));
+      const fromMonth = addMonth(today.slice(0, 7), 1);
+      plan.rateChanges = (plan.rateChanges ?? []).filter((c) => c.fromMonth !== fromMonth);
+      plan.rateChanges.push({ fromMonth, amountCents: Math.max(1, amount) });
+      plan.rateChanges.sort((a, b) => a.fromMonth.localeCompare(b.fromMonth));
+    }
+    return next;
+  }
+  function cycleKey(plan, cycle) {
+    if (plan.kind !== "fixed" || plan.intervalMonths === 1) return cycle;
+    const anchor = plan.intervalAnchor ?? plan.startMonth, delta = (Number(cycle.slice(0, 4)) - Number(anchor.slice(0, 4))) * 12 + Number(cycle.slice(-2)) - Number(anchor.slice(-2));
+    return addMonth(anchor, Math.floor(delta / plan.intervalMonths) * plan.intervalMonths);
+  }
+  function balance(state2, plan, throughMonth) {
+    const last = throughMonth < plan.startMonth ? null : throughMonth;
+    const saved = (throughMonth >= plan.startMonth ? Number(plan.openingBalanceCents ?? 0) : 0) + (last ? months(plan.startMonth, last, 1200).reduce((n, m) => n + Math.max(0, contribution(plan, m)), 0) : 0);
+    const spent = Object.values(state2.payments).filter((p) => p.planId === plan.id && p.status === "posted" && p.date.slice(0, 7) <= throughMonth && p.date.slice(0, 7) >= plan.startMonth).reduce((n, p) => n + p.amountCents, 0);
+    return { contributedCents: saved, paidCents: spent, fundCents: plan.status === "active" && !["advance", "recovery"].includes(plan.kind) ? Math.max(0, saved - spent) : 0, fromGeneralSavingsCents: Math.max(0, spent - saved) };
+  }
+  function project(state2, selectedMonth) {
+    month(selectedMonth);
+    return {
+      version: 2,
+      month: selectedMonth,
+      adjustmentCents: adjustment(state2.plans, selectedMonth),
+      plans: Object.values(state2.plans).map((p) => ({ ...p, outstandingCents: Math.max(0, p.amountCents - Object.values(state2.payments).filter((x) => x.planId === p.id && x.status === "posted").reduce((n, x) => n + x.amountCents, 0)), contributionCents: contribution(p, selectedMonth), ...balance(state2, p, selectedMonth) })),
+      payments: Object.values(state2.payments).map(({ recovery, ...p }) => p)
+    };
+  }
+
+  // backend/plans/service.mjs
+  var PlanService = class {
+    constructor(repository, cash, today) {
+      this.repository = repository;
+      this.cash = cash;
+      this.today = today;
+    }
+    async change(transform) {
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const { revision, state: state2 } = await this.repository.read(), next = transform(state2);
+        if (JSON.stringify(next.state) === JSON.stringify(state2)) return next.result;
+        if (await this.repository.compareAndSet(revision, next.state)) return next.result;
+      }
+      throw new PlanError("Un altro dispositivo sta aggiornando i piani. Riprova.", 409);
+    }
+    async execute(action, input) {
+      const result = await this.change((state2) => command(state2, action, input, this.today));
+      if (result.paymentId) await this.finish(result.paymentId);
+      return result;
+    }
+    async finish(paymentId) {
+      const { state: state2 } = await this.repository.read(), p = state2.payments[paymentId];
+      if (!p) throw new PlanError("Pagamento non trovato.", 404);
+      if (p.status === "posted") return;
+      const plan = state2.plans[p.planId];
+      const movementId = await this.cash.record({
+        requestId: p.requestId,
+        name: p.cashName || plan.name,
+        category: plan.category,
+        amountCents: p.amountCents,
+        date: p.date,
+        competenceMonths: p.competenceMonths,
+        planId: p.planId,
+        existingMovementId: p.existingMovementId
+      });
+      await this.change((current) => ({ state: completePayment(current, paymentId, movementId, this.today), result: {} }));
+    }
+    async view(month2) {
+      const { state: state2 } = await this.repository.read();
+      return project(state2, month2);
+    }
+  };
+
+  // backend/worker/events.mjs
+  function expandEvents(rows, low, high) {
+    const out = [];
+    for (const ev of rows) {
+      const start = ev.day, base = /* @__PURE__ */ new Date(start + "T12:00:00Z");
+      for (let n = 0; n < 12e3; n++) {
+        let day2 = start;
+        if (n) {
+          if (!ev.frequency || ev.frequency === "none") break;
+          if (ev.frequency === "weekly")
+            day2 = new Date(+base + n * 7 * 864e5).toISOString().slice(0, 10);
+          else {
+            const months2 = n * (ev.frequency === "yearly" ? 12 : 1), y = base.getUTCFullYear(), m = base.getUTCMonth() + months2, last = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+            day2 = new Date(Date.UTC(y, m, Math.min(base.getUTCDate(), last), 12)).toISOString().slice(0, 10);
+          }
+        }
+        if (day2 >= high || ev.until_day && day2 > ev.until_day) break;
+        if (day2 >= low) out.push({ ...ev, day: day2, series_day: start });
+      }
+    }
+    return out.sort(
+      (a, b) => a.day.localeCompare(b.day) || (a.start_time || "").localeCompare(b.start_time || "") || a.id - b.id
+    );
+  }
+
+  // backend/worker/local-model.mjs
+  var copy = structuredClone;
+  var addDay = (value, n) => new Date(Date.parse(value + "T12:00:00Z") + n * 864e5).toISOString().slice(0, 10);
+  var nextID = (rows, key = "id") => Math.max(0, ...rows.map((r) => Number(r[key]) || 0)) + 1;
+  var title = (s) => {
+    s = String(s || "").trim();
+    if (!s || s.length > 160) throw Error("Inserisci un nome valido.");
+    return s;
+  };
+  function demoArchive(today) {
+    const source = demo_data_default.life.today, delta = Math.round((Date.parse(today) - Date.parse(source)) / 864e5), monthOffset = (Number(today.slice(0, 4)) - Number(source.slice(0, 4))) * 12 + Number(today.slice(5, 7)) - Number(source.slice(5, 7));
+    function translate(value) {
+      if (typeof value === "string" && /^20\\d\\d-\\d\\d-\\d\\d$/.test(value)) return addDay(value, delta);
+      if (typeof value === "string" && /^20\\d\\d-\\d\\d$/.test(value)) return addMonth(value, monthOffset);
+      if (Array.isArray(value)) return value.map(translate);
+      if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, translate(v)]));
+      return value;
+    }
+    const archive = translate(copy(demo_data_default));
+    archive.finance.yearly = (archive.finance.yearly || []).map((row, i) => ({ ...row, month: today.slice(0, 4) + "-" + String(i + 1).padStart(2, "0") }));
+    return { ...archive, demo: true, pending: [], routineDay: today };
+  }
+  function snapshotArchive(raw, fallbackMonth = (/* @__PURE__ */ new Date()).toLocaleDateString("sv-SE", { timeZone: "Europe/Rome" }).slice(0, 7)) {
+    const finance = raw?.current?.finance || raw?.finance || raw;
+    if (!finance || !finance.summary || !["budget", "committedCurrent", "remainingFree"].every((k) => Number.isFinite(finance.summary[k])) || !Array.isArray(finance.transactions)) throw Error("Snapshot finanziario non valido.");
+    const ids = /* @__PURE__ */ new Set();
+    for (const r of finance.transactions) {
+      if (!Number.isFinite(r.amount) || !Number.isSafeInteger(r.row) || r.row <= 0 || ids.has(r.row) || typeof r.name !== "string" || !r.name) throw Error("Il JSON contiene un movimento non valido.");
+      day(r.date, "2099-12-31");
+      ids.add(r.row);
+    }
+    const dates = [...new Set(finance.transactions.map((r) => r.date.slice(0, 7)))];
+    const candidate = finance.key || raw?.current?.financeMonth || raw?.financeMonth;
+    const key = /^20\\d\\d-(0[1-9]|1[0-2])$/.test(candidate) ? candidate : dates.length === 1 ? dates[0] : fallbackMonth;
+    month(key);
+    return { finance: copy(finance), life: { today: key + "-01", categories: [{ key: "action", label: "Attivit\\xE0", position: 0 }], tasks: [], routines: [], shifts: [], events: [], occurrences: {} }, plan: copy(finance.extraPlan || {}), pending: [], demo: false, imported: true, financeMonth: key, calendarMonth: key };
+  }
+  var LocalModel = class {
+    constructor(archive, today, persist = () => {
+    }) {
+      this.archive = copy(archive);
+      this.today = today;
+      this.persist = persist;
+      this.planState = initialState();
+      this.revision = 0;
+    }
+    save() {
+      this.persist(this);
+    }
+    finance(selected) {
+      const d = copy(this.archive.finance), v = project(this.planState, selected), current = project(this.planState, this.today.slice(0, 7));
+      const s = d.summary;
+      d.key = selected;
+      d.year = Number(selected.slice(0, 4));
+      d.month = Number(selected.slice(-2));
+      d.updatedAt = "Demo locale";
+      d.extraPlan = copy(this.archive.plan);
+      d.plansV2 = v;
+      s.monthlyRemaining = (s.monthlyRemaining || 0) + v.adjustmentCents / 100;
+      s.monthlyCommitted = (s.monthlyCommitted || 0) - v.adjustmentCents / 100;
+      s.committedCurrent += current.plans.reduce((n, p) => n + p.fundCents, 0) / 100;
+      s.remainingFree = s.budget - s.committedCurrent;
+      return d;
+    }
+    life(selected) {
+      const d = copy(this.archive.life), low = addMonth(selected, -1) + "-01", high = addMonth(selected, 2) + "-01";
+      const state2 = (e) => ({ ...e, occurrence_status: d.occurrences?.[\`\${e.id}:\${e.day}\`] || "open" });
+      d.events = expandEvents(d.events || [], low, high).map(state2).filter((e) => e.occurrence_status !== "skipped");
+      d.upcomingEvents = expandEvents(this.archive.life.events || [], this.today, addDay(this.today, 7)).map(state2).filter((e) => e.occurrence_status === "open");
+      d.today = this.today;
+      d.month = selected;
+      if (this.archive.routineDay !== this.today) {
+        for (const r of this.archive.life.routines || []) r.checked = 0;
+        this.archive.routineDay = this.today;
+        d.routines = copy(this.archive.life.routines);
+        this.save();
+      }
+      return d;
+    }
+    adjustMoney(next, old) {
+      const s = this.archive.finance.summary, contribution2 = (r, account) => r?.account === account ? r.amount : 0;
+      s.budget = Math.round((s.budget + contribution2(next, "Trade Republic") - contribution2(old, "Trade Republic")) * 100) / 100;
+      s.remainingFree = s.budget - s.committedCurrent;
+      s.revolutBalance = (s.revolutBalance || 0) + contribution2(next, "Revolut") - contribution2(old, "Revolut");
+      const ordinary = (r) => r && ["Spesa", "Rimborso"].includes(r.type) && !["savings", "planned", "recovery"].includes(r.budgetTreatment) && r.date.slice(0, 7) === this.today.slice(0, 7) ? -r.amount : 0;
+      const delta = ordinary(next) - ordinary(old);
+      s.monthlySpent = (s.monthlySpent || 0) + delta;
+      s.monthlyRemaining = (s.monthlyRemaining || 0) - delta;
+    }
+    movement(p, editing = false) {
+      const rows = this.archive.finance.transactions;
+      if (!editing && p.requestId) {
+        const prior = rows.filter((r) => r.requestId === p.requestId).sort((a, b) => a.row - b.row)[0];
+        if (prior) return prior.row;
+      }
+      const amount = Number(p.amount);
+      if (!Number.isFinite(amount) || amount <= 0 || amount > 1e6 || Math.abs(amount * 100 - Math.round(amount * 100)) > 1e-6) throw Error("Importo non valido.");
+      day(p.date, this.today);
+      const name = title(p.name), type = p.type || "Spesa", account = p.account || "Trade Republic";
+      const old = editing ? rows.find((r) => r.row === Number(p.row)) : null;
+      if (editing && !old) throw Error("Movimento non trovato.");
+      if (editing && Object.values(this.planState.payments).some((x) => x.movementId === old.row)) throw Error("Gestisci il pagamento dal piano collegato.");
+      const signed = type === "Trasferimento" && old?.amount > 0 ? amount : ["Spesa", "Trasferimento"].includes(type) ? -amount : amount;
+      const row = { ...p, row: old?.row || nextID(rows, "row"), amount: signed, name, type, account, months: Number(p.months) || 1 };
+      if (type === "Trasferimento") {
+        if (!p.counterpart || p.counterpart === account) throw Error("Scegli due conti diversi.");
+        const pair = old?.transfer_id ? rows.find((r) => r.transfer_id === old.transfer_id && r.row !== old.row) : null;
+        if (old && !pair) throw Error("Mantieni entrambi i conti del trasferimento.");
+        row.transfer_id = old?.transfer_id || p.requestId || crypto.randomUUID();
+        const other = { ...row, row: pair?.row || Math.max(nextID(rows, "row"), row.row + 1), amount: -signed, account: p.counterpart, counterpart: account, name: "Trasferimento da " + account };
+        if (pair) rows[rows.indexOf(pair)] = other;
+        else rows.push(other);
+        this.adjustMoney(other, pair);
+      }
+      if (old) rows[rows.indexOf(old)] = row;
+      else rows.push(row);
+      this.adjustMoney(row, old);
+      return row.row;
+    }
+    async request(method, args = []) {
+      const p = args[0] || {}, id = Number(p.id ?? args[0]), life2 = this.archive.life, finance = this.archive.finance;
+      const remove = (key) => life2[key] = life2[key].filter((r) => r.id !== id);
+      const update = (key, value, identity = "id") => {
+        const rows = life2[key], index = rows.findIndex((r) => r[identity] === value[identity]);
+        if (index >= 0) rows[index] = { ...rows[index], ...value };
+        else rows.push(value);
+        return value;
+      };
+      if (method === "getLifeData") return this.life(args[0] || this.today.slice(0, 7));
+      if (["getFinanceData", "getFinanceOverview", "getFinanceExtras"].includes(method)) return this.finance(\`\${args[0]}-\${String(args[1]).padStart(2, "0")}\`);
+      if (method === "getFinancePlans") return project(this.planState, args[0] || this.today.slice(0, 7));
+      if (method === "getExtraPlan") return copy(this.archive.plan);
+      if (method === "getExtraCycleDetail") {
+        const row = this.archive.plan.allocations?.find((r) => r.cycle_id === Number(args[0]));
+        if (!row) throw Error("Piano non trovato.");
+        return { ...copy(row), id: row.cycle_id, account: row.payment_account, links: copy((this.archive.plan.links || []).filter((l) => l.cycle_id === row.cycle_id)) };
+      }
+      if (method === "getMovement") {
+        const r = finance.transactions.find((r2) => r2.row === Number(args[0]));
+        if (!r) throw Error("Movimento non trovato.");
+        return { ...copy(r), source_row: r.row, description: r.name, actual_date: r.date, movement_type: r.type, competence_months: r.months || 1, notes: r.note || "" };
+      }
+      if (method === "getFinancePlanMovements") return { movements: finance.transactions.filter((r) => r.amount < 0 && r.account === "Trade Republic" && r.date.startsWith(args[0]) && !Object.values(this.planState.payments).some((p2) => p2.movementId === r.row)).map((r) => ({ row: r.row, name: r.name, date: r.date, amountCents: Math.round(-r.amount * 100) })) };
+      const actions = { saveFinancePlan: "create", recordFinancePlanPayment: "pay", editFinancePlan: "edit", stopFinancePlan: "stop" };
+      if (actions[method] || method === "resumeFinancePlanPayment") {
+        const repo = { read: async () => ({ revision: this.revision, state: copy(this.planState) }), compareAndSet: async (revision, state2) => {
+          if (revision !== this.revision) return false;
+          this.planState = state2;
+          this.revision++;
+          this.save();
+          return true;
+        } };
+        const cash = { record: async (p2) => {
+          if (p2.existingMovementId) {
+            const row = finance.transactions.find((r) => r.row === p2.existingMovementId);
+            if (!row || Math.round(-row.amount * 100) !== p2.amountCents || row.date !== p2.date) throw Error("Movimento non compatibile.");
+            if (!["savings", "planned", "recovery"].includes(row.budgetTreatment)) this.adjustMoney({ ...row, budgetTreatment: "savings" }, row);
+            row.budgetTreatment = "savings";
+            this.save();
+            return row.row;
+          }
+          const id2 = this.movement({ ...p2, type: "Spesa", amount: p2.amountCents / 100, budgetTreatment: "savings", account: "Trade Republic", months: p2.competenceMonths });
+          this.save();
+          return id2;
+        } };
+        const service = new PlanService(repo, cash, this.today);
+        if (method === "resumeFinancePlanPayment") await service.finish(p.paymentId);
+        else await service.execute(actions[method], p);
+        return { ok: true };
+      }
+      let result = true;
+      switch (method) {
+        case "saveTask":
+          result = update("tasks", { ...p, id: id || nextID(life2.tasks), title: title(p.title), status: life2.tasks.find((r) => r.id === id)?.status || "todo", sort_order: life2.tasks.find((r) => r.id === id)?.sort_order || nextID(life2.tasks, "sort_order") });
+          break;
+        case "setTaskStatus":
+          if (!["todo", "waiting", "done"].includes(p.status)) throw Error("Stato non valido.");
+          update("tasks", { ...life2.tasks.find((r) => r.id === id), id, status: p.status });
+          break;
+        case "deleteTask":
+          remove("tasks");
+          break;
+        case "deleteCompletedTasks":
+          life2.tasks = life2.tasks.filter((t) => t.list_kind !== p.category || t.status !== "done");
+          break;
+        case "reorderTasks":
+          life2.tasks.forEach((t) => {
+            const i = p.ids.indexOf(t.id);
+            if (i >= 0) t.sort_order = i + 1;
+          });
+          break;
+        case "addCategory": {
+          const label = title(p.label);
+          if (life2.categories.some((c) => c.label.toLowerCase() === label.toLowerCase())) throw Error("La categoria esiste gi\\xE0.");
+          result = update("categories", { key: "custom-" + crypto.randomUUID(), label, position: life2.categories.length }, "key");
+          break;
+        }
+        case "renameCategory":
+          result = update("categories", { ...p, label: title(p.label) }, "key");
+          break;
+        case "reorderCategories":
+          life2.categories.forEach((c) => c.position = p.keys.indexOf(c.key));
+          break;
+        case "deleteCategory":
+          if (p.key === p.destination || !life2.categories.some((c) => c.key === p.destination)) throw Error("Scegli dove spostare le attivit\\xE0.");
+          life2.categories = life2.categories.filter((c) => c.key !== p.key);
+          life2.tasks.forEach((t) => {
+            if (t.list_kind === p.key) t.list_kind = p.destination;
+          });
+          break;
+        case "saveRoutine":
+          if (!id && life2.routines.length >= 8) throw Error("Massimo otto routine.");
+          result = update("routines", { ...p, id: id || nextID(life2.routines), title: title(p.title), checked: life2.routines.find((r) => r.id === id)?.checked || 0 });
+          break;
+        case "deleteRoutine":
+          remove("routines");
+          break;
+        case "setRoutineCheck":
+          if (p.day !== this.today) throw Error("\\xC8 iniziato un nuovo giorno. Aggiorna le routine.");
+          result = update("routines", { ...life2.routines.find((r) => r.id === id), id, checked: p.checked ? 1 : 0 });
+          break;
+        case "paintShift":
+          life2.shifts = life2.shifts.filter((r) => r.day !== p.day);
+          if (p.kind !== "erase") life2.shifts.push(p);
+          break;
+        case "saveEvent": {
+          const old = life2.events.find((e) => e.id === id);
+          if (old && (old.day !== p.day || old.frequency !== p.frequency) && Object.keys(life2.occurrences || {}).some((k) => k.startsWith(id + ":"))) throw Error("Usa Modifica da qui per preservare le occorrenze segnate.");
+          result = update("events", { ...p, id: id || nextID(life2.events), title: title(p.title) });
+          break;
+        }
+        case "splitEventSeries": {
+          const old = life2.events.find((e) => e.id === id);
+          if (!old) throw Error("Serie non trovata.");
+          if (Object.keys(life2.occurrences || {}).some((k) => k.startsWith(id + ":") && k.slice(-10) >= p.split_from)) throw Error("Riapri prima le occorrenze future gi\\xE0 segnate.");
+          old.until_day = addDay(p.split_from, -1);
+          result = update("events", { ...p, id: nextID(life2.events), title: title(p.title) });
+          break;
+        }
+        case "setEventOccurrence":
+          life2.occurrences ??= {};
+          if (p.status === "open") delete life2.occurrences[\`\${id}:\${p.day}\`];
+          else life2.occurrences[\`\${id}:\${p.day}\`] = p.status;
+          break;
+        case "deleteEvent":
+          remove("events");
+          break;
+        case "saveTransaction":
+        case "editMovement":
+          result = this.movement(p, method === "editMovement");
+          break;
+        case "deleteMovement": {
+          const row = finance.transactions.find((r) => r.row === id);
+          if (Object.values(this.planState.payments).some((p2) => p2.movementId === id)) throw Error("Gestisci il pagamento dal piano collegato.");
+          const removed = finance.transactions.filter((r) => r.row === id || row?.transfer_id && r.transfer_id === row.transfer_id);
+          finance.transactions = finance.transactions.filter((r) => !removed.includes(r));
+          removed.forEach((r) => this.adjustMoney(null, r));
+          break;
+        }
+        case "saveEstimate": {
+          const row = finance.recurring.find((r) => r.name === args[0]);
+          if (!row || Number(args[1]) <= 0) throw Error("Stima non valida.");
+          row.estimate = Number(args[1]);
+          break;
+        }
+        case "savePlanningSettings":
+          if (args.some((n) => !Number.isFinite(Number(n))) || Number(args[0]) < 0 || Number(args[2]) <= 0) throw Error("Impostazioni non valide.");
+          finance.planning = { ...finance.planning, goal: Number(args[0]), monthlySaving: Number(args[1]), savingsTarget: Number(args[2]) };
+          break;
+        case "updateExtraPlan": {
+          const plan = this.archive.plan, old = plan.allocations.find((r) => r.cycle_id === Number(p.cycleId));
+          if (!old) throw Error("Piano non trovato.");
+          const range = months(p.month, p.endMonth, 60), cents2 = Math.round(Number(p.amount) * 100), shares = split(cents2, range.length), linked = (plan.links || []).filter((l) => l.cycle_id === old.cycle_id).reduce((n, l) => n + l.attributed_cents, 0);
+          if (cents2 < linked) throw Error("Il piano non pu\\xF2 scendere sotto quanto gi\\xE0 attribuito.");
+          plan.allocations = plan.allocations.filter((r) => r.cycle_id !== old.cycle_id);
+          range.forEach((m, i) => plan.allocations.push({ ...old, name: title(p.name), month: m, start_month: p.month, end_month: p.endMonth, total_cents: cents2, amount_cents: shares[i], notes: p.note || "" }));
+          break;
+        }
+        case "recordExtraPayment":
+        case "markExtraPaid":
+        case "cancelExtraCycle":
+        case "deleteExtraPlan": {
+          const plan = this.archive.plan, cycle = Number(p.cycleId), row = plan.allocations.find((r) => r.cycle_id === cycle);
+          if (!row) throw Error("Piano non trovato.");
+          if (method === "deleteExtraPlan") {
+            if (row.status !== "Annullato" || (plan.links || []).some((l) => l.cycle_id === cycle)) throw Error("Annulla prima il piano e conserva i pagamenti collegati.");
+            plan.allocations = plan.allocations.filter((r) => r.cycle_id !== cycle);
+            break;
+          }
+          if (method === "recordExtraPayment" && row.status !== "Pagato") {
+            const movement = this.movement({ ...p, requestId: p.requestId || "legacy-payment-" + cycle, type: "Spesa", name: p.name || row.name, category: "Straordinarie", budgetTreatment: "savings", account: "Trade Republic" }), actual = Math.round(Number(p.amount) * 100);
+            plan.links ??= [];
+            plan.settlements ??= [];
+            plan.links.push({ cycle_id: cycle, movement_source_row: movement, attributed_cents: Math.min(actual, row.total_cents), role: "payment" });
+            plan.settlements.push({ cycle_id: cycle, movement_source_row: movement, actual_cents: actual, planned_cents: row.total_cents });
+          }
+          plan.allocations.forEach((r) => {
+            if (r.cycle_id === cycle) r.status = method === "cancelExtraCycle" ? "Annullato" : "Pagato";
+          });
+          break;
+        }
+        case "linkExtraMovement":
+        case "unlinkExtraMovement": {
+          const plan = this.archive.plan, cycle = Number(p.cycleId), movement = Number(p.movementId), row = plan.allocations.find((r) => r.cycle_id === cycle);
+          if (!row) throw Error("Piano non trovato.");
+          plan.links ??= [];
+          if (method === "unlinkExtraMovement") plan.links = plan.links.filter((l) => l.cycle_id !== cycle || l.movement_source_row !== movement);
+          else {
+            const cash = finance.transactions.find((r) => r.row === movement), amount = Math.round(Number(p.amount) * 100), used = plan.links.filter((l) => l.movement_source_row === movement).reduce((n, l) => n + l.attributed_cents, 0), paid2 = plan.links.filter((l) => l.cycle_id === cycle).reduce((n, l) => n + l.attributed_cents, 0);
+            if (!cash || cash.amount >= 0 || cash.budgetTreatment === "recovery" || ["Pagato", "Annullato"].includes(row.status) || amount <= 0 || amount + used > Math.round(-cash.amount * 100) || amount + paid2 > row.total_cents || plan.links.some((l) => l.cycle_id === cycle && l.movement_source_row === movement)) throw Error("Movimento o importo non compatibile con il piano.");
+            plan.links.push({ cycle_id: cycle, movement_source_row: movement, attributed_cents: amount, role: "payment" });
+          }
+          const paid = plan.links.filter((l) => l.cycle_id === cycle).reduce((n, l) => n + l.attributed_cents, 0);
+          plan.allocations.forEach((r) => {
+            if (r.cycle_id === cycle) r.status = paid >= row.total_cents ? "Pagato" : "Programmato";
+          });
+          break;
+        }
+        default:
+          throw Error("Questa azione richiede il server collegato.");
+      }
+      this.save();
+      return copy(result);
+    }
+  };
+
+  // backend/worker/local-web.js
+  (() => {
+    const key = "lifeos-web-local-v2", transport = workerRequest;
+    let mode = "server", model = null, snapshot = null, previous = null, invalid = false;
+    const status = document.createElement("p");
+    status.className = "hint";
+    status.id = "platform-local-status";
+    status.setAttribute("role", "status");
+    document.getElementById("error").before(status);
+    function persist(value = model) {
+      localStorage.setItem(key, JSON.stringify({ mode, archive: value?.archive || snapshot, planState: value?.planState, revision: value?.revision, previous }));
+    }
+    function restore(raw) {
+      if (!raw || !["demo", "snapshot"].includes(raw.mode) || !raw.archive || !/^20\\d\\d-(0[1-9]|1[0-2])$/.test(raw.archive.financeMonth) || !["tasks", "categories", "routines", "events", "shifts"].every((k) => Array.isArray(raw.archive.life?.[k]))) throw Error("Archivio locale non valido.");
+      snapshotArchive({ current: raw.archive });
+      if (raw.revision !== void 0 && (!Number.isSafeInteger(raw.revision) || raw.revision < 0)) throw Error("Revisione archivio non valida.");
+      if (raw.planState && (raw.planState.version !== 1 || !["plans", "payments", "commands"].every((k) => raw.planState[k] && typeof raw.planState[k] === "object" && !Array.isArray(raw.planState[k])))) throw Error("Archivio piani non valido.");
+      mode = raw.mode;
+      previous = raw.previous && Number.isInteger(raw.previous.year) && Number.isInteger(raw.previous.month) && raw.previous.month >= 1 && raw.previous.month <= 12 && /^20\\d\\d-(0[1-9]|1[0-2])$/.test(raw.previous.calendarMonth) ? raw.previous : null;
+      if (mode === "demo") {
+        model = new LocalModel(raw.archive, todayIso(), persist);
+        if (raw.planState) model.planState = raw.planState;
+        model.revision = raw.revision || 0;
+      } else if (mode === "snapshot") snapshot = raw.archive;
+      else throw Error("Modalit\\xE0 non valida.");
+    }
+    try {
+      const raw = JSON.parse(localStorage.getItem(key) || "null");
+      if (raw) restore(raw);
+    } catch {
+      invalid = true;
+      status.textContent = "Archivio locale non leggibile. I dati originali sono conservati.";
+    }
+    function draw() {
+      document.getElementById("platform-sync-status").hidden = mode !== "server";
+      if (!invalid) status.textContent = mode === "demo" ? "Demo con dati simulati \\xB7 nessuna modifica al server." : mode === "snapshot" ? "Snapshot locale \\xB7 consultazione senza modificare il database." : "";
+    }
+    function connection() {
+      const finance = state.data || life.finance || {}, pending = (globalThis.lifeOSDeviceBackup?.().pending || []).map((w) => ({ id: w.id, method: "saveTransaction", payload: w.payload, accepted: false }));
+      return { year: state.year, month: state.month, calendarMonth: life.month, archive: { life: structuredClone(life.data || {}), finance: structuredClone(finance), plan: structuredClone(finance.extraPlan || {}), pending, demo: false, imported: false, endpoint: location.origin, financeMonth: finance.key || \`\${state.year}-\${String(state.month).padStart(2, "0")}\`, calendarMonth: life.month, routineDay: life.data?.today || todayIso() } };
+    }
+    function apply() {
+      const archive = mode === "demo" ? model.archive : snapshot;
+      if (archive) {
+        const m = archive.financeMonth || todayIso().slice(0, 7);
+        state.year = Number(m.slice(0, 4));
+        state.month = Number(m.slice(-2));
+        life.month = archive.calendarMonth || m;
+      } else if (previous) {
+        state.year = previous.year;
+        state.month = previous.month;
+        life.month = previous.calendarMonth;
+      }
+      const view = state.view;
+      ++state.loadRevision;
+      ++life.readRevision;
+      life.homeFinanceRevision = (life.homeFinanceRevision || 0) + 1;
+      state.data = null;
+      state.loadedDetail = false;
+      life.finance = null;
+      life.data = null;
+      life.selected = null;
+      document.querySelectorAll(".view").forEach((element) => element.replaceChildren());
+      closeDialog();
+      draw();
+      loadLifeOS();
+      setView(view);
+    }
+    globalThis.lifeOSLocalMode = {
+      get mode() {
+        return mode;
+      },
+      get isValid() {
+        return !invalid;
+      },
+      get previousArchive() {
+        return previous?.archive ? structuredClone(previous.archive) : null;
+      },
+      get rawArchive() {
+        return invalid ? localStorage.getItem(key) : null;
+      },
+      get archive() {
+        return mode === "demo" ? structuredClone(model.archive) : mode === "snapshot" ? structuredClone(snapshot) : null;
+      },
+      demo() {
+        if (state.busy || life.busy) throw Error("Attendi la fine dell\\u2019operazione in corso.");
+        if (invalid) throw Error("Conserva prima l\\u2019archivio locale non leggibile.");
+        if (mode === "demo") throw Error("La demo \\xE8 gi\\xE0 aperta. Le modifiche locali sono conservate.");
+        const old = { mode, model, snapshot, previous };
+        if (mode === "server") previous = connection();
+        mode = "demo";
+        model = new LocalModel(demoArchive(todayIso()), todayIso(), persist);
+        try {
+          persist();
+        } catch (error) {
+          ({ mode, model, snapshot, previous } = old);
+          throw error;
+        }
+        apply();
+      },
+      import(raw) {
+        if (mode === "server") throw Error("Scollega prima il server per importare uno snapshot locale.");
+        const next = snapshotArchive(raw, snapshot?.financeMonth || \`\${state.year}-\${String(state.month).padStart(2, "0")}\`);
+        const old = { mode, model, snapshot };
+        mode = "snapshot";
+        model = null;
+        snapshot = next;
+        try {
+          persist();
+        } catch (error) {
+          ({ mode, model, snapshot } = old);
+          throw error;
+        }
+        apply();
+      },
+      disconnect() {
+        const finance = state.data || life.finance;
+        if (!finance) throw Error("Carica prima uno snapshot da conservare.");
+        const old = { mode, model, snapshot, previous };
+        previous = connection();
+        snapshot = snapshotArchive(finance);
+        mode = "snapshot";
+        model = null;
+        try {
+          persist();
+        } catch (error) {
+          ({ mode, model, snapshot, previous } = old);
+          throw error;
+        }
+        apply();
+      },
+      server() {
+        if (invalid) {
+          const raw = localStorage.getItem(key);
+          if (raw) localStorage.setItem(key + "-recovery-" + crypto.randomUUID(), raw);
+        }
+        localStorage.removeItem(key);
+        mode = "server";
+        model = null;
+        snapshot = null;
+        invalid = false;
+        apply();
+      }
+    };
+    workerRequest = async function(method, args = [], options) {
+      if (invalid) throw Error("Archivio locale non leggibile. I dati originali sono conservati.");
+      if (mode === "server") return transport(method, args, options);
+      if (method === "getFinanceCategoryOptions") return [.../* @__PURE__ */ new Set([...lifeOSContract.expenseCategories, ...lifeOSContract.incomeCategories])];
+      if (mode === "demo") {
+        model.today = todayIso();
+        try {
+          return await model.request(method, args);
+        } catch (error) {
+          const raw = JSON.parse(localStorage.getItem(key));
+          if (raw) restore(raw);
+          throw error;
+        }
+      }
+      if (method === "getLifeData") return { ...structuredClone(snapshot.life), today: todayIso(), month: args[0] };
+      if (["getFinanceOverview", "getFinanceData", "getFinanceExtras"].includes(method)) {
+        const m = \`\${args[0]}-\${String(args[1]).padStart(2, "0")}\`;
+        if (m !== snapshot.financeMonth) throw Error("Questo mese non \\xE8 incluso nello snapshot. Collega Life OS per aggiornarlo.");
+        return { ...structuredClone(snapshot.finance), key: m, year: Number(m.slice(0, 4)), month: Number(m.slice(-2)), extraPlan: structuredClone(snapshot.plan) };
+      }
+      if (method === "getFinancePlans" && snapshot.finance.plansV2) return structuredClone(snapshot.finance.plansV2);
+      throw Error("Questo snapshot \\xE8 consultabile. Per modificare attivit\\xE0 e calendario usa la demo o collega Life OS.");
+    };
+    if (mode !== "server") {
+      const archive = mode === "demo" ? model.archive : snapshot, m = archive.financeMonth || todayIso().slice(0, 7);
+      state.year = Number(m.slice(0, 4));
+      state.month = Number(m.slice(-2));
+      life.month = archive.calendarMonth || m;
+    }
+    draw();
+  })();
+})();
+<\/script><script>(() => {
+  // backend/worker/weight-transfer.mjs
+  var parts = (date) => Object.fromEntries(new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Rome", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(date).filter((p) => p.type !== "literal").map((p) => [p.type, p.value]));
+  function romeInput(date = /* @__PURE__ */ new Date()) {
+    const p = parts(date);
+    return \`\${p.year}-\${p.month}-\${p.day}T\${p.hour}:\${p.minute}\`;
+  }
+  function romeTimestamp(value) {
+    if (!/^20\\d\\d-(0[1-9]|1[0-2])-\\d\\dT[0-2]\\d:[0-5]\\d$/.test(value)) throw Error("Data della pesata non valida.");
+    const [y, m, d, h, n] = value.split(/[-T:]/).map(Number), naive = Date.UTC(y, m - 1, d, h, n);
+    let guess = naive;
+    for (let i = 0; i < 3; i++) {
+      const p = parts(new Date(guess)), represented = Date.UTC(Number(p.year), Number(p.month) - 1, Number(p.day), Number(p.hour), Number(p.minute));
+      guess -= represented - naive;
+    }
+    if (romeInput(new Date(guess)) !== value) throw Error("Questo orario non \\xE8 valido a Roma. Scegli un altro orario.");
+    return guess;
+  }
+  function weightLink(kilograms, value, id, now = /* @__PURE__ */ new Date()) {
+    const weight = Number(kilograms), at = romeTimestamp(value);
+    if (!Number.isFinite(weight) || weight <= 0 || weight > 500 || at > now.getTime() || !/^\\p{ASCII_Hex_Digit}{8}-\\p{ASCII_Hex_Digit}{4}-\\p{ASCII_Hex_Digit}{4}-\\p{ASCII_Hex_Digit}{4}-\\p{ASCII_Hex_Digit}{12}$/u.test(id)) throw Error("Controlla peso e data della pesata.");
+    const url = new URL("lifeos://weight");
+    url.search = new URLSearchParams({ id, kg: String(weight), at: String(at) }).toString();
+    return url.href;
+  }
+
+  // backend/worker/weight-web.js
+  (() => {
+    const renderHome = osToday;
+    osToday = function() {
+      const html = renderHome();
+      return html.slice(0, -6) + \`<section class="os-card"><div class="card-title"><h2>Peso e calorie</h2><button data-web-weight aria-label="Aggiungi peso">+</button></div><p class="hint">La lettura di Apple Health \\xE8 disponibile nell\\u2019app. Puoi preparare una pesata da confermare su iPhone.</p></section></div>\`;
+    };
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest("[data-web-weight]")) return;
+      const host = document.getElementById("life-dialog"), id = crypto.randomUUID();
+      host.innerHTML = \`<div class="modal os-dialog" role="dialog" aria-modal="true" aria-label="Aggiungi peso"><div class="modal-top"><h2>Aggiungi peso</h2><button data-life-close aria-label="Chiudi">\\xD7</button></div><form id="web-weight-form" class="form-grid"><label>Peso in chilogrammi<input name="weight" type="number" min="0.001" max="500" step="any" required></label><label>Data \\xB7 Roma<input name="date" type="datetime-local" max="\${romeInput()}" value="\${romeInput()}" required></label><p class="hint full">La pesata viene salvata in Apple Health dopo la conferma nell\\u2019app Life OS su iPhone. Questi valori non vengono inviati al server.</p><p role="alert" class="os-form-error full"></p><div class="form-actions"><button type="button" data-life-close>Annulla</button><button type="submit">Continua nell\\u2019app</button></div><div class="full" data-weight-handoff></div></form></div>\`;
+      host.classList.remove("hidden");
+      const form = host.querySelector("form");
+      let link = null;
+      form.onsubmit = (e2) => {
+        e2.preventDefault();
+        if (!form.reportValidity()) return;
+        try {
+          link ??= weightLink(form.elements.weight.value, form.elements.date.value, id);
+          form.elements.weight.readOnly = true;
+          form.elements.date.readOnly = true;
+          const target = form.querySelector("[data-weight-handoff]");
+          target.replaceChildren();
+          const anchor = document.createElement("a");
+          anchor.href = link;
+          anchor.textContent = "Apri Life OS su iPhone e conferma la pesata";
+          anchor.className = "os-button";
+          anchor.dataset.weightLink = "";
+          target.append(anchor);
+          const text = document.createElement("p");
+          text.className = "hint";
+          text.textContent = "Il salvataggio non \\xE8 ancora confermato. Apri il link con Life OS 0.9.5 o successivo e tocca Salva nell\\u2019app.";
+          target.append(text);
+        } catch (error) {
+          form.querySelector("[role=alert]").textContent = error.message;
+        }
+      };
+    });
+  })();
+})();
+<\/script><script>window.dispatchEvent(new Event("lifeos-ready"));<\/script></body>
 </html>
 `;
 function octoberAdvanceReconciliation(movements, month2, todayDay, grossAdvance, rules = {}) {
@@ -6923,29 +8230,6 @@ async function initializeLife(env) {
 }
 var validMonthKey = (s) => typeof s === "string" && /^20\d\d-(0[1-9]|1[0-2])$/.test(s);
 var validClock = (s) => s === null || s === "" || typeof s === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(s);
-function expandEvents(rows, low, high) {
-  const out = [];
-  for (const ev of rows) {
-    const start = ev.day, base = /* @__PURE__ */ new Date(start + "T12:00:00Z");
-    for (let n = 0; n < 12e3; n++) {
-      let day2 = start;
-      if (n) {
-        if (!ev.frequency || ev.frequency === "none") break;
-        if (ev.frequency === "weekly")
-          day2 = new Date(+base + n * 7 * 864e5).toISOString().slice(0, 10);
-        else {
-          const months2 = n * (ev.frequency === "yearly" ? 12 : 1), y = base.getUTCFullYear(), m = base.getUTCMonth() + months2, last = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
-          day2 = new Date(Date.UTC(y, m, Math.min(base.getUTCDate(), last), 12)).toISOString().slice(0, 10);
-        }
-      }
-      if (day2 >= high || ev.until_day && day2 > ev.until_day) break;
-      if (day2 >= low) out.push({ ...ev, day: day2, series_day: start });
-    }
-  }
-  return out.sort(
-    (a, b) => a.day.localeCompare(b.day) || (a.start_time || "").localeCompare(b.start_time || "") || a.id - b.id
-  );
-}
 async function lifeRead(env, focus) {
   await ensureLife(env);
   await env.DB.prepare(
@@ -8776,7 +10060,15 @@ function withFinancePlans(base, { repositoryFactory = (env) => new D1PlanReposit
 }
 
 // backend/worker/entry.mjs
-var entry_default = withFinancePlans(runtime_generated_default, { recordTransaction: (env, input) => saveTransaction(env, input) });
+var app = withFinancePlans(runtime_generated_default, { recordTransaction: (env, input) => saveTransaction(env, input) });
+var entry_default = { async fetch(request, env, ctx) {
+  if (env.NATIVE_DATA_MODE === "maintenance" && new URL(request.url).pathname.startsWith("/api/")) return new Response("Aggiornamento in corso. I movimenti locali restano conservati.", { status: 503, headers: { "Cache-Control": "no-store", "Retry-After": "30" } });
+  const response2 = await app.fetch(request, env, ctx);
+  if (!["shared", "maintenance"].includes(env.NATIVE_DATA_MODE)) return response2;
+  const headers = new Headers(response2.headers);
+  headers.set("X-LifeOS-Data-Source", env.NATIVE_DATA_MODE);
+  return new Response(response2.body, { status: response2.status, statusText: response2.statusText, headers });
+} };
 export {
   entry_default as default
 };

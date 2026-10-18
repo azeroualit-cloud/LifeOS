@@ -37,6 +37,14 @@ import {addMonth,wealthForecast,aggregateCategories} from './finance-model.mjs';
     const refresh=document.querySelector('[data-refresh-categories]');refresh.disabled=true;
     const current=()=>active===token&&state.view==='analysis'&&selectedMonth()===month&&target.isConnected;
     try{
+      const local=globalThis.lifeOSLocalMode;
+      if(local?.mode==='snapshot')throw Error('Collega il server per analizzare 3, 6 o 12 mesi. Lo snapshot locale non garantisce la copertura del periodo.');
+      if(local?.mode==='demo'){
+        const samples=new Map(requested.map(m=>[m,[]]));
+        for(const row of local.archive.finance.transactions||[]){const m=String(row.date||'').slice(0,7);if(samples.has(m)&&['Spesa','Rimborso'].includes(row.type))samples.get(m).push({name:row.displayCategory||row.category||'Altro',amount:-row.amount});}
+        if(month===todayIso().slice(0,7)&&Array.isArray(d.categories))samples.set(month,d.categories);
+        for(const [m,rows] of samples)cache.set(m,rows);
+      }
       for(const m of [...requested].reverse())if(!cache.has(m)){
         if(!current())return;
         target.textContent=`Categorie: ${requested.filter(m=>cache.has(m)).length} di ${requested.length} mesi…`;

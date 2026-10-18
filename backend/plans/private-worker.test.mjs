@@ -47,6 +47,10 @@ test('Worker completo: autenticazione, adozione, pagamento, saldo e mesi storici
   assert.equal(plans.version,2);assert.equal(plans.month,'2026-10');
   assert.deepEqual(plans.plans,overview.plansV2.plans);
   assert.ok(Array.isArray(plans.payments));
+  const nativeResponse=await worker.fetch(request('getFinancePlans',['2026-10']),{...env,NATIVE_DATA_MODE:'shared'},{});
+  assert.equal(nativeResponse.status,200);assert.equal(nativeResponse.headers.get('X-LifeOS-Data-Source'),'shared');
+  const maintenanceResponse=await worker.fetch(request('getFinancePlans',['2026-10']),{...env,NATIVE_DATA_MODE:'maintenance'},{});
+  assert.equal(maintenanceResponse.status,503);assert.equal(maintenanceResponse.headers.get('Retry-After'),'30');
   assert.equal(overview.summary.monthlyRemaining,oldOverview.summary.monthlyRemaining);
   assert.deepEqual(sql.prepare('SELECT * FROM extraordinary').all(),legacyBefore);
   assert.equal(sql.prepare('SELECT COUNT(*) n FROM account_balance_events').get().n,0);

@@ -8,7 +8,7 @@ Include l’integrazione Piani e le correzioni delle letture SQL per Analisi. Le
 
 Verifica: 34 test server superati sul bundle completo con SQLite sintetico; decifratura verificata contro la configurazione originale privata; 48 confronti delle riconciliazioni con risultati identici. Scansione del bundle senza identificativi bancari in chiaro o seed personali.
 
-SHA-256: `c3ba3f1c68ba5e04f5307f35c8c6be9f065eda5e468b820100cbfc98be08f89a`.
+Lo SHA-256 del bundle corrente è incluso nella consegna locale `work/delivery/SHA256SUMS`; i riferimenti ai test privati qui sopra documentano la verifica originaria della sanificazione, non una nuova esecuzione del confronto privato.
 
 Il sorgente originale integrale e la procedura di generazione restano nell’archivio privato indicato in AGENTS.md. Nessun deploy Cloudflare eseguito: caricamento manuale scelto dall’utente.
 
@@ -23,3 +23,5 @@ Il frontend servito dal Worker ora usa Piani v2: Obiettivo, Fondo, Ricorrenza fi
 Il test `backend/worker/plans-web.test.mjs` apre in Chromium l’HTML realmente restituito dal Worker (dati API sintetici), verifica i sei tipi, l’assenza di chiamate legacy, retry, collegamento, modifica, stop, fondi con pagamenti ripetuti, ripresa e layout mobile. Il workflow esegue questa prova e salva screenshot desktop e mobile. I test SQLite separati verificano il registro reale sul bundle completo con dati sintetici.
 
 Revisione di coerenza web/iOS: vedere `docs/PLATFORM-PARITY.md`. Le categorie derivano dal contratto condiviso; Home, Budget, Analisi, Piani e coda spese web sono verificati sul bundle servito. Anche il Worker collegato all’app deve includere Piani v2.
+
+Revisione locale 18 ottobre: scelta endpoint, demo/importazione snapshot, backup con archivio precedente e preparazione pesata per conferma nativa. Sorgenti iOS 0.9.5/56, compilazione Apple ancora da eseguire. Nessun nuovo link Raw pubblicato: push bloccato dal controllo automatico in attesa di autorizzazione esplicita. Non usare il vecchio Raw come se contenesse questa revisione.

@@ -32,7 +32,7 @@ jobs:
           python3 - <<'PY'
           import hashlib,pathlib,zipfile
           p=pathlib.Path('lifeos-native.zip')
-          assert hashlib.sha256(p.read_bytes()).hexdigest()=='d4938db7025c5ea1c76b39c2dd0c80ff767ecdcbb5ec172c5334ed4051519139'
+          assert hashlib.sha256(p.read_bytes()).hexdigest()=='51d513347f2e3fcab350e4de0c70fb1de100217d556524544fdbf064d30ef105'
           with zipfile.ZipFile(p) as z:
             assert all(not pathlib.PurePosixPath(n).is_absolute() and '..' not in pathlib.PurePosixPath(n).parts for n in z.namelist())
             z.extractall('app')
@@ -64,6 +64,7 @@ jobs:
           assert info['CFBundleSupportedPlatforms']==['iPhoneOS']
           assert info.get('NSHealthShareUsageDescription') and info.get('NSHealthUpdateUsageDescription')
           assert plistlib.loads(pathlib.Path('LifeOS.entitlements').read_bytes())['com.apple.developer.healthkit'] is True
+          assert any('lifeos' in item.get('CFBundleURLSchemes',[]) for item in info.get('CFBundleURLTypes',[]))
           executable=app/info['CFBundleExecutable']
           assert 'arm64' in subprocess.check_output(['lipo','-archs',str(executable)],text=True)
           assert 'IOSSIMULATOR' not in subprocess.check_output(['vtool','-show-build',str(executable)],text=True)

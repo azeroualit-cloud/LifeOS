@@ -125,6 +125,7 @@ html:not([data-theme="light"]) [data-kind="holiday"] {--shift-color:#d7bf52;}
 .plans-web {display:grid;gap:var(--space);}.plan-list-row {display:flex;justify-content:space-between;text-align:left;width:100%;gap:var(--space);}.plan-list-row > span:first-child {min-width:0;overflow-wrap:anywhere;}.plan-list-row small,.plan-list-row strong,.plan-list-row span span {display:block;}.plans-web button,input,select {min-height:44px;}.plans-web .kv strong {white-space:normal;}.budget-flow .kv strong small {display:block;white-space:normal;}.budget-flow > section {min-width:0;}.budget-flow svg {width:100%;height:auto;}[data-plan-preview] {max-height:280px;overflow:auto;}@media(max-width:420px){.plans-web .card-title{flex-wrap:wrap;}.budget-flow .kv {grid-template-columns:minmax(0,1fr) minmax(0,1fr);}.budget-flow .kv strong {white-space:normal;overflow-wrap:anywhere;}}
 .home-native {display:grid;gap:24px;max-width:680px;margin:auto;}.home-week-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;text-align:center;}.home-week-grid .os-day{width:100%;}.home-week-grid small{display:block;margin-bottom:4px;}.home-summary{font-size:20px;line-height:1.55;}.home-next-time{display:flex;justify-content:space-between;width:100%;border:0;padding:12px 0;}.home-habit{display:flex;width:100%;justify-content:flex-start;border:0;border-radius:0;border-bottom:1px solid var(--line);padding:14px 0;}.home-habit span{font-size:22px;}.os-category-navigation{grid-template-columns:minmax(0,1fr);}.header-tools button,.card-title button,.period button{min-height:44px;min-width:44px;}
 .page-heading{display:grid;grid-template-columns:44px minmax(0,1fr) auto;}.page-heading h1{font-size:20px;text-align:center;}.page-heading>.theme-toggle{width:44px;height:44px;min-height:44px;}
+.settings-confirm{display:flex;align-items:center;gap:var(--space);}.settings-confirm input{width:24px;min-width:24px;flex:none;}
 </style>
   <style id="native-web-parity">
 /* Web parity with native 0.9.0. Shift palette and data contracts are unchanged. */
@@ -616,6 +617,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
 
       /** Aggiorna la sintesi finanziaria della home per il mese corrente a Roma. */
       async function osLoadHomeFinance() {
+        const revision = life.homeFinanceRevision = (life.homeFinanceRevision || 0) + 1;
         try {
           const day = new Date().toLocaleDateString("sv-SE", {
             timeZone: "Europe/Rome",
@@ -625,10 +627,12 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
             Number(day.slice(0, 4)),
             Number(day.slice(5, 7)),
           );
+          if (revision !== life.homeFinanceRevision) return;
           life.finance = fresh;
           life.financeError = false;
           if (life.data) document.getElementById("today").innerHTML = osToday();
         } catch (e) {
+          if (revision !== life.homeFinanceRevision) return;
           life.financeError = true;
           if (life.data) document.getElementById("today").innerHTML = osToday();
         }
@@ -2798,13 +2802,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
           }
         }
         const category = financialCategoryOptions(type);
-        const current = todayIso(),
-          chosen =
-            state.view === "today" ||
-            current.slice(0, 7) ===
-              state.year + "-" + String(state.month).padStart(2, "0")
-              ? current
-              : state.year + "-" + String(state.month).padStart(2, "0") + "-01";
+        const chosen = todayIso();
         modal(
           "Nuovo movimento",
           select(
@@ -3610,9 +3608,9 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         state.month,
       );
       document.getElementById("loading").classList.add("hidden");
-      loadLifeOS();
-      osLoadHomeFinance();
-      osLoadWeather();
+      window.addEventListener("lifeos-ready", () => {
+        loadLifeOS(); osLoadHomeFinance(); osLoadWeather();
+      }, {once:true});
     </script>
 
     <script>

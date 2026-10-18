@@ -30,7 +30,7 @@ const server=createServer(async(req,res)=>{
   res.end('true');return;
  }
  if(method==='saveEstimate'){res.end('true');return;}
- const d={key,year:Number(key.slice(0,4)),month:Number(key.slice(-2)),updatedAt:'test',summary:{budget:7000,monthlyRemaining:1000,monthlySalary:1800,monthlySpent:200,monthlyCommitted:600,recurringCommitments:[],monthlyBudgetBreakdown:[]},transactions:[],recurring:[{name:'Gas',estimate:40,nextEstimate:45}],averages:[],planning,categories:[{name:'Casa',amount:100},{name:'Auto',amount:-10}],extraPlan:{allocations:[],links:[]},forecastHistory:[],wealthHistory:[{month:key,measured:7000}],lifetime:{series:[],salaryHistory:[{month:key,base:1700,additional:100}]} };
+ const d={key,year:Number(key.slice(0,4)),month:Number(key.slice(-2)),updatedAt:'test',summary:{budget:7000,committedCurrent:200,remainingFree:6800,monthlyRemaining:1000,monthlySalary:1800,monthlySpent:200,monthlyCommitted:600,recurringCommitments:[],monthlyBudgetBreakdown:[]},transactions:[],recurring:[{name:'Gas',estimate:40,nextEstimate:45}],averages:[],planning,categories:[{name:'Casa',amount:100},{name:'Auto',amount:-10}],extraPlan:{allocations:[],links:[]},forecastHistory:[],wealthHistory:[{month:key,measured:7000}],lifetime:{series:[],salaryHistory:[{month:key,base:1700,additional:100}]} };
  if(!oldServer)d.plansV2={version:2,month:key,plans:[],payments:[]};
  res.end(JSON.stringify(d));
 });
@@ -88,6 +88,7 @@ try{
  await page.locator('#next-month').click();await page.locator('[data-finance-retry]').waitFor();
  assert.equal(await page.locator('.finance-value').count(),0);
  await page.locator('[data-finance-retry]').click();await page.locator('.finance-value').waitFor();
+ await page.locator('.finance-actions [data-new-transaction]').click();assert.equal(await page.locator('#entry-form [name=date]').inputValue(),today);await page.locator('#dialog [data-close]').first().click();
  await page.locator('#prev-month').click();await page.locator('.finance-value').waitFor();
  await page.evaluate(()=>setView('analysis'));await page.locator('[data-refresh-categories]:enabled').waitFor();
  assert.deepEqual(await page.locator('#analysis h2').allTextContents(),['Spese per categoria','Previsione patrimonio','Patrimonio','Stipendi per competenza']);
@@ -109,6 +110,37 @@ try{
  }
  oldServer=true;await page.evaluate(()=>{state.data=null;setView('extras');});await page.locator('#extras [role=alert]').waitFor();assert.equal(await page.locator('#extras [role=alert]').textContent(),platformContract.plansUnavailable);
  assert.equal(await page.locator('#extras').getByText('Caricamento Piani…').count(),0);
+ oldServer=false;
+ // Local tools use the native demo fixture and never fall through to remote writes.
+ quickUnavailable=true;await page.evaluate(p=>workerRequest('saveTransaction',[p]),{...queued,requestId:'synthetic-before-demo-1'});
+ await page.evaluate(()=>setView('today'));await page.getByRole('button',{name:'Impostazioni',exact:true}).click();
+ page.once('dialog',d=>d.accept());await page.locator('[data-settings-demo]').click();
+ await page.waitForFunction(()=>lifeOSLocalMode.mode==='demo'&&!!life.data);
+ assert.deepEqual(await page.evaluate(()=>life.data.categories.map(c=>c.label)),['Attività','Desideri','Giochi','Letture']);
+ const remoteBefore=calls.length;
+ quickUnavailable=false;await page.evaluate(()=>{window.dispatchEvent(new Event('online'));document.dispatchEvent(new Event('visibilitychange'));});
+ assert.equal(await page.evaluate(()=>lifeOSDeviceBackup().pending.length),1);assert.equal(calls.length,remoteBefore);
+ assert.equal(await page.evaluate(()=>lifeOSLocalMode.previousArchive.pending.length),1);
+ await page.evaluate(()=>setView('extras'));await page.locator('#extras [data-new-extra]').click();
+ await page.locator('#plans-web-form [name=kind]').selectOption('fund');await page.locator('#plans-web-form [name=name]').fill('Fondo demo');await page.locator('#plans-web-form [name=amount]').fill('50');await page.locator('#plans-web-form [type=submit]').click();
+ await page.locator('[data-plans-detail]').click();await page.locator('[data-plans-pay]').click();await page.locator('#plans-web-form [name=amount]').fill('40');await page.locator('#plans-web-form [type=submit]').click();
+ await page.waitForFunction(()=>document.getElementById('dialog').classList.contains('hidden'));
+ assert.equal(await page.evaluate(()=>state.data.summary.budget),960);assert.equal(calls.length,remoteBefore);
+ await page.reload();await page.waitForFunction(()=>lifeOSLocalMode.mode==='demo'&&!!life.data);assert.equal(calls.length,remoteBefore);
+ await page.evaluate(()=>setView('overview'));await page.locator('.finance-value').waitFor();assert.equal(await page.evaluate(()=>state.data.summary.budget),960);
+ await page.getByRole('button',{name:'Impostazioni',exact:true}).click();await page.locator('[data-settings-restore]').click();await page.waitForFunction(()=>lifeOSLocalMode.mode==='server'&&!!life.data);
+ await page.evaluate(()=>setView('overview'));await page.locator('.finance-value').waitFor();
+ await page.getByRole('button',{name:'Impostazioni',exact:true}).click();await page.locator('[data-settings-disconnect]').click();await page.waitForFunction(()=>lifeOSLocalMode.mode==='snapshot'&&!!life.data);
+ await page.getByRole('button',{name:'Impostazioni',exact:true}).click();await page.locator('[data-settings-paste]').click();
+ const imported={key:month,summary:{budget:1234,committedCurrent:100,remainingFree:1134,monthlyRemaining:500},transactions:[]};
+ await page.locator('[name=snapshot]').fill(JSON.stringify(imported));await page.locator('[data-settings-import-text]').click();
+ await page.waitForFunction(()=>lifeOSLocalMode.mode==='snapshot'&&!!life.data);await page.evaluate(()=>setView('overview'));await page.locator('.finance-value').waitFor();assert.equal(await page.evaluate(()=>state.data.summary.budget),1234);
+ const snapshotCalls=calls.length;await assert.rejects(()=>page.evaluate(()=>workerRequest('saveTask',[{title:'Do not write'}])),/consultabile/);assert.equal(calls.length,snapshotCalls);
+ await page.evaluate(()=>setView('today'));await page.getByRole('button',{name:'Aggiungi peso',exact:true}).click();
+ await page.locator('#web-weight-form [name=weight]').fill('80.235');await page.locator('#web-weight-form [type=submit]').click();
+ const weightURL=await page.locator('[data-weight-link]').getAttribute('href');assert.ok(weightURL.startsWith('lifeos://weight?'));assert.equal(new URL(weightURL).searchParams.get('kg'),'80.235');
+ await page.locator('#web-weight-form [type=submit]').click();assert.equal(await page.locator('[data-weight-link]').getAttribute('href'),weightURL);assert.equal(calls.length,snapshotCalls);
+ await page.locator('#life-dialog [data-life-close]').first().click();
  await page.emulateMedia({reducedMotion:'reduce'});assert.equal(await page.locator('.theme-toggle').evaluate(e=>getComputedStyle(e).transitionDuration),'0s');
  assert.deepEqual(errors,[]);
  const broken=await browser.newPage();await broken.addInitScript(()=>localStorage.setItem('lifeos-web-device-v2','corrupted'));
@@ -117,5 +149,5 @@ try{
  await assert.rejects(()=>broken.evaluate(p=>workerRequest('saveTransaction',[p]),queued),/Archivio locale non leggibile/);
  assert.equal(calls.filter(c=>c.method==='saveTransaction').length,before);
  assert.equal(await broken.evaluate(()=>localStorage.getItem('lifeos-web-device-v2')),'corrupted');await broken.close();
- console.log('PASS: shared categories, dashboard week, neutral times, tasks, movement fields, savings read-back, recurring payment, four analysis charts, 3/6/12 month cache/error/retry, outdated server recovery, seven views at three widths.');
+ console.log('PASS: shared categories, dashboard week, neutral times, tasks, movement fields, savings read-back, recurring payment, four analysis charts, 3/6/12 month cache/error/retry, outdated server recovery, seven views at three widths, isolated persistent demo, snapshot import and confirmed-app weight handoff.');
 }finally{await browser.close();await new Promise(resolve=>server.close(resolve));}

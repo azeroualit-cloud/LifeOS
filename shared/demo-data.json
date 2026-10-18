@@ -1,0 +1,360 @@
+{
+  "calendarMonth": "2026-10",
+  "demo": true,
+  "finance": {
+    "categories": [
+      {
+        "amount": 12.34,
+        "name": "Alimentari"
+      }
+    ],
+    "forecastHistory": [
+      {
+        "month": "2026-04",
+        "observed": true,
+        "ordinaryNet": 170
+      },
+      {
+        "month": "2026-05",
+        "observed": true,
+        "ordinaryNet": 155
+      },
+      {
+        "month": "2026-06",
+        "observed": true,
+        "ordinaryNet": 140
+      },
+      {
+        "month": "2026-07",
+        "observed": true,
+        "ordinaryNet": 125
+      },
+      {
+        "month": "2026-08",
+        "observed": true,
+        "ordinaryNet": 110
+      },
+      {
+        "month": "2026-09",
+        "observed": true,
+        "ordinaryNet": 95
+      }
+    ],
+    "history": [],
+    "lifetime": {
+      "series": [
+        {
+          "month": "2026-04",
+          "observed": true,
+          "ordinaryNet": 170,
+          "wealth": 200
+        },
+        {
+          "month": "2026-05",
+          "observed": true,
+          "ordinaryNet": 155,
+          "wealth": 330
+        },
+        {
+          "month": "2026-06",
+          "observed": true,
+          "ordinaryNet": 140,
+          "wealth": 460
+        },
+        {
+          "month": "2026-07",
+          "observed": true,
+          "ordinaryNet": 125,
+          "wealth": 590
+        },
+        {
+          "month": "2026-08",
+          "observed": true,
+          "ordinaryNet": 110,
+          "wealth": 720
+        },
+        {
+          "month": "2026-09",
+          "observed": true,
+          "ordinaryNet": 95,
+          "wealth": 850
+        }
+      ]
+    },
+    "planning": {
+      "goal": 3000,
+      "monthlySaving": 150,
+      "now": 1000,
+      "projection": 1450
+    },
+    "recurring": [
+      {
+        "estimate": 44,
+        "name": "Elettricità",
+        "treatment": "Vincolata"
+      },
+      {
+        "estimate": 30,
+        "name": "Gas",
+        "treatment": "Vincolata"
+      },
+      {
+        "estimate": 20,
+        "name": "Acqua",
+        "treatment": "Vincolata"
+      },
+      {
+        "estimate": 25,
+        "name": "Condominio",
+        "treatment": "Vincolata"
+      },
+      {
+        "estimate": 33,
+        "name": "Palestra",
+        "treatment": "Vincolata"
+      },
+      {
+        "estimate": 13,
+        "name": "Abbonamenti",
+        "treatment": "Vincolata"
+      },
+      {
+        "estimate": 66,
+        "name": "Benzina",
+        "treatment": "Flessibile"
+      }
+    ],
+    "summary": {
+      "account": "Trade Republic",
+      "budget": 1000,
+      "committedCurrent": 200,
+      "monthlyBudgetBreakdown": [
+        {
+          "amount": 550,
+          "name": "Affitto"
+        },
+        {
+          "amount": 100,
+          "name": "Bollette e abbonamenti"
+        },
+        {
+          "amount": 200,
+          "name": "Accantonamenti"
+        }
+      ],
+      "monthlyCommitted": 850,
+      "monthlyRemaining": 837.66,
+      "monthlySalary": 1800,
+      "monthlySpent": 112.34,
+      "remainingFree": 800,
+      "revolutBalance": 0
+    },
+    "transactions": [
+      {
+        "account": "Trade Republic",
+        "amount": -12.34,
+        "category": "Alimentari",
+        "date": "2026-10-18",
+        "name": "Spesa alimentare",
+        "row": 2,
+        "type": "Spesa"
+      },
+      {
+        "account": "Trade Republic",
+        "amount": 1800,
+        "category": "Stipendio",
+        "date": "2026-10-17",
+        "name": "Stipendio demo",
+        "row": 3,
+        "type": "Entrata"
+      }
+    ],
+    "yearly": [
+      {
+        "commitments": 850,
+        "income": 1800,
+        "month": "2026-01",
+        "spent": 723
+      },
+      {
+        "commitments": 850,
+        "income": 1800,
+        "month": "2026-02",
+        "spent": 746
+      },
+      {
+        "commitments": 850,
+        "income": 1800,
+        "month": "2026-03",
+        "spent": 769
+      },
+      {
+        "commitments": 850,
+        "income": 1800,
+        "month": "2026-04",
+        "spent": 792
+      },
+      {
+        "commitments": 850,
+        "income": 1800,
+        "month": "2026-05",
+        "spent": 815
+      },
+      {
+        "commitments": 850,
+        "income": 1800,
+        "month": "2026-06",
+        "spent": 838
+      },
+      {
+        "commitments": 850,
+        "income": 1800,
+        "month": "2026-07",
+        "spent": 861
+      },
+      {
+        "commitments": 850,
+        "income": 1800,
+        "month": "2026-08",
+        "spent": 884
+      },
+      {
+        "commitments": 850,
+        "income": 1800,
+        "month": "2026-09",
+        "spent": 907
+      },
+      {
+        "commitments": 850,
+        "income": 1800,
+        "month": "2026-10",
+        "spent": 930
+      },
+      {
+        "commitments": 850,
+        "income": 1800,
+        "month": "2026-11",
+        "spent": 953
+      },
+      {
+        "commitments": 850,
+        "income": 1800,
+        "month": "2026-12",
+        "spent": 976
+      }
+    ]
+  },
+  "financeMonth": "2026-10",
+  "imported": false,
+  "life": {
+    "categories": [
+      {
+        "key": "action",
+        "label": "Attività",
+        "position": 0
+      },
+      {
+        "key": "wish",
+        "label": "Desideri",
+        "position": 1
+      },
+      {
+        "key": "games",
+        "label": "Giochi",
+        "position": 2
+      },
+      {
+        "key": "reading",
+        "label": "Letture",
+        "position": 3
+      }
+    ],
+    "events": [
+      {
+        "day": "2026-10-19",
+        "end_time": "19:00",
+        "frequency": "weekly",
+        "id": 1,
+        "location": "Palestra",
+        "notes": "",
+        "start_time": "18:00",
+        "title": "Allenamento"
+      }
+    ],
+    "month": "2026-10",
+    "occurrences": {},
+    "routines": [
+      {
+        "checked": 0,
+        "id": 1,
+        "position": 0,
+        "title": "Leggere"
+      },
+      {
+        "checked": 0,
+        "id": 2,
+        "position": 1,
+        "title": "Camminare"
+      }
+    ],
+    "shifts": [
+      {
+        "day": "2026-10-18",
+        "kind": "morning"
+      },
+      {
+        "day": "2026-10-19",
+        "kind": "rest"
+      }
+    ],
+    "tasks": [
+      {
+        "id": 1,
+        "list_kind": "action",
+        "notes": "Esempio modificabile nella demo.",
+        "sort_order": 1,
+        "status": "todo",
+        "title": "Organizzare la settimana"
+      },
+      {
+        "id": 2,
+        "list_kind": "action",
+        "notes": "Esempio modificabile nella demo.",
+        "sort_order": 2,
+        "status": "todo",
+        "title": "Prenotare il controllo auto"
+      },
+      {
+        "id": 3,
+        "list_kind": "reading",
+        "notes": "Esempio modificabile nella demo.",
+        "sort_order": 3,
+        "status": "todo",
+        "title": "Finire il libro"
+      }
+    ],
+    "today": "2026-10-18"
+  },
+  "pending": [],
+  "plan": {
+    "allocations": [
+      {
+        "amount_cents": 5000,
+        "cycle_id": 1,
+        "end_month": "2027-09",
+        "extraordinary_source_row": 2,
+        "kind": "expense",
+        "month": "2026-10",
+        "name": "Manutenzione auto",
+        "payment_account": "Trade Republic",
+        "repeat": "Annuale",
+        "start_month": "2026-10",
+        "status": "Programmato",
+        "total_cents": 60000
+      }
+    ],
+    "links": []
+  },
+  "refreshedAt": 813974452.2970062,
+  "routineDay": "2026-10-18"
+}
