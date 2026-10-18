@@ -23,7 +23,7 @@ jobs:
           python3 -m zipfile -e lifeos-native.zip work/native
           python3 scripts/platform-contract.py --check
           python3 scripts/generate-demo.py --check
-          node --test backend/worker/finance-model.test.mjs backend/worker/local-model.test.mjs backend/worker/weight-transfer.test.mjs
+          node --test backend/worker/finance-model.test.mjs backend/worker/local-model.test.mjs backend/worker/weight-transfer.test.mjs backend/worker/habits.test.mjs
       - name: Validate editor compatibility
         run: npx --yes --package typescript@5.9.3 tsc --allowJs --checkJs --noEmit --target es2022 --module esnext --lib es2022,webworker worker.js
       - name: Test the actual deliverable, including D1 integration

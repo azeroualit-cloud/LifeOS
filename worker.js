@@ -1,3 +1,24 @@
+// backend/worker/habits.mjs
+function validHabitDay(day2) {
+  return typeof day2 === "string" && /^\d{4}-\d{2}-\d{2}$/.test(day2) && Number.isFinite(Date.parse(day2 + "T12:00:00Z")) && (/* @__PURE__ */ new Date(day2 + "T12:00:00Z")).toISOString().slice(0, 10) === day2;
+}
+function habitSchedule(value) {
+  if (value === void 0) return { mode: "daily", intervalDays: 1, weekdays: [], startDate: "" };
+  if (!value || typeof value !== "object" || Array.isArray(value) || !["daily", "interval", "weekdays"].includes(value.mode)) throw Error("Ripetizione non valida.");
+  const { mode } = value, startDate = value.startDate ?? "", intervalDays = value.intervalDays ?? 1, days = value.weekdays ?? [];
+  if (startDate !== "" && !validHabitDay(startDate) || mode !== "daily" && !validHabitDay(startDate)) throw Error("Scegli una data di inizio valida.");
+  if (mode === "interval" && (!Number.isInteger(intervalDays) || intervalDays < 1 || intervalDays > 365)) throw Error("Scegli un intervallo da 1 a 365 giorni.");
+  if (mode === "weekdays" && (!Array.isArray(days) || !days.length || days.some((d) => !Number.isInteger(d) || d < 1 || d > 7))) throw Error("Scegli almeno un giorno della settimana.");
+  return { mode, intervalDays: mode === "interval" ? intervalDays : 1, weekdays: mode === "weekdays" ? [...new Set(days)].sort((a, b) => a - b) : [], startDate };
+}
+function habitDue(routine, day2) {
+  const s = habitSchedule(routine.schedule);
+  if (!validHabitDay(day2) || s.startDate && day2 < s.startDate) return false;
+  if (s.mode === "daily") return true;
+  if (s.mode === "weekdays") return s.weekdays.includes(((/* @__PURE__ */ new Date(day2 + "T12:00:00Z")).getUTCDay() + 6) % 7 + 1);
+  return Math.round((Date.parse(day2 + "T12:00:00Z") - Date.parse(s.startDate + "T12:00:00Z")) / 864e5) % s.intervalDays === 0;
+}
+
 // backend/worker/events.mjs
 function expandEvents(rows, low, high) {
   const out = [];
@@ -188,7 +209,7 @@ main {width:100%;max-width:1140px;margin:0 auto;padding:32px 32px 104px;min-widt
 .breakdown {display:grid;grid-template-columns:120px minmax(0,1fr);gap:16px;align-items:center;}.category-ring {position:relative;width:120px;height:120px;flex:none;}.category-ring svg {width:120px;height:120px;}.category-ring-label {position:absolute;inset:22%;display:flex;flex-direction:column;justify-content:center;align-items:center;pointer-events:none;}.category-ring-label small {font-size:10px;}.category-ring-label strong {font-size:13px;white-space:nowrap;}.category-legend {min-width:0;}.bar-row {display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 8px;margin-bottom:12px;font-size:12px;}.bar-row span {overflow-wrap:anywhere;}.bar {grid-column:1/-1;height:4px;background:var(--os-panel-2);border-radius:3px;overflow:hidden;}.bar i {display:block;height:100%;}.category-swatch {display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;}.details-label {margin-top:18px;color:var(--muted);font-size:12px;}.small-arrow {width:28px;height:30px;min-height:30px;border:0;padding:0;font-size:20px;}.category-month {font-size:12px;color:var(--muted);white-space:nowrap;}
 .filters {display:flex;gap:10px;margin-bottom:18px;}.filters .search {flex:1;min-width:0;}.tabular {border-collapse:collapse;width:100%;font-size:13px;}.tabular th {color:var(--muted);font-size:11px;text-align:left;font-weight:500;}.tabular td,.tabular th {padding:12px 8px;border-bottom:1px solid var(--line);}.tabular th:first-child,.tabular td:first-child {padding-left:0;}.tabular .num {text-align:right;white-space:nowrap;}.tx-description-row {display:flex;justify-content:space-between;gap:12px;}.tx-description-text small {display:block;}.tx-actions {display:flex;gap:6px;}.tx-actions button {min-height:30px;font-size:11px;padding:4px 6px;}.movement-list {display:none;}.movement-more {margin-top:16px;}.extra-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;}.extra-toolbar {display:none;}.extra-card-head {display:grid;grid-template-columns:minmax(0,1fr) max-content;align-items:baseline;}.extra-card-head h3 {min-width:0;overflow-wrap:anywhere;}.extra-card-head strong {white-space:nowrap;font-size:18px;}.extra-metadata {display:flex;justify-content:space-between;color:var(--muted);font-size:12px;gap:8px;margin-bottom:18px;}.extra-card-controls {display:flex;gap:8px;flex-wrap:wrap;}.extra-card-controls button {font-size:12px;}.extra-state-row {display:flex;align-items:center;gap:8px;flex:1;}.state-tag {font-size:11px;border-radius:6px;background:var(--os-panel-2);padding:5px 8px;color:var(--muted);}.extra-pay-action {color:var(--os-accent);border:0;}.extra-info {padding-top:12px;}
 input,select,textarea {display:block;width:100%;min-height:42px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--os-panel-2);color:var(--ink);min-width:0;}textarea {min-height:84px;resize:vertical;}input[type=checkbox] {width:18px;min-height:18px;}input::placeholder,textarea::placeholder {color:var(--muted);}.modal-wrap {position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:24px;background:#0008;overflow-y:auto;}.modal {background:var(--os-panel);border:1px solid var(--line);border-radius:24px;padding:24px;width:min(600px,100%);max-height:calc(100svh - 48px);overflow-y:auto;}.modal-top {display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:22px;}.modal-top h2 {font-size:22px;}.os-form,.form-grid {display:grid;grid-template-columns:1fr 1fr;gap:14px;}.os-form label,.form-grid label {display:grid;gap:6px;font-size:12px;color:var(--muted);}.os-form .wide,.form-grid .full,.form-grid .wide {grid-column:1/-1;}.form-actions {position:sticky;bottom:0;background:var(--os-panel);padding-top:12px;padding-bottom:4px;z-index:2;}
-.form-actions,.os-form-actions {grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px;margin-top:10px;}.os-form-error {grid-column:1/-1;color:var(--red);font-size:13px;}.os-inline-event {margin-top:18px;border-top:1px solid var(--line);padding-top:16px;}.os-routine-manager > div {display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line);}.os-routine-manager span {flex:1;}.os-routine-manager button {font-size:11px;min-height:30px;padding:4px 7px;}.os-routine-dialog > p {color:var(--muted);font-size:12px;margin-bottom:12px;}.os-routine-dialog form {margin-top:16px;}.category-order {padding-top:12px;}.category-order > div {display:flex;align-items:center;gap:6px;padding:8px 0;}.category-order span {flex:1;}
+.form-actions,.os-form-actions {grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px;margin-top:10px;}.os-form-error {grid-column:1/-1;color:var(--red);font-size:13px;}.os-inline-event {margin-top:18px;border-top:1px solid var(--line);padding-top:16px;}.os-routine-manager > div {display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line);}.os-routine-manager span {flex:1;}.os-routine-manager button {font-size:13px;min-height:44px;min-width:44px;padding:4px 7px;}.os-routine-manager span{min-width:0;overflow-wrap:anywhere;}.os-routine-manager small{color:var(--muted);font-size:12px;}.os-routine-dialog > p {color:var(--muted);font-size:12px;margin-bottom:12px;}.os-routine-dialog form {margin-top:16px;}.habit-fields{display:grid;gap:14px;}.habit-fields legend{font-size:12px;color:var(--muted);margin-bottom:6px;}.category-order {padding-top:12px;}.category-order > div {display:flex;align-items:center;gap:6px;padding:8px 0;}.category-order span {flex:1;}
 .errorbox {background:color-mix(in srgb,var(--red) 10%,var(--os-panel));border:1px solid var(--red);color:var(--red);padding:12px;border-radius:12px;margin-bottom:16px;}.loading-overlay {position:fixed;inset:0;z-index:80;display:grid;place-items:center;background:#0004;}.loading-panel {display:grid;gap:12px;justify-items:center;background:var(--os-panel);border:1px solid var(--line);border-radius:20px;padding:28px;}.loading-spinner {width:24px;height:24px;border:2px solid var(--line);border-top-color:var(--os-accent);border-radius:50%;animation:spin .8s linear infinite;}@keyframes spin {to {transform:rotate(360deg);}}
 @media(max-width:760px) {
  :root {--card-padding:18px;--space:14px;}.shell {display:block;min-height:100svh;}.sidebar {position:fixed;inset:auto 14px calc(12px + var(--safe-bottom));height:var(--nav-height);width:auto;max-width:520px;margin:0 auto;padding:5px;border:1px solid var(--line);border-radius:36px;z-index:40;background:color-mix(in srgb,var(--os-panel) 90%,transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);}.brand,.sidebar-foot {display:none;}.nav {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px;width:100%;height:100%;}.nav button {display:flex;flex-direction:column;justify-content:center;gap:5px;padding:4px 2px;min-height:0;border-radius:30px;font-size:11px;line-height:1.2;}.nav-symbol {width:22px;height:22px;}
@@ -898,11 +919,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
       }
 
       /** Apre il foglio di gestione delle routine; non modifica le spunte. */
-      function osManageRoutines() {
-        const d = document.getElementById("life-dialog");
-        d.innerHTML = \`<div class="modal os-dialog os-routine-dialog" role="dialog" aria-modal="true" aria-label="Routine"><div class="os-topline"><div><h2>Routine</h2></div><button class="os-icon-button" data-life-close aria-label="Chiudi">\xD7</button></div><p>Le spunte si azzerano ogni giorno.</p><div class="os-routine-manager">\${(life.data.routines || []).map((h) => \`<div><span>\${osSafe(h.title)}</span><button data-life-routine-edit="\${h.id}" aria-label="Rinomina \${osSafe(h.title)}">Rinomina</button><button data-life-routine-delete="\${h.id}" aria-label="Elimina \${osSafe(h.title)}">Elimina</button></div>\`).join("")}</div><form id="os-routine-form" class="os-form"><input type="hidden" name="record_id" value=""><label class="wide">Nome *<input name="title" maxlength="60" required placeholder="Es. Acqua" autocomplete="off"></label><div class="os-form-actions"><button class="os-button primary" type="submit">Aggiungi</button></div></form></div>\`;
-        d.classList.remove("hidden");
-      }
+      function osManageRoutines() { return lifeOSHabits.open(); }
 
       /** Scadenza esplicita Domani/Oggi/Scaduto; nessun badge per completate. */
       function osDueBadge(day, status) {
@@ -1274,11 +1291,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
             (x) => x.id === Number(el.dataset.lifeRoutineEdit),
           );
           if (!h) return;
-          const form = document.getElementById("os-routine-form");
-          form.elements.record_id.value = h.id;
-          form.elements.title.value = h.title;
-          form.querySelector("[type=submit]").textContent = "Salva nome";
-          form.elements.title.focus();
+          lifeOSHabits.edit(h);
           return;
         }
         if (el.hasAttribute("data-life-routine-delete")) {
@@ -1519,13 +1532,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
           }
           if (e.target.getAttribute("id") === "os-routine-form") {
             e.preventDefault();
-            if (!e.target.reportValidity()) return;
-            const values = new FormData(e.target),
-              title = values.get("title"),
-              id = Number(values.get("record_id") || 0);
-            osWrite("saveRoutine", { title, id }).then((saved) => {
-              if (saved) osManageRoutines();
-            });
+            lifeOSHabits.save(e.target);
           }
         },
         true,
@@ -3999,7 +4006,92 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         document.addEventListener("touchcancel", reset, { passive: true });
       })();
     <\/script>
-  <script>/* Home follows the native order: rolling week, day summary, next time, habits. */
+  <script>(() => {
+  // backend/worker/habits.mjs
+  var habitWeekdays = ["Luned\\xEC", "Marted\\xEC", "Mercoled\\xEC", "Gioved\\xEC", "Venerd\\xEC", "Sabato", "Domenica"];
+  function validHabitDay(day) {
+    return typeof day === "string" && /^\\d{4}-\\d{2}-\\d{2}$/.test(day) && Number.isFinite(Date.parse(day + "T12:00:00Z")) && (/* @__PURE__ */ new Date(day + "T12:00:00Z")).toISOString().slice(0, 10) === day;
+  }
+  function habitSchedule(value) {
+    if (value === void 0) return { mode: "daily", intervalDays: 1, weekdays: [], startDate: "" };
+    if (!value || typeof value !== "object" || Array.isArray(value) || !["daily", "interval", "weekdays"].includes(value.mode)) throw Error("Ripetizione non valida.");
+    const { mode } = value, startDate = value.startDate ?? "", intervalDays = value.intervalDays ?? 1, days = value.weekdays ?? [];
+    if (startDate !== "" && !validHabitDay(startDate) || mode !== "daily" && !validHabitDay(startDate)) throw Error("Scegli una data di inizio valida.");
+    if (mode === "interval" && (!Number.isInteger(intervalDays) || intervalDays < 1 || intervalDays > 365)) throw Error("Scegli un intervallo da 1 a 365 giorni.");
+    if (mode === "weekdays" && (!Array.isArray(days) || !days.length || days.some((d) => !Number.isInteger(d) || d < 1 || d > 7))) throw Error("Scegli almeno un giorno della settimana.");
+    return { mode, intervalDays: mode === "interval" ? intervalDays : 1, weekdays: mode === "weekdays" ? [...new Set(days)].sort((a, b) => a - b) : [], startDate };
+  }
+  function habitDue(routine, day) {
+    const s = habitSchedule(routine.schedule);
+    if (!validHabitDay(day) || s.startDate && day < s.startDate) return false;
+    if (s.mode === "daily") return true;
+    if (s.mode === "weekdays") return s.weekdays.includes(((/* @__PURE__ */ new Date(day + "T12:00:00Z")).getUTCDay() + 6) % 7 + 1);
+    return Math.round((Date.parse(day + "T12:00:00Z") - Date.parse(s.startDate + "T12:00:00Z")) / 864e5) % s.intervalDays === 0;
+  }
+  function habitSummary(routine) {
+    const s = habitSchedule(routine.schedule);
+    return s.mode === "daily" ? "Ogni giorno" : s.mode === "interval" ? \`Ogni \${s.intervalDays} \${s.intervalDays === 1 ? "giorno" : "giorni"}\` : s.weekdays.map((d) => habitWeekdays[d - 1]).join(", ");
+  }
+
+  // backend/worker/habits-web.js
+  (() => {
+    const supported = () => life.data?.routineScheduleVersion === 1 || globalThis.lifeOSLocalMode?.mode === "demo";
+    function updateFields(form) {
+      const mode = form.elements.mode.value;
+      form.querySelector("[data-habit-interval]").hidden = mode !== "interval";
+      form.querySelector("[data-habit-weekdays]").hidden = mode !== "weekdays";
+      form.querySelector("[data-habit-start]").hidden = mode === "daily";
+      form.elements.startDate.required = mode !== "daily";
+      form.elements.startDate.disabled = mode === "daily";
+      form.elements.intervalDays.required = mode === "interval";
+      form.elements.intervalDays.disabled = mode !== "interval";
+    }
+    function edit(routine) {
+      const form = document.getElementById("os-routine-form"), s = habitSchedule(routine.schedule);
+      form.elements.record_id.value = routine.id;
+      form.elements.title.value = routine.title;
+      form.elements.mode.value = s.mode;
+      form.elements.intervalDays.value = s.mode === "interval" ? s.intervalDays : 2;
+      form.elements.startDate.value = s.startDate || life.data.today;
+      form.querySelectorAll("[name=weekday]").forEach((el) => el.checked = s.weekdays.includes(Number(el.value)));
+      form.querySelector("[type=submit]").textContent = "Salva";
+      form.querySelector("[data-habit-cancel]").hidden = false;
+      updateFields(form);
+      form.elements.title.focus();
+    }
+    function open() {
+      const host = document.getElementById("life-dialog"), ok = supported();
+      host.innerHTML = \`<div class="modal os-dialog os-routine-dialog" role="dialog" aria-modal="true" aria-label="Abitudini"><div class="os-topline"><h2>Abitudini</h2><button data-life-close aria-label="Chiudi">\\xD7</button></div><p>La dashboard mostra le abitudini previste oggi. Ogni data ha i propri completamenti.</p>\${ok ? "" : '<p role="alert">Aggiorna il Worker collegato per programmare le abitudini.</p>'}<div class="os-routine-manager">\${(life.data.routines || []).map((h) => \`<div><span>\${osSafe(h.title)}<small style="display:block">\${osSafe(habitSummary(h))}\${h.schedule?.startDate ? " \\xB7 Dal " + osSafe(h.schedule.startDate) : ""}</small></span><button data-life-routine-edit="\${h.id}" aria-label="Modifica \${osSafe(h.title)}">Modifica</button><button data-life-routine-delete="\${h.id}" aria-label="Elimina \${osSafe(h.title)}">Elimina</button></div>\`).join("")}</div><form id="os-routine-form" class="os-form"><fieldset \${ok ? "" : "disabled"} style="border:0;padding:0;min-width:0" class="wide habit-fields"><input type="hidden" name="record_id" value=""><label>Nome<input name="title" maxlength="60" required autocomplete="off"></label><label>Ripetizione<select name="mode"><option value="daily">Ogni giorno</option><option value="interval">Ogni N giorni</option><option value="weekdays">Giorni della settimana</option></select></label><label data-habit-interval hidden>Intervallo in giorni<input name="intervalDays" type="number" min="1" max="365" step="1" value="2"></label><fieldset data-habit-weekdays hidden style="border:0;padding:0"><legend>Giorni della settimana</legend>\${habitWeekdays.map((name, i) => \`<label style="display:flex;align-items:center;min-height:44px;gap:8px"><input name="weekday" type="checkbox" value="\${i + 1}" style="width:auto">\${name}</label>\`).join("")}</fieldset><label data-habit-start hidden>Data di inizio<input name="startDate" type="date" value="\${life.data.today}"></label><p class="hint">Gli intervalli si contano dalla data di inizio, anche se salti un completamento.</p><p role="alert" data-habit-error></p><div class="os-form-actions"><button type="button" data-habit-cancel hidden>Annulla modifica</button><button type="submit">Aggiungi</button></div></fieldset></form></div>\`;
+      host.classList.remove("hidden");
+      const form = host.querySelector("form");
+      form.elements.mode.onchange = () => updateFields(form);
+      form.querySelector("[data-habit-cancel]").onclick = open;
+      updateFields(form);
+    }
+    async function save(form) {
+      if (life.busy || !supported() || !form.reportValidity()) return;
+      const error = form.querySelector("[data-habit-error]");
+      error.textContent = "";
+      try {
+        const schedule = habitSchedule({ mode: form.elements.mode.value, intervalDays: Number(form.elements.intervalDays.value), weekdays: [...form.querySelectorAll("[name=weekday]:checked")].map((el) => Number(el.value)), startDate: form.elements.mode.value === "daily" ? "" : form.elements.startDate.value });
+        const payload = { id: Number(form.elements.record_id.value || 0), title: form.elements.title.value, schedule };
+        form.querySelector("fieldset").disabled = true;
+        form.closest(".modal").querySelector("[data-life-close]").disabled = true;
+        const result = await osWrite("saveRoutine", payload);
+        if (result) open();
+      } catch (e) {
+        error.textContent = e.message;
+      } finally {
+        if (form.isConnected) {
+          form.querySelector("fieldset").disabled = !supported();
+          form.closest(".modal").querySelector("[data-life-close]").disabled = false;
+        }
+      }
+    }
+    globalThis.lifeOSHabits = { due: habitDue, summary: habitSummary, open, edit, save };
+  })();
+})();
+<\/script><script>/* Home follows the native order: rolling week, day summary, next time, habits. */
 (() => {
   const safe=osSafe;
   const shiftNames={morning:'di mattina',afternoon:'di pomeriggio',night:'di notte',rest:'di riposo',holiday:'in ferie'};
@@ -4042,8 +4134,8 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
     if(!shift&&!next)parts.push('Turni non disponibili.');
     if(agenda.length){const e=agenda[0],when=e.day===today?'Oggi':e.day===tomorrow?'Domani':osDate(e.day);parts.push(\`\${when}: \${String(e.title||'Appuntamento').replace(/\\s+/g,' ').slice(0,70)}\${e.start_time?' alle '+e.start_time:''}.\`);}
     else parts.push('Nessun appuntamento nei prossimi 7 giorni.');
-    const nextSolar=nextTime(),habits=d.routines||[];
-    return \`<div class="home-native"><section class="home-week"><div class="card-title"><span>\${safe(titleMonth(Number(today.slice(0,4)),Number(today.slice(5,7))))}</span><button data-home-day="\${today}" aria-label="Apri calendario">\u25A6</button></div><div class="home-week-grid">\${week}</div></section><section><p class="hint">\${hour<12?'Buongiorno':hour<18?'Buon pomeriggio':'Buonasera'}, Anass.</p><p class="home-summary">\${safe(parts.join(' '))}</p>\${agenda.length?\`<button data-home-agenda>\${agenda.length===1?'Dettagli appuntamento':'Tutti i '+agenda.length+' appuntamenti'}</button>\`:''}</section><button class="home-next-time" data-home-times-sheet aria-label="Prossimo orario, \${safe(nextSolar.label)}, \${safe(nextSolar.time)}"><span>\${safe(nextSolar.label)}</span><strong>\${safe(nextSolar.time)}</strong></button><section class="os-card"><div class="card-title"><h2>Abitudini</h2><button data-life-routine-manage>Gestisci</button></div>\${habits.map(h=>\`<button class="home-habit" data-life-routine="\${h.id}" aria-pressed="\${!!h.checked}"><span aria-hidden="true">\${h.checked?'\u2713':'\u25CB'}</span>\${safe(h.title)}</button>\`).join('')||'<button data-life-routine-manage>Aggiungi la prima abitudine</button>'}</section></div>\`;
+    const nextSolar=nextTime(),habits=(d.routines||[]).filter(h=>lifeOSHabits.due(h,today));
+    return \`<div class="home-native"><section class="home-week"><div class="card-title"><span>\${safe(titleMonth(Number(today.slice(0,4)),Number(today.slice(5,7))))}</span><button data-home-day="\${today}" aria-label="Apri calendario">\u25A6</button></div><div class="home-week-grid">\${week}</div></section><section><p class="hint">\${hour<12?'Buongiorno':hour<18?'Buon pomeriggio':'Buonasera'}, Anass.</p><p class="home-summary">\${safe(parts.join(' '))}</p>\${agenda.length?\`<button data-home-agenda>\${agenda.length===1?'Dettagli appuntamento':'Tutti i '+agenda.length+' appuntamenti'}</button>\`:''}</section><button class="home-next-time" data-home-times-sheet aria-label="Prossimo orario, \${safe(nextSolar.label)}, \${safe(nextSolar.time)}"><span>\${safe(nextSolar.label)}</span><strong>\${safe(nextSolar.time)}</strong></button><section class="os-card"><div class="card-title"><h2>Abitudini</h2><button data-life-routine-manage>Gestisci</button></div>\${habits.map(h=>\`<button class="home-habit" data-life-routine="\${h.id}" aria-pressed="\${!!h.checked}"><span aria-hidden="true">\${h.checked?'\u2713':'\u25CB'}</span>\${safe(h.title)}</button>\`).join('')||(d.routines?.length?'<p class="hint">Nessuna abitudine prevista per oggi.</p>':'<button data-life-routine-manage>Aggiungi la prima abitudine</button>')}</section></div>\`;
   };
   document.addEventListener('click',async e=>{
     const b=e.target.closest('[data-home-day],[data-home-times-sheet],[data-home-agenda]');if(!b)return;
@@ -4769,6 +4861,27 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
   draw();
 })();
 <\/script><script>(() => {
+  // backend/worker/habits.mjs
+  function validHabitDay(day2) {
+    return typeof day2 === "string" && /^\\d{4}-\\d{2}-\\d{2}$/.test(day2) && Number.isFinite(Date.parse(day2 + "T12:00:00Z")) && (/* @__PURE__ */ new Date(day2 + "T12:00:00Z")).toISOString().slice(0, 10) === day2;
+  }
+  function habitSchedule(value) {
+    if (value === void 0) return { mode: "daily", intervalDays: 1, weekdays: [], startDate: "" };
+    if (!value || typeof value !== "object" || Array.isArray(value) || !["daily", "interval", "weekdays"].includes(value.mode)) throw Error("Ripetizione non valida.");
+    const { mode } = value, startDate = value.startDate ?? "", intervalDays = value.intervalDays ?? 1, days = value.weekdays ?? [];
+    if (startDate !== "" && !validHabitDay(startDate) || mode !== "daily" && !validHabitDay(startDate)) throw Error("Scegli una data di inizio valida.");
+    if (mode === "interval" && (!Number.isInteger(intervalDays) || intervalDays < 1 || intervalDays > 365)) throw Error("Scegli un intervallo da 1 a 365 giorni.");
+    if (mode === "weekdays" && (!Array.isArray(days) || !days.length || days.some((d) => !Number.isInteger(d) || d < 1 || d > 7))) throw Error("Scegli almeno un giorno della settimana.");
+    return { mode, intervalDays: mode === "interval" ? intervalDays : 1, weekdays: mode === "weekdays" ? [...new Set(days)].sort((a, b) => a - b) : [], startDate };
+  }
+  function habitDue(routine, day2) {
+    const s = habitSchedule(routine.schedule);
+    if (!validHabitDay(day2) || s.startDate && day2 < s.startDate) return false;
+    if (s.mode === "daily") return true;
+    if (s.mode === "weekdays") return s.weekdays.includes(((/* @__PURE__ */ new Date(day2 + "T12:00:00Z")).getUTCDay() + 6) % 7 + 1);
+    return Math.round((Date.parse(day2 + "T12:00:00Z") - Date.parse(s.startDate + "T12:00:00Z")) / 864e5) % s.intervalDays === 0;
+  }
+
   // shared/demo-data.json
   var demo_data_default = {
     calendarMonth: "2026-10",
@@ -5127,7 +5240,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
       ],
       links: []
     },
-    refreshedAt: 8139744522970062e-7,
+    refreshedAt: 8139756694119892e-7,
     routineDay: "2026-10-18"
   };
 
@@ -5537,6 +5650,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         d.routines = copy(this.archive.life.routines);
         this.save();
       }
+      d.routineScheduleVersion = 1;
       return d;
     }
     adjustMoney(next, old) {
@@ -5671,14 +5785,16 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
           });
           break;
         case "saveRoutine":
-          if (!id && life2.routines.length >= 8) throw Error("Massimo otto routine.");
-          result = update("routines", { ...p, id: id || nextID(life2.routines), title: title(p.title), checked: life2.routines.find((r) => r.id === id)?.checked || 0 });
+          if (!id && life2.routines.length >= 100) throw Error("Massimo 100 abitudini.");
+          result = update("routines", { ...p, id: id || nextID(life2.routines), title: title(p.title), schedule: habitSchedule(p.schedule ?? life2.routines.find((r) => r.id === id)?.schedule), checked: life2.routines.find((r) => r.id === id)?.checked || 0 });
           break;
         case "deleteRoutine":
           remove("routines");
           break;
         case "setRoutineCheck":
           if (p.day !== this.today) throw Error("\\xC8 iniziato un nuovo giorno. Aggiorna le routine.");
+          if (!life2.routines.some((r) => r.id === id)) throw Error("Abitudine non trovata.");
+          if (p.checked && !habitDue(life2.routines.find((r) => r.id === id), this.today)) throw Error("Questa abitudine non \\xE8 prevista per oggi.");
           result = update("routines", { ...life2.routines.find((r) => r.id === id), id, checked: p.checked ? 1 : 0 });
           break;
         case "paintShift":
@@ -8205,6 +8321,14 @@ async function initializeLife(env) {
       ).bind(key, label, position, key)
     )
   );
+  const routineColumns = (await env.DB.prepare("PRAGMA table_info(os_routines)").all()).results;
+  if (!routineColumns.some((c) => c.name === "schedule_json")) {
+    try {
+      await env.DB.prepare("ALTER TABLE os_routines ADD COLUMN schedule_json TEXT").run();
+    } catch (error) {
+      if (!(await env.DB.prepare("PRAGMA table_info(os_routines)").all()).results.some((c) => c.name === "schedule_json")) throw error;
+    }
+  }
   const columns = (await env.DB.prepare("PRAGMA table_info(os_tasks)").all()).results;
   if (!columns.some((column) => column.name === "sort_order")) {
     try {
@@ -8268,7 +8392,7 @@ async function lifeRead(env, focus) {
       "SELECT e.*,r.frequency,r.until_day FROM os_events e LEFT JOIN os_event_repeat r ON r.event_id=e.id WHERE e.day<? ORDER BY e.day"
     ).bind(high).all(),
     env.DB.prepare(
-      "SELECT r.id,r.title,r.position,CASE WHEN c.routine_id IS NULL THEN 0 ELSE 1 END AS checked FROM os_routines r LEFT JOIN os_routine_checks c ON c.routine_id=r.id AND c.day=? ORDER BY r.position,r.id"
+      "SELECT r.id,r.title,r.position,r.schedule_json,CASE WHEN c.routine_id IS NULL THEN 0 ELSE 1 END AS checked FROM os_routines r LEFT JOIN os_routine_checks c ON c.routine_id=r.id AND c.day=? ORDER BY r.position,r.id"
     ).bind(today).all(),
     env.DB.prepare(
       "SELECT event_id,day,status FROM os_event_occurrences"
@@ -8293,7 +8417,8 @@ async function lifeRead(env, focus) {
     upcomingEvents: expandEvents(all.results, today, next).map(state).filter(
       (e) => e.occurrence_status === "open" && (e.day > today || !e.start_time || e.start_time >= clock)
     ).slice(0, 3),
-    routines: routines.results,
+    routines: routines.results.map(({ schedule_json, ...r }) => ({ ...r, schedule: habitSchedule(schedule_json == null ? void 0 : JSON.parse(schedule_json)) })),
+    routineScheduleVersion: 1,
     today,
     month: base
   };
@@ -8310,8 +8435,9 @@ async function lifeAction(env, method, args) {
       throw Error(
         "\xC8 iniziato un nuovo giorno. Aggiorna la routine e riprova."
       );
-    if (!await env.DB.prepare("SELECT id FROM os_routines WHERE id=?").bind(id).first())
-      throw Error("Routine non trovata.");
+    const routine = await env.DB.prepare("SELECT schedule_json FROM os_routines WHERE id=?").bind(id).first();
+    if (!routine) throw Error("Abitudine non trovata.");
+    if (checked && !habitDue({ schedule: habitSchedule(routine.schedule_json == null ? void 0 : JSON.parse(routine.schedule_json)) }, x.day)) throw Error("Questa abitudine non \xE8 prevista per oggi.");
     if (checked)
       await env.DB.prepare(
         "INSERT OR IGNORE INTO os_routine_checks(routine_id,day) VALUES (?,?)"
@@ -8326,19 +8452,19 @@ async function lifeAction(env, method, args) {
     const title = String(x?.title || "").trim().slice(0, 60), id = Number(x?.id || 0);
     if (!title) throw Error("Inserisci un nome.");
     if (!Number.isInteger(id) || id < 0) throw Error("Routine non valida.");
+    const schedule = x?.schedule === void 0 ? void 0 : JSON.stringify(habitSchedule(x.schedule));
     if (id) {
       const result = await env.DB.prepare(
-        "UPDATE os_routines SET title=? WHERE id=?"
-      ).bind(title, id).run();
+        schedule === void 0 ? "UPDATE os_routines SET title=? WHERE id=?" : "UPDATE os_routines SET title=?,schedule_json=? WHERE id=?"
+      ).bind(...schedule === void 0 ? [title, id] : [title, schedule, id]).run();
       if (result.meta.changes !== 1) throw Error("Routine non trovata.");
       return true;
     }
     const count = await env.DB.prepare(
       "SELECT COUNT(*) AS n FROM os_routines"
     ).first();
-    if (count.n >= 8)
-      throw Error("Massimo 8 routine: mantieni solo quelle essenziali.");
-    await env.DB.prepare("INSERT INTO os_routines(title,position) VALUES (?,?)").bind(title, count.n).run();
+    if (count.n >= 100) throw Error("Massimo 100 abitudini.");
+    await env.DB.prepare("INSERT INTO os_routines(title,position,schedule_json) VALUES (?,?,?)").bind(title, count.n, schedule ?? JSON.stringify(habitSchedule(void 0))).run();
     return true;
   }
   if (method === "deleteRoutine") {

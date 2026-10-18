@@ -121,6 +121,17 @@ try{
  quickUnavailable=false;await page.evaluate(()=>{window.dispatchEvent(new Event('online'));document.dispatchEvent(new Event('visibilitychange'));});
  assert.equal(await page.evaluate(()=>lifeOSDeviceBackup().pending.length),1);assert.equal(calls.length,remoteBefore);
  assert.equal(await page.evaluate(()=>lifeOSLocalMode.previousArchive.pending.length),1);
+ await page.setViewportSize({width:390,height:844});await page.evaluate(()=>setView('today'));await page.locator('[data-life-routine-manage]').click();
+ await page.locator('#os-routine-form [name=title]').fill('Allenamento programmato');await page.locator('#os-routine-form [name=mode]').selectOption('interval');await page.locator('#os-routine-form [name=intervalDays]').fill('2');await page.locator('#os-routine-form [name=startDate]').fill(today);await page.locator('#os-routine-form [type=submit]').click();
+ await page.waitForFunction(()=>life.data.routines.some(r=>r.title==='Allenamento programmato'));const habitID=await page.evaluate(()=>life.data.routines.find(r=>r.title==='Allenamento programmato').id);
+ await page.locator('#life-dialog [data-life-close]').click();await page.locator(`[data-life-routine="${habitID}"]`).click();await page.waitForFunction(id=>!!life.data.routines.find(r=>r.id===id)?.checked,habitID);
+ await page.locator('[data-life-routine-manage]').click();await page.getByRole('button',{name:'Modifica Allenamento programmato',exact:true}).click();assert.equal(await page.locator('#os-routine-form [name=intervalDays]').inputValue(),'2');
+ await page.locator('#os-routine-form [name=mode]').selectOption('weekdays');if(process.env.LIFEOS_WEB_SCREENSHOTS)await page.screenshot({path:process.env.LIFEOS_WEB_SCREENSHOTS+'/habits-management-mobile.png',fullPage:true});await page.locator('#os-routine-form [type=submit]').click();assert.match(await page.locator('[data-habit-error]').textContent(),/almeno un giorno/);
+ const offDay=(new Date(today+'T12:00:00Z').getUTCDay()+6)%7+1===7?1:(new Date(today+'T12:00:00Z').getUTCDay()+6)%7+2;
+ await page.locator(`#os-routine-form [name=weekday][value="${offDay}"]`).check();await page.locator('#os-routine-form [type=submit]').click();await page.waitForFunction(id=>life.data.routines.find(r=>r.id===id)?.schedule?.mode==='weekdays',habitID);
+ await page.locator('#life-dialog [data-life-close]').click();assert.equal(await page.locator(`[data-life-routine="${habitID}"]`).count(),0);
+ await page.reload();await page.waitForFunction(()=>lifeOSLocalMode.mode==='demo'&&!!life.data);await page.evaluate(()=>setView('today'));assert.equal(await page.locator(`[data-life-routine="${habitID}"]`).count(),0);
+ await page.locator('[data-life-routine-manage]').click();assert.equal(await page.getByRole('button',{name:'Modifica Allenamento programmato',exact:true}).count(),1);await page.locator('#life-dialog [data-life-close]').click();
  await page.evaluate(()=>setView('extras'));await page.locator('#extras [data-new-extra]').click();
  await page.locator('#plans-web-form [name=kind]').selectOption('fund');await page.locator('#plans-web-form [name=name]').fill('Fondo demo');await page.locator('#plans-web-form [name=amount]').fill('50');await page.locator('#plans-web-form [type=submit]').click();
  await page.locator('[data-plans-detail]').click();await page.locator('[data-plans-pay]').click();await page.locator('#plans-web-form [name=amount]').fill('40');await page.locator('#plans-web-form [type=submit]').click();
@@ -149,5 +160,5 @@ try{
  await assert.rejects(()=>broken.evaluate(p=>workerRequest('saveTransaction',[p]),queued),/Archivio locale non leggibile/);
  assert.equal(calls.filter(c=>c.method==='saveTransaction').length,before);
  assert.equal(await broken.evaluate(()=>localStorage.getItem('lifeos-web-device-v2')),'corrupted');await broken.close();
- console.log('PASS: shared categories, dashboard week, neutral times, tasks, movement fields, savings read-back, recurring payment, four analysis charts, 3/6/12 month cache/error/retry, outdated server recovery, seven views at three widths, isolated persistent demo, snapshot import and confirmed-app weight handoff.');
+ console.log('PASS: shared categories, dashboard week, neutral times, tasks, movement fields, savings read-back, recurring payment, four analysis charts, 3/6/12 month cache/error/retry, outdated server recovery, seven views at three widths, isolated persistent demo, interval/weekday habit scheduling and reload, snapshot import and confirmed-app weight handoff.');
 }finally{await browser.close();await new Promise(resolve=>server.close(resolve));}

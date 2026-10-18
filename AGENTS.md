@@ -38,3 +38,5 @@ L’utente chiede di conservare sorgenti e modifiche nel progetto e di non richi
 
 - Il 18 ottobre l’utente ha autorizzato esplicitamente la pubblicazione di fix/platform-parity e richiesto nuova IPA + GitHub Raw. Push effettuato con commit sorgente 48693689cf2449e41a85c7342022db9aa5fc9928; workflow IPA 39081406881 e test Apple 39081388601. Nessun deploy Cloudflare autorizzato o eseguito da questa istruzione; caricamento Worker resta manuale.
 - Consegna build 56 verificata: backend/plans/IPA-build56.json. Run Apple 39081388601 riuscito (122 unitari e 7 UI), IPA 39081406881 riuscita, Worker 39081388607 riuscito. SHA IPA ae799b5330f13b6c17bc3df9db973b20156d886928b981d034650b39bb524fe0; Raw SHA 2a3e46862dcd6ad313cc7ed6a7cd43c9d2ce2ca76031940db2f96f05c91bce46.
+
+- Modifiche richieste il 18 ottobre: salute compatta e ricorrenze abitudini. Contratto, migrazione e verifiche in docs/HABITS-HEALTH-COMPACT.md. Preservare le spunte os_routine_checks e la programmazione nelle rinomine da vecchi client. iOS autorevole sempre nello ZIP; release preparata 0.9.6/57.

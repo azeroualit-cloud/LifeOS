@@ -1,3 +1,4 @@
+import {habitSchedule,habitDue} from "./habits.mjs";
 import {expandEvents} from "./events.mjs";
 import {platformContract} from "./platform-contract.mjs";
 
@@ -2851,6 +2852,11 @@ async function initializeLife(env) {
     ),
   );
   // Personal tasks, routines, shifts and their seed markers remain in the existing D1 database.
+  const routineColumns = (await env.DB.prepare("PRAGMA table_info(os_routines)").all()).results;
+  if (!routineColumns.some(c => c.name === "schedule_json")) {
+    try { await env.DB.prepare("ALTER TABLE os_routines ADD COLUMN schedule_json TEXT").run(); }
+    catch (error) { if (!(await env.DB.prepare("PRAGMA table_info(os_routines)").all()).results.some(c => c.name === "schedule_json")) throw error; }
+  }
   // Older exports predate task ordering and occurrence exceptions.
   const columns = (await env.DB.prepare("PRAGMA table_info(os_tasks)").all())
     .results;
@@ -2938,7 +2944,7 @@ async function lifeRead(env, focus) {
         .bind(high)
         .all(),
       env.DB.prepare(
-        "SELECT r.id,r.title,r.position,CASE WHEN c.routine_id IS NULL THEN 0 ELSE 1 END AS checked FROM os_routines r LEFT JOIN os_routine_checks c ON c.routine_id=r.id AND c.day=? ORDER BY r.position,r.id",
+        "SELECT r.id,r.title,r.position,r.schedule_json,CASE WHEN c.routine_id IS NULL THEN 0 ELSE 1 END AS checked FROM os_routines r LEFT JOIN os_routine_checks c ON c.routine_id=r.id AND c.day=? ORDER BY r.position,r.id",
       )
         .bind(today)
         .all(),
@@ -2976,7 +2982,8 @@ async function lifeRead(env, focus) {
           (e.day > today || !e.start_time || e.start_time >= clock),
       )
       .slice(0, 3),
-    routines: routines.results,
+    routines: routines.results.map(({schedule_json,...r}) => ({...r,schedule:habitSchedule(schedule_json == null ? undefined : JSON.parse(schedule_json))})),
+    routineScheduleVersion: 1,
     today,
     month: base,
   };
@@ -2996,12 +3003,9 @@ async function lifeAction(env, method, args) {
       throw Error(
         "\u00c8 iniziato un nuovo giorno. Aggiorna la routine e riprova.",
       );
-    if (
-      !(await env.DB.prepare("SELECT id FROM os_routines WHERE id=?")
-        .bind(id)
-        .first())
-    )
-      throw Error("Routine non trovata.");
+    const routine = await env.DB.prepare("SELECT schedule_json FROM os_routines WHERE id=?").bind(id).first();
+    if (!routine) throw Error("Abitudine non trovata.");
+    if (checked && !habitDue({schedule:habitSchedule(routine.schedule_json == null ? undefined : JSON.parse(routine.schedule_json))},x.day)) throw Error("Questa abitudine non è prevista per oggi.");
     if (checked)
       await env.DB.prepare(
         "INSERT OR IGNORE INTO os_routine_checks(routine_id,day) VALUES (?,?)",
@@ -3023,11 +3027,12 @@ async function lifeAction(env, method, args) {
       id = Number(x?.id || 0);
     if (!title) throw Error("Inserisci un nome.");
     if (!Number.isInteger(id) || id < 0) throw Error("Routine non valida.");
+    const schedule = x?.schedule === undefined ? undefined : JSON.stringify(habitSchedule(x.schedule));
     if (id) {
       const result = await env.DB.prepare(
-        "UPDATE os_routines SET title=? WHERE id=?",
+        schedule === undefined ? "UPDATE os_routines SET title=? WHERE id=?" : "UPDATE os_routines SET title=?,schedule_json=? WHERE id=?",
       )
-        .bind(title, id)
+        .bind(...(schedule === undefined ? [title,id] : [title,schedule,id]))
         .run();
       if (result.meta.changes !== 1) throw Error("Routine non trovata.");
       return true;
@@ -3035,10 +3040,9 @@ async function lifeAction(env, method, args) {
     const count = await env.DB.prepare(
       "SELECT COUNT(*) AS n FROM os_routines",
     ).first();
-    if (count.n >= 8)
-      throw Error("Massimo 8 routine: mantieni solo quelle essenziali.");
-    await env.DB.prepare("INSERT INTO os_routines(title,position) VALUES (?,?)")
-      .bind(title, count.n)
+    if (count.n >= 100) throw Error("Massimo 100 abitudini.");
+    await env.DB.prepare("INSERT INTO os_routines(title,position,schedule_json) VALUES (?,?,?)")
+      .bind(title, count.n, schedule ?? JSON.stringify(habitSchedule(undefined)))
       .run();
     return true;
   }

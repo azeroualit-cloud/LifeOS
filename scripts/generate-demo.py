@@ -20,7 +20,7 @@ else:
     with tempfile.TemporaryDirectory() as folder:
         path = Path(folder)
         (path / 'main.swift').write_text('import Foundation\nFileHandle.standardOutput.write(try JSONEncoder().encode(DemoData.make()))\n')
-        sources = ['Models', 'NativeModels', 'NativePlanModel', 'NativePlanDemo', 'NativePlatformContract', 'DemoData']
+        sources = ['Models', 'NativeModels', 'NativePlanModel', 'NativePlanDemo', 'NativePlatformContract', 'NativeRoutineSchedule', 'DemoData']
         subprocess.run([os.environ.get('LIFEOS_SWIFTC', 'swiftc'), *[str(native / 'Sources' / (name + '.swift')) for name in sources], str(path / 'main.swift'), '-module-cache-path', str(path / 'cache'), '-o', str(path / 'export')], check=True)
         value = json.loads(subprocess.check_output([str(path / 'export')]))
         target.write_text(json.dumps(value, ensure_ascii=False, sort_keys=True, indent=2) + '\n')

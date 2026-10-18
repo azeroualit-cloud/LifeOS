@@ -1,3 +1,4 @@
+import {habitSchedule,habitDue} from "./habits.mjs";
 import fixture from '../../shared/demo-data.json' with {type:'json'};
 import {initialState,project,addMonth,month,day,months,split} from '../plans/engine.mjs';
 import {PlanService} from '../plans/service.mjs';
@@ -45,7 +46,7 @@ export class LocalModel {
     d.events=expandEvents(d.events||[],low,high).map(state).filter(e=>e.occurrence_status!=='skipped');
     d.upcomingEvents=expandEvents(this.archive.life.events||[],this.today,addDay(this.today,7)).map(state).filter(e=>e.occurrence_status==='open');d.today=this.today;d.month=selected;
     if(this.archive.routineDay!==this.today){for(const r of this.archive.life.routines||[])r.checked=0;this.archive.routineDay=this.today;d.routines=copy(this.archive.life.routines);this.save();}
-    return d;
+    d.routineScheduleVersion=1;return d;
   }
   adjustMoney(next,old){
     const s=this.archive.finance.summary,contribution=(r,account)=>r?.account===account?r.amount:0;
@@ -101,9 +102,9 @@ export class LocalModel {
       case 'renameCategory':result=update('categories',{...p,label:title(p.label)},'key');break;
       case 'reorderCategories':life.categories.forEach(c=>c.position=p.keys.indexOf(c.key));break;
       case 'deleteCategory':if(p.key===p.destination||!life.categories.some(c=>c.key===p.destination))throw Error('Scegli dove spostare le attività.');life.categories=life.categories.filter(c=>c.key!==p.key);life.tasks.forEach(t=>{if(t.list_kind===p.key)t.list_kind=p.destination;});break;
-      case 'saveRoutine':if(!id&&life.routines.length>=8)throw Error('Massimo otto routine.');result=update('routines',{...p,id:id||nextID(life.routines),title:title(p.title),checked:life.routines.find(r=>r.id===id)?.checked||0});break;
+      case 'saveRoutine':if(!id&&life.routines.length>=100)throw Error('Massimo 100 abitudini.');result=update('routines',{...p,id:id||nextID(life.routines),title:title(p.title),schedule:habitSchedule(p.schedule??life.routines.find(r=>r.id===id)?.schedule),checked:life.routines.find(r=>r.id===id)?.checked||0});break;
       case 'deleteRoutine':remove('routines');break;
-      case 'setRoutineCheck':if(p.day!==this.today)throw Error('È iniziato un nuovo giorno. Aggiorna le routine.');result=update('routines',{...life.routines.find(r=>r.id===id),id,checked:p.checked?1:0});break;
+      case 'setRoutineCheck':if(p.day!==this.today)throw Error('È iniziato un nuovo giorno. Aggiorna le routine.');if(!life.routines.some(r=>r.id===id))throw Error('Abitudine non trovata.');if(p.checked&&!habitDue(life.routines.find(r=>r.id===id),this.today))throw Error('Questa abitudine non è prevista per oggi.');result=update('routines',{...life.routines.find(r=>r.id===id),id,checked:p.checked?1:0});break;
       case 'paintShift':life.shifts=life.shifts.filter(r=>r.day!==p.day);if(p.kind!=='erase')life.shifts.push(p);break;
       case 'saveEvent':{const old=life.events.find(e=>e.id===id);if(old&&(old.day!==p.day||old.frequency!==p.frequency)&&Object.keys(life.occurrences||{}).some(k=>k.startsWith(id+':')))throw Error('Usa Modifica da qui per preservare le occorrenze segnate.');result=update('events',{...p,id:id||nextID(life.events),title:title(p.title)});break;}
       case 'splitEventSeries':{const old=life.events.find(e=>e.id===id);if(!old)throw Error('Serie non trovata.');if(Object.keys(life.occurrences||{}).some(k=>k.startsWith(id+':')&&k.slice(-10)>=p.split_from))throw Error('Riapri prima le occorrenze future già segnate.');old.until_day=addDay(p.split_from,-1);result=update('events',{...p,id:nextID(life.events),title:title(p.title)});break;}
