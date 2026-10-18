@@ -69,9 +69,9 @@ jobs:
           assert 'arm64' in subprocess.check_output(['lipo','-archs',str(executable)],text=True)
           assert 'IOSSIMULATOR' not in subprocess.check_output(['vtool','-show-build',str(executable)],text=True)
           binary=executable.read_bytes()
-          markers=['plan-record-payment','plan-payment-confirm','plan-link-movement-','X-LifeOS-Plans-Version','routine-repeat','routine-save']
+          markers=['plan-record-payment','plan-payment-confirm','plan-link-movement-','X-LifeOS-Plans-Version','Giorni della settimana']
           for marker in markers: assert marker.encode() in binary,marker
-          metadata={'version':'0.9.6','build':'57','bundle_id':info['CFBundleIdentifier'],'platform':'iPhoneOS','architecture':'arm64','signing':'unsigned; sign with Signulous','source_commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'source_zip_sha256':hashlib.sha256(pathlib.Path('../lifeos-native.zip').read_bytes()).hexdigest(),'plans_binary_markers':markers}
+          metadata={'version':'0.9.6','build':'57','bundle_id':info['CFBundleIdentifier'],'platform':'iPhoneOS','architecture':'arm64','signing':'unsigned; sign with Signulous','source_commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'source_zip_sha256':hashlib.sha256(pathlib.Path('../lifeos-native.zip').read_bytes()).hexdigest(),'plans_binary_markers':markers,'habits_ui_verification':'NativeInterfaceTests/testHabitIntervalAndWeekdaySchedulingPersistInManagement; binary string search is not an accessibility-identifier test'}
           pathlib.Path('download/BUILD-INFO.json').write_text(json.dumps(metadata,indent=2)+'\n')
           PY
           cd build
