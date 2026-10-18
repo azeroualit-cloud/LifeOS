@@ -5,7 +5,7 @@ on:
       focus:
         description: Ripeti tutti i controlli o il solo flusso fondo
         type: choice
-        options: [all, fund, regressions, visual]
+        options: [all, fund, regressions, visual, habits]
         default: all
   push:
     branches: ['feature/plans-v2', 'fix/platform-parity']
@@ -79,7 +79,7 @@ jobs:
           set -euo pipefail
           xcodebuild build-for-testing -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$PLAN_SIMULATOR" -derivedDataPath build/Derived CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compile.log
       - name: Unit tests
-        if: inputs.focus != 'fund'
+        if: inputs.focus != 'fund' && inputs.focus != 'habits'
         timeout-minutes: 10
         working-directory: app
         run: |
@@ -94,7 +94,9 @@ jobs:
         working-directory: app
         run: |
           set -euo pipefail
-          if [ "${{ inputs.focus }}" = fund ]; then
+          if [ "${{ inputs.focus }}" = habits ]; then
+            FILTERS="-only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHabitIntervalAndWeekdaySchedulingPersistInManagement -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeHealthCardRemainsCompactAndOpensDetail"
+          elif [ "${{ inputs.focus }}" = fund ]; then
             FILTERS="-only-testing:LifeOSProbeUITests/NativeInterfaceTests/testPlansFundCanEditFutureQuotaAndLinkAnExistingMovement"
           elif [ "${{ inputs.focus }}" = visual ]; then
             FILTERS="-only-testing:LifeOSProbeUITests/HealthChartVisualTests/testEntireHomeHealthChartIsVisible"
