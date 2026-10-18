@@ -127,6 +127,15 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
+          name: Habit-interface-images
+          path: |
+            app/build/screenshots/**/*.png
+            app/build/screenshots/**/*.txt
+          if-no-files-found: ignore
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
           name: Plans-test-results-no-IPA
           path: |
             app/build/Plans.xcresult
