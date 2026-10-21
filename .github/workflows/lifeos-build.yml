@@ -61,7 +61,7 @@ jobs:
           import hashlib, pathlib, zipfile
           source = pathlib.Path('lifeos-native.zip')
           if source.is_file():
-              assert hashlib.sha256(source.read_bytes()).hexdigest() == '7db3474a1133b1ea2e1b2749536bc1e187f6d1af713d9277134c05def03a7a73', 'ZIP sorgenti diverso da quello previsto'
+              assert hashlib.sha256(source.read_bytes()).hexdigest() == '9f77ebb7c38ffe656e7f6f07e91768f8d063aaf9948ce34d6aaf803ab38b2a30', 'ZIP sorgenti diverso da quello previsto'
               with zipfile.ZipFile(source) as archive:
                   for name in archive.namelist():
                       p = pathlib.PurePosixPath(name)

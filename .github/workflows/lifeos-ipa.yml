@@ -37,7 +37,7 @@ jobs:
           python3 - <<'PY'
           import hashlib,pathlib,zipfile
           p=pathlib.Path('lifeos-native.zip')
-          assert hashlib.sha256(p.read_bytes()).hexdigest()=='7db3474a1133b1ea2e1b2749536bc1e187f6d1af713d9277134c05def03a7a73'
+          assert hashlib.sha256(p.read_bytes()).hexdigest()=='9f77ebb7c38ffe656e7f6f07e91768f8d063aaf9948ce34d6aaf803ab38b2a30'
           with zipfile.ZipFile(p) as z:
             assert all(not pathlib.PurePosixPath(n).is_absolute() and '..' not in pathlib.PurePosixPath(n).parts for n in z.namelist())
             z.extractall('app')
@@ -74,7 +74,7 @@ jobs:
           assert 'arm64' in subprocess.check_output(['lipo','-archs',str(executable)],text=True)
           assert 'IOSSIMULATOR' not in subprocess.check_output(['vtool','-show-build',str(executable)],text=True)
           binary=executable.read_bytes()
-          markers=['plan-record-payment','plan-payment-confirm','plan-link-movement-','X-LifeOS-Plans-Version','Giorni della settimana','budget-salary','budget-final','finance-new-plan']
+          markers=['plan-record-payment','plan-payment-confirm','plan-link-movement-','X-LifeOS-Plans-Version','Giorni della settimana','budget-salary-reference','budget-final-remaining','finance-new-plan']
           for marker in markers: assert marker.encode() in binary,marker
           metadata={'version':'0.9.8','build':'59','bundle_id':info['CFBundleIdentifier'],'platform':'iPhoneOS','architecture':'arm64','signing':'unsigned; sign with Signulous','source_commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'source_zip_sha256':hashlib.sha256(pathlib.Path('../lifeos-native.zip').read_bytes()).hexdigest(),'plans_binary_markers':markers,'habits_ui_verification':'NativeInterfaceTests/testHabitIntervalAndWeekdaySchedulingPersistInManagement; binary string search is not an accessibility-identifier test'}
           pathlib.Path('download/BUILD-INFO.json').write_text(json.dumps(metadata,indent=2)+'\n')
@@ -143,7 +143,7 @@ jobs:
           folder=Path('delivery');ipa=folder/'LifeOS-0.9.8-build59-unsigned.ipa'
           metadata=json.loads((folder/'BUILD-INFO.json').read_text())
           assert metadata['source_commit']=='280db8a46c1bdaae52a2641ad5bdb16470e3cd50'
-          assert metadata['source_zip_sha256']=='7db3474a1133b1ea2e1b2749536bc1e187f6d1af713d9277134c05def03a7a73'
+          assert metadata['source_zip_sha256']=='9f77ebb7c38ffe656e7f6f07e91768f8d063aaf9948ce34d6aaf803ab38b2a30'
           assert hashlib.sha256(ipa.read_bytes()).hexdigest()==(folder/'SHA256.txt').read_text().split()[0]
           with zipfile.ZipFile(ipa) as z:
             assert z.testzip() is None
@@ -153,7 +153,7 @@ jobs:
             assert not any(n.endswith(('.p12','.mobileprovision','.env')) for n in z.namelist())
             binary=z.read('Payload/LifeOSProbe.app/'+info['CFBundleExecutable'])
             assert binary[:4]==bytes.fromhex('cffaedfe') and int.from_bytes(binary[4:8],'little')==0x0100000c
-            for marker in ['plan-payment-delete','getFinanceCategoryPeriod','movement-manage-plan-payment','budget-salary','budget-final','finance-new-plan']:assert marker.encode() in binary
+            for marker in ['plan-payment-delete','getFinanceCategoryPeriod','movement-manage-plan-payment','budget-salary-reference','budget-final-remaining','finance-new-plan']:assert marker.encode() in binary
           Path('RELEASE-NOTES.md').write_text('IPA non firmata per Signulous. Budget e Piani unificati: stipendio, quote e residuo progressivo, budget finale. Finanza con quattro azioni: Budget, Nuovo piano, Nuova spesa, Analisi. Conservate gestione dei pagamenti collegati e analisi 3/6/12 mesi.\n\nWorker corrispondente: https://raw.githubusercontent.com/azeroualit-cloud/LifeOS/280db8a46c1bdaae52a2641ad5bdb16470e3cd50/worker.js\n')
           print('IPA_SOURCE_AND_BINARY_VERIFIED',hashlib.sha256(ipa.read_bytes()).hexdigest())
           PY
