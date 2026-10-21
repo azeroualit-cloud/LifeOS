@@ -9,3 +9,5 @@ L'Analisi usa getFinanceCategoryPeriod per una singola aggregazione di 3/6/12 me
 Prove locali: 39 test server, inclusa due pagamenti sintetici e un piano Palestra interrotto; 25 test Foundation; regressioni Chromium sul Worker realmente servito, incluso errore HTML 500 e ripetizione dell'eliminazione; TypeScript, parsing Swift e design system. Verifica Apple e archivio iPhone eseguiti dal workflow sulla revisione pubblicata; gli esiti e i riferimenti del pacchetto sono registrati nella consegna.
 
 Sorgente iOS autorevole: lifeos-native.zip. Worker pubblico sanificato: worker.js, rigenerabile con backend/worker/build.mjs. Nessuna modifica ai dati reali e nessun deploy Cloudflare: l'utente carica manualmente il Raw e firma l'IPA.
+
+Consegna verificata: [provenienza e link diretti](native/CONSEGNA-0.9.7.json). Apple: 128 unitari e 3 UI passati; Worker e archivio iPhone riusciti. IPA e Raw riscaricati dai link di consegna e verificati con SHA-256. Installare l’IPA firmata sopra l’app esistente e aggiornare manualmente il Worker collegato all’app.

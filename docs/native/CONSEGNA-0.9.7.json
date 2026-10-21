@@ -1,0 +1,28 @@
+{
+  "version": "0.9.7",
+  "build": "58",
+  "bundle_id": "com.nas.lifeos.probe",
+  "platform": "iPhoneOS",
+  "architecture": "arm64",
+  "signing": "unsigned; sign with Signulous",
+  "source_commit": "ff5a07424f6b97f5494f024b7abed1081397c186",
+  "source_zip_sha256": "f2a586c34e40088583f2ca79a00b76eaaa6f23880344753452e8540cc42e6cf1",
+  "ipa_sha256": "9d67e005a2571ef51d24ce112291e6dd5082614c90d2d79786689d8aab5bb571",
+  "size_bytes": 1131039,
+  "ipa_url": "https://github.com/azeroualit-cloud/LifeOS/releases/download/v0.9.7-build58/LifeOS-0.9.7-build58-unsigned.ipa",
+  "worker_url": "https://raw.githubusercontent.com/azeroualit-cloud/LifeOS/ff5a07424f6b97f5494f024b7abed1081397c186/worker.js",
+  "worker_sha256": "75a1f82b3ad57a3995a7ddd3a760816f918bbe7c632cfcf552e86dc80595352d",
+  "verification": {
+    "apple_run": 39606909804,
+    "unit_tests": 128,
+    "ui_tests": 3,
+    "conclusion": "success",
+    "worker_run": 39606844897,
+    "server_tests": 39,
+    "archive_run": 39606915520,
+    "delivery_run": 39610082468,
+    "direct_ipa_download_verified": true,
+    "direct_raw_download_verified": true,
+    "cloudflare_deployment": "not performed; user uploads manually"
+  }
+}
