@@ -20,7 +20,7 @@ on:
         options: [full, health, tdee, tdee-compact]
         default: full
   push:
-    branches-ignore: ['feature/plans-v2', 'fix/platform-parity']
+    branches-ignore: ['feature/plans-v2', 'fix/platform-parity', 'fix/finance-payment-analysis']
     paths: ['lifeos-native.zip', '.github/workflows/lifeos-build.yml', '.github/workflows/ios.yml', 'Sources/**', 'Tests/**', 'Assets.xcassets/**', 'project.yml']
 permissions:
   contents: read
@@ -61,7 +61,7 @@ jobs:
           import hashlib, pathlib, zipfile
           source = pathlib.Path('lifeos-native.zip')
           if source.is_file():
-              assert hashlib.sha256(source.read_bytes()).hexdigest() == '3c1773819dbcdc8716cafcf6dc484edd845af49943e9608ef571a45a6d35f6ef', 'ZIP sorgenti diverso da quello previsto'
+              assert hashlib.sha256(source.read_bytes()).hexdigest() == 'f2a586c34e40088583f2ca79a00b76eaaa6f23880344753452e8540cc42e6cf1', 'ZIP sorgenti diverso da quello previsto'
               with zipfile.ZipFile(source) as archive:
                   for name in archive.namelist():
                       p = pathlib.PurePosixPath(name)

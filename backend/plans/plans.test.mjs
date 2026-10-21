@@ -21,6 +21,65 @@ async function setup(day=today) {
 const make=(state,id,kind,extra={})=>command(state,'create',input(id,kind,extra),today).state;
 const pay=(state,id,planId,amountCents,extra={})=>command(state,'pay',{requestId:id,planId,amountCents,date:today,...extra},today).state;
 
+test('eliminazione pagamento su piano interrotto: ripresa dopo timeout e una sola restituzione',async()=>{
+  const {repo,service,cash}=await setup();
+  await service.execute('create',input('delete-fund-01','fund'));
+  await service.execute('pay',{requestId:'delete-cash-01',planId:'delete-fund-01',amountCents:35875,date:today});
+  await service.execute('pay',{requestId:'delete-cash-02',planId:'delete-fund-01',amountCents:10525,date:today});
+  await service.execute('stop',{requestId:'delete-stop-01',planId:'delete-fund-01'});
+  let removals=0,lost=true;
+  cash.remove=async p=>{if(cash.rows.delete(p.requestId))removals++;if(lost){lost=false;throw Error('Synthetic timeout after delete');}};
+  const operation={requestId:'delete-action-01',planId:'delete-fund-01',paymentId:'delete-cash-01'};
+  await assert.rejects(service.execute('deletePayment',operation));
+  assert.equal((await repo.read()).state.payments['delete-cash-01'].status,'deleting');
+  await service.finish('delete-cash-01');await service.execute('deletePayment',operation);
+  const view=await service.view('2026-10');
+  assert.equal(removals,1);assert.equal(cash.rows.size,1);assert.equal(view.payments.length,1);
+  assert.equal(view.payments[0].amountCents,10525);assert.equal(view.plans[0].status,'stopped');
+  assert.equal((await service.view('2026-11')).adjustmentCents,0);
+});
+test('eliminare un saldo obiettivo lo riapre e consente un pagamento corretto',async()=>{
+  const {service,cash}=await setup();cash.remove=async p=>{cash.rows.delete(p.requestId);};
+  await service.execute('create',input('delete-goal-01'));
+  await service.execute('pay',{requestId:'delete-goalpay-01',planId:'delete-goal-01',amountCents:60000,date:today});
+  await service.execute('deletePayment',{requestId:'delete-goalcmd-01',planId:'delete-goal-01',paymentId:'delete-goalpay-01'});
+  assert.equal((await service.view('2026-10')).plans[0].status,'active');
+  await service.execute('pay',{requestId:'delete-goalpay-02',planId:'delete-goal-01',amountCents:50000,date:today});
+  assert.equal(cash.rows.size,1);assert.equal((await service.view('2026-10')).payments.length,1);
+});
+test('non eliminare un pagamento ancora da confermare',async()=>{
+  const {service,cash,repo}=await setup();cash.failAfterWrite=true;
+  await service.execute('create',input('pending-del-01'));
+  await assert.rejects(service.execute('pay',{requestId:'pending-cash-01',planId:'pending-del-01',amountCents:10000,date:today}));
+  await assert.rejects(service.execute('deletePayment',{requestId:'pending-delete-01',planId:'pending-del-01',paymentId:'pending-cash-01'}));
+  assert.equal((await repo.read()).state.payments['pending-cash-01'].status,'pending');
+});
+
+test('spesa normale Palestra: nessun collegamento automatico con piano attivo o interrotto',async()=>{
+  for(const stopped of [false,true]) {
+    const {repo,service,cash}=await setup();
+    await service.execute('create',input('gym-plan-0001','fixed',{category:'Palestra',amountCents:3000}));
+    if(stopped)await service.execute('stop',{requestId:'stop-gym-0001',planId:'gym-plan-0001'});
+    const before=(await repo.read()).state, writes=[];
+    const wrapper=withFinancePlans({fetch:async()=>Response.json({summary:{budget:1000},transactions:[]})},{
+      repositoryFactory:()=>repo,clock:()=>today,recordTransaction:async(_env,p)=>{writes.push(p);return true;}
+    });
+    const response=await wrapper.fetch(new Request('https://lifeos.invalid/api/saveTransaction',{method:'POST',headers:{Origin:'https://lifeos.invalid'},body:JSON.stringify([{requestId:'ordinary-gym-01',type:'Spesa',category:'Palestra',name:'Palestra sintetica',amount:360,date:today,account:'Trade Republic',months:1,budgetTreatment:'auto'}])}),{},{});
+    assert.equal(response.status,200,await response.text());
+    assert.equal(writes.length,1);assert.equal(writes[0].budgetTreatment,'ordinary');assert.equal(writes[0].months,1);
+    assert.deepEqual((await repo.read()).state,before);assert.equal(cash.calls,0);
+  }
+});
+test('spesa normale: ripartizioni da client precedenti richiedono Piani senza scrivere',async()=>{
+  const {repo}=await setup();let writes=0;
+  const wrapper=withFinancePlans({fetch:async()=>Response.json({summary:{budget:1000},transactions:[]})},{repositoryFactory:()=>repo,clock:()=>today,recordTransaction:async()=>{writes++;return true;}});
+  for(const extra of [{months:12},{budgetTreatment:'recovery'},{budgetTreatment:'planned'}]) {
+    const response=await wrapper.fetch(new Request('https://lifeos.invalid/api/saveTransaction',{method:'POST',headers:{Origin:'https://lifeos.invalid'},body:JSON.stringify([{requestId:'old-expense-01',type:'Spesa',name:'Palestra',amount:360,date:today,...extra}])}),{},{});
+    assert.equal(response.status,422);assert.match((await response.json()).error,/Piani/);
+  }
+  assert.equal(writes,0);assert.deepEqual((await repo.read()).state.payments,{});
+});
+
 test('250 euro da novembre a ottobre: somma zero e nessuna uscita bancaria',async()=>{
   const {service,cash}=await setup();await service.execute('create',input('advance-0001','advance',{amountCents:25000,startMonth:'2026-11',endMonth:'2026-11',beneficiaryMonth:'2026-10'}));
   assert.equal((await service.view('2026-10')).adjustmentCents,25000);

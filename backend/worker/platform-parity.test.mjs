@@ -21,7 +21,11 @@ const server=createServer(async(req,res)=>{
  const key=typeof args[0]==='string'?args[0]:`${args[0]}-${String(args[1]).padStart(2,'0')}`;
  if(method==='getLifeData'){res.end(JSON.stringify(life));return;}
  if(method==='getFinanceCategoryOptions'){res.end(JSON.stringify([...platformContract.expenseCategories,...platformContract.incomeCategories]));return;}
- if(method==='getFinanceData'&&key===failMonth){failMonth=null;res.statusCode=503;res.end('Mese temporaneamente non disponibile');return;}
+ if(method==='getFinanceCategoryPeriod'){
+  const last=args[0],count=args[1],[y,m]=last.split('-').map(Number),months=Array.from({length:count},(_,i)=>new Date(Date.UTC(y,m-count+i,1)).toISOString().slice(0,7));
+  if(failMonth&&months.includes(failMonth)){failMonth=null;res.statusCode=500;res.setHeader('Content-Type','text/html');res.end('<!DOCTYPE html><html><head><title>Worker exceeded resource limits</title></head></html>');return;}
+  res.end(JSON.stringify({version:1,months:months.map(month=>({month,categories:[{name:'Casa',amount:100},{name:'Auto',amount:-10}]}))}));return;
+ }
  if(method==='getFinanceOverview'&&failOverview){failOverview=false;res.statusCode=503;res.end('Mese non disponibile');return;}
  if(method==='savePlanningSettings'){[planning.goal,planning.monthlySaving,planning.savingsTarget]=args;res.end('true');return;}
  if(method==='saveTransaction'){
@@ -59,9 +63,9 @@ try{
  assert.deepEqual((await page.locator('.finance-actions button').allTextContents()).map(t=>t.replace(/[◷⋯＋]/g,'').trim()),['Budget','Piani','Spesa']);
  await page.locator('.finance-actions [data-new-transaction]').click();
  assert.deepEqual(await page.locator('#entry-form [name=category] option').allTextContents(),platformContract.expenseCategories);
- assert.equal(await page.locator('#entry-form [name=months]').count(),1);
+ assert.equal(await page.locator('#entry-form [name=months]').count(),0);
  assert.equal(await page.locator('#entry-form [name=note]').count(),1);
- assert.deepEqual(await page.locator('#entry-form [name=budgetTreatment] option').allTextContents(),['Automatico','Da risparmi']);
+ assert.equal(await page.locator('#entry-form [name=budgetTreatment]').count(),0);
  await page.locator('#entry-form [name=type]').selectOption('Entrata');
  assert.deepEqual(await page.locator('#entry-form [name=category] option').allTextContents(),platformContract.incomeCategories);
  await page.locator('#dialog [data-close]').first().click();
@@ -70,8 +74,9 @@ try{
  await page.locator('#platform-planning-form [name=goal]').fill('5000');await page.locator('#platform-planning-form [name=target]').fill('14000');
  await page.locator('#platform-planning-form [type=submit]').click();await page.waitForFunction(()=>document.getElementById('dialog').classList.contains('hidden'));
  const saved=calls.find(c=>c.method==='savePlanningSettings');assert.equal(saved.args[0],5000);assert.equal(saved.args[2],14000);assert.equal(saved.args[1],7000/(13-Number(month.slice(-2))));
- await page.locator('[data-budget-recurring]').click();await page.locator('#platform-recurring-form [name=amount]').fill('160');await page.locator('#platform-recurring-form [name=months]').fill('2');await page.locator('#platform-recurring-form [type=submit]').click();await page.waitForFunction(()=>document.getElementById('dialog').classList.contains('hidden'));
- const bill=calls.find(c=>c.method==='saveTransaction');assert.equal(bill.args[0].category,'Gas');assert.equal(bill.args[0].months,2);assert.ok(bill.args[0].requestId);
+ await page.locator('[data-budget-recurring]').click();
+ assert.equal(await page.locator('#platform-recurring-form').count(),0);
+ assert.equal(await page.locator('#page-title').textContent(),'Piani');
  // The bank commits, but the browser never receives its response. Reload and
  // replay must retain the original identity and exact persisted payload.
  quickUnavailable=true;
@@ -95,11 +100,11 @@ try{
  assert.match(await page.locator('[data-period-categories]').textContent(),/300,00/);
  if(process.env.LIFEOS_WEB_SCREENSHOTS)await page.screenshot({path:process.env.LIFEOS_WEB_SCREENSHOTS+'/analysis-parity-mobile.png',fullPage:true});
  await page.locator('[data-category-period="6"]').click();await page.locator('[data-refresh-categories]:enabled').waitFor();assert.match(await page.locator('[data-period-categories]').textContent(),/600,00/);
- const reads=calls.filter(c=>c.method==='getFinanceData').length;
- await page.locator('[data-category-period="3"]').click();await page.locator('[data-refresh-categories]:enabled').waitFor();assert.equal(calls.filter(c=>c.method==='getFinanceData').length,reads);
+ const reads=calls.filter(c=>c.method==='getFinanceCategoryPeriod').length;
+ await page.locator('[data-category-period="3"]').click();await page.locator('[data-refresh-categories]:enabled').waitFor();assert.equal(calls.filter(c=>c.method==='getFinanceCategoryPeriod').length,reads);
  // An interrupted category period is never displayed as a complete total.
  const older=new Date(month+'-01T12:00:00Z');older.setUTCMonth(older.getUTCMonth()-8);failMonth=older.toISOString().slice(0,7);
- await page.locator('[data-category-period="12"]').click();await page.getByRole('button',{name:'Riprova',exact:true}).waitFor();assert.match(await page.locator('[data-period-categories]').textContent(),/Caricati/);
+ await page.locator('[data-category-period="12"]').click();await page.getByRole('button',{name:'Riprova',exact:true}).waitFor();assert.match(await page.locator('[data-period-categories]').textContent(),/server è momentaneamente occupato/);assert.ok(!(await page.locator('[data-period-categories]').textContent()).includes('<!DOCTYPE'));
  await page.getByRole('button',{name:'Riprova',exact:true}).click();await page.locator('[data-refresh-categories]:enabled').waitFor();assert.match(await page.locator('[data-period-categories]').textContent(),/1\.200,00/);
  for(const [width,height] of [[320,568],[390,844],[1280,900]]){
   await page.setViewportSize({width,height});

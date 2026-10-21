@@ -4066,6 +4066,18 @@ async function classifyMovement(env, id, category) {
 }
 
 /** Whitelist RPC di letture e scritture; nessuna esecuzione di nomi arbitrari. */
+async function getFinanceCategoryPeriod(env,last,count) {
+  if(typeof last!=='string'||!/^20\d\d-(0[1-9]|1[0-2])$/.test(last)||![3,6,12].includes(count))throw Error('Periodo categorie non valido.');
+  const [year,number]=last.split('-').map(Number),first=new Date(Date.UTC(year,number-count,1)).toISOString().slice(0,7);
+  await ensureFinanceCategories(env);
+  const result=await env.DB.prepare(`SELECT substr(m.actual_date,1,7) month,COALESCE(c.detail_category,NULLIF(m.category,''),'Altro') name,SUM(CAST(ROUND(-m.amount*100) AS INTEGER)) cents
+    FROM movements m LEFT JOIN movement_financial_categories c ON c.movement_source_row=m.source_row
+    WHERE m.account IN ('Trade Republic','Revolut') AND m.status='Eseguito' AND m.movement_type='Spesa' AND m.amount<0
+      AND m.actual_date>=? AND m.actual_date<?
+    GROUP BY substr(m.actual_date,1,7),COALESCE(c.detail_category,NULLIF(m.category,''),'Altro')`).bind(first+'-01',new Date(Date.UTC(year,number,1)).toISOString().slice(0,10)).all();
+  const months=Array.from({length:count},(_,i)=>new Date(Date.UTC(year,number-count+i,1)).toISOString().slice(0,7));
+  return {version:1,months:months.map(month=>({month,categories:result.results.filter(r=>r.month===month).map(r=>({name:r.name,amount:Number(r.cents)/100}))}))};
+}
 async function writeAction(env, method, args) {
   if (
     [
@@ -4091,6 +4103,8 @@ async function writeAction(env, method, args) {
   )
     return lifeAction(env, method, args);
   switch (method) {
+    case "getFinanceCategoryPeriod":
+      return getFinanceCategoryPeriod(env,args[0],args[1]);
     case "getFinanceCategoryOptions":
       await ensureFinanceCategories(env);
       return [...FINANCE_MANUAL_CATEGORIES];

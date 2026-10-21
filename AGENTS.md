@@ -40,3 +40,5 @@ L’utente chiede di conservare sorgenti e modifiche nel progetto e di non richi
 - Consegna build 56 verificata: backend/plans/IPA-build56.json. Run Apple 39081388601 riuscito (122 unitari e 7 UI), IPA 39081406881 riuscita, Worker 39081388607 riuscito. SHA IPA ae799b5330f13b6c17bc3df9db973b20156d886928b981d034650b39bb524fe0; Raw SHA 2a3e46862dcd6ad313cc7ed6a7cd43c9d2ce2ca76031940db2f96f05c91bce46.
 
 - Modifiche richieste il 18 ottobre: salute compatta e ricorrenze abitudini. Contratto, migrazione e verifiche in docs/HABITS-HEALTH-COMPACT.md. Preservare le spunte os_routine_checks e la programmazione nelle rinomine da vecchi client. iOS autorevole sempre nello ZIP; release preparata 0.9.6/57.
+
+- Riparazione Finanza del 21 ottobre: docs/FINANCE-REPAIR-58.md. Spese normali senza ripartizioni o agganci automatici; eliminazione dei pagamenti collegati da Piani, anche interrotti, con storno idempotente e ripresa; endpoint getFinanceCategoryPeriod condiviso da web e iOS. L'utente ha richiesto esplicitamente IPA da firmare e Worker GitHub Raw. Conservare le modifiche abitudini/salute del ramo fix/platform-parity. Nessun deploy Cloudflare: caricamento manuale.

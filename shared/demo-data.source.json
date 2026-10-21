@@ -1,7 +1,7 @@
 {
   "inputs": {
-    "DemoData.swift": "9835b396083addec00ae857ca6f7e4ad36353616014fba27d0a53d6e2468bc21",
+    "DemoData.swift": "98050478375ed232db28e68fc2e8127b8be18ea1d90f0f1c3a407b6d22261147",
     "NativeModels.swift": "483ac2a7cbd07dad93752b4a1e83eeda8bb9680f10cb07eac30b10077d203b2f"
   },
-  "sha256": "a492c856378951706c7fc56e9b472db0610531e47be628a9201304713563d58d"
+  "sha256": "366ab0a224ac5d02d3ed046a5685ec8cb5cf2bb3ae26e1fd92cc832ee906bb47"
 }

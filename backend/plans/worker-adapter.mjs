@@ -1,7 +1,7 @@
 import {PlanError,month,addMonth} from './engine.mjs';
 import {adoptLegacy,readLegacyContext,replacement,hideAdoptedLegacy} from './legacy.mjs';
 import {D1PlanRepository,PlanService} from './service.mjs';
-const METHODS={saveFinancePlan:'create',recordFinancePlanPayment:'pay',stopFinancePlan:'stop',editFinancePlan:'edit'};
+const METHODS={saveFinancePlan:'create',recordFinancePlanPayment:'pay',stopFinancePlan:'stop',editFinancePlan:'edit',deleteFinancePlanPayment:'deletePayment'};
 const readMethods=new Set(['getFinanceOverview','getFinanceData']);
 const protectedCash=new Set(['editMovement','deleteMovement']);
 const quickWrites=new Set(['saveTransaction','saveRecurringPayment','saveEstimate']);
@@ -52,7 +52,7 @@ export function augmentFinance(base,view,currentView,currentBase=base) {
 export function withFinancePlans(base,{repositoryFactory=env=>new D1PlanRepository(env.DB),clock=romeToday,cashFactory=null,recordTransaction=null}={}) {
   return {async fetch(request,env,ctx) {
     const url=new URL(request.url), method=url.pathname.startsWith('/api/')?url.pathname.slice(5):'';
-    if(!METHODS[method]&&method!=='getFinancePlans'&&method!=='resumeFinancePlanPayment'&&!readMethods.has(method)&&!protectedCash.has(method)&&!legacyWrites.has(method)&&method!=='getFinancePlanMovements'&&!quickWrites.has(method))return base.fetch(request,env,ctx);
+    if(!METHODS[method]&&method!=='getMovement'&&method!=='getFinancePlans'&&method!=='resumeFinancePlanPayment'&&!readMethods.has(method)&&!protectedCash.has(method)&&!legacyWrites.has(method)&&method!=='getFinancePlanMovements'&&!quickWrites.has(method))return base.fetch(request,env,ctx);
     if(request.method!=='POST')return json({error:'Metodo non consentito.'},405);
     if(request.headers.get('Origin')!==url.origin)return json({error:'Origine non consentita.'},403);
     try {
@@ -74,7 +74,16 @@ export function withFinancePlans(base,{repositoryFactory=env=>new D1PlanReposito
         const response=await forward('getFinanceOverview',[Number(current.slice(0,4)),Number(current.slice(-2))]);
         if(!response.ok)throw new PlanError('Budget corrente non disponibile.',503);currentBase=await response.json();
       }
-      const cash=cashFactory?cashFactory({forward}):{async record(p) {
+      const cash=cashFactory?cashFactory({forward}):{async remove(p) {
+        const row=await env.DB.prepare('SELECT amount,account,movement_type,status FROM movements WHERE source_row=?').bind(p.movementId).first();
+        if(!row)return; // A previous attempt may have committed before its response was lost.
+        if(row.movement_type!=='Spesa'||row.status!=='Eseguito'||Math.round(-Number(row.amount)*100)!==p.amountCents)
+          throw new PlanError('Importo del movimento e pagamento non coincidono. Nessun movimento è stato eliminato.',409);
+        const response=await forward('deleteMovement',[p.movementId]);
+        if(!response.ok)throw new PlanError('Eliminazione non confermata. Riprova da questo pagamento senza registrare una nuova spesa.',503);
+        const remaining=await env.DB.prepare('SELECT source_row FROM movements WHERE source_row=?').bind(p.movementId).first();
+        if(remaining)throw new PlanError('Il movimento risulta ancora presente. Riprova l’eliminazione.',503);
+      },async record(p) {
         if(p.existingMovementId) {
           const row=await existingMovement(env.DB,p,current);
           await env.DB.prepare("INSERT INTO movement_budget_policies(movement_source_row,treatment,recovery_json) VALUES (?,'savings','[]') ON CONFLICT(movement_source_row) DO UPDATE SET treatment='savings',recovery_json='[]'").bind(row.source_row).run();
@@ -106,23 +115,36 @@ export function withFinancePlans(base,{repositoryFactory=env=>new D1PlanReposito
         const context=await readLegacyContext(env.DB,currentBase);
         await service.change(state=>({state:adoptLegacy(state,context,today),result:{}}));
       }
+      if(method==='getMovement') {
+        const response=await forward(method,args);if(!response.ok)return response;
+        const row=await response.json(),{state}=await repository.read();
+        const payment=Object.values(state.payments).find(p=>p.status!=='deleted'&&(p.movementId===Number(args[0])||p.existingMovementId===Number(args[0])));
+        return json(payment?{...row,financePlanId:payment.planId,financePlanPaymentId:payment.id}:row);
+      }
       if(quickWrites.has(method)) {
+        if(method==='saveTransaction'&&args[0]?.type==='Spesa') {
+          const input=args[0], mode=input.budgetTreatment??'auto';
+          // Normal expenses never select a plan by category. Plan payments use
+          // their own endpoint and write the cash ledger with savings treatment.
+          if(mode!=='savings') {
+            if(!['auto','ordinary'].includes(mode)||Number(input.months??1)!==1)
+              throw new PlanError('Per ripartire una spesa o registrare un pagamento pianificato usa Piani.');
+            args[0]={...input,months:1,budgetTreatment:'ordinary'};
+          }
+          if(recordTransaction)return json(await recordTransaction(env,args[0]));
+          return forward(method,args);
+        }
         const {state}=await repository.read();
         if(method==='saveEstimate') {
           const plan=Object.values(state.plans).find(p=>p.legacy?.type==='recurring'&&p.name===args[0]);
           if(plan) {await service.execute('edit',{requestId:crypto.randomUUID(),planId:plan.id,amountCents:Math.round(Number(args[1])*100),fromMonth:addMonth(current,1)});return json(true);}
-        } else {
-          const input=args[0]??{}, category=method==='saveRecurringPayment'?input.name:input.category;
-          const automatic=method==='saveRecurringPayment'||(input.type==='Spesa'&&(!input.budgetTreatment||input.budgetTreatment==='auto'));
-          if(automatic) {
-            const candidates=Object.values(state.plans).filter(p=>['fixed','estimated'].includes(p.kind)&&p.category===category&&p.status==='active'&&p.startMonth<=String(input.date).slice(0,7));
-            if(candidates.length===1) {
-              const value=Number(input.amount), cents=Math.round(value*100);
-              if(!Number.isFinite(value)||Math.abs(value-cents/100)>1e-8||(input.account&&input.account!=='Trade Republic'))throw new PlanError('Importo o conto non valido.');
-              await service.execute('pay',{requestId:input.requestId??crypto.randomUUID(),planId:candidates[0].id,amountCents:cents,date:input.date,cycleMonth:String(input.date).slice(0,7),competenceMonths:input.months??1,originalName:input.name});return json(true);
-            }
-            const old=Object.values(state.plans).find(p=>p.legacy?.type==='recurring'&&p.category===category);
-            if(old&&old.stopAfter&&String(input.date).slice(0,7)>old.stopAfter&&method==='saveTransaction')return forward(method,[{...input,budgetTreatment:'ordinary'}]);
+        } else if(method==='saveRecurringPayment') {
+          const input=args[0]??{}, category=input.name;
+          const candidates=Object.values(state.plans).filter(p=>['fixed','estimated'].includes(p.kind)&&p.category===category&&p.status==='active'&&p.startMonth<=String(input.date).slice(0,7));
+          if(candidates.length===1) {
+            const value=Number(input.amount), cents=Math.round(value*100);
+            if(!Number.isFinite(value)||Math.abs(value-cents/100)>1e-8||(input.account&&input.account!=='Trade Republic'))throw new PlanError('Importo o conto non valido.');
+            await service.execute('pay',{requestId:input.requestId??crypto.randomUUID(),planId:candidates[0].id,amountCents:cents,date:input.date,cycleMonth:String(input.date).slice(0,7),competenceMonths:input.months??1,originalName:input.name});return json(true);
           }
         }
         if(recordTransaction&&method==='saveTransaction')return json(await recordTransaction(env,args[0]));
@@ -157,6 +179,14 @@ export function withFinancePlans(base,{repositoryFactory=env=>new D1PlanReposito
           throw new PlanError('Esiste già un accantonamento precedente con questo nome. Gestiscilo da Piani: non verrà duplicato.');
       }
       if(method==='resumeFinancePlanPayment') { await service.finish(args[0]?.paymentId);return json({ok:true}); }
+      if(method==='deleteFinancePlanPayment') {
+        const {state}=await repository.read(),p=state.payments[args[0]?.paymentId];
+        if(p?.status==='posted') {
+          const row=await env.DB.prepare('SELECT amount,movement_type,status FROM movements WHERE source_row=?').bind(p.movementId).first();
+          if(row&&(row.movement_type!=='Spesa'||row.status!=='Eseguito'||Math.round(-Number(row.amount)*100)!==p.amountCents))
+            throw new PlanError('Importo del movimento e pagamento non coincidono. Nessun movimento è stato eliminato.',409);
+        }
+      }
       if(METHODS[method]&&args[0]?.movementId)await existingMovement(env.DB,{existingMovementId:Number(args[0].movementId),amountCents:args[0].amountCents,date:args[0].date??args[0].paymentDate},current);
       if(METHODS[method]) { await service.execute(METHODS[method],args[0]??{});return json({ok:true}); }
       if(method==='getFinancePlans')return json(await service.view(args[0]??current));

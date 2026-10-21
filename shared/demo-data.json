@@ -154,7 +154,7 @@
         "account": "Trade Republic",
         "amount": -12.34,
         "category": "Alimentari",
-        "date": "2026-10-18",
+        "date": "2026-10-21",
         "name": "Spesa alimentare",
         "row": 2,
         "type": "Spesa"
@@ -163,7 +163,7 @@
         "account": "Trade Republic",
         "amount": 1800,
         "category": "Stipendio",
-        "date": "2026-10-17",
+        "date": "2026-10-20",
         "name": "Stipendio demo",
         "row": 3,
         "type": "Entrata"
@@ -271,7 +271,7 @@
     ],
     "events": [
       {
-        "day": "2026-10-19",
+        "day": "2026-10-22",
         "end_time": "19:00",
         "frequency": "weekly",
         "id": 1,
@@ -299,11 +299,11 @@
     ],
     "shifts": [
       {
-        "day": "2026-10-18",
+        "day": "2026-10-21",
         "kind": "morning"
       },
       {
-        "day": "2026-10-19",
+        "day": "2026-10-22",
         "kind": "rest"
       }
     ],
@@ -333,7 +333,7 @@
         "title": "Finire il libro"
       }
     ],
-    "today": "2026-10-18"
+    "today": "2026-10-21"
   },
   "pending": [],
   "plan": {
@@ -355,6 +355,6 @@
     ],
     "links": []
   },
-  "refreshedAt": 813975669.4119892,
-  "routineDay": "2026-10-18"
+  "refreshedAt": 814281163.2316678,
+  "routineDay": "2026-10-21"
 }

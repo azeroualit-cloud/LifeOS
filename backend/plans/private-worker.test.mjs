@@ -81,12 +81,12 @@ test('Worker completo: autenticazione, adozione, pagamento, saldo e mesi storici
   assert.equal(sql.prepare('SELECT COUNT(*) n FROM account_balance_events').get().n,2);
   const november=await api('getFinanceOverview',[2026,11]);assert.ok(november.summary.monthlyBudgetBreakdown.some(r=>r.name==='Recupero spesa esistente'&&r.amount===100));
   const beforeBill=await api('getFinanceOverview',[2026,10]);
-  const bill={requestId:'quick-gas-bill-01',type:'Spesa',account:'Trade Republic',name:'Bolletta sintetica',category:'Gas',amount:120,date:'2026-10-17',months:2,budgetTreatment:'auto'};
-  await api('saveTransaction',[bill]);await api('saveTransaction',[bill]);
+  const gas=beforeBill.plansV2.plans.find(p=>p.name==='Gas');
+  const bill={requestId:'plan-gas-bill-01',planId:gas.id,amountCents:12000,date:'2026-10-17',cycleMonth:'2026-10',competenceMonths:2};
+  await api('recordFinancePlanPayment',[bill]);await api('recordFinancePlanPayment',[bill]);
   const afterBill=await api('getFinanceOverview',[2026,10]);
   assert.equal(afterBill.summary.budget,beforeBill.summary.budget-120);assert.equal(afterBill.summary.monthlyRemaining,beforeBill.summary.monthlyRemaining);
   assert.equal((await api('getFinanceOverview',[2026,11])).plansV2.plans.find(p=>p.name==='Gas').contributionCents,6000);
-  const gas=afterBill.plansV2.plans.find(p=>p.name==='Gas');
   await api('editFinancePlan',[{requestId:'edit-gas-future-01',planId:gas.id,amountCents:7000,fromMonth:'2026-12'}]);
   assert.equal((await api('getFinanceOverview',[2026,10])).summary.monthlyRemaining,afterBill.summary.monthlyRemaining);
   assert.equal((await api('getFinanceOverview',[2026,12])).plansV2.plans.find(p=>p.name==='Gas').contributionCents,7000);
@@ -117,6 +117,33 @@ test('Worker completo: autenticazione, adozione, pagamento, saldo e mesi storici
   for(let i=0;i<300;i++)historicalInsert.run(10000+i);
   await api('getFinanceCategoryOptions');
   assert.equal(sql.prepare("SELECT COUNT(*) n FROM movement_financial_categories WHERE movement_source_row>=10000 AND detail_category='Alimentari'").get().n,300);
+  // Reproduce a stopped gym plan with the two linked payments from a synthetic fixture.
+  const gym=(await api('getFinancePlans',['2026-10'])).plans.find(p=>p.name==='Palestra');
+  for(const [id,amount] of [['gym-old-payment',105.25],['gym-new-payment',358.75]]) {
+    await api('saveTransaction',[{requestId:id,name:'Palestra sintetica',type:'Spesa',category:'Palestra',account:'Trade Republic',amount,date:'2026-10-17',budgetTreatment:'savings'}]);
+    const row=sql.prepare('SELECT source_row FROM movements WHERE import_id=?').get('APP-'+id);
+    const stored=sql.prepare('SELECT document FROM finance_plans_v2_state WHERE id=1').get(),state=JSON.parse(stored.document);
+    state.payments[id]={id,planId:gym.id,movementId:row.source_row,amountCents:Math.round(amount*100),date:'2026-10-17',cycleMonth:'2026-10',competenceMonths:12,status:'posted',settlementKey:'2026-10',requestId:id};
+    sql.prepare('UPDATE finance_plans_v2_state SET document=?,revision=revision+1 WHERE id=1').run(JSON.stringify(state));
+  }
+  await api('stopFinancePlan',[{requestId:'stop-gym-synthetic',planId:gym.id}]);
+  const beforeDelete=await api('getFinanceOverview',[2026,10]);
+  const payment=beforeDelete.plansV2.payments.find(p=>p.id==='gym-new-payment');
+  const detail=await api('getMovement',[payment.movementId]);assert.equal(detail.financePlanPaymentId,payment.id);
+  const remove={requestId:'remove-gym-synthetic',planId:gym.id,paymentId:payment.id};
+  await api('deleteFinancePlanPayment',[remove]);await api('deleteFinancePlanPayment',[remove]);
+  const afterDelete=await api('getFinanceOverview',[2026,10]);
+  assert.equal(Math.round((afterDelete.summary.budget-beforeDelete.summary.budget)*100),35875);
+  assert.equal(sql.prepare('SELECT COUNT(*) n FROM movements WHERE source_row=?').get(payment.movementId).n,0);
+  assert.ok(afterDelete.plansV2.payments.some(p=>p.id==='gym-old-payment'));
+  assert.ok(!afterDelete.plansV2.payments.some(p=>p.id===payment.id));
+  assert.equal(afterDelete.plansV2.plans.find(p=>p.id===gym.id).status,'stopped');
+  const period=await api('getFinanceCategoryPeriod',['2026-10',12]);
+  assert.equal(period.months.length,12);assert.equal(period.months[0].month,'2025-11');
+  assert.ok(queryCount<=8,'Categorie richiedono soltanto classificazione incrementale e aggregazione, query: '+queryCount);
+  assert.ok(period.months.every(r=>Array.isArray(r.categories)));
+  assert.equal((await worker.fetch(request('getFinanceCategoryPeriod',['2026-10',12],false),env,{})).status,401);
+  assert.notEqual((await worker.fetch(request('getFinanceCategoryPeriod',['2026-10',13]),env,{})).status,200);
   t.diagnostic('Query SQL per pagamento (prima registrazione, replay, cold start): '+paymentQueries.join(', '));
 
 

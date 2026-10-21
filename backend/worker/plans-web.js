@@ -32,9 +32,9 @@ import {newPlan,contribution,months,addMonth} from '../plans/engine.mjs';
   function detail(p,v){
     let cycle=v.month;
     if(p.kind==='fixed'&&p.intervalMonths>1){const anchor=p.intervalAnchor||p.startMonth,[y,m]=anchor.split('-').map(Number),delta=(Number(cycle.slice(0,4))-y)*12+Number(cycle.slice(-2))-m;cycle=addMonth(anchor,Math.floor(delta/p.intervalMonths)*p.intervalMonths);}
-    const payments=v.payments.filter(x=>x.planId===p.id),paid=p.kind!=='fund'&&payments.some(x=>x.status==='posted'&&(p.kind==='goal'||x.settlementKey===cycle));
+    const payments=v.payments.filter(x=>x.planId===p.id),paid=p.kind!=='fund'&&payments.some(x=>['posted','deleting'].includes(x.status)&&(p.kind==='goal'||x.settlementKey===cycle));
     const payable=p.status==='active'&&!['advance','recovery'].includes(p.kind)&&p.startMonth<=current();
-    return `<div class="plans-web"><button data-plans-back>‹ Piani</button><section class="card pad"><h2>${safe(p.name)}</h2><p>${safe(kinds[p.kind])} · ${safe(statuses[p.status]||p.status)}</p><p class="hint">${safe(p.startMonth)}${p.endMonth?' → '+safe(p.endMonth):' · Senza scadenza'}</p><div class="kv"><span>Categoria della spesa</span><strong>${safe(p.category||'Altro')}</strong></div><div class="kv"><span>Budget di ${safe(shortMonth(v.month))}</span><strong>${money(-p.contributionCents)}</strong></div>${p.kind==='advance'?`<div class="kv"><span>Mese beneficiario</span><strong>${safe(shortMonth(p.beneficiaryMonth))}</strong></div>`:p.kind!=='recovery'?`<div class="kv"><span>Destinato al fondo nel mese consultato</span><strong>${money(p.fundCents)}</strong></div>${p.fromGeneralSavingsCents>0?`<div class="kv"><span>Pagato dagli altri risparmi</span><strong>${money(p.fromGeneralSavingsCents)}</strong></div>`:''}`:''}${p.kind==='goal'?`<div class="kv"><span>Obiettivo</span><strong>${money(p.amountCents)}</strong></div><div class="kv"><span>Residuo</span><strong>${money(p.outstandingCents)}</strong></div>`:''}${payable&&!paid?`<button data-plans-pay="${safe(p.id)}">${p.kind==='goal'?'Paga dai risparmi e chiudi il piano':'Registra un pagamento'}</button>`:paid?'<p>Pagamento registrato</p>':''}</section><section class="card pad"><h2>Pagamenti</h2>${payments.map(p=>`<div class="kv"><span>${safe(p.date||'')}<small>${p.status==='posted'?'Pagato · movimento collegato':'Da completare · non registrare una nuova spesa'}</small></span><strong>${money(p.amountCents)}</strong></div>${p.status==='pending'?`<button data-plans-resume="${safe(p.id)}">Completa questa registrazione</button>`:''}`).join('')||'<p class="empty">Nessun pagamento registrato</p>'}</section>${p.status==='active'?`<section class="card pad">${!['advance','recovery'].includes(p.kind)?`<button data-plans-edit="${safe(p.id)}">Modifica le quote future</button>`:''}<button class="danger" data-plans-stop="${safe(p.id)}">${p.kind==='advance'?'Annulla l’intero anticipo':'Interrompi le quote future'}</button></section>`:''}</div>`;
+    return `<div class="plans-web"><button data-plans-back>‹ Piani</button><section class="card pad"><h2>${safe(p.name)}</h2><p>${safe(kinds[p.kind])} · ${safe(statuses[p.status]||p.status)}</p><p class="hint">${safe(p.startMonth)}${p.endMonth?' → '+safe(p.endMonth):' · Senza scadenza'}</p><div class="kv"><span>Categoria della spesa</span><strong>${safe(p.category||'Altro')}</strong></div><div class="kv"><span>Budget di ${safe(shortMonth(v.month))}</span><strong>${money(-p.contributionCents)}</strong></div>${p.kind==='advance'?`<div class="kv"><span>Mese beneficiario</span><strong>${safe(shortMonth(p.beneficiaryMonth))}</strong></div>`:p.kind!=='recovery'?`<div class="kv"><span>Destinato al fondo nel mese consultato</span><strong>${money(p.fundCents)}</strong></div>${p.fromGeneralSavingsCents>0?`<div class="kv"><span>Pagato dagli altri risparmi</span><strong>${money(p.fromGeneralSavingsCents)}</strong></div>`:''}`:''}${p.kind==='goal'?`<div class="kv"><span>Obiettivo</span><strong>${money(p.amountCents)}</strong></div><div class="kv"><span>Residuo</span><strong>${money(p.outstandingCents)}</strong></div>`:''}${payable&&!paid?`<button data-plans-pay="${safe(p.id)}">${p.kind==='goal'?'Paga dai risparmi e chiudi il piano':'Registra un pagamento'}</button>`:paid?'<p>Pagamento registrato</p>':''}</section><section class="card pad"><h2>Pagamenti</h2>${payments.map(p=>`<div class="kv"><span>${safe(p.date||'')}<small>${p.status==='posted'?'Pagato · movimento collegato':p.status==='deleting'?'Eliminazione da completare':'Da completare · non registrare una nuova spesa'}</small></span><strong>${money(p.amountCents)}</strong></div>${['posted','deleting'].includes(p.status)?`<button data-plans-payment="${safe(p.id)}">${p.status==='deleting'?'Completa eliminazione':'Gestisci pagamento'}</button>`:''}${p.status==='pending'?`<button data-plans-resume="${safe(p.id)}">Completa questa registrazione</button>`:''}`).join('')||'<p class="empty">Nessun pagamento registrato</p>'}</section>${p.status==='active'?`<section class="card pad">${!['advance','recovery'].includes(p.kind)?`<button data-plans-edit="${safe(p.id)}">Modifica le quote future</button>`:''}<button class="danger" data-plans-stop="${safe(p.id)}">${p.kind==='advance'?'Annulla l’intero anticipo':'Interrompi le quote future'}</button></section>`:''}</div>`;
   }
   function modal(title,body,method,makePayload){
     const host=document.getElementById('dialog');
@@ -103,6 +103,13 @@ import {newPlan,contribution,months,addMonth} from '../plans/engine.mjs';
     select.addEventListener('change',()=>{const o=select.selectedOptions[0];if(o?.dataset.cents){form.elements.amount.value=Number(o.dataset.cents)/100;date.value=o.dataset.date;}form.elements.amount.readOnly=!!o?.dataset.cents;date.readOnly=!!o?.dataset.cents;form.dispatchEvent(new Event('input'));});
     date.addEventListener('change',refresh);await refresh();
   }
+  function paymentDetail(id){
+    const p=view()?.payments.find(p=>p.id===id);if(!p)return;
+    const removing=p.status==='deleting';
+    const form=modal('Pagamento del piano',`<div class="full"><p>${safe(p.date)} · ${money(p.amountCents)}</p><p>Elimina il pagamento e il movimento collegato. Il saldo verrà aggiornato. Un piano interrotto resta interrotto; un obiettivo chiuso torna aperto.</p></div>`,removing?'resumeFinancePlanPayment':'deleteFinancePlanPayment',()=>({paymentId:id,...(removing?{}:{planId:p.planId})}));
+    form.querySelector('[type=submit]').textContent=removing?'Completa eliminazione':'Elimina pagamento';
+  }
+  globalThis.openPlanPayment=(planId,paymentId)=>{activePlan=planId;closeDialog();setView('extras');paymentDetail(paymentId);};
   function pay(id){
     const p=plan(id);if(!p)return;
     const m=view().month<=current()?view().month:current();
@@ -123,7 +130,7 @@ import {newPlan,contribution,months,addMonth} from '../plans/engine.mjs';
     host.classList.remove('hidden');host.querySelector('button').focus();
   }
   document.addEventListener('click',e=>{
-    const b=e.target.closest('[data-new-extra],[data-plans-pay],[data-plans-edit],[data-plans-stop],[data-plans-close],[data-plans-refresh],[data-plans-resume],[data-plans-info],[data-plans-detail],[data-plans-back],[data-plans-legacy]');if(!b)return;
+    const b=e.target.closest('[data-plans-payment],[data-new-extra],[data-plans-pay],[data-plans-edit],[data-plans-stop],[data-plans-close],[data-plans-refresh],[data-plans-resume],[data-plans-info],[data-plans-detail],[data-plans-back],[data-plans-legacy]');if(!b)return;
     e.preventDefault();e.stopImmediatePropagation();
     if(b.hasAttribute('data-plans-detail')){activePlan=b.dataset.plansDetail;render();}
     if(b.hasAttribute('data-plans-back')){activePlan=null;render();}
@@ -131,6 +138,7 @@ import {newPlan,contribution,months,addMonth} from '../plans/engine.mjs';
     if(b.hasAttribute('data-plans-info'))showInfo();
     if(b.hasAttribute('data-new-extra')){activePlan=null;openExtra();}
     if(b.hasAttribute('data-plans-close'))document.getElementById('dialog').classList.add('hidden');
+    if(b.hasAttribute('data-plans-payment'))paymentDetail(b.dataset.plansPayment);
     if(b.hasAttribute('data-plans-pay'))pay(b.dataset.plansPay);
     if(b.hasAttribute('data-plans-edit'))edit(b.dataset.plansEdit);
     if(b.hasAttribute('data-plans-stop')){const id=b.dataset.plansStop,p=plan(id);modal('Interrompi · '+p.name,'<p class="full">Conserva i pagamenti e lo storico. Le quote successive al mese corrente si interrompono. Gli anticipi di mesi chiusi non possono essere annullati.</p>','stopFinancePlan',()=>({planId:id}));}

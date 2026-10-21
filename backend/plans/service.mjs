@@ -1,4 +1,4 @@
-import {PlanError,initialState,command,completePayment,project} from './engine.mjs';
+import {PlanError,initialState,command,completePayment,completePaymentDeletion,project} from './engine.mjs';
 
 // Repository owns optimistic concurrency. Adoption is additive and never rewrites legacy rows.
 const schemaJobs=new WeakMap();
@@ -41,7 +41,12 @@ export class PlanService {
   async finish(paymentId) {
     const {state}=await this.repository.read(), p=state.payments[paymentId];
     if(!p)throw new PlanError('Pagamento non trovato.',404);
-    if(p.status==='posted')return;
+    if(['posted','deleted'].includes(p.status))return;
+    if(p.status==='deleting') {
+      await this.cash.remove(p);
+      await this.change(current=>({state:completePaymentDeletion(current,paymentId,this.today),result:{}}));
+      return;
+    }
     const plan=state.plans[p.planId];
     // Stable requestId is shared across retries/crashes. The legacy cash adapter MUST
     // implement idempotent saveTransaction, not an unprotected insert.

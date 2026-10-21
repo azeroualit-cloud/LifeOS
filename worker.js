@@ -400,6 +400,8 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
             const raw = (await r.text()).slice(0, 500);
             let message = raw;
             try { message = JSON.parse(raw).error || raw; } catch {}
+            if(r.headers.get('content-type')?.includes('text/html')||/<(?:!doctype|html|head|body)\\b/i.test(raw))
+              message=[429,500,502,503,504].includes(r.status)?'Il server \xE8 momentaneamente occupato. Riprova tra poco.':'Il server non ha restituito dati validi. Verifica l\u2019accesso e riprova.';
             if (method.includes("FinancePlan") && (r.status === 404 || message.trim() === "Operazione non disponibile.")) message = lifeOSContract.plansUnavailable;
             throw Error(r.status === 401 ? "Sessione scaduta. Riapri l\u2019app e accedi." : message);
           }
@@ -2372,7 +2374,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         );
       }
       document.addEventListener("change", (e) => {
-        if(e.target.name === "category" && e.target.closest("#entry-form")){syncUtilityFields();syncCommitmentHint();}
+        if(e.target.name === "category" && e.target.closest("#entry-form")){syncUtilityFields();}
         const wrap = e.target.closest(".quick-classify");
         if (wrap && e.target.tagName === "SELECT")
           wrap.querySelector("button").disabled = !e.target.value;
@@ -2400,7 +2402,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         const choices = financialCategoryOptions(e.target.value), label = financeCategoryLabel(category.value);
         category.innerHTML = categoryOptionsHtml(choices);
         category.value = choices.includes(label) ? label : "Altro";
-        syncUtilityFields();syncCommitmentHint();
+        syncUtilityFields();
       });
 
       /** Controllo per classificare un movimento storico, senza modificarne importo o conto. */
@@ -2714,7 +2716,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
 
       /** Storico dettagliato in fondo a Budget, dopo grafici e impostazioni. */
       function billsHistory(d) {
-        return \`<section class="card pad budget-history"><details data-budget-panel="budgetHistoryOpen" \${state.budgetHistoryOpen ? "open" : ""}><summary>Storico pagamenti \xB7 \${d.history.length}</summary><div class="budget-detail-content"><div class="card-title"><button class="save" data-new-recurring="1">+ Pagamento</button></div>\${d.history.length ? '<div class="table-scroll"><table class="tabular"><thead><tr><th>Data</th><th>Voce</th><th>Pagato</th><th>Mesi</th><th>Nota</th></tr></thead><tbody>' + d.history.map((h) => "<tr><td>" + escapeHtml(h.date) + "</td><td>" + escapeHtml(h.name) + "</td><td>" + exactEuro(h.paid) + "</td><td>" + h.months + "</td><td>" + escapeHtml(String(h.note||"").replace(/ ?\\[Categoria manuale\\]/g,"")) + "</td></tr>").join("") + "</tbody></table></div>" : '<p class="empty">Nessun pagamento.</p>'}</div></details></section>\`;
+        return \`<section class="card pad budget-history"><details data-budget-panel="budgetHistoryOpen" \${state.budgetHistoryOpen ? "open" : ""}><summary>Storico pagamenti \xB7 \${d.history.length}</summary><div class="budget-detail-content"><div class="card-title"><button class="save" data-new-recurring="1">Vai a Piani</button></div>\${d.history.length ? '<div class="table-scroll"><table class="tabular"><thead><tr><th>Data</th><th>Voce</th><th>Pagato</th><th>Mesi</th><th>Nota</th></tr></thead><tbody>' + d.history.map((h) => "<tr><td>" + escapeHtml(h.date) + "</td><td>" + escapeHtml(h.name) + "</td><td>" + exactEuro(h.paid) + "</td><td>" + h.months + "</td><td>" + escapeHtml(String(h.note||"").replace(/ ?\\[Categoria manuale\\]/g,"")) + "</td></tr>").join("") + "</tbody></table></div>" : '<p class="empty">Nessun pagamento.</p>'}</div></details></section>\`;
       }
 
       /** Carte straordinarie: stato, Segna pagato, Modifica e Annulla/Elimina. */
@@ -2856,48 +2858,18 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
       function isUtilityCategory(category) {
         return ["Utenze","Elettricit\xE0","Gas","Acqua"].includes(category);
       }
-      function utilityFields(category="",months=1) {
-        const active=isUtilityCategory(category),direct=active && category!=="Utenze";
-        return \`<div class="full form-grid \${active?"":"hidden"}" id="utility-fields"><label class="\${direct?"hidden":""}">Tipo utenza *<select name="utilityKind" \${active && !direct?"required":"disabled"}><option value="">Scegli</option>\${["Elettricit\xE0","Gas","Acqua"].map(x=>\`<option \${category===x?"selected":""}>\${x}</option>\`).join("")}</select></label><label class="\${direct?"full":""}">Mesi coperti *<input name="utilityMonths" type="number" min="1" max="12" step="1" value="\${Number(months)||1}" \${active?"required":"disabled"}></label></div>\`;
+      function utilityFields(category="") {
+        return \`<label class="full \${category==="Utenze"?"":"hidden"}" id="utility-fields">Tipo utenza *<select name="utilityKind" \${category==="Utenze"?"required":"disabled"}><option value="">Scegli</option>\${["Elettricit\xE0","Gas","Acqua"].map(x=>\`<option>\${x}</option>\`).join("")}</select></label>\`;
       }
       function syncUtilityFields() {
-        const f=document.getElementById("entry-form"),box=document.getElementById("utility-fields");if(!box)return;
-        const category=f.elements.category.value,active=f.elements.type.value==="Spesa" && isUtilityCategory(category);
-        box.classList.toggle("hidden",!active);box.querySelectorAll("select,input").forEach(x=>{x.disabled=!active;x.required=active;});
-        const direct=active && category!=="Utenze",kind=f.elements.utilityKind;
-        kind.disabled=!active || direct;kind.required=active && !direct;
-        kind.closest("label").classList.toggle("hidden",direct);
-        f.elements.utilityMonths.closest("label").classList.toggle("full",direct);
-        if(direct)kind.value=category;
+        const f=document.getElementById("entry-form"),box=document.getElementById("utility-fields");if(!f||!box)return;
+        const active=f.elements.type.value==="Spesa"&&f.elements.category.value==="Utenze";
+        box.classList.toggle("hidden",!active);f.elements.utilityKind.disabled=!active;f.elements.utilityKind.required=active;
       }
-      function commitmentHint(category="") {
-        const d=state.data || life.finance, r=d?.recurring?.find(x=>x.name===category && x.treatment==="Vincolata");
-        const estimate=category==="Affitto" ? d?.summary?.rent : r?.estimate;
-        const text=estimate===undefined ? (["Assicurazione","Bollo","Manutenzione auto","Dentista","Straordinarie"].includes(category)?"Automatico: questa spesa incide sui risparmi. Puoi scegliere un recupero nei mesi successivi.":"Automatico: questa categoria incide sul budget libero, salvo un trattamento diverso.") : \`Previsti per \${category}: \${exactEuro(estimate)} al mese. La quota mensile \xE8 gi\xE0 sottratta dal budget. Il pagamento e le differenze incidono sul saldo, senza un secondo addebito al budget libero.\`;
-        return \`<p id="commitment-hint" class="hint full \${text?"":"hidden"}">\${escapeHtml(text)}</p>\`;
+      function movementPolicyMetadata(r) {
+        const fields={months:r.competence_months||1,budgetTreatment:r.budgetTreatment||"auto",recoveryMonths:r.recoveryMonths||"",recoveryAmount:r.recoveryAmount||""};
+        return Object.entries(fields).map(([name,value])=>\`<input type="hidden" name="\${name}" value="\${escapeHtml(String(value))}">\`).join("");
       }
-      function syncCommitmentHint() {
-        const f=document.getElementById("entry-form"),box=document.getElementById("commitment-hint");if(!f || !box)return;
-        box.outerHTML=commitmentHint(f.elements.type.value==="Spesa" ? f.elements.category.value : "");
-      }
-
-      function budgetPolicyFields(r={}) {
-        const mode=r.budgetTreatment || "auto";
-        return \`<div id="budget-policy-fields" class="full form-grid"><label class="full">Trattamento budget<select name="budgetTreatment">\${[["auto","Automatico"],["savings","Da risparmi"],...(!["auto","savings"].includes(mode)?[[mode,"Gestito dal piano esistente"]]:[])].map(([v,l])=>\`<option value="\${v}" \${v===mode?"selected":""}>\${l}</option>\`).join("")}</select></label><label class="full \${mode==="recovery"?"":"hidden"}" data-recovery-field>Mesi di recupero<input name="recoveryMonths" value="\${escapeHtml(r.recoveryMonths||"")}" placeholder="2026-11, 2026-12, 2027-01" \${mode==="recovery"?"required":"disabled"}></label><label class="full \${mode==="recovery"?"":"hidden"}" data-recovery-field>Importo da recuperare \u20AC (vuoto = tutta la spesa)<input name="recoveryAmount" type="number" min="0.01" step="0.01" value="\${r.recoveryAmount||""}" \${mode==="recovery"?"":"disabled"}></label><p class="hint full" id="recovery-preview"></p><p class="hint full">Il saldo registra sempre l\u2019intera uscita. Il budget libero pu\xF2 diventare negativo. Per una spesa annuale usa Segna pagato nel suo piano; per un movimento gi\xE0 registrato usa Collega movimento.</p></div>\`;
-      }
-      function syncBudgetPolicyFields(){
-        const f=document.getElementById("entry-form"),box=document.getElementById("budget-policy-fields");if(!box)return;
-        const expense=f.elements.type.value==="Spesa",recovery=expense && f.elements.budgetTreatment.value==="recovery";
-        box.classList.toggle("hidden",!expense);f.elements.budgetTreatment.disabled=!expense;
-        box.querySelectorAll("[data-recovery-field]").forEach(e=>{e.classList.toggle("hidden",!recovery);e.querySelector("input").disabled=!recovery;});
-        f.elements.recoveryMonths.required=recovery;
-        const out=document.getElementById("recovery-preview");out.textContent="";
-        if(recovery){const months=f.elements.recoveryMonths.value.split(",").map(x=>x.trim()).filter(Boolean).sort(),cents=Math.round(Number(f.elements.recoveryAmount.value || f.elements.amount.value)*100);
-          if(months.length && new Set(months).size===months.length && months.length<=60 && months.every(m=>/^20[2-3]\\d-(0[1-9]|1[0-2])$/.test(m)) && cents>0 && cents<=Math.round(Number(f.elements.amount.value)*100))out.textContent=months.map((m,i)=>\`\${shortMonth(m)}: \${exactEuro((Math.floor(cents/months.length)+(i<cents%months.length?1:0))/100)}\`).join(" \xB7 ");
-        }
-      }
-      document.addEventListener("change",e=>{if(e.target.closest("#entry-form")){syncBudgetPolicyFields();}});
-      document.addEventListener("input",e=>{if(e.target.closest("#budget-policy-fields") || e.target.name==="amount")syncBudgetPolicyFields();});
 
       /** Data civile usata dai form, nel fuso Europe/Rome. */
       function todayIso() {
@@ -2954,7 +2926,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
               "Altro",
             ) +
             field("Data effettiva", "date", "date", chosen, 'max="'+todayIso()+'"') +
-            field("Mesi coperti", "months", "number", 1, 'min="1" max="12" step="1"') + budgetPolicyFields() + field("Note", "note", "text", "", 'maxlength="1000"', "full") +
+            field("Note", "note", "text", "", 'maxlength="1000"', "full") +
 
             '<label id="counterpart-box" class="' +
             (type === "Trasferimento" ? "" : "hidden") +
@@ -2965,7 +2937,6 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         );
         updateTransactionAccount();
         updateSnapshotChoice();
-        syncBudgetPolicyFields();
       }
 
       /** Mostra l\u2019opzione gi\xE0 incluso nel saldo soltanto per date e conti compatibili. */
@@ -2995,6 +2966,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         if (state.busy) return;
         google.script.run
           .withSuccessHandler((r) => {
+            if(r.financePlanPaymentId){globalThis.openPlanPayment(r.financePlanId,r.financePlanPaymentId);return;}
             const categories = financialCategoryOptions(r.movement_type);
             if (r.category && !categories.includes(financeCategoryLabel(r.category)))
               categories.push(r.category);
@@ -3039,7 +3011,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
                 ) +
                 select("Conto", "account", accounts, r.account) +
                 select("Categoria", "category", categories, r.category) +
-                budgetPolicyFields(r) +
+                movementPolicyMetadata(r) +
                 field(
                   "Data effettiva",
                   "date",
@@ -3048,13 +3020,6 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
                     0,
                     10,
                   ),
-                ) +
-                field(
-                  "Mesi coperti",
-                  "months",
-                  "number",
-                  r.competence_months || 1,
-                  'min="1" max="12" step="1"',
                 ) +
                 '<label id="counterpart-box" class="' +
                 (type === "Trasferimento" ? "" : "hidden") +
@@ -3073,7 +3038,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
                 '<p class="hint full">Dopo una correzione, verifica i saldi nel Budget.</p>',
               "movement-edit",
             );
-            syncBudgetPolicyFields();syncUtilityFields();syncCommitmentHint();
+            syncUtilityFields();
           })
           .withFailureHandler((err) => {
             const box = document.getElementById("error");
@@ -3083,44 +3048,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
           .getMovement(row);
       }
 
-      /** Registra una bolletta o un\u2019altra spesa ricorrente e i mesi coperti. */
-      function openRecurring() {
-        modal(
-          "Registra pagamento",
-          select(
-            "Voce",
-            "name",
-            [
-              "Elettricit\xE0",
-              "Gas",
-              "Acqua",
-              "Condominio",
-              "Palestra",
-              "Abbonamenti",
-              "Benzina",
-            ],
-            "Elettricit\xE0",
-          ) +
-            field(
-              "Pagato \u20AC",
-              "amount",
-              "number",
-              "",
-              'min="0.01" max="2000" step="0.01" inputmode="decimal"',
-            ) +
-            '<input type="hidden" name="account" value="Trade Republic">' +
-            field("Data", "date", "date", todayIso()) +
-            field(
-              "Mesi coperti",
-              "months",
-              "number",
-              1,
-              'min="1" max="12" step="1"',
-            ) +
-            field("Nota", "note", "text", "", 'maxlength="200"', "full"),
-          "recurring",
-        );
-      }
+      function openRecurring() { setView("extras"); }
 
       /** Crea una pianificazione straordinaria; non implica pagamento. */
       function openExtra(c) {
@@ -3710,6 +3638,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         }
         if((kind==="transaction"||kind==="movement-edit") && d.type!=="Spesa"){d.budgetTreatment="auto";delete d.recoveryMonths;delete d.recoveryAmount;}
 
+        if(kind==="transaction"){d.months=1;d.budgetTreatment=d.type==="Spesa"?"ordinary":"auto";}
         if (kind === "extra-payment") return submit("recordExtraPayment", [d]);
         if (kind === "extra-link") return submit("linkExtraMovement", [d]);
         submit(
@@ -4184,17 +4113,9 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
   }
   function recurring(index){
     const r=state.data?.recurring?.[index];if(!r)return;
-    const host=sheet(r.name,\`<form id="platform-recurring-form" class="form-grid"><label class="full">Stima mensile \u20AC<input name="estimate" type="number" min="0.01" max="1000000" step="0.01" value="\${r.estimate}"></label>\${Number.isFinite(r.nextEstimate)?\`<p>Stima mese successivo: \${state.assetsVisible?exactEuro(r.nextEstimate):'\u2022\u2022\u2022\u2022'}</p>\`:''}<button type="button" data-recurring-estimate>Salva stima</button><h3 class="full">Registra pagamento</h3><label>Importo \u20AC<input name="amount" type="number" min="0.01" max="1000000" step="0.01"></label><label>Data<input name="date" type="date" value="\${todayIso()}" max="\${todayIso()}"></label><label>Mesi coperti<input name="months" type="number" min="1" max="12" step="1" value="1"></label><p class="os-form-error full" role="alert"></p><div class="form-actions"><button type="button" data-close>Fine</button><button class="save" type="submit">Registra</button></div></form>\`);
-    const form=host.querySelector('form'),requestId=crypto.randomUUID();let submitted=null;
-    async function send(method,args){
-      if(form.dataset.busy)return;form.dataset.busy='true';const controls=[...form.querySelectorAll('button')];controls.forEach(b=>b.disabled=true);
-      try{const result=await workerRequest(method,args);if(result===false)throw Error('Il server non ha confermato la modifica.');closeDialog();load();}
-      catch(error){form.querySelector('[role=alert]').textContent=error.message;}
-      finally{delete form.dataset.busy;controls.forEach(b=>b.disabled=false);}
-    }
-    form.querySelector('[data-recurring-estimate]').onclick=()=>{const input=form.elements.estimate;if(!input.value||!input.reportValidity())return;send('saveEstimate',[r.name,Number(input.value)]);};
-    form.onsubmit=e=>{e.preventDefault();if(!form.elements.amount.value||!form.reportValidity())return;submitted??={requestId,type:'Spesa',name:r.name,category:r.name,account:'Trade Republic',date:form.elements.date.value,months:Number(form.elements.months.value),amount:Number(form.elements.amount.value),budgetTreatment:'auto'};send('saveTransaction',[submitted]);};
+    closeDialog();setView('extras');
   }
+
   document.addEventListener('click',e=>{const b=e.target.closest('[data-edit-planning],[data-budget-recurring]');if(!b)return;if(b.hasAttribute('data-edit-planning'))settings();else recurring(Number(b.dataset.budgetRecurring));});
 })();
 <\/script><script>(() => {
@@ -4353,13 +4274,14 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
           if (month === todayIso().slice(0, 7) && Array.isArray(d.categories)) samples.set(month, d.categories);
           for (const [m, rows2] of samples) cache.set(m, rows2);
         }
-        for (const m of [...requested].reverse()) if (!cache.has(m)) {
+        if (requested.some((m) => !cache.has(m))) {
           if (!current()) return;
-          target.textContent = \`Categorie: \${requested.filter((m2) => cache.has(m2)).length} di \${requested.length} mesi\\u2026\`;
-          const data = await workerRequest("getFinanceData", [Number(m.slice(0, 4)), Number(m.slice(-2))]);
+          const data = await workerRequest("getFinanceCategoryPeriod", [month, range]);
           if (!current()) return;
-          aggregateCategories(/* @__PURE__ */ new Map([[m, data.categories]]), [m]);
-          cache.set(m, data.categories);
+          if (!Array.isArray(data.months) || data.months.length !== requested.length) throw Error("Periodo categorie incompleto. Riprova.");
+          const samples = new Map(data.months.map((r) => [r.month, r.categories]));
+          aggregateCategories(samples, requested);
+          for (const m of requested) cache.set(m, samples.get(m));
         }
         if (!current()) return;
         const rows = aggregateCategories(cache, requested);
@@ -4374,7 +4296,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         refresh.textContent = "Aggiorna categorie";
       } catch (error) {
         if (current()) {
-          target.textContent = \`Caricati \${requested.filter((m) => cache.has(m)).length} di \${requested.length} mesi. \${error.message} Riprova riprende dai mesi mancanti.\`;
+          target.textContent = error.message + " Premi Riprova per caricare il periodo.";
           refresh.textContent = "Riprova";
         }
       } finally {
@@ -4559,9 +4481,9 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         const anchor = p.intervalAnchor || p.startMonth, [y, m] = anchor.split("-").map(Number), delta = (Number(cycle.slice(0, 4)) - y) * 12 + Number(cycle.slice(-2)) - m;
         cycle = addMonth(anchor, Math.floor(delta / p.intervalMonths) * p.intervalMonths);
       }
-      const payments = v.payments.filter((x) => x.planId === p.id), paid = p.kind !== "fund" && payments.some((x) => x.status === "posted" && (p.kind === "goal" || x.settlementKey === cycle));
+      const payments = v.payments.filter((x) => x.planId === p.id), paid = p.kind !== "fund" && payments.some((x) => ["posted", "deleting"].includes(x.status) && (p.kind === "goal" || x.settlementKey === cycle));
       const payable = p.status === "active" && !["advance", "recovery"].includes(p.kind) && p.startMonth <= current();
-      return \`<div class="plans-web"><button data-plans-back>\\u2039 Piani</button><section class="card pad"><h2>\${safe(p.name)}</h2><p>\${safe(kinds2[p.kind])} \\xB7 \${safe(statuses[p.status] || p.status)}</p><p class="hint">\${safe(p.startMonth)}\${p.endMonth ? " \\u2192 " + safe(p.endMonth) : " \\xB7 Senza scadenza"}</p><div class="kv"><span>Categoria della spesa</span><strong>\${safe(p.category || "Altro")}</strong></div><div class="kv"><span>Budget di \${safe(shortMonth(v.month))}</span><strong>\${money(-p.contributionCents)}</strong></div>\${p.kind === "advance" ? \`<div class="kv"><span>Mese beneficiario</span><strong>\${safe(shortMonth(p.beneficiaryMonth))}</strong></div>\` : p.kind !== "recovery" ? \`<div class="kv"><span>Destinato al fondo nel mese consultato</span><strong>\${money(p.fundCents)}</strong></div>\${p.fromGeneralSavingsCents > 0 ? \`<div class="kv"><span>Pagato dagli altri risparmi</span><strong>\${money(p.fromGeneralSavingsCents)}</strong></div>\` : ""}\` : ""}\${p.kind === "goal" ? \`<div class="kv"><span>Obiettivo</span><strong>\${money(p.amountCents)}</strong></div><div class="kv"><span>Residuo</span><strong>\${money(p.outstandingCents)}</strong></div>\` : ""}\${payable && !paid ? \`<button data-plans-pay="\${safe(p.id)}">\${p.kind === "goal" ? "Paga dai risparmi e chiudi il piano" : "Registra un pagamento"}</button>\` : paid ? "<p>Pagamento registrato</p>" : ""}</section><section class="card pad"><h2>Pagamenti</h2>\${payments.map((p2) => \`<div class="kv"><span>\${safe(p2.date || "")}<small>\${p2.status === "posted" ? "Pagato \\xB7 movimento collegato" : "Da completare \\xB7 non registrare una nuova spesa"}</small></span><strong>\${money(p2.amountCents)}</strong></div>\${p2.status === "pending" ? \`<button data-plans-resume="\${safe(p2.id)}">Completa questa registrazione</button>\` : ""}\`).join("") || '<p class="empty">Nessun pagamento registrato</p>'}</section>\${p.status === "active" ? \`<section class="card pad">\${!["advance", "recovery"].includes(p.kind) ? \`<button data-plans-edit="\${safe(p.id)}">Modifica le quote future</button>\` : ""}<button class="danger" data-plans-stop="\${safe(p.id)}">\${p.kind === "advance" ? "Annulla l\\u2019intero anticipo" : "Interrompi le quote future"}</button></section>\` : ""}</div>\`;
+      return \`<div class="plans-web"><button data-plans-back>\\u2039 Piani</button><section class="card pad"><h2>\${safe(p.name)}</h2><p>\${safe(kinds2[p.kind])} \\xB7 \${safe(statuses[p.status] || p.status)}</p><p class="hint">\${safe(p.startMonth)}\${p.endMonth ? " \\u2192 " + safe(p.endMonth) : " \\xB7 Senza scadenza"}</p><div class="kv"><span>Categoria della spesa</span><strong>\${safe(p.category || "Altro")}</strong></div><div class="kv"><span>Budget di \${safe(shortMonth(v.month))}</span><strong>\${money(-p.contributionCents)}</strong></div>\${p.kind === "advance" ? \`<div class="kv"><span>Mese beneficiario</span><strong>\${safe(shortMonth(p.beneficiaryMonth))}</strong></div>\` : p.kind !== "recovery" ? \`<div class="kv"><span>Destinato al fondo nel mese consultato</span><strong>\${money(p.fundCents)}</strong></div>\${p.fromGeneralSavingsCents > 0 ? \`<div class="kv"><span>Pagato dagli altri risparmi</span><strong>\${money(p.fromGeneralSavingsCents)}</strong></div>\` : ""}\` : ""}\${p.kind === "goal" ? \`<div class="kv"><span>Obiettivo</span><strong>\${money(p.amountCents)}</strong></div><div class="kv"><span>Residuo</span><strong>\${money(p.outstandingCents)}</strong></div>\` : ""}\${payable && !paid ? \`<button data-plans-pay="\${safe(p.id)}">\${p.kind === "goal" ? "Paga dai risparmi e chiudi il piano" : "Registra un pagamento"}</button>\` : paid ? "<p>Pagamento registrato</p>" : ""}</section><section class="card pad"><h2>Pagamenti</h2>\${payments.map((p2) => \`<div class="kv"><span>\${safe(p2.date || "")}<small>\${p2.status === "posted" ? "Pagato \\xB7 movimento collegato" : p2.status === "deleting" ? "Eliminazione da completare" : "Da completare \\xB7 non registrare una nuova spesa"}</small></span><strong>\${money(p2.amountCents)}</strong></div>\${["posted", "deleting"].includes(p2.status) ? \`<button data-plans-payment="\${safe(p2.id)}">\${p2.status === "deleting" ? "Completa eliminazione" : "Gestisci pagamento"}</button>\` : ""}\${p2.status === "pending" ? \`<button data-plans-resume="\${safe(p2.id)}">Completa questa registrazione</button>\` : ""}\`).join("") || '<p class="empty">Nessun pagamento registrato</p>'}</section>\${p.status === "active" ? \`<section class="card pad">\${!["advance", "recovery"].includes(p.kind) ? \`<button data-plans-edit="\${safe(p.id)}">Modifica le quote future</button>\` : ""}<button class="danger" data-plans-stop="\${safe(p.id)}">\${p.kind === "advance" ? "Annulla l\\u2019intero anticipo" : "Interrompi le quote future"}</button></section>\` : ""}</div>\`;
     }
     function modal(title, body, method, makePayload) {
       const host = document.getElementById("dialog");
@@ -4683,6 +4605,19 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
       date.addEventListener("change", refresh);
       await refresh();
     }
+    function paymentDetail(id) {
+      const p = view()?.payments.find((p2) => p2.id === id);
+      if (!p) return;
+      const removing = p.status === "deleting";
+      const form = modal("Pagamento del piano", \`<div class="full"><p>\${safe(p.date)} \\xB7 \${money(p.amountCents)}</p><p>Elimina il pagamento e il movimento collegato. Il saldo verr\\xE0 aggiornato. Un piano interrotto resta interrotto; un obiettivo chiuso torna aperto.</p></div>\`, removing ? "resumeFinancePlanPayment" : "deleteFinancePlanPayment", () => ({ paymentId: id, ...removing ? {} : { planId: p.planId } }));
+      form.querySelector("[type=submit]").textContent = removing ? "Completa eliminazione" : "Elimina pagamento";
+    }
+    globalThis.openPlanPayment = (planId, paymentId) => {
+      activePlan = planId;
+      closeDialog();
+      setView("extras");
+      paymentDetail(paymentId);
+    };
     function pay(id) {
       const p = plan(id);
       if (!p) return;
@@ -4719,7 +4654,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
       host.querySelector("button").focus();
     }
     document.addEventListener("click", (e) => {
-      const b = e.target.closest("[data-new-extra],[data-plans-pay],[data-plans-edit],[data-plans-stop],[data-plans-close],[data-plans-refresh],[data-plans-resume],[data-plans-info],[data-plans-detail],[data-plans-back],[data-plans-legacy]");
+      const b = e.target.closest("[data-plans-payment],[data-new-extra],[data-plans-pay],[data-plans-edit],[data-plans-stop],[data-plans-close],[data-plans-refresh],[data-plans-resume],[data-plans-info],[data-plans-detail],[data-plans-back],[data-plans-legacy]");
       if (!b) return;
       e.preventDefault();
       e.stopImmediatePropagation();
@@ -4738,6 +4673,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         openExtra();
       }
       if (b.hasAttribute("data-plans-close")) document.getElementById("dialog").classList.add("hidden");
+      if (b.hasAttribute("data-plans-payment")) paymentDetail(b.dataset.plansPayment);
       if (b.hasAttribute("data-plans-pay")) pay(b.dataset.plansPay);
       if (b.hasAttribute("data-plans-edit")) edit(b.dataset.plansEdit);
       if (b.hasAttribute("data-plans-stop")) {
@@ -5039,7 +4975,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
           account: "Trade Republic",
           amount: -12.34,
           category: "Alimentari",
-          date: "2026-10-18",
+          date: "2026-10-21",
           name: "Spesa alimentare",
           row: 2,
           type: "Spesa"
@@ -5048,7 +4984,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
           account: "Trade Republic",
           amount: 1800,
           category: "Stipendio",
-          date: "2026-10-17",
+          date: "2026-10-20",
           name: "Stipendio demo",
           row: 3,
           type: "Entrata"
@@ -5156,7 +5092,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
       ],
       events: [
         {
-          day: "2026-10-19",
+          day: "2026-10-22",
           end_time: "19:00",
           frequency: "weekly",
           id: 1,
@@ -5184,11 +5120,11 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
       ],
       shifts: [
         {
-          day: "2026-10-18",
+          day: "2026-10-21",
           kind: "morning"
         },
         {
-          day: "2026-10-19",
+          day: "2026-10-22",
           kind: "rest"
         }
       ],
@@ -5218,7 +5154,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
           title: "Finire il libro"
         }
       ],
-      today: "2026-10-18"
+      today: "2026-10-21"
     },
     pending: [],
     plan: {
@@ -5240,8 +5176,8 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
       ],
       links: []
     },
-    refreshedAt: 8139756694119892e-7,
-    routineDay: "2026-10-18"
+    refreshedAt: 8142811632316678e-7,
+    routineDay: "2026-10-21"
   };
 
   // backend/plans/engine.mjs
@@ -5382,6 +5318,13 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         if (plan.status !== "active") fail("Il piano non \\xE8 attivo.");
         reservePayment(next, plan, input, today, key);
         result = { planId: plan.id, paymentId: key };
+      } else if (action === "deletePayment") {
+        const payment = next.payments[input.paymentId];
+        if (!payment || payment.planId !== plan.id) fail("Pagamento non trovato.");
+        if (!["posted", "deleting", "deleted"].includes(payment.status)) fail("Completa l\\u2019operazione in sospeso prima di eliminare il pagamento.");
+        if (Object.values(next.payments).some((p) => p.id !== payment.id && p.status !== "deleted" && p.movementId === payment.movementId)) fail("Il movimento \\xE8 condiviso con un altro pagamento.");
+        if (payment.status !== "deleted") payment.status = "deleting";
+        result = { planId: plan.id, paymentId: payment.id };
       } else if (action === "edit") {
         if (plan.status !== "active" || ["advance", "recovery"].includes(plan.kind)) fail("Questo piano non \\xE8 modificabile.");
         const amount = plan.kind === "goal" ? cents(input.amountCents) : input.amountCents, first = month(input.fromMonth ?? addMonth(today.slice(0, 7), 1));
@@ -5406,7 +5349,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         result = { planId: plan.id };
       } else if (action === "stop") {
         if (plan.status !== "active") fail("Il piano non \\xE8 attivo.");
-        if (Object.values(next.payments).some((p) => p.planId === plan.id && p.status === "pending")) fail("Completa il pagamento in sospeso prima di interrompere.");
+        if (Object.values(next.payments).some((p) => p.planId === plan.id && ["pending", "deleting"].includes(p.status))) fail("Completa il pagamento in sospeso prima di interrompere.");
         if (plan.kind === "advance") {
           if (plan.beneficiaryMonth < today.slice(0, 7)) fail("L\\u2019anticipo ha gi\\xE0 inciso su un mese chiuso: non puoi cancellarne solo il recupero.");
           plan.status = "cancelled";
@@ -5430,7 +5373,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
     const existingMovementId = input.movementId === void 0 ? null : Number(input.movementId);
     if (existingMovementId !== null && (!Number.isSafeInteger(existingMovementId) || existingMovementId < 2)) fail("Movimento non valido.");
     if (existingMovementId && Object.values(state2.payments).some((p) => p.movementId === existingMovementId || p.existingMovementId === existingMovementId)) fail("Questo movimento \\xE8 gi\\xE0 collegato a un piano.");
-    if (Object.values(state2.payments).some((p) => p.planId === plan.id && p.settlementKey === settlement)) fail("Pagamento gi\\xE0 registrato o in completamento.");
+    if (Object.values(state2.payments).some((p) => p.planId === plan.id && p.status !== "deleted" && p.settlementKey === settlement)) fail("Pagamento gi\\xE0 registrato o in completamento.");
     let recovery = null;
     if (input.recoverDifference) {
       if (plan.kind !== "goal" || amount + Object.values(state2.payments).filter((p) => p.planId === plan.id && p.status === "posted").reduce((n, p) => n + p.amountCents, 0) <= plan.amountCents) fail("Il recupero riguarda soltanto l\\u2019eccedenza di un obiettivo finito.");
@@ -5462,7 +5405,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
   function completePayment(state2, id, movementId, today) {
     const next = structuredClone(state2), payment = next.payments[id];
     if (!payment) fail("Pagamento non trovato.");
-    if (payment.status === "posted") return next;
+    if (["posted", "deleting", "deleted"].includes(payment.status)) return next;
     if (!Number.isSafeInteger(movementId) || movementId <= 0) fail("Il movimento bancario non \\xE8 stato confermato.");
     const plan = next.plans[payment.planId];
     payment.status = "posted";
@@ -5488,10 +5431,34 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
     const anchor = plan.intervalAnchor ?? plan.startMonth, delta = (Number(cycle.slice(0, 4)) - Number(anchor.slice(0, 4))) * 12 + Number(cycle.slice(-2)) - Number(anchor.slice(-2));
     return addMonth(anchor, Math.floor(delta / plan.intervalMonths) * plan.intervalMonths);
   }
+  function completePaymentDeletion(state2, id, today) {
+    const next = structuredClone(state2), payment = next.payments[id];
+    if (!payment) fail("Pagamento non trovato.");
+    if (payment.status === "deleted") return next;
+    if (payment.status !== "deleting") fail("Eliminazione non avviata.");
+    payment.status = "deleted";
+    payment.deletedDay = today;
+    const plan = next.plans[payment.planId];
+    if (plan.kind === "goal" && plan.status === "closed") {
+      plan.status = "active";
+      plan.closedMonth = null;
+    }
+    if (plan.kind === "recovery") plan.status = "cancelled";
+    for (const linked of Object.values(next.plans)) if (linked.sourcePaymentId === id) linked.status = "cancelled";
+    if (plan.kind === "estimated") {
+      const history = Object.values(next.payments).filter((p) => p.planId === plan.id && p.status === "posted").sort((a, b) => a.date.localeCompare(b.date)).slice(-12);
+      const rate = history.length ? Math.max(1, Math.round(history.reduce((n, p) => n + p.amountCents, 0) / history.reduce((n, p) => n + p.competenceMonths, 0))) : plan.amountCents;
+      const fromMonth = addMonth(today.slice(0, 7), 1);
+      plan.rateChanges = (plan.rateChanges ?? []).filter((c) => c.fromMonth !== fromMonth);
+      plan.rateChanges.push({ fromMonth, amountCents: rate });
+      plan.rateChanges.sort((a, b) => a.fromMonth.localeCompare(b.fromMonth));
+    }
+    return next;
+  }
   function balance(state2, plan, throughMonth) {
     const last = throughMonth < plan.startMonth ? null : throughMonth;
     const saved = (throughMonth >= plan.startMonth ? Number(plan.openingBalanceCents ?? 0) : 0) + (last ? months(plan.startMonth, last, 1200).reduce((n, m) => n + Math.max(0, contribution(plan, m)), 0) : 0);
-    const spent = Object.values(state2.payments).filter((p) => p.planId === plan.id && p.status === "posted" && p.date.slice(0, 7) <= throughMonth && p.date.slice(0, 7) >= plan.startMonth).reduce((n, p) => n + p.amountCents, 0);
+    const spent = Object.values(state2.payments).filter((p) => p.planId === plan.id && ["posted", "deleting"].includes(p.status) && p.date.slice(0, 7) <= throughMonth && p.date.slice(0, 7) >= plan.startMonth).reduce((n, p) => n + p.amountCents, 0);
     return { contributedCents: saved, paidCents: spent, fundCents: plan.status === "active" && !["advance", "recovery"].includes(plan.kind) ? Math.max(0, saved - spent) : 0, fromGeneralSavingsCents: Math.max(0, spent - saved) };
   }
   function project(state2, selectedMonth) {
@@ -5500,8 +5467,8 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
       version: 2,
       month: selectedMonth,
       adjustmentCents: adjustment(state2.plans, selectedMonth),
-      plans: Object.values(state2.plans).map((p) => ({ ...p, outstandingCents: Math.max(0, p.amountCents - Object.values(state2.payments).filter((x) => x.planId === p.id && x.status === "posted").reduce((n, x) => n + x.amountCents, 0)), contributionCents: contribution(p, selectedMonth), ...balance(state2, p, selectedMonth) })),
-      payments: Object.values(state2.payments).map(({ recovery, ...p }) => p)
+      plans: Object.values(state2.plans).map((p) => ({ ...p, outstandingCents: Math.max(0, p.amountCents - Object.values(state2.payments).filter((x) => x.planId === p.id && ["posted", "deleting"].includes(x.status)).reduce((n, x) => n + x.amountCents, 0)), contributionCents: contribution(p, selectedMonth), ...balance(state2, p, selectedMonth) })),
+      payments: Object.values(state2.payments).filter((p) => p.status !== "deleted").map(({ recovery, ...p }) => p)
     };
   }
 
@@ -5528,7 +5495,12 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
     async finish(paymentId) {
       const { state: state2 } = await this.repository.read(), p = state2.payments[paymentId];
       if (!p) throw new PlanError("Pagamento non trovato.", 404);
-      if (p.status === "posted") return;
+      if (["posted", "deleted"].includes(p.status)) return;
+      if (p.status === "deleting") {
+        await this.cash.remove(p);
+        await this.change((current) => ({ state: completePaymentDeletion(current, paymentId, this.today), result: {} }));
+        return;
+      }
       const plan = state2.plans[p.planId];
       const movementId = await this.cash.record({
         requestId: p.requestId,
@@ -9228,6 +9200,18 @@ async function classifyMovement(env, id, category) {
   ).bind(category, id).run();
   return true;
 }
+async function getFinanceCategoryPeriod(env, last, count) {
+  if (typeof last !== "string" || !/^20\d\d-(0[1-9]|1[0-2])$/.test(last) || ![3, 6, 12].includes(count)) throw Error("Periodo categorie non valido.");
+  const [year, number] = last.split("-").map(Number), first = new Date(Date.UTC(year, number - count, 1)).toISOString().slice(0, 7);
+  await ensureFinanceCategories(env);
+  const result = await env.DB.prepare(`SELECT substr(m.actual_date,1,7) month,COALESCE(c.detail_category,NULLIF(m.category,''),'Altro') name,SUM(CAST(ROUND(-m.amount*100) AS INTEGER)) cents
+    FROM movements m LEFT JOIN movement_financial_categories c ON c.movement_source_row=m.source_row
+    WHERE m.account IN ('Trade Republic','Revolut') AND m.status='Eseguito' AND m.movement_type='Spesa' AND m.amount<0
+      AND m.actual_date>=? AND m.actual_date<?
+    GROUP BY substr(m.actual_date,1,7),COALESCE(c.detail_category,NULLIF(m.category,''),'Altro')`).bind(first + "-01", new Date(Date.UTC(year, number, 1)).toISOString().slice(0, 10)).all();
+  const months2 = Array.from({ length: count }, (_, i) => new Date(Date.UTC(year, number - count + i, 1)).toISOString().slice(0, 7));
+  return { version: 1, months: months2.map((month2) => ({ month: month2, categories: result.results.filter((r) => r.month === month2).map((r) => ({ name: r.name, amount: Number(r.cents) / 100 })) })) };
+}
 async function writeAction(env, method, args) {
   if ([
     "getLifeData",
@@ -9251,6 +9235,8 @@ async function writeAction(env, method, args) {
   ].includes(method))
     return lifeAction(env, method, args);
   switch (method) {
+    case "getFinanceCategoryPeriod":
+      return getFinanceCategoryPeriod(env, args[0], args[1]);
     case "getFinanceCategoryOptions":
       await ensureFinanceCategories(env);
       return [...FINANCE_MANUAL_CATEGORIES];
@@ -9658,6 +9644,13 @@ function command(state, action, input, today) {
       if (plan.status !== "active") fail2("Il piano non \xE8 attivo.");
       reservePayment(next, plan, input, today, key);
       result = { planId: plan.id, paymentId: key };
+    } else if (action === "deletePayment") {
+      const payment = next.payments[input.paymentId];
+      if (!payment || payment.planId !== plan.id) fail2("Pagamento non trovato.");
+      if (!["posted", "deleting", "deleted"].includes(payment.status)) fail2("Completa l\u2019operazione in sospeso prima di eliminare il pagamento.");
+      if (Object.values(next.payments).some((p) => p.id !== payment.id && p.status !== "deleted" && p.movementId === payment.movementId)) fail2("Il movimento \xE8 condiviso con un altro pagamento.");
+      if (payment.status !== "deleted") payment.status = "deleting";
+      result = { planId: plan.id, paymentId: payment.id };
     } else if (action === "edit") {
       if (plan.status !== "active" || ["advance", "recovery"].includes(plan.kind)) fail2("Questo piano non \xE8 modificabile.");
       const amount = plan.kind === "goal" ? cents(input.amountCents) : input.amountCents, first = month(input.fromMonth ?? addMonth(today.slice(0, 7), 1));
@@ -9682,7 +9675,7 @@ function command(state, action, input, today) {
       result = { planId: plan.id };
     } else if (action === "stop") {
       if (plan.status !== "active") fail2("Il piano non \xE8 attivo.");
-      if (Object.values(next.payments).some((p) => p.planId === plan.id && p.status === "pending")) fail2("Completa il pagamento in sospeso prima di interrompere.");
+      if (Object.values(next.payments).some((p) => p.planId === plan.id && ["pending", "deleting"].includes(p.status))) fail2("Completa il pagamento in sospeso prima di interrompere.");
       if (plan.kind === "advance") {
         if (plan.beneficiaryMonth < today.slice(0, 7)) fail2("L\u2019anticipo ha gi\xE0 inciso su un mese chiuso: non puoi cancellarne solo il recupero.");
         plan.status = "cancelled";
@@ -9706,7 +9699,7 @@ function reservePayment(state, plan, input, today, id) {
   const existingMovementId = input.movementId === void 0 ? null : Number(input.movementId);
   if (existingMovementId !== null && (!Number.isSafeInteger(existingMovementId) || existingMovementId < 2)) fail2("Movimento non valido.");
   if (existingMovementId && Object.values(state.payments).some((p) => p.movementId === existingMovementId || p.existingMovementId === existingMovementId)) fail2("Questo movimento \xE8 gi\xE0 collegato a un piano.");
-  if (Object.values(state.payments).some((p) => p.planId === plan.id && p.settlementKey === settlement)) fail2("Pagamento gi\xE0 registrato o in completamento.");
+  if (Object.values(state.payments).some((p) => p.planId === plan.id && p.status !== "deleted" && p.settlementKey === settlement)) fail2("Pagamento gi\xE0 registrato o in completamento.");
   let recovery = null;
   if (input.recoverDifference) {
     if (plan.kind !== "goal" || amount + Object.values(state.payments).filter((p) => p.planId === plan.id && p.status === "posted").reduce((n, p) => n + p.amountCents, 0) <= plan.amountCents) fail2("Il recupero riguarda soltanto l\u2019eccedenza di un obiettivo finito.");
@@ -9738,7 +9731,7 @@ function reservePayment(state, plan, input, today, id) {
 function completePayment(state, id, movementId, today) {
   const next = structuredClone(state), payment = next.payments[id];
   if (!payment) fail2("Pagamento non trovato.");
-  if (payment.status === "posted") return next;
+  if (["posted", "deleting", "deleted"].includes(payment.status)) return next;
   if (!Number.isSafeInteger(movementId) || movementId <= 0) fail2("Il movimento bancario non \xE8 stato confermato.");
   const plan = next.plans[payment.planId];
   payment.status = "posted";
@@ -9764,10 +9757,34 @@ function cycleKey(plan, cycle) {
   const anchor = plan.intervalAnchor ?? plan.startMonth, delta = (Number(cycle.slice(0, 4)) - Number(anchor.slice(0, 4))) * 12 + Number(cycle.slice(-2)) - Number(anchor.slice(-2));
   return addMonth(anchor, Math.floor(delta / plan.intervalMonths) * plan.intervalMonths);
 }
+function completePaymentDeletion(state, id, today) {
+  const next = structuredClone(state), payment = next.payments[id];
+  if (!payment) fail2("Pagamento non trovato.");
+  if (payment.status === "deleted") return next;
+  if (payment.status !== "deleting") fail2("Eliminazione non avviata.");
+  payment.status = "deleted";
+  payment.deletedDay = today;
+  const plan = next.plans[payment.planId];
+  if (plan.kind === "goal" && plan.status === "closed") {
+    plan.status = "active";
+    plan.closedMonth = null;
+  }
+  if (plan.kind === "recovery") plan.status = "cancelled";
+  for (const linked of Object.values(next.plans)) if (linked.sourcePaymentId === id) linked.status = "cancelled";
+  if (plan.kind === "estimated") {
+    const history = Object.values(next.payments).filter((p) => p.planId === plan.id && p.status === "posted").sort((a, b) => a.date.localeCompare(b.date)).slice(-12);
+    const rate = history.length ? Math.max(1, Math.round(history.reduce((n, p) => n + p.amountCents, 0) / history.reduce((n, p) => n + p.competenceMonths, 0))) : plan.amountCents;
+    const fromMonth = addMonth(today.slice(0, 7), 1);
+    plan.rateChanges = (plan.rateChanges ?? []).filter((c) => c.fromMonth !== fromMonth);
+    plan.rateChanges.push({ fromMonth, amountCents: rate });
+    plan.rateChanges.sort((a, b) => a.fromMonth.localeCompare(b.fromMonth));
+  }
+  return next;
+}
 function balance(state, plan, throughMonth) {
   const last = throughMonth < plan.startMonth ? null : throughMonth;
   const saved = (throughMonth >= plan.startMonth ? Number(plan.openingBalanceCents ?? 0) : 0) + (last ? months(plan.startMonth, last, 1200).reduce((n, m) => n + Math.max(0, contribution(plan, m)), 0) : 0);
-  const spent = Object.values(state.payments).filter((p) => p.planId === plan.id && p.status === "posted" && p.date.slice(0, 7) <= throughMonth && p.date.slice(0, 7) >= plan.startMonth).reduce((n, p) => n + p.amountCents, 0);
+  const spent = Object.values(state.payments).filter((p) => p.planId === plan.id && ["posted", "deleting"].includes(p.status) && p.date.slice(0, 7) <= throughMonth && p.date.slice(0, 7) >= plan.startMonth).reduce((n, p) => n + p.amountCents, 0);
   return { contributedCents: saved, paidCents: spent, fundCents: plan.status === "active" && !["advance", "recovery"].includes(plan.kind) ? Math.max(0, saved - spent) : 0, fromGeneralSavingsCents: Math.max(0, spent - saved) };
 }
 function project(state, selectedMonth) {
@@ -9776,8 +9793,8 @@ function project(state, selectedMonth) {
     version: 2,
     month: selectedMonth,
     adjustmentCents: adjustment(state.plans, selectedMonth),
-    plans: Object.values(state.plans).map((p) => ({ ...p, outstandingCents: Math.max(0, p.amountCents - Object.values(state.payments).filter((x) => x.planId === p.id && x.status === "posted").reduce((n, x) => n + x.amountCents, 0)), contributionCents: contribution(p, selectedMonth), ...balance(state, p, selectedMonth) })),
-    payments: Object.values(state.payments).map(({ recovery, ...p }) => p)
+    plans: Object.values(state.plans).map((p) => ({ ...p, outstandingCents: Math.max(0, p.amountCents - Object.values(state.payments).filter((x) => x.planId === p.id && ["posted", "deleting"].includes(x.status)).reduce((n, x) => n + x.amountCents, 0)), contributionCents: contribution(p, selectedMonth), ...balance(state, p, selectedMonth) })),
+    payments: Object.values(state.payments).filter((p) => p.status !== "deleted").map(({ recovery, ...p }) => p)
   };
 }
 
@@ -9974,7 +9991,12 @@ var PlanService = class {
   async finish(paymentId) {
     const { state } = await this.repository.read(), p = state.payments[paymentId];
     if (!p) throw new PlanError("Pagamento non trovato.", 404);
-    if (p.status === "posted") return;
+    if (["posted", "deleted"].includes(p.status)) return;
+    if (p.status === "deleting") {
+      await this.cash.remove(p);
+      await this.change((current) => ({ state: completePaymentDeletion(current, paymentId, this.today), result: {} }));
+      return;
+    }
     const plan = state.plans[p.planId];
     const movementId = await this.cash.record({
       requestId: p.requestId,
@@ -9995,7 +10017,7 @@ var PlanService = class {
 };
 
 // backend/plans/worker-adapter.mjs
-var METHODS = { saveFinancePlan: "create", recordFinancePlanPayment: "pay", stopFinancePlan: "stop", editFinancePlan: "edit" };
+var METHODS = { saveFinancePlan: "create", recordFinancePlanPayment: "pay", stopFinancePlan: "stop", editFinancePlan: "edit", deleteFinancePlanPayment: "deletePayment" };
 var readMethods = /* @__PURE__ */ new Set(["getFinanceOverview", "getFinanceData"]);
 var protectedCash = /* @__PURE__ */ new Set(["editMovement", "deleteMovement"]);
 var quickWrites = /* @__PURE__ */ new Set(["saveTransaction", "saveRecurringPayment", "saveEstimate"]);
@@ -10042,7 +10064,7 @@ function augmentFinance(base, view, currentView, currentBase = base) {
 function withFinancePlans(base, { repositoryFactory = (env) => new D1PlanRepository(env.DB), clock = romeToday, cashFactory = null, recordTransaction = null } = {}) {
   return { async fetch(request, env, ctx) {
     const url = new URL(request.url), method = url.pathname.startsWith("/api/") ? url.pathname.slice(5) : "";
-    if (!METHODS[method] && method !== "getFinancePlans" && method !== "resumeFinancePlanPayment" && !readMethods.has(method) && !protectedCash.has(method) && !legacyWrites.has(method) && method !== "getFinancePlanMovements" && !quickWrites.has(method)) return base.fetch(request, env, ctx);
+    if (!METHODS[method] && method !== "getMovement" && method !== "getFinancePlans" && method !== "resumeFinancePlanPayment" && !readMethods.has(method) && !protectedCash.has(method) && !legacyWrites.has(method) && method !== "getFinancePlanMovements" && !quickWrites.has(method)) return base.fetch(request, env, ctx);
     if (request.method !== "POST") return json({ error: "Metodo non consentito." }, 405);
     if (request.headers.get("Origin") !== url.origin) return json({ error: "Origine non consentita." }, 403);
     try {
@@ -10069,7 +10091,16 @@ function withFinancePlans(base, { repositoryFactory = (env) => new D1PlanReposit
         if (!response2.ok) throw new PlanError("Budget corrente non disponibile.", 503);
         currentBase = await response2.json();
       }
-      const cash = cashFactory ? cashFactory({ forward }) : { async record(p) {
+      const cash = cashFactory ? cashFactory({ forward }) : { async remove(p) {
+        const row = await env.DB.prepare("SELECT amount,account,movement_type,status FROM movements WHERE source_row=?").bind(p.movementId).first();
+        if (!row) return;
+        if (row.movement_type !== "Spesa" || row.status !== "Eseguito" || Math.round(-Number(row.amount) * 100) !== p.amountCents)
+          throw new PlanError("Importo del movimento e pagamento non coincidono. Nessun movimento \xE8 stato eliminato.", 409);
+        const response2 = await forward("deleteMovement", [p.movementId]);
+        if (!response2.ok) throw new PlanError("Eliminazione non confermata. Riprova da questo pagamento senza registrare una nuova spesa.", 503);
+        const remaining = await env.DB.prepare("SELECT source_row FROM movements WHERE source_row=?").bind(p.movementId).first();
+        if (remaining) throw new PlanError("Il movimento risulta ancora presente. Riprova l\u2019eliminazione.", 503);
+      }, async record(p) {
         if (p.existingMovementId) {
           const row = await existingMovement(env.DB, p, current);
           await env.DB.prepare("INSERT INTO movement_budget_policies(movement_source_row,treatment,recovery_json) VALUES (?,'savings','[]') ON CONFLICT(movement_source_row) DO UPDATE SET treatment='savings',recovery_json='[]'").bind(row.source_row).run();
@@ -10109,7 +10140,24 @@ function withFinancePlans(base, { repositoryFactory = (env) => new D1PlanReposit
         const context = await readLegacyContext(env.DB, currentBase);
         await service.change((state) => ({ state: adoptLegacy(state, context, today), result: {} }));
       }
+      if (method === "getMovement") {
+        const response2 = await forward(method, args);
+        if (!response2.ok) return response2;
+        const row = await response2.json(), { state } = await repository.read();
+        const payment = Object.values(state.payments).find((p) => p.status !== "deleted" && (p.movementId === Number(args[0]) || p.existingMovementId === Number(args[0])));
+        return json(payment ? { ...row, financePlanId: payment.planId, financePlanPaymentId: payment.id } : row);
+      }
       if (quickWrites.has(method)) {
+        if (method === "saveTransaction" && args[0]?.type === "Spesa") {
+          const input = args[0], mode = input.budgetTreatment ?? "auto";
+          if (mode !== "savings") {
+            if (!["auto", "ordinary"].includes(mode) || Number(input.months ?? 1) !== 1)
+              throw new PlanError("Per ripartire una spesa o registrare un pagamento pianificato usa Piani.");
+            args[0] = { ...input, months: 1, budgetTreatment: "ordinary" };
+          }
+          if (recordTransaction) return json(await recordTransaction(env, args[0]));
+          return forward(method, args);
+        }
         const { state } = await repository.read();
         if (method === "saveEstimate") {
           const plan = Object.values(state.plans).find((p) => p.legacy?.type === "recurring" && p.name === args[0]);
@@ -10117,19 +10165,14 @@ function withFinancePlans(base, { repositoryFactory = (env) => new D1PlanReposit
             await service.execute("edit", { requestId: crypto.randomUUID(), planId: plan.id, amountCents: Math.round(Number(args[1]) * 100), fromMonth: addMonth(current, 1) });
             return json(true);
           }
-        } else {
-          const input = args[0] ?? {}, category = method === "saveRecurringPayment" ? input.name : input.category;
-          const automatic = method === "saveRecurringPayment" || input.type === "Spesa" && (!input.budgetTreatment || input.budgetTreatment === "auto");
-          if (automatic) {
-            const candidates = Object.values(state.plans).filter((p) => ["fixed", "estimated"].includes(p.kind) && p.category === category && p.status === "active" && p.startMonth <= String(input.date).slice(0, 7));
-            if (candidates.length === 1) {
-              const value = Number(input.amount), cents2 = Math.round(value * 100);
-              if (!Number.isFinite(value) || Math.abs(value - cents2 / 100) > 1e-8 || input.account && input.account !== "Trade Republic") throw new PlanError("Importo o conto non valido.");
-              await service.execute("pay", { requestId: input.requestId ?? crypto.randomUUID(), planId: candidates[0].id, amountCents: cents2, date: input.date, cycleMonth: String(input.date).slice(0, 7), competenceMonths: input.months ?? 1, originalName: input.name });
-              return json(true);
-            }
-            const old = Object.values(state.plans).find((p) => p.legacy?.type === "recurring" && p.category === category);
-            if (old && old.stopAfter && String(input.date).slice(0, 7) > old.stopAfter && method === "saveTransaction") return forward(method, [{ ...input, budgetTreatment: "ordinary" }]);
+        } else if (method === "saveRecurringPayment") {
+          const input = args[0] ?? {}, category = input.name;
+          const candidates = Object.values(state.plans).filter((p) => ["fixed", "estimated"].includes(p.kind) && p.category === category && p.status === "active" && p.startMonth <= String(input.date).slice(0, 7));
+          if (candidates.length === 1) {
+            const value = Number(input.amount), cents2 = Math.round(value * 100);
+            if (!Number.isFinite(value) || Math.abs(value - cents2 / 100) > 1e-8 || input.account && input.account !== "Trade Republic") throw new PlanError("Importo o conto non valido.");
+            await service.execute("pay", { requestId: input.requestId ?? crypto.randomUUID(), planId: candidates[0].id, amountCents: cents2, date: input.date, cycleMonth: String(input.date).slice(0, 7), competenceMonths: input.months ?? 1, originalName: input.name });
+            return json(true);
           }
         }
         if (recordTransaction && method === "saveTransaction") return json(await recordTransaction(env, args[0]));
@@ -10167,6 +10210,14 @@ function withFinancePlans(base, { repositoryFactory = (env) => new D1PlanReposit
       if (method === "resumeFinancePlanPayment") {
         await service.finish(args[0]?.paymentId);
         return json({ ok: true });
+      }
+      if (method === "deleteFinancePlanPayment") {
+        const { state } = await repository.read(), p = state.payments[args[0]?.paymentId];
+        if (p?.status === "posted") {
+          const row = await env.DB.prepare("SELECT amount,movement_type,status FROM movements WHERE source_row=?").bind(p.movementId).first();
+          if (row && (row.movement_type !== "Spesa" || row.status !== "Eseguito" || Math.round(-Number(row.amount) * 100) !== p.amountCents))
+            throw new PlanError("Importo del movimento e pagamento non coincidono. Nessun movimento \xE8 stato eliminato.", 409);
+        }
       }
       if (METHODS[method] && args[0]?.movementId) await existingMovement(env.DB, { existingMovementId: Number(args[0].movementId), amountCents: args[0].amountCents, date: args[0].date ?? args[0].paymentDate }, current);
       if (METHODS[method]) {

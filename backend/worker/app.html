@@ -266,6 +266,8 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
             const raw = (await r.text()).slice(0, 500);
             let message = raw;
             try { message = JSON.parse(raw).error || raw; } catch {}
+            if(r.headers.get('content-type')?.includes('text/html')||/<(?:!doctype|html|head|body)\b/i.test(raw))
+              message=[429,500,502,503,504].includes(r.status)?'Il server è momentaneamente occupato. Riprova tra poco.':'Il server non ha restituito dati validi. Verifica l’accesso e riprova.';
             if (method.includes("FinancePlan") && (r.status === 404 || message.trim() === "Operazione non disponibile.")) message = lifeOSContract.plansUnavailable;
             throw Error(r.status === 401 ? "Sessione scaduta. Riapri l’app e accedi." : message);
           }
@@ -2238,7 +2240,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         );
       }
       document.addEventListener("change", (e) => {
-        if(e.target.name === "category" && e.target.closest("#entry-form")){syncUtilityFields();syncCommitmentHint();}
+        if(e.target.name === "category" && e.target.closest("#entry-form")){syncUtilityFields();}
         const wrap = e.target.closest(".quick-classify");
         if (wrap && e.target.tagName === "SELECT")
           wrap.querySelector("button").disabled = !e.target.value;
@@ -2266,7 +2268,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         const choices = financialCategoryOptions(e.target.value), label = financeCategoryLabel(category.value);
         category.innerHTML = categoryOptionsHtml(choices);
         category.value = choices.includes(label) ? label : "Altro";
-        syncUtilityFields();syncCommitmentHint();
+        syncUtilityFields();
       });
 
       /** Controllo per classificare un movimento storico, senza modificarne importo o conto. */
@@ -2580,7 +2582,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
 
       /** Storico dettagliato in fondo a Budget, dopo grafici e impostazioni. */
       function billsHistory(d) {
-        return `<section class="card pad budget-history"><details data-budget-panel="budgetHistoryOpen" ${state.budgetHistoryOpen ? "open" : ""}><summary>Storico pagamenti · ${d.history.length}</summary><div class="budget-detail-content"><div class="card-title"><button class="save" data-new-recurring="1">+ Pagamento</button></div>${d.history.length ? '<div class="table-scroll"><table class="tabular"><thead><tr><th>Data</th><th>Voce</th><th>Pagato</th><th>Mesi</th><th>Nota</th></tr></thead><tbody>' + d.history.map((h) => "<tr><td>" + escapeHtml(h.date) + "</td><td>" + escapeHtml(h.name) + "</td><td>" + exactEuro(h.paid) + "</td><td>" + h.months + "</td><td>" + escapeHtml(String(h.note||"").replace(/ ?\[Categoria manuale\]/g,"")) + "</td></tr>").join("") + "</tbody></table></div>" : '<p class="empty">Nessun pagamento.</p>'}</div></details></section>`;
+        return `<section class="card pad budget-history"><details data-budget-panel="budgetHistoryOpen" ${state.budgetHistoryOpen ? "open" : ""}><summary>Storico pagamenti · ${d.history.length}</summary><div class="budget-detail-content"><div class="card-title"><button class="save" data-new-recurring="1">Vai a Piani</button></div>${d.history.length ? '<div class="table-scroll"><table class="tabular"><thead><tr><th>Data</th><th>Voce</th><th>Pagato</th><th>Mesi</th><th>Nota</th></tr></thead><tbody>' + d.history.map((h) => "<tr><td>" + escapeHtml(h.date) + "</td><td>" + escapeHtml(h.name) + "</td><td>" + exactEuro(h.paid) + "</td><td>" + h.months + "</td><td>" + escapeHtml(String(h.note||"").replace(/ ?\[Categoria manuale\]/g,"")) + "</td></tr>").join("") + "</tbody></table></div>" : '<p class="empty">Nessun pagamento.</p>'}</div></details></section>`;
       }
 
       /** Carte straordinarie: stato, Segna pagato, Modifica e Annulla/Elimina. */
@@ -2722,48 +2724,18 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
       function isUtilityCategory(category) {
         return ["Utenze","Elettricità","Gas","Acqua"].includes(category);
       }
-      function utilityFields(category="",months=1) {
-        const active=isUtilityCategory(category),direct=active && category!=="Utenze";
-        return `<div class="full form-grid ${active?"":"hidden"}" id="utility-fields"><label class="${direct?"hidden":""}">Tipo utenza *<select name="utilityKind" ${active && !direct?"required":"disabled"}><option value="">Scegli</option>${["Elettricità","Gas","Acqua"].map(x=>`<option ${category===x?"selected":""}>${x}</option>`).join("")}</select></label><label class="${direct?"full":""}">Mesi coperti *<input name="utilityMonths" type="number" min="1" max="12" step="1" value="${Number(months)||1}" ${active?"required":"disabled"}></label></div>`;
+      function utilityFields(category="") {
+        return `<label class="full ${category==="Utenze"?"":"hidden"}" id="utility-fields">Tipo utenza *<select name="utilityKind" ${category==="Utenze"?"required":"disabled"}><option value="">Scegli</option>${["Elettricità","Gas","Acqua"].map(x=>`<option>${x}</option>`).join("")}</select></label>`;
       }
       function syncUtilityFields() {
-        const f=document.getElementById("entry-form"),box=document.getElementById("utility-fields");if(!box)return;
-        const category=f.elements.category.value,active=f.elements.type.value==="Spesa" && isUtilityCategory(category);
-        box.classList.toggle("hidden",!active);box.querySelectorAll("select,input").forEach(x=>{x.disabled=!active;x.required=active;});
-        const direct=active && category!=="Utenze",kind=f.elements.utilityKind;
-        kind.disabled=!active || direct;kind.required=active && !direct;
-        kind.closest("label").classList.toggle("hidden",direct);
-        f.elements.utilityMonths.closest("label").classList.toggle("full",direct);
-        if(direct)kind.value=category;
+        const f=document.getElementById("entry-form"),box=document.getElementById("utility-fields");if(!f||!box)return;
+        const active=f.elements.type.value==="Spesa"&&f.elements.category.value==="Utenze";
+        box.classList.toggle("hidden",!active);f.elements.utilityKind.disabled=!active;f.elements.utilityKind.required=active;
       }
-      function commitmentHint(category="") {
-        const d=state.data || life.finance, r=d?.recurring?.find(x=>x.name===category && x.treatment==="Vincolata");
-        const estimate=category==="Affitto" ? d?.summary?.rent : r?.estimate;
-        const text=estimate===undefined ? (["Assicurazione","Bollo","Manutenzione auto","Dentista","Straordinarie"].includes(category)?"Automatico: questa spesa incide sui risparmi. Puoi scegliere un recupero nei mesi successivi.":"Automatico: questa categoria incide sul budget libero, salvo un trattamento diverso.") : `Previsti per ${category}: ${exactEuro(estimate)} al mese. La quota mensile è già sottratta dal budget. Il pagamento e le differenze incidono sul saldo, senza un secondo addebito al budget libero.`;
-        return `<p id="commitment-hint" class="hint full ${text?"":"hidden"}">${escapeHtml(text)}</p>`;
+      function movementPolicyMetadata(r) {
+        const fields={months:r.competence_months||1,budgetTreatment:r.budgetTreatment||"auto",recoveryMonths:r.recoveryMonths||"",recoveryAmount:r.recoveryAmount||""};
+        return Object.entries(fields).map(([name,value])=>`<input type="hidden" name="${name}" value="${escapeHtml(String(value))}">`).join("");
       }
-      function syncCommitmentHint() {
-        const f=document.getElementById("entry-form"),box=document.getElementById("commitment-hint");if(!f || !box)return;
-        box.outerHTML=commitmentHint(f.elements.type.value==="Spesa" ? f.elements.category.value : "");
-      }
-
-      function budgetPolicyFields(r={}) {
-        const mode=r.budgetTreatment || "auto";
-        return `<div id="budget-policy-fields" class="full form-grid"><label class="full">Trattamento budget<select name="budgetTreatment">${[["auto","Automatico"],["savings","Da risparmi"],...(!["auto","savings"].includes(mode)?[[mode,"Gestito dal piano esistente"]]:[])].map(([v,l])=>`<option value="${v}" ${v===mode?"selected":""}>${l}</option>`).join("")}</select></label><label class="full ${mode==="recovery"?"":"hidden"}" data-recovery-field>Mesi di recupero<input name="recoveryMonths" value="${escapeHtml(r.recoveryMonths||"")}" placeholder="2026-11, 2026-12, 2027-01" ${mode==="recovery"?"required":"disabled"}></label><label class="full ${mode==="recovery"?"":"hidden"}" data-recovery-field>Importo da recuperare € (vuoto = tutta la spesa)<input name="recoveryAmount" type="number" min="0.01" step="0.01" value="${r.recoveryAmount||""}" ${mode==="recovery"?"":"disabled"}></label><p class="hint full" id="recovery-preview"></p><p class="hint full">Il saldo registra sempre l’intera uscita. Il budget libero può diventare negativo. Per una spesa annuale usa Segna pagato nel suo piano; per un movimento già registrato usa Collega movimento.</p></div>`;
-      }
-      function syncBudgetPolicyFields(){
-        const f=document.getElementById("entry-form"),box=document.getElementById("budget-policy-fields");if(!box)return;
-        const expense=f.elements.type.value==="Spesa",recovery=expense && f.elements.budgetTreatment.value==="recovery";
-        box.classList.toggle("hidden",!expense);f.elements.budgetTreatment.disabled=!expense;
-        box.querySelectorAll("[data-recovery-field]").forEach(e=>{e.classList.toggle("hidden",!recovery);e.querySelector("input").disabled=!recovery;});
-        f.elements.recoveryMonths.required=recovery;
-        const out=document.getElementById("recovery-preview");out.textContent="";
-        if(recovery){const months=f.elements.recoveryMonths.value.split(",").map(x=>x.trim()).filter(Boolean).sort(),cents=Math.round(Number(f.elements.recoveryAmount.value || f.elements.amount.value)*100);
-          if(months.length && new Set(months).size===months.length && months.length<=60 && months.every(m=>/^20[2-3]\d-(0[1-9]|1[0-2])$/.test(m)) && cents>0 && cents<=Math.round(Number(f.elements.amount.value)*100))out.textContent=months.map((m,i)=>`${shortMonth(m)}: ${exactEuro((Math.floor(cents/months.length)+(i<cents%months.length?1:0))/100)}`).join(" · ");
-        }
-      }
-      document.addEventListener("change",e=>{if(e.target.closest("#entry-form")){syncBudgetPolicyFields();}});
-      document.addEventListener("input",e=>{if(e.target.closest("#budget-policy-fields") || e.target.name==="amount")syncBudgetPolicyFields();});
 
       /** Data civile usata dai form, nel fuso Europe/Rome. */
       function todayIso() {
@@ -2820,7 +2792,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
               "Altro",
             ) +
             field("Data effettiva", "date", "date", chosen, 'max="'+todayIso()+'"') +
-            field("Mesi coperti", "months", "number", 1, 'min="1" max="12" step="1"') + budgetPolicyFields() + field("Note", "note", "text", "", 'maxlength="1000"', "full") +
+            field("Note", "note", "text", "", 'maxlength="1000"', "full") +
 
             '<label id="counterpart-box" class="' +
             (type === "Trasferimento" ? "" : "hidden") +
@@ -2831,7 +2803,6 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         );
         updateTransactionAccount();
         updateSnapshotChoice();
-        syncBudgetPolicyFields();
       }
 
       /** Mostra l’opzione già incluso nel saldo soltanto per date e conti compatibili. */
@@ -2861,6 +2832,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         if (state.busy) return;
         google.script.run
           .withSuccessHandler((r) => {
+            if(r.financePlanPaymentId){globalThis.openPlanPayment(r.financePlanId,r.financePlanPaymentId);return;}
             const categories = financialCategoryOptions(r.movement_type);
             if (r.category && !categories.includes(financeCategoryLabel(r.category)))
               categories.push(r.category);
@@ -2905,7 +2877,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
                 ) +
                 select("Conto", "account", accounts, r.account) +
                 select("Categoria", "category", categories, r.category) +
-                budgetPolicyFields(r) +
+                movementPolicyMetadata(r) +
                 field(
                   "Data effettiva",
                   "date",
@@ -2914,13 +2886,6 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
                     0,
                     10,
                   ),
-                ) +
-                field(
-                  "Mesi coperti",
-                  "months",
-                  "number",
-                  r.competence_months || 1,
-                  'min="1" max="12" step="1"',
                 ) +
                 '<label id="counterpart-box" class="' +
                 (type === "Trasferimento" ? "" : "hidden") +
@@ -2939,7 +2904,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
                 '<p class="hint full">Dopo una correzione, verifica i saldi nel Budget.</p>',
               "movement-edit",
             );
-            syncBudgetPolicyFields();syncUtilityFields();syncCommitmentHint();
+            syncUtilityFields();
           })
           .withFailureHandler((err) => {
             const box = document.getElementById("error");
@@ -2949,44 +2914,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
           .getMovement(row);
       }
 
-      /** Registra una bolletta o un’altra spesa ricorrente e i mesi coperti. */
-      function openRecurring() {
-        modal(
-          "Registra pagamento",
-          select(
-            "Voce",
-            "name",
-            [
-              "Elettricità",
-              "Gas",
-              "Acqua",
-              "Condominio",
-              "Palestra",
-              "Abbonamenti",
-              "Benzina",
-            ],
-            "Elettricità",
-          ) +
-            field(
-              "Pagato €",
-              "amount",
-              "number",
-              "",
-              'min="0.01" max="2000" step="0.01" inputmode="decimal"',
-            ) +
-            '<input type="hidden" name="account" value="Trade Republic">' +
-            field("Data", "date", "date", todayIso()) +
-            field(
-              "Mesi coperti",
-              "months",
-              "number",
-              1,
-              'min="1" max="12" step="1"',
-            ) +
-            field("Nota", "note", "text", "", 'maxlength="200"', "full"),
-          "recurring",
-        );
-      }
+      function openRecurring() { setView("extras"); }
 
       /** Crea una pianificazione straordinaria; non implica pagamento. */
       function openExtra(c) {
@@ -3576,6 +3504,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         }
         if((kind==="transaction"||kind==="movement-edit") && d.type!=="Spesa"){d.budgetTreatment="auto";delete d.recoveryMonths;delete d.recoveryAmount;}
 
+        if(kind==="transaction"){d.months=1;d.budgetTreatment=d.type==="Spesa"?"ordinary":"auto";}
         if (kind === "extra-payment") return submit("recordExtraPayment", [d]);
         if (kind === "extra-link") return submit("linkExtraMovement", [d]);
         submit(

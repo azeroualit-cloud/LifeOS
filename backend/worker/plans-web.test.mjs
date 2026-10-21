@@ -95,6 +95,17 @@ try{
  await page.locator('#plans-web-form [type=submit]').click();
  await page.waitForFunction(()=>document.getElementById('dialog').classList.contains('hidden'));
  assert.ok(calls.some(c=>c.method==='resumeFinancePlanPayment'&&c.args[0].paymentId==='payment-pending'));
+ // Payments remain manageable after the plan is stopped; ambiguous deletion retries keep the same ID.
+ plan.status='stopped';
+ finance.plansV2.payments.push({id:'gym-delete-payment',planId:plan.id,status:'posted',date:today,amountCents:35875,movementId:77});
+ await page.evaluate(()=>load());await page.locator('[data-plans-payment="gym-delete-payment"]').click();
+ failWrite=true;await page.locator('#plans-web-form [type=submit]').click();
+ await page.getByRole('button',{name:'Riprova',exact:true}).click();
+ await page.waitForFunction(()=>document.getElementById('dialog').classList.contains('hidden'));
+ const deletions=calls.filter(c=>c.method==='deleteFinancePlanPayment');assert.equal(deletions.length,2);assert.deepEqual(deletions[0].args,deletions[1].args);assert.equal(deletions[0].args[0].paymentId,'gym-delete-payment');
+ await page.evaluate(()=>openPlanPayment('synthetic-goal','gym-delete-payment'));
+ assert.equal(await page.getByRole('heading',{name:'Pagamento del piano'}).count(),1);
+ await page.locator('[data-plans-close]').first().click();
  await page.setViewportSize({width:390,height:844});
  await page.locator('[data-plans-back]').click();
  await page.locator('#extras [data-new-extra]').click();
@@ -104,5 +115,5 @@ try{
  if(shot)await page.screenshot({path:shot+'/new-plan-mobile.png'});
  assert.ok(!calls.some(c=>['saveExtra','getFinanceExtras','recordExtraPayment'].includes(c.method)));
  assert.ok(calls.every(c=>c.version==='2'));assert.deepEqual(errors,[]);
- console.log('PASS: six plan types, legacy dialog replaced, same-ID retry, movement link, future edit, stop, repeated fund payments, resume pending payment, mobile layout; no JavaScript errors.');
+ console.log('PASS: six plan types, legacy dialog replaced, same-ID retry, movement link, future edit, stop, repeated fund payments, resume pending payment, stopped-payment deletion with same-ID retry, movement-to-plan navigation, mobile layout; no JavaScript errors.');
 }finally{await browser.close();await new Promise(resolve=>server.close(resolve));}

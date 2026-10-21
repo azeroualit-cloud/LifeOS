@@ -45,11 +45,13 @@ import {addMonth,wealthForecast,aggregateCategories} from './finance-model.mjs';
         if(month===todayIso().slice(0,7)&&Array.isArray(d.categories))samples.set(month,d.categories);
         for(const [m,rows] of samples)cache.set(m,rows);
       }
-      for(const m of [...requested].reverse())if(!cache.has(m)){
+      if(requested.some(m=>!cache.has(m))){
         if(!current())return;
-        target.textContent=`Categorie: ${requested.filter(m=>cache.has(m)).length} di ${requested.length} mesi…`;
-        const data=await workerRequest('getFinanceData',[Number(m.slice(0,4)),Number(m.slice(-2))]);
-        if(!current())return;aggregateCategories(new Map([[m,data.categories]]),[m]);cache.set(m,data.categories);
+        const data=await workerRequest('getFinanceCategoryPeriod',[month,range]);
+        if(!current())return;
+        if(!Array.isArray(data.months)||data.months.length!==requested.length)throw Error('Periodo categorie incompleto. Riprova.');
+        const samples=new Map(data.months.map(r=>[r.month,r.categories]));aggregateCategories(samples,requested);
+        for(const m of requested)cache.set(m,samples.get(m));
       }
       if(!current())return;
       const rows=aggregateCategories(cache,requested);
@@ -57,7 +59,7 @@ import {addMonth,wealthForecast,aggregateCategories} from './finance-model.mjs';
       const segments=rows.map((r,i)=>{const share=r.amount/total*100,shape=`<circle cx="60" cy="60" r="48" pathLength="100" fill="none" stroke="${colors[i%colors.length]}" stroke-width="12" stroke-dasharray="${share} ${100-share}" stroke-dashoffset="${-offset}" transform="rotate(-90 60 60)"/>`;offset+=share;return shape;}).join('');
       target.innerHTML=rows.length?`<div class="breakdown"><div class="category-ring"><svg viewBox="0 0 120 120" role="img" aria-label="Spese per categoria">${segments}</svg><div class="category-ring-label"><small>Spese</small><strong>${state.assetsVisible?exactEuro(total):'••••'}</strong></div></div><div>${rows.map((r,i)=>`<div class="kv"><span><i class="category-swatch" style="background:${colors[i%colors.length]}"></i>${safe(r.name)}</span><strong>${state.assetsVisible?exactEuro(r.amount):'••••'}</strong></div>`).join('')}</div></div>`:'<p class="empty">Nessuna spesa nel periodo</p>';
       refresh.textContent='Aggiorna categorie';
-    }catch(error){if(current()){target.textContent=`Caricati ${requested.filter(m=>cache.has(m)).length} di ${requested.length} mesi. ${error.message} Riprova riprende dai mesi mancanti.`;refresh.textContent='Riprova';}}
+    }catch(error){if(current()){target.textContent=error.message+' Premi Riprova per caricare il periodo.';refresh.textContent='Riprova';}}
     finally{if(current())refresh.disabled=false;}
   }
   document.addEventListener('click',e=>{

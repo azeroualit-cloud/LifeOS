@@ -35,16 +35,8 @@
   }
   function recurring(index){
     const r=state.data?.recurring?.[index];if(!r)return;
-    const host=sheet(r.name,`<form id="platform-recurring-form" class="form-grid"><label class="full">Stima mensile €<input name="estimate" type="number" min="0.01" max="1000000" step="0.01" value="${r.estimate}"></label>${Number.isFinite(r.nextEstimate)?`<p>Stima mese successivo: ${state.assetsVisible?exactEuro(r.nextEstimate):'••••'}</p>`:''}<button type="button" data-recurring-estimate>Salva stima</button><h3 class="full">Registra pagamento</h3><label>Importo €<input name="amount" type="number" min="0.01" max="1000000" step="0.01"></label><label>Data<input name="date" type="date" value="${todayIso()}" max="${todayIso()}"></label><label>Mesi coperti<input name="months" type="number" min="1" max="12" step="1" value="1"></label><p class="os-form-error full" role="alert"></p><div class="form-actions"><button type="button" data-close>Fine</button><button class="save" type="submit">Registra</button></div></form>`);
-    const form=host.querySelector('form'),requestId=crypto.randomUUID();let submitted=null;
-    async function send(method,args){
-      if(form.dataset.busy)return;form.dataset.busy='true';const controls=[...form.querySelectorAll('button')];controls.forEach(b=>b.disabled=true);
-      try{const result=await workerRequest(method,args);if(result===false)throw Error('Il server non ha confermato la modifica.');closeDialog();load();}
-      catch(error){form.querySelector('[role=alert]').textContent=error.message;}
-      finally{delete form.dataset.busy;controls.forEach(b=>b.disabled=false);}
-    }
-    form.querySelector('[data-recurring-estimate]').onclick=()=>{const input=form.elements.estimate;if(!input.value||!input.reportValidity())return;send('saveEstimate',[r.name,Number(input.value)]);};
-    form.onsubmit=e=>{e.preventDefault();if(!form.elements.amount.value||!form.reportValidity())return;submitted??={requestId,type:'Spesa',name:r.name,category:r.name,account:'Trade Republic',date:form.elements.date.value,months:Number(form.elements.months.value),amount:Number(form.elements.amount.value),budgetTreatment:'auto'};send('saveTransaction',[submitted]);};
+    closeDialog();setView('extras');
   }
+
   document.addEventListener('click',e=>{const b=e.target.closest('[data-edit-planning],[data-budget-recurring]');if(!b)return;if(b.hasAttribute('data-edit-planning'))settings();else recurring(Number(b.dataset.budgetRecurring));});
 })();

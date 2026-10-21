@@ -5,7 +5,7 @@ on:
       focus:
         description: Ripeti tutti i controlli o il solo flusso fondo
         type: choice
-        options: [all, fund, regressions, visual, habits]
+        options: [all, fund, regressions, visual, habits, finance]
         default: all
   push:
     branches: ['feature/plans-v2', 'fix/platform-parity']
@@ -94,7 +94,9 @@ jobs:
         working-directory: app
         run: |
           set -euo pipefail
-          if [ "${{ inputs.focus }}" = habits ]; then
+          if [ "${{ inputs.focus }}" = finance ]; then
+            FILTERS="-only-testing:LifeOSProbeUITests/NativeInterfaceTests/testKeyboardAndLocalMovementFlow -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testPlansFundCanEditFutureQuotaAndLinkAnExistingMovement -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testAnalysisShowsFourChartsAndCategoryPeriods"
+          elif [ "${{ inputs.focus }}" = habits ]; then
             FILTERS="-only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHabitIntervalAndWeekdaySchedulingPersistInManagement -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeHealthCardRemainsCompactAndOpensDetail"
           elif [ "${{ inputs.focus }}" = fund ]; then
             FILTERS="-only-testing:LifeOSProbeUITests/NativeInterfaceTests/testPlansFundCanEditFutureQuotaAndLinkAnExistingMovement"
