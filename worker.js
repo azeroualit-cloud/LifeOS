@@ -266,7 +266,7 @@ html:not([data-theme="light"]) [data-kind="holiday"] {--shift-color:#d7bf52;}
 :root {--os-bg:#0b0b0b;--os-panel:#1c1c1e;--os-panel-2:#272729;--ink:#f4f4f5;--muted:#adadad;--os-accent:#dedede;--os-focus:#dedede;--green:#8cbaa1;--red:#d4928f;--card-radius:24px;font-size:17px;}
 html[data-theme="light"] {--os-accent:#3b3b3b;--os-focus:#3b3b3b;--green:#387354;--red:#a14947;}
 button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {font-size:17px;}button {transition:opacity .18s,background-color .16s,transform .18s;}button:active:not(:disabled) {transform:scale(.985);opacity:.75;}
-.finance-tabs:not(.hidden) {display:flex;background:transparent;border:0;padding:0;}.finance-tabs:not(.hidden) button{flex:none;}.finance-open {max-width:720px;margin-inline:auto;}.finance-heading {display:flex;align-items:center;justify-content:space-between;gap:16px;}.finance-heading>button {border:0;}.finance-hero {padding:32px 0 24px;text-align:center;}.finance-hero h2 {color:var(--muted);font-weight:500;}.finance-value {display:block;font-size:clamp(32px,7vw,56px);line-height:1.2;letter-spacing:-1.5px;margin:12px 0;overflow-wrap:anywhere;}.finance-hero p {font-size:15px;}.finance-account {display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:16px 0 24px;}.finance-account>div {flex:1;min-width:0;}.finance-account h2 {color:var(--muted);font-size:15px;font-weight:500;}.finance-account strong {font-size:28px;overflow-wrap:anywhere;}.finance-account>small {flex-basis:100%;}.finance-actions {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;padding:8px 0 32px;}.finance-actions button {display:flex;flex-direction:column;border:0;padding:0;min-width:0;background:transparent;}.finance-actions span {display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--os-panel-2);font-size:28px;border:1px solid var(--line);}.finance-recent {padding-top:16px;}.finance-movement {display:flex;width:100%;justify-content:space-between;gap:16px;text-align:left;border:0;border-radius:0;border-bottom:1px solid var(--line);padding:16px 0;background:transparent;}.finance-movement>span {min-width:0;}.finance-movement strong {display:block;overflow-wrap:anywhere;}.finance-movement small {display:block;}.finance-movement>b {flex-shrink:0;font-size:15px;}
+.finance-tabs:not(.hidden) {display:flex;background:transparent;border:0;padding:0;}.finance-tabs:not(.hidden) button{flex:none;}.finance-open {max-width:720px;margin-inline:auto;}.finance-heading {display:flex;align-items:center;justify-content:space-between;gap:16px;}.finance-heading>button {border:0;}.finance-hero {padding:32px 0 24px;text-align:center;}.finance-hero h2 {color:var(--muted);font-weight:500;}.finance-value {display:block;font-size:clamp(32px,7vw,56px);line-height:1.2;letter-spacing:-1.5px;margin:12px 0;overflow-wrap:anywhere;}.finance-hero p {font-size:15px;}.finance-account {display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:16px 0 24px;}.finance-account>div {flex:1;min-width:0;}.finance-account h2 {color:var(--muted);font-size:15px;font-weight:500;}.finance-account strong {font-size:28px;overflow-wrap:anywhere;}.finance-account>small {flex-basis:100%;}.finance-actions {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:8px 0 32px;}.finance-actions button {display:flex;flex-direction:column;border:0;padding:0;min-width:0;background:transparent;}.finance-actions span {display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--os-panel-2);font-size:28px;border:1px solid var(--line);}.finance-recent {padding-top:16px;}.finance-movement {display:flex;width:100%;justify-content:space-between;gap:16px;text-align:left;border:0;border-radius:0;border-bottom:1px solid var(--line);padding:16px 0;background:transparent;}.finance-movement>span {min-width:0;}.finance-movement strong {display:block;overflow-wrap:anywhere;}.finance-movement small {display:block;}.finance-movement>b {flex-shrink:0;font-size:15px;}
 :is(#budget,#analysis,#extras,#movements) .card {background:transparent;border:0;border-radius:0;padding:20px 0;border-bottom:1px solid var(--line);}.overview-analysis-grid,.chart-pair {gap:24px;}.os-calendar-week {background:transparent;border:0;border-top:1px solid var(--line);border-radius:0;padding:8px 0;gap:0;}.os-days {gap:0;}.os-day {height:64px;min-height:64px;background:transparent;border-radius:0;}.os-calendar-week>.os-day:nth-child(n+6),.os-calendar-week>.os-day:nth-child(n+6).selected,.os-day.selected {background:transparent;box-shadow:none;}.os-day b {width:26px;height:26px;border-radius:50%;font-size:15px;}.os-day.today b {background:transparent;color:var(--ink);outline:1px solid var(--muted);}.os-day.selected b {background:var(--os-accent);color:var(--os-bg);outline:0;}.os-day .os-shift {border-radius:6px;height:20px;}.os-day-mark {color:var(--shift-color,var(--muted));}.os-calendar-week>.os-day:nth-child(n+6):not(.selected) b {color:var(--muted);}#calendar>.os-card {background:transparent;border:0;padding:0;}.os-calendar-details {padding-top:24px;}.os-month-header h2 {font-size:26px;}.os-home-week .os-day {background:transparent;}
 @supports ((backdrop-filter:blur(20px)) or (-webkit-backdrop-filter:blur(20px))) {.theme-toggle,.fab-button {background:color-mix(in srgb,var(--os-panel-2) 72%,transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}}
 @media(max-width:760px) {.nav {background:color-mix(in srgb,var(--os-panel) 90%,transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}main {padding-inline:20px;}.overview-analysis-grid,.chart-pair {grid-template-columns:minmax(0,1fr);}.finance-hero {padding-top:24px;}.os-day {min-height:58px;height:58px;}}
@@ -722,7 +722,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         } else if (view === 'calendar') {
           action = 'data-life-event="new"'; label = 'Aggiungi evento';
         } else if (['overview','movements','budget','extras'].includes(view)) {
-          if (view === 'extras') { action = 'data-new-extra="1"'; label = 'Aggiungi straordinaria'; }
+          if (['extras','budget'].includes(view)) { action = 'data-new-extra="1"'; label = 'Nuovo piano'; }
           secondary = '';
         }
         document.getElementById('page-actions').innerHTML = secondary;
@@ -1824,7 +1824,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
 
         }
         if (state.view === "budget" && state.loadedDetail) {
-          document.getElementById("budget").innerHTML = monthlyBudgetDetails(d.summary) + overviewAnalysis(d);
+          document.getElementById("budget").innerHTML = overviewAnalysis(d);
           updateProjection();
         }
         if (state.view === "analysis" && state.loadedDetail) document.getElementById("analysis").innerHTML = platformAnalysis(d);
@@ -2615,27 +2615,14 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
 
 
 
-      function monthlyBudgetDetails(s) {
-        const items = Array.isArray(s.monthlyBudgetBreakdown) ? s.monthlyBudgetBreakdown : [];
-        const line = (label,value) => \`<div class="kv"><span>\${escapeHtml(label)}</span><strong>\${exactEuro(value)}</strong></div>\`;
-        return \`<details class="budget-calculation"><summary>Calcolo budget del mese</summary>
-          \${line("Media stipendio",s.monthlySalary)}
-          \${items.map(x=>line(x.name,-x.amount)).join("")}
-          \${line("Spese non gi\xE0 coperte",-s.monthlySpent)}
-          \${(s.monthlyFixedSettlements||[]).filter(r=>r.paid!==r.estimate).map(r=>\`<div class="details-label">\${escapeHtml(r.name)}: previsti \${exactEuro(r.estimate)}, pagati \${exactEuro(r.paid)}. La differenza incide sul saldo, senza un secondo addebito al budget libero.</div>\`).join("")}
-          <div class="kv total"><span>Budget del mese</span><strong>\${exactEuro(s.monthlyRemaining)}</strong></div>
-          \${s.monthlyAdvanceReturned ? \`<div class="details-label">Anticipo: \${exactEuro(s.monthlyAdvanceGross)} \u2212 \${exactEuro(s.monthlyAdvanceReturned)} restituiti = \${exactEuro(s.monthlyAdvances)}.<br>Spese gi\xE0 coperte: \${exactEuro(s.monthlyAdvanceCovered)}. Incluse nelle uscite, non sottratte di nuovo dal budget.</div>\` : ""}
-        </details>\`;
-      }
-
       /** Panoramica essenziale: saldo Trade Republic, impegnato, spendibile, patrimonio e flussi TR. */
       function overview(d) {
         const s = d.summary, daily = dailyBudgetRange(s);
         const recent = (d.transactions || []).slice(0, 3);
-        return \`<div class="finance-open"><div class="finance-heading"><span></span><button data-view="analysis">Analisi</button></div>
+        return \`<div class="finance-open">
         <section class="finance-hero"><h2>Budget rimanente</h2><strong class="finance-value \${amountClass(s.monthlyRemaining)}">\${state.assetsVisible ? exactEuro(s.monthlyRemaining) : "\u2022\u2022\u2022\u2022 \u20AC"}</strong><p class="muted">\${daily.days ? (state.assetsVisible ? exactEuro(daily.low) : "\u2022\u2022\u2022\u2022 \u20AC")+" al giorno" : "Mese concluso \xB7 riepilogo del budget"}</p>\${daily.days?\`<small>\${daily.days} giorni\${d.key===todayIso().slice(0,7)?", incluso oggi":" del mese selezionato"}</small>\`:""}</section>
         <section class="finance-account"><div><h2>Saldo attuale</h2><strong>\${state.assetsVisible ? exactEuro(s.budget) : "\u2022\u2022\u2022\u2022 \u20AC"}</strong></div>\${privacyButton()}<small>Saldo dell\u2019ultima sincronizzazione, distinto dal mese selezionato.</small></section>
-        <div class="finance-actions"><button data-view="budget"><span aria-hidden="true">\u25F7</span>Budget</button><button data-view="extras"><span aria-hidden="true">\u22EF</span>Extra</button><button data-new-transaction="Spesa"><span aria-hidden="true">\uFF0B</span>Spesa</button></div>
+        <div class="finance-actions"><button data-view="budget"><span aria-hidden="true">\u25F7</span>Budget</button><button data-new-extra><span aria-hidden="true">\uFF0B</span>Nuovo piano</button><button data-new-transaction="Spesa"><span aria-hidden="true">\u2212</span>Nuova spesa</button><button data-view="analysis"><span aria-hidden="true">\u25F7</span>Analisi</button></div>
         <section class="finance-recent"><div class="finance-heading"><h2>Ultimi movimenti</h2><button data-view="movements">Vedi tutti</button></div>\${recent.length ? recent.map(t => \`<button class="finance-movement" data-edit-movement="\${Number(t.row)}"><span><strong>\${escapeHtml(t.name)}</strong><small>\${escapeHtml(t.date || '')} \xB7 \${escapeHtml(t.category || t.type || '')}</small></span><b class="\${amountClass(t.amount)}">\${state.assetsVisible ? exactEuro(t.amount) : '\u2022\u2022\u2022\u2022 \u20AC'}</b></button>\`).join('') : '<p class="empty">Nessun movimento nel mese.</p>'}</section></div>\`;
       }
 
@@ -4089,7 +4076,6 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
     const p=progress();
     return \`<section class="card pad planning-card"><h2>Obiettivo di risparmio</h2>\${line('Patrimonio totale',p.assets)}\${line('Fondo emergenza',p.emergency)}\${line('Fondo emergenza coperto',p.reserved)}\${line('Altri risparmi',p.other)}\${line('Prossimo traguardo',p.target)}\${line('Manca',p.missing)}\${line('Da risparmiare al mese',p.monthly)}<p class="hint">Cifra mancante divisa per \${p.months} mesi fino a dicembre, incluso quello corrente.</p><button data-edit-planning>Obiettivo e fondo emergenza</button></section>\`;
   };
-  overviewAnalysis=function(d){return \`<div class="budget-flow"><section class="card pad"><h2>Ricorrenti</h2>\${(d.recurring||[]).map((r,i)=>\`<button class="plan-list-row" data-budget-recurring="\${i}"><span>\${safe(r.name)}</span><strong>\${state.assetsVisible?exactEuro(r.estimate):'\u2022\u2022\u2022\u2022'}</strong></button>\`).join('')||'<p class="empty">Nessuna voce ricorrente</p>'}</section>\${planningCard(d)}</div>\`;};
   function sheet(title,body){
     const host=document.getElementById('dialog');
     host.innerHTML=\`<div class="modal" role="dialog" aria-modal="true" aria-label="\${safe(title)}"><div class="modal-top"><h2>\${safe(title)}</h2><button data-close aria-label="Chiudi">\xD7</button></div>\${body}</div>\`;host.classList.remove('hidden');return host;
@@ -4111,12 +4097,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
       finally{delete form.dataset.busy;button.disabled=false;}
     });
   }
-  function recurring(index){
-    const r=state.data?.recurring?.[index];if(!r)return;
-    closeDialog();setView('extras');
-  }
-
-  document.addEventListener('click',e=>{const b=e.target.closest('[data-edit-planning],[data-budget-recurring]');if(!b)return;if(b.hasAttribute('data-edit-planning'))settings();else recurring(Number(b.dataset.budgetRecurring));});
+  document.addEventListener('click',e=>{if(e.target.closest('[data-edit-planning]'))settings();});
 })();
 <\/script><script>(() => {
   // backend/worker/finance-model.mjs
@@ -4317,6 +4298,21 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
   })();
 })();
 <\/script><script>(() => {
+  // backend/plans/budget-flow.mjs
+  function budgetFlow(summary, plans, month2) {
+    const cents2 = (value) => Math.round(Number(value || 0) * 100);
+    const current = plans.filter((p) => p.contributionCents !== 0 || p.status === "active" && p.startMonth <= month2 && (!p.endMonth || p.endMonth >= month2));
+    const rows = current.map((p) => ({ name: p.name, planId: p.id, amountCents: p.contributionCents }));
+    for (const item of summary.monthlyBudgetBreakdown || []) {
+      if (!item.planId && cents2(item.amount)) rows.push({ name: item.name, amountCents: cents2(item.amount) });
+    }
+    const salaryCents = cents2(summary.monthlySalary), spentCents = cents2(summary.monthlySpent), remainingCents = cents2(summary.monthlyRemaining);
+    const difference = salaryCents - spentCents - remainingCents - rows.reduce((n, r) => n + r.amountCents, 0);
+    if (difference) rows.push({ name: "Altri impegni del mese", amountCents: difference });
+    let remaining = salaryCents;
+    return { salaryCents, spentCents, remainingCents, rows: rows.map((r) => ({ ...r, remainingCents: remaining -= r.amountCents })) };
+  }
+
   // backend/plans/engine.mjs
   var PlanError = class extends Error {
     constructor(message, status = 422) {
@@ -4445,21 +4441,15 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
       document.querySelectorAll("[data-new-extra]").forEach((b) => {
         b.setAttribute("aria-label", "Nuovo piano");
         b.setAttribute("title", "Nuovo piano");
-        if (!b.classList.contains("fab-button")) b.textContent = "+ Piano";
       });
     };
     const oldSetView = setView;
     setView = function(v) {
-      if (v !== "extras") activePlan = null;
-      oldSetView(v);
-      if (v === "extras") document.getElementById("page-title").textContent = activePlan ? "Dettagli piano" : "Piani";
-    };
-    const oldOverview = overview;
-    overview = function(d) {
-      return oldOverview(d).replace(">Extra</button>", ">Piani</button>");
+      if (!["extras", "budget"].includes(v)) activePlan = null;
+      oldSetView(v === "extras" ? "budget" : v);
     };
     let activePlan = null;
-    extrasView = function(d) {
+    overviewAnalysis = extrasView = function(d) {
       const v = d.plansV2;
       if (!v || v.version !== 2 || !Array.isArray(v.plans) || !Array.isArray(v.payments)) return \`<p role="alert">\${safe(lifeOSContract.plansUnavailable)}</p><button data-plans-refresh>Riprova</button>\`;
       const p = v.plans.find((p2) => p2.id === activePlan);
@@ -4468,9 +4458,12 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         return detail(p, v);
       }
       activePlan = null;
-      document.getElementById("page-title").textContent = "Piani";
+      document.getElementById("page-title").textContent = "Budget";
+      const flow = budgetFlow(d.summary, v.plans, v.month), currentIDs = new Set(flow.rows.map((r) => r.planId));
+      const value = (c) => state.assetsVisible ? money(c) : "\\u2022\\u2022\\u2022\\u2022 \\u20AC";
+      const line = (name, c) => \`<div class="kv"><span>\${safe(name)}</span><strong>\${value(c)}</strong></div>\`;
       const legacy = [...new Map((d.extraPlan?.allocations || []).map((r) => [r.cycle_id, r])).values()];
-      return \`<div class="plans-web"><div class="card-title"><div><h2>Piani</h2><p class="hint">Tutti i piani \\xB7 impatto su \${safe(titleMonth(state.year, state.month))}</p></div><div class="actions"><button data-plans-info aria-label="Come funzionano i piani">\\u24D8</button><button class="save" data-new-extra>Nuovo piano</button></div></div><div class="extra-grid">\${v.plans.map((p2) => \`<button class="extra-card plan-list-row" data-plans-detail="\${safe(p2.id)}"><span><strong>\${safe(p2.name)}</strong><small>\${safe(kinds2[p2.kind])} \\xB7 \${safe(statuses[p2.status] || p2.status)}</small><span>Budget del mese: \${money(-p2.contributionCents)}</span></span><span aria-hidden="true">\\u203A</span></button>\`).join("") || '<p class="empty">Anticipa budget, metti da parte o distribuisci una spesa sui mesi scelti.</p>'}</div>\${legacy.length ? \`<section class="card pad"><h2>Piani precedenti</h2><p class="hint">Le voci storiche non adottate sono conservate. Non duplicarle con un nuovo piano.</p>\${legacy.map((r) => \`<button class="plan-list-row" data-plans-legacy="\${Number(r.extraordinary_source_row)}"><span>\${safe(r.name)}<small>\${safe(NativeExtraTitle(r.status))}</small></span><span aria-hidden="true">\\u203A</span></button>\`).join("")}</section>\` : ""}</div>\`;
+      return \`<div class="plans-web"><div class="card-title"><div><h2>Budget di \${safe(titleMonth(state.year, state.month))}</h2><p class="hint">Stipendio, piani e budget disponibile</p></div><div class="actions"><button data-plans-info aria-label="Come funzionano i piani">\\u24D8</button><button class="save" data-new-extra>Nuovo piano</button></div></div><section class="card pad budget-waterfall">\${line("Stipendio di riferimento", flow.salaryCents)}\${flow.rows.map((r) => \`<\${r.planId ? "button" : "div"} class="plan-list-row" \${r.planId ? \`data-plans-detail="\${safe(r.planId)}"\` : ""}><span><strong>\${safe(r.name)}</strong><small>Rimane \${value(r.remainingCents)}</small></span><strong>\${value(-r.amountCents)}</strong></\${r.planId ? "button" : "div"}>\`).join("") || '<p class="empty">Nessun piano per questo mese.</p>'}\${line("Spese non gi\\xE0 coperte dai piani", -flow.spentCents)}<div data-budget-final>\${line("Budget finale", flow.remainingCents)}</div><p class="hint">Le quote dei piani riducono il budget. I pagamenti gi\\xE0 coperti da un piano non vengono sottratti una seconda volta.</p></section><details class="card pad"><summary>Altri piani \\xB7 futuri e conclusi</summary>\${v.plans.filter((p2) => !currentIDs.has(p2.id)).map((p2) => \`<button class="plan-list-row" data-plans-detail="\${safe(p2.id)}"><span>\${safe(p2.name)}<small>\${safe(statuses[p2.status] || p2.status)} \\xB7 da \${safe(p2.startMonth)}</small></span><span aria-hidden="true">\\u203A</span></button>\`).join("") || '<p class="empty">Nessun altro piano</p>'}</details>\${legacy.length ? \`<section class="card pad"><h2>Piani precedenti</h2><p class="hint">Le voci storiche non adottate sono conservate. Non duplicarle con un nuovo piano.</p>\${legacy.map((r) => \`<button class="plan-list-row" data-plans-legacy="\${Number(r.extraordinary_source_row)}"><span>\${safe(r.name)}<small>\${safe(NativeExtraTitle(r.status))}</small></span><span aria-hidden="true">\\u203A</span></button>\`).join("")}</section>\` : ""}\${planningCard(d)}</div>\`;
     };
     function NativeExtraTitle(status) {
       return { Pagato: "Pagata", Programmato: "In corso", Previsto: "Da valutare", Annullato: "Annullata" }[status] || status;
@@ -4483,7 +4476,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
       }
       const payments = v.payments.filter((x) => x.planId === p.id), paid = p.kind !== "fund" && payments.some((x) => ["posted", "deleting"].includes(x.status) && (p.kind === "goal" || x.settlementKey === cycle));
       const payable = p.status === "active" && !["advance", "recovery"].includes(p.kind) && p.startMonth <= current();
-      return \`<div class="plans-web"><button data-plans-back>\\u2039 Piani</button><section class="card pad"><h2>\${safe(p.name)}</h2><p>\${safe(kinds2[p.kind])} \\xB7 \${safe(statuses[p.status] || p.status)}</p><p class="hint">\${safe(p.startMonth)}\${p.endMonth ? " \\u2192 " + safe(p.endMonth) : " \\xB7 Senza scadenza"}</p><div class="kv"><span>Categoria della spesa</span><strong>\${safe(p.category || "Altro")}</strong></div><div class="kv"><span>Budget di \${safe(shortMonth(v.month))}</span><strong>\${money(-p.contributionCents)}</strong></div>\${p.kind === "advance" ? \`<div class="kv"><span>Mese beneficiario</span><strong>\${safe(shortMonth(p.beneficiaryMonth))}</strong></div>\` : p.kind !== "recovery" ? \`<div class="kv"><span>Destinato al fondo nel mese consultato</span><strong>\${money(p.fundCents)}</strong></div>\${p.fromGeneralSavingsCents > 0 ? \`<div class="kv"><span>Pagato dagli altri risparmi</span><strong>\${money(p.fromGeneralSavingsCents)}</strong></div>\` : ""}\` : ""}\${p.kind === "goal" ? \`<div class="kv"><span>Obiettivo</span><strong>\${money(p.amountCents)}</strong></div><div class="kv"><span>Residuo</span><strong>\${money(p.outstandingCents)}</strong></div>\` : ""}\${payable && !paid ? \`<button data-plans-pay="\${safe(p.id)}">\${p.kind === "goal" ? "Paga dai risparmi e chiudi il piano" : "Registra un pagamento"}</button>\` : paid ? "<p>Pagamento registrato</p>" : ""}</section><section class="card pad"><h2>Pagamenti</h2>\${payments.map((p2) => \`<div class="kv"><span>\${safe(p2.date || "")}<small>\${p2.status === "posted" ? "Pagato \\xB7 movimento collegato" : p2.status === "deleting" ? "Eliminazione da completare" : "Da completare \\xB7 non registrare una nuova spesa"}</small></span><strong>\${money(p2.amountCents)}</strong></div>\${["posted", "deleting"].includes(p2.status) ? \`<button data-plans-payment="\${safe(p2.id)}">\${p2.status === "deleting" ? "Completa eliminazione" : "Gestisci pagamento"}</button>\` : ""}\${p2.status === "pending" ? \`<button data-plans-resume="\${safe(p2.id)}">Completa questa registrazione</button>\` : ""}\`).join("") || '<p class="empty">Nessun pagamento registrato</p>'}</section>\${p.status === "active" ? \`<section class="card pad">\${!["advance", "recovery"].includes(p.kind) ? \`<button data-plans-edit="\${safe(p.id)}">Modifica le quote future</button>\` : ""}<button class="danger" data-plans-stop="\${safe(p.id)}">\${p.kind === "advance" ? "Annulla l\\u2019intero anticipo" : "Interrompi le quote future"}</button></section>\` : ""}</div>\`;
+      return \`<div class="plans-web"><button data-plans-back>\\u2039 Budget</button><section class="card pad"><h2>\${safe(p.name)}</h2><p>\${safe(kinds2[p.kind])} \\xB7 \${safe(statuses[p.status] || p.status)}</p><p class="hint">\${safe(p.startMonth)}\${p.endMonth ? " \\u2192 " + safe(p.endMonth) : " \\xB7 Senza scadenza"}</p><div class="kv"><span>Categoria della spesa</span><strong>\${safe(p.category || "Altro")}</strong></div><div class="kv"><span>Budget di \${safe(shortMonth(v.month))}</span><strong>\${money(-p.contributionCents)}</strong></div>\${p.kind === "advance" ? \`<div class="kv"><span>Mese beneficiario</span><strong>\${safe(shortMonth(p.beneficiaryMonth))}</strong></div>\` : p.kind !== "recovery" ? \`<div class="kv"><span>Destinato al fondo nel mese consultato</span><strong>\${money(p.fundCents)}</strong></div>\${p.fromGeneralSavingsCents > 0 ? \`<div class="kv"><span>Pagato dagli altri risparmi</span><strong>\${money(p.fromGeneralSavingsCents)}</strong></div>\` : ""}\` : ""}\${p.kind === "goal" ? \`<div class="kv"><span>Obiettivo</span><strong>\${money(p.amountCents)}</strong></div><div class="kv"><span>Residuo</span><strong>\${money(p.outstandingCents)}</strong></div>\` : ""}\${payable && !paid ? \`<button data-plans-pay="\${safe(p.id)}">\${p.kind === "goal" ? "Paga dai risparmi e chiudi il piano" : "Registra un pagamento"}</button>\` : paid ? "<p>Pagamento registrato</p>" : ""}</section><section class="card pad"><h2>Pagamenti</h2>\${payments.map((p2) => \`<div class="kv"><span>\${safe(p2.date || "")}<small>\${p2.status === "posted" ? "Pagato \\xB7 movimento collegato" : p2.status === "deleting" ? "Eliminazione da completare" : "Da completare \\xB7 non registrare una nuova spesa"}</small></span><strong>\${money(p2.amountCents)}</strong></div>\${["posted", "deleting"].includes(p2.status) ? \`<button data-plans-payment="\${safe(p2.id)}">\${p2.status === "deleting" ? "Completa eliminazione" : "Gestisci pagamento"}</button>\` : ""}\${p2.status === "pending" ? \`<button data-plans-resume="\${safe(p2.id)}">Completa questa registrazione</button>\` : ""}\`).join("") || '<p class="empty">Nessun pagamento registrato</p>'}</section>\${p.status === "active" ? \`<section class="card pad">\${!["advance", "recovery"].includes(p.kind) ? \`<button data-plans-edit="\${safe(p.id)}">Modifica le quote future</button>\` : ""}<button class="danger" data-plans-stop="\${safe(p.id)}">\${p.kind === "advance" ? "Annulla l\\u2019intero anticipo" : "Interrompi le quote future"}</button></section>\` : ""}</div>\`;
     }
     function modal(title, body, method, makePayload) {
       const host = document.getElementById("dialog");
@@ -4509,7 +4502,10 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
           host.classList.add("hidden");
           state.data = null;
           state.loadedDetail = false;
-          load();
+          if (method === "saveFinancePlan") {
+            activePlan = null;
+            setView("budget");
+          } else load();
           osLoadHomeFinance();
         } catch (err) {
           error.textContent = err.message + " Puoi riprovare la stessa operazione senza duplicarla.";

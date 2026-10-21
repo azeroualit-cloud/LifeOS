@@ -60,7 +60,7 @@ try{
  await page.getByRole('button',{name:'Gestisci categorie',exact:true}).click();
  await page.locator('#life-dialog input[name=label]').waitFor();await page.locator('#life-dialog [data-life-close]').click();
  await page.evaluate(()=>setView('overview'));await page.locator('.finance-actions').waitFor();
- assert.deepEqual((await page.locator('.finance-actions button').allTextContents()).map(t=>t.replace(/[◷⋯＋]/g,'').trim()),['Budget','Piani','Spesa']);
+ assert.deepEqual((await page.locator('.finance-actions button').allTextContents()).map(t=>t.replace(/[◷⋯＋−]/g,'').trim()),['Budget','Nuovo piano','Nuova spesa','Analisi']);
  await page.locator('.finance-actions [data-new-transaction]').click();
  assert.deepEqual(await page.locator('#entry-form [name=category] option').allTextContents(),platformContract.expenseCategories);
  assert.equal(await page.locator('#entry-form [name=months]').count(),0);
@@ -74,9 +74,11 @@ try{
  await page.locator('#platform-planning-form [name=goal]').fill('5000');await page.locator('#platform-planning-form [name=target]').fill('14000');
  await page.locator('#platform-planning-form [type=submit]').click();await page.waitForFunction(()=>document.getElementById('dialog').classList.contains('hidden'));
  const saved=calls.find(c=>c.method==='savePlanningSettings');assert.equal(saved.args[0],5000);assert.equal(saved.args[2],14000);assert.equal(saved.args[1],7000/(13-Number(month.slice(-2))));
- await page.locator('[data-budget-recurring]').click();
- assert.equal(await page.locator('#platform-recurring-form').count(),0);
- assert.equal(await page.locator('#page-title').textContent(),'Piani');
+ assert.equal(await page.locator('[data-budget-recurring]').count(),0);
+ assert.equal(await page.locator('#page-title').textContent(),'Budget');
+ await page.locator('#budget [data-new-extra]').click();
+ await page.locator('#plans-web-form').waitFor();
+ await page.locator('[data-plans-close]').first().click();
  // The bank commits, but the browser never receives its response. Reload and
  // replay must retain the original identity and exact persisted payload.
  quickUnavailable=true;
@@ -113,8 +115,8 @@ try{
    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),view+' overflow at '+width);
   }
  }
- oldServer=true;await page.evaluate(()=>{state.data=null;setView('extras');});await page.locator('#extras [role=alert]').waitFor();assert.equal(await page.locator('#extras [role=alert]').textContent(),platformContract.plansUnavailable);
- assert.equal(await page.locator('#extras').getByText('Caricamento Piani…').count(),0);
+ oldServer=true;await page.evaluate(()=>{state.data=null;setView('extras');});await page.locator('#budget [role=alert]').waitFor();assert.equal(await page.locator('#budget [role=alert]').textContent(),platformContract.plansUnavailable);
+ assert.equal(await page.locator('#budget').getByText('Caricamento Piani…').count(),0);
  oldServer=false;
  // Local tools use the native demo fixture and never fall through to remote writes.
  quickUnavailable=true;await page.evaluate(p=>workerRequest('saveTransaction',[p]),{...queued,requestId:'synthetic-before-demo-1'});
@@ -137,8 +139,12 @@ try{
  await page.locator('#life-dialog [data-life-close]').click();assert.equal(await page.locator(`[data-life-routine="${habitID}"]`).count(),0);
  await page.reload();await page.waitForFunction(()=>lifeOSLocalMode.mode==='demo'&&!!life.data);await page.evaluate(()=>setView('today'));assert.equal(await page.locator(`[data-life-routine="${habitID}"]`).count(),0);
  await page.locator('[data-life-routine-manage]').click();assert.equal(await page.getByRole('button',{name:'Modifica Allenamento programmato',exact:true}).count(),1);await page.locator('#life-dialog [data-life-close]').click();
- await page.evaluate(()=>setView('extras'));await page.locator('#extras [data-new-extra]').click();
+ await page.evaluate(()=>setView('extras'));await page.locator('#budget [data-new-extra]').click();
  await page.locator('#plans-web-form [name=kind]').selectOption('fund');await page.locator('#plans-web-form [name=name]').fill('Fondo demo');await page.locator('#plans-web-form [name=amount]').fill('50');await page.locator('#plans-web-form [type=submit]').click();
+ await page.locator('[data-plans-detail]').waitFor();
+ assert.equal(await page.locator('#page-title').textContent(),'Budget');
+ assert.match(await page.locator('.budget-waterfall').textContent(),/Fondo demo/);
+ assert.ok((await page.locator('[data-budget-final]').textContent()).includes(await page.evaluate(()=>exactEuro(state.data.summary.monthlyRemaining))));
  await page.locator('[data-plans-detail]').click();await page.locator('[data-plans-pay]').click();await page.locator('#plans-web-form [name=amount]').fill('40');await page.locator('#plans-web-form [type=submit]').click();
  await page.waitForFunction(()=>document.getElementById('dialog').classList.contains('hidden'));
  assert.equal(await page.evaluate(()=>state.data.summary.budget),960);assert.equal(calls.length,remoteBefore);

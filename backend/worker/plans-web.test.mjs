@@ -12,7 +12,7 @@ assert.equal(response.status,200);const html=await response.text();
 assert.ok(html.includes('X-LifeOS-Plans-Version'));assert.ok(html.includes('Nuovo piano'));
 const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Rome'}),month=today.slice(0,7);
 const plan={id:'synthetic-goal',name:'Obiettivo sintetico',kind:'goal',status:'active',amountCents:30000,contributionCents:10000,fundCents:10000,paidCents:0,outstandingCents:30000,startMonth:month,endMonth:month};
-const finance={year:Number(month.slice(0,4)),month:Number(month.slice(-2)),key:month,updatedAt:'test',transactions:[],recurring:[],extraPlan:{allocations:[],links:[]},summary:{budget:4000,monthlyRemaining:1000,monthlyCommitted:500},plansV2:{version:2,month,plans:[plan],payments:[]}};
+const finance={year:Number(month.slice(0,4)),month:Number(month.slice(-2)),key:month,updatedAt:'test',transactions:[],recurring:[],extraPlan:{allocations:[],links:[]},summary:{budget:4000,monthlySalary:1500,monthlySpent:400,monthlyRemaining:1000,monthlyCommitted:100},plansV2:{version:2,month,plans:[plan],payments:[]}};
 const life={today,month,categories:[],tasks:[],shifts:[],events:[],upcomingEvents:[],routines:[]};
 const calls=[];let failWrite=false;
 const server=createServer(async(req,res)=>{
@@ -37,10 +37,15 @@ try{
  await page.waitForFunction(()=>!!life.data);
  await page.evaluate(()=>setView('extras'));
  await page.getByRole('button',{name:'Nuovo piano',exact:true}).last().waitFor();
- assert.equal(await page.locator('#page-title').textContent(),'Piani');
+ assert.equal(await page.locator('#page-title').textContent(),'Budget');
+ assert.match(await page.locator('.budget-waterfall').textContent(),/Stipendio di riferimento/);
+ assert.match(await page.locator('.budget-waterfall').textContent(),/Rimane 1.400,00/);
+ assert.match(await page.locator('[data-budget-final]').textContent(),/1.000,00/);
+ assert.equal(await page.locator('[data-budget-recurring]').count(),0);
  const shot=process.env.LIFEOS_WEB_SCREENSHOTS;if(shot)await mkdir(shot,{recursive:true});
+ if(shot)await page.screenshot({path:shot+'/budget-unified-desktop.png'});
  for(const kind of ['goal','fund','fixed','estimated','advance','recovery']){
-  await page.locator('#extras [data-new-extra]').click();
+  await page.locator('#budget [data-new-extra]').click();
   await page.locator('#plans-web-form [name=kind]').selectOption(kind);
   await page.locator('#plans-web-form [name=name]').fill('Piano '+kind);
   await page.locator('#plans-web-form [name=amount]').fill('250');
@@ -61,10 +66,10 @@ try{
   assert.equal(call.args[0].kind,kind);assert.equal(call.args[0].amountCents,25000);assert.equal(call.version,'2');
   if(kind!=='advance')assert.equal(call.args[0].category,'Casa');
   if(kind==='fixed')assert.equal(call.args[0].intervalMonths,5);
-  await page.locator('#extras [data-new-extra]').waitFor();
+  await page.locator('#budget [data-new-extra]').waitFor();
  }
  // Retry after an ambiguous response keeps both operation ID and exact payload.
- await page.locator('#extras [data-new-extra]').click();
+ await page.locator('#budget [data-new-extra]').click();
  await page.locator('#plans-web-form [name=name]').fill('Riprova');
  await page.locator('#plans-web-form [name=amount]').fill('80');failWrite=true;
  await page.locator('#plans-web-form [type=submit]').click();
@@ -108,7 +113,8 @@ try{
  await page.locator('[data-plans-close]').first().click();
  await page.setViewportSize({width:390,height:844});
  await page.locator('[data-plans-back]').click();
- await page.locator('#extras [data-new-extra]').click();
+ if(shot)await page.screenshot({path:shot+'/budget-unified-mobile.png'});
+ await page.locator('#budget [data-new-extra]').click();
  assert.equal(await page.getByRole('heading',{name:'Nuova straordinaria'}).count(),0);
  assert.equal(await page.locator('#plans-web-form [name=kind] option').count(),6);
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));

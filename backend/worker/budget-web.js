@@ -11,7 +11,6 @@
     const p=progress();
     return `<section class="card pad planning-card"><h2>Obiettivo di risparmio</h2>${line('Patrimonio totale',p.assets)}${line('Fondo emergenza',p.emergency)}${line('Fondo emergenza coperto',p.reserved)}${line('Altri risparmi',p.other)}${line('Prossimo traguardo',p.target)}${line('Manca',p.missing)}${line('Da risparmiare al mese',p.monthly)}<p class="hint">Cifra mancante divisa per ${p.months} mesi fino a dicembre, incluso quello corrente.</p><button data-edit-planning>Obiettivo e fondo emergenza</button></section>`;
   };
-  overviewAnalysis=function(d){return `<div class="budget-flow"><section class="card pad"><h2>Ricorrenti</h2>${(d.recurring||[]).map((r,i)=>`<button class="plan-list-row" data-budget-recurring="${i}"><span>${safe(r.name)}</span><strong>${state.assetsVisible?exactEuro(r.estimate):'••••'}</strong></button>`).join('')||'<p class="empty">Nessuna voce ricorrente</p>'}</section>${planningCard(d)}</div>`;};
   function sheet(title,body){
     const host=document.getElementById('dialog');
     host.innerHTML=`<div class="modal" role="dialog" aria-modal="true" aria-label="${safe(title)}"><div class="modal-top"><h2>${safe(title)}</h2><button data-close aria-label="Chiudi">×</button></div>${body}</div>`;host.classList.remove('hidden');return host;
@@ -33,10 +32,5 @@
       finally{delete form.dataset.busy;button.disabled=false;}
     });
   }
-  function recurring(index){
-    const r=state.data?.recurring?.[index];if(!r)return;
-    closeDialog();setView('extras');
-  }
-
-  document.addEventListener('click',e=>{const b=e.target.closest('[data-edit-planning],[data-budget-recurring]');if(!b)return;if(b.hasAttribute('data-edit-planning'))settings();else recurring(Number(b.dataset.budgetRecurring));});
+  document.addEventListener('click',e=>{if(e.target.closest('[data-edit-planning]'))settings();});
 })();

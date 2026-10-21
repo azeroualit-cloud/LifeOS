@@ -95,7 +95,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ "${{ inputs.focus }}" = finance ]; then
-            FILTERS="-only-testing:LifeOSProbeUITests/NativeInterfaceTests/testKeyboardAndLocalMovementFlow -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testPlansFundCanEditFutureQuotaAndLinkAnExistingMovement -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testAnalysisShowsFourChartsAndCategoryPeriods"
+            FILTERS="-only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFinanceHasOpenOverviewAndDirectMovements -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testPlansInfoAndMonthOnlyAdvanceFlow -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testKeyboardAndLocalMovementFlow -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testPlansFundCanEditFutureQuotaAndLinkAnExistingMovement -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testAnalysisShowsFourChartsAndCategoryPeriods"
           elif [ "${{ inputs.focus }}" = habits ]; then
             FILTERS="-only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHabitIntervalAndWeekdaySchedulingPersistInManagement -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeHealthCardRemainsCompactAndOpensDetail"
           elif [ "${{ inputs.focus }}" = fund ]; then
