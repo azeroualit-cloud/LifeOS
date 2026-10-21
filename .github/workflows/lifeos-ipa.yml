@@ -104,7 +104,7 @@ jobs:
           path: app/build/archive.log
           retention-days: 7
   deliver:
-    if: inputs.delivery_run == '39629067661'
+    if: inputs.delivery_run == '39629728799'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -117,10 +117,10 @@ jobs:
       - name: Require successful matching app, Worker and archive checks
         run: |
           set -euo pipefail
-          for run in 39629063284 39629064021 39629067661; do
+          for run in 39629724505 39629725308 39629728799; do
             for attempt in $(seq 1 60); do
               gh api "repos/$GH_REPO/actions/runs/$run" > run.json
-              status=$(python3 -c "import json; r=json.load(open('run.json')); assert r['head_sha']=='280db8a46c1bdaae52a2641ad5bdb16470e3cd50'; print(r['status'])")
+              status=$(python3 -c "import json; r=json.load(open('run.json')); assert r['head_sha']=='d88355ba9c10cc57cf7e4ff99e80d8f76ff7e6d9'; print(r['status'])")
               if [ "$status" = completed ]; then
                 python3 -c "import json; assert json.load(open('run.json'))['conclusion']=='success'"
                 break
@@ -132,7 +132,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           github-token: ${{ github.token }}
-          run-id: 39629067661
+          run-id: 39629728799
           name: LifeOS-0.9.8-build59-per-Signulous
           path: delivery
       - name: Verify exact unsigned iPhone IPA before publishing the requested direct download
@@ -142,7 +142,7 @@ jobs:
           import hashlib,json,plistlib,zipfile
           folder=Path('delivery');ipa=folder/'LifeOS-0.9.8-build59-unsigned.ipa'
           metadata=json.loads((folder/'BUILD-INFO.json').read_text())
-          assert metadata['source_commit']=='280db8a46c1bdaae52a2641ad5bdb16470e3cd50'
+          assert metadata['source_commit']=='d88355ba9c10cc57cf7e4ff99e80d8f76ff7e6d9'
           assert metadata['source_zip_sha256']=='9f77ebb7c38ffe656e7f6f07e91768f8d063aaf9948ce34d6aaf803ab38b2a30'
           assert hashlib.sha256(ipa.read_bytes()).hexdigest()==(folder/'SHA256.txt').read_text().split()[0]
           with zipfile.ZipFile(ipa) as z:
@@ -154,7 +154,7 @@ jobs:
             binary=z.read('Payload/LifeOSProbe.app/'+info['CFBundleExecutable'])
             assert binary[:4]==bytes.fromhex('cffaedfe') and int.from_bytes(binary[4:8],'little')==0x0100000c
             for marker in ['plan-payment-delete','getFinanceCategoryPeriod','movement-manage-plan-payment','budget-salary-reference','budget-final-remaining','finance-new-plan']:assert marker.encode() in binary
-          Path('RELEASE-NOTES.md').write_text('IPA non firmata per Signulous. Budget e Piani unificati: stipendio, quote e residuo progressivo, budget finale. Finanza con quattro azioni: Budget, Nuovo piano, Nuova spesa, Analisi. Conservate gestione dei pagamenti collegati e analisi 3/6/12 mesi.\n\nWorker corrispondente: https://raw.githubusercontent.com/azeroualit-cloud/LifeOS/280db8a46c1bdaae52a2641ad5bdb16470e3cd50/worker.js\n')
+          Path('RELEASE-NOTES.md').write_text('IPA non firmata per Signulous. Budget e Piani unificati: stipendio, quote e residuo progressivo, budget finale. Finanza con quattro azioni: Budget, Nuovo piano, Nuova spesa, Analisi. Conservate gestione dei pagamenti collegati e analisi 3/6/12 mesi.\n\nWorker corrispondente: https://raw.githubusercontent.com/azeroualit-cloud/LifeOS/d88355ba9c10cc57cf7e4ff99e80d8f76ff7e6d9/worker.js\n')
           print('IPA_SOURCE_AND_BINARY_VERIFIED',hashlib.sha256(ipa.read_bytes()).hexdigest())
           PY
       - name: Publish the requested direct IPA download
