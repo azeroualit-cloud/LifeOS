@@ -159,4 +159,9 @@ jobs:
           PY
       - name: Publish the requested direct IPA download
         run: |
-          gh release create v0.9.7-build58 delivery/LifeOS-0.9.7-build58-unsigned.ipa delivery/BUILD-INFO.json delivery/SHA256.txt --target ff5a07424f6b97f5494f024b7abed1081397c186 --title 'Life OS 0.9.7 build 58' --notes-file RELEASE-NOTES.md
+          set -euo pipefail
+          if gh release view v0.9.7-build58 >/dev/null 2>&1; then
+            gh release upload v0.9.7-build58 delivery/LifeOS-0.9.7-build58-unsigned.ipa delivery/BUILD-INFO.json delivery/SHA256.txt
+          else
+            gh release create v0.9.7-build58 delivery/LifeOS-0.9.7-build58-unsigned.ipa delivery/BUILD-INFO.json delivery/SHA256.txt --verify-tag --title 'Life OS 0.9.7 build 58' --notes-file RELEASE-NOTES.md
+          fi
