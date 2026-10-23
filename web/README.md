@@ -1,6 +1,6 @@
 # Webapp Life OS
 
-Struttura attuale: navigazione **Dashboard / Finanza**, settimana e meteo in Dashboard, azioni Aggiungi peso e Calendario, grafico peso/calorie da inserimento manuale. Calendario dei turni come pagina secondaria; nessuna pagina Attività o controllo delle abitudini. Dati precedenti conservati. Contratto e verifiche: [DASHBOARD-SALUTE.md](../docs/DASHBOARD-SALUTE.md). Codice preparato per la PR; nessun deploy. Build iPhone in verifica.
+Struttura attuale: navigazione **Dashboard / Finanza**, settimana e meteo in Dashboard, azioni Aggiungi peso e Calendario, grafico peso/calorie da inserimento manuale. Calendario dei turni come pagina secondaria; nessuna pagina Attività o controllo delle abitudini. Dati precedenti conservati. Contratto e verifiche: [DASHBOARD-SALUTE.md](../docs/DASHBOARD-SALUTE.md). Codice preparato per la PR; nessun deploy. Build iPhone 52 verificata: [evidenze e IPA](../docs/native/BUILD-52.md).
 
 ## Turni per Calendario Apple — 23 ottobre 2026
 

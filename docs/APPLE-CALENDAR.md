@@ -1,6 +1,6 @@
 # Turni Life OS → Calendario Apple
 
-Implementazione del 23 ottobre 2026, con codice nuovo separato dal template backend. Webapp e sorgenti dell’app iPhone 0.9.0 build 52 preparati; **backend non distribuito, IPA 52 non compilata, abbonamento Apple non ancora attivato**. La build 51 resta l’ultima IPA verificata.
+Implementazione del 23 ottobre 2026, con codice nuovo separato dal template backend. Webapp e sorgenti iPhone 0.9.0 build 52 nella PR. **Build Apple, 83 unitari, 26 UI standard, 12 UI compatti e verifica IPA superati**; backend non distribuito e abbonamento Apple non ancora attivato. [Evidenze e IPA build 52](native/BUILD-52.md).
 
 ## Uso previsto
 
@@ -26,7 +26,7 @@ Il calendario Life OS ora mostra soltanto i turni, senza creazione di eventi, e 
 
 ## Attivazione ancora necessaria
 
-Il runtime non ha credenziali Cloudflare. Nessun dato reale o configurazione live è stato modificato.
+Il runtime non ha credenziali Cloudflare. Non sono state eseguite pubblicazioni di turni né registrazioni di salute reali; la configurazione Cloudflare non è stata modificata.
 
 La connessione GitHub riconosce il repository pubblico `azeroualit-cloud/LifeOS` e il suo ramo `main` coincide con la baseline locale. Il 23 ottobre il tentativo di caricare i file per avviare la CI Apple è stato respinto dalla revisione automatica perché manca un’autorizzazione esplicita dell’utente all’esportazione del codice e dell’archivio verso il repository pubblico. Nessun blob/ramo/commit è stato creato da quel tentativo. L’utente ha successivamente confermato il caricamento sul nuovo ramo GitHub; autorizzazione acquisita. La CI Apple viene avviata con questa revisione. La successiva revisione automatica ha richiesto un consenso specifico per ripubblicare l’intero Worker con i dati incorporati. È stata quindi adottata un’alternativa che non esporta quel contenuto: template originale invariato, sole nuove funzioni in `web/backend-extensions.mjs`, applicazione delle modifiche con `web/backend_update.py`, risultato completo in `web/dist/worker.mjs` ignorato da Git. La pubblicazione del codice aggiunto non richiede di caricare una nuova copia dello storico finanziario.
 
@@ -42,7 +42,7 @@ La connessione GitHub riconosce il repository pubblico `azeroualit-cloud/LifeOS`
 - `web`: `npm run build`; `npm test` con Node 24+ e Chromium. SQLite locale esegue il vero SQL: autenticazione, bozze isolate, revisione stabile, cancellazione/ripristino, mesi separati, retry, rotazione del link, rollback e feed senza effetti di seed.
 - Playwright: viste finanziarie e calendario a 320/375/1280 px, errori JS assenti, nessun overflow; pubblicazione fallita/nuovo tentativo, attesa coda del pennello, blocco di pubblicazione dopo un salvataggio fallito, collegamento webcal e Riduci movimento.
 - Anteprima web reale con dati simulati: `web/previews/turni-apple.png`.
-- Swift: parser su tutti i sorgenti e test; controllo design system; 60 test Foundation su Linux superati, inclusi 2 sul collegamento Apple. Questi non compilano SwiftUI né eseguono i test `NativeStoreTests` o UI.
-- Aggiunti test Apple per chiamata di pubblicazione senza aggiornamento finanziario, timeout senza retry automatico, nuovo tentativo, blocco demo e pannello raggiungibile dopo scorrimento. Sono preparati, **non eseguiti**. CI aggiornata con i nuovi nomi dei test compatti.
+- Swift: parser su tutti i sorgenti e test; controllo design system; 60 test Foundation su Linux superati, inclusi 2 sul collegamento Apple. Questi controlli Linux sono separati dalle verifiche Apple: anche compilazione SwiftUI, NativeStore, UI standard/compatta e archivio IPA sono ora passati; evidenze in `native/BUILD-52.md`.
+- Aggiunti test Apple per chiamata di pubblicazione senza aggiornamento finanziario, timeout senza retry automatico, nuovo tentativo, blocco demo e pannello raggiungibile dopo scorrimento. Sono stati eseguiti e superati nella CI Apple. CI aggiornata con i nuovi nomi dei test compatti.
 
 Diff nativo leggibile: `native/APPLE-TURNI-52.diff`. Pacchetto sorgenti: `../lifeos-native.zip`.
