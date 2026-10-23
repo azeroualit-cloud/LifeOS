@@ -1,0 +1,46 @@
+name: Life OS - Verifica IPA
+on:
+  push:
+    paths: ['.github/workflows/lifeos-artifact-check.yml']
+permissions:
+  actions: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Scarica l'unica IPA dalla build verificata
+        uses: actions/download-artifact@v5
+        with:
+          name: LifeOS-IPA-per-Signulous
+          run-id: 39991175624
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: ipa
+      - name: Verifica checksum, ZIP, versione e architettura
+        run: |
+          python3 - <<'PY'
+          import hashlib, pathlib, plistlib, re, zipfile
+          root = pathlib.Path('ipa')
+          files = list(root.rglob('*.ipa'))
+          assert len(files) == 1, 'Serve una sola IPA'
+          checksums = list(root.rglob('SHA256.txt'))
+          assert len(checksums) == 1
+          expected = checksums[0].read_text().split()[0]
+          digest = hashlib.sha256(files[0].read_bytes()).hexdigest()
+          assert digest == expected, 'Checksum IPA non corrispondente'
+          with zipfile.ZipFile(files[0]) as archive:
+              assert archive.testzip() is None, 'Archivio IPA danneggiato'
+              plists = [name for name in archive.namelist() if re.fullmatch(r'Payload/[^/]+\.app/Info.plist', name)]
+              assert len(plists) == 1
+              info = plistlib.loads(archive.read(plists[0]))
+              assert info['CFBundleIdentifier'] == 'com.nas.lifeos.probe'
+              assert str(info['CFBundleVersion']) == '52'
+              assert info['CFBundleShortVersionString'] == '0.9.0'
+              executable = plists[0].removesuffix('Info.plist') + info['CFBundleExecutable']
+              binary = archive.read(executable)
+              assert binary[:4] == bytes.fromhex('cffaedfe'), 'Eseguibile Mach-O 64 bit atteso'
+              assert int.from_bytes(binary[4:8], 'little') == 0x0100000c, 'Architettura arm64 attesa'
+          print('IPA_VERIFIED: version=0.9.0 build=52 bundle=com.nas.lifeos.probe architecture=arm64')
+          print('SHA256=' + digest)
+          PY
