@@ -912,7 +912,7 @@
                  }
              }
              capture(dark ? "native-toolbar-hit-region-dark" : "native-toolbar-hit-region-light")
-@@ -93,109 +88,68 @@
+@@ -93,109 +88,77 @@
          }
      }
      func testNavigationKeepsSelectionAndGeometryWhenChangingTabs() {
@@ -1003,16 +1003,25 @@
 -        XCTAssertTrue(summary.label.contains("Turni non disponibili"))
 +    func testHomeEmptyHealthStateCanAddAndCorrectWeight() {
 +        let app = launch(["--empty-home"])
-+        XCTAssertTrue(app.staticTexts["health-empty"].exists)
-+        app.buttons["dashboard-add-weight"].tap()
++        let empty = app.staticTexts["Nessuna misurazione disponibile. Usa Aggiungi peso per iniziare."]
++        reveal(empty, in: app)
++        XCTAssertTrue(empty.waitForExistence(timeout: 5), app.debugDescription)
++        XCTAssertTrue(empty.isHittable)
++        capture("health-empty-visible")
++        let add = app.buttons["dashboard-add-weight"]
++        for _ in 0..<8 { if add.isHittable { break }; app.scrollViews["dashboard-scroll"].swipeDown() }
++        XCTAssertTrue(add.isHittable); add.tap()
 +        XCTAssertTrue(app.navigationBars["Aggiungi peso"].waitForExistence(timeout: 5))
 +        app.textFields["Peso (kg)"].tap(); app.textFields["Peso (kg)"].typeText("78,4")
 +        app.buttons["save-health-measurement"].tap()
-+        XCTAssertTrue(app.buttons["dashboard-add-weight"].waitForExistence(timeout: 5))
-+        XCTAssertFalse(app.staticTexts["health-empty"].exists)
-+        app.buttons["dashboard-add-weight"].tap()
++        XCTAssertTrue(add.waitForExistence(timeout: 5)); add.tap()
 +        XCTAssertEqual(app.textFields["Peso (kg)"].value as? String, "78.4")
 +        app.buttons["Annulla"].tap()
++        let readings = app.buttons["Mostra misurazioni"]
++        reveal(readings, in: app)
++        XCTAssertTrue(readings.isHittable, app.debugDescription); readings.tap()
++        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "78,4")).firstMatch.waitForExistence(timeout: 5))
++        XCTAssertFalse(empty.exists)
 +        capture("health-weight-saved")
 +    }
 +
@@ -1068,7 +1077,7 @@
          app.buttons["Aggiungi spesa"].tap()
          let description = app.textFields["Descrizione"]
          XCTAssertTrue(description.waitForExistence(timeout: 10))
-@@ -213,12 +167,14 @@
+@@ -213,12 +176,14 @@
          capture("movement-saved-locally")
      }
      func testLargeTextAndSixWeekCalendar() {
@@ -1088,7 +1097,7 @@
      }
      func testNativeSignInKeyboard() {
          continueAfterFailure = false
-@@ -233,7 +189,7 @@
+@@ -233,7 +198,7 @@
      }
      func testBottomAddOpensTheCorrectEditor() {
          let app = launch(["--dark"])
@@ -1097,7 +1106,7 @@
              app.buttons[tab].tap()
              addButton(app).tap()
              XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: 10))
-@@ -247,81 +203,35 @@
+@@ -247,81 +212,35 @@
          capture("bottom-add-extra")
          app.buttons["Annulla"].tap()
      }
@@ -1204,7 +1213,7 @@
          let cells = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "calendar-day-"))
          XCTAssertGreaterThanOrEqual(cells.count, 28)
          // Repeated day changes exercise selection without changing the month/data indexes.
-@@ -333,22 +243,12 @@
+@@ -333,22 +252,12 @@
          }
          capture("calendar-repeated-selection")
      }
@@ -1230,7 +1239,7 @@
          let formatter = DateFormatter(); formatter.locale = Locale(identifier: "en_US_POSIX"); formatter.timeZone = TimeZone(identifier: "Europe/Rome"); formatter.dateFormat = "yyyy-MM-dd"
          let day = formatter.string(from: Date())
          app.buttons["dashboard-day-" + day].tap()
-@@ -379,7 +279,7 @@
+@@ -379,7 +288,7 @@
      }
      func testVisibleShiftBrushPaintsAndUndoRestoresDay() {
          let app = launch(["--dark"])
@@ -1239,7 +1248,7 @@
          app.buttons["toggle-shift-paint"].tap()
          let brush = app.buttons["shift-brush-afternoon"]
          XCTAssertTrue(brush.waitForExistence(timeout: 10)); brush.tap()
-@@ -392,7 +292,7 @@
+@@ -392,7 +301,7 @@
          XCTAssertTrue(day.label.contains("Mattina"))
          app.buttons["toggle-shift-paint"].tap()
      }
@@ -1248,7 +1257,7 @@
          let app = launch(["--dark"])
          app.buttons["Finanza"].tap()
          openBudget(app)
-@@ -400,11 +300,6 @@
+@@ -400,11 +309,6 @@
          for _ in 0..<5 { if assets.isHittable { break }; app.collectionViews.firstMatch.swipeUp() }
          XCTAssertTrue(assets.exists)
          capture("savings-breakdown")
@@ -1260,7 +1269,7 @@
      }
      func testExtraActualPaymentUsesSavingsAndKeepsMonthlyBudget() {
          let app = launch(["--stress-money", "--dark"])
-@@ -492,28 +387,16 @@
+@@ -492,28 +396,16 @@
          XCTAssertTrue(app.navigationBars["Movimenti"].waitForExistence(timeout: 10))
          capture("all-movements-direct")
      }
@@ -1294,7 +1303,7 @@
          }
      }
      private func revealFinanceControl(_ element: XCUIElement, in app: XCUIApplication) {
-@@ -559,32 +442,20 @@
+@@ -559,32 +451,20 @@
          }
      }
  

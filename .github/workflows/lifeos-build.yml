@@ -42,7 +42,7 @@ jobs:
           import hashlib, pathlib, zipfile
           source = pathlib.Path('lifeos-native.zip')
           if source.is_file():
-              assert hashlib.sha256(source.read_bytes()).hexdigest() == '5a06966fc3c16cb89e5dbd9f7a0e2ab7e6a07e9524984bb05edf5232c74dad04', 'ZIP sorgenti diverso da quello previsto'
+              assert hashlib.sha256(source.read_bytes()).hexdigest() == '61ba8197492e5d139bbd441ef64d94e3eddb7e117e10f96670e554a27e9e4ec3', 'ZIP sorgenti diverso da quello previsto'
               with zipfile.ZipFile(source) as archive:
                   for name in archive.namelist():
                       p = pathlib.PurePosixPath(name)
@@ -69,58 +69,8 @@ jobs:
           brew install xcodegen
           xcodegen generate
           mkdir -p build
-      - name: Verifica contratto nativo sul database condiviso
-        if: github.repository == 'azeroualit-cloud/LifeOS'
-        working-directory: app
-        env:
-          LIFEOS_TEST_PASSWORD: ${{ secrets.LIFEOS_TEST_PASSWORD }}
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          import datetime, http.cookiejar, json, os, pathlib, subprocess, tempfile, time, urllib.request
-          origin = 'https://lifeos-native-test.a-zeroual-it.workers.dev'
-          client = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
-          def request(path, value):
-              r = urllib.request.Request(origin + path, data=json.dumps(value).encode(), method='POST', headers={'Origin':origin,'Content-Type':'application/json','User-Agent':'LifeOS-Native-Check/1.0'})
-              with client.open(r, timeout=90) as response:
-                  assert response.status == 200 and response.headers.get('X-LifeOS-Data-Source') == 'shared'
-                  return response.read()
-          stage = 'login'
-          try:
-              password = os.environ['LIFEOS_TEST_PASSWORD']
-              assert password
-              request('/auth/login', {'user':'nas','password':password})
-              now = datetime.datetime.now(datetime.timezone.utc)
-              with tempfile.TemporaryDirectory(prefix='lifeos-contract-') as tmp:
-                  folder = pathlib.Path(tmp)
-                  start = time.monotonic()
-                  stage = 'finance-overview'
-                  finance = request('/api/getFinanceOverview', [now.year, now.month])
-                  elapsed = time.monotonic()-start
-                  light = json.loads(finance)
-                  assert isinstance(light['planning'], dict)
-                  (folder/'finance.json').write_bytes(finance)
-                  stage = 'native-validator'
-                  (folder/'Verify.swift').write_text('import Foundation\n@main struct Verify { static func main() { do { _ = try NativeValidation.snapshot(Data(contentsOf: URL(fileURLWithPath: CommandLine.arguments[1]))); print("NATIVE_FINANCE_CONTRACT_OK") } catch { print("NATIVE_FINANCE_CONTRACT_FAILED"); exit(1) } } }')
-                  clean = dict(os.environ); clean.pop('LIFEOS_TEST_PASSWORD', None)
-                  result = subprocess.run(['swiftc','-swift-version','5','-parse-as-library','Sources/Models.swift','Sources/NativeModels.swift',str(folder/'Verify.swift'),'-o',str(folder/'verify')],env=clean,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-                  assert result.returncode == 0, 'Compilazione validatore non riuscita'
-                  subprocess.run([str(folder/'verify'),str(folder/'finance.json')],env=clean,check=True)
-                  stage = 'life-data'
-                  life = json.loads(request('/api/getLifeData',[now.strftime('%Y-%m')]))
-                  assert isinstance(life['tasks'],list) and isinstance(life['categories'],list)
-                  assert isinstance(json.loads(finance)['extraPlan']['allocations'],list)
-                  assert len(json.loads(finance)['forecastHistory']) == 6
-                  stage = 'finance-full'
-                  full = json.loads(request('/api/getFinanceData', [now.year, now.month]))
-                  assert isinstance(full['forecastPlan']['allocations'], list)
-                  assert isinstance(full['planning'], dict)
-                  assert light['planning']['goal'] == full['planning']['goal']
-                  assert light['planning'].get('savingsTarget') == full['planning'].get('savingsTarget')
-                  print('Contratto condiviso verificato; riepilogo: %.3f secondi, %d byte.' % (elapsed,len(finance)))
-          except Exception as error:
-              raise SystemExit('Verifica contratto fallita: stage=%s class=%s HTTP=%s. Nessun dato o credenziale pubblicato.' % (stage,type(error).__name__,getattr(error,'code','n/a')))
-          PY
+      # This build validates local fixtures only. Live backend verification is a
+      # separate action requiring explicit authorization and configured credentials.
       - name: Compila app e test Apple
         timeout-minutes: 12
         working-directory: app
@@ -128,6 +78,13 @@ jobs:
           set -euo pipefail
           DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,re,sys; d=json.load(sys.stdin); keys=sorted((k for k in d["devices"] if "iOS" in k),key=lambda k:tuple(map(int,re.findall(r"\d+",k))),reverse=True); print(next(x["udid"] for k in keys for x in d["devices"][k] if "iPhone" in x["name"]))')
           xcodebuild build-for-testing -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compile.log
+      - name: Verifica mirata Dashboard salute
+        timeout-minutes: 8
+        working-directory: app
+        run: |
+          set -euo pipefail
+          DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,re,sys; d=json.load(sys.stdin); keys=sorted((k for k in d["devices"] if "iOS" in k),key=lambda k:tuple(map(int,re.findall(r"\d+",k))),reverse=True); print(next(x["udid"] for k in keys for x in d["devices"][k] if "iPhone" in x["name"]))')
+          xcodebuild test-without-building -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 300 -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeEmptyHealthStateCanAddAndCorrectWeight -resultBundlePath build/Health.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/health-tests.log
       - name: Verifica mirata Finanza su compatto
         timeout-minutes: 15
         working-directory: app
@@ -151,6 +108,8 @@ jobs:
         run: |
           if [ -d build/Tests.xcresult ]; then
             xcrun xcresulttool export attachments --path build/Tests.xcresult --output-path build/screenshots
+          elif [ -d build/Health.xcresult ]; then
+            xcrun xcresulttool export attachments --path build/Health.xcresult --output-path build/screenshots
           elif [ -d build/Focused.xcresult ]; then
             xcrun xcresulttool export attachments --path build/Focused.xcresult --output-path build/screenshots
           fi
@@ -194,7 +153,7 @@ jobs:
         run: |
           python3 - <<'PYLOG'
           import pathlib, re
-          for name in ['compile.log', 'focused-tests.log', 'tests.log', 'compact.log', 'archive.log']:
+          for name in ['compile.log', 'health-tests.log', 'focused-tests.log', 'tests.log', 'compact.log', 'archive.log']:
               path = pathlib.Path('build') / name
               if not path.exists(): continue
               lines = path.read_text(errors='replace').splitlines()
