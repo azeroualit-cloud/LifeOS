@@ -1,3 +1,11 @@
+## Dashboard salute — struttura definitiva richiesta il 23 ottobre 2026
+
+Solo Dashboard e Finanza nella navigazione. Dashboard con settimana, riepilogo turni/meteo senza attività o abitudini, azioni Aggiungi peso e Calendario, grafico peso/calorie. Calendario dei turni come destinazione secondaria. Misurazioni manuali implementate provvisoriamente in assenza di una preferenza sulla sorgente; HealthKit non integrato. Build web e prove locali passate; 65 test Foundation passati. Sorgenti iPhone build 52 aggiornati, CI Apple e deploy non eseguiti: caricamento pubblico ora autorizzato dalla conferma dell’utente, accesso Cloudflare assente. Dettagli: [DASHBOARD-SALUTE.md](DASHBOARD-SALUTE.md).
+
+## Turni → Calendario Apple — 23 ottobre 2026
+
+Webapp e sorgenti nativi build 52 preparati con pubblicazione mensile e abbonamento ICS riservato. Verifiche locali superate; nessun deploy Cloudflare, nessuna nuova IPA o attivazione Apple. La build 51 resta l’ultima IPA verificata. Dettagli, limiti e attivazione: [APPLE-CALENDAR.md](APPLE-CALENDAR.md). Vecchi dati conservati; migrazione in Apple non eseguita. La pagina Attività è stata rimossa nella revisione seguente.
+
 ## Webapp — revisione locale 17 ottobre 2026
 
 Sorgente completo recuperato dal file allegato e versionato in `web/worker.mjs`, HTML leggibile in `web/app.html`. Palette platino, Finanza aperta senza card, Budget/Extra/Spesa (Spesa a destra), Budget separato, grafici esistenti in Analisi; calendario uniforme senza fondi weekend e selezione sul numero; più contestuale nell’intestazione e microanimazioni con Riduci movimento. Rimossi dalla UI il Sankey storico e il riepilogo annuale. Backend identico alla baseline allegata.

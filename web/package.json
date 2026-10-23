@@ -2,7 +2,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node tests/interface.mjs",
+    "test": "python3 build.py && node tests/shift-calendar.mjs && node tests/interface.mjs",
     "build": "python3 build.py"
   },
   "devDependencies": {

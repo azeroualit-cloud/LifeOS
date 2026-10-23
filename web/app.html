@@ -78,7 +78,7 @@ input,select,textarea {display:block;width:100%;min-height:42px;padding:10px 12p
 .form-actions,.os-form-actions {grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px;margin-top:10px;}.os-form-error {grid-column:1/-1;color:var(--red);font-size:13px;}.os-inline-event {margin-top:18px;border-top:1px solid var(--line);padding-top:16px;}.os-routine-manager > div {display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line);}.os-routine-manager span {flex:1;}.os-routine-manager button {font-size:11px;min-height:30px;padding:4px 7px;}.os-routine-dialog > p {color:var(--muted);font-size:12px;margin-bottom:12px;}.os-routine-dialog form {margin-top:16px;}.category-order {padding-top:12px;}.category-order > div {display:flex;align-items:center;gap:6px;padding:8px 0;}.category-order span {flex:1;}
 .errorbox {background:color-mix(in srgb,var(--red) 10%,var(--os-panel));border:1px solid var(--red);color:var(--red);padding:12px;border-radius:12px;margin-bottom:16px;}.loading-overlay {position:fixed;inset:0;z-index:80;display:grid;place-items:center;background:#0004;}.loading-panel {display:grid;gap:12px;justify-items:center;background:var(--os-panel);border:1px solid var(--line);border-radius:20px;padding:28px;}.loading-spinner {width:24px;height:24px;border:2px solid var(--line);border-top-color:var(--os-accent);border-radius:50%;animation:spin .8s linear infinite;}@keyframes spin {to {transform:rotate(360deg);}}
 @media(max-width:760px) {
- :root {--card-padding:18px;--space:14px;}.shell {display:block;min-height:100svh;}.sidebar {position:fixed;inset:auto 14px calc(12px + var(--safe-bottom));height:var(--nav-height);width:auto;max-width:520px;margin:0 auto;padding:5px;border:1px solid var(--line);border-radius:36px;z-index:40;background:color-mix(in srgb,var(--os-panel) 90%,transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);}.brand,.sidebar-foot {display:none;}.nav {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px;width:100%;height:100%;}.nav button {display:flex;flex-direction:column;justify-content:center;gap:5px;padding:4px 2px;min-height:0;border-radius:30px;font-size:11px;line-height:1.2;}.nav-symbol {width:22px;height:22px;}
+ :root {--card-padding:18px;--space:14px;}.shell {display:block;min-height:100svh;}.sidebar {position:fixed;inset:auto 14px calc(12px + var(--safe-bottom));height:var(--nav-height);width:auto;max-width:520px;margin:0 auto;padding:5px;border:1px solid var(--line);border-radius:36px;z-index:40;background:color-mix(in srgb,var(--os-panel) 90%,transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);}.brand,.sidebar-foot {display:none;}.nav {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px;width:100%;height:100%;}.nav button {display:flex;flex-direction:column;justify-content:center;gap:5px;padding:4px 2px;min-height:0;border-radius:30px;font-size:11px;line-height:1.2;}.nav-symbol {width:22px;height:22px;}
  main {padding:calc(22px + var(--safe-top)) var(--page-gutter) calc(164px + var(--safe-bottom));max-width:600px;margin:0 auto;}.top {margin-bottom:18px;}.page-heading {gap:10px;}.header-tools {gap:6px;}h1 {font-size:30px;}.theme-toggle {width:40px;height:40px;min-height:40px;font-size:22px;}.os-more-menu summary {width:36px;height:36px;font-size:18px;}.sync {display:none;}.period {width:190px;gap:4px;}.header-meta {margin-top:10px;}.page-fab {right:20px;bottom:calc(100px + var(--safe-bottom));}.page-fab .fab-button {width:56px;height:56px;min-height:56px;}
  .os-home {grid-template-columns:minmax(0,1fr);}.os-home-daygrid h2 {font-size:24px;}.os-routine {gap:12px;}.os-routine-items {gap:6px;}.os-routine-check {font-size:12px;padding:8px;}.os-money-primary strong {font-size:min(40px,calc(100cqw / var(--money-units,6)));}.os-home-submoney {gap:14px;}.os-home-metric > b {font-size:18px;}.os-sunline-meta {font-size:11px;}.os-sunline-meta strong {font-size:11px;}.os-prayer-list {grid-template-columns:repeat(2,minmax(0,1fr));}
  .os-category-page {padding:0 14px;}.os-task {gap:8px;grid-template-columns:28px 24px minmax(0,1fr) 26px;min-height:68px;padding:16px 0;}.os-task-title {font-size:15px;}.os-wait {width:26px;}.os-drag-handle {width:16px;}.os-category-tabs button {padding:9px 11px;}.os-month-header {margin-bottom:16px;}.os-month-header h2 {font-size:21px;}.os-calendar-week {gap:0;padding:2px;}.os-calendar-details {margin-top:18px;}
@@ -122,6 +122,10 @@ html:not([data-theme="light"]) [data-kind="holiday"] {--shift-color:#d7bf52;}
 
 .os-day[data-kind="night"] .os-shift,.os-day .os-shift[data-kind="night"] {color:#fff;}
 @media(max-width:760px) {.overview-analysis-grid {grid-template-columns:minmax(0,1fr);}.overview-analysis-grid > .annual-card,.overview-analysis-grid > .integrated-chart {grid-column:auto;}}
+
+.shift-publication {margin-top:24px;} .shift-publication .actions {margin-top:16px;flex-wrap:wrap;} .shift-publication [role="status"],.shift-publication [role="alert"] {margin-top:12px;} .shift-subscription {display:grid;gap:16px;margin-top:16px;min-width:0;} .shift-subscription label {display:grid;gap:8px;} .shift-subscription input {width:100%;min-width:0;} .shift-subscription a {width:fit-content;min-height:44px;}
+
+.health-dashboard {display:grid;gap:24px;max-width:720px;} .dashboard-mode .header-meta {display:none;} .dashboard-week .os-day small {grid-row:1;} .dashboard-week .os-day b {grid-row:2;} .dashboard-week .os-day .os-shift {grid-row:3;} .dashboard-week .os-day {grid-template-rows:18px 26px 20px;height:88px;} .health-panel {display:grid;gap:16px;} .health-panel .actions {display:flex;gap:8px;} .health-chart {width:100%;height:auto;color:var(--os-accent);} .health-chart text {fill:var(--muted);font-size:11px;} .health-dashboard .dashboard-actions {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;} .health-dashboard .dashboard-actions button {width:100%;} .dashboard-actions button {display:flex;flex-direction:column;gap:8px;} .dashboard-actions button span {font-size:26px;} .health-latest {font-size:14px;}
 </style>
   <style id="native-web-parity">
 /* Web parity with native 0.9.0. Shift palette and data contracts are unchanged. */
@@ -157,36 +161,6 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
               <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" />
               <path d="M9 21v-7h6v7" /></svg
             >Dashboard
-          </button>
-          <button data-view="tasks">
-            <svg
-              class="nav-symbol"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <rect x="4" y="4" width="16" height="16" rx="3" />
-              <path d="m8 12 3 3 5-6" /></svg
-            >Attività
-          </button>
-          <button data-view="calendar">
-            <svg
-              class="nav-symbol"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <rect x="3" y="5" width="18" height="16" rx="2" />
-              <path d="M7 3v4M17 3v4M3 10h18M8 14h2M14 14h2M8 18h2" /></svg
-            >Calendario
           </button>
           <button data-view="overview">
             <svg
@@ -234,7 +208,6 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
           </div>
         </div>
         <section id="today" class="view active"></section>
-        <section id="tasks" class="view"></section>
         <section id="calendar" class="view"></section>
         <section id="overview" class="view"></section>
         <section id="movements" class="view"></section>
@@ -504,11 +477,16 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         category: "action",
         weather: null,
         weatherAt: 0,
+        weatherLoading: false,
         timesOpen: false,
         reorder: false,
         paletteOpen: false,
         readRevision: 0,
         paintRevision: 0,
+        publishing: false,
+        publishError: "",
+        publishMessage: "",
+        paintFailures: new Set(),
       };
       const osSafe = (v) =>
         String(v ?? "").replace(
@@ -575,11 +553,17 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
       function osPageActions() {
         const view = state.view, active = life.data?.categories.find(c => c.key === life.category);
         let action = 'data-new-transaction="Spesa"', label = 'Aggiungi spesa', secondary = '';
-        if (view === 'tasks') {
+        if (view === 'today') {
+          document.getElementById('page-actions').innerHTML = '';
+          document.getElementById('page-fab').innerHTML = '';
+          return;
+        } else if (view === 'tasks') {
           action = 'data-life-task="new"'; label = 'Aggiungi attività';
           secondary = `<details class="os-more-menu"><summary aria-label="Opzioni categoria" title="Opzioni categoria"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg></summary><div><button data-life-rename-category="${osSafe(active?.key || "action")}">Rinomina categoria</button><button data-life-reorder aria-pressed="${life.reorder}">${life.reorder ? "Fine riordino" : "Riordina attività"}</button><button data-life-category>Gestisci categorie</button></div></details>`;
         } else if (view === 'calendar') {
-          action = 'data-life-event="new"'; label = 'Aggiungi evento';
+          document.getElementById('page-actions').innerHTML = '';
+          document.getElementById('page-fab').innerHTML = '';
+          return;
         } else if (['overview','movements','budget','extras'].includes(view)) {
           if (view === 'extras') { action = 'data-new-extra="1"'; label = 'Aggiungi straordinaria'; }
           secondary = '<details class="os-more-menu"><summary aria-label="Altre azioni" title="Altre azioni"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg></summary><div><button data-new-transaction="Entrata">+ Entrata</button><button data-new-extra="1">+ Straordinaria</button><button data-new-transaction="Trasferimento">Trasferimento finale da Revolut</button></div></details>';
@@ -596,37 +580,15 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         const view = typeof state !== "undefined" ? state.view : "today";
         if (view === "today")
           document.getElementById("today").innerHTML = osToday();
-        if (view === "tasks")
-          document.getElementById("tasks").innerHTML = osTasks();
         if (view === "calendar") {
           document.getElementById("calendar").innerHTML = osCalendar();
           document.body.dataset.calendarRows = Math.ceil(
-            document.querySelectorAll(".os-day").length / 7,
+            document.querySelectorAll("#calendar .os-day").length / 7,
           );
           document.body.style.setProperty(
             "--calendar-rows",
             document.body.dataset.calendarRows,
           );
-        }
-      }
-
-      /** Aggiorna la sintesi finanziaria della home per il mese corrente a Roma. */
-      async function osLoadHomeFinance() {
-        try {
-          const day = new Date().toLocaleDateString("sv-SE", {
-            timeZone: "Europe/Rome",
-          });
-          const fresh = await osRequest(
-            "getFinanceOverview",
-            Number(day.slice(0, 4)),
-            Number(day.slice(5, 7)),
-          );
-          life.finance = fresh;
-          life.financeError = false;
-          if (life.data) document.getElementById("today").innerHTML = osToday();
-        } catch (e) {
-          life.financeError = true;
-          if (life.data) document.getElementById("today").innerHTML = osToday();
         }
       }
 
@@ -639,7 +601,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
       /** Etichetta meteo compatta da dati già caricati. */
       function osWeatherText() {
         const w = life.weather;
-        if (!w) return "Meteo —";
+        if (!w) return life.weatherLoading ? "Aggiornamento meteo…" : "Meteo non disponibile";
         const condition = [0].includes(w.code)
           ? "sereno"
           : [1, 2].includes(w.code)
@@ -661,6 +623,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
       async function osLoadWeather() {
         if (life.weatherAt && Date.now() - life.weatherAt < 30 * 60000) return;
         life.weatherAt = Date.now();
+        life.weatherLoading = true;
         const controller = new AbortController(),
           timer = setTimeout(() => controller.abort(), 6000);
         try {
@@ -704,77 +667,64 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
           life.weather = null;
         } finally {
           clearTimeout(timer);
+          life.weatherLoading = false;
           osUpdateHeader();
           if (life.data) document.getElementById("today").innerHTML = osToday();
         }
       }
 
-      /** Markup dashboard: routine, oggi/domani, tre attività, eventi e saldi. */
+      /** Dashboard: settimana, meteo, azioni salute/turni e misurazioni reali. */
       function osToday() {
-        const d = life.data,
-          day = d.today,
-          shift = d.shifts.find((s) => s.day === day),
-          tomorrow = d.shifts.find((s) => s.day === osNextDay(day));
-        const tasks = d.tasks.filter(
-            (t) => t.status === "todo" && t.list_kind === "action",
-          ),
-          waiting = d.tasks.filter(
-            (t) => t.status === "waiting" && t.list_kind === "action",
-          ),
-          upcoming = (d.upcomingEvents || []).slice(0, 3);
-        const habits = d.routines || [],
-          complete = habits.filter((h) => h.checked).length;
-        const finance = life.finance?.summary;
-        const shiftLabel = (v) =>
-          v
-            ? {
-                morning: 'Mattina',
-                afternoon:
-                  'Pomeriggio',
-                night: 'Notte',
-                holiday: "Ferie",
-                rest: "Riposo",
-              }[v.kind] || osShift[v.kind]
-            : "Nessun turno";
-        const featured =
-          upcoming
-            .map(
-              (ev) =>
-                `<div class="os-agenda-entry"><button class="os-agenda-row" data-life-event="${ev.id}"><span class="os-agenda-date"><b>${new Date(ev.day + "T12:00:00Z").toLocaleDateString("it-IT", { day: "2-digit", timeZone: "UTC" })}</b><small>${new Date(ev.day + "T12:00:00Z").toLocaleDateString("it-IT", { month: "short", timeZone: "UTC" })}</small></span><span class="os-agenda-title"><span class="os-home-agenda-name">${osSafe(ev.title)}${osDueBadge(ev.day, ev.occurrence_status)}</span><small>${ev.start_time || "Tutto il giorno"}${ev.location ? " · " + osSafe(ev.location) : ""}</small></span><span class="os-agenda-arrow" aria-hidden="true">›</span></button><button type="button" class="os-agenda-done" data-life-occurrence="${ev.id}:${ev.day}:done" aria-label="Segna fatta ${osSafe(ev.title)}">Fatto</button></div>`,
-            )
-            .concat(
-              tasks
-                .slice(0, Math.max(0, 3 - upcoming.length))
-                .map(
-                  (t) =>
-                    `<div class="os-home-task"><button class="os-check" data-life-complete="${t.id}" aria-label="Completa ${osSafe(t.title)}"></button><button class="os-home-task-title" data-life-task="${t.id}">${osSafe(t.title)}${osDueBadge(t.due_date || t.scheduled_date, t.status)}</button></div>`,
-                ),
-            )
-            .slice(0, 3)
-            .join("") || '<p class="os-empty">Nessun evento o attività.</p>';
-        const routine = habits
-          .map(
-            (h) =>
-              `<button type="button" class="os-routine-check ${h.checked ? "checked" : ""}" data-life-routine="${h.id}" aria-pressed="${!!h.checked}" aria-label="${h.checked ? "Annulla" : "Completa"} ${osSafe(h.title)}"><span class="os-routine-tick" aria-hidden="true">${h.checked ? "✓" : ""}</span>${osSafe(h.title)}</button>`,
-          )
-          .join("");
-        const exactMoney = (n) =>
-          new Intl.NumberFormat("it-IT", {
-            style: "currency",
-            currency: "EUR",
-            useGrouping: "always",
-          }).format(n);
-        return `<div class="os-home">
-    <section class="os-card os-day-dashboard" aria-label="La giornata"><div class="os-home-daygrid"><div data-kind="${shift?.kind || ""}"><span class="os-home-label">Oggi</span><h2>${shiftLabel(shift)}</h2></div><div class="os-home-tomorrow" data-kind="${tomorrow?.kind || ""}"><span>Domani</span><strong>${shiftLabel(tomorrow)}</strong></div></div>
-      <div class="os-routine"><div class="os-routine-head"><span>Routine <b>${complete}/${habits.length}</b></span><button type="button" class="os-routine-manage" data-life-routine-manage>Gestisci</button></div><div class="os-routine-items">${routine || '<button class="os-home-routine-add" data-life-routine-manage>Aggiungi routine</button>'}</div></div>
-    </section>
-    <section class="os-card os-home-agenda"><div class="os-topline"><h2>In evidenza</h2><button class="os-button" data-life-nav="tasks">Tutte le attività</button></div>${featured}</section>
-    <section class="os-card os-home-finance" aria-label="Denaro">
-      ${finance ? `<div class="os-home-money"><div class="os-money-primary" style="--money-units:${exactMoney(finance.monthlyRemaining).length*0.62}"><small>Budget del mese</small><strong>${state.assetsVisible ? exactMoney(finance.monthlyRemaining) : "•••• €"}</strong></div>${privacyButton()}</div><div class="os-home-submoney ${Math.abs(finance.budget)>=100000 || Math.abs(finance.monthlyCommitted)>=100000?"large-amount":""}"><div class="os-home-metric"><span>Impegnato</span><b>${exactMoney(finance.monthlyCommitted)}</b></div><div class="os-home-metric os-home-private"><span>Saldo</span><b>${state.assetsVisible ? exactMoney(finance.budget) : "•••• €"}</b></div></div>` : life.financeError ? '<p class="os-empty">Saldo non disponibile.</p><button class="os-button" data-life-nav="overview">Riprova in Finanza</button>' : '<p class="os-empty" role="status">Caricamento…</p>'}
-    </section>
-    <section class="os-card os-home-prayer"><div class="os-solar-inline">${osPrayerCard(day, new Date(), life.timesOpen)}</div></section>
-  </div>`;
+        const today = life.data.today, shifts = new Map(life.data.shifts.map(s => [s.day,s.kind]));
+        const names = {morning:"di mattina",afternoon:"di pomeriggio",night:"di notte",holiday:"in ferie",rest:"di riposo"};
+        const summary = [shifts.has(today) ? `Oggi sei ${names[shifts.get(today)]}.` : "Nessun turno assegnato per oggi.", osWeatherText()].join(" ");
+        const week = Array.from({length:7},(_,i)=>{
+          const date = new Date(Date.parse(today+"T12:00:00Z")+(i-3)*86400000), day=date.toISOString().slice(0,10), kind=shifts.get(day);
+          return `<button class="os-day ${day===today?"selected":""}" data-dashboard-day="${day}" data-kind="${kind||""}" aria-label="${osDate(day)} · ${osShift[kind]||"Nessun turno"}"><small>${date.toLocaleDateString("it-IT",{weekday:"short",timeZone:"UTC"})}</small><b>${date.getUTCDate()}</b><span class="os-shift ${kind?"":"no-shift"}">${osShiftInitial[kind]||""}</span></button>`;
+        }).join("");
+        return `<div class="health-dashboard"><section aria-label="Calendario settimanale"><div class="os-calendar-week dashboard-week">${week}</div></section><section aria-label="Turni e previsioni meteo"><p id="home-summary">${osSafe(summary)}</p></section><div class="finance-actions dashboard-actions"><button data-add-weight><span aria-hidden="true">＋</span>Aggiungi peso</button><button data-dashboard-calendar><span aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg></span>Calendario</button></div>${osHealthChart()}</div>`;
       }
+      function osHealthChart() {
+        const metric = life.healthMetric || "weight_kg", label = metric === "weight_kg" ? "Peso" : "Calorie", unit = metric === "weight_kg" ? "kg" : "kcal";
+        const rows = (life.data.health || []).slice(-30).filter(row => typeof row[metric] === "number" && Number.isFinite(row[metric]));
+        let plot = '<p class="os-empty">Nessuna misurazione disponibile. Usa Aggiungi peso per iniziare.</p>';
+        if (rows.length) {
+          const values=rows.map(r=>r[metric]), low=Math.min(...values), high=Math.max(...values), span=high-low||1;
+          const first=Date.parse(rows[0].day), last=Date.parse(rows.at(-1).day), range=last-first||1;
+          const x=r=>rows.length===1?180:24+(Date.parse(r.day)-first)/range*312, y=r=>high===low?84:132-(r[metric]-low)/span*96;
+          plot=`<p class="health-latest">${label}: <strong>${rows.at(-1)[metric].toLocaleString("it-IT")} ${unit}</strong> · ${osSafe(osDate(rows.at(-1).day))}</p><svg class="health-chart" viewBox="0 0 360 176" role="img" aria-label="${label} nel tempo, ${unit}"><text x="8" y="18">${high.toLocaleString("it-IT")} ${unit}</text><text x="8" y="154">${low.toLocaleString("it-IT")} ${unit}</text>${rows.map(r=>`<circle cx="${x(r)}" cy="${y(r)}" r="4" fill="currentColor"><title>${r.day}: ${r[metric]} ${unit}</title></circle>`).join("")}<text x="24" y="174">${rows[0].day.slice(5)}</text><text x="288" y="174">${rows.at(-1).day.slice(5)}</text></svg><details><summary>Mostra misurazioni</summary>${rows.map(r=>`<p>${osSafe(osDate(r.day))}: ${r[metric].toLocaleString("it-IT")} ${unit}</p>`).join("")}</details>`;
+        }
+        return `<section class="health-panel" aria-label="Grafico peso e calorie"><h2>Peso e calorie</h2><div class="actions">${[["weight_kg","Peso"],["calories","Calorie"]].map(([key,title])=>`<button data-health-metric="${key}" aria-pressed="${metric===key}">${title}</button>`).join("")}</div><p class="hint">Ultime 30 misurazioni negli ultimi 90 giorni. I giorni senza dati restano vuoti.</p>${plot}</section>`;
+      }
+      function osOpenWeight() {
+        const today=life.data.today, row=(life.data.health||[]).find(r=>r.day===today)||{};
+        const dialog=document.getElementById("life-dialog");
+        dialog.innerHTML=`<div class="modal os-dialog" role="dialog" aria-modal="true" aria-label="Aggiungi peso"><div class="os-topline"><h2>Aggiungi peso</h2><button data-life-close aria-label="Chiudi">×</button></div><form id="health-form" class="os-form"><label>Data<input name="day" type="date" max="${today}" value="${today}" required></label><label>Peso (kg)<input name="weightKg" type="number" inputmode="decimal" min="20" max="500" step="0.01" value="${row.weight_kg??""}"></label><label>Calorie (kcal, facoltative)<input name="calories" type="number" inputmode="numeric" min="0" max="15000" step="1" value="${row.calories??""}"></label><p class="hint">Una misurazione per giorno. Un nuovo salvataggio aggiorna i valori inseriti; i campi vuoti conservano quelli precedenti.</p><p role="alert" class="danger" id="health-error"></p><button type="submit">Salva misurazione</button></form></div>`;
+        dialog.classList.remove("hidden");
+      }
+      document.addEventListener("click",event=>{
+        const day=event.target.closest("[data-dashboard-day]");
+        if (day || event.target.closest("[data-dashboard-calendar]")) {
+          life.selected=day?.dataset.dashboardDay||life.data.today;life.month=life.selected.slice(0,7);setView("calendar");loadLifeOS();
+        }
+        if(event.target.closest("[data-add-weight]"))osOpenWeight();
+        const metric=event.target.closest("[data-health-metric]");
+        if(metric){life.healthMetric=metric.dataset.healthMetric;renderLifeOS();}
+      });
+      document.addEventListener("submit",async event=>{
+        if(event.target.id!=="health-form")return;
+        event.preventDefault();const form=event.target,button=form.querySelector("[type=submit]"),error=form.querySelector("#health-error");
+        if(button.disabled)return;button.disabled=true;button.textContent="Salvataggio…";error.textContent="";
+        const payload=Object.fromEntries(new FormData(form)),inputs=[...form.querySelectorAll("input")];
+        inputs.forEach(input=>input.disabled=true);
+        try{
+          await osRequest("saveHealthEntry",payload);
+          try { life.data.health=await osRequest("getHealthData"); }
+          catch { error.textContent="Misurazione salvata. Riapri la Dashboard per aggiornare il grafico.";return; }
+          osClose();renderLifeOS();
+        }catch(issue){error.textContent=issue.message||String(issue);}
+        finally{inputs.forEach(input=>input.disabled=false);button.disabled=false;button.textContent="Salva misurazione";}
+      });
 
       /** Apre il foglio di gestione delle routine; non modifica le spunte. */
       function osManageRoutines() {
@@ -851,54 +801,48 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
           first = new Date(Date.UTC(year, month - 1, 1)),
           days = new Date(Date.UTC(year, month, 0)).getUTCDate(),
           offset = (first.getUTCDay() + 6) % 7,
-          shiftMap = new Map(life.data.shifts.map((s) => [s.day, s.kind])),
-          events = life.data.events.filter((e) => e.day === life.selected),
-          tasks = life.data.tasks.filter(
-            (t) =>
-              t.status !== "done" &&
-              (t.scheduled_date === life.selected ||
-                t.due_date === life.selected),
-          ),
-          shift = shiftMap.get(life.selected);
-        const eventCounts = new Map(),
-          taskDays = new Set();
-        for (const event of life.data.events)
-          eventCounts.set(event.day, (eventCounts.get(event.day) || 0) + 1);
-        for (const task of life.data.tasks)
-          if (task.status !== "done") {
-            if (task.scheduled_date) taskDays.add(task.scheduled_date);
-            if (task.due_date) taskDays.add(task.due_date);
-          }
+          shifts = new Map(life.data.shifts.map(s => [s.day, s.kind]));
         let cells = "";
         for (let i = 0; i < Math.ceil((offset + days) / 7) * 7; i++) {
-          const n = i - offset + 1,
-            date = new Date(Date.UTC(year, month - 1, n)),
-            day = date.toISOString().slice(0, 10),
-            kind = shiftMap.get(day),
-            dayEventCount = eventCounts.get(day) || 0,
-            hasTask = taskDays.has(day);
+          const date = new Date(Date.UTC(year, month - 1, i - offset + 1)), day = date.toISOString().slice(0, 10), kind = shifts.get(day);
           if (i % 7 === 0) cells += '<div class="os-calendar-week">';
-          cells += `<button class="os-day ${date.getUTCMonth() !== month - 1 ? "other" : ""} ${day === life.data.today ? "today" : ""} ${day === life.selected ? "selected" : ""}" data-life-day="${day}" data-kind="${kind || ""}" aria-label="${osDate(day)}${kind ? " · " + osShift[kind] : ""}${dayEventCount ? " · " + dayEventCount + " eventi" : ""}${hasTask ? " · attività" : ""}" title="${day}${kind ? " · " + osShift[kind] : ""}"><b>${date.getUTCDate()}</b><span class="os-shift ${kind ? "" : "no-shift"}">${kind ? osShiftInitial[kind] : ""}</span><span class="os-day-mark ${dayEventCount ? "event-count" : hasTask ? "dot" : ""}" aria-hidden="true">${dayEventCount ? dayEventCount : ""}</span></button>`;
-          if (i % 7 === 6) cells += "</div>";
+          cells += `<button class="os-day ${date.getUTCMonth() !== month - 1 ? "other" : ""} ${day === life.data.today ? "today" : ""} ${day === life.selected ? "selected" : ""}" data-life-day="${day}" data-kind="${kind || ""}" ${life.publishing ? "disabled" : ""} aria-label="${osDate(day)} · ${kind ? osShift[kind] : "Nessun turno"}"><b>${date.getUTCDate()}</b><span class="os-shift ${kind ? "" : "no-shift"}">${kind ? osShiftInitial[kind] : ""}</span></button>`;
+          if (i % 7 === 6) cells += '</div>';
         }
-        document.body.style.setProperty(
-          "--calendar-rows",
-          Math.ceil((offset + days) / 7),
-        );
-        return `<div class="os-card"><div class="os-month-header"><button data-life-month="-1" aria-label="Mese precedente">‹</button><h2>${first.toLocaleDateString("it-IT", { month: "long", year: "numeric", timeZone: "UTC" })}</h2><button data-life-month="1" aria-label="Mese successivo">›</button></div><div class="os-weekdays">${["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"].map((x) => `<span>${x}</span>`).join("")}</div><div class="os-days">${cells}</div>${life.selected ? `<div class="os-calendar-details">` : ""}${life.selected ? `<h3>${osDate(life.selected)}${shift ? " · " + osShift[shift] : ""}</h3>${events.length ? events.map((e) => `<div class="os-mini"><div><strong>${osSafe(e.title)}</strong><small>${e.start_time || "Tutto il giorno"}${e.end_time ? "–" + e.end_time : ""}${e.location ? " · " + osSafe(e.location) : ""}${e.occurrence_status === "done" ? " · Fatto" : ""}</small></div><button class="os-row-action" data-life-occurrence="${e.id}:${e.day}:${e.occurrence_status === "done" ? "open" : "done"}">${e.occurrence_status === "done" ? "Riapri" : "Fatto"}</button><details class="os-event-options"><summary aria-label="Opzioni evento">Opzioni</summary><button class="os-row-action" data-life-occurrence="${e.id}:${e.day}:skipped" aria-label="Elimina questa occorrenza">Elimina questa</button>${e.frequency && e.frequency !== "none" ? `<button class="os-row-action" data-life-split-event="${e.id}:${e.day}">Modifica da qui</button>` : ""}<button class="os-row-action" data-life-event="${e.id}" aria-label="Modifica serie">Modifica</button></details></div>`).join("") : '<p class="os-empty">Nessun evento.</p>'}${tasks.length ? '<div class="os-section-label">Attività</div>' + tasks.map((t) => `<div class="os-mini"><strong>${osSafe(t.title)}</strong><button class="os-row-action" data-life-task="${t.id}" aria-label="Modifica attività">···</button></div>`).join("") : ""}` : ""}${life.selected ? "</div>" : ""}${osEventForm()}</div><details class="os-palette-wrap os-tools-drawer" ${life.paletteOpen || life.tool ? "open" : ""}><summary>Dipingi turni${life.tool ? " · " + osSafe(osShift[life.tool] || life.tool) : ""}</summary><div class="os-palette-state" role="status">${life.tool ? `Pennello attivo: <strong>${osSafe(osShift[life.tool] || (life.tool === "event" ? "Evento" : "Cancella"))}</strong>` : "Scegli un turno, poi tocca i giorni."}</div><div class="os-palette" aria-label="Pennello calendario">${Object.entries(
-          osShift,
-        )
-          .map(
-            ([key, val]) =>
-              `<button data-life-tool="${key}" title="${val}" aria-label="${val}" class="${life.tool === key ? "active" : ""}" aria-pressed="${life.tool === key}">${osSafe(val)}</button>`,
-          )
-          .join(
-            "",
-          )}<button data-life-tool="event" class="${life.tool === "event" ? "active" : ""}" aria-pressed="${life.tool === "event"}">+ Evento</button><button data-life-tool="erase" class="${life.tool === "erase" ? "active" : ""}" aria-pressed="${life.tool === "erase"}">Cancella</button>${life.tool ? '<button class="os-palette-stop" data-life-tool="none" aria-label="Disattiva pennello">Fine</button>' : ""}${life.undo ? '<button data-life-undo aria-label="Annulla ultimo turno">↶</button>' : ""}</div></details>`;
+        const selected = life.selected ? `<div class="os-calendar-details"><h3>${osDate(life.selected)} · ${osSafe(osShift[shifts.get(life.selected)] || "Nessun turno")}</h3></div>` : "";
+        return `<button class="os-button" data-view="today">‹ Dashboard</button><div class="os-card"><div class="os-month-header"><button data-life-month="-1" ${life.publishing ? "disabled" : ""} aria-label="Mese precedente">‹</button><h2>${first.toLocaleDateString("it-IT", {month:"long", year:"numeric", timeZone:"UTC"})}</h2><button data-life-month="1" ${life.publishing ? "disabled" : ""} aria-label="Mese successivo">›</button></div><p class="hint">Prepara qui i turni. Eventi in Calendario Apple, attività in Promemoria.</p><div class="os-weekdays">${["Lun","Mar","Mer","Gio","Ven","Sab","Dom"].map(x => `<span>${x}</span>`).join("")}</div><div class="os-days">${cells}</div>${selected}${life.editingEvent ? osEventForm() : ""}</div>
+          <details class="os-palette-wrap os-tools-drawer" ${life.paletteOpen || life.tool ? "open" : ""}><summary>Dipingi turni</summary><div class="os-palette-state" role="status">${life.tool ? `Pennello attivo: ${osSafe(osShift[life.tool] || "Cancella")}` : "Scegli un turno, poi tocca i giorni."}</div><div class="os-palette" aria-label="Pennello calendario">${Object.entries(osShift).map(([key,val]) => `<button data-life-tool="${key}" aria-pressed="${life.tool === key}" class="${life.tool === key ? "active" : ""}">${val}</button>`).join("")}<button data-life-tool="erase" aria-pressed="${life.tool === "erase"}">Cancella</button>${life.tool ? '<button data-life-tool="none">Fine</button>' : ""}${life.undo ? '<button data-life-undo>Annulla ultimo turno</button>' : ""}</div></details>${osShiftPublication()}`;
       }
+      function osShiftPublication() {
+        const calendar = life.data.shiftCalendar || {}, path = calendar.path;
+        const url = path ? new URL(path, location.origin).href : "";
+        return `<section class="os-card shift-publication" aria-label="Pubblicazione turni"><h3>Turni in Calendario Apple</h3><p class="hint">Pubblica il mese visualizzato, anche dopo una correzione o una cancellazione. Gli altri mesi pubblicati restano disponibili.</p><p class="hint">${calendar.publishedAt ? "Ultima pubblicazione del mese: " + osSafe(new Date(calendar.publishedAt).toLocaleString("it-IT")) : "Questo mese non è ancora stato pubblicato."}</p><div class="actions"><button class="os-button primary" data-shift-publish ${life.publishing ? 'disabled aria-busy="true"' : ""}>${life.publishing ? "Pubblicazione…" : "Pubblica turni del mese"}</button></div><p role="status">${osSafe(life.publishMessage)}</p>${life.publishError ? `<p role="alert" class="danger">${osSafe(life.publishError)} Puoi riprovare.</p>` : ""}${url ? `<div class="shift-subscription"><a class="os-button" href="${osSafe(url.replace(/^https?:/, "webcal:"))}" rel="noreferrer">Collega Calendario Apple</a><label>Link riservato del calendario<input aria-label="Link riservato del calendario" value="${osSafe(url)}" readonly onclick="this.select()"></label><p class="hint">Collegalo una sola volta. Apple aggiorna periodicamente i turni; le modifiche possono richiedere tempo. I turni si modificano qui, gli altri eventi direttamente in Apple. Chi possiede questo link può leggere i turni.</p><button data-shift-rotate ${life.publishing ? "disabled" : ""}>Rigenera link riservato</button></div>` : ""}</section>`;
+      }
+      async function osPublishShifts(rotate = false) {
+        if (life.publishing) return;
+        if (rotate && !confirm("Il vecchio link smetterà di funzionare. Dovrai collegare di nuovo il calendario su Apple. Continuare?")) return;
+        const month = life.month;
+        ++life.readRevision;
+        life.publishing = true; life.publishError = ""; life.publishMessage = ""; renderLifeOS();
+        try {
+          await life.paintQueue;
+          if ([...life.paintFailures].some(day => day.startsWith(month))) throw Error("Alcuni turni non sono stati salvati. Riassegnali prima di pubblicare.");
+          const result = await osRequest(rotate ? "rotateShiftCalendarLink" : "publishShiftCalendar", {month});
+          if (life.month === month) {
+            life.data.shiftCalendar = result;
+            life.publishMessage = rotate ? "Nuovo link pronto. Collegalo di nuovo in Calendario Apple." : "Turni pubblicati. Calendario Apple li riceverà al prossimo aggiornamento.";
+          }
+        } catch (error) { life.publishError = error.message || String(error); }
+        finally { life.publishing = false; renderLifeOS(); }
+      }
+      document.addEventListener("click", event => {
+        if (event.target.closest("[data-shift-publish]")) osPublishShifts();
+        if (event.target.closest("[data-shift-rotate]")) osPublishShifts(true);
+      });
 
       /** Accetta solo l’ultima lettura del mese corrente; scarta risposte tardive. */
       async function osRefresh() {
+        if (life.publishing) return;
         const revision = ++life.readRevision,
           month = life.month;
         const fresh = await osRequest("getLifeData", month);
@@ -910,6 +854,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
 
       /** Aggiornamento ottimistico del turno, scritture serializzate e recupero errore. */
       function osPaint(day, kind) {
+        if (life.publishing) return;
         const previous =
           life.data.shifts.find((s) => s.day === day)?.kind || null;
         const revision = ++life.paintRevision;
@@ -919,7 +864,9 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         renderLifeOS();
         life.paintQueue = life.paintQueue
           .then(() => osRequest("paintShift", { day, kind }))
+          .then(() => life.paintFailures.delete(day))
           .catch((err) => {
+            life.paintFailures.add(day);
             if (revision === life.paintRevision) {
               life.data.shifts = life.data.shifts.filter((s) => s.day !== day);
               if (previous) life.data.shifts.push({ day, kind: previous });
@@ -1097,7 +1044,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
             life.selected = splitFrom || ev.day;
           }
         }
-        life.tool = "event";
+        life.tool = null;
         setView("calendar");
         document
           .getElementById("os-event-editor")
@@ -1277,6 +1224,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
             .toISOString()
             .slice(0, 7);
           life.selected = null;
+          life.publishMessage = ""; life.publishError = "";
           life.creatingEvent = false;
           life.editingEvent = null;
           return loadLifeOS();
@@ -1287,15 +1235,6 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
           life.selected = day;
           if (!life.tool) {
             renderLifeOS();
-            return;
-          }
-          if (life.tool === "event") {
-            life.creatingEvent = true;
-            life.editingEvent = null;
-            renderLifeOS();
-            document
-              .getElementById("os-event-editor")
-              ?.scrollIntoView({ behavior: "smooth", block: "center" });
             return;
           }
           life.undo = { day, kind: old };
@@ -1420,7 +1359,6 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
           life.month = today.slice(0, 7);
           life.selected = null;
           loadLifeOS();
-          osLoadHomeFinance();
           osLoadWeather();
           osUpdateHeader();
           return;
@@ -1588,7 +1526,6 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         if (
           ![
             "today",
-            "tasks",
             "calendar",
             "overview",
             "movements",
@@ -1615,7 +1552,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
             x.classList.toggle("active", x.dataset.view === view),
           );
         document.getElementById("page-title").textContent = {
-          today: "Life OS",
+          today: "Dashboard",
           tasks: "Attività",
           calendar: "Calendario",
           overview: "Finanza",
@@ -1654,6 +1591,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
             "active",
             ["overview", "movements", "budget", "analysis", "budget", "extras", "analysis"].includes(view),
           );
+        document.querySelector('.nav [data-view="today"]').classList.toggle("active", ["today","calendar"].includes(view));
         document
           .querySelectorAll(".nav [data-view]")
           .forEach((button) =>
@@ -1663,9 +1601,9 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
             ),
           );
         if (view !== "calendar") life.tool = null;
-        if (["today", "tasks", "calendar"].includes(view)) {
+        if (["today", "calendar"].includes(view)) {
           renderLifeOS();
-          if (view === "today") osLoadHomeFinance();
+
         }
         window.scrollTo({ top: 0, behavior: "instant" });
       }
@@ -3338,7 +3276,6 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
             ["overview", "budget", "movements", "extras"].includes(state.view)
           )
             load();
-          if (state.view === "today") osLoadHomeFinance();
           return true;
         } catch (error) {
           const box = document.getElementById("error");
@@ -3617,7 +3554,6 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
       );
       document.getElementById("loading").classList.add("hidden");
       loadLifeOS();
-      osLoadHomeFinance();
       osLoadWeather();
     </script>
 

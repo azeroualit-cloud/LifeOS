@@ -1,6 +1,12 @@
 # Webapp Life OS
 
-`worker.mjs` conserva il backend del sorgente fornito il 17 ottobre 2026; `app.html` è il suo APP_HTML leggibile. Modificare HTML e rigenerare la costante prima del deploy. Non distribuire con nuovi binding: il worker `lifeos` deve mantenere DB, segreti e Cloudflare Access esistenti.
+Struttura attuale: navigazione **Dashboard / Finanza**, settimana e meteo in Dashboard, azioni Aggiungi peso e Calendario, grafico peso/calorie da inserimento manuale. Calendario dei turni come pagina secondaria; nessuna pagina Attività o controllo delle abitudini. Dati precedenti conservati. Contratto e verifiche: [DASHBOARD-SALUTE.md](../docs/DASHBOARD-SALUTE.md). Codice preparato per la PR; nessun deploy. Build iPhone in verifica.
+
+## Turni per Calendario Apple — 23 ottobre 2026
+
+Il calendario ora prepara soltanto turni, con pubblicazione mensile, collegamento Apple in abbonamento e rigenerazione del link. Il backend aggiunge schema/snapshot e una rotta ICS protetta da token: la precedente identità byte per byte del backend descritta sotto è **storica**. Stato locale, contratto, verifica e attivazione Cloudflare in [APPLE-CALENDAR.md](../docs/APPLE-CALENDAR.md). Nessun deploy eseguito. Anteprima attuale: `previews/turni-apple.png`. I vecchi dati non sono stati trasferiti né cancellati.
+
+`worker.mjs` resta il template originale già presente nel repository, senza ripubblicare una copia modificata dei dati incorporati. `backend-extensions.mjs` contiene soltanto le nuove funzioni e `backend_update.py` le applica al template. `app.html` è la UI leggibile. `npm run build` produce `dist/worker.mjs`, escluso da Git e dagli artefatti pubblici: è questo il file da valutare per il deploy. Il build non modifica il template. Non distribuire con nuovi binding: il worker `lifeos` deve mantenere DB, segreti e Cloudflare Access esistenti.
 
 Allineamento: palette platino, tipografia e target44; Finanza aperta con Budget / Extra / Spesa, dettagli Budget separati, grafici in Analisi, riepilogo annuale e Sankey storico rimossi dalla navigazione. Calendario uniforme senza fondi weekend, selezione sul numero. Motion ridotto rispettato.
 

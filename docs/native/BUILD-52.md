@@ -2,7 +2,7 @@
 
 Sorgenti iPhone 0.9.0 build 52: navigazione Dashboard/Finanza, settimana e meteo, due azioni Aggiungi peso/Calendario, misurazioni manuali e grafico peso/calorie, calendario dei turni come pagina secondaria e pubblicazione Apple in abbonamento.
 
-Questo ramo permette la verifica Apple del pacchetto nativo senza pubblicare nuovamente il backend. Le nuove API salute e calendario sono implementate e verificate localmente ma il caricamento di `web/worker.mjs` è ancora sospeso: la revisione automatica richiede un consenso specifico ai dati finanziari incorporati nel sorgente. L’utente ha autorizzato il caricamento del codice in generale; è stata presentata una domanda aggiuntiva sul solo backend. Nessun deploy Cloudflare è stato eseguito.
+Questo ramo verifica il pacchetto nativo e contiene le sole nuove estensioni backend e UI. La revisione automatica ha bloccato la ripubblicazione del Worker completo con lo storico: è stata adottata un’alternativa senza quel contenuto. `web/worker.mjs` resta il template originale invariato; `backend-extensions.mjs` e `backend_update.py` aggiungono solo codice, producendo localmente `web/dist/worker.mjs`, ignorato da Git. Non vengono caricati dati finanziari nuovi o una copia modificata dello storico. Nessun deploy Cloudflare è stato eseguito.
 
 La demo salva le misurazioni solo localmente. Sul server le nuove funzioni richiedono prima l’attivazione delle API; l’eventuale IPA di questo ramo non dimostra l’integrazione live con Apple Calendar o il backend.
 
