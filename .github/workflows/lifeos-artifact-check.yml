@@ -1,0 +1,110 @@
+name: Life OS - Verifica IPA
+on:
+  push:
+    paths: ['.github/workflows/lifeos-artifact-check.yml']
+permissions:
+  actions: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Attendi il completamento della build fissata
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          for attempt in {1..40}; do
+            state=$(gh api "repos/$GH_REPO/actions/runs/40129522914" --jq '.status + ":" + (.conclusion // "")')
+            if [ "$state" = 'completed:success' ]; then exit 0; fi
+            if [[ "$state" == completed:* ]]; then echo "La build non è riuscita: $state"; exit 1; fi
+            sleep 20
+          done
+          echo 'Build ancora in corso: nessuna IPA verificata.'
+          exit 1
+      - name: Scarica l'unica IPA dalla build verificata
+        uses: actions/download-artifact@v5
+        with:
+          name: LifeOS-IPA-per-Signulous
+          run-id: 40129522914
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: ipa
+      - name: Scarica i risultati dei test della stessa build
+        uses: actions/download-artifact@v5
+        with:
+          name: LifeOS-diagnostica
+          run-id: 40129522914
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: diagnostics
+      - name: Scarica la verifica completa dei 35 percorsi invariati
+        uses: actions/download-artifact@v5
+        with:
+          name: LifeOS-diagnostica
+          run-id: 40123920833
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: baseline
+      - name: Verifica test, checksum, widget e architetture
+        run: |
+          python3 - <<'PY'
+          import hashlib, pathlib, plistlib, re, zipfile, json
+          root = pathlib.Path('ipa')
+          files = list(root.rglob('*.ipa'))
+          assert len(files) == 1, 'Serve una sola IPA'
+          checksums = list(root.rglob('SHA256.txt'))
+          assert len(checksums) == 1
+          expected = checksums[0].read_text().split()[0]
+          digest = hashlib.sha256(files[0].read_bytes()).hexdigest()
+          assert digest == expected, 'Checksum IPA non corrispondente'
+          with zipfile.ZipFile(files[0]) as archive:
+              assert archive.testzip() is None, 'Archivio IPA danneggiato'
+              app = 'Payload/LifeOSProbe.app/'
+              info = plistlib.loads(archive.read(app + 'Info.plist'))
+              assert info['CFBundleIdentifier'] == 'com.nas.lifeos.probe'
+              assert str(info['CFBundleVersion']) == '60'
+              assert info['CFBundleShortVersionString'] == '0.9.9'
+              assert info['CFBundleDevelopmentRegion'] == 'it'
+              assert info['NSHealthShareUsageDescription'] and info['NSHealthUpdateUsageDescription']
+              assert any('lifeos' in row.get('CFBundleURLSchemes', []) for row in info['CFBundleURLTypes'])
+              assert any(name.startswith(app + 'Metadata.appintents/') for name in archive.namelist())
+              widget = app + 'PlugIns/LifeOSWidget.appex/'
+              extension = plistlib.loads(archive.read(widget + 'Info.plist'))
+              assert str(extension['CFBundleVersion']) == '60'
+              assert extension['NSExtension']['NSExtensionPointIdentifier'] == 'com.apple.widgetkit-extension'
+              for folder, metadata in [(app, info), (widget, extension)]:
+                  binary = archive.read(folder + metadata['CFBundleExecutable'])
+                  assert binary[:4] == bytes.fromhex('cffaedfe'), 'Eseguibile Mach-O 64 bit atteso'
+                  assert int.from_bytes(binary[4:8], 'little') == 0x0100000c, 'Architettura arm64 attesa'
+          required = {'tests.log': 2, 'compact.log': 6}
+          for name, count in required.items():
+              logs = list(pathlib.Path('diagnostics').rglob(name))
+              assert len(logs) == 1, 'Manca un solo log: ' + name
+              outcomes = re.findall(r'Executed (\d+) tests?, with (\d+) failures?', logs[0].read_text(errors='replace'))
+              assert outcomes and tuple(map(int, outcomes[-1])) == (count, 0), 'Risultato test non valido: ' + name
+          unit = list(pathlib.Path('baseline').rglob('unit-tests.log'))
+          assert len(unit) == 1
+          assert tuple(map(int, re.findall(r'Executed (\d+) tests?, with (\d+) failures?', unit[0].read_text(errors='replace'))[-1])) == (156, 0)
+          baseline = list(pathlib.Path('baseline').rglob('tests.log'))
+          assert len(baseline) == 1
+          baseline = baseline[0].read_text(errors='replace')
+          assert tuple(map(int, re.findall(r'Executed (\d+) tests?, with (\d+) failures?', baseline)[-1])) == (37, 2)
+          failed = set(re.findall(r"Test Case '-\[.*? (test\w+)\]' failed", baseline))
+          passed = set(re.findall(r"Test Case '-\[.*? (test\w+)\]' passed", baseline))
+          assert failed == {'testBottomAddOpensTheCorrectEditor', 'testExtraActualPaymentUsesSavingsAndKeepsMonthlyBudget'}
+          assert len(passed - failed) == 35
+          proof = json.loads((root / 'VERIFICATION.json').read_text())
+          assert proof['baselineRun'] == 40123920833
+          assert proof['unitTestsSHA256'] == '6b3354284f32bddf6e1af9226db659d10f3d866ededec889a1a421905b3e5cbe'
+          assert proof['productionSHA256'] == '079e97f133339e83b2023c991cc3711aca2c410b1a4f8957b8f4889dd7d0e99d'
+          assert proof['stableUITestsSHA256'] == 'da678db8ba4bf0e5b9abb50d2c9bde5794b37ff1384027848641ae094f55a544'
+          archives = list(pathlib.Path('diagnostics').rglob('archive.log'))
+          assert len(archives) == 1 and '** ARCHIVE SUCCEEDED **' in archives[0].read_text(errors='replace')
+          print('IPA_VERIFIED: version=0.9.9 build=60 app=arm64 widget=arm64 locale=it')
+          print('TESTS_VERIFIED: unit=156 UI=35-baseline+2-updated compact=6 failures=0')
+          print('SHA256=' + digest)
+          print('::notice title=Life OS build 60::IPA e test verificati; SHA256=' + digest)
+          PY
+

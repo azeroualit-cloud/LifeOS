@@ -1,0 +1,1357 @@
+--- a/Sources/App.swift
++++ b/Sources/App.swift
+@@ -41,12 +41,12 @@
+         #endif
+     }
+ }
+-enum NativeTab: Hashable { case dashboard, tasks, calendar, finance }
++enum NativeTab: Hashable { case dashboard, finance }
+ enum NativeSheet: Identifiable {
+-    case settings, task(Record), event(Record), movement(Record), extra(Record), routines, categories, budget, recurring(Record), planning
++    case weight, settings, task(Record), event(Record), movement(Record), extra(Record), routines, categories, budget, recurring(Record), planning
+     var id: String {
+         switch self {
+-        case .settings: return "settings"; case .task: return "task"; case .event: return "event"
++        case .weight: return "weight"; case .settings: return "settings"; case .task: return "task"; case .event: return "event"
+         case .movement: return "movement"; case .extra: return "extra"; case .routines: return "routines"
+         case .categories: return "categories"; case .budget: return "budget"; case .recurring: return "recurring"; case .planning: return "planning"
+         }
+@@ -57,6 +57,7 @@
+     @Published var sheet: NativeSheet?
+     @Published var taskCategory = "action"
+     @Published var financeSection = "Panoramica"
++    @Published var showCalendar = false
+     @Published var calendarDay = CivilDate.day()
+     // Session-only: switching tabs or refreshing data never replays the intro.
+     var homeIntroConsumed = false
+@@ -77,6 +78,7 @@
+         .sheet(item: $router.sheet) { sheet in
+             NavigationStack {
+                 switch sheet {
++                case .weight: WeightEditor()
+                 case .settings: NativeSettings()
+                 case .task(let record): TaskEditor(record: record)
+                 case .event(let record): EventEditor(record: record)
+@@ -109,23 +111,19 @@
+     private var nativeTabs: some View {
+         TabView(selection: $router.tab) {
+             dashboard.tabItem { Label("Dashboard", systemImage: "square.grid.2x2") }.tag(NativeTab.dashboard)
+-            tasks.tabItem { Label("Attività", systemImage: "checklist") }.tag(NativeTab.tasks)
+-            calendar.tabItem { Label("Calendario", systemImage: "calendar") }.tag(NativeTab.calendar)
+             finance.tabItem { Label("Finanza", systemImage: "chart.bar") }.tag(NativeTab.finance)
+         }
+     }
+     private var dashboard: some View { NavigationStack { DashboardScreen().toolbar { tools }.navigationTitle("Dashboard").navigationBarTitleDisplayMode(.inline) } }
+-    private var tasks: some View { NavigationStack { TasksScreen().toolbar { tools }.navigationTitle("Attività").navigationBarTitleDisplayMode(.inline) } }
+-    private var calendar: some View { NavigationStack { CalendarScreen().toolbar { tools }.navigationTitle("Calendario").navigationBarTitleDisplayMode(.inline) } }
+     private var finance: some View { NavigationStack { FinanceScreen().toolbar { tools }.navigationTitle("Finanza").navigationBarTitleDisplayMode(.inline) } }
+     @ToolbarContentBuilder private var tools: some ToolbarContent {
+         if #available(iOS 26.0, *) {
+-            ToolbarItem(placement: .topBarTrailing) { addControl }
++            ToolbarItem(placement: .topBarTrailing) { if router.tab == .finance { addControl } }
+                 .sharedBackgroundVisibility(.hidden)
+             ToolbarItem(placement: .topBarLeading) { settingsControl }
+                 .sharedBackgroundVisibility(.hidden)
+         } else {
+-            ToolbarItem(placement: .topBarTrailing) { addControl }
++            ToolbarItem(placement: .topBarTrailing) { if router.tab == .finance { addControl } }
+             ToolbarItem(placement: .topBarLeading) { settingsControl }
+         }
+     }
+@@ -139,18 +137,14 @@
+     }
+     private func addItem() {
+         switch router.tab {
+-        case .dashboard: router.sheet = .movement([:])
++        case .dashboard: router.sheet = .weight
+         case .finance: router.sheet = router.financeSection == "Extra" ? .extra([:]) : .movement([:])
+-        case .tasks: router.sheet = .task(["list_kind": .string(router.taskCategory)])
+-        case .calendar: router.sheet = .event(["day": .string(router.calendarDay)])
+         }
+     }
+     private var addLabel: String {
+         switch router.tab {
+-        case .dashboard: return "Aggiungi spesa"
++        case .dashboard: return "Aggiungi peso"
+         case .finance: return router.financeSection == "Extra" ? "Aggiungi straordinaria" : "Aggiungi spesa"
+-        case .tasks: return "Aggiungi attività"
+-        case .calendar: return "Aggiungi evento"
+         }
+     }
+ }
+--- a/Sources/CalendarScreen.swift
++++ b/Sources/CalendarScreen.swift
+@@ -7,8 +7,6 @@
+     @State private var brush = "consult"
+     @State private var lastShift: (String, String)?
+     @State private var days: [CalendarDayPresentation] = []
+-    @State private var eventsByDay: [String: [Record]] = [:]
+-    @State private var tasksByDay: [String: [Record]] = [:]
+     @ScaledMetric(relativeTo: .caption) private var brushWidth = 132.0
+     @ScaledMetric(relativeTo: .caption) private var brushHeight = 64.0
+     var body: some View {
+@@ -18,6 +16,7 @@
+                 brushPanel
+                 monthGrid
+                 dayCard
++                ShiftCalendarPanel()
+             }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.top, NativeDesign.Space.xs).padding(.bottom, NativeDesign.Layout.scrollClearance)
+         }.background(NativeDesign.canvas).scrollBounceBehavior(.basedOnSize).accessibilityIdentifier("calendar-scroll")
+         .onAppear { rebuildMonth(); selected = preferredDay(in: store.calendarMonth); router.calendarDay = selected }
+@@ -34,13 +33,11 @@
+     private func rebuildMonth() {
+         // Build the date labels and indexes only when the month or source data changes.
+         // A day selection must not parse and format every date in the grid again.
+-        eventsByDay = Dictionary(grouping: store.events, by: { $0.text("day") })
+-        tasksByDay = Dictionary(grouping: store.tasks, by: { $0.text("scheduled_date") })
+         let shifts = Dictionary(store.life.records("shifts").map { ($0.text("day"), $0.text("kind")) }, uniquingKeysWith: { first, _ in first })
+         let today = CivilDate.day(), month = store.calendarMonth
+         days = CivilDate.grid(month).map { day in
+             let weekday = CivilDate.calendar.component(.weekday, from: CivilDate.date(day))
+-            return CalendarDayPresentation(day: day, label: CivilDate.label(day), shift: shifts[day].flatMap(ShiftKind.init(rawValue:)), hasEvents: !(eventsByDay[day] ?? []).isEmpty || !(tasksByDay[day] ?? []).isEmpty, isToday: day == today, isWeekend: weekday == 1 || weekday == 7, isCurrentMonth: day.hasPrefix(month))
++            return CalendarDayPresentation(day: day, label: CivilDate.label(day), shift: shifts[day].flatMap(ShiftKind.init(rawValue:)), hasEvents: false, isToday: day == today, isWeekend: weekday == 1 || weekday == 7, isCurrentMonth: day.hasPrefix(month))
+         }
+     }
+     private var monthHeader: some View {
+@@ -157,45 +154,9 @@
+                 }.frame(minHeight: NativeDesign.Layout.touchTarget).accessibilityElement(children: .combine)
+                 Divider()
+             }
+-            let dayEvents = eventsByDay[selected] ?? []
+-            let dayTasks = tasksByDay[selected] ?? []
+-            ForEach(dayEvents.map { DisplayRecord($0) }) { item in eventRow(item.value); Divider() }
+-            ForEach(dayTasks.map { DisplayRecord($0) }) { item in
+-                NativeChecklistRow(title: item.value.text("title"), checked: item.value.text("status") == "done", completionLabel: "Cambia completamento " + item.value.text("title"), onComplete: {
+-                    Task { await store.run("setTaskStatus", ["id": .int(item.value.integer("id")), "status": .string(item.value.text("status") == "done" ? "todo" : "done")]) }
+-                }, onOpen: { router.sheet = .task(item.value) }).disabled(store.busy)
+-                Divider()
+-            }
+-            Button { router.sheet = .event(["day": .string(selected)]) } label: {
+-                HStack(spacing: NativeDesign.Space.small) {
+-                    Image(systemName: "plus.circle").font(NativeDesign.symbol).frame(width: NativeDesign.Layout.touchTarget)
+-                    Text("Aggiungi evento").font(NativeDesign.body)
+-                }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
+-            }.buttonStyle(NativePressStyle()).accessibilityIdentifier("calendar-add-event")
++            if store.shift(selected) == nil { Text("Nessun turno").foregroundStyle(NativeDesign.secondary) }
++
+         }.padding(.top, NativeDesign.Space.small)
+-    }
+-    private func eventRow(_ r: Record) -> some View {
+-        let time = r.text("start_time"), location = r.text("location")
+-        return HStack(spacing: NativeDesign.Space.small) {
+-            RoundedRectangle(cornerRadius: NativeDesign.progressRadius).fill(NativeDesign.accent.opacity(0.65))
+-                .frame(width: NativeDesign.Layout.calendarMarker, height: NativeDesign.Layout.touchTarget).accessibilityHidden(true)
+-            NativeCompletionButton(checked: r.text("occurrence_status") == "done", label: "Cambia completamento evento " + r.text("title")) {
+-                Task { await store.run("setEventOccurrence", ["id": .int(r.integer("id")), "day": .string(r.text("day")), "status": .string(r.text("occurrence_status") == "done" ? "open" : "done")]) }
+-            }.accessibilityIdentifier("event-check-" + String(r.integer("id")))
+-            Button { router.sheet = .event(r) } label: {
+-                ViewThatFits(in: .horizontal) {
+-                    HStack(alignment: .center, spacing: NativeDesign.Space.small) {
+-                        NativeRowText(title: r.text("title"), subtitle: location, completed: r.text("occurrence_status") == "done", titleIdentifier: "event-title-" + String(r.integer("id")))
+-                        Text(time.isEmpty ? "Tutto il giorno" : time).font(.subheadline).monospacedDigit().foregroundStyle(NativeDesign.secondary).fixedSize()
+-                    }
+-                    VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
+-                        NativeRowText(title: r.text("title"), subtitle: location, completed: r.text("occurrence_status") == "done", titleIdentifier: "event-title-" + String(r.integer("id")))
+-                        Text(time.isEmpty ? "Tutto il giorno" : time).font(.subheadline).monospacedDigit().foregroundStyle(NativeDesign.secondary)
+-                    }
+-                }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading).contentShape(Rectangle())
+-            }.buttonStyle(.borderless).accessibilityLabel(r.text("title"))
+-                .accessibilityValue([time.isEmpty ? "Tutto il giorno" : time, location].filter { !$0.isEmpty }.joined(separator: ", "))
+-        }.disabled(store.busy)
+     }
+ 
+ }
+--- a/Sources/DashboardScreen.swift
++++ b/Sources/DashboardScreen.swift
+@@ -3,232 +3,57 @@
+ struct DashboardScreen: View {
+     @EnvironmentObject var store: NativeStore
+     @EnvironmentObject var router: NativeRouter
+-    @State private var routineBusy: Int?
+-    @State private var routineFeedback = false
+-    @State private var showingTimes = false
+-    @AppStorage("native-hide-money") private var hidden = false
+-
+     var body: some View {
+         TimelineView(.periodic(from: .now, by: 60)) { context in
+-            let now = context.date, today = CivilDate.day(now)
+-            let summary = NativeHomeSummary(now: now, todayShift: store.shift(today), tomorrowShift: store.shift(CivilDate.adding(1, to: today)), previousShift: store.shift(CivilDate.adding(-1, to: today)), events: store.dashboardEvents, weather: store.weather == "Meteo non disponibile" ? nil : store.weatherDetails, weatherDate: store.weatherDate, calendarAvailable: NativeHomeSummary.hasCalendarData(life: store.life, demo: store.isDemo))
+-            let todos = NativeHomeSummary.todos(store.tasks)
++            let today = CivilDate.day(context.date)
++            let summary = NativeHomeSummary(now: context.date, todayShift: store.shift(today), tomorrowShift: store.shift(CivilDate.adding(1, to: today)), previousShift: store.shift(CivilDate.adding(-1, to: today)), events: [], weather: store.weatherDetails, weatherDate: store.weatherDate, includeEvents: false)
+             ScrollView {
+                 VStack(alignment: .leading, spacing: NativeDesign.Space.section) {
+                     rollingCalendar(today)
+-                    overview(summary)
+-                    nextTime(context.date)
+-                    routines
+-                    todoSection(todos)
+-                    budget
++                    VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
++                        Text(summary.greeting).font(.footnote).foregroundStyle(NativeDesign.secondary)
++                        Text(summary.text).font(.body).accessibilityIdentifier("home-summary")
++                        if let weather = store.weatherDetails, let updated = store.weatherDate, context.date.timeIntervalSince(updated) < 3600 {
++                            Text("Min \(Int(weather.low))° · Max \(Int(weather.high))° · \(weather.change)").font(.caption).foregroundStyle(NativeDesign.secondary)
++                        }
++                        if store.weather == "Meteo non disponibile" { Text(store.weather).font(.caption).foregroundStyle(NativeDesign.secondary) }
++                    }
++                    HStack(alignment: .top, spacing: NativeDesign.Space.medium) {
++                        Button { router.sheet = .weight } label: { NativeActionLabel(title: "Aggiungi peso", symbol: "plus") }.accessibilityIdentifier("dashboard-add-weight")
++                        Button { openCalendar(today) } label: { NativeActionLabel(title: "Calendario", symbol: "calendar") }.accessibilityIdentifier("dashboard-calendar")
++                    }.buttonStyle(NativePressStyle()).foregroundStyle(NativeDesign.accent)
++                    HealthChartPanel()
+                     NativeConnectionBadge()
+                     if let notice = store.notice { Text(notice).font(.caption).foregroundStyle(NativeDesign.secondary) }
+                 }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.top, NativeDesign.Space.small).padding(.bottom, NativeDesign.Layout.scrollClearance)
+-            }
+-            .background(NativeDesign.canvas).scrollBounceBehavior(.basedOnSize).accessibilityIdentifier("dashboard-scroll")
+-            .task(id: today) {
+-                // Home dates follow today without changing the month being browsed in Calendar.
+-                await store.loadWeather()
+-            }
+-        }.sensoryFeedback(.success, trigger: routineFeedback)
++            }.background(NativeDesign.canvas).scrollBounceBehavior(.basedOnSize).accessibilityIdentifier("dashboard-scroll")
++                .task(id: today) { await store.loadWeather() }
++        }
++        .navigationDestination(isPresented: $router.showCalendar) {
++            CalendarScreen().navigationTitle("Calendario").navigationBarTitleDisplayMode(.inline)
++        }
+     }
+-
+     private func rollingCalendar(_ today: String) -> some View {
+-        let days = NativeHomeSummary.rollingDays(today)
+-        let marked = Set(store.events.map { $0.text("day") } + store.tasks.map { $0.text("scheduled_date") })
+-        return VStack(spacing: NativeDesign.Space.small) {
+-            HStack {
+-                Text(CivilDate.monthTitle(String(today.prefix(7)))).font(.subheadline).foregroundStyle(NativeDesign.secondary)
+-                Spacer()
+-                NativeIconButton(symbol: "calendar", label: "Apri calendario") { openCalendar(today) }
+-            }
++        VStack(spacing: NativeDesign.Space.small) {
++            Text(CivilDate.monthTitle(String(today.prefix(7)))).font(.subheadline).foregroundStyle(NativeDesign.secondary).frame(maxWidth: .infinity, alignment: .leading)
+             HStack(spacing: NativeDesign.Space.xs) {
+-                ForEach(days, id: \.self) { day in
+-                    let current = day == today, shift = store.shift(day)
++                ForEach(NativeHomeSummary.rollingDays(today), id: \.self) { day in
+                     let weekday = CivilDate.calendar.component(.weekday, from: CivilDate.date(day))
+-                    let item = CalendarDayPresentation(day: day, label: CivilDate.label(day), shift: shift,
+-                        hasEvents: marked.contains(day), isToday: current,
+-                        isWeekend: weekday == 1 || weekday == 7,
+-                        isCurrentMonth: day.hasPrefix(String(today.prefix(7))))
++                    let item = CalendarDayPresentation(day: day, label: CivilDate.label(day), shift: store.shift(day), hasEvents: false, isToday: day == today, isWeekend: weekday == 1 || weekday == 7, isCurrentMonth: day.hasPrefix(String(today.prefix(7))))
+                     Button { openCalendar(day) } label: {
+                         VStack(spacing: NativeDesign.Space.xs) {
+                             Text(["D", "L", "M", "M", "G", "V", "S"][weekday - 1]).font(.caption).foregroundStyle(NativeDesign.secondary)
+-                            CalendarDayCell(item: item, active: current).equatable()
++                            CalendarDayCell(item: item, active: day == today).equatable()
+                         }.frame(maxWidth: .infinity).contentShape(Rectangle())
+                     }.buttonStyle(.plain).accessibilityIdentifier("dashboard-day-" + day)
+-                        .accessibilityLabel(CivilDate.label(day) + ", " + (shift?.title ?? "Turno non disponibile"))
+-                        .accessibilityAddTraits(current ? .isSelected : [])
++                        .accessibilityLabel(CivilDate.label(day) + ", " + (store.shift(day)?.title ?? "Nessun turno"))
++                        .accessibilityAddTraits(day == today ? .isSelected : [])
+                 }
+             }.dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+         }
+     }
+     private func openCalendar(_ day: String) {
+-        var transaction = Transaction(animation: nil); transaction.disablesAnimations = true
+-        withTransaction(transaction) { store.calendarMonth = String(day.prefix(7)); router.calendarDay = day; router.tab = .calendar }
++        store.calendarMonth = String(day.prefix(7)); router.calendarDay = day; router.showCalendar = true
+         Task { await store.sync(scope: .life) }
+     }
+-    private func naturalText(_ summary: NativeHomeSummary) -> AttributedString {
+-        var result = AttributedString()
+-        for (index, phrase) in summary.phrases.enumerated() {
+-            var lead = AttributedString((index == 0 ? "" : " ") + phrase.lead)
+-            lead.foregroundColor = NativeDesign.secondary
+-            var detail = AttributedString(phrase.detail)
+-            detail.foregroundColor = .primary; detail.font = NativeDesign.heading
+-            var tail = AttributedString(phrase.tail); tail.foregroundColor = NativeDesign.secondary
+-            result += lead; result += detail; result += tail
+-        }
+-        return result
+-    }
+-    private func overview(_ summary: NativeHomeSummary) -> some View {
+-        VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+-            Text(summary.greeting).font(.footnote).foregroundStyle(NativeDesign.secondary).accessibilityIdentifier("home-greeting")
+-            NativeTypingSummary(text: naturalText(summary), ready: NativeHomeSummary.hasCalendarData(life: store.life, demo: store.isDemo))
+-                .accessibilityIdentifier("home-summary")
+-            if !summary.events.isEmpty {
+-                NavigationLink { HomeAgendaScreen() } label: {
+-                    HStack(spacing: NativeDesign.Space.xs) {
+-                        Text(summary.events.count == 1 ? "Dettagli appuntamento" : "Tutti i \(summary.events.count) appuntamenti")
+-                        Image(systemName: "chevron.right").font(.caption2)
+-                    }.font(.subheadline).frame(minHeight: NativeDesign.Layout.touchTarget)
+-                }.accessibilityIdentifier("home-events")
+-            }
+-            if store.weather == "Meteo non disponibile" { Text("Meteo non disponibile").font(.caption).foregroundStyle(NativeDesign.secondary) }
+-        }
+-    }
+-    @ViewBuilder private func nextTime(_ now: Date) -> some View {
+-        if let next = NativeNextTime.next(now: now) {
+-            Button { showingTimes = true } label: {
+-                ViewThatFits(in: .horizontal) {
+-                    HStack(spacing: NativeDesign.Space.small) {
+-                        Image(systemName: next.symbol).foregroundStyle(NativeDesign.secondary)
+-                        Text(next.label).foregroundStyle(NativeDesign.secondary)
+-                        Spacer(minLength: NativeDesign.Space.small)
+-                        Text(next.displayTime).fontWeight(.medium).monospacedDigit()
+-                    }
+-                    VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
+-                        Label(next.label, systemImage: next.symbol).foregroundStyle(NativeDesign.secondary)
+-                        Text(next.displayTime).fontWeight(.medium).monospacedDigit()
+-                    }
+-                }.font(.subheadline).frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
+-                    .contentShape(Rectangle())
+-            }.buttonStyle(NativePressStyle())
+-                .accessibilityLabel("Prossimo orario, " + next.label + ", " + next.displayTime)
+-                .accessibilityIdentifier("home-next-time")
+-                .sheet(isPresented: $showingTimes) {
+-                    NavigationStack {
+-                        List {
+-                            Section("Empoli · " + CivilDate.label(next.day)) {
+-                                ForEach(NativeNextTime.schedule(day: next.day), id: \.label) { time in
+-                                    LabeledContent(time.label, value: time.time).monospacedDigit()
+-                                }
+-                            }
+-                            Section { Text("Orari indicativi calcolati sul dispositivo per Empoli, nel fuso Europe/Rome.").font(.caption).foregroundStyle(NativeDesign.secondary) }
+-                        }.modifier(NativeListAppearance()).navigationTitle("Orari").navigationBarTitleDisplayMode(.inline).toolbar { DoneButton() }
+-                    }.presentationDetents([.medium, .large])
+-                }
+-        }
+-    }
+-    private var routines: some View {
+-        VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
+-            NativeSectionHeader("Abitudini", titleIdentifier: "home-routines-heading") {
+-                NavigationLink { RoutinesEditor() } label: { Text("Gestisci").font(.subheadline).frame(minHeight: NativeDesign.Layout.touchTarget) }.accessibilityIdentifier("home-manage-routines")
+-            }
+-            if store.routines.isEmpty {
+-                NavigationLink { RoutinesEditor() } label: { Label("Aggiungi la prima abitudine", systemImage: "plus").font(.subheadline).frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading) }.accessibilityIdentifier("home-empty-routines")
+-            } else {
+-                NativeGroupedCard {
+-                    ForEach(Array(store.routines.enumerated()), id: \.element.integerID) { index, record in
+-                        if index > 0 { Divider().padding(.leading, NativeDesign.Layout.touchTarget + NativeDesign.Space.small) }
+-                        Button { checkRoutine(record) } label: {
+-                            HStack(spacing: NativeDesign.Space.small) {
+-                                NativeCheckmark(checked: record.flag("checked"))
+-                                Text(record.text("title")).font(.body).foregroundStyle(Color.primary).fixedSize(horizontal: false, vertical: true)
+-                                Spacer(minLength: 0)
+-                                if routineBusy == record.integer("id") { ProgressView().controlSize(.small) }
+-                            }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading).contentShape(Rectangle())
+-                        }.buttonStyle(NativePressStyle()).padding(.vertical, NativeDesign.Space.xs).disabled(store.busy || routineBusy != nil)
+-                            .accessibilityIdentifier("home-routine-\(record.integer("id"))")
+-                            .accessibilityLabel(record.text("title")).accessibilityValue(record.flag("checked") ? "Completata" : "Da completare")
+-                    }
+-                }
+-            }
+-        }
+-    }
+-    private func checkRoutine(_ record: Record) {
+-        guard routineBusy == nil else { return }
+-        routineBusy = record.integer("id")
+-        Task {
+-            defer { routineBusy = nil }
+-            do {
+-                try await store.perform("setRoutineCheck", ["id": .int(record.integer("id")), "day": .string(CivilDate.day()), "checked": .bool(!record.flag("checked"))])
+-                routineFeedback.toggle()
+-            } catch { store.error = error.localizedDescription }
+-        }
+-    }
+-    private func todoSection(_ rows: [Record]) -> some View {
+-        VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
+-            NativeSectionHeader("Da fare", titleIdentifier: "home-todos-heading") {
+-                Button { router.taskCategory = "action"; router.tab = .tasks } label: { Text(rows.isEmpty ? "Apri" : "Tutte · \(rows.count)").font(.subheadline).frame(minHeight: NativeDesign.Layout.touchTarget) }.accessibilityIdentifier("home-all-todos")
+-            }
+-            if rows.isEmpty {
+-                Button { router.sheet = .task(["list_kind": .string("action")]) } label: {
+-                    Label("Nessuna attività da fare. Aggiungine una", systemImage: "plus").font(.subheadline).frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
+-                }.accessibilityIdentifier("home-empty-todos")
+-            } else {
+-                NativeGroupedCard {
+-                    ForEach(Array(rows.prefix(3).enumerated()), id: \.element.integerID) { index, record in
+-                        if index > 0 { Divider().padding(.leading, NativeDesign.Layout.touchTarget + NativeDesign.Space.small) }
+-                        NativeChecklistRow(title: record.text("title"), dueDay: record.text("due_date"), openIdentifier: "home-todo-\(record.integer("id"))", completionLabel: "Completa " + record.text("title"), onComplete: {
+-                            Task { await store.run("setTaskStatus", ["id": .int(record.integer("id")), "status": .string("done")]) }
+-                        }, onOpen: { router.sheet = .task(record) })
+-                            .padding(.vertical, NativeDesign.Space.xs).disabled(store.busy)
+-                    }
+-                }
+-            }
+-        }
+-    }
+-    private var budget: some View {
+-        let valid: Bool = { if case .number(let value)? = store.summary["monthlyRemaining"] { return value.isFinite }; return false }()
+-        let daily = NativeValidation.dailyBudget(store.summary, month: store.financeMonth)
+-        return Button { router.financeSection = "Panoramica"; router.tab = .finance } label: {
+-            NativeCard(density: .compact) {
+-                HStack { Text("Budget rimanente").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary); Spacer(); NativeDisclosureIndicator() }
+-                ViewThatFits(in: .horizontal) {
+-                    HStack(alignment: .firstTextBaseline) { budgetValue(valid); Spacer(minLength: 12); dailyValue(valid, days: daily.days, amount: daily.low) }
+-                    VStack(alignment: .leading, spacing: NativeDesign.Space.small) { budgetValue(valid); dailyValue(valid, days: daily.days, amount: daily.low) }
+-                }
+-                if valid && !hidden { NativeBudgetAllocation(summary: store.summary, compact: true) }
+-                if store.financeMonth != CivilDate.month() { Text(CivilDate.monthTitle(store.financeMonth)).font(.caption2).foregroundStyle(NativeDesign.secondary) }
+-            }.contentShape(RoundedRectangle(cornerRadius: NativeDesign.cardRadius))
+-        }.buttonStyle(NativePressStyle()).accessibilityIdentifier("home-budget").accessibilityLabel("Budget rimanente")
+-            .accessibilityValue(hidden ? "Importo nascosto" : valid ? store.summary.amount("monthlyRemaining").euro : "Da aggiornare")
+-            .accessibilityHint("Apre la panoramica finanziaria")
+-    }
+-    private func budgetValue(_ valid: Bool) -> some View {
+-        Text(hidden ? "•••• €" : valid ? store.summary.amount("monthlyRemaining").euro : "Da aggiornare")
+-            .font(.title2.weight(.semibold)).monospacedDigit().lineLimit(1).minimumScaleFactor(0.6)
+-            .modifier(NativeNumericFeedback(value: hidden || !valid ? 0 : store.summary.amount("monthlyRemaining"), enabled: !hidden && valid))
+-            .foregroundStyle(!hidden && valid && store.summary.amount("monthlyRemaining") < 0 ? NativeDesign.financialRed : Color.primary)
+-    }
+-    @ViewBuilder private func dailyValue(_ valid: Bool, days: Int, amount: Double) -> some View {
+-        if valid && !hidden && days > 0 { Text(amount.euro + "/giorno").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary).fixedSize() }
+-    }
+ }
+-
+-private extension Dictionary where Key == String, Value == JSONValue { var integerID: Int { integer("id") } }
+-
+-private struct HomeAgendaScreen: View {
+-    @EnvironmentObject var store: NativeStore
+-    @EnvironmentObject var router: NativeRouter
+-    private var events: [Record] { NativeHomeSummary(now: Date(), todayShift: nil, tomorrowShift: nil, events: store.dashboardEvents, weather: nil, weatherDate: nil).events }
+-    var body: some View {
+-        List {
+-            if events.isEmpty { ContentUnavailableView("Nessun appuntamento", systemImage: "calendar") }
+-            ForEach(events.map { DisplayRecord($0) }) { item in
+-                Button { router.sheet = .event(item.value) } label: {
+-                    NativeRowText(title: item.value.text("title"), subtitle: CivilDate.label(item.value.text("day")) + (item.value.text("start_time").isEmpty ? "" : " · " + item.value.text("start_time")))
+-                }.buttonStyle(.plain)
+-            }
+-        }.modifier(NativeListAppearance()).navigationTitle("Prossimi appuntamenti").navigationBarTitleDisplayMode(.inline)
+-    }
+-}
+--- a/Sources/DemoData.swift
++++ b/Sources/DemoData.swift
+@@ -58,6 +58,15 @@
+         }
+         func replace(_ key: String, _ rows: [Record]) { state.life[key] = .array(rows.map(JSONValue.object)) }
+         switch method {
++        case "saveHealthEntry":
++            let checked = try HealthMeasurement.payload(day: payload.text("day"), weight: payload["weightKg"].map { String($0.number) } ?? "", calories: payload["calories"].map { String($0.number) } ?? "")
++            var rows = state.life.records("health")
++            let day = checked.text("day"), index = rows.firstIndex { $0.text("day") == day }
++            var row = index.map { rows[$0] } ?? ["day": .string(day)]
++            if let value = checked["weightKg"] { row["weight_kg"] = value }
++            if let value = checked["calories"] { row["calories"] = value }
++            if let index { rows[index] = row } else { rows.append(row) }
++            replace("health", rows.sorted { $0.text("day") < $1.text("day") })
+         case "saveTask":
+             var rows = state.life.records("tasks"), p = payload
+             p["title"] = .string(try checkedTitle())
+--- a/Sources/FinanceScreen.swift
++++ b/Sources/FinanceScreen.swift
+@@ -86,18 +86,10 @@
+             NavigationLink {
+                 List { detailedOverview }.modifier(NativeListAppearance()).navigationTitle("Budget").navigationBarTitleDisplayMode(.inline)
+                     .task(id: store.financeGeneration) { await store.loadAnalysis() }
+-            } label: { actionLabel("Budget", symbol: "slider.horizontal.3") }.accessibilityIdentifier("finance-budget")
+-            Button { showingExtras = true } label: { actionLabel("Extra", symbol: "ellipsis") }.accessibilityIdentifier("finance-extra")
+-            Button { router.sheet = .movement([:]) } label: { actionLabel("Spesa", symbol: "minus") }.accessibilityIdentifier("finance-expense")
++            } label: { NativeActionLabel(title: "Budget", symbol: "slider.horizontal.3") }.accessibilityIdentifier("finance-budget")
++            Button { showingExtras = true } label: { NativeActionLabel(title: "Extra", symbol: "ellipsis") }.accessibilityIdentifier("finance-extra")
++            Button { router.sheet = .movement([:]) } label: { NativeActionLabel(title: "Spesa", symbol: "minus") }.accessibilityIdentifier("finance-expense")
+         }.buttonStyle(NativePressStyle()).foregroundStyle(NativeDesign.accent)
+-    }
+-    private func actionLabel(_ title: String, symbol: String) -> some View {
+-        VStack(spacing: NativeDesign.Space.small) {
+-            Image(systemName: symbol).font(.title2.weight(.regular))
+-                .frame(width: NativeDesign.Layout.primaryAction, height: NativeDesign.Layout.primaryAction)
+-                .background(NativeDesign.inset, in: Circle()).accessibilityHidden(true)
+-            Text(title).font(.subheadline).fixedSize(horizontal: false, vertical: true)
+-        }.frame(maxWidth: .infinity).contentShape(Rectangle())
+     }
+     private var recentMovements: some View {
+         VStack(alignment: .leading, spacing: NativeDesign.Space.large) {
+--- a/Sources/HealthChartPanel.swift
++++ b/Sources/HealthChartPanel.swift
+@@ -0,0 +1,77 @@
++import SwiftUI
++import Charts
++
++struct HealthChartPanel: View {
++    @EnvironmentObject var store: NativeStore
++    @State private var metric = "Peso"
++    private var samples: [HealthMeasurement] {
++        let today = CivilDate.day(), start = CivilDate.adding(-89, to: today)
++        return Array(store.life.records("health").compactMap(HealthMeasurement.init).filter { $0.day >= start && $0.day <= today }.sorted { $0.day < $1.day }.suffix(30))
++    }
++    var body: some View {
++        let rows = samples.filter { metric == "Peso" ? $0.weight != nil : $0.calories != nil }
++        let unit = metric == "Peso" ? "kg" : "kcal"
++        VStack(alignment: .leading, spacing: NativeDesign.Space.large) {
++            Text("Peso e calorie").font(NativeDesign.heading)
++            Picker("Misurazione", selection: $metric) { Text("Peso").tag("Peso"); Text("Calorie").tag("Calorie") }.pickerStyle(.segmented)
++                .accessibilityIdentifier("health-chart-metric")
++            Text("Ultime 30 misurazioni negli ultimi 90 giorni. I giorni senza dati restano vuoti.").font(.caption).foregroundStyle(NativeDesign.secondary)
++            if rows.isEmpty {
++                Text(store.isDemo || store.life["health"] != nil ? "Nessuna misurazione disponibile. Usa Aggiungi peso per iniziare." : "Misurazioni da aggiornare. Sincronizza Life OS nelle Impostazioni.").foregroundStyle(NativeDesign.secondary).accessibilityIdentifier("health-empty")
++            } else {
++                Chart(rows) { sample in
++                    if let value = metric == "Peso" ? sample.weight : sample.calories {
++                        PointMark(x: .value("Data", CivilDate.date(sample.day)), y: .value(unit, value))
++                            .foregroundStyle(NativeDesign.accent)
++                            .accessibilityLabel(CivilDate.label(sample.day))
++                            .accessibilityValue(value.formatted() + " " + unit)
++                    }
++                }.chartYScale(domain: .automatic(includesZero: metric != "Peso"))
++                    .chartYAxisLabel(unit)
++                    .frame(height: NativeDesign.Layout.healthChartHeight).accessibilityIdentifier("health-chart")
++                DisclosureGroup("Mostra misurazioni") {
++                    ForEach(rows) { sample in
++                        LabeledContent(CivilDate.label(sample.day), value: ((metric == "Peso" ? sample.weight : sample.calories) ?? 0).formatted() + " " + unit)
++                    }
++                }.font(.caption)
++            }
++        }.accessibilityIdentifier("health-panel")
++    }
++}
++
++struct WeightEditor: View {
++    @EnvironmentObject var store: NativeStore
++    @Environment(\.dismiss) private var dismiss
++    @State private var date = Date()
++    @State private var weight = ""
++    @State private var calories = ""
++    @State private var saving = false
++    @State private var issue = ""
++    var body: some View {
++        Form {
++            DatePicker("Data", selection: $date, in: ...Date(), displayedComponents: .date)
++            TextField("Peso (kg)", text: $weight).keyboardType(.decimalPad)
++            TextField("Calorie (kcal, facoltative)", text: $calories).keyboardType(.numberPad)
++            Text("Una misurazione per giorno. Un nuovo salvataggio aggiorna i valori inseriti; i campi vuoti conservano quelli precedenti.").font(.caption).foregroundStyle(NativeDesign.secondary)
++            if !issue.isEmpty { Text(issue).foregroundStyle(NativeDesign.danger).accessibilityIdentifier("health-save-error") }
++            Button(saving ? "Salvataggio…" : "Salva misurazione") {
++                Task {
++                    guard !saving else { return }; saving = true; issue = ""
++                    defer { saving = false }
++                    do {
++                        let payload = try HealthMeasurement.payload(day: CivilDate.day(date), weight: weight, calories: calories)
++                        try await store.perform("saveHealthEntry", payload)
++                        dismiss()
++                    } catch { issue = error.localizedDescription }
++                }
++            }.disabled(store.busy || saving).accessibilityIdentifier("save-health-measurement")
++        }.modifier(NativeListAppearance()).navigationTitle("Aggiungi peso").navigationBarTitleDisplayMode(.inline)
++            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Annulla") { dismiss() }.disabled(saving) } }
++            .onAppear { loadDay() }.onChange(of: date) { _, _ in loadDay() }
++    }
++    private func loadDay() {
++        let row = store.life.records("health").first { $0.text("day") == CivilDate.day(date) } ?? [:]
++        weight = row["weight_kg"].flatMap { if case .number(let value) = $0 { return String(value) }; return nil } ?? ""
++        calories = row["calories"].flatMap { if case .number(let value) = $0 { return String(Int(value)) }; return nil } ?? ""
++    }
++}
+--- a/Sources/HealthMeasurement.swift
++++ b/Sources/HealthMeasurement.swift
+@@ -0,0 +1,32 @@
++import Foundation
++
++struct HealthMeasurement: Identifiable {
++    let day: String
++    let weight: Double?
++    let calories: Double?
++    var id: String { day }
++    init?(_ record: Record) {
++        day = record.text("day")
++        guard day.count == 10, CivilDate.day(CivilDate.date(day)) == day else { return nil }
++        func value(_ key: String, range: ClosedRange<Double>) -> Double? {
++            guard case .number(let number)? = record[key], number.isFinite, range.contains(number) else { return nil }
++            return number
++        }
++        weight = value("weight_kg", range: 20...500)
++        calories = value("calories", range: 0...15000)
++    }
++    static func payload(day: String, weight: String, calories: String, today: String = CivilDate.day()) throws -> Record {
++        guard day.count == 10, CivilDate.day(CivilDate.date(day)) == day, day <= today else { throw Message(text: "Scegli oggi o una data precedente.") }
++        func parse(_ text: String, range: ClosedRange<Double>, integer: Bool = false) throws -> JSONValue? {
++            let clean = text.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: ",", with: ".")
++            if clean.isEmpty { return nil }
++            guard let number = Double(clean), number.isFinite, range.contains(number), !integer || number.rounded() == number else { throw Message(text: "Controlla peso (20–500 kg) e calorie (0–15000 kcal).") }
++            return .number(number)
++        }
++        let kg = try parse(weight, range: 20...500), kcal = try parse(calories, range: 0...15000, integer: true)
++        guard kg != nil || kcal != nil else { throw Message(text: "Inserisci il peso o le calorie.") }
++        var result: Record = ["day": .string(day)]
++        result["weightKg"] = kg; result["calories"] = kcal
++        return result
++    }
++}
+--- a/Sources/NativeActionLabel.swift
++++ b/Sources/NativeActionLabel.swift
+@@ -0,0 +1,14 @@
++import SwiftUI
++
++struct NativeActionLabel: View {
++    let title: String
++    let symbol: String
++    var body: some View {
++        VStack(spacing: NativeDesign.Space.small) {
++            Image(systemName: symbol).font(.title2.weight(.regular))
++                .frame(width: NativeDesign.Layout.primaryAction, height: NativeDesign.Layout.primaryAction)
++                .background(NativeDesign.inset, in: Circle()).accessibilityHidden(true)
++            Text(title).font(.subheadline).fixedSize(horizontal: false, vertical: true)
++        }.frame(maxWidth: .infinity).contentShape(Rectangle())
++    }
++}
+--- a/Sources/NativeDesign.swift
++++ b/Sources/NativeDesign.swift
+@@ -41,6 +41,7 @@
+         static let iconTile: CGFloat = 38
+         static let tabHeight: CGFloat = 52
+         static let primaryAction: CGFloat = 60
++        static let healthChartHeight: CGFloat = 200
+         static let categoryWidth: CGFloat = 88
+         static let navigationInset = Space.large
+         static let calendarDayNumber: CGFloat = 26
+--- a/Sources/NativeHomeModel.swift
++++ b/Sources/NativeHomeModel.swift
+@@ -28,7 +28,7 @@
+                 return a == b ? ($0.amount("sort_order"), $0.integer("id")) < ($1.amount("sort_order"), $1.integer("id")) : a < b
+             }
+     }
+-    init(now: Date, todayShift: ShiftKind?, tomorrowShift: ShiftKind?, previousShift: ShiftKind? = nil, events source: [Record], weather: NativeWeather?, weatherDate: Date?, calendarAvailable: Bool = true) {
++    init(now: Date, todayShift: ShiftKind?, tomorrowShift: ShiftKind?, previousShift: ShiftKind? = nil, events source: [Record], weather: NativeWeather?, weatherDate: Date?, calendarAvailable: Bool = true, includeEvents: Bool = true) {
+         let today = CivilDate.day(now), tomorrow = CivilDate.adding(1, to: today)
+         let end = CivilDate.adding(7, to: today)
+         let hour = CivilDate.calendar.component(.hour, from: now)
+@@ -76,6 +76,7 @@
+         }
+         if current == nil && next == nil { parts.append(Phrase(lead: "", detail: "Turni non disponibili", tail: ".")) }
+ 
++        if includeEvents {
+         if let first = events.first {
+             let day = first.text("day")
+             let when = day == today ? "Oggi" : day == tomorrow ? "Domani" : CivilDate.label(day).capitalized
+@@ -86,6 +87,7 @@
+         } else {
+             parts.append(Phrase(lead: "", detail: calendarAvailable ? "Nessun appuntamento nei prossimi 7 giorni" : "Calendario da aggiornare", tail: "."))
+         }
++        }
+         phrases = parts
+     }
+ }
+--- a/Sources/NativeStore.swift
++++ b/Sources/NativeStore.swift
+@@ -387,6 +387,17 @@
+         do { try await refresh(NativeSyncPolicy.scope(for: method)) }
+         catch { notice = "Operazione inviata. Aggiornamento non riuscito: sincronizza prima di ripetere l’azione." }
+     }
++    func updateShiftCalendar(_ method: String, month: String) async throws -> Record {
++        guard ["getShiftCalendar", "publishShiftCalendar", "rotateShiftCalendarLink"].contains(method),
++              !isDemo, server != nil else { throw Message(text: "Collega prima il server Life OS.") }
++        guard !busy else { throw Message(text: "Attendi la fine del salvataggio e riprova.") }
++        busy = true; defer { busy = false }
++        let result = try await read(method, args: [.object(["month": .string(month)])])
++        guard case .object(let record) = result, record["path"] != nil, record["publishedAt"] != nil else {
++            throw Message(text: "Il server non ha confermato il collegamento del calendario.")
++        }
++        return record
++    }
+     func run(_ method: String, _ payload: Record = [:], args: [JSONValue]? = nil) async {
+         do { try await perform(method, payload, args: args) } catch { self.error = error.localizedDescription }
+     }
+--- a/Sources/NativeSyncPolicy.swift
++++ b/Sources/NativeSyncPolicy.swift
+@@ -8,7 +8,7 @@
+ }
+ enum NativeSyncPolicy {
+     static func scope(for method: String) -> NativeRefreshScope {
+-        let life: Set<String> = ["setRoutineCheck", "saveRoutine", "deleteRoutine", "paintShift", "saveTask", "setTaskStatus", "deleteTask", "deleteCompletedTasks", "reorderTasks", "addCategory", "renameCategory", "deleteCategory", "reorderCategories", "saveEvent", "splitEventSeries", "setEventOccurrence", "deleteEvent"]
++        let life: Set<String> = ["saveHealthEntry","setRoutineCheck", "saveRoutine", "deleteRoutine", "paintShift", "saveTask", "setTaskStatus", "deleteTask", "deleteCompletedTasks", "reorderTasks", "addCategory", "renameCategory", "deleteCategory", "reorderCategories", "saveEvent", "splitEventSeries", "setEventOccurrence", "deleteEvent"]
+         return life.contains(method) ? .life : .finance
+     }
+     static func isTransient(_ error: Error) -> Bool {
+--- a/Sources/ShiftCalendarLink.swift
++++ b/Sources/ShiftCalendarLink.swift
+@@ -0,0 +1,12 @@
++import Foundation
++
++enum ShiftCalendarLink {
++    static func subscription(server: URL?, path: String) -> URL? {
++        guard let server, server.scheme == "https", server.host != nil,
++              path.range(of: #"^/calendar/turni/[a-f0-9]{64}\.ics$"#, options: .regularExpression) != nil,
++              var components = URLComponents(url: server, resolvingAgainstBaseURL: false) else { return nil }
++        components.scheme = "webcal"; components.path = path
++        components.query = nil; components.fragment = nil; components.user = nil; components.password = nil
++        return components.url
++    }
++}
+--- a/Sources/ShiftCalendarPanel.swift
++++ b/Sources/ShiftCalendarPanel.swift
+@@ -0,0 +1,70 @@
++import SwiftUI
++
++struct ShiftCalendarPanel: View {
++    @EnvironmentObject var store: NativeStore
++    @State private var status: Record = [:]
++    @State private var statusMonth = ""
++    @State private var message = ""
++    @State private var failure = ""
++    @State private var working = false
++    @State private var confirmRotation = false
++
++    private var subscription: URL? {
++        guard statusMonth == store.calendarMonth else { return nil }
++        return ShiftCalendarLink.subscription(server: store.server, path: status.text("path"))
++    }
++    var body: some View {
++        VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
++            Text("Turni in Calendario Apple").font(NativeDesign.heading)
++            Text("Prepara qui i turni. Eventi in Calendario Apple, attività in Promemoria.")
++                .font(.subheadline).foregroundStyle(NativeDesign.secondary)
++            Text("Pubblica il mese visualizzato, anche dopo una correzione o una cancellazione. Gli altri mesi pubblicati restano disponibili.")
++                .font(.caption).foregroundStyle(NativeDesign.secondary)
++            if statusMonth == store.calendarMonth, !status.text("publishedAt").isEmpty {
++                Text("Questo mese è stato pubblicato. Le nuove modifiche richiedono una nuova pubblicazione.")
++                    .font(.caption).foregroundStyle(NativeDesign.secondary)
++            }
++            if store.isDemo || store.server == nil {
++                Text("Per pubblicare i turni collega il server Life OS nelle Impostazioni. La demo non invia dati ad Apple.")
++                    .font(.caption).foregroundStyle(NativeDesign.secondary)
++            }
++            Button(working ? "Attendi…" : "Pubblica turni del mese") { Task { await update("publishShiftCalendar") } }
++                .buttonStyle(.borderedProminent).disabled(store.busy || working || store.isDemo || store.server == nil)
++                .frame(minHeight: NativeDesign.Layout.touchTarget).accessibilityIdentifier("publish-shift-calendar")
++            if !message.isEmpty { Text(message).font(.caption).accessibilityIdentifier("shift-calendar-status") }
++            if !failure.isEmpty {
++                Text(failure + " Puoi riprovare.").font(.caption).foregroundStyle(NativeDesign.danger)
++                    .accessibilityIdentifier("shift-calendar-error")
++                Button("Riprova collegamento") { Task { await update("getShiftCalendar") } }.disabled(store.busy || working)
++            }
++            if let subscription {
++                Link("Collega Calendario Apple", destination: subscription)
++                    .frame(minHeight: NativeDesign.Layout.touchTarget).accessibilityIdentifier("subscribe-shift-calendar")
++                Text("Collegalo una sola volta. Apple aggiorna periodicamente i turni: le modifiche possono richiedere tempo. I turni si modificano in Life OS.")
++                    .font(.caption).foregroundStyle(NativeDesign.secondary)
++                Text("Il link è riservato: chi lo possiede può leggere i turni.").font(.caption).foregroundStyle(NativeDesign.secondary)
++                Button("Rigenera link riservato", role: .destructive) { confirmRotation = true }
++                    .disabled(store.busy || working).frame(minHeight: NativeDesign.Layout.touchTarget)
++            }
++        }
++        .task(id: store.calendarMonth) { await update("getShiftCalendar") }
++        .confirmationDialog("Il vecchio link smetterà di funzionare. Dovrai collegare di nuovo il calendario su Apple.", isPresented: $confirmRotation, titleVisibility: .visible) {
++            Button("Rigenera link", role: .destructive) { Task { await update("rotateShiftCalendarLink") } }
++        }
++    }
++    @MainActor private func update(_ method: String) async {
++        guard !working, !store.isDemo, store.server != nil else { return }
++        let month = store.calendarMonth
++        working = true; failure = ""; message = ""
++        defer { working = false }
++        do {
++            let result = try await store.updateShiftCalendar(method, month: month)
++            guard !Task.isCancelled, store.calendarMonth == month else { return }
++            status = result; statusMonth = month
++            if method == "publishShiftCalendar" { message = "Turni pubblicati. Apple li riceverà al prossimo aggiornamento." }
++            if method == "rotateShiftCalendarLink" { message = "Nuovo link pronto. Collegalo di nuovo su Apple." }
++        } catch {
++            if !Task.isCancelled, store.calendarMonth == month { failure = error.localizedDescription }
++        }
++    }
++}
+--- a/Tests/HealthMeasurementTests.swift
++++ b/Tests/HealthMeasurementTests.swift
+@@ -0,0 +1,41 @@
++import XCTest
++@testable import LifeOSProbe
++
++final class HealthMeasurementTests: XCTestCase {
++    func testManualPayloadAcceptsItalianDecimalsAndZeroCalories() throws {
++        let value = try HealthMeasurement.payload(day: "2026-10-23", weight: "78,4", calories: "0", today: "2026-10-23")
++        XCTAssertEqual(value.amount("weightKg"), 78.4)
++        XCTAssertEqual(value["calories"], .number(0))
++    }
++    func testMissingMeasurementsStayMissing() throws {
++        let value = try HealthMeasurement.payload(day: "2026-10-23", weight: "78", calories: "", today: "2026-10-23")
++        XCTAssertNil(value["calories"])
++        let sample = HealthMeasurement(["day": .string("2026-10-23"), "weight_kg": .number(78), "calories": .null])
++        XCTAssertNil(sample?.calories)
++        XCTAssertEqual(sample?.weight, 78)
++    }
++    func testInvalidAndFutureMeasurementsAreRejected() {
++        for (weight, calories) in [("", ""), ("nan", ""), ("19", ""), ("78", "1.5"), ("78", "15001")] {
++            XCTAssertThrowsError(try HealthMeasurement.payload(day: "2026-10-23", weight: weight, calories: calories, today: "2026-10-23"))
++        }
++        XCTAssertThrowsError(try HealthMeasurement.payload(day: "2026-02-30", weight: "78", calories: "", today: "2026-10-23"))
++        XCTAssertThrowsError(try HealthMeasurement.payload(day: "2026-10-24", weight: "78", calories: "", today: "2026-10-23"))
++    }
++    func testDemoUpdatesOneDayAndPreservesOtherData() throws {
++        var state = NativeArchive(); state.demo = true
++        state.life = ["shifts": .array([.object(["day": .string(CivilDate.day()), "kind": .string("morning")])])]
++        let day = CivilDate.day()
++        try DemoActions.apply("saveHealthEntry", ["day": .string(day), "weightKg": .number(78.4), "calories": .number(2100)], args: nil, state: &state)
++        try DemoActions.apply("saveHealthEntry", ["day": .string(day), "weightKg": .number(78.1)], args: nil, state: &state)
++        XCTAssertEqual(state.life.records("health").count, 1)
++        XCTAssertEqual(state.life.records("health")[0].amount("weight_kg"), 78.1)
++        XCTAssertEqual(state.life.records("health")[0].amount("calories"), 2100)
++        XCTAssertEqual(state.life.records("shifts").count, 1)
++    }
++    func testDashboardSummaryDoesNotReadLegacyAppointments() {
++        let summary = NativeHomeSummary(now: CivilDate.date("2026-10-23"), todayShift: .morning, tomorrowShift: .rest, events: [["id": .int(1), "day": .string("2026-10-23"), "title": .string("Evento precedente")]], weather: nil, weatherDate: nil, includeEvents: false)
++        XCTAssertFalse(summary.text.contains("Evento precedente"))
++        XCTAssertFalse(summary.text.contains("appuntamento"))
++        XCTAssertTrue(summary.text.contains("mattina"))
++    }
++}
+--- a/Tests/NativeStoreTests.swift
++++ b/Tests/NativeStoreTests.swift
+@@ -23,6 +23,7 @@
+         var text = "{}"
+         if Self.failAll { status = 401; text = "Sessione scaduta" }
+         else if method == "saveTransaction" { Self.writes += 1; text = "true" }
++        else if ["getShiftCalendar", "publishShiftCalendar", "rotateShiftCalendarLink"].contains(method) { text = #"{"path":"/calendar/turni/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.ics","publishedAt":"2026-10-23T12:00:00Z"}"# }
+         else if method == "getLifeData" { text = #"{"tasks":[],"categories":[],"routines":[],"events":[],"shifts":[],"upcomingEvents":[]}"# }
+         else if method == "getExtraPlan" { text = #"{"allocations":[],"links":[]}"# }
+         else if method == "getFinanceData" || method == "getFinanceOverview" {
+@@ -39,6 +40,30 @@
+ }
+ 
+ @MainActor final class NativeStoreTests: XCTestCase {
++    func testShiftPublicationDoesNotRefreshFinanceOrRetryWrites() async throws {
++        let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
++        let store = NativeStore(directory: directory, session: session, migrateLegacy: false)
++        try store.configure("https://lifeos-test.invalid")
++        let result = try await store.updateShiftCalendar("publishShiftCalendar", month: "2026-10")
++        XCTAssertFalse(result.text("path").isEmpty)
++        XCTAssertEqual(MockAPI.calls, ["publishShiftCalendar"])
++        XCTAssertFalse(store.busy)
++        MockAPI.timeoutOnce = "publishShiftCalendar"
++        do {
++            _ = try await store.updateShiftCalendar("publishShiftCalendar", month: "2026-10")
++            XCTFail("Un timeout deve restare visibile")
++        } catch { XCTAssertEqual((error as? URLError)?.code, .timedOut) }
++        XCTAssertEqual(MockAPI.calls.filter { $0 == "publishShiftCalendar" }.count, 2)
++        XCTAssertFalse(store.busy)
++        _ = try await store.updateShiftCalendar("publishShiftCalendar", month: "2026-10")
++        XCTAssertEqual(MockAPI.calls.count, 3)
++    }
++    func testDemoCannotPublishShifts() async throws {
++        let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
++        let store = NativeStore(directory: directory, session: session, migrateLegacy: false)
++        do { _ = try await store.updateShiftCalendar("publishShiftCalendar", month: "2026-10"); XCTFail("La demo non può pubblicare") }
++        catch { XCTAssertTrue(MockAPI.calls.isEmpty) }
++    }
+     private func setup() throws -> (URL, URLSession) {
+         MockAPI.lock.lock(); MockAPI.writes = 0; MockAPI.failAfterWrite = false; MockAPI.failAll = false; MockAPI.calls = []; MockAPI.timeoutOnce = nil; MockAPI.lock.unlock()
+         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+--- a/Tests/ShiftCalendarLinkTests.swift
++++ b/Tests/ShiftCalendarLinkTests.swift
+@@ -0,0 +1,18 @@
++import Foundation
++import XCTest
++@testable import LifeOSProbe
++
++final class ShiftCalendarLinkTests: XCTestCase {
++    private let path = "/calendar/turni/" + String(repeating: "a", count: 64) + ".ics"
++    func testSubscriptionUsesTheConfiguredServerWithoutForwardingCredentials() {
++        let server = URL(string: "https://user:password@lifeos.example/old?key=private#fragment")
++        XCTAssertEqual(ShiftCalendarLink.subscription(server: server, path: path)?.absoluteString, "webcal://lifeos.example" + path)
++    }
++    func testSubscriptionRejectsExternalMalformedAndInsecureLinks() {
++        for candidate in ["https://external.example" + path, path + "?extra=1", path + "/extra", "/calendar/turni/short.ics", "//external.example/feed.ics"] {
++            XCTAssertNil(ShiftCalendarLink.subscription(server: URL(string: "https://lifeos.example"), path: candidate))
++        }
++        XCTAssertNil(ShiftCalendarLink.subscription(server: nil, path: path))
++        XCTAssertNil(ShiftCalendarLink.subscription(server: URL(string: "http://lifeos.example"), path: path))
++    }
++}
+--- a/UITests/NativeInterfaceTests.swift
++++ b/UITests/NativeInterfaceTests.swift
+@@ -40,23 +40,17 @@
+         let shot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+         shot.name = name; shot.lifetime = .keepAlways; add(shot)
+     }
+-    func testFourSectionsInBothThemes() {
++    func testTwoSectionsInBothThemes() {
+         for dark in [false, true] {
+             let app = launch(dark ? ["--dark"] : [])
+-            for tab in ["Dashboard", "Attività", "Calendario", "Finanza"] {
+-                app.buttons[tab].tap()
++            XCTAssertEqual(app.tabBars.buttons.count, 2)
++            XCTAssertFalse(app.tabBars.buttons["Attività"].exists)
++            XCTAssertFalse(app.tabBars.buttons["Calendario"].exists)
++            for tab in ["Dashboard", "Finanza"] {
++                app.tabBars.buttons[tab].tap()
+                 XCTAssertTrue(app.navigationBars[tab].waitForExistence(timeout: 10))
+-                let add = addButton(app)
+-                XCTAssertTrue(add.isHittable)
+-                assertMinimumTouchTarget(add)
+-                add.tap()
+-                let editor = tab == "Attività" ? "Nuova attività" : tab == "Calendario" ? "Nuovo evento" : "Nuovo movimento"
+-                XCTAssertTrue(app.navigationBars[editor].waitForExistence(timeout: 10))
+-                app.buttons["Annulla"].tap()
+-                XCTAssertTrue(app.navigationBars[tab].waitForExistence(timeout: 10))
+-                XCTAssertTrue(app.navigationBars.buttons["primary-add"].exists)
+-                XCTAssertTrue(app.tabBars.firstMatch.exists)
+-                if tab == "Finanza" { XCTAssertTrue(app.staticTexts["finance-budget-value"].exists) }
++                XCTAssertTrue(app.navigationBars.buttons["Impostazioni"].isHittable)
++                assertMinimumTouchTarget(app.tabBars.buttons[tab])
+                 capture((dark ? "dark-" : "light-") + tab)
+             }
+             app.terminate()
+@@ -65,6 +59,7 @@
+     func testNativeToolbarRespondsAcross44PointTouchRegion() {
+         for dark in [false, true] {
+             let app = launch(dark ? ["--dark"] : [])
++            app.tabBars.buttons["Finanza"].tap()
+             // 21.5pt from the centre samples just inside each edge of a 44pt target.
+             // Coordinates are relative to the app, so XCTest cannot snap to the
+             // button centre or substitute its own inferred hit point.
+@@ -85,7 +80,7 @@
+                     XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: 5),
+                                   "Toolbar non risponde a \(offset) dal centro: \(identifier), frame \(frame)")
+                     app.buttons[dismiss].tap()
+-                    XCTAssertTrue(app.navigationBars["Dashboard"].waitForExistence(timeout: 5))
++                    XCTAssertTrue(app.navigationBars["Finanza"].waitForExistence(timeout: 5))
+                 }
+             }
+             capture(dark ? "native-toolbar-hit-region-dark" : "native-toolbar-hit-region-light")
+@@ -93,109 +88,77 @@
+         }
+     }
+     func testNavigationKeepsSelectionAndGeometryWhenChangingTabs() {
+-        let app = launch(["--stress-content", "--dark"])
++        let app = launch(["--dark"])
+         let initial = app.tabBars.buttons["Dashboard"].frame
+-        for (key, title) in [("finance", "Finanza"), ("tasks", "Attività"), ("calendar", "Calendario"), ("dashboard", "Dashboard"), ("calendar", "Calendario"), ("tasks", "Attività"), ("dashboard", "Dashboard")] {
+-            let tab = app.tabBars.buttons[title]
+-            XCTAssertTrue(tab.isHittable); assertMinimumTouchTarget(tab); tab.tap()
+-            XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: 3))
++        for title in ["Finanza", "Dashboard", "Finanza", "Dashboard"] {
++            let tab = app.tabBars.buttons[title]; tab.tap()
+             XCTAssertTrue(tab.isSelected)
+-            for other in ["dashboard", "tasks", "calendar", "finance"] where other != key {
+-                XCTAssertFalse(app.tabBars.buttons[["dashboard": "Dashboard", "tasks": "Attività", "calendar": "Calendario", "finance": "Finanza"][other]!].isSelected)
+-            }
+-            let frame = app.tabBars.buttons["Dashboard"].frame
+-            XCTAssertEqual(frame.minY, initial.minY, accuracy: 1)
+-            XCTAssertEqual(frame.width, initial.width, accuracy: 1)
+-            XCTAssertTrue(addButton(app).isHittable)
+-        }
+-        capture("navigation-selection-after-repeated-changes")
++            XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: 5))
++            XCTAssertEqual(app.tabBars.buttons["Dashboard"].frame.minY, initial.minY, accuracy: 1)
++        }
++        app.buttons["dashboard-calendar"].tap()
++        XCTAssertTrue(app.navigationBars["Calendario"].waitForExistence(timeout: 5))
++        XCTAssertTrue(app.tabBars.buttons["Dashboard"].isSelected)
++        app.navigationBars.buttons["Dashboard"].tap()
++        XCTAssertTrue(app.buttons["dashboard-add-weight"].waitForExistence(timeout: 5))
+     }
+     private func reveal(_ element: XCUIElement, in app: XCUIApplication) {
+         let scroll = app.scrollViews["dashboard-scroll"]
+         for _ in 0..<10 { if element.isHittable { return }; scroll.swipeUp() }
+     }
+-    func testHomeSummaryAndVerticalRoutinesInBothThemes() {
++    func testDashboardHealthLayoutInBothThemes() {
+         for dark in [false, true] {
+             let app = launch(dark ? ["--dark"] : [])
+-            let summary = app.staticTexts["home-summary"]
+-            XCTAssertTrue(summary.waitForExistence(timeout: 10))
+-            XCTAssertTrue(summary.label.contains("Allenamento"))
+-            XCTAssertFalse(summary.label.contains("dalle"))
+-            XCTAssertFalse(app.otherElements["today-condition"].exists)
+-            let days = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "dashboard-day-"))
+-            XCTAssertEqual(days.count, 7)
+-            XCTAssertTrue(days.element(boundBy: 3).isSelected)
+-            XCTAssertEqual(days.element(boundBy: 3).frame.midX, app.frame.midX, accuracy: 1)
+-            capture(dark ? "home-editorial-dark" : "home-editorial-light")
+-            let routine = app.buttons["home-routine-1"]
+-            reveal(routine, in: app)
+-            XCTAssertTrue(routine.isHittable)
+-            assertMinimumTouchTarget(routine)
+-            let before = routine.value as? String
+-            routine.tap()
+-            let changed = NSPredicate(format: "value != %@", before ?? "")
+-            expectation(for: changed, evaluatedWith: routine)
+-            waitForExpectations(timeout: 10)
+-            let routines = app.staticTexts["home-routines-heading"]
+-            let todos = app.staticTexts["home-todos-heading"]
+-            XCTAssertTrue(routines.exists); XCTAssertTrue(todos.exists)
+-            XCTAssertLessThan(routines.frame.minY, todos.frame.minY)
+-            let rows = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-todo-"))
+-            XCTAssertLessThanOrEqual(rows.count, 3)
+-            XCTAssertGreaterThan(rows.count, 0)
+-            let budget = app.buttons["home-budget"]
+-            reveal(budget, in: app); XCTAssertTrue(budget.isHittable)
+-            capture(dark ? "home-budget-dark" : "home-budget-light")
++            XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "dashboard-day-")).count, 7)
++            XCTAssertTrue(app.staticTexts["home-summary"].exists)
++            for id in ["dashboard-add-weight", "dashboard-calendar"] {
++                let button = app.buttons[id]; reveal(button, in: app)
++                XCTAssertTrue(button.isHittable); assertMinimumTouchTarget(button)
++            }
++            XCTAssertFalse(app.buttons["home-all-todos"].exists)
++            XCTAssertFalse(app.buttons["home-manage-routines"].exists)
++            XCTAssertFalse(app.staticTexts["Abitudini"].exists)
++            XCTAssertTrue(app.staticTexts["Peso e calorie"].exists)
++            capture(dark ? "health-dashboard-dark" : "health-dashboard-light")
+             app.terminate()
+         }
+     }
+-    func testHomeEmptyStatesRemainActionable() {
+-        let app = launch(["--empty-home", "--dark"])
+-        let summary = app.staticTexts["home-summary"]
+-        XCTAssertTrue(summary.waitForExistence(timeout: 10))
+-        XCTAssertTrue(summary.label.contains("Nessun appuntamento"))
+-        XCTAssertTrue(summary.label.contains("Turni non disponibili"))
++    func testHomeEmptyHealthStateCanAddAndCorrectWeight() {
++        let app = launch(["--empty-home"])
++        let empty = app.staticTexts["Nessuna misurazione disponibile. Usa Aggiungi peso per iniziare."]
++        reveal(empty, in: app)
++        XCTAssertTrue(empty.waitForExistence(timeout: 5), app.debugDescription)
++        XCTAssertTrue(empty.isHittable)
++        capture("health-empty-visible")
++        let add = app.buttons["dashboard-add-weight"]
++        for _ in 0..<8 { if add.isHittable { break }; app.scrollViews["dashboard-scroll"].swipeDown() }
++        XCTAssertTrue(add.isHittable); add.tap()
++        XCTAssertTrue(app.navigationBars["Aggiungi peso"].waitForExistence(timeout: 5))
++        app.textFields["Peso (kg)"].tap(); app.textFields["Peso (kg)"].typeText("78,4")
++        app.buttons["save-health-measurement"].tap()
++        XCTAssertTrue(add.waitForExistence(timeout: 5)); add.tap()
++        XCTAssertEqual(app.textFields["Peso (kg)"].value as? String, "78.4")
++        app.buttons["Annulla"].tap()
++        let readings = app.buttons["Mostra misurazioni"]
++        reveal(readings, in: app)
++        XCTAssertTrue(readings.isHittable, app.debugDescription); readings.tap()
++        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "78,4")).firstMatch.waitForExistence(timeout: 5))
++        XCTAssertFalse(empty.exists)
++        capture("health-weight-saved")
++    }
++
++    func testLegacyTasksEventsAndRoutinesAreAbsentFromDashboard() {
++        let app = launch(["--busy-home", "--stress-content"])
++        let text = app.staticTexts["home-summary"].label
++        XCTAssertFalse(text.contains("Appuntamento"))
++        XCTAssertFalse(text.contains("Organizzare"))
+         XCTAssertFalse(app.buttons["home-events"].exists)
+-        let routines = app.buttons["home-empty-routines"]
+-        reveal(routines, in: app); XCTAssertTrue(routines.isHittable)
+-        let todos = app.buttons["home-empty-todos"]
+-        reveal(todos, in: app); XCTAssertTrue(todos.isHittable)
+-        todos.tap()
+-        XCTAssertTrue(app.navigationBars["Nuova attività"].waitForExistence(timeout: 10))
+-        app.buttons["Annulla"].tap()
+-        let budget = app.buttons["home-budget"]
+-        reveal(budget, in: app)
+-        XCTAssertEqual(budget.value as? String, "Da aggiornare")
+-        capture("home-empty")
+-    }
+-    func testHomeAllTodosRestoresActionCategory() {
+-        let app = launch(["--dark"])
+-        app.buttons["Attività"].tap()
+-        app.buttons["Desideri"].tap()
+-        XCTAssertFalse(app.staticTexts["Organizzare la settimana"].exists)
+-        app.buttons["Dashboard"].tap()
+-        let all = app.buttons["home-all-todos"]
+-        reveal(all, in: app); XCTAssertTrue(all.isHittable); all.tap()
+-        XCTAssertTrue(app.navigationBars["Attività"].waitForExistence(timeout: 10))
+-        XCTAssertTrue(app.staticTexts["Organizzare la settimana"].exists)
+-    }
+-    func testHomeManyEventsAndTasksStayBoundedAndReachable() {
+-        let app = launch(["--busy-home", "--stress-content", "--dark"])
+-        let summary = app.staticTexts["home-summary"]
+-        XCTAssertTrue(summary.waitForExistence(timeout: 10))
+-        XCTAssertTrue(summary.label.contains("Appuntamento 5"))
+-        XCTAssertFalse(summary.label.contains("Appuntamento 10"))
+-        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-todo-")).count, 3)
+-        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-routine-")).count, 8)
+-        let events = app.buttons["home-events"]
+-        reveal(events, in: app); XCTAssertTrue(events.isHittable)
+-        events.tap()
+-        XCTAssertTrue(app.navigationBars["Prossimi appuntamenti"].waitForExistence(timeout: 10))
+-        XCTAssertTrue(app.staticTexts["Appuntamento 5"].exists)
+-        capture("home-many-events-agenda")
++        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-todo-")).count, 0)
++        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-routine-")).count, 0)
+     }
+     func testKeyboardAndLocalMovementFlow() {
+         let app = launch()
++        app.tabBars.buttons["Finanza"].tap()
+         app.buttons["Aggiungi spesa"].tap()
+         let description = app.textFields["Descrizione"]
+         XCTAssertTrue(description.waitForExistence(timeout: 10))
+@@ -213,12 +176,14 @@
+         capture("movement-saved-locally")
+     }
+     func testLargeTextAndSixWeekCalendar() {
+-        let app = launch(["--large-text", "--six-weeks"])
+-        capture("accessibility-dashboard")
+-        app.buttons["Calendario"].tap()
+-        XCTAssertTrue(app.staticTexts["Marzo 2026"].waitForExistence(timeout: 10))
++        let app = launch(["--large-text"])
++        app.buttons["dashboard-calendar"].tap()
++        var calendar = Calendar(identifier: .gregorian); calendar.timeZone = TimeZone(identifier: "Europe/Rome")!
++        let now = calendar.dateComponents([.year, .month], from: Date())
++        let delta = (now.year! - 2026) * 12 + now.month! - 3
++        for _ in 0..<abs(delta) { app.buttons[delta >= 0 ? "Mese precedente" : "Mese successivo"].tap() }
++        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "calendar-day-")).count, 42)
+         capture("accessibility-six-weeks")
+-        app.terminate()
+     }
+     func testNativeSignInKeyboard() {
+         continueAfterFailure = false
+@@ -233,7 +198,7 @@
+     }
+     func testBottomAddOpensTheCorrectEditor() {
+         let app = launch(["--dark"])
+-        for (tab, title) in [("Dashboard", "Nuovo movimento"), ("Attività", "Nuova attività"), ("Calendario", "Nuovo evento"), ("Finanza", "Nuovo movimento")] {
++        for (tab, title) in [("Dashboard", "Aggiungi peso"), ("Finanza", "Nuovo movimento")] {
+             app.buttons[tab].tap()
+             addButton(app).tap()
+             XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: 10))
+@@ -247,81 +212,35 @@
+         capture("bottom-add-extra")
+         app.buttons["Annulla"].tap()
+     }
+-    func testSharedRowsAndCategoryChoicesKeepAccessibleTargets() {
+-        let app = launch(["--dark"])
+-        app.tabBars.buttons["Attività"].tap()
+-        let wishes = app.buttons["task-category-wish"], actions = app.buttons["task-category-action"]
+-        XCTAssertTrue(wishes.waitForExistence(timeout: 10)); wishes.tap()
+-        XCTAssertTrue(wishes.isSelected)
+-        actions.tap(); XCTAssertTrue(actions.isSelected)
+-        assertMinimumTouchTarget(actions)
+-        let completion = app.buttons["Cambia completamento Organizzare la settimana"]
+-        XCTAssertTrue(completion.waitForExistence(timeout: 10)); XCTAssertTrue(completion.isHittable)
+-        assertMinimumTouchTarget(completion)
+-        app.staticTexts["Organizzare la settimana"].tap()
+-        XCTAssertTrue(app.navigationBars["Modifica attività"].waitForExistence(timeout: 10))
+-        app.buttons["Annulla"].tap()
+-        capture("shared-task-rows")
+-        completion.tap()
+-        XCTAssertTrue(app.staticTexts["Completate"].waitForExistence(timeout: 10))
+-        XCTAssertEqual(completion.value as? String, "Completata")
+-        capture("shared-completed-task-rows")
+-        completion.tap()
+-        XCTAssertEqual(completion.value as? String, "Da completare")
+-    }
++
+     func testRepeatedBoundaryScrollingKeepsNavigationStable() {
+-        let app = launch(["--stress-content", "--dark"])
+-        for tab in ["Dashboard", "Attività", "Calendario", "Finanza"] {
+-            app.buttons[tab].tap()
+-            let tabs = app.buttons["Dashboard"]
+-            let before = tabs.frame
+-            let surface = tab == "Attività" ? app.collectionViews.firstMatch : app.scrollViews[tab == "Dashboard" ? "dashboard-scroll" : tab == "Finanza" ? "finance-scroll" : "calendar-scroll"]
+-            XCTAssertTrue(surface.waitForExistence(timeout: 10))
+-            for _ in 0..<4 { surface.swipeUp(velocity: .fast) }
+-            for _ in 0..<3 { surface.swipeUp(velocity: .fast) }
+-            for _ in 0..<7 { surface.swipeDown(velocity: .fast) }
+-            XCTAssertTrue(app.buttons["Dashboard"].isHittable)
+-            XCTAssertTrue(app.buttons["Calendario"].isHittable)
+-            XCTAssertEqual(before.height, tabs.frame.height, accuracy: 2)
+-            capture("boundary-" + tab)
+-        }
+-    }
+-    func testCalendarEventCanBeCreatedAfterBoundaryScroll() {
+-        let app = launch(["--dark"])
+-        app.buttons["Calendario"].tap()
++        let app = launch(["--dark"])
++        for tab in ["Dashboard", "Finanza"] {
++            app.tabBars.buttons[tab].tap()
++            let scroll = app.scrollViews[tab == "Dashboard" ? "dashboard-scroll" : "finance-scroll"]
++            for _ in 0..<4 { scroll.swipeUp(velocity: .fast) }
++            for _ in 0..<4 { scroll.swipeDown(velocity: .fast) }
++            XCTAssertTrue(app.tabBars.buttons["Dashboard"].isHittable)
++            XCTAssertTrue(app.tabBars.buttons["Finanza"].isHittable)
++        }
++    }
++    func testCalendarPublicationIsVisibleAfterBoundaryScrollAndDisabledInDemo() {
++        let app = launch(["--dark"])
++        app.buttons["dashboard-calendar"].tap()
+         let scroll = app.scrollViews["calendar-scroll"]
+         XCTAssertTrue(scroll.waitForExistence(timeout: 10))
+         for _ in 0..<4 { scroll.swipeUp(velocity: .fast) }
+-        let add = app.buttons["calendar-add-event"]
+-        XCTAssertTrue(add.isHittable)
+-        XCTAssertLessThan(add.frame.maxY, app.buttons["Dashboard"].frame.minY - 4)
+-        add.tap()
+-        let title = app.textFields["Titolo"]
+-        XCTAssertTrue(title.waitForExistence(timeout: 10))
+-        title.tap(); title.typeText("Evento dopo scorrimento")
+-        app.buttons["Salva"].tap()
+-        XCTAssertTrue(app.buttons["Calendario"].waitForExistence(timeout: 10))
+-        // A single-line native Button exposes its title as the button label, not a child StaticText.
+-        let eventTitle = app.buttons.matching(NSPredicate(format: "label == %@", "Evento dopo scorrimento")).firstMatch
+-        XCTAssertTrue(eventTitle.waitForExistence(timeout: 10))
+-        let titleFrame = eventTitle.frame
+-        let checkboxes = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "event-check-"))
+-        let nearest = checkboxes.allElementsBoundByIndex.min { abs($0.frame.midY - titleFrame.midY) < abs($1.frame.midY - titleFrame.midY) }
+-        XCTAssertNotNil(nearest)
+-        if let nearest { assertMinimumTouchTarget(nearest); XCTAssertEqual(nearest.frame.midY, titleFrame.midY, accuracy: 2, "Senza orario o luogo il titolo deve essere centrato sul controllo") }
+-        capture("calendar-event-after-scroll")
+-        eventTitle.tap()
+-        XCTAssertTrue(app.navigationBars["Modifica evento"].waitForExistence(timeout: 10))
+-        XCTAssertEqual(app.textFields["Titolo"].value as? String, "Evento dopo scorrimento")
+-        app.buttons["Annulla"].tap()
+-        for _ in 0..<4 { scroll.swipeDown(velocity: .fast) }
+-        addButton(app).tap()
+-        XCTAssertTrue(app.textFields["Titolo"].waitForExistence(timeout: 10))
+-        app.buttons["Annulla"].tap()
+-    }
+-    func testCalendarSelectionUpdatesImmediatelyAndKeepsEventIndex() {
+-        let app = launch(["--dark"])
+-        app.buttons["Calendario"].tap()
++        let publish = app.buttons["publish-shift-calendar"]
++        XCTAssertTrue(publish.isHittable)
++        XCTAssertFalse(publish.isEnabled, "La demo non deve pubblicare dati reali")
++        XCTAssertFalse(app.buttons["calendar-add-event"].exists)
++        XCTAssertFalse(app.navigationBars.buttons["primary-add"].exists)
++        XCTAssertTrue(app.staticTexts["Per pubblicare i turni collega il server Life OS nelle Impostazioni. La demo non invia dati ad Apple."].exists)
++        capture("calendar-shift-publication-demo")
++    }
++    func testCalendarSelectionUpdatesImmediatelyInShiftPlanner() {
++        let app = launch(["--dark"])
++        app.buttons["dashboard-calendar"].tap()
+         let cells = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "calendar-day-"))
+         XCTAssertGreaterThanOrEqual(cells.count, 28)
+         // Repeated day changes exercise selection without changing the month/data indexes.
+@@ -333,22 +252,12 @@
+         }
+         capture("calendar-repeated-selection")
+     }
+-    func testLongTaskOpensAfterScrollingWithoutTriggeringCompletion() {
+-        let app = launch(["--stress-content"])
+-        app.buttons["Attività"].tap()
+-        let title = "Attività lunga di verifica 1: pianificare e organizzare gli impegni della settimana"
+-        XCTAssertTrue(app.staticTexts[title].waitForExistence(timeout: 10))
+-        app.staticTexts[title].tap()
+-        XCTAssertTrue(app.navigationBars["Modifica attività"].waitForExistence(timeout: 10))
+-        capture("long-task-editor")
+-        app.buttons["Annulla"].tap()
+-        XCTAssertTrue(app.staticTexts[title].exists)
+-    }
++
+     func testDashboardDayRestoresCalendarMonthAndSelection() {
+         let app = launch()
+-        app.buttons["Calendario"].tap()
++        app.buttons["dashboard-calendar"].tap()
+         app.buttons["Mese precedente"].tap()
+-        app.buttons["Dashboard"].tap()
++        app.navigationBars.buttons["Dashboard"].tap()
+         let formatter = DateFormatter(); formatter.locale = Locale(identifier: "en_US_POSIX"); formatter.timeZone = TimeZone(identifier: "Europe/Rome"); formatter.dateFormat = "yyyy-MM-dd"
+         let day = formatter.string(from: Date())
+         app.buttons["dashboard-day-" + day].tap()
+@@ -379,7 +288,7 @@
+     }
+     func testVisibleShiftBrushPaintsAndUndoRestoresDay() {
+         let app = launch(["--dark"])
+-        app.buttons["Calendario"].tap()
++        app.buttons["dashboard-calendar"].tap()
+         app.buttons["toggle-shift-paint"].tap()
+         let brush = app.buttons["shift-brush-afternoon"]
+         XCTAssertTrue(brush.waitForExistence(timeout: 10)); brush.tap()
+@@ -392,7 +301,7 @@
+         XCTAssertTrue(day.label.contains("Mattina"))
+         app.buttons["toggle-shift-paint"].tap()
+     }
+-    func testSavingsBreakdownAndDirectTaskReorder() {
++    func testSavingsBreakdownRemainsAvailable() {
+         let app = launch(["--dark"])
+         app.buttons["Finanza"].tap()
+         openBudget(app)
+@@ -400,11 +309,6 @@
+         for _ in 0..<5 { if assets.isHittable { break }; app.collectionViews.firstMatch.swipeUp() }
+         XCTAssertTrue(assets.exists)
+         capture("savings-breakdown")
+-        app.buttons["Attività"].tap()
+-        XCTAssertTrue(app.buttons["Desideri"].exists)
+-        app.buttons["reorder-tasks"].tap()
+-        capture("task-categories-and-reorder")
+-        app.buttons["reorder-tasks"].tap()
+     }
+     func testExtraActualPaymentUsesSavingsAndKeepsMonthlyBudget() {
+         let app = launch(["--stress-money", "--dark"])
+@@ -492,28 +396,16 @@
+         XCTAssertTrue(app.navigationBars["Movimenti"].waitForExistence(timeout: 10))
+         capture("all-movements-direct")
+     }
+-    func testHomeRestoresNeutralNextTimeWithoutArabicNames() {
+-        let app = launch(["--dark"])
+-        let next = app.buttons["home-next-time"]
+-        reveal(next, in: app)
+-        XCTAssertTrue(next.isHittable)
+-        XCTAssertTrue(next.label.hasPrefix("Prossimo orario"))
+-        XCTAssertFalse(next.label.localizedCaseInsensitiveContains("preghier"))
+-        next.tap()
+-        XCTAssertTrue(app.navigationBars["Orari"].waitForExistence(timeout: 10))
+-        XCTAssertFalse(app.staticTexts["Alba"].exists)
+-        XCTAssertTrue(app.staticTexts["Pomeriggio"].exists)
+-        capture("home-neutral-next-time")
+-    }
++
+     func testNativeAddKeepsDestinationSelectedAfterRepeatedPresentation() {
+         let app = launch(["--dark"])
+         for _ in 0..<3 {
+-            app.tabBars.buttons["Calendario"].tap()
++            app.tabBars.buttons["Finanza"].tap()
+             addButton(app).tap()
+-            XCTAssertTrue(app.navigationBars["Nuovo evento"].waitForExistence(timeout: 10))
++            XCTAssertTrue(app.navigationBars["Nuovo movimento"].waitForExistence(timeout: 10))
+             app.buttons["Annulla"].tap()
+-            XCTAssertTrue(app.navigationBars["Calendario"].waitForExistence(timeout: 10))
+-            XCTAssertTrue(app.tabBars.buttons["Calendario"].isSelected)
++            XCTAssertTrue(app.navigationBars["Finanza"].waitForExistence(timeout: 10))
++            XCTAssertTrue(app.tabBars.buttons["Finanza"].isSelected)
+         }
+     }
+     private func revealFinanceControl(_ element: XCUIElement, in app: XCUIApplication) {
+@@ -559,32 +451,20 @@
+         }
+     }
+ 
+-    func testReducedMotionKeepsChecklistAndFinanceActionsFunctional() {
++    func testReducedMotionKeepsHealthAndFinanceActionsFunctional() {
+         let app = launch(["--dark", "--reduce-motion"])
+-        app.tabBars.buttons["Attività"].tap()
+-        let wishes = app.buttons["task-category-wish"], actions = app.buttons["task-category-action"]
+-        wishes.tap(); XCTAssertTrue(wishes.isSelected)
+-        actions.tap(); XCTAssertTrue(actions.isSelected)
+-        let completion = app.buttons["Cambia completamento Organizzare la settimana"]
+-        XCTAssertTrue(completion.waitForExistence(timeout: 10))
+-        completion.tap()
+-        XCTAssertTrue(app.staticTexts["Completate"].waitForExistence(timeout: 10))
+-        XCTAssertEqual(completion.value as? String, "Completata")
+-        XCTAssertFalse(app.navigationBars["Modifica attività"].exists)
+-        completion.tap(); XCTAssertEqual(completion.value as? String, "Da completare")
++        app.buttons["dashboard-add-weight"].tap()
++        XCTAssertTrue(app.navigationBars["Aggiungi peso"].waitForExistence(timeout: 5))
++        app.buttons["Annulla"].tap()
+         app.tabBars.buttons["Finanza"].tap()
+-        let expense = app.buttons["finance-expense"]
+-        for _ in 0..<5 { if expense.isHittable { break }; app.scrollViews["finance-scroll"].swipeUp() }
+-        expense.tap()
+-        XCTAssertTrue(app.navigationBars["Nuovo movimento"].waitForExistence(timeout: 10))
++        let expense = app.buttons["finance-expense"]; revealFinanceControl(expense, in: app); expense.tap()
++        XCTAssertTrue(app.navigationBars["Nuovo movimento"].waitForExistence(timeout: 5))
+         app.buttons["Annulla"].tap()
+         XCTAssertTrue(app.tabBars.buttons["Finanza"].isSelected)
+-        capture("reduced-motion-finance")
+-    }
+-
++    }
+     func testCalendarTodayRestoresMonthAndSelection() {
+         let app = launch(["--dark"])
+-        app.tabBars.buttons["Calendario"].tap()
++        app.buttons["dashboard-calendar"].tap()
+         app.buttons["Mese precedente"].tap()
+         let today = app.buttons["calendar-today"]
+         XCTAssertTrue(today.waitForExistence(timeout: 10)); assertMinimumTouchTarget(today); today.tap()
+--- a/project.yml
++++ b/project.yml
+@@ -17,7 +17,7 @@
+         PRODUCT_BUNDLE_IDENTIFIER: com.nas.lifeos.probe
+         GENERATE_INFOPLIST_FILE: YES
+         MARKETING_VERSION: '0.9.0'
+-        CURRENT_PROJECT_VERSION: '51'
++        CURRENT_PROJECT_VERSION: '52'
+         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+         INFOPLIST_KEY_CFBundleDisplayName: Life OS
+         INFOPLIST_KEY_UILaunchScreen_Generation: YES

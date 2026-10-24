@@ -1,0 +1,1581 @@
+--- a/Sources/App.swift
++++ b/Sources/App.swift
+@@ -13,7 +13,7 @@
+             UserDefaults.standard.set(false, forKey: "native-hide-money")
+         }
+         #endif
+-        let value = NativeStore(directory: directory, migrateLegacy: directory == nil)
++        let value = directory == nil ? NativeServices.store : NativeStore(directory: directory, migrateLegacy: false)
+         #if DEBUG
+         if args.contains("--stress-content") { value.seedVisualTasks() }
+         if args.contains("--stress-money") { value.seedVisualMoney() }
+@@ -21,6 +21,7 @@
+         if args.contains("--empty-home") { value.seedVisualHome(empty: true) }
+         if args.contains("--busy-home") { value.seedVisualHome(empty: false) }
+         #endif
++        NativeNotifications.shared.start()
+         _store = StateObject(wrappedValue: value)
+     }
+     @StateObject private var router = NativeRouter()
+@@ -41,7 +42,7 @@
+         #endif
+     }
+ }
+-enum NativeTab: Hashable { case dashboard, finance }
++enum NativeTab: Hashable { case dashboard, tasks, finance }
+ enum NativeSheet: Identifiable {
+     case weight, settings, task(Record), event(Record), movement(Record), extra(Record), routines, categories, budget, recurring(Record), planning
+     var id: String {
+@@ -67,6 +68,7 @@
+     @EnvironmentObject var router: NativeRouter
+     @Environment(\.scenePhase) private var scenePhase
+     @AppStorage("native-theme") private var theme = "system"
++    @AppStorage("native-reminders-enabled") private var remindersEnabled = false
+     @State private var currentDay = CivilDate.day()
+     var body: some View {
+         nativeTabs
+@@ -95,7 +97,18 @@
+         .alert("Operazione non riuscita", isPresented: Binding(get: { store.error != nil }, set: { if !$0 { store.error = nil } })) {
+             Button("OK") { store.error = nil }
+         } message: { Text(store.error ?? "") }
+-        .task { await store.sync(automatic: true); await store.loadWeather() }
++        .task {
++            if let url = NativeIntentDraft.pendingURL { route(url) }
++            if NativeIntentDraft.taskTitle != nil { route(URL(string: "lifeos://task")!) }
++            await store.sync(automatic: true); await store.loadWeather()
++        }
++        .onChange(of: store.life, initial: true) { _, _ in updateReminders() }
++        .onChange(of: remindersEnabled) { _, _ in updateReminders() }
++        .onChange(of: store.isDemo) { _, _ in updateReminders() }
++        .onOpenURL { url in route(url) }
++        .onReceive(NotificationCenter.default.publisher(for: .lifeOSRoute)) { note in
++            if let url = note.object as? URL { route(url) }
++        }
+         .onChange(of: scenePhase) { _, phase in
+             if phase == .active { currentDay = CivilDate.day(); store.rollover(); Task { await store.sync(automatic: true); await store.loadWeather() } }
+         }
+@@ -107,23 +120,40 @@
+             } else if scenePhase == .active { Task { await store.sync(automatic: true); await store.loadWeather() } }
+         }
+     }
++    private func updateReminders() { NativeNotifications.shared.update(life: store.life, enabled: remindersEnabled && !store.isDemo) }
++    private func route(_ url: URL) {
++        guard let route = LifeOSRoute(url) else { return }
++        NativeIntentDraft.pendingURL = nil
++        switch route {
++        case .activities: router.tab = .tasks
++        case .task:
++            var draft: Record = ["list_kind": .string(router.taskCategory)]
++            if let title = NativeIntentDraft.taskTitle { draft["title"] = .string(title); NativeIntentDraft.taskTitle = nil }
++            router.tab = .tasks; router.sheet = .task(draft)
++        case .weight: router.tab = .dashboard; router.sheet = .weight
++        case .calendar: router.tab = .dashboard; router.calendarDay = CivilDate.day(); router.showCalendar = true
++        case .dashboard: router.tab = .dashboard
++        }
++    }
+     // Native destinations only: no custom capsule, animation or action disguised as a tab.
+     private var nativeTabs: some View {
+         TabView(selection: $router.tab) {
+             dashboard.tabItem { Label("Dashboard", systemImage: "square.grid.2x2") }.tag(NativeTab.dashboard)
++            tasks.tabItem { Label("Attività", systemImage: "checklist") }.tag(NativeTab.tasks)
+             finance.tabItem { Label("Finanza", systemImage: "chart.bar") }.tag(NativeTab.finance)
+         }
+     }
+     private var dashboard: some View { NavigationStack { DashboardScreen().toolbar { tools }.navigationTitle("Dashboard").navigationBarTitleDisplayMode(.inline) } }
++    private var tasks: some View { NavigationStack { TasksScreen().toolbar { tools }.navigationTitle("Attività").navigationBarTitleDisplayMode(.inline) } }
+     private var finance: some View { NavigationStack { FinanceScreen().toolbar { tools }.navigationTitle("Finanza").navigationBarTitleDisplayMode(.inline) } }
+     @ToolbarContentBuilder private var tools: some ToolbarContent {
+         if #available(iOS 26.0, *) {
+-            ToolbarItem(placement: .topBarTrailing) { if router.tab == .finance { addControl } }
++            ToolbarItem(placement: .topBarTrailing) { if router.tab != .dashboard { addControl } }
+                 .sharedBackgroundVisibility(.hidden)
+             ToolbarItem(placement: .topBarLeading) { settingsControl }
+                 .sharedBackgroundVisibility(.hidden)
+         } else {
+-            ToolbarItem(placement: .topBarTrailing) { if router.tab == .finance { addControl } }
++            ToolbarItem(placement: .topBarTrailing) { if router.tab != .dashboard { addControl } }
+             ToolbarItem(placement: .topBarLeading) { settingsControl }
+         }
+     }
+@@ -137,12 +167,14 @@
+     }
+     private func addItem() {
+         switch router.tab {
++        case .tasks: router.sheet = .task(["list_kind": .string(router.taskCategory)])
+         case .dashboard: router.sheet = .weight
+         case .finance: router.sheet = router.financeSection == "Extra" ? .extra([:]) : .movement([:])
+         }
+     }
+     private var addLabel: String {
+         switch router.tab {
++        case .tasks: return "Aggiungi attività"
+         case .dashboard: return "Aggiungi peso"
+         case .finance: return router.financeSection == "Extra" ? "Aggiungi straordinaria" : "Aggiungi spesa"
+         }
+@@ -165,7 +197,7 @@
+             Button { Task { await store.changeMonth(-1, finance: finance) } } label: { Image(systemName: "chevron.left").frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget) }.accessibilityLabel("Mese precedente")
+             Spacer(); Text(CivilDate.monthTitle(finance ? store.financeMonth : store.calendarMonth)).font(.headline)
+             Spacer(); Button { Task { await store.changeMonth(1, finance: finance) } } label: { Image(systemName: "chevron.right").frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget) }.accessibilityLabel("Mese successivo")
+-        }.buttonStyle(NativePressStyle()).disabled(store.busy)
++        }.buttonStyle(NativePressStyle()).disabled(store.busy || store.syncing)
+     }
+ }
+ struct DoneButton: ToolbarContent {
+--- a/Sources/CalendarScreen.swift
++++ b/Sources/CalendarScreen.swift
+@@ -3,6 +3,7 @@
+ struct CalendarScreen: View {
+     @EnvironmentObject var store: NativeStore
+     @EnvironmentObject var router: NativeRouter
++    @State private var appleExport = false
+     @State private var selected = ""
+     @State private var brush = "consult"
+     @State private var lastShift: (String, String)?
+@@ -16,7 +17,15 @@
+                 brushPanel
+                 monthGrid
+                 dayCard
+-                ShiftCalendarPanel()
++                Button { appleExport.toggle() } label: {
++                    HStack {
++                        Text("Esporta turni su Apple (facoltativo)")
++                        Spacer()
++                        Image(systemName: appleExport ? "chevron.up" : "chevron.down").accessibilityHidden(true)
++                    }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle())
++                }.buttonStyle(.plain).accessibilityIdentifier("calendar-apple-export")
++                    .accessibilityValue(appleExport ? "Espanso" : "Compresso")
++                if appleExport { ShiftCalendarPanel() }
+             }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.top, NativeDesign.Space.xs).padding(.bottom, NativeDesign.Layout.scrollClearance)
+         }.background(NativeDesign.canvas).scrollBounceBehavior(.basedOnSize).accessibilityIdentifier("calendar-scroll")
+         .onAppear { rebuildMonth(); selected = preferredDay(in: store.calendarMonth); router.calendarDay = selected }
+@@ -37,7 +46,7 @@
+         let today = CivilDate.day(), month = store.calendarMonth
+         days = CivilDate.grid(month).map { day in
+             let weekday = CivilDate.calendar.component(.weekday, from: CivilDate.date(day))
+-            return CalendarDayPresentation(day: day, label: CivilDate.label(day), shift: shifts[day].flatMap(ShiftKind.init(rawValue:)), hasEvents: false, isToday: day == today, isWeekend: weekday == 1 || weekday == 7, isCurrentMonth: day.hasPrefix(month))
++            return CalendarDayPresentation(day: day, label: CivilDate.label(day), shift: shifts[day].flatMap(ShiftKind.init(rawValue:)), hasEvents: store.events.contains { $0.text("day") == day }, isToday: day == today, isWeekend: weekday == 1 || weekday == 7, isCurrentMonth: day.hasPrefix(month))
+         }
+     }
+     private var monthHeader: some View {
+@@ -49,7 +58,7 @@
+             Spacer(minLength: NativeDesign.Space.small)
+             NativeIconButton(symbol: "chevron.left", label: "Mese precedente") { Task { await store.changeMonth(-1, finance: false) } }
+             NativeIconButton(symbol: "chevron.right", label: "Mese successivo") { Task { await store.changeMonth(1, finance: false) } }
+-        }.disabled(store.busy).accessibilityElement(children: .contain)
++        }.disabled(store.busy || store.syncing).accessibilityElement(children: .contain)
+     }
+     private var monthName: some View {
+         let formatter = DateFormatter()
+@@ -155,8 +164,45 @@
+                 Divider()
+             }
+             if store.shift(selected) == nil { Text("Nessun turno").foregroundStyle(NativeDesign.secondary) }
++            HStack {
++                Text("Impegni").font(.headline)
++                Spacer()
++                Button("Aggiungi evento", systemImage: "plus") { router.sheet = .event(["day": .string(selected)]) }
++                    .frame(minHeight: NativeDesign.Layout.touchTarget).accessibilityIdentifier("calendar-add-event")
++            }
++            ForEach(store.events.filter { $0.text("day") == selected }.map { DisplayRecord($0) }) { item in
++                eventRow(item.value)
++            }
++            ForEach(store.tasks.filter { $0.text("scheduled_date") == selected && $0.text("status") != "done" }.map { DisplayRecord($0) }) { item in
++                Button(item.value.text("title")) { router.tab = .tasks; router.sheet = .task(item.value) }
++                    .frame(minHeight: NativeDesign.Layout.touchTarget)
++            }
++
+ 
+         }.padding(.top, NativeDesign.Space.small)
++    }
++    private func eventRow(_ r: Record) -> some View {
++        let time = r.text("start_time"), location = r.text("location")
++        return HStack(spacing: NativeDesign.Space.small) {
++            RoundedRectangle(cornerRadius: NativeDesign.progressRadius).fill(NativeDesign.accent.opacity(0.65))
++                .frame(width: NativeDesign.Layout.calendarMarker, height: NativeDesign.Layout.touchTarget).accessibilityHidden(true)
++            NativeCompletionButton(checked: r.text("occurrence_status") == "done", label: "Cambia completamento evento " + r.text("title")) {
++                Task { await store.run("setEventOccurrence", ["id": .int(r.integer("id")), "day": .string(r.text("day")), "status": .string(r.text("occurrence_status") == "done" ? "open" : "done")]) }
++            }.accessibilityIdentifier("event-check-" + String(r.integer("id")))
++            Button { router.sheet = .event(r) } label: {
++                ViewThatFits(in: .horizontal) {
++                    HStack(alignment: .center, spacing: NativeDesign.Space.small) {
++                        NativeRowText(title: r.text("title"), subtitle: location, completed: r.text("occurrence_status") == "done", titleIdentifier: "event-title-" + String(r.integer("id")))
++                        Text(time.isEmpty ? "Tutto il giorno" : time).font(.subheadline).monospacedDigit().foregroundStyle(NativeDesign.secondary).fixedSize()
++                    }
++                    VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
++                        NativeRowText(title: r.text("title"), subtitle: location, completed: r.text("occurrence_status") == "done", titleIdentifier: "event-title-" + String(r.integer("id")))
++                        Text(time.isEmpty ? "Tutto il giorno" : time).font(.subheadline).monospacedDigit().foregroundStyle(NativeDesign.secondary)
++                    }
++                }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading).contentShape(Rectangle())
++            }.buttonStyle(.borderless).accessibilityLabel(r.text("title"))
++                .accessibilityValue([time.isEmpty ? "Tutto il giorno" : time, location].filter { !$0.isEmpty }.joined(separator: ", "))
++        }.disabled(store.busy)
+     }
+ 
+ }
+--- a/Sources/DailyLifePanel.swift
++++ b/Sources/DailyLifePanel.swift
+@@ -0,0 +1,31 @@
++import SwiftUI
++
++struct DailyLifePanel: View {
++    @EnvironmentObject var store: NativeStore
++    @EnvironmentObject var router: NativeRouter
++    var body: some View {
++        VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
++            HStack {
++                Text("Attività").font(.headline)
++                Spacer()
++                Button("Vedi tutte") { router.tab = .tasks }.frame(minHeight: NativeDesign.Layout.touchTarget)
++            }
++            ForEach(store.tasks.filter { $0.text("status") == "todo" }.sorted { $0.text("due_date", fallback: "9999") < $1.text("due_date", fallback: "9999") }.prefix(3).map { DisplayRecord($0) }) { item in
++                NativeChecklistRow(title: item.value.text("title"), subtitle: item.value.text("notes"), checked: false, dueDay: item.value.text("due_date"), completionLabel: "Completa " + item.value.text("title"), onComplete: {
++                    Task { await store.run("setTaskStatus", ["id": item.value["id"]!, "status": .string("done")]) }
++                }, onOpen: { router.sheet = .task(item.value) })
++            }
++            HStack {
++                Text("Abitudini").font(.headline)
++                Spacer()
++                Button("Gestisci") { router.sheet = .routines }.frame(minHeight: NativeDesign.Layout.touchTarget)
++            }
++            if store.routines.isEmpty { Text("Aggiungi la tua prima abitudine.").foregroundStyle(NativeDesign.secondary) }
++            ForEach(store.routines.map { DisplayRecord($0) }) { item in
++                NativeChecklistRow(title: item.value.text("title"), subtitle: "", checked: item.value.flag("checked"), dueDay: "", completionLabel: "Cambia completamento " + item.value.text("title"), onComplete: {
++                    Task { await store.run("setRoutineCheck", ["id": item.value["id"]!, "day": .string(CivilDate.day()), "checked": .bool(!item.value.flag("checked"))]) }
++                }, onOpen: { router.sheet = .routines })
++            }
++        }.accessibilityIdentifier("daily-life-panel")
++    }
++}
+--- a/Sources/DashboardScreen.swift
++++ b/Sources/DashboardScreen.swift
+@@ -6,7 +6,7 @@
+     var body: some View {
+         TimelineView(.periodic(from: .now, by: 60)) { context in
+             let today = CivilDate.day(context.date)
+-            let summary = NativeHomeSummary(now: context.date, todayShift: store.shift(today), tomorrowShift: store.shift(CivilDate.adding(1, to: today)), previousShift: store.shift(CivilDate.adding(-1, to: today)), events: [], weather: store.weatherDetails, weatherDate: store.weatherDate, includeEvents: false)
++            let summary = NativeHomeSummary(now: context.date, todayShift: store.shift(today), tomorrowShift: store.shift(CivilDate.adding(1, to: today)), previousShift: store.shift(CivilDate.adding(-1, to: today)), events: store.dashboardEvents, weather: store.weatherDetails, weatherDate: store.weatherDate, includeEvents: true)
+             ScrollView {
+                 VStack(alignment: .leading, spacing: NativeDesign.Space.section) {
+                     rollingCalendar(today)
+@@ -22,6 +22,7 @@
+                         Button { router.sheet = .weight } label: { NativeActionLabel(title: "Aggiungi peso", symbol: "plus") }.accessibilityIdentifier("dashboard-add-weight")
+                         Button { openCalendar(today) } label: { NativeActionLabel(title: "Calendario", symbol: "calendar") }.accessibilityIdentifier("dashboard-calendar")
+                     }.buttonStyle(NativePressStyle()).foregroundStyle(NativeDesign.accent)
++                    DailyLifePanel()
+                     HealthChartPanel()
+                     NativeConnectionBadge()
+                     if let notice = store.notice { Text(notice).font(.caption).foregroundStyle(NativeDesign.secondary) }
+@@ -39,7 +40,7 @@
+             HStack(spacing: NativeDesign.Space.xs) {
+                 ForEach(NativeHomeSummary.rollingDays(today), id: \.self) { day in
+                     let weekday = CivilDate.calendar.component(.weekday, from: CivilDate.date(day))
+-                    let item = CalendarDayPresentation(day: day, label: CivilDate.label(day), shift: store.shift(day), hasEvents: false, isToday: day == today, isWeekend: weekday == 1 || weekday == 7, isCurrentMonth: day.hasPrefix(String(today.prefix(7))))
++                    let item = CalendarDayPresentation(day: day, label: CivilDate.label(day), shift: store.shift(day), hasEvents: store.dashboardEvents.contains { $0.text("day") == day }, isToday: day == today, isWeekend: weekday == 1 || weekday == 7, isCurrentMonth: day.hasPrefix(String(today.prefix(7))))
+                     Button { openCalendar(day) } label: {
+                         VStack(spacing: NativeDesign.Space.xs) {
+                             Text(["D", "L", "M", "M", "G", "V", "S"][weekday - 1]).font(.caption).foregroundStyle(NativeDesign.secondary)
+--- a/Sources/FinanceScreen.swift
++++ b/Sources/FinanceScreen.swift
+@@ -15,9 +15,9 @@
+                 balance
+                 actions
+                 recentMovements
+-                if !store.state.pending.isEmpty {
++                if !store.financialPending.isEmpty {
+                     VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
+-                        Label("\(store.state.pending.count) movimenti salvati sul dispositivo", systemImage: "icloud.and.arrow.up").font(.subheadline)
++                        Label("\(store.financialPending.count) movimenti salvati sul dispositivo", systemImage: "icloud.and.arrow.up").font(.subheadline)
+                         Text("In attesa di sincronizzazione. Il saldo mostra l’ultimo dato del server.").font(.caption).foregroundStyle(NativeDesign.secondary)
+                     }
+                 }
+@@ -157,9 +157,9 @@
+             TextField("Cerca movimento", text: $search)
+             Picker("Conto", selection: $account) { ForEach(["Tutti", "Trade Republic", "Revolut", "IsyBank"], id: \.self) { Text($0) } }
+         }
+-        if !store.state.pending.isEmpty {
++        if !store.financialPending.isEmpty {
+             Section("Salvati sul dispositivo") {
+-                ForEach(store.state.pending) { pending in
++                ForEach(store.financialPending) { pending in
+                     HStack { VStack(alignment: .leading) { Text(pending.payload.text("name")); Text(pending.accepted ? "Inviato · aggiornamento da completare" : "Da sincronizzare").font(.caption).foregroundStyle(NativeDesign.secondary) }; Spacer(); MoneyText(amount: pending.payload.amount("amount")) }
+                 }
+             }
+--- a/Sources/LifeOSRoute.swift
++++ b/Sources/LifeOSRoute.swift
+@@ -0,0 +1,12 @@
++import Foundation
++
++enum LifeOSRoute: String {
++    case task, activities, weight, calendar, dashboard
++    init?(_ url: URL) {
++        guard url.scheme == "lifeos", url.user == nil, url.password == nil,
++              url.query == nil, url.fragment == nil, url.path.isEmpty || url.path == "/",
++              let host = url.host, let route = Self(rawValue: host) else { return nil }
++        self = route
++    }
++}
++extension Notification.Name { static let lifeOSRoute = Notification.Name("LifeOSRoute") }
+--- a/Sources/LocalLifeMutation.swift
++++ b/Sources/LocalLifeMutation.swift
+@@ -0,0 +1,62 @@
++import Foundation
++
++/// Only absolute setters with stable server keys may be replayed. Creation/deletion
++/// APIs remain server-confirmed until the backend supplies an idempotency contract.
++enum LocalLifeMutation {
++    private static func validDay(_ day: String) -> Bool { day.count == 10 && CivilDate.day(CivilDate.date(day)) == day }
++    static func supports(_ method: String) -> Bool {
++        ["setTaskStatus", "setRoutineCheck", "paintShift", "saveHealthEntry", "setEventOccurrence"].contains(method)
++    }
++    static func key(_ write: PendingWrite) -> String {
++        switch write.method {
++        case "paintShift", "saveHealthEntry": return write.method + ":" + write.payload.text("day")
++        case "setRoutineCheck", "setEventOccurrence": return write.method + ":" + String(write.payload.integer("id")) + ":" + write.payload.text("day")
++        case "setTaskStatus": return write.method + ":" + String(write.payload.integer("id"))
++        default: return write.id
++        }
++    }
++    static func apply(_ method: String, _ p: Record, to life: inout Record) throws {
++        switch method {
++        case "setTaskStatus":
++            guard p.integer("id") > 0, ["todo", "done", "waiting"].contains(p.text("status")) else { throw Message(text: "Stato attività non valido.") }
++            var rows = life.records("tasks")
++            if let i = rows.firstIndex(where: { $0.integer("id") == p.integer("id") }) { rows[i]["status"] = p["status"] }
++            life["tasks"] = .array(rows.map(JSONValue.object))
++        case "setRoutineCheck":
++            guard p.integer("id") > 0, validDay(p.text("day")) else { throw Message(text: "Abitudine o data non valida.") }
++            // An old pending check still syncs to its own day, never to today's UI.
++            if p.text("day") == CivilDate.day() {
++                var rows = life.records("routines")
++                if let i = rows.firstIndex(where: { $0.integer("id") == p.integer("id") }) { rows[i]["checked"] = .int(p.flag("checked") ? 1 : 0) }
++                life["routines"] = .array(rows.map(JSONValue.object))
++            }
++        case "paintShift":
++            guard validDay(p.text("day")), ShiftKind(rawValue: p.text("kind")) != nil else { throw Message(text: "Turno o data non valido.") }
++            var rows = life.records("shifts").filter { $0.text("day") != p.text("day") }
++            if p.text("kind") != "erase" { rows.append(p) }
++            life["shifts"] = .array(rows.map(JSONValue.object))
++        case "setEventOccurrence":
++            guard p.integer("id") > 0, validDay(p.text("day")), ["open", "done"].contains(p.text("status")) else { throw Message(text: "Occorrenza non valida.") }
++            for key in ["events", "upcomingEvents"] {
++                life[key] = .array(life.records(key).map { event in
++                    var row = event
++                    if row.integer("id") == p.integer("id") && row.text("day") == p.text("day") { row["occurrence_status"] = p["status"] }
++                    return .object(row)
++                })
++            }
++            var occurrences = life.record("occurrences")
++            let key = "\(p.integer("id")):\(p.text("day"))"
++            if p.text("status") == "open" { occurrences.removeValue(forKey: key) } else { occurrences[key] = p["status"] }
++            life["occurrences"] = .object(occurrences)
++        case "saveHealthEntry":
++            let valid = try HealthMeasurement.payload(day: p.text("day"), weight: p["weightKg"] == nil ? "" : String(p.amount("weightKg")), calories: p["calories"] == nil ? "" : String(p.amount("calories")))
++            var rows = life.records("health")
++            var row = rows.first { $0.text("day") == p.text("day") } ?? ["day": p["day"]!]
++            if let kg = valid["weightKg"] { row["weight_kg"] = kg }
++            if let kcal = valid["calories"] { row["calories"] = kcal }
++            rows.removeAll { $0.text("day") == p.text("day") }; rows.append(row)
++            life["health"] = .array(rows.sorted { $0.text("day") < $1.text("day") }.map(JSONValue.object))
++        default: throw Message(text: "Questa operazione richiede la conferma del server.")
++        }
++    }
++}
+--- a/Sources/NativeComponents.swift
++++ b/Sources/NativeComponents.swift
+@@ -122,13 +122,14 @@
+     @EnvironmentObject var store: NativeStore
+     private var text: String {
+         if store.isDemo { return "Demo" }
+-        if store.busy { return "Aggiornamento" }
++        if store.busy { return "Salvataggio" }
++        if store.syncing { return "Sincronizzazione" }
+         if !store.state.pending.isEmpty { return "\(store.state.pending.count) in coda" }
+         if !store.syncStatus.isEmpty && store.syncStatus != "Aggiornato" { return "Da aggiornare" }
+         return store.sharedDatabase ? "Condiviso con il sito" : store.server == nil ? "Sul dispositivo" : "Collegato"
+     }
+     var body: some View {
+-        NativeStatusBadge(title: text, tone: store.isDemo || !store.state.pending.isEmpty || (!store.syncStatus.isEmpty && store.syncStatus != "Aggiornato") ? .warning : .success, showsIndicator: true, loading: store.busy)
++        NativeStatusBadge(title: text, tone: store.isDemo || !store.state.pending.isEmpty || (!store.syncStatus.isEmpty && store.syncStatus != "Aggiornato") ? .warning : .success, showsIndicator: true, loading: store.busy || store.syncing)
+     }
+ }
+ 
+--- a/Sources/NativeIntegrationSettings.swift
++++ b/Sources/NativeIntegrationSettings.swift
+@@ -0,0 +1,41 @@
++import SwiftUI
++import AppIntents
++import UserNotifications
++
++struct NativeIntegrationSettings: View {
++    @EnvironmentObject var store: NativeStore
++    @Environment(\.scenePhase) private var phase
++    @AppStorage("native-reminders-enabled") private var enabled = false
++    @State private var status = "Verifica in corso…"
++    @State private var requesting = false
++    var body: some View {
++        Section("Notifiche e Siri") {
++            Toggle("Promemoria locali", isOn: Binding(get: { enabled }, set: { value in
++                if !value { enabled = false; return }
++                requesting = true
++                Task {
++                    defer { requesting = false }
++                    do { enabled = try await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]); await refreshStatus() }
++                    catch { status = error.localizedDescription }
++                }
++            })).disabled(requesting || store.isDemo)
++            Text(status).font(.caption).foregroundStyle(NativeDesign.secondary)
++            Text("Attività alle 9 del giorno di scadenza, eventi 15 minuti prima, turni un’ora prima. Sono programmati i prossimi 48 avvisi dai dati presenti su questo iPhone. Apri l’app dopo modifiche dal web per aggiornarli.").font(.caption).foregroundStyle(NativeDesign.secondary)
++            if let url = URL(string: UIApplication.openSettingsURLString) { Link("Impostazioni notifiche di iPhone", destination: url) }
++            ShortcutsLink()
++            Text("Con Siri: “Registra il peso in Life OS” oppure “Prepara un’attività in Life OS”. Per le attività conferma il salvataggio nell’app.").font(.caption).foregroundStyle(NativeDesign.secondary)
++            Text("Widget: aggiungi “Life OS · Azioni rapide” alla schermata Home. Apre attività, peso e calendario. La disponibilità va verificata dopo la firma Signulous.").font(.caption).foregroundStyle(NativeDesign.secondary)
++        }.task { await refreshStatus() }
++        .onChange(of: phase) { _, value in if value == .active { Task { await refreshStatus() } } }
++    }
++    private func refreshStatus() async {
++        let settings = await UNUserNotificationCenter.current().notificationSettings()
++        switch settings.authorizationStatus {
++        case .authorized, .provisional, .ephemeral: status = enabled ? "Notifiche autorizzate su questo iPhone." : "Promemoria disattivati nell’app."
++        case .denied: status = "Notifiche negate: puoi abilitarle nelle impostazioni di iPhone."
++        case .notDetermined: status = "Attiva i promemoria per autorizzare le notifiche."
++        @unknown default: status = "Controlla le impostazioni notifiche di iPhone."
++        }
++        if let error = NativeNotifications.shared.lastError { status = error }
++    }
++}
+--- a/Sources/NativeIntents.swift
++++ b/Sources/NativeIntents.swift
+@@ -0,0 +1,42 @@
++import AppIntents
++import Foundation
++
++/// App and foreground intents share one store; never create a competing archive writer.
++@MainActor enum NativeServices { static let store = NativeStore() }
++
++struct RecordWeightIntent: AppIntent {
++    static var title: LocalizedStringResource = "Registra peso"
++    static var description = IntentDescription("Salva il peso di oggi sul dispositivo e lo mette in coda per Life OS.")
++    static var openAppWhenRun = true
++    static var authenticationPolicy: IntentAuthenticationPolicy = .requiresAuthentication
++    @Parameter(title: "Peso in kg", requestValueDialog: "Quanto pesi in chilogrammi?") var kilograms: Double
++    static var parameterSummary: some ParameterSummary { Summary("Registra \(\.$kilograms) kg") }
++    @MainActor func perform() async throws -> some IntentResult & ProvidesDialog {
++        let store = NativeServices.store
++        guard !store.isDemo, store.server != nil else { throw Message(text: "Apri Life OS e collega il tuo server prima di registrare il peso con Siri.") }
++        let payload = try HealthMeasurement.payload(day: CivilDate.day(), weight: String(kilograms), calories: "")
++        try await store.perform("saveHealthEntry", payload)
++        return .result(dialog: "Peso salvato sul dispositivo. Verrà sincronizzato con Life OS.")
++    }
++}
++struct PrepareTaskIntent: AppIntent {
++    static var title: LocalizedStringResource = "Prepara attività"
++    static var description = IntentDescription("Apre una nuova attività in Life OS con il titolo dettato. Premi Salva nell’app per confermare.")
++    static var openAppWhenRun = true
++    static var authenticationPolicy: IntentAuthenticationPolicy = .requiresAuthentication
++    @Parameter(title: "Titolo", requestValueDialog: "Quale attività vuoi preparare?") var taskTitle: String
++    @MainActor func perform() async throws -> some IntentResult & ProvidesDialog {
++        let clean = taskTitle.trimmingCharacters(in: .whitespacesAndNewlines)
++        guard !clean.isEmpty, clean.count <= 300 else { throw Message(text: "Scegli un titolo da 1 a 300 caratteri.") }
++        NativeIntentDraft.taskTitle = clean
++        NotificationCenter.default.post(name: .lifeOSRoute, object: URL(string: "lifeos://task")!)
++        return .result(dialog: "Attività preparata. Premi Salva in Life OS per confermare.")
++    }
++}
++@MainActor enum NativeIntentDraft { static var taskTitle: String?; static var pendingURL: URL? }
++struct LifeOSShortcuts: AppShortcutsProvider {
++    static var appShortcuts: [AppShortcut] {
++        AppShortcut(intent: RecordWeightIntent(), phrases: ["Registra il peso in \(.applicationName)"], shortTitle: "Registra peso", systemImageName: "scalemass")
++        AppShortcut(intent: PrepareTaskIntent(), phrases: ["Prepara un’attività in \(.applicationName)"], shortTitle: "Prepara attività", systemImageName: "checklist")
++    }
++}
+--- a/Sources/NativeNotifications.swift
++++ b/Sources/NativeNotifications.swift
+@@ -0,0 +1,51 @@
++import Foundation
++import UserNotifications
++
++@MainActor final class NativeNotifications: NSObject, UNUserNotificationCenterDelegate {
++    static let shared = NativeNotifications()
++    private var pending: (Record, Bool)?
++    private var worker: Task<Void, Never>?
++    private let center = UNUserNotificationCenter.current()
++    private(set) var lastError: String?
++    func start() { center.delegate = self }
++    func update(life: Record, enabled: Bool) {
++        pending = (life, enabled)
++        guard worker == nil else { return }
++        worker = Task {
++            while let (life, enabled) = pending {
++                pending = nil
++                await reconcile(life: life, enabled: enabled)
++            }
++            worker = nil
++        }
++    }
++    private func reconcile(life: Record, enabled: Bool) async {
++        let settings = await center.notificationSettings()
++        let authorized = settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional
++        let plan = enabled && authorized ? ReminderPlan.make(life: life) : []
++        let requests = await center.pendingNotificationRequests()
++        let ids = Set(plan.map { "lifeos-" + $0.id })
++        center.removePendingNotificationRequests(withIdentifiers: requests.map(\.identifier).filter { $0.hasPrefix("lifeos-") && !ids.contains($0) })
++        do {
++            for item in plan {
++                let content = UNMutableNotificationContent()
++                content.title = item.title; content.body = item.body; content.sound = .default
++                content.userInfo = ["route": item.route]
++                var components = CivilDate.calendar.dateComponents([.year, .month, .day, .hour, .minute], from: item.date)
++                components.calendar = CivilDate.calendar; components.timeZone = CivilDate.calendar.timeZone
++                let request = UNNotificationRequest(identifier: "lifeos-" + item.id, content: content, trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: false))
++                try await center.add(request)
++            }
++            lastError = nil
++        } catch { lastError = "Promemoria non programmati: " + error.localizedDescription }
++    }
++    nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions { [.banner, .sound] }
++    nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
++        guard let route = response.notification.request.content.userInfo["route"] as? String,
++              let url = URL(string: "lifeos://" + route), LifeOSRoute(url) != nil else { return }
++        await MainActor.run {
++            NativeIntentDraft.pendingURL = url
++            NotificationCenter.default.post(name: .lifeOSRoute, object: url)
++        }
++    }
++}
+--- a/Sources/NativeSettings.swift
++++ b/Sources/NativeSettings.swift
+@@ -19,6 +19,8 @@
+                 Picker("Tema", selection: $theme) { Text("Automatico").tag("system"); Text("Chiaro").tag("light"); Text("Scuro").tag("dark") }
+                 Text("Controlli, navigazione e caratteri di sistema Apple. Le dimensioni del testo seguono le impostazioni di iPhone.").font(.caption).foregroundStyle(NativeDesign.secondary)
+             }
++            NativeIntegrationSettings()
++            if !store.state.pending.isEmpty { PendingWritesSection() }
+             Section("Modalità") {
+                 LabeledContent("Attuale", value: store.isDemo ? "Demo locale" : store.server == nil ? "Snapshot locale" : store.sharedDatabase ? "Condiviso con il sito" : "Server collegato")
+                 Button("Apri demo completa") { useDemo = true }.disabled(store.busy)
+@@ -48,7 +50,7 @@
+             if let notice = store.notice { Section { Text(notice).font(.caption).foregroundStyle(NativeDesign.secondary) } }
+             Section("Life OS") {
+                 LabeledContent("Versione", value: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.3")
+-                LabeledContent("Movimenti da conservare", value: String(store.state.pending.count))
++                LabeledContent("Modifiche da sincronizzare", value: String(store.state.pending.count))
+                 Text("I movimenti in coda restano sul telefono fino alla conferma del server. I dati già caricati sono consultabili anche senza rete.").font(.caption).foregroundStyle(NativeDesign.secondary)
+             }
+         }.modifier(NativeListAppearance()).navigationTitle("Impostazioni").toolbar { DoneButton() }
+--- a/Sources/NativeStore.swift
++++ b/Sources/NativeStore.swift
+@@ -4,6 +4,9 @@
+ @MainActor final class NativeStore: ObservableObject {
+     @Published private(set) var state = NativeArchive()
+     @Published private(set) var busy = false
++    @Published private(set) var syncing = false
++    private var syncTask: Task<Void, Never>?
++    private let automaticallySyncsWrites: Bool
+     @Published var error: String?
+     @Published var notice: String?
+     @Published var financeMonth = CivilDate.month()
+@@ -30,6 +33,7 @@
+     var life: Record { state.life }
+     var finance: Record { state.finance }
+     var summary: Record { finance.record("summary") }
++    var financialPending: [PendingWrite] { state.pending.filter { ["saveTransaction", "saveExtra"].contains($0.method) } }
+     var tasks: [Record] { life.records("tasks") }
+     var categories: [Record] { life.records("categories").sorted { $0.amount("position") < $1.amount("position") } }
+     var routines: [Record] { life.records("routines") }
+@@ -63,7 +67,8 @@
+         }.prefix(max(0, 3 - events.count)).map { row -> Record in var r = row; r["highlightKind"] = .string("task"); return r }
+         return events + todo
+     }
+-    init(directory: URL? = nil, session injectedSession: URLSession? = nil, migrateLegacy: Bool = true) {
++    init(directory: URL? = nil, session injectedSession: URLSession? = nil, migrateLegacy: Bool = true, automaticallySyncsWrites: Bool = true) {
++        self.automaticallySyncsWrites = automaticallySyncsWrites
+         let config = URLSessionConfiguration.ephemeral; config.timeoutIntervalForRequest = 40; config.timeoutIntervalForResource = 90
+         persistsSession = injectedSession == nil
+         session = injectedSession ?? URLSession(configuration: config)
+@@ -139,14 +144,23 @@
+         state = next
+     }
+     func rollover() {
+-        guard state.demo, state.routineDay != CivilDate.day() else { return }
++        // A finance-only archive has no daily habit state to migrate.
++        guard state.demo || !routines.isEmpty else { return }
++        let today = CivilDate.day()
++        let previousDay = state.demo ? state.routineDay : state.life.text("today", fallback: state.routineDay)
++        guard previousDay != today else { return }
+         var next = state
+-        next.routineDay = CivilDate.day(); next.life["today"] = .string(CivilDate.day())
++        next.routineDay = today; next.life["today"] = .string(today)
+         next.life["routines"] = .array(routines.map { var r = $0; r["checked"] = .int(0); return .object(r) })
+-        do { try save(next) } catch { self.error = error.localizedDescription }
++        do {
++            for write in next.pending where write.method == "setRoutineCheck" {
++                try LocalLifeMutation.apply(write.method, write.payload, to: &next.life)
++            }
++            try save(next)
++        } catch { self.error = error.localizedDescription }
+     }
+     func configure(_ raw: String) throws {
+-        guard !busy else { throw Message(text: "Attendi la fine dell’operazione.") }
++        guard !busy, !syncing else { throw Message(text: "Attendi la fine dell’operazione.") }
+         guard let u = URL(string: raw.trimmingCharacters(in: .whitespacesAndNewlines)), u.scheme == "https", let host = u.host,
+               u.user == nil, u.password == nil, u.query == nil, u.fragment == nil, u.path.isEmpty || u.path == "/" else {
+             throw Message(text: "Inserisci l’indirizzo HTTPS del server Life OS.")
+@@ -170,7 +184,7 @@
+     }
+     func useDemo() throws {
+         guard archiveWritable else { throw Message(text: "L’archivio precedente non è leggibile e non verrà sovrascritto.") }
+-        guard !busy else { throw Message(text: "Attendi la fine dell’operazione.") }
++        guard !busy, !syncing else { throw Message(text: "Attendi la fine dell’operazione.") }
+         guard !state.demo else { notice = "La demo è già aperta. Le modifiche locali sono conservate."; return }
+         if !state.demo {
+             try JSONEncoder().encode(state).write(to: connectionFile, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
+@@ -184,7 +198,7 @@
+         notice = "Demo con dati simulati. Nessuna connessione al database."
+     }
+     func restoreConnection() throws {
+-        guard !busy, state.demo, hasSavedConnection else { throw Message(text: "L’archivio precedente si ripristina dalla demo.") }
++        guard !busy, !syncing, state.demo, hasSavedConnection else { throw Message(text: "L’archivio precedente si ripristina dalla demo.") }
+         let previous = try JSONDecoder().decode(NativeArchive.self, from: Data(contentsOf: connectionFile))
+         revision += 1
+         try save(previous)
+@@ -194,7 +208,7 @@
+         session.configuration.httpCookieStorage?.removeCookies(since: .distantPast)
+     }
+     func importFinance(_ data: Data) throws {
+-        guard server == nil, !busy else { throw Message(text: "L’importazione locale è disponibile senza un server configurato.") }
++        guard server == nil, !busy, !syncing else { throw Message(text: "L’importazione locale è disponibile senza un server configurato.") }
+         let snapshot = try NativeValidation.snapshot(data)
+         var next = state; next.finance = snapshot; next.demo = false; next.imported = true
+         let key = snapshot.text("key")
+@@ -224,7 +238,7 @@
+     }
+     func signIn(password: String) async throws {
+         guard let server else { throw Message(text: "Collega prima il tuo server Life OS.") }
+-        guard !busy else { throw Message(text: "Attendi la fine dell’aggiornamento e riprova.") }
++        guard !busy, !syncing else { throw Message(text: "Attendi la fine dell’aggiornamento e riprova.") }
+         busy = true; defer { busy = false }
+         var request = URLRequest(url: server.appendingPathComponent("auth/login"))
+         request.httpMethod = "POST"; request.timeoutInterval = 40
+@@ -268,7 +282,7 @@
+             if [502, 503, 504].contains(http.statusCode) { throw NativeServerUnavailable(status: http.statusCode) }
+             let text = String(data: data, encoding: .utf8) ?? ""
+             if http.mimeType == "text/html" { throw Message(text: "Accedi a Life OS nelle Impostazioni.") }
+-            throw Message(text: text.isEmpty ? "Operazione rifiutata (\(http.statusCode))." : String(text.prefix(500)))
++            throw NativeRequestRejected(status: http.statusCode, message: text.isEmpty ? "Operazione rifiutata (\(http.statusCode))." : String(text.prefix(500)))
+         }
+         guard http.mimeType == "application/json" else { throw Message(text: "Il server non ha restituito JSON. Verifica l’accesso a Life OS.") }
+         let result = try JSONDecoder().decode(JSONValue.self, from: data)
+@@ -290,7 +304,9 @@
+             do {
+                 let value = try l.get().object
+                 guard case .array? = value["tasks"] else { throw Message(text: "Elenco attività non compatibile.") }
+-                next.life = value; next.calendarMonth = cm; next.lifeRefreshedAt = Date(); changed = true
++                next.life = value
++                for write in next.pending where LocalLifeMutation.supports(write.method) { try LocalLifeMutation.apply(write.method, write.payload, to: &next.life) }
++                next.calendarMonth = cm; next.lifeRefreshedAt = Date(); changed = true
+             } catch { failure = error }
+         }
+         if let f {
+@@ -316,7 +332,7 @@
+         guard analysisGeneration != financeGeneration, !Task.isCancelled else { return }
+         analysisBusy = true; defer { analysisBusy = false }
+         do {
+-            while busy { try await Task.sleep(nanoseconds: 100_000_000) }
++            while busy || syncing { try await Task.sleep(nanoseconds: 100_000_000) }
+             let version = revision, generation = financeGeneration, month = financeMonth
+             let result = try await read("getFinanceData", args: [.int(Int(month.prefix(4)) ?? 2026), .int(Int(month.suffix(2)) ?? 1)])
+             try Task.checkCancellation()
+@@ -330,30 +346,49 @@
+         }
+     }
+     var analysisIsCurrent: Bool { isDemo || analysisGeneration == financeGeneration }
+-    func sync(automatic: Bool = false, scope: NativeRefreshScope = .all) async {
++    func sync(automatic: Bool = false, writeTriggered: Bool = false, scope: NativeRefreshScope = .all) async {
+         if isDemo { rollover(); return }
+-        guard server != nil, !busy else { return }
+-        if automatic, state.pending.isEmpty, Date().timeIntervalSince(lastAutomaticSync) < 25 { return }
+-        busy = true; error = nil; syncStatus = "Aggiornamento…"; defer { busy = false }
+-        let hadPending = !state.pending.isEmpty
++        guard server != nil, !busy, !syncing else { return }
++        if automatic, !writeTriggered, Date().timeIntervalSince(lastAutomaticSync) < 25 { return }
++        syncing = true; error = nil; syncStatus = "Sincronizzazione…"; defer { syncing = false }
++        var pendingScope = scope
++        for write in state.pending { pendingScope.formUnion(NativeSyncPolicy.scope(for: write.method)) }
+         do {
+             // The destination is persisted before writes. Stable UUIDs make a later retry safe.
+             // No full read before sending: it doubled latency and prevented offline queues draining.
+-            while let write = state.pending.first(where: { !$0.accepted }) {
+-                let result = try await read(write.method, args: [.object(write.payload)])
+-                let accepted = write.method == "saveTransaction" ? result == .bool(true) : result.object.integer("row") > 0
+-                guard accepted else { throw Message(text: "Il server non ha confermato il movimento. La coda è conservata.") }
+-                var next = state
+-                if let index = next.pending.firstIndex(where: { $0.id == write.id }) { next.pending[index].accepted = true }
+-                try save(next)
+-            }
+-            try await refresh(hadPending ? scope.union(.finance) : scope)
+-            if hadPending { var next = state; next.pending.removeAll { $0.accepted }; try save(next) }
+-            lastAutomaticSync = Date(); syncStatus = "Aggiornato"; notice = nil
+-        } catch is CancellationError { syncStatus = "Aggiornamento sospeso" }
++            var attempted = Set<String>()
++            var blockedKeys = Set<String>()
++            var writeFailure: Error?
++            while let write = state.pending.first(where: { !$0.accepted && !attempted.contains($0.id) }) {
++                attempted.insert(write.id)
++                let key = LocalLifeMutation.key(write)
++                if blockedKeys.contains(key) { continue }
++                pendingScope.formUnion(NativeSyncPolicy.scope(for: write.method))
++                do {
++                    let result = try await read(write.method, args: [.object(write.payload)])
++                    let accepted = write.method == "saveExtra" ? result.object.integer("row") > 0 : result == .bool(true)
++                    guard accepted else { throw Message(text: "Il server non ha confermato la modifica. La coda è conservata.") }
++                    var next = state
++                    if let index = next.pending.firstIndex(where: { $0.id == write.id }) { next.pending[index].accepted = true }
++                    try save(next)
++                } catch {
++                    writeFailure = writeFailure ?? error
++                    blockedKeys.insert(key)
++                    if NativeSyncPolicy.isTransient(error) || [401, 403].contains((error as? NativeRequestRejected)?.status ?? 0) { break }
++                    // A rejected health/routine setter must not block financial writes.
++                }
++            }
++            try await refresh(pendingScope)
++            var next = state; next.pending.removeAll { $0.accepted }; try save(next)
++            lastAutomaticSync = Date()
++            if let writeFailure { throw writeFailure }
++            syncStatus = state.pending.isEmpty ? "Aggiornato" : "Modifiche sul dispositivo · in attesa di invio"; notice = state.pending.isEmpty ? nil : syncStatus
++            if !state.pending.isEmpty { scheduleSync() }
++        } catch is CancellationError { lastAutomaticSync = Date(); syncStatus = "Aggiornamento sospeso" }
+         catch {
++            lastAutomaticSync = Date()
+             if NativeSyncPolicy.isTransient(error) {
+-                syncStatus = state.pending.isEmpty ? "Dati salvati · riprovo al prossimo aggiornamento" : "Movimenti salvati · in attesa di rete"
++                syncStatus = state.pending.isEmpty ? "Dati salvati · riprovo al prossimo aggiornamento" : "Modifiche sul dispositivo · in attesa di rete"
+                 notice = syncStatus
+             } else {
+                 syncStatus = "Accesso o verifica richiesta"
+@@ -362,13 +397,23 @@
+         }
+     }
+     func perform(_ method: String, _ payload: Record = [:], args: [JSONValue]? = nil) async throws {
+-        guard !busy else { throw Message(text: "Attendi la fine dell’operazione in corso.") }
+         error = nil
+         if isDemo {
+             var next = state
+             try DemoActions.apply(method, payload, args: args, state: &next)
+             next.refreshedAt = Date(); try save(next); return
+         }
++        if LocalLifeMutation.supports(method) {
++            guard server != nil else { throw Message(text: "Collega il server per sincronizzare le modifiche.") }
++            var next = state
++            try LocalLifeMutation.apply(method, payload, to: &next.life)
++            next.pending.append(PendingWrite(id: UUID().uuidString, method: method, payload: payload))
++            try save(next)
++            notice = "Salvato sul dispositivo · sincronizzazione in attesa"
++            scheduleSync()
++            return
++        }
++        guard !busy else { throw Message(text: "Attendi la fine del salvataggio.") }
+         if method == "saveTransaction" || method == "saveExtra" {
+             guard server != nil else { throw Message(text: "Per nuovi movimenti collega Life OS oppure apri la demo.") }
+             var p = payload
+@@ -377,9 +422,11 @@
+             if !next.pending.contains(where: { $0.id == id }) { next.pending.append(PendingWrite(id: id, method: method, payload: p)) }
+             try save(next)
+             notice = "Salvato sul dispositivo."
+-            await sync(automatic: true, scope: .finance); return
++            scheduleSync(); return
+         }
+         guard server != nil else { throw Message(text: "Questo snapshot è consultabile. Per modificare attività e calendario usa la demo o collega Life OS.") }
++        while syncing { try await Task.sleep(nanoseconds: 50_000_000) }
++        guard !busy else { throw Message(text: "Attendi la fine del salvataggio.") }
+         busy = true; defer { busy = false }
+         // No automatic retry: these API methods do not all support request IDs.
+         let result = try await read(method, args: args ?? [.object(payload)])
+@@ -387,12 +434,53 @@
+         do { try await refresh(NativeSyncPolicy.scope(for: method)) }
+         catch { notice = "Operazione inviata. Aggiornamento non riuscito: sincronizza prima di ripetere l’azione." }
+     }
++    private func scheduleSync() {
++        guard automaticallySyncsWrites, syncTask == nil else { return }
++        syncTask = Task { [weak self] in
++            guard let self else { return }
++            while self.syncing || self.busy {
++                do { try await Task.sleep(nanoseconds: 50_000_000) } catch { self.syncTask = nil; return }
++            }
++            var scope: NativeRefreshScope = []
++            for write in self.state.pending { scope.formUnion(NativeSyncPolicy.scope(for: write.method)) }
++            await self.sync(automatic: true, writeTriggered: true, scope: scope.isEmpty ? .all : scope)
++            self.syncTask = nil
++            // Writes may arrive during the final read. Drain only after a successful sync;
++            // failures wait for foreground/reachability/manual retry instead of spinning.
++            if self.syncStatus == "Modifiche sul dispositivo · in attesa di invio" { self.scheduleSync() }
++        }
++    }
++    func discardLocalWrite(_ id: String) async throws {
++        guard !busy, !syncing, let write = state.pending.first(where: { $0.id == id }),
++              !write.accepted, LocalLifeMutation.supports(write.method) else {
++            throw Message(text: "Attendi la sincronizzazione. I movimenti finanziari non si annullano da qui.")
++        }
++        busy = true; defer { busy = false }
++        // Read first: without a confirmed server snapshot we cannot safely undo locally.
++        let fresh = try await read("getLifeData", args: [.string(calendarMonth)]).object
++        guard case .array? = fresh["tasks"] else { throw Message(text: "Risposta server non compatibile.") }
++        var next = state; next.pending.removeAll { $0.id == id }; next.life = fresh
++        for pending in next.pending where LocalLifeMutation.supports(pending.method) {
++            try LocalLifeMutation.apply(pending.method, pending.payload, to: &next.life)
++        }
++        try save(next)
++        notice = "Modifica locale rimossa. Dati del server ripristinati."
++    }
+     func updateShiftCalendar(_ method: String, month: String) async throws -> Record {
+         guard ["getShiftCalendar", "publishShiftCalendar", "rotateShiftCalendarLink"].contains(method),
+               !isDemo, server != nil else { throw Message(text: "Collega prima il server Life OS.") }
+-        guard !busy else { throw Message(text: "Attendi la fine del salvataggio e riprova.") }
+-        busy = true; defer { busy = false }
++        let mutates = method != "getShiftCalendar"
++        if mutates {
++            guard !busy, !syncing else { throw Message(text: "Attendi la fine del salvataggio e riprova.") }
++            if method == "publishShiftCalendar", state.pending.contains(where: { $0.method == "paintShift" }) {
++                throw Message(text: "Sincronizza prima i turni salvati sul dispositivo, poi pubblica il mese.")
++            }
++            busy = true
++        }
++        defer { if mutates { busy = false } }
++        let version = revision
+         let result = try await read(method, args: [.object(["month": .string(month)])])
++        guard version == revision else { throw CancellationError() }
+         guard case .object(let record) = result, record["path"] != nil, record["publishedAt"] != nil else {
+             throw Message(text: "Il server non ha confermato il collegamento del calendario.")
+         }
+@@ -403,7 +491,7 @@
+     }
+     func shift(_ day: String) -> ShiftKind? { life.records("shifts").first { $0.text("day") == day }.flatMap { ShiftKind(rawValue: $0.text("kind")) } }
+     func changeMonth(_ delta: Int, finance: Bool) async {
+-        guard !busy else { return }
++        guard !busy, !syncing else { return }
+         if finance {
+             let next = String(CivilDate.adding(delta, to: financeMonth + "-01", component: .month).prefix(7))
+             guard next >= "2024-01", next <= "2035-12" else { return }
+--- a/Sources/NativeSyncPolicy.swift
++++ b/Sources/NativeSyncPolicy.swift
+@@ -26,3 +26,9 @@
+     let status: Int
+     var errorDescription: String? { "Il server è momentaneamente occupato. I dati sul dispositivo sono conservati." }
+ }
++
++struct NativeRequestRejected: LocalizedError {
++    let status: Int
++    let message: String
++    var errorDescription: String? { message }
++}
+--- a/Sources/PendingWritesSection.swift
++++ b/Sources/PendingWritesSection.swift
+@@ -0,0 +1,35 @@
++import SwiftUI
++
++struct PendingWritesSection: View {
++    @EnvironmentObject var store: NativeStore
++    @State private var discarding: PendingWrite?
++    private func title(_ write: PendingWrite) -> String {
++        switch write.method {
++        case "setTaskStatus": return "Stato attività"
++        case "setEventOccurrence": return "Evento del " + write.payload.text("day")
++        case "setRoutineCheck": return "Abitudine del " + write.payload.text("day")
++        case "paintShift": return "Turno del " + write.payload.text("day")
++        case "saveHealthEntry": return "Misurazione del " + write.payload.text("day")
++        default: return "Movimento finanziario"
++        }
++    }
++    var body: some View {
++        Section("Modifiche sul dispositivo") {
++            Text(store.syncStatus.isEmpty ? "In attesa di sincronizzazione" : store.syncStatus).font(.caption)
++            ForEach(store.state.pending) { write in
++                VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
++                    Text(title(write))
++                    Text(write.accepted ? "Ricevuta dal server · aggiornamento dati in attesa" : "Conferma del server in attesa").font(.caption).foregroundStyle(NativeDesign.secondary)
++                    if !write.accepted && LocalLifeMutation.supports(write.method) {
++                        Button("Annulla modifica locale", role: .destructive) { discarding = write }.disabled(store.busy || store.syncing)
++                    }
++                }
++            }
++            Button("Riprova sincronizzazione") { Task { await store.sync() } }.disabled(store.busy || store.syncing)
++        }.confirmationDialog("Ripristinare il valore presente sul server? È necessaria la rete. Un invio già ricevuto dal server non verrà annullato.", isPresented: Binding(get: { discarding != nil }, set: { if !$0 { discarding = nil } })) {
++            if let write = discarding {
++                Button("Ripristina dal server", role: .destructive) { Task { do { try await store.discardLocalWrite(write.id) } catch { store.error = error.localizedDescription }; discarding = nil } }
++            }
++        }
++    }
++}
+--- a/Sources/ReminderPlan.swift
++++ b/Sources/ReminderPlan.swift
+@@ -0,0 +1,41 @@
++import Foundation
++
++struct LifeReminder: Equatable {
++    let id: String
++    let title: String
++    let body: String
++    let date: Date
++    let route: String
++}
++enum ReminderPlan {
++    static func make(life: Record, now: Date = Date()) -> [LifeReminder] {
++        func date(_ day: String, _ clock: String) -> Date? {
++            guard day.count == 10, CivilDate.day(CivilDate.date(day)) == day else { return nil }
++            let parts = clock.split(separator: ":").compactMap { Int($0) }
++            guard parts.count == 2, (0...23).contains(parts[0]), (0...59).contains(parts[1]) else { return nil }
++            return CivilDate.calendar.date(bySettingHour: parts[0], minute: parts[1], second: 0, of: CivilDate.date(day))
++        }
++        var result: [LifeReminder] = []
++        for task in life.records("tasks") where task.text("status") == "todo" {
++            if let due = date(task.text("due_date"), "09:00"), due > now {
++                result.append(LifeReminder(id: "task-\(task.integer("id"))", title: "Attività in scadenza", body: task.text("title"), date: due, route: "activities"))
++            }
++        }
++        for shift in life.records("shifts") {
++            let start = ["morning": "06:00", "afternoon": "14:00", "night": "22:00"][shift.text("kind")]
++            if let start, let time = date(shift.text("day"), start)?.addingTimeInterval(-3600), time > now {
++                result.append(LifeReminder(id: "shift-" + shift.text("day"), title: "Turno tra un’ora", body: "Il tuo turno inizia alle " + start, date: time, route: "calendar"))
++            }
++        }
++        // The API supplies expanded upcoming occurrences; in demo use the base events.
++        let events = life["upcomingEvents"] != nil ? life.records("upcomingEvents") : life.records("events")
++        for event in events where event.text("occurrence_status", fallback: "open") == "open" {
++            if let time = date(event.text("day"), event.text("start_time", fallback: "09:00"))?.addingTimeInterval(-900), time > now {
++                result.append(LifeReminder(id: "event-\(event.integer("id"))-" + event.text("day"), title: "Evento tra 15 minuti", body: event.text("title"), date: time, route: "calendar"))
++            }
++        }
++        // Leave room in the system scheduler. Opening the app replenishes the plan.
++        var unique = Set<String>()
++        return Array(result.sorted { $0.date == $1.date ? $0.id < $1.id : $0.date < $1.date }.filter { unique.insert($0.id).inserted }.prefix(48))
++    }
++}
+--- a/Sources/ShiftCalendarPanel.swift
++++ b/Sources/ShiftCalendarPanel.swift
+@@ -7,6 +7,7 @@
+     @State private var message = ""
+     @State private var failure = ""
+     @State private var working = false
++    @State private var updateID = UUID()
+     @State private var confirmRotation = false
+ 
+     private var subscription: URL? {
+@@ -16,7 +17,7 @@
+     var body: some View {
+         VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
+             Text("Turni in Calendario Apple").font(NativeDesign.heading)
+-            Text("Prepara qui i turni. Eventi in Calendario Apple, attività in Promemoria.")
++            Text("Opzionale: invia una copia dei turni a Calendario Apple. Attività, eventi e abitudini restano in Life OS.")
+                 .font(.subheadline).foregroundStyle(NativeDesign.secondary)
+             Text("Pubblica il mese visualizzato, anche dopo una correzione o una cancellazione. Gli altri mesi pubblicati restano disponibili.")
+                 .font(.caption).foregroundStyle(NativeDesign.secondary)
+@@ -53,10 +54,11 @@
+         }
+     }
+     @MainActor private func update(_ method: String) async {
+-        guard !working, !store.isDemo, store.server != nil else { return }
++        guard (!working || method == "getShiftCalendar"), !store.isDemo, store.server != nil else { return }
+         let month = store.calendarMonth
++        let requestID = UUID(); updateID = requestID
+         working = true; failure = ""; message = ""
+-        defer { working = false }
++        defer { if updateID == requestID { working = false } }
+         do {
+             let result = try await store.updateShiftCalendar(method, month: month)
+             guard !Task.isCancelled, store.calendarMonth == month else { return }
+--- a/Tests/LocalLifeMutationTests.swift
++++ b/Tests/LocalLifeMutationTests.swift
+@@ -0,0 +1,50 @@
++import XCTest
++@testable import LifeOSProbe
++
++final class LocalLifeMutationTests: XCTestCase {
++    func testOnlyStableAbsoluteSettersCanBeQueued() {
++        for method in ["saveTask", "saveEvent", "saveRoutine", "deleteMovement", "recordExtraPayment"] { XCTAssertFalse(LocalLifeMutation.supports(method)) }
++    }
++    func testShiftReplayAndEraseAreIdempotent() throws {
++        var life: Record = [:]
++        let payload: Record = ["day": .string(CivilDate.day()), "kind": .string("night")]
++        try LocalLifeMutation.apply("paintShift", payload, to: &life)
++        let once = life
++        try LocalLifeMutation.apply("paintShift", payload, to: &life)
++        XCTAssertEqual(life, once)
++        XCTAssertEqual(life.records("shifts").count, 1)
++        try LocalLifeMutation.apply("paintShift", ["day": payload["day"]!, "kind": .string("erase")], to: &life)
++        XCTAssertTrue(life.records("shifts").isEmpty)
++    }
++    func testHealthUpsertPreservesOmittedFieldsAndUsesReadSchema() throws {
++        var life: Record = ["health": .array([.object(["day": .string(CivilDate.day()), "calories": .int(2100)])])]
++        let payload = try HealthMeasurement.payload(day: CivilDate.day(), weight: "78,4", calories: "")
++        try LocalLifeMutation.apply("saveHealthEntry", payload, to: &life)
++        try LocalLifeMutation.apply("saveHealthEntry", payload, to: &life)
++        XCTAssertEqual(life.records("health").count, 1)
++        XCTAssertEqual(life.records("health")[0].amount("weight_kg"), 78.4)
++        XCTAssertEqual(life.records("health")[0].integer("calories"), 2100)
++        XCTAssertThrowsError(try LocalLifeMutation.apply("saveHealthEntry", ["day": .string(CivilDate.day()), "calories": .number(1.5)], to: &life))
++    }
++    func testPastRoutineCheckNeverChangesToday() throws {
++        var life: Record = ["routines": .array([.object(["id": .int(1), "checked": .bool(false)])])]
++        try LocalLifeMutation.apply("setRoutineCheck", ["id": .int(1), "day": .string(CivilDate.adding(-1, to: CivilDate.day())), "checked": .bool(true)], to: &life)
++        XCTAssertFalse(life.records("routines")[0].flag("checked"))
++        try LocalLifeMutation.apply("setRoutineCheck", ["id": .int(1), "day": .string(CivilDate.day()), "checked": .bool(true)], to: &life)
++        XCTAssertTrue(life.records("routines")[0].flag("checked"))
++    }
++    func testCompletedEventUpdatesOnlyItsOccurrenceAndStopsReminder() throws {
++        let day = CivilDate.adding(1, to: CivilDate.day())
++        var life: Record = ["upcomingEvents": .array([.object(["id": .int(1), "title": .string("Evento demo"), "day": .string(day), "start_time": .string("14:00")])])]
++        XCTAssertEqual(ReminderPlan.make(life: life).count, 1)
++        try LocalLifeMutation.apply("setEventOccurrence", ["id": .int(1), "day": .string(day), "status": .string("done")], to: &life)
++        XCTAssertTrue(ReminderPlan.make(life: life).isEmpty)
++        XCTAssertEqual(life.record("occurrences").text("1:" + day), "done")
++        try LocalLifeMutation.apply("setEventOccurrence", ["id": .int(1), "day": .string(day), "status": .string("open")], to: &life)
++        XCTAssertEqual(ReminderPlan.make(life: life).count, 1)
++    }
++    func testRoutesCannotInjectDataOrExternalDestinations() {
++        for route in ["task", "activities", "weight", "calendar", "dashboard"] { XCTAssertNotNil(LifeOSRoute(URL(string: "lifeos://" + route)!)) }
++        for url in ["https://calendar", "lifeos://weight?weight=10", "lifeos://task/extra", "lifeos://user@calendar", "lifeos://delete"] { XCTAssertNil(LifeOSRoute(URL(string: url)!)) }
++    }
++}
+--- a/Tests/NativeStoreTests.swift
++++ b/Tests/NativeStoreTests.swift
+@@ -9,6 +9,10 @@
+     static var failAll = false
+     static var calls: [String] = []
+     static var timeoutOnce: String?
++    static var rejectMethod: String?
++    static var pauseMethod: String?
++    static var paused: MockAPI?
++    private var deferredResponse: (HTTPURLResponse, String)?
+     override class func canInit(with request: URLRequest) -> Bool { request.url?.host == "lifeos-test.invalid" }
+     override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+     override func startLoading() {
+@@ -22,6 +26,8 @@
+         var status = 200
+         var text = "{}"
+         if Self.failAll { status = 401; text = "Sessione scaduta" }
++        else if Self.rejectMethod == method { status = 400; text = "Modifica rifiutata" }
++        else if ["setTaskStatus", "setRoutineCheck", "paintShift", "saveHealthEntry", "setEventOccurrence"].contains(method) { text = "true" }
+         else if method == "saveTransaction" { Self.writes += 1; text = "true" }
+         else if ["getShiftCalendar", "publishShiftCalendar", "rotateShiftCalendarLink"].contains(method) { text = #"{"path":"/calendar/turni/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.ics","publishedAt":"2026-10-23T12:00:00Z"}"# }
+         else if method == "getLifeData" { text = #"{"tasks":[],"categories":[],"routines":[],"events":[],"shifts":[],"upcomingEvents":[]}"# }
+@@ -32,6 +38,18 @@
+         }
+         Self.lock.unlock()
+         let response = HTTPURLResponse(url: request.url!, statusCode: status, httpVersion: nil, headerFields: ["Content-Type": status == 200 ? "application/json" : "text/plain", "Set-Cookie": method == "login" && status == 200 ? "liquidita_session=mock-session; Path=/; Max-Age=3600; Secure; HttpOnly; SameSite=Strict" : "", "X-LifeOS-Data-Source": "shared"])!
++        Self.lock.lock()
++        if Self.pauseMethod == method {
++            deferredResponse = (response, text); Self.paused = self; Self.lock.unlock(); return
++        }
++        Self.lock.unlock()
++        deliver(response, text)
++    }
++    static func resume() {
++        lock.lock(); let request = paused; paused = nil; pauseMethod = nil; lock.unlock()
++        if let request, let (response, text) = request.deferredResponse { request.deliver(response, text) }
++    }
++    private func deliver(_ response: HTTPURLResponse, _ text: String) {
+         client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+         client?.urlProtocol(self, didLoad: Data(text.utf8))
+         client?.urlProtocolDidFinishLoading(self)
+@@ -42,7 +60,7 @@
+ @MainActor final class NativeStoreTests: XCTestCase {
+     func testShiftPublicationDoesNotRefreshFinanceOrRetryWrites() async throws {
+         let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
+-        let store = NativeStore(directory: directory, session: session, migrateLegacy: false)
++        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
+         try store.configure("https://lifeos-test.invalid")
+         let result = try await store.updateShiftCalendar("publishShiftCalendar", month: "2026-10")
+         XCTAssertFalse(result.text("path").isEmpty)
+@@ -58,14 +76,140 @@
+         _ = try await store.updateShiftCalendar("publishShiftCalendar", month: "2026-10")
+         XCTAssertEqual(MockAPI.calls.count, 3)
+     }
++    func testCalendarStatusReadDoesNotBlockLocalPaintingAndUnsentShiftsCannotPublish() async throws {
++        let (directory, session) = try setup(); defer { MockAPI.resume(); try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
++        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
++        try store.configure("https://lifeos-test.invalid")
++        MockAPI.pauseMethod = "getShiftCalendar"
++        let status = Task { try await store.updateShiftCalendar("getShiftCalendar", month: CivilDate.month()) }
++        for _ in 0..<100 { if MockAPI.paused != nil { break }; try await Task.sleep(nanoseconds: 10_000_000) }
++        XCTAssertNotNil(MockAPI.paused)
++        XCTAssertFalse(store.busy)
++        try await store.perform("paintShift", ["day": .string(CivilDate.day()), "kind": .string("night")])
++        XCTAssertEqual(store.shift(CivilDate.day()), .night)
++        MockAPI.resume()
++        _ = try await status.value
++        do { _ = try await store.updateShiftCalendar("publishShiftCalendar", month: CivilDate.month()); XCTFail("Non pubblicare una bozza remota obsoleta") } catch {}
++        XCTAssertFalse(MockAPI.calls.contains("publishShiftCalendar"))
++    }
++    func testConnectedArchiveRollsHabitsToTodayOfflineWithoutMovingYesterdayCheck() async throws {
++        let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
++        let yesterday = CivilDate.adding(-1, to: CivilDate.day())
++        var archive = NativeArchive()
++        archive.demo = false; archive.endpoint = "https://lifeos-test.invalid"
++        archive.life = ["today": .string(yesterday), "routines": .array([.object(["id": .int(1), "checked": .bool(true)])])]
++        archive.pending = [PendingWrite(id: "old-check", method: "setRoutineCheck", payload: ["id": .int(1), "day": .string(yesterday), "checked": .bool(true)])]
++        try JSONEncoder().encode(archive).write(to: directory.appendingPathComponent("lifeos-native-v2.json"))
++        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
++        XCTAssertFalse(store.routines[0].flag("checked"))
++        XCTAssertEqual(store.life.text("today"), CivilDate.day())
++        XCTAssertEqual(store.state.pending[0].payload.text("day"), yesterday)
++        try await store.perform("setRoutineCheck", ["id": .int(1), "day": .string(CivilDate.day()), "checked": .bool(true)])
++        let restored = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
++        XCTAssertTrue(restored.routines[0].flag("checked"))
++        XCTAssertTrue(MockAPI.calls.isEmpty)
++    }
++    func testRejectedSetterPreservesOrderForSameKeyButDoesNotBlockFinance() async throws {
++        let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
++        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
++        try store.configure("https://lifeos-test.invalid")
++        for kind in ["morning", "night"] { try await store.perform("paintShift", ["day": .string(CivilDate.day()), "kind": .string(kind)]) }
++        try await store.perform("saveTransaction", payload)
++        MockAPI.rejectMethod = "paintShift"
++        await store.sync()
++        XCTAssertEqual(MockAPI.calls.filter { $0 == "paintShift" }.count, 1)
++        XCTAssertEqual(MockAPI.writes, 1)
++        XCTAssertEqual(store.state.pending.map(\.method), ["paintShift", "paintShift"])
++        XCTAssertEqual(store.shift(CivilDate.day()), .night)
++        MockAPI.rejectMethod = nil
++        await store.sync()
++        XCTAssertTrue(store.state.pending.isEmpty)
++        XCTAssertEqual(MockAPI.calls.filter { $0 == "paintShift" }.count, 3)
++        XCTAssertEqual(MockAPI.writes, 1)
++    }
++    func testLocalWriteDuringSlowRefreshIsImmediateAndCannotBeOverwritten() async throws {
++        let (directory, session) = try setup(); defer { MockAPI.resume(); try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
++        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
++        try store.configure("https://lifeos-test.invalid")
++        MockAPI.pauseMethod = "getLifeData"
++        let refresh = Task { await store.sync() }
++        for _ in 0..<100 {
++            if MockAPI.paused != nil { break }
++            try await Task.sleep(nanoseconds: 10_000_000)
++        }
++        XCTAssertNotNil(MockAPI.paused)
++        XCTAssertTrue(store.syncing)
++        XCTAssertFalse(store.busy)
++        let payload = try HealthMeasurement.payload(day: CivilDate.day(), weight: "81.2", calories: "")
++        try await store.perform("saveHealthEntry", payload)
++        XCTAssertEqual(store.life.records("health").first?.amount("weight_kg"), 81.2)
++        XCTAssertFalse(MockAPI.calls.contains("saveHealthEntry"))
++        MockAPI.resume()
++        await refresh.value
++        XCTAssertEqual(store.life.records("health").first?.amount("weight_kg"), 81.2)
++        XCTAssertEqual(store.state.pending.count, 1)
++        await store.sync()
++        XCTAssertTrue(store.state.pending.isEmpty)
++        XCTAssertEqual(MockAPI.calls.filter { $0 == "saveHealthEntry" }.count, 1)
++    }
++    func testQueuedHealthIsVisibleAndDurableBeforeAnyNetworkCall() async throws {
++        let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
++        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
++        try store.configure("https://lifeos-test.invalid")
++        let payload = try HealthMeasurement.payload(day: CivilDate.day(), weight: "78.4", calories: "2100")
++        try await store.perform("saveHealthEntry", payload)
++        XCTAssertTrue(MockAPI.calls.isEmpty)
++        XCTAssertFalse(store.busy)
++        XCTAssertEqual(store.life.records("health").first?.amount("weight_kg"), 78.4)
++        XCTAssertEqual(store.state.pending.count, 1)
++        let restored = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
++        XCTAssertEqual(restored.state.pending.first?.payload, payload)
++        XCTAssertEqual(restored.life.records("health").first?.integer("calories"), 2100)
++        await restored.sync()
++        XCTAssertTrue(restored.state.pending.isEmpty)
++        XCTAssertEqual(MockAPI.calls.filter { $0 == "saveHealthEntry" }.count, 1)
++    }
++    func testRapidShiftChangesStayOrderedAndSurviveAuthenticationFailure() async throws {
++        let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
++        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
++        try store.configure("https://lifeos-test.invalid")
++        for kind in ["morning", "night", "erase", "afternoon"] {
++            try await store.perform("paintShift", ["day": .string(CivilDate.day()), "kind": .string(kind)])
++        }
++        XCTAssertEqual(store.shift(CivilDate.day()), .afternoon)
++        XCTAssertEqual(store.state.pending.map { $0.payload.text("kind") }, ["morning", "night", "erase", "afternoon"])
++        XCTAssertTrue(MockAPI.calls.isEmpty)
++        MockAPI.failAll = true
++        await store.sync(automatic: true)
++        XCTAssertEqual(store.state.pending.count, 4)
++        XCTAssertTrue(store.financialPending.isEmpty)
++        XCTAssertEqual(store.shift(CivilDate.day()), .afternoon)
++        XCTAssertNil(store.error)
++        XCTAssertNotNil(store.notice)
++        XCTAssertFalse(store.syncing)
++    }
++    func testUnacceptedLocalWriteCanOnlyBeDiscardedAfterServerRead() async throws {
++        let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
++        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
++        try store.configure("https://lifeos-test.invalid")
++        try await store.perform("paintShift", ["day": .string(CivilDate.day()), "kind": .string("night")])
++        let id = try XCTUnwrap(store.state.pending.first?.id)
++        MockAPI.failAll = true
++        do { try await store.discardLocalWrite(id); XCTFail("Serve una lettura confermata") } catch {}
++        XCTAssertEqual(store.state.pending.count, 1)
++        MockAPI.failAll = false
++        try await store.discardLocalWrite(id)
++        XCTAssertTrue(store.state.pending.isEmpty)
++        XCTAssertNil(store.shift(CivilDate.day()))
++    }
+     func testDemoCannotPublishShifts() async throws {
+         let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
+-        let store = NativeStore(directory: directory, session: session, migrateLegacy: false)
++        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
+         do { _ = try await store.updateShiftCalendar("publishShiftCalendar", month: "2026-10"); XCTFail("La demo non può pubblicare") }
+         catch { XCTAssertTrue(MockAPI.calls.isEmpty) }
+     }
+     private func setup() throws -> (URL, URLSession) {
+-        MockAPI.lock.lock(); MockAPI.writes = 0; MockAPI.failAfterWrite = false; MockAPI.failAll = false; MockAPI.calls = []; MockAPI.timeoutOnce = nil; MockAPI.lock.unlock()
++        MockAPI.lock.lock(); MockAPI.writes = 0; MockAPI.failAfterWrite = false; MockAPI.failAll = false; MockAPI.calls = []; MockAPI.timeoutOnce = nil; MockAPI.pauseMethod = nil; MockAPI.paused = nil; MockAPI.rejectMethod = nil; MockAPI.lock.unlock()
+         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+         let config = URLSessionConfiguration.ephemeral; config.protocolClasses = [MockAPI.self]
+@@ -73,7 +217,7 @@
+     }
+     func testDashboardCapsHighlightsAtThreeAndPrioritizesSevenDayEvents() async throws {
+         let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
+-        let store = NativeStore(directory: directory, session: session, migrateLegacy: false)
++        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
+         store.seedVisualTasks()
+         XCTAssertLessThanOrEqual(store.highlights.count, 3)
+         XCTAssertEqual(store.highlights.first?.text("highlightKind"), "event")
+@@ -82,7 +226,7 @@
+     private var payload: Record { ["requestId": .string("regression-12345678"), "type": .string("Spesa"), "name": .string("Spesa da conservare"), "amount": .number(2), "account": .string("Trade Republic"), "category": .string("Altro"), "date": .string(CivilDate.day())] }
+     func testNativeSignInReceivesSecureCookieWithoutLoadingWebPage() async throws {
+         let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
+-        let store = NativeStore(directory: directory, session: session, migrateLegacy: false)
++        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
+         try store.configure("https://lifeos-test.invalid")
+         try await store.signIn(password: "not-a-real-password-for-unit-tests")
+         XCTAssertEqual(MockAPI.calls, ["login"])
+@@ -93,7 +237,7 @@
+     }
+     func testRefreshUsesOneLightFinanceReadAndEmbeddedPlan() async throws {
+         let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
+-        let store = NativeStore(directory: directory, session: session, migrateLegacy: false)
++        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
+         try store.configure("https://lifeos-test.invalid")
+         await store.sync()
+         XCTAssertNil(store.error)
+@@ -104,18 +248,19 @@
+     }
+     func testLifeMutationDoesNotFetchFinanceOrAnalytics() async throws {
+         let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
+-        let store = NativeStore(directory: directory, session: session, migrateLegacy: false)
++        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
+         try store.configure("https://lifeos-test.invalid")
+         await store.sync()
+         let financeDate = store.state.financeRefreshedAt
+         MockAPI.calls = []
+         try await store.perform("setTaskStatus", ["id": .int(1), "status": .string("done")])
++        await store.sync(scope: .life)
+         XCTAssertEqual(MockAPI.calls, ["setTaskStatus", "getLifeData"])
+         XCTAssertEqual(store.state.financeRefreshedAt, financeDate)
+     }
+     func testTransientReadTimeoutRetriesOnceButMutationIsNeverRetriedAutomatically() async throws {
+         let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
+-        let store = NativeStore(directory: directory, session: session, migrateLegacy: false)
++        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
+         try store.configure("https://lifeos-test.invalid")
+         MockAPI.timeoutOnce = "getLifeData"
+         _ = try await store.read("getLifeData")
+@@ -127,10 +272,11 @@
+     }
+     func testAutomaticAuthenticationFailureKeepsCacheAndQueueWithoutModalError() async throws {
+         let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
+-        let store = NativeStore(directory: directory, session: session, migrateLegacy: false)
++        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
+         try store.configure("https://lifeos-test.invalid")
+         MockAPI.failAll = true
+         try await store.perform("saveTransaction", payload)
++        await store.sync(automatic: true)
+         XCTAssertNil(store.error)
+         XCTAssertNotNil(store.notice)
+         XCTAssertEqual(store.state.pending.first?.payload, payload)
+@@ -140,11 +286,11 @@
+         let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
+         let initial = NativeArchive(pending: [PendingWrite(id: "regression-12345678", method: "saveTransaction", payload: payload)], demo: false)
+         try JSONEncoder().encode(initial).write(to: directory.appendingPathComponent("lifeos-native-v2.json"))
+-        let store = NativeStore(directory: directory, session: session, migrateLegacy: false)
++        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
+         try store.configure("https://lifeos-test.invalid")
+         XCTAssertEqual(store.state.pending.first?.payload, payload)
+         XCTAssertEqual(MockAPI.writes, 0)
+-        let relaunched = NativeStore(directory: directory, session: session, migrateLegacy: false)
++        let relaunched = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
+         XCTAssertEqual(relaunched.state.endpoint, "https://lifeos-test.invalid")
+         XCTAssertEqual(relaunched.state.pending.first?.id, "regression-12345678")
+         XCTAssertEqual(relaunched.state.pending.first?.payload.amount("amount"), 2)
+@@ -160,13 +306,13 @@
+         let file = directory.appendingPathComponent("lifeos-native-v2.json")
+         try JSONEncoder().encode(initial).write(to: file)
+         let original = try Data(contentsOf: file)
+-        let store = NativeStore(directory: directory, session: session, migrateLegacy: false)
++        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
+         XCTAssertThrowsError(try store.configure("https://lifeos-test.invalid"))
+         XCTAssertEqual(try Data(contentsOf: file), original)
+     }
+     func testConfiguringServerResetsDisplayedMonthsToTheNewArchive() async throws {
+         let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
+-        let store = NativeStore(directory: directory, session: session, migrateLegacy: false)
++        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
+         await store.changeMonth(-1, finance: true)
+         await store.changeMonth(1, finance: false)
+         try store.configure("https://lifeos-test.invalid")
+@@ -176,14 +322,15 @@
+     }
+     func testConfirmedWriteSurvivesFailedRefreshAndRelaunchWithoutResending() async throws {
+         let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
+-        let store = NativeStore(directory: directory, session: session, migrateLegacy: false)
++        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
+         try store.configure("https://lifeos-test.invalid")
+         MockAPI.failAfterWrite = true
+         try await store.perform("saveTransaction", payload)
++        await store.sync(automatic: true)
+         XCTAssertEqual(store.state.pending.count, 1)
+         XCTAssertEqual(store.state.pending.first?.accepted, true)
+         XCTAssertNotNil(store.notice)
+-        let relaunched = NativeStore(directory: directory, session: session, migrateLegacy: false)
++        let relaunched = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
+         await relaunched.sync()
+         XCTAssertTrue(relaunched.state.pending.isEmpty)
+         XCTAssertNil(relaunched.error)
+@@ -191,10 +338,11 @@
+     }
+     func testDemoSwitchAndRestoreKeepUnsentWriteAndEndpoint() async throws {
+         let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
+-        let store = NativeStore(directory: directory, session: session, migrateLegacy: false)
++        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
+         try store.configure("https://lifeos-test.invalid")
+         MockAPI.failAll = true
+         try await store.perform("saveTransaction", payload)
++        await store.sync(automatic: true)
+         XCTAssertEqual(store.state.pending.count, 1)
+         XCTAssertThrowsError(try store.configure("https://different-test.invalid"))
+         try store.configure("https://lifeos-test.invalid/")
+@@ -212,7 +360,7 @@
+         let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
+         let initial = NativeArchive(pending: [PendingWrite(id: "regression-12345678", method: "saveTransaction", payload: payload)], demo: false)
+         try JSONEncoder().encode(initial).write(to: directory.appendingPathComponent("lifeos-native-v2.json"))
+-        let store = NativeStore(directory: directory, session: session, migrateLegacy: false)
++        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
+         let data = Data(#"{"summary":{"budget":1000,"committedCurrent":200,"remainingFree":800},"transactions":[]}"#.utf8)
+         try store.importFinance(data)
+         XCTAssertEqual(store.state.pending.first?.id, "regression-12345678")
+@@ -233,7 +381,7 @@
+         let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
+         let file = directory.appendingPathComponent("lifeos-native-v2.json"), original = Data("JSON incompleto".utf8)
+         try original.write(to: file)
+-        let store = NativeStore(directory: directory, session: session, migrateLegacy: false)
++        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
+         XCTAssertNotNil(store.error)
+         XCTAssertThrowsError(try store.useDemo())
+         XCTAssertThrowsError(try store.configure("https://lifeos-test.invalid"))
+--- a/Tests/ReminderPlanTests.swift
++++ b/Tests/ReminderPlanTests.swift
+@@ -0,0 +1,23 @@
++import XCTest
++@testable import LifeOSProbe
++
++final class ReminderPlanTests: XCTestCase {
++    private let day = "2026-10-26"
++    func testPlanUsesRomeAndExcludesDoneTasksAndRestDays() throws {
++        let life: Record = [
++            "tasks": .array([.object(["id": .int(1), "title": .string("Scadenza demo"), "status": .string("todo"), "due_date": .string(day)]), .object(["id": .int(2), "status": .string("done"), "due_date": .string(day)])]),
++            "shifts": .array([.object(["day": .string(day), "kind": .string("morning")]), .object(["day": .string("2026-10-27"), "kind": .string("rest")])]),
++            "upcomingEvents": .array([.object(["id": .int(3), "title": .string("Evento demo"), "day": .string(day), "start_time": .string("14:30")])])]
++        let plan = ReminderPlan.make(life: life, now: CivilDate.date("2026-10-25"))
++        XCTAssertEqual(plan.map(\.id), ["shift-2026-10-26", "task-1", "event-3-2026-10-26"])
++        XCTAssertEqual(plan.map { CivilDate.calendar.component(.hour, from: $0.date) }, [5, 9, 14])
++        XCTAssertEqual(CivilDate.calendar.component(.minute, from: plan[2].date), 15)
++        XCTAssertTrue(ReminderPlan.make(life: life, now: CivilDate.date("2026-10-28")).isEmpty)
++    }
++    func testPlanLimitsTo48AndDeduplicates() {
++        let tasks = (1...70).map { id in JSONValue.object(["id": .int(id), "status": .string("todo"), "due_date": .string(day)]) }
++        let plan = ReminderPlan.make(life: ["tasks": .array(tasks + tasks)], now: CivilDate.date("2026-10-25"))
++        XCTAssertEqual(plan.count, 48)
++        XCTAssertEqual(Set(plan.map(\.id)).count, 48)
++    }
++}
+--- a/UITests/NativeInterfaceTests.swift
++++ b/UITests/NativeInterfaceTests.swift
+@@ -40,13 +40,13 @@
+         let shot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+         shot.name = name; shot.lifetime = .keepAlways; add(shot)
+     }
+-    func testTwoSectionsInBothThemes() {
++    func testThreeSectionsInBothThemes() {
+         for dark in [false, true] {
+             let app = launch(dark ? ["--dark"] : [])
+-            XCTAssertEqual(app.tabBars.buttons.count, 2)
+-            XCTAssertFalse(app.tabBars.buttons["Attività"].exists)
++            XCTAssertEqual(app.tabBars.buttons.count, 3)
++            XCTAssertTrue(app.tabBars.buttons["Attività"].exists)
+             XCTAssertFalse(app.tabBars.buttons["Calendario"].exists)
+-            for tab in ["Dashboard", "Finanza"] {
++            for tab in ["Dashboard", "Attività", "Finanza"] {
+                 app.tabBars.buttons[tab].tap()
+                 XCTAssertTrue(app.navigationBars[tab].waitForExistence(timeout: 10))
+                 XCTAssertTrue(app.navigationBars.buttons["Impostazioni"].isHittable)
+@@ -117,7 +117,8 @@
+             }
+             XCTAssertFalse(app.buttons["home-all-todos"].exists)
+             XCTAssertFalse(app.buttons["home-manage-routines"].exists)
+-            XCTAssertFalse(app.staticTexts["Abitudini"].exists)
++            let habits = app.staticTexts["Abitudini"]; reveal(habits, in: app)
++            XCTAssertTrue(habits.exists)
+             XCTAssertTrue(app.staticTexts["Peso e calorie"].exists)
+             capture(dark ? "health-dashboard-dark" : "health-dashboard-light")
+             app.terminate()
+@@ -147,14 +148,18 @@
+         capture("health-weight-saved")
+     }
+ 
+-    func testLegacyTasksEventsAndRoutinesAreAbsentFromDashboard() {
++    func testUnifiedDashboardRestoresActivitiesAndHabits() {
+         let app = launch(["--busy-home", "--stress-content"])
+-        let text = app.staticTexts["home-summary"].label
+-        XCTAssertFalse(text.contains("Appuntamento"))
+-        XCTAssertFalse(text.contains("Organizzare"))
+-        XCTAssertFalse(app.buttons["home-events"].exists)
+-        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-todo-")).count, 0)
+-        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-routine-")).count, 0)
++        let habits = app.staticTexts["Abitudini"]; reveal(habits, in: app)
++        XCTAssertTrue(habits.isHittable)
++        app.tabBars.buttons["Attività"].tap()
++        XCTAssertTrue(app.navigationBars["Attività"].waitForExistence(timeout: 5))
++        app.buttons["primary-add"].tap()
++        let title = app.textFields["Titolo"]
++        XCTAssertTrue(title.waitForExistence(timeout: 5)); title.tap(); title.typeText("Attività ripristinata")
++        app.buttons["Salva"].tap()
++        XCTAssertTrue(app.navigationBars["Attività"].waitForExistence(timeout: 5))
++        capture("unified-activities")
+     }
+     func testKeyboardAndLocalMovementFlow() {
+         let app = launch()
+@@ -215,9 +220,9 @@
+ 
+     func testRepeatedBoundaryScrollingKeepsNavigationStable() {
+         let app = launch(["--dark"])
+-        for tab in ["Dashboard", "Finanza"] {
++        for tab in ["Dashboard", "Attività", "Finanza"] {
+             app.tabBars.buttons[tab].tap()
+-            let scroll = app.scrollViews[tab == "Dashboard" ? "dashboard-scroll" : "finance-scroll"]
++            let scroll = tab == "Attività" ? app.collectionViews.firstMatch : app.scrollViews[tab == "Dashboard" ? "dashboard-scroll" : "finance-scroll"]
+             for _ in 0..<4 { scroll.swipeUp(velocity: .fast) }
+             for _ in 0..<4 { scroll.swipeDown(velocity: .fast) }
+             XCTAssertTrue(app.tabBars.buttons["Dashboard"].isHittable)
+@@ -230,10 +235,13 @@
+         let scroll = app.scrollViews["calendar-scroll"]
+         XCTAssertTrue(scroll.waitForExistence(timeout: 10))
+         for _ in 0..<4 { scroll.swipeUp(velocity: .fast) }
++        let export = app.buttons["calendar-apple-export"]
++        XCTAssertTrue(export.isHittable); export.tap()
+         let publish = app.buttons["publish-shift-calendar"]
++        for _ in 0..<6 { if publish.isHittable { break }; scroll.swipeUp() }
+         XCTAssertTrue(publish.isHittable)
+         XCTAssertFalse(publish.isEnabled, "La demo non deve pubblicare dati reali")
+-        XCTAssertFalse(app.buttons["calendar-add-event"].exists)
++        XCTAssertTrue(app.buttons["calendar-add-event"].exists)
+         XCTAssertFalse(app.navigationBars.buttons["primary-add"].exists)
+         XCTAssertTrue(app.staticTexts["Per pubblicare i turni collega il server Life OS nelle Impostazioni. La demo non invia dati ad Apple."].exists)
+         capture("calendar-shift-publication-demo")
+--- a/Widget/LifeOSWidget.swift
++++ b/Widget/LifeOSWidget.swift
+@@ -0,0 +1,46 @@
++import SwiftUI
++import WidgetKit
++
++struct QuickActionsEntry: TimelineEntry { let date: Date }
++struct QuickActionsProvider: TimelineProvider {
++    func placeholder(in context: Context) -> QuickActionsEntry { QuickActionsEntry(date: .now) }
++    func getSnapshot(in context: Context, completion: @escaping (QuickActionsEntry) -> Void) { completion(QuickActionsEntry(date: .now)) }
++    func getTimeline(in context: Context, completion: @escaping (Timeline<QuickActionsEntry>) -> Void) {
++        completion(Timeline(entries: [QuickActionsEntry(date: .now)], policy: .never))
++    }
++}
++struct QuickActionsView: View {
++    @Environment(\.widgetFamily) private var family
++    var body: some View {
++        VStack(alignment: .leading) {
++            Label("Life OS", systemImage: "square.grid.2x2").font(.headline)
++            Spacer()
++            if family == .systemSmall {
++                Label("Nuova attività", systemImage: "plus.circle").font(.title3)
++                Text("Tocca per aggiungere").font(.caption).foregroundStyle(.secondary)
++            } else {
++                HStack {
++                    action("Attività", symbol: "plus.circle", route: "task")
++                    Spacer()
++                    action("Peso", symbol: "scalemass", route: "weight")
++                    Spacer()
++                    action("Calendario", symbol: "calendar", route: "calendar")
++                }
++            }
++        }.widgetURL(family == .systemSmall ? URL(string: "lifeos://task") : nil)
++        .containerBackground(.fill.tertiary, for: .widget)
++    }
++    private func action(_ title: String, symbol: String, route: String) -> some View {
++        Link(destination: URL(string: "lifeos://" + route)!) {
++            VStack { Image(systemName: symbol).font(.title2); Text(title).font(.caption) }
++        }.accessibilityLabel(title)
++    }
++}
++@main struct LifeOSQuickActionsWidget: Widget {
++    var body: some WidgetConfiguration {
++        StaticConfiguration(kind: "LifeOSQuickActions", provider: QuickActionsProvider()) { _ in QuickActionsView() }
++            .configurationDisplayName("Life OS · Azioni rapide")
++            .description("Apri una nuova attività, registra il peso o consulta il calendario.")
++            .supportedFamilies([.systemSmall, .systemMedium])
++    }
++}
+--- a/project.yml
++++ b/project.yml
+@@ -1,5 +1,6 @@
+ name: LifeOSProbe
+ options:
++  developmentLanguage: it
+   bundleIdPrefix: com.nas.lifeos
+   deploymentTarget:
+     iOS: '17.0'
+@@ -17,13 +18,40 @@
+         PRODUCT_BUNDLE_IDENTIFIER: com.nas.lifeos.probe
+         GENERATE_INFOPLIST_FILE: YES
+         MARKETING_VERSION: '0.9.0'
+-        CURRENT_PROJECT_VERSION: '52'
++        CURRENT_PROJECT_VERSION: '53'
+         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+         INFOPLIST_KEY_CFBundleDisplayName: Life OS
+         INFOPLIST_KEY_UILaunchScreen_Generation: YES
+         INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
++    info:
++      path: AppInfo.plist
++      properties:
++        CFBundleURLTypes:
++          - CFBundleURLName: com.nas.lifeos.routes
++            CFBundleURLSchemes: [lifeos]
+     dependencies:
+       - sdk: libsqlite3.tbd
++      - target: LifeOSWidget
++        embed: true
++  LifeOSWidget:
++    type: app-extension
++    platform: iOS
++    sources: [Widget]
++    info:
++      path: WidgetInfo.plist
++      properties:
++        CFBundleDisplayName: Life OS Azioni rapide
++        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
++        CFBundleShortVersionString: $(MARKETING_VERSION)
++        NSExtension:
++          NSExtensionPointIdentifier: com.apple.widgetkit-extension
++    settings:
++      base:
++        PRODUCT_BUNDLE_IDENTIFIER: com.nas.lifeos.probe.quickactions
++        MARKETING_VERSION: '0.9.0'
++        CURRENT_PROJECT_VERSION: '53'
++        SKIP_INSTALL: YES
++        APPLICATION_EXTENSION_API_ONLY: YES
+   LifeOSProbeTests:
+     type: bundle.unit-test
+     platform: iOS
