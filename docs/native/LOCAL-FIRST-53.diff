@@ -123,7 +123,26 @@
  struct DoneButton: ToolbarContent {
 --- a/Sources/CalendarScreen.swift
 +++ b/Sources/CalendarScreen.swift
-@@ -37,7 +37,7 @@
+@@ -3,6 +3,7 @@
+ struct CalendarScreen: View {
+     @EnvironmentObject var store: NativeStore
+     @EnvironmentObject var router: NativeRouter
++    @State private var appleExport = false
+     @State private var selected = ""
+     @State private var brush = "consult"
+     @State private var lastShift: (String, String)?
+@@ -16,7 +17,9 @@
+                 brushPanel
+                 monthGrid
+                 dayCard
+-                ShiftCalendarPanel()
++                DisclosureGroup("Esporta turni su Apple (facoltativo)", isExpanded: $appleExport) {
++                    if appleExport { ShiftCalendarPanel() }
++                }.frame(minHeight: NativeDesign.Layout.touchTarget).accessibilityIdentifier("calendar-apple-export")
+             }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.top, NativeDesign.Space.xs).padding(.bottom, NativeDesign.Layout.scrollClearance)
+         }.background(NativeDesign.canvas).scrollBounceBehavior(.basedOnSize).accessibilityIdentifier("calendar-scroll")
+         .onAppear { rebuildMonth(); selected = preferredDay(in: store.calendarMonth); router.calendarDay = selected }
+@@ -37,7 +40,7 @@
          let today = CivilDate.day(), month = store.calendarMonth
          days = CivilDate.grid(month).map { day in
              let weekday = CivilDate.calendar.component(.weekday, from: CivilDate.date(day))
@@ -132,7 +151,7 @@
          }
      }
      private var monthHeader: some View {
-@@ -49,7 +49,7 @@
+@@ -49,7 +52,7 @@
              Spacer(minLength: NativeDesign.Space.small)
              NativeIconButton(symbol: "chevron.left", label: "Mese precedente") { Task { await store.changeMonth(-1, finance: false) } }
              NativeIconButton(symbol: "chevron.right", label: "Mese successivo") { Task { await store.changeMonth(1, finance: false) } }
@@ -141,7 +160,7 @@
      }
      private var monthName: some View {
          let formatter = DateFormatter()
-@@ -155,8 +155,45 @@
+@@ -155,8 +158,45 @@
                  Divider()
              }
              if store.shift(selected) == nil { Text("Nessun turno").foregroundStyle(NativeDesign.secondary) }
@@ -567,8 +586,25 @@
          let config = URLSessionConfiguration.ephemeral; config.timeoutIntervalForRequest = 40; config.timeoutIntervalForResource = 90
          persistsSession = injectedSession == nil
          session = injectedSession ?? URLSession(configuration: config)
-@@ -146,7 +151,7 @@
-         do { try save(next) } catch { self.error = error.localizedDescription }
+@@ -139,14 +144,21 @@
+         state = next
+     }
+     func rollover() {
+-        guard state.demo, state.routineDay != CivilDate.day() else { return }
++        let today = CivilDate.day()
++        let previousDay = state.demo ? state.routineDay : state.life.text("today", fallback: state.routineDay)
++        guard previousDay != today else { return }
+         var next = state
+-        next.routineDay = CivilDate.day(); next.life["today"] = .string(CivilDate.day())
++        next.routineDay = today; next.life["today"] = .string(today)
+         next.life["routines"] = .array(routines.map { var r = $0; r["checked"] = .int(0); return .object(r) })
+-        do { try save(next) } catch { self.error = error.localizedDescription }
++        do {
++            for write in next.pending where write.method == "setRoutineCheck" {
++                try LocalLifeMutation.apply(write.method, write.payload, to: &next.life)
++            }
++            try save(next)
++        } catch { self.error = error.localizedDescription }
      }
      func configure(_ raw: String) throws {
 -        guard !busy else { throw Message(text: "Attendi la fine dell’operazione.") }
@@ -576,7 +612,7 @@
          guard let u = URL(string: raw.trimmingCharacters(in: .whitespacesAndNewlines)), u.scheme == "https", let host = u.host,
                u.user == nil, u.password == nil, u.query == nil, u.fragment == nil, u.path.isEmpty || u.path == "/" else {
              throw Message(text: "Inserisci l’indirizzo HTTPS del server Life OS.")
-@@ -170,7 +175,7 @@
+@@ -170,7 +182,7 @@
      }
      func useDemo() throws {
          guard archiveWritable else { throw Message(text: "L’archivio precedente non è leggibile e non verrà sovrascritto.") }
@@ -585,7 +621,7 @@
          guard !state.demo else { notice = "La demo è già aperta. Le modifiche locali sono conservate."; return }
          if !state.demo {
              try JSONEncoder().encode(state).write(to: connectionFile, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
-@@ -184,7 +189,7 @@
+@@ -184,7 +196,7 @@
          notice = "Demo con dati simulati. Nessuna connessione al database."
      }
      func restoreConnection() throws {
@@ -594,7 +630,7 @@
          let previous = try JSONDecoder().decode(NativeArchive.self, from: Data(contentsOf: connectionFile))
          revision += 1
          try save(previous)
-@@ -194,7 +199,7 @@
+@@ -194,7 +206,7 @@
          session.configuration.httpCookieStorage?.removeCookies(since: .distantPast)
      }
      func importFinance(_ data: Data) throws {
@@ -603,7 +639,7 @@
          let snapshot = try NativeValidation.snapshot(data)
          var next = state; next.finance = snapshot; next.demo = false; next.imported = true
          let key = snapshot.text("key")
-@@ -224,7 +229,7 @@
+@@ -224,7 +236,7 @@
      }
      func signIn(password: String) async throws {
          guard let server else { throw Message(text: "Collega prima il tuo server Life OS.") }
@@ -612,7 +648,7 @@
          busy = true; defer { busy = false }
          var request = URLRequest(url: server.appendingPathComponent("auth/login"))
          request.httpMethod = "POST"; request.timeoutInterval = 40
-@@ -268,7 +273,7 @@
+@@ -268,7 +280,7 @@
              if [502, 503, 504].contains(http.statusCode) { throw NativeServerUnavailable(status: http.statusCode) }
              let text = String(data: data, encoding: .utf8) ?? ""
              if http.mimeType == "text/html" { throw Message(text: "Accedi a Life OS nelle Impostazioni.") }
@@ -621,7 +657,7 @@
          }
          guard http.mimeType == "application/json" else { throw Message(text: "Il server non ha restituito JSON. Verifica l’accesso a Life OS.") }
          let result = try JSONDecoder().decode(JSONValue.self, from: data)
-@@ -290,7 +295,9 @@
+@@ -290,7 +302,9 @@
              do {
                  let value = try l.get().object
                  guard case .array? = value["tasks"] else { throw Message(text: "Elenco attività non compatibile.") }
@@ -632,7 +668,7 @@
              } catch { failure = error }
          }
          if let f {
-@@ -316,7 +323,7 @@
+@@ -316,7 +330,7 @@
          guard analysisGeneration != financeGeneration, !Task.isCancelled else { return }
          analysisBusy = true; defer { analysisBusy = false }
          do {
@@ -641,7 +677,7 @@
              let version = revision, generation = financeGeneration, month = financeMonth
              let result = try await read("getFinanceData", args: [.int(Int(month.prefix(4)) ?? 2026), .int(Int(month.suffix(2)) ?? 1)])
              try Task.checkCancellation()
-@@ -330,30 +337,49 @@
+@@ -330,30 +344,49 @@
          }
      }
      var analysisIsCurrent: Bool { isDemo || analysisGeneration == financeGeneration }
@@ -667,6 +703,11 @@
 -                var next = state
 -                if let index = next.pending.firstIndex(where: { $0.id == write.id }) { next.pending[index].accepted = true }
 -                try save(next)
+-            }
+-            try await refresh(hadPending ? scope.union(.finance) : scope)
+-            if hadPending { var next = state; next.pending.removeAll { $0.accepted }; try save(next) }
+-            lastAutomaticSync = Date(); syncStatus = "Aggiornato"; notice = nil
+-        } catch is CancellationError { syncStatus = "Aggiornamento sospeso" }
 +            var attempted = Set<String>()
 +            var blockedKeys = Set<String>()
 +            var writeFailure: Error?
@@ -688,11 +729,7 @@
 +                    if NativeSyncPolicy.isTransient(error) || [401, 403].contains((error as? NativeRequestRejected)?.status ?? 0) { break }
 +                    // A rejected health/routine setter must not block financial writes.
 +                }
-             }
--            try await refresh(hadPending ? scope.union(.finance) : scope)
--            if hadPending { var next = state; next.pending.removeAll { $0.accepted }; try save(next) }
--            lastAutomaticSync = Date(); syncStatus = "Aggiornato"; notice = nil
--        } catch is CancellationError { syncStatus = "Aggiornamento sospeso" }
++            }
 +            try await refresh(pendingScope)
 +            var next = state; next.pending.removeAll { $0.accepted }; try save(next)
 +            lastAutomaticSync = Date()
@@ -708,7 +745,7 @@
                  notice = syncStatus
              } else {
                  syncStatus = "Accesso o verifica richiesta"
-@@ -362,13 +388,23 @@
+@@ -362,13 +395,23 @@
          }
      }
      func perform(_ method: String, _ payload: Record = [:], args: [JSONValue]? = nil) async throws {
@@ -733,7 +770,7 @@
          if method == "saveTransaction" || method == "saveExtra" {
              guard server != nil else { throw Message(text: "Per nuovi movimenti collega Life OS oppure apri la demo.") }
              var p = payload
-@@ -377,9 +413,11 @@
+@@ -377,9 +420,11 @@
              if !next.pending.contains(where: { $0.id == id }) { next.pending.append(PendingWrite(id: id, method: method, payload: p)) }
              try save(next)
              notice = "Salvato sul dispositivo."
@@ -746,7 +783,7 @@
          busy = true; defer { busy = false }
          // No automatic retry: these API methods do not all support request IDs.
          let result = try await read(method, args: args ?? [.object(payload)])
-@@ -387,10 +425,42 @@
+@@ -387,12 +432,53 @@
          do { try await refresh(NativeSyncPolicy.scope(for: method)) }
          catch { notice = "Operazione inviata. Aggiornamento non riuscito: sincronizza prima di ripetere l’azione." }
      }
@@ -786,11 +823,23 @@
          guard ["getShiftCalendar", "publishShiftCalendar", "rotateShiftCalendarLink"].contains(method),
                !isDemo, server != nil else { throw Message(text: "Collega prima il server Life OS.") }
 -        guard !busy else { throw Message(text: "Attendi la fine del salvataggio e riprova.") }
-+        guard !busy, !syncing else { throw Message(text: "Attendi la fine del salvataggio e riprova.") }
-         busy = true; defer { busy = false }
+-        busy = true; defer { busy = false }
++        let mutates = method != "getShiftCalendar"
++        if mutates {
++            guard !busy, !syncing else { throw Message(text: "Attendi la fine del salvataggio e riprova.") }
++            if method == "publishShiftCalendar", state.pending.contains(where: { $0.method == "paintShift" }) {
++                throw Message(text: "Sincronizza prima i turni salvati sul dispositivo, poi pubblica il mese.")
++            }
++            busy = true
++        }
++        defer { if mutates { busy = false } }
++        let version = revision
          let result = try await read(method, args: [.object(["month": .string(month)])])
++        guard version == revision else { throw CancellationError() }
          guard case .object(let record) = result, record["path"] != nil, record["publishedAt"] != nil else {
-@@ -403,7 +473,7 @@
+             throw Message(text: "Il server non ha confermato il collegamento del calendario.")
+         }
+@@ -403,7 +489,7 @@
      }
      func shift(_ day: String) -> ShiftKind? { life.records("shifts").first { $0.text("day") == day }.flatMap { ShiftKind(rawValue: $0.text("kind")) } }
      func changeMonth(_ delta: Int, finance: Bool) async {
@@ -893,6 +942,17 @@
 +        return Array(result.sorted { $0.date == $1.date ? $0.id < $1.id : $0.date < $1.date }.filter { unique.insert($0.id).inserted }.prefix(48))
 +    }
 +}
+--- a/Sources/ShiftCalendarPanel.swift
++++ b/Sources/ShiftCalendarPanel.swift
+@@ -16,7 +16,7 @@
+     var body: some View {
+         VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
+             Text("Turni in Calendario Apple").font(NativeDesign.heading)
+-            Text("Prepara qui i turni. Eventi in Calendario Apple, attività in Promemoria.")
++            Text("Opzionale: invia una copia dei turni a Calendario Apple. Attività, eventi e abitudini restano in Life OS.")
+                 .font(.subheadline).foregroundStyle(NativeDesign.secondary)
+             Text("Pubblica il mese visualizzato, anche dopo una correzione o una cancellazione. Gli altri mesi pubblicati restano disponibili.")
+                 .font(.caption).foregroundStyle(NativeDesign.secondary)
 --- a/Tests/LocalLifeMutationTests.swift
 +++ b/Tests/LocalLifeMutationTests.swift
 @@ -0,0 +1,50 @@
@@ -996,10 +1056,43 @@
          try store.configure("https://lifeos-test.invalid")
          let result = try await store.updateShiftCalendar("publishShiftCalendar", month: "2026-10")
          XCTAssertFalse(result.text("path").isEmpty)
-@@ -58,14 +76,107 @@
+@@ -58,14 +76,140 @@
          _ = try await store.updateShiftCalendar("publishShiftCalendar", month: "2026-10")
          XCTAssertEqual(MockAPI.calls.count, 3)
      }
++    func testCalendarStatusReadDoesNotBlockLocalPaintingAndUnsentShiftsCannotPublish() async throws {
++        let (directory, session) = try setup(); defer { MockAPI.resume(); try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
++        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
++        try store.configure("https://lifeos-test.invalid")
++        MockAPI.pauseMethod = "getShiftCalendar"
++        let status = Task { try await store.updateShiftCalendar("getShiftCalendar", month: CivilDate.month()) }
++        for _ in 0..<100 { if MockAPI.paused != nil { break }; try await Task.sleep(nanoseconds: 10_000_000) }
++        XCTAssertNotNil(MockAPI.paused)
++        XCTAssertFalse(store.busy)
++        try await store.perform("paintShift", ["day": .string(CivilDate.day()), "kind": .string("night")])
++        XCTAssertEqual(store.shift(CivilDate.day()), .night)
++        MockAPI.resume()
++        _ = try await status.value
++        do { _ = try await store.updateShiftCalendar("publishShiftCalendar", month: CivilDate.month()); XCTFail("Non pubblicare una bozza remota obsoleta") } catch {}
++        XCTAssertFalse(MockAPI.calls.contains("publishShiftCalendar"))
++    }
++    func testConnectedArchiveRollsHabitsToTodayOfflineWithoutMovingYesterdayCheck() async throws {
++        let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
++        let yesterday = CivilDate.adding(-1, to: CivilDate.day())
++        var archive = NativeArchive()
++        archive.demo = false; archive.endpoint = "https://lifeos-test.invalid"
++        archive.life = ["today": .string(yesterday), "routines": .array([.object(["id": .int(1), "checked": .bool(true)])])]
++        archive.pending = [PendingWrite(id: "old-check", method: "setRoutineCheck", payload: ["id": .int(1), "day": .string(yesterday), "checked": .bool(true)])]
++        try JSONEncoder().encode(archive).write(to: directory.appendingPathComponent("lifeos-native-v2.json"))
++        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
++        XCTAssertFalse(store.routines[0].flag("checked"))
++        XCTAssertEqual(store.life.text("today"), CivilDate.day())
++        XCTAssertEqual(store.state.pending[0].payload.text("day"), yesterday)
++        try await store.perform("setRoutineCheck", ["id": .int(1), "day": .string(CivilDate.day()), "checked": .bool(true)])
++        let restored = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
++        XCTAssertTrue(restored.routines[0].flag("checked"))
++        XCTAssertTrue(MockAPI.calls.isEmpty)
++    }
 +    func testRejectedSetterPreservesOrderForSameKeyButDoesNotBlockFinance() async throws {
 +        let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
 +        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
@@ -1106,7 +1199,7 @@
          let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
          try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
          let config = URLSessionConfiguration.ephemeral; config.protocolClasses = [MockAPI.self]
-@@ -73,7 +184,7 @@
+@@ -73,7 +217,7 @@
      }
      func testDashboardCapsHighlightsAtThreeAndPrioritizesSevenDayEvents() async throws {
          let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
@@ -1115,7 +1208,7 @@
          store.seedVisualTasks()
          XCTAssertLessThanOrEqual(store.highlights.count, 3)
          XCTAssertEqual(store.highlights.first?.text("highlightKind"), "event")
-@@ -82,7 +193,7 @@
+@@ -82,7 +226,7 @@
      private var payload: Record { ["requestId": .string("regression-12345678"), "type": .string("Spesa"), "name": .string("Spesa da conservare"), "amount": .number(2), "account": .string("Trade Republic"), "category": .string("Altro"), "date": .string(CivilDate.day())] }
      func testNativeSignInReceivesSecureCookieWithoutLoadingWebPage() async throws {
          let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
@@ -1124,7 +1217,7 @@
          try store.configure("https://lifeos-test.invalid")
          try await store.signIn(password: "not-a-real-password-for-unit-tests")
          XCTAssertEqual(MockAPI.calls, ["login"])
-@@ -93,7 +204,7 @@
+@@ -93,7 +237,7 @@
      }
      func testRefreshUsesOneLightFinanceReadAndEmbeddedPlan() async throws {
          let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
@@ -1133,7 +1226,7 @@
          try store.configure("https://lifeos-test.invalid")
          await store.sync()
          XCTAssertNil(store.error)
-@@ -104,18 +215,19 @@
+@@ -104,18 +248,19 @@
      }
      func testLifeMutationDoesNotFetchFinanceOrAnalytics() async throws {
          let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
@@ -1155,7 +1248,7 @@
          try store.configure("https://lifeos-test.invalid")
          MockAPI.timeoutOnce = "getLifeData"
          _ = try await store.read("getLifeData")
-@@ -127,10 +239,11 @@
+@@ -127,10 +272,11 @@
      }
      func testAutomaticAuthenticationFailureKeepsCacheAndQueueWithoutModalError() async throws {
          let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
@@ -1168,7 +1261,7 @@
          XCTAssertNil(store.error)
          XCTAssertNotNil(store.notice)
          XCTAssertEqual(store.state.pending.first?.payload, payload)
-@@ -140,11 +253,11 @@
+@@ -140,11 +286,11 @@
          let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
          let initial = NativeArchive(pending: [PendingWrite(id: "regression-12345678", method: "saveTransaction", payload: payload)], demo: false)
          try JSONEncoder().encode(initial).write(to: directory.appendingPathComponent("lifeos-native-v2.json"))
@@ -1182,7 +1275,7 @@
          XCTAssertEqual(relaunched.state.endpoint, "https://lifeos-test.invalid")
          XCTAssertEqual(relaunched.state.pending.first?.id, "regression-12345678")
          XCTAssertEqual(relaunched.state.pending.first?.payload.amount("amount"), 2)
-@@ -160,13 +273,13 @@
+@@ -160,13 +306,13 @@
          let file = directory.appendingPathComponent("lifeos-native-v2.json")
          try JSONEncoder().encode(initial).write(to: file)
          let original = try Data(contentsOf: file)
@@ -1198,7 +1291,7 @@
          await store.changeMonth(-1, finance: true)
          await store.changeMonth(1, finance: false)
          try store.configure("https://lifeos-test.invalid")
-@@ -176,14 +289,15 @@
+@@ -176,14 +322,15 @@
      }
      func testConfirmedWriteSurvivesFailedRefreshAndRelaunchWithoutResending() async throws {
          let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
@@ -1216,7 +1309,7 @@
          await relaunched.sync()
          XCTAssertTrue(relaunched.state.pending.isEmpty)
          XCTAssertNil(relaunched.error)
-@@ -191,10 +305,11 @@
+@@ -191,10 +338,11 @@
      }
      func testDemoSwitchAndRestoreKeepUnsentWriteAndEndpoint() async throws {
          let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
@@ -1229,7 +1322,7 @@
          XCTAssertEqual(store.state.pending.count, 1)
          XCTAssertThrowsError(try store.configure("https://different-test.invalid"))
          try store.configure("https://lifeos-test.invalid/")
-@@ -212,7 +327,7 @@
+@@ -212,7 +360,7 @@
          let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
          let initial = NativeArchive(pending: [PendingWrite(id: "regression-12345678", method: "saveTransaction", payload: payload)], demo: false)
          try JSONEncoder().encode(initial).write(to: directory.appendingPathComponent("lifeos-native-v2.json"))
@@ -1238,7 +1331,7 @@
          let data = Data(#"{"summary":{"budget":1000,"committedCurrent":200,"remainingFree":800},"transactions":[]}"#.utf8)
          try store.importFinance(data)
          XCTAssertEqual(store.state.pending.first?.id, "regression-12345678")
-@@ -233,7 +348,7 @@
+@@ -233,7 +381,7 @@
          let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
          let file = directory.appendingPathComponent("lifeos-native-v2.json"), original = Data("JSON incompleto".utf8)
          try original.write(to: file)
@@ -1341,8 +1434,14 @@
              for _ in 0..<4 { scroll.swipeUp(velocity: .fast) }
              for _ in 0..<4 { scroll.swipeDown(velocity: .fast) }
              XCTAssertTrue(app.tabBars.buttons["Dashboard"].isHittable)
-@@ -233,7 +238,7 @@
+@@ -230,10 +235,13 @@
+         let scroll = app.scrollViews["calendar-scroll"]
+         XCTAssertTrue(scroll.waitForExistence(timeout: 10))
+         for _ in 0..<4 { scroll.swipeUp(velocity: .fast) }
++        let export = app.buttons["calendar-apple-export"]
++        XCTAssertTrue(export.isHittable); export.tap()
          let publish = app.buttons["publish-shift-calendar"]
++        for _ in 0..<6 { if publish.isHittable { break }; scroll.swipeUp() }
          XCTAssertTrue(publish.isHittable)
          XCTAssertFalse(publish.isEnabled, "La demo non deve pubblicare dati reali")
 -        XCTAssertFalse(app.buttons["calendar-add-event"].exists)
