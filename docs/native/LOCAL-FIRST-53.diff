@@ -746,7 +746,7 @@
          busy = true; defer { busy = false }
          // No automatic retry: these API methods do not all support request IDs.
          let result = try await read(method, args: args ?? [.object(payload)])
-@@ -387,10 +425,40 @@
+@@ -387,10 +425,42 @@
          do { try await refresh(NativeSyncPolicy.scope(for: method)) }
          catch { notice = "Operazione inviata. Aggiornamento non riuscito: sincronizza prima di ripetere l’azione." }
      }
@@ -757,7 +757,9 @@
 +            while self.syncing || self.busy {
 +                do { try await Task.sleep(nanoseconds: 50_000_000) } catch { self.syncTask = nil; return }
 +            }
-+            await self.sync(automatic: true, writeTriggered: true)
++            var scope: NativeRefreshScope = []
++            for write in self.state.pending { scope.formUnion(NativeSyncPolicy.scope(for: write.method)) }
++            await self.sync(automatic: true, writeTriggered: true, scope: scope.isEmpty ? .all : scope)
 +            self.syncTask = nil
 +            // Writes may arrive during the final read. Drain only after a successful sync;
 +            // failures wait for foreground/reachability/manual retry instead of spinning.
@@ -788,7 +790,7 @@
          busy = true; defer { busy = false }
          let result = try await read(method, args: [.object(["month": .string(month)])])
          guard case .object(let record) = result, record["path"] != nil, record["publishedAt"] != nil else {
-@@ -403,7 +471,7 @@
+@@ -403,7 +473,7 @@
      }
      func shift(_ day: String) -> ShiftKind? { life.records("shifts").first { $0.text("day") == day }.flatMap { ShiftKind(rawValue: $0.text("kind")) } }
      func changeMonth(_ delta: Int, finance: Bool) async {
@@ -1142,7 +1144,7 @@
          let financeDate = store.state.financeRefreshedAt
          MockAPI.calls = []
          try await store.perform("setTaskStatus", ["id": .int(1), "status": .string("done")])
-+        await store.sync()
++        await store.sync(scope: .life)
          XCTAssertEqual(MockAPI.calls, ["setTaskStatus", "getLifeData"])
          XCTAssertEqual(store.state.financeRefreshedAt, financeDate)
      }
