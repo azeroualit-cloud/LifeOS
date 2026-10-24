@@ -29,6 +29,10 @@ with zipfile.ZipFile(root / 'lifeos-native.zip', 'w', compression=zipfile.ZIP_DE
             after = path.read_text()
             if before != after:
                 parts.extend(difflib.unified_diff(before.splitlines(True), after.splitlines(True), fromfile='a/' + name, tofile='b/' + name))
+current_names = {path.relative_to(source).as_posix() for path in files}
+for name in sorted(set(old.namelist()) - current_names):
+    if Path(name).suffix in {'.swift', '.yml', '.py', '.md', '.entitlements'}:
+        parts.extend(difflib.unified_diff(old.read(name).decode().splitlines(True), [], fromfile='a/' + name, tofile='b/' + name))
 (root / 'docs/native/RESTORE-60.diff').write_text(''.join(parts))
 sha = hashlib.sha256((root / 'lifeos-native.zip').read_bytes()).hexdigest()
 workflow = root / '.github/workflows/lifeos-build.yml'

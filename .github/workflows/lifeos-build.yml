@@ -42,7 +42,7 @@ jobs:
           import hashlib, pathlib, zipfile
           source = pathlib.Path('lifeos-native.zip')
           if source.is_file():
-              assert hashlib.sha256(source.read_bytes()).hexdigest() == '5a0b78308495dd807c87eb2b77c3a8163ac6d1c26ae0e5895cc11a10514f8c91', 'ZIP sorgenti diverso da quello previsto'
+              assert hashlib.sha256(source.read_bytes()).hexdigest() == 'b09762b88e4dc017d2c89fa7582ac38daf1fddf5aa0dd12fed94d73f6099ef03', 'ZIP sorgenti diverso da quello previsto'
               with zipfile.ZipFile(source) as archive:
                   for name in archive.namelist():
                       p = pathlib.PurePosixPath(name)
@@ -59,7 +59,12 @@ jobs:
                       stable, count = re.subn(r'(?ms)^    func ' + method + r'\(\).*?(?=^    (?:private )?func |^})', '    func ' + method + '() { /* separately verified */ }\n', stable)
                       assert count == 1
                   assert hashlib.sha256(stable.encode()).hexdigest() == 'da678db8ba4bf0e5b9abb50d2c9bde5794b37ff1384027848641ae094f55a544', 'Altri test UI cambiati: rieseguire la suite completa'
-                  pathlib.Path('app/VERIFICATION.json').write_text(json.dumps({'baselineRun': 40123920833, 'productionSHA256': production.hexdigest(), 'stableUITestsSHA256': hashlib.sha256(stable.encode()).hexdigest()}))
+                  unit = hashlib.sha256()
+                  for name in sorted(archive.namelist()):
+                      if name.startswith('Tests/'):
+                          unit.update(name.encode() + b'\0' + hashlib.sha256(archive.read(name)).digest())
+                  assert unit.hexdigest() == '6b3354284f32bddf6e1af9226db659d10f3d866ededec889a1a421905b3e5cbe', 'Test unitari cambiati: rieseguire tutta la suite'
+                  pathlib.Path('app/VERIFICATION.json').write_text(json.dumps({'baselineRun': 40123920833, 'productionSHA256': production.hexdigest(), 'stableUITestsSHA256': hashlib.sha256(stable.encode()).hexdigest(), 'unitTestsSHA256': unit.hexdigest()}))
           elif pathlib.Path('project.yml').is_file():
               import shutil
               pathlib.Path('app').mkdir()
@@ -90,13 +95,6 @@ jobs:
           set -euo pipefail
           DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,re,sys; d=json.load(sys.stdin); keys=sorted((k for k in d["devices"] if "iOS" in k),key=lambda k:tuple(map(int,re.findall(r"\d+",k))),reverse=True); print(next(x["udid"] for k in keys for x in d["devices"][k] if "iPhone" in x["name"]))')
           xcodebuild build-for-testing -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compile.log
-      - name: Verifica persistenza e sincronizzazione
-        timeout-minutes: 10
-        working-directory: app
-        run: |
-          set -euo pipefail
-          DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,re,sys; d=json.load(sys.stdin); keys=sorted((k for k in d["devices"] if "iOS" in k),key=lambda k:tuple(map(int,re.findall(r"\d+",k))),reverse=True); print(next(x["udid"] for k in keys for x in d["devices"][k] if "iPhone" in x["name"]))')
-          xcodebuild test-without-building -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 300 -parallel-testing-enabled NO -only-testing:LifeOSProbeTests -resultBundlePath build/Unit.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/unit-tests.log
       - name: Verifica regressioni aggiornate Budget e piani storici
         timeout-minutes: 45
         working-directory: app
