@@ -141,7 +141,7 @@
      }
      private var monthName: some View {
          let formatter = DateFormatter()
-@@ -155,6 +155,25 @@
+@@ -155,8 +155,45 @@
                  Divider()
              }
              if store.shift(selected) == nil { Text("Nessun turno").foregroundStyle(NativeDesign.secondary) }
@@ -152,12 +152,7 @@
 +                    .frame(minHeight: NativeDesign.Layout.touchTarget).accessibilityIdentifier("calendar-add-event")
 +            }
 +            ForEach(store.events.filter { $0.text("day") == selected }.map { DisplayRecord($0) }) { item in
-+                Button { router.sheet = .event(item.value) } label: {
-+                    VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-+                        Text(item.value.text("title"))
-+                        Text(item.value.text("start_time")).font(.caption).foregroundStyle(NativeDesign.secondary)
-+                    }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
-+                }.buttonStyle(.plain)
++                eventRow(item.value)
 +            }
 +            ForEach(store.tasks.filter { $0.text("scheduled_date") == selected && $0.text("status") != "done" }.map { DisplayRecord($0) }) { item in
 +                Button(item.value.text("title")) { router.tab = .tasks; router.sheet = .task(item.value) }
@@ -166,7 +161,32 @@
 +
  
          }.padding(.top, NativeDesign.Space.small)
++    }
++    private func eventRow(_ r: Record) -> some View {
++        let time = r.text("start_time"), location = r.text("location")
++        return HStack(spacing: NativeDesign.Space.small) {
++            RoundedRectangle(cornerRadius: NativeDesign.progressRadius).fill(NativeDesign.accent.opacity(0.65))
++                .frame(width: NativeDesign.Layout.calendarMarker, height: NativeDesign.Layout.touchTarget).accessibilityHidden(true)
++            NativeCompletionButton(checked: r.text("occurrence_status") == "done", label: "Cambia completamento evento " + r.text("title")) {
++                Task { await store.run("setEventOccurrence", ["id": .int(r.integer("id")), "day": .string(r.text("day")), "status": .string(r.text("occurrence_status") == "done" ? "open" : "done")]) }
++            }.accessibilityIdentifier("event-check-" + String(r.integer("id")))
++            Button { router.sheet = .event(r) } label: {
++                ViewThatFits(in: .horizontal) {
++                    HStack(alignment: .center, spacing: NativeDesign.Space.small) {
++                        NativeRowText(title: r.text("title"), subtitle: location, completed: r.text("occurrence_status") == "done", titleIdentifier: "event-title-" + String(r.integer("id")))
++                        Text(time.isEmpty ? "Tutto il giorno" : time).font(.subheadline).monospacedDigit().foregroundStyle(NativeDesign.secondary).fixedSize()
++                    }
++                    VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
++                        NativeRowText(title: r.text("title"), subtitle: location, completed: r.text("occurrence_status") == "done", titleIdentifier: "event-title-" + String(r.integer("id")))
++                        Text(time.isEmpty ? "Tutto il giorno" : time).font(.subheadline).monospacedDigit().foregroundStyle(NativeDesign.secondary)
++                    }
++                }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading).contentShape(Rectangle())
++            }.buttonStyle(.borderless).accessibilityLabel(r.text("title"))
++                .accessibilityValue([time.isEmpty ? "Tutto il giorno" : time, location].filter { !$0.isEmpty }.joined(separator: ", "))
++        }.disabled(store.busy)
      }
+ 
+ }
 --- a/Sources/DailyLifePanel.swift
 +++ b/Sources/DailyLifePanel.swift
 @@ -0,0 +1,31 @@
@@ -272,7 +292,7 @@
 +extension Notification.Name { static let lifeOSRoute = Notification.Name("LifeOSRoute") }
 --- a/Sources/LocalLifeMutation.swift
 +++ b/Sources/LocalLifeMutation.swift
-@@ -0,0 +1,49 @@
+@@ -0,0 +1,62 @@
 +import Foundation
 +
 +/// Only absolute setters with stable server keys may be replayed. Creation/deletion
@@ -280,12 +300,12 @@
 +enum LocalLifeMutation {
 +    private static func validDay(_ day: String) -> Bool { day.count == 10 && CivilDate.day(CivilDate.date(day)) == day }
 +    static func supports(_ method: String) -> Bool {
-+        ["setTaskStatus", "setRoutineCheck", "paintShift", "saveHealthEntry"].contains(method)
++        ["setTaskStatus", "setRoutineCheck", "paintShift", "saveHealthEntry", "setEventOccurrence"].contains(method)
 +    }
 +    static func key(_ write: PendingWrite) -> String {
 +        switch write.method {
 +        case "paintShift", "saveHealthEntry": return write.method + ":" + write.payload.text("day")
-+        case "setRoutineCheck": return write.method + ":" + String(write.payload.integer("id")) + ":" + write.payload.text("day")
++        case "setRoutineCheck", "setEventOccurrence": return write.method + ":" + String(write.payload.integer("id")) + ":" + write.payload.text("day")
 +        case "setTaskStatus": return write.method + ":" + String(write.payload.integer("id"))
 +        default: return write.id
 +        }
@@ -310,6 +330,19 @@
 +            var rows = life.records("shifts").filter { $0.text("day") != p.text("day") }
 +            if p.text("kind") != "erase" { rows.append(p) }
 +            life["shifts"] = .array(rows.map(JSONValue.object))
++        case "setEventOccurrence":
++            guard p.integer("id") > 0, validDay(p.text("day")), ["open", "done"].contains(p.text("status")) else { throw Message(text: "Occorrenza non valida.") }
++            for key in ["events", "upcomingEvents"] {
++                life[key] = .array(life.records(key).map { event in
++                    var row = event
++                    if row.integer("id") == p.integer("id") && row.text("day") == p.text("day") { row["occurrence_status"] = p["status"] }
++                    return .object(row)
++                })
++            }
++            var occurrences = life.record("occurrences")
++            let key = "\(p.integer("id")):\(p.text("day"))"
++            if p.text("status") == "open" { occurrences.removeValue(forKey: key) } else { occurrences[key] = p["status"] }
++            life["occurrences"] = .object(occurrences)
 +        case "saveHealthEntry":
 +            let valid = try HealthMeasurement.payload(day: p.text("day"), weight: p["weightKg"] == nil ? "" : String(p.amount("weightKg")), calories: p["calories"] == nil ? "" : String(p.amount("calories")))
 +            var rows = life.records("health")
@@ -778,7 +811,7 @@
 +}
 --- a/Sources/PendingWritesSection.swift
 +++ b/Sources/PendingWritesSection.swift
-@@ -0,0 +1,34 @@
+@@ -0,0 +1,35 @@
 +import SwiftUI
 +
 +struct PendingWritesSection: View {
@@ -787,6 +820,7 @@
 +    private func title(_ write: PendingWrite) -> String {
 +        switch write.method {
 +        case "setTaskStatus": return "Stato attività"
++        case "setEventOccurrence": return "Evento del " + write.payload.text("day")
 +        case "setRoutineCheck": return "Abitudine del " + write.payload.text("day")
 +        case "paintShift": return "Turno del " + write.payload.text("day")
 +        case "saveHealthEntry": return "Misurazione del " + write.payload.text("day")
@@ -859,7 +893,7 @@
 +}
 --- a/Tests/LocalLifeMutationTests.swift
 +++ b/Tests/LocalLifeMutationTests.swift
-@@ -0,0 +1,40 @@
+@@ -0,0 +1,50 @@
 +import XCTest
 +@testable import LifeOSProbe
 +
@@ -895,6 +929,16 @@
 +        try LocalLifeMutation.apply("setRoutineCheck", ["id": .int(1), "day": .string(CivilDate.day()), "checked": .bool(true)], to: &life)
 +        XCTAssertTrue(life.records("routines")[0].flag("checked"))
 +    }
++    func testCompletedEventUpdatesOnlyItsOccurrenceAndStopsReminder() throws {
++        let day = CivilDate.adding(1, to: CivilDate.day())
++        var life: Record = ["upcomingEvents": .array([.object(["id": .int(1), "title": .string("Evento demo"), "day": .string(day), "start_time": .string("14:00")])])]
++        XCTAssertEqual(ReminderPlan.make(life: life).count, 1)
++        try LocalLifeMutation.apply("setEventOccurrence", ["id": .int(1), "day": .string(day), "status": .string("done")], to: &life)
++        XCTAssertTrue(ReminderPlan.make(life: life).isEmpty)
++        XCTAssertEqual(life.record("occurrences").text("1:" + day), "done")
++        try LocalLifeMutation.apply("setEventOccurrence", ["id": .int(1), "day": .string(day), "status": .string("open")], to: &life)
++        XCTAssertEqual(ReminderPlan.make(life: life).count, 1)
++    }
 +    func testRoutesCannotInjectDataOrExternalDestinations() {
 +        for route in ["task", "activities", "weight", "calendar", "dashboard"] { XCTAssertNotNil(LifeOSRoute(URL(string: "lifeos://" + route)!)) }
 +        for url in ["https://calendar", "lifeos://weight?weight=10", "lifeos://task/extra", "lifeos://user@calendar", "lifeos://delete"] { XCTAssertNil(LifeOSRoute(URL(string: url)!)) }
@@ -918,7 +962,7 @@
          var text = "{}"
          if Self.failAll { status = 401; text = "Sessione scaduta" }
 +        else if Self.rejectMethod == method { status = 400; text = "Modifica rifiutata" }
-+        else if ["setTaskStatus", "setRoutineCheck", "paintShift", "saveHealthEntry"].contains(method) { text = "true" }
++        else if ["setTaskStatus", "setRoutineCheck", "paintShift", "saveHealthEntry", "setEventOccurrence"].contains(method) { text = "true" }
          else if method == "saveTransaction" { Self.writes += 1; text = "true" }
          else if ["getShiftCalendar", "publishShiftCalendar", "rotateShiftCalendarLink"].contains(method) { text = #"{"path":"/calendar/turni/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.ics","publishedAt":"2026-10-23T12:00:00Z"}"# }
          else if method == "getLifeData" { text = #"{"tasks":[],"categories":[],"routines":[],"events":[],"shifts":[],"upcomingEvents":[]}"# }
