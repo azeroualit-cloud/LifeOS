@@ -13,11 +13,19 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           name: LifeOS-IPA-per-Signulous
-          run-id: 39991175624
+          run-id: 40115963503
           repository: ${{ github.repository }}
           github-token: ${{ github.token }}
           path: ipa
-      - name: Verifica checksum, ZIP, versione e architettura
+      - name: Scarica i risultati dei test della stessa build
+        uses: actions/download-artifact@v5
+        with:
+          name: LifeOS-diagnostica
+          run-id: 40115963503
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: diagnostics
+      - name: Verifica test, checksum, widget e architetture
         run: |
           python3 - <<'PY'
           import hashlib, pathlib, plistlib, re, zipfile
@@ -31,16 +39,33 @@ jobs:
           assert digest == expected, 'Checksum IPA non corrispondente'
           with zipfile.ZipFile(files[0]) as archive:
               assert archive.testzip() is None, 'Archivio IPA danneggiato'
-              plists = [name for name in archive.namelist() if re.fullmatch(r'Payload/[^/]+\.app/Info.plist', name)]
-              assert len(plists) == 1
-              info = plistlib.loads(archive.read(plists[0]))
+              app = 'Payload/LifeOSProbe.app/'
+              info = plistlib.loads(archive.read(app + 'Info.plist'))
               assert info['CFBundleIdentifier'] == 'com.nas.lifeos.probe'
-              assert str(info['CFBundleVersion']) == '52'
+              assert str(info['CFBundleVersion']) == '53'
               assert info['CFBundleShortVersionString'] == '0.9.0'
-              executable = plists[0].removesuffix('Info.plist') + info['CFBundleExecutable']
-              binary = archive.read(executable)
-              assert binary[:4] == bytes.fromhex('cffaedfe'), 'Eseguibile Mach-O 64 bit atteso'
-              assert int.from_bytes(binary[4:8], 'little') == 0x0100000c, 'Architettura arm64 attesa'
-          print('IPA_VERIFIED: version=0.9.0 build=52 bundle=com.nas.lifeos.probe architecture=arm64')
+              assert info['CFBundleDevelopmentRegion'] == 'it'
+              assert any('lifeos' in row.get('CFBundleURLSchemes', []) for row in info['CFBundleURLTypes'])
+              assert any(name.startswith(app + 'Metadata.appintents/') for name in archive.namelist())
+              widget = app + 'PlugIns/LifeOSWidget.appex/'
+              extension = plistlib.loads(archive.read(widget + 'Info.plist'))
+              assert str(extension['CFBundleVersion']) == '53'
+              assert extension['NSExtension']['NSExtensionPointIdentifier'] == 'com.apple.widgetkit-extension'
+              for folder, metadata in [(app, info), (widget, extension)]:
+                  binary = archive.read(folder + metadata['CFBundleExecutable'])
+                  assert binary[:4] == bytes.fromhex('cffaedfe'), 'Eseguibile Mach-O 64 bit atteso'
+                  assert int.from_bytes(binary[4:8], 'little') == 0x0100000c, 'Architettura arm64 attesa'
+          required = {'unit-tests.log': 98, 'tests.log': 26, 'compact.log': 12, 'health-tests.log': 2, 'focused-tests.log': 1}
+          for name, count in required.items():
+              logs = list(pathlib.Path('diagnostics').rglob(name))
+              assert len(logs) == 1, 'Manca un solo log: ' + name
+              outcomes = re.findall(r'Executed (\d+) tests?, with (\d+) failures?', logs[0].read_text(errors='replace'))
+              assert outcomes and tuple(map(int, outcomes[-1])) == (count, 0), 'Risultato test non valido: ' + name
+          archives = list(pathlib.Path('diagnostics').rglob('archive.log'))
+          assert len(archives) == 1 and '** ARCHIVE SUCCEEDED **' in archives[0].read_text(errors='replace')
+          print('IPA_VERIFIED: version=0.9.0 build=53 app=arm64 widget=arm64 locale=it')
+          print('TESTS_VERIFIED: unit=98 UI=26 compact=12 health=2 finance=1 failures=0')
           print('SHA256=' + digest)
+          print('::notice title=Life OS build 53::IPA e test verificati; SHA256=' + digest)
           PY
+
