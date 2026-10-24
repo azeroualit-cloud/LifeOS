@@ -131,18 +131,24 @@
      @State private var selected = ""
      @State private var brush = "consult"
      @State private var lastShift: (String, String)?
-@@ -16,7 +17,9 @@
+@@ -16,7 +17,15 @@
                  brushPanel
                  monthGrid
                  dayCard
 -                ShiftCalendarPanel()
-+                DisclosureGroup("Esporta turni su Apple (facoltativo)", isExpanded: $appleExport) {
-+                    if appleExport { ShiftCalendarPanel() }
-+                }.frame(minHeight: NativeDesign.Layout.touchTarget).accessibilityIdentifier("calendar-apple-export")
++                Button { appleExport.toggle() } label: {
++                    HStack {
++                        Text("Esporta turni su Apple (facoltativo)")
++                        Spacer()
++                        Image(systemName: appleExport ? "chevron.up" : "chevron.down").accessibilityHidden(true)
++                    }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle())
++                }.buttonStyle(.plain).accessibilityIdentifier("calendar-apple-export")
++                    .accessibilityValue(appleExport ? "Espanso" : "Compresso")
++                if appleExport { ShiftCalendarPanel() }
              }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.top, NativeDesign.Space.xs).padding(.bottom, NativeDesign.Layout.scrollClearance)
          }.background(NativeDesign.canvas).scrollBounceBehavior(.basedOnSize).accessibilityIdentifier("calendar-scroll")
          .onAppear { rebuildMonth(); selected = preferredDay(in: store.calendarMonth); router.calendarDay = selected }
-@@ -37,7 +40,7 @@
+@@ -37,7 +46,7 @@
          let today = CivilDate.day(), month = store.calendarMonth
          days = CivilDate.grid(month).map { day in
              let weekday = CivilDate.calendar.component(.weekday, from: CivilDate.date(day))
@@ -151,7 +157,7 @@
          }
      }
      private var monthHeader: some View {
-@@ -49,7 +52,7 @@
+@@ -49,7 +58,7 @@
              Spacer(minLength: NativeDesign.Space.small)
              NativeIconButton(symbol: "chevron.left", label: "Mese precedente") { Task { await store.changeMonth(-1, finance: false) } }
              NativeIconButton(symbol: "chevron.right", label: "Mese successivo") { Task { await store.changeMonth(1, finance: false) } }
@@ -160,7 +166,7 @@
      }
      private var monthName: some View {
          let formatter = DateFormatter()
-@@ -155,8 +158,45 @@
+@@ -155,8 +164,45 @@
                  Divider()
              }
              if store.shift(selected) == nil { Text("Nessun turno").foregroundStyle(NativeDesign.secondary) }
@@ -586,11 +592,13 @@
          let config = URLSessionConfiguration.ephemeral; config.timeoutIntervalForRequest = 40; config.timeoutIntervalForResource = 90
          persistsSession = injectedSession == nil
          session = injectedSession ?? URLSession(configuration: config)
-@@ -139,14 +144,21 @@
+@@ -139,14 +144,23 @@
          state = next
      }
      func rollover() {
 -        guard state.demo, state.routineDay != CivilDate.day() else { return }
++        // A finance-only archive has no daily habit state to migrate.
++        guard state.demo || !routines.isEmpty else { return }
 +        let today = CivilDate.day()
 +        let previousDay = state.demo ? state.routineDay : state.life.text("today", fallback: state.routineDay)
 +        guard previousDay != today else { return }
@@ -612,7 +620,7 @@
          guard let u = URL(string: raw.trimmingCharacters(in: .whitespacesAndNewlines)), u.scheme == "https", let host = u.host,
                u.user == nil, u.password == nil, u.query == nil, u.fragment == nil, u.path.isEmpty || u.path == "/" else {
              throw Message(text: "Inserisci l’indirizzo HTTPS del server Life OS.")
-@@ -170,7 +182,7 @@
+@@ -170,7 +184,7 @@
      }
      func useDemo() throws {
          guard archiveWritable else { throw Message(text: "L’archivio precedente non è leggibile e non verrà sovrascritto.") }
@@ -621,7 +629,7 @@
          guard !state.demo else { notice = "La demo è già aperta. Le modifiche locali sono conservate."; return }
          if !state.demo {
              try JSONEncoder().encode(state).write(to: connectionFile, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
-@@ -184,7 +196,7 @@
+@@ -184,7 +198,7 @@
          notice = "Demo con dati simulati. Nessuna connessione al database."
      }
      func restoreConnection() throws {
@@ -630,7 +638,7 @@
          let previous = try JSONDecoder().decode(NativeArchive.self, from: Data(contentsOf: connectionFile))
          revision += 1
          try save(previous)
-@@ -194,7 +206,7 @@
+@@ -194,7 +208,7 @@
          session.configuration.httpCookieStorage?.removeCookies(since: .distantPast)
      }
      func importFinance(_ data: Data) throws {
@@ -639,7 +647,7 @@
          let snapshot = try NativeValidation.snapshot(data)
          var next = state; next.finance = snapshot; next.demo = false; next.imported = true
          let key = snapshot.text("key")
-@@ -224,7 +236,7 @@
+@@ -224,7 +238,7 @@
      }
      func signIn(password: String) async throws {
          guard let server else { throw Message(text: "Collega prima il tuo server Life OS.") }
@@ -648,7 +656,7 @@
          busy = true; defer { busy = false }
          var request = URLRequest(url: server.appendingPathComponent("auth/login"))
          request.httpMethod = "POST"; request.timeoutInterval = 40
-@@ -268,7 +280,7 @@
+@@ -268,7 +282,7 @@
              if [502, 503, 504].contains(http.statusCode) { throw NativeServerUnavailable(status: http.statusCode) }
              let text = String(data: data, encoding: .utf8) ?? ""
              if http.mimeType == "text/html" { throw Message(text: "Accedi a Life OS nelle Impostazioni.") }
@@ -657,7 +665,7 @@
          }
          guard http.mimeType == "application/json" else { throw Message(text: "Il server non ha restituito JSON. Verifica l’accesso a Life OS.") }
          let result = try JSONDecoder().decode(JSONValue.self, from: data)
-@@ -290,7 +302,9 @@
+@@ -290,7 +304,9 @@
              do {
                  let value = try l.get().object
                  guard case .array? = value["tasks"] else { throw Message(text: "Elenco attività non compatibile.") }
@@ -668,7 +676,7 @@
              } catch { failure = error }
          }
          if let f {
-@@ -316,7 +330,7 @@
+@@ -316,7 +332,7 @@
          guard analysisGeneration != financeGeneration, !Task.isCancelled else { return }
          analysisBusy = true; defer { analysisBusy = false }
          do {
@@ -677,7 +685,7 @@
              let version = revision, generation = financeGeneration, month = financeMonth
              let result = try await read("getFinanceData", args: [.int(Int(month.prefix(4)) ?? 2026), .int(Int(month.suffix(2)) ?? 1)])
              try Task.checkCancellation()
-@@ -330,30 +344,49 @@
+@@ -330,30 +346,49 @@
          }
      }
      var analysisIsCurrent: Bool { isDemo || analysisGeneration == financeGeneration }
@@ -745,7 +753,7 @@
                  notice = syncStatus
              } else {
                  syncStatus = "Accesso o verifica richiesta"
-@@ -362,13 +395,23 @@
+@@ -362,13 +397,23 @@
          }
      }
      func perform(_ method: String, _ payload: Record = [:], args: [JSONValue]? = nil) async throws {
@@ -770,7 +778,7 @@
          if method == "saveTransaction" || method == "saveExtra" {
              guard server != nil else { throw Message(text: "Per nuovi movimenti collega Life OS oppure apri la demo.") }
              var p = payload
-@@ -377,9 +420,11 @@
+@@ -377,9 +422,11 @@
              if !next.pending.contains(where: { $0.id == id }) { next.pending.append(PendingWrite(id: id, method: method, payload: p)) }
              try save(next)
              notice = "Salvato sul dispositivo."
@@ -783,7 +791,7 @@
          busy = true; defer { busy = false }
          // No automatic retry: these API methods do not all support request IDs.
          let result = try await read(method, args: args ?? [.object(payload)])
-@@ -387,12 +432,53 @@
+@@ -387,12 +434,53 @@
          do { try await refresh(NativeSyncPolicy.scope(for: method)) }
          catch { notice = "Operazione inviata. Aggiornamento non riuscito: sincronizza prima di ripetere l’azione." }
      }
@@ -839,7 +847,7 @@
          guard case .object(let record) = result, record["path"] != nil, record["publishedAt"] != nil else {
              throw Message(text: "Il server non ha confermato il collegamento del calendario.")
          }
-@@ -403,7 +489,7 @@
+@@ -403,7 +491,7 @@
      }
      func shift(_ day: String) -> ShiftKind? { life.records("shifts").first { $0.text("day") == day }.flatMap { ShiftKind(rawValue: $0.text("kind")) } }
      func changeMonth(_ delta: Int, finance: Bool) async {
