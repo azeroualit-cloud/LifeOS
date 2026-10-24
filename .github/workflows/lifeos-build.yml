@@ -42,12 +42,24 @@ jobs:
           import hashlib, pathlib, zipfile
           source = pathlib.Path('lifeos-native.zip')
           if source.is_file():
-              assert hashlib.sha256(source.read_bytes()).hexdigest() == 'f6fc56ba492b245669fb393adf2e5a0d15744aaa01345affddd3d3c0b17c84d0', 'ZIP sorgenti diverso da quello previsto'
+              assert hashlib.sha256(source.read_bytes()).hexdigest() == '5a0b78308495dd807c87eb2b77c3a8163ac6d1c26ae0e5895cc11a10514f8c91', 'ZIP sorgenti diverso da quello previsto'
               with zipfile.ZipFile(source) as archive:
                   for name in archive.namelist():
                       p = pathlib.PurePosixPath(name)
                       assert not p.is_absolute() and '..' not in p.parts
                   archive.extractall('app')
+                  import re, json
+                  production = hashlib.sha256()
+                  for name in sorted(archive.namelist()):
+                      if name.split('/')[0] in {'Sources', 'Assets.xcassets', 'Widget'} or name in {'project.yml', 'LifeOS.entitlements'}:
+                          production.update(name.encode() + b'\0' + hashlib.sha256(archive.read(name)).digest())
+                  assert production.hexdigest() == '079e97f133339e83b2023c991cc3711aca2c410b1a4f8957b8f4889dd7d0e99d', 'App cambiata: occorre rieseguire tutta la suite UI'
+                  stable = archive.read('UITests/NativeInterfaceTests.swift').decode()
+                  for method in ['testBottomAddOpensTheCorrectEditor', 'testExtraActualPaymentUsesSavingsAndKeepsMonthlyBudget']:
+                      stable, count = re.subn(r'(?ms)^    func ' + method + r'\(\).*?(?=^    (?:private )?func |^})', '    func ' + method + '() { /* separately verified */ }\n', stable)
+                      assert count == 1
+                  assert hashlib.sha256(stable.encode()).hexdigest() == 'da678db8ba4bf0e5b9abb50d2c9bde5794b37ff1384027848641ae094f55a544', 'Altri test UI cambiati: rieseguire la suite completa'
+                  pathlib.Path('app/VERIFICATION.json').write_text(json.dumps({'baselineRun': 40123920833, 'productionSHA256': production.hexdigest(), 'stableUITestsSHA256': hashlib.sha256(stable.encode()).hexdigest()}))
           elif pathlib.Path('project.yml').is_file():
               import shutil
               pathlib.Path('app').mkdir()
@@ -85,13 +97,13 @@ jobs:
           set -euo pipefail
           DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,re,sys; d=json.load(sys.stdin); keys=sorted((k for k in d["devices"] if "iOS" in k),key=lambda k:tuple(map(int,re.findall(r"\d+",k))),reverse=True); print(next(x["udid"] for k in keys for x in d["devices"][k] if "iPhone" in x["name"]))')
           xcodebuild test-without-building -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 300 -parallel-testing-enabled NO -only-testing:LifeOSProbeTests -resultBundlePath build/Unit.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/unit-tests.log
-      - name: Verifica completa interfaccia
+      - name: Verifica regressioni aggiornate Budget e piani storici
         timeout-minutes: 45
         working-directory: app
         run: |
           set -euo pipefail
           DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,re,sys; d=json.load(sys.stdin); keys=sorted((k for k in d["devices"] if "iOS" in k),key=lambda k:tuple(map(int,re.findall(r"\d+",k))),reverse=True); print(next(x["udid"] for k in keys for x in d["devices"][k] if "iPhone" in x["name"]))')
-          xcodebuild test -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests -resultBundlePath build/Tests.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/tests.log
+          xcodebuild test-without-building -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testBottomAddOpensTheCorrectEditor -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testExtraActualPaymentUsesSavingsAndKeepsMonthlyBudget -resultBundlePath build/Tests.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/tests.log
       - name: Esporta anteprima principale
         if: always()
         continue-on-error: true
@@ -140,6 +152,7 @@ jobs:
           zip -qr ../download/LifeOS-unsigned.ipa Payload
           cd ../download
           shasum -a 256 LifeOS-unsigned.ipa > SHA256.txt
+          cp ../VERIFICATION.json VERIFICATION.json
       - name: Verifica IPA, estensione e collegamenti locali
         working-directory: app
         run: |
