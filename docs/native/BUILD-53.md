@@ -4,7 +4,7 @@ Sostituisce la direzione della build 52: Dashboard, Attività e Finanza; calenda
 
 ## Responsività e integrità
 
-Stato attività, spunte abitudini, turni e misurazioni salute si applicano e si persistono atomicamente sul dispositivo prima della rete. La coda conserva ordine e conferme del server anche dopo riavvio; un aggiornamento tardivo riapplica le modifiche locali pendenti. La sincronizzazione ha uno stato separato dal salvataggio in primo piano. I movimenti finanziari mantengono gli UUID e la conferma remota e chiudono il salvataggio dopo la persistenza locale.
+Stato attività, spunte abitudini, completamenti eventi, turni e misurazioni salute si applicano e si persistono atomicamente sul dispositivo prima della rete. La coda conserva ordine e conferme del server anche dopo riavvio; un aggiornamento tardivo riapplica le modifiche locali pendenti. La sincronizzazione ha uno stato separato dal salvataggio in primo piano e aggiorna soltanto l’ambito modificato. I setter inviati in seguito prevalgono sul valore corrente del server: non è ancora presente una risoluzione dei conflitti tra dispositivi. I movimenti finanziari mantengono gli UUID e la conferma remota e chiudono il salvataggio dopo la persistenza locale.
 
 Solo setter assoluti con chiavi stabili vengono accodati. Nuove attività/eventi/abitudini, modifiche e cancellazioni restano confermate dal server: queste API non hanno ancora un contratto per creazioni offline senza duplicati. Le abitudini di un giorno passato possono essere rifiutate dal backend esistente: la modifica resta visibile in coda, senza bloccare le altre. Nelle impostazioni si può riprovare oppure ripristinare il valore del server con una lettura confermata; i movimenti finanziari non sono eliminabili da questo pannello.
 
@@ -17,6 +17,10 @@ Solo setter assoluti con chiavi stabili vengono accodati. Nuove attività/eventi
 ## Verifica e limiti
 
 Design-system guard e controllo diff locali passati. Build Apple e test in corso: non dichiarare ancora l’IPA verificata. Test nuovi per persistenza prima della rete, risposta ritardata, riavvio, ordine dei turni, errore di accesso, ripristino sicuro, replay, validazione salute, notifiche e URL.
+
+L’esportazione Apple è facoltativa e si apre su richiesta; il controllo del collegamento non blocca le altre azioni. La pubblicazione non parte se ci sono turni locali ancora da sincronizzare. Le abitudini passano al nuovo giorno anche senza rete, conservando in coda le spunte riferite ai giorni precedenti.
+
+Il client web non viene ripristinato da questo incremento iOS; la precedente dashboard web della build 52 non è stata distribuita.
 
 La build unsigned contiene l’estensione; registrazione del widget e Siri dopo firma Signulous richiedono prova sull’iPhone. Non è possibile attestare le capability del profilo di firma da questo ambiente. Conservare le estensioni durante la firma se il servizio offre tale opzione; aggiornare senza disinstallare. Nessun deploy Cloudflare effettuato: le API salute della build 52 restano da attivare, eventuali misurazioni restano in coda se il server non le supporta.
 

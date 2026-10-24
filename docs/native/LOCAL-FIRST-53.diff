@@ -944,7 +944,15 @@
 +}
 --- a/Sources/ShiftCalendarPanel.swift
 +++ b/Sources/ShiftCalendarPanel.swift
-@@ -16,7 +16,7 @@
+@@ -7,6 +7,7 @@
+     @State private var message = ""
+     @State private var failure = ""
+     @State private var working = false
++    @State private var updateID = UUID()
+     @State private var confirmRotation = false
+ 
+     private var subscription: URL? {
+@@ -16,7 +17,7 @@
      var body: some View {
          VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
              Text("Turni in Calendario Apple").font(NativeDesign.heading)
@@ -953,6 +961,20 @@
                  .font(.subheadline).foregroundStyle(NativeDesign.secondary)
              Text("Pubblica il mese visualizzato, anche dopo una correzione o una cancellazione. Gli altri mesi pubblicati restano disponibili.")
                  .font(.caption).foregroundStyle(NativeDesign.secondary)
+@@ -53,10 +54,11 @@
+         }
+     }
+     @MainActor private func update(_ method: String) async {
+-        guard !working, !store.isDemo, store.server != nil else { return }
++        guard (!working || method == "getShiftCalendar"), !store.isDemo, store.server != nil else { return }
+         let month = store.calendarMonth
++        let requestID = UUID(); updateID = requestID
+         working = true; failure = ""; message = ""
+-        defer { working = false }
++        defer { if updateID == requestID { working = false } }
+         do {
+             let result = try await store.updateShiftCalendar(method, month: month)
+             guard !Task.isCancelled, store.calendarMonth == month else { return }
 --- a/Tests/LocalLifeMutationTests.swift
 +++ b/Tests/LocalLifeMutationTests.swift
 @@ -0,0 +1,50 @@
