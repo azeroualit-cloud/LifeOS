@@ -42,7 +42,7 @@ jobs:
           import hashlib, pathlib, zipfile
           source = pathlib.Path('lifeos-native.zip')
           if source.is_file():
-              assert hashlib.sha256(source.read_bytes()).hexdigest() == '0918595b5f10c152fa4450406e620586745c9a32ce33fb5c1a3e48294f169b39', 'ZIP sorgenti diverso da quello previsto'
+              assert hashlib.sha256(source.read_bytes()).hexdigest() == '06fb7036362358ee557b6bfc20ad24e699449cf62fae16df0229a882f5c3ad2f', 'ZIP sorgenti diverso da quello previsto'
               with zipfile.ZipFile(source) as archive:
                   for name in archive.namelist():
                       p = pathlib.PurePosixPath(name)
@@ -147,6 +147,31 @@ jobs:
           zip -qr ../download/LifeOS-unsigned.ipa Payload
           cd ../download
           shasum -a 256 LifeOS-unsigned.ipa > SHA256.txt
+      - name: Verifica IPA, estensione e collegamenti locali
+        working-directory: app
+        run: |
+          python3 - <<'PYIPA'
+          import hashlib, pathlib, plistlib, struct, zipfile
+          ipa = pathlib.Path('download/LifeOS-unsigned.ipa')
+          expected = pathlib.Path('download/SHA256.txt').read_text().split()[0]
+          assert hashlib.sha256(ipa.read_bytes()).hexdigest() == expected
+          with zipfile.ZipFile(ipa) as z:
+              assert z.testzip() is None
+              app = 'Payload/LifeOSProbe.app/'
+              info = plistlib.loads(z.read(app + 'Info.plist'))
+              assert info['CFBundleIdentifier'] == 'com.nas.lifeos.probe'
+              assert info['CFBundleVersion'] == '53'
+              assert any('lifeos' in x.get('CFBundleURLSchemes', []) for x in info['CFBundleURLTypes'])
+              widget = app + 'PlugIns/LifeOSWidget.appex/'
+              extension = plistlib.loads(z.read(widget + 'Info.plist'))
+              assert extension['CFBundleVersion'] == info['CFBundleVersion']
+              assert extension['NSExtension']['NSExtensionPointIdentifier'] == 'com.apple.widgetkit-extension'
+              for prefix, metadata in [(app, info), (widget, extension)]:
+                  binary = z.read(prefix + metadata['CFBundleExecutable'])
+                  magic, cpu = struct.unpack('<II', binary[:8])
+                  assert magic == 0xfeedfacf and cpu == 0x0100000c, 'Serve Mach-O arm64'
+          print('IPA_OK: checksum, CRC, build 53, URL scheme, widget embedded, both binaries arm64')
+          PYIPA
       - name: Errori XCTest in annotazioni
         if: always()
         working-directory: app

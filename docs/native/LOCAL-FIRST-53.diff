@@ -229,6 +229,32 @@
                      Button { openCalendar(day) } label: {
                          VStack(spacing: NativeDesign.Space.xs) {
                              Text(["D", "L", "M", "M", "G", "V", "S"][weekday - 1]).font(.caption).foregroundStyle(NativeDesign.secondary)
+--- a/Sources/FinanceScreen.swift
++++ b/Sources/FinanceScreen.swift
+@@ -15,9 +15,9 @@
+                 balance
+                 actions
+                 recentMovements
+-                if !store.state.pending.isEmpty {
++                if !store.financialPending.isEmpty {
+                     VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
+-                        Label("\(store.state.pending.count) movimenti salvati sul dispositivo", systemImage: "icloud.and.arrow.up").font(.subheadline)
++                        Label("\(store.financialPending.count) movimenti salvati sul dispositivo", systemImage: "icloud.and.arrow.up").font(.subheadline)
+                         Text("In attesa di sincronizzazione. Il saldo mostra l’ultimo dato del server.").font(.caption).foregroundStyle(NativeDesign.secondary)
+                     }
+                 }
+@@ -157,9 +157,9 @@
+             TextField("Cerca movimento", text: $search)
+             Picker("Conto", selection: $account) { ForEach(["Tutti", "Trade Republic", "Revolut", "IsyBank"], id: \.self) { Text($0) } }
+         }
+-        if !store.state.pending.isEmpty {
++        if !store.financialPending.isEmpty {
+             Section("Salvati sul dispositivo") {
+-                ForEach(store.state.pending) { pending in
++                ForEach(store.financialPending) { pending in
+                     HStack { VStack(alignment: .leading) { Text(pending.payload.text("name")); Text(pending.accepted ? "Inviato · aggiornamento da completare" : "Da sincronizzare").font(.caption).foregroundStyle(NativeDesign.secondary) }; Spacer(); MoneyText(amount: pending.payload.amount("amount")) }
+                 }
+             }
 --- a/Sources/LifeOSRoute.swift
 +++ b/Sources/LifeOSRoute.swift
 @@ -0,0 +1,12 @@
@@ -246,7 +272,7 @@
 +extension Notification.Name { static let lifeOSRoute = Notification.Name("LifeOSRoute") }
 --- a/Sources/LocalLifeMutation.swift
 +++ b/Sources/LocalLifeMutation.swift
-@@ -0,0 +1,41 @@
+@@ -0,0 +1,49 @@
 +import Foundation
 +
 +/// Only absolute setters with stable server keys may be replayed. Creation/deletion
@@ -255,6 +281,14 @@
 +    private static func validDay(_ day: String) -> Bool { day.count == 10 && CivilDate.day(CivilDate.date(day)) == day }
 +    static func supports(_ method: String) -> Bool {
 +        ["setTaskStatus", "setRoutineCheck", "paintShift", "saveHealthEntry"].contains(method)
++    }
++    static func key(_ write: PendingWrite) -> String {
++        switch write.method {
++        case "paintShift", "saveHealthEntry": return write.method + ":" + write.payload.text("day")
++        case "setRoutineCheck": return write.method + ":" + String(write.payload.integer("id")) + ":" + write.payload.text("day")
++        case "setTaskStatus": return write.method + ":" + String(write.payload.integer("id"))
++        default: return write.id
++        }
 +    }
 +    static func apply(_ method: String, _ p: Record, to life: inout Record) throws {
 +        switch method {
@@ -288,6 +322,25 @@
 +        }
 +    }
 +}
+--- a/Sources/NativeComponents.swift
++++ b/Sources/NativeComponents.swift
+@@ -122,13 +122,14 @@
+     @EnvironmentObject var store: NativeStore
+     private var text: String {
+         if store.isDemo { return "Demo" }
+-        if store.busy { return "Aggiornamento" }
++        if store.busy { return "Salvataggio" }
++        if store.syncing { return "Sincronizzazione" }
+         if !store.state.pending.isEmpty { return "\(store.state.pending.count) in coda" }
+         if !store.syncStatus.isEmpty && store.syncStatus != "Aggiornato" { return "Da aggiornare" }
+         return store.sharedDatabase ? "Condiviso con il sito" : store.server == nil ? "Sul dispositivo" : "Collegato"
+     }
+     var body: some View {
+-        NativeStatusBadge(title: text, tone: store.isDemo || !store.state.pending.isEmpty || (!store.syncStatus.isEmpty && store.syncStatus != "Aggiornato") ? .warning : .success, showsIndicator: true, loading: store.busy)
++        NativeStatusBadge(title: text, tone: store.isDemo || !store.state.pending.isEmpty || (!store.syncStatus.isEmpty && store.syncStatus != "Aggiornato") ? .warning : .success, showsIndicator: true, loading: store.busy || store.syncing)
+     }
+ }
+ 
 --- a/Sources/NativeIntegrationSettings.swift
 +++ b/Sources/NativeIntegrationSettings.swift
 @@ -0,0 +1,41 @@
@@ -463,7 +516,15 @@
      @Published var error: String?
      @Published var notice: String?
      @Published var financeMonth = CivilDate.month()
-@@ -63,7 +66,8 @@
+@@ -30,6 +33,7 @@
+     var life: Record { state.life }
+     var finance: Record { state.finance }
+     var summary: Record { finance.record("summary") }
++    var financialPending: [PendingWrite] { state.pending.filter { ["saveTransaction", "saveExtra"].contains($0.method) } }
+     var tasks: [Record] { life.records("tasks") }
+     var categories: [Record] { life.records("categories").sorted { $0.amount("position") < $1.amount("position") } }
+     var routines: [Record] { life.records("routines") }
+@@ -63,7 +67,8 @@
          }.prefix(max(0, 3 - events.count)).map { row -> Record in var r = row; r["highlightKind"] = .string("task"); return r }
          return events + todo
      }
@@ -473,7 +534,7 @@
          let config = URLSessionConfiguration.ephemeral; config.timeoutIntervalForRequest = 40; config.timeoutIntervalForResource = 90
          persistsSession = injectedSession == nil
          session = injectedSession ?? URLSession(configuration: config)
-@@ -146,7 +150,7 @@
+@@ -146,7 +151,7 @@
          do { try save(next) } catch { self.error = error.localizedDescription }
      }
      func configure(_ raw: String) throws {
@@ -482,7 +543,7 @@
          guard let u = URL(string: raw.trimmingCharacters(in: .whitespacesAndNewlines)), u.scheme == "https", let host = u.host,
                u.user == nil, u.password == nil, u.query == nil, u.fragment == nil, u.path.isEmpty || u.path == "/" else {
              throw Message(text: "Inserisci l’indirizzo HTTPS del server Life OS.")
-@@ -170,7 +174,7 @@
+@@ -170,7 +175,7 @@
      }
      func useDemo() throws {
          guard archiveWritable else { throw Message(text: "L’archivio precedente non è leggibile e non verrà sovrascritto.") }
@@ -491,7 +552,7 @@
          guard !state.demo else { notice = "La demo è già aperta. Le modifiche locali sono conservate."; return }
          if !state.demo {
              try JSONEncoder().encode(state).write(to: connectionFile, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
-@@ -184,7 +188,7 @@
+@@ -184,7 +189,7 @@
          notice = "Demo con dati simulati. Nessuna connessione al database."
      }
      func restoreConnection() throws {
@@ -500,7 +561,7 @@
          let previous = try JSONDecoder().decode(NativeArchive.self, from: Data(contentsOf: connectionFile))
          revision += 1
          try save(previous)
-@@ -194,7 +198,7 @@
+@@ -194,7 +199,7 @@
          session.configuration.httpCookieStorage?.removeCookies(since: .distantPast)
      }
      func importFinance(_ data: Data) throws {
@@ -509,7 +570,7 @@
          let snapshot = try NativeValidation.snapshot(data)
          var next = state; next.finance = snapshot; next.demo = false; next.imported = true
          let key = snapshot.text("key")
-@@ -224,7 +228,7 @@
+@@ -224,7 +229,7 @@
      }
      func signIn(password: String) async throws {
          guard let server else { throw Message(text: "Collega prima il tuo server Life OS.") }
@@ -518,7 +579,16 @@
          busy = true; defer { busy = false }
          var request = URLRequest(url: server.appendingPathComponent("auth/login"))
          request.httpMethod = "POST"; request.timeoutInterval = 40
-@@ -290,7 +294,9 @@
+@@ -268,7 +273,7 @@
+             if [502, 503, 504].contains(http.statusCode) { throw NativeServerUnavailable(status: http.statusCode) }
+             let text = String(data: data, encoding: .utf8) ?? ""
+             if http.mimeType == "text/html" { throw Message(text: "Accedi a Life OS nelle Impostazioni.") }
+-            throw Message(text: text.isEmpty ? "Operazione rifiutata (\(http.statusCode))." : String(text.prefix(500)))
++            throw NativeRequestRejected(status: http.statusCode, message: text.isEmpty ? "Operazione rifiutata (\(http.statusCode))." : String(text.prefix(500)))
+         }
+         guard http.mimeType == "application/json" else { throw Message(text: "Il server non ha restituito JSON. Verifica l’accesso a Life OS.") }
+         let result = try JSONDecoder().decode(JSONValue.self, from: data)
+@@ -290,7 +295,9 @@
              do {
                  let value = try l.get().object
                  guard case .array? = value["tasks"] else { throw Message(text: "Elenco attività non compatibile.") }
@@ -529,7 +599,7 @@
              } catch { failure = error }
          }
          if let f {
-@@ -316,7 +322,7 @@
+@@ -316,7 +323,7 @@
          guard analysisGeneration != financeGeneration, !Task.isCancelled else { return }
          analysisBusy = true; defer { analysisBusy = false }
          do {
@@ -538,7 +608,7 @@
              let version = revision, generation = financeGeneration, month = financeMonth
              let result = try await read("getFinanceData", args: [.int(Int(month.prefix(4)) ?? 2026), .int(Int(month.suffix(2)) ?? 1)])
              try Task.checkCancellation()
-@@ -330,30 +336,45 @@
+@@ -330,30 +337,49 @@
          }
      }
      var analysisIsCurrent: Bool { isDemo || analysisGeneration == financeGeneration }
@@ -565,9 +635,12 @@
 -                if let index = next.pending.firstIndex(where: { $0.id == write.id }) { next.pending[index].accepted = true }
 -                try save(next)
 +            var attempted = Set<String>()
++            var blockedKeys = Set<String>()
 +            var writeFailure: Error?
 +            while let write = state.pending.first(where: { !$0.accepted && !attempted.contains($0.id) }) {
 +                attempted.insert(write.id)
++                let key = LocalLifeMutation.key(write)
++                if blockedKeys.contains(key) { continue }
 +                pendingScope.formUnion(NativeSyncPolicy.scope(for: write.method))
 +                do {
 +                    let result = try await read(write.method, args: [.object(write.payload)])
@@ -578,7 +651,8 @@
 +                    try save(next)
 +                } catch {
 +                    writeFailure = writeFailure ?? error
-+                    if NativeSyncPolicy.isTransient(error) { break }
++                    blockedKeys.insert(key)
++                    if NativeSyncPolicy.isTransient(error) || [401, 403].contains((error as? NativeRequestRejected)?.status ?? 0) { break }
 +                    // A rejected health/routine setter must not block financial writes.
 +                }
              }
@@ -601,7 +675,7 @@
                  notice = syncStatus
              } else {
                  syncStatus = "Accesso o verifica richiesta"
-@@ -362,13 +383,23 @@
+@@ -362,13 +388,23 @@
          }
      }
      func perform(_ method: String, _ payload: Record = [:], args: [JSONValue]? = nil) async throws {
@@ -626,7 +700,7 @@
          if method == "saveTransaction" || method == "saveExtra" {
              guard server != nil else { throw Message(text: "Per nuovi movimenti collega Life OS oppure apri la demo.") }
              var p = payload
-@@ -377,9 +408,11 @@
+@@ -377,9 +413,11 @@
              if !next.pending.contains(where: { $0.id == id }) { next.pending.append(PendingWrite(id: id, method: method, payload: p)) }
              try save(next)
              notice = "Salvato sul dispositivo."
@@ -639,7 +713,7 @@
          busy = true; defer { busy = false }
          // No automatic retry: these API methods do not all support request IDs.
          let result = try await read(method, args: args ?? [.object(payload)])
-@@ -387,10 +420,40 @@
+@@ -387,10 +425,40 @@
          do { try await refresh(NativeSyncPolicy.scope(for: method)) }
          catch { notice = "Operazione inviata. Aggiornamento non riuscito: sincronizza prima di ripetere l’azione." }
      }
@@ -681,7 +755,7 @@
          busy = true; defer { busy = false }
          let result = try await read(method, args: [.object(["month": .string(month)])])
          guard case .object(let record) = result, record["path"] != nil, record["publishedAt"] != nil else {
-@@ -403,7 +466,7 @@
+@@ -403,7 +471,7 @@
      }
      func shift(_ day: String) -> ShiftKind? { life.records("shifts").first { $0.text("day") == day }.flatMap { ShiftKind(rawValue: $0.text("kind")) } }
      func changeMonth(_ delta: Int, finance: Bool) async {
@@ -690,6 +764,18 @@
          if finance {
              let next = String(CivilDate.adding(delta, to: financeMonth + "-01", component: .month).prefix(7))
              guard next >= "2024-01", next <= "2035-12" else { return }
+--- a/Sources/NativeSyncPolicy.swift
++++ b/Sources/NativeSyncPolicy.swift
+@@ -26,3 +26,9 @@
+     let status: Int
+     var errorDescription: String? { "Il server è momentaneamente occupato. I dati sul dispositivo sono conservati." }
+ }
++
++struct NativeRequestRejected: LocalizedError {
++    let status: Int
++    let message: String
++    var errorDescription: String? { message }
++}
 --- a/Sources/PendingWritesSection.swift
 +++ b/Sources/PendingWritesSection.swift
 @@ -0,0 +1,34 @@
@@ -816,25 +902,27 @@
 +}
 --- a/Tests/NativeStoreTests.swift
 +++ b/Tests/NativeStoreTests.swift
-@@ -9,6 +9,9 @@
+@@ -9,6 +9,10 @@
      static var failAll = false
      static var calls: [String] = []
      static var timeoutOnce: String?
++    static var rejectMethod: String?
 +    static var pauseMethod: String?
 +    static var paused: MockAPI?
 +    private var deferredResponse: (HTTPURLResponse, String)?
      override class func canInit(with request: URLRequest) -> Bool { request.url?.host == "lifeos-test.invalid" }
      override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
      override func startLoading() {
-@@ -22,6 +25,7 @@
+@@ -22,6 +26,8 @@
          var status = 200
          var text = "{}"
          if Self.failAll { status = 401; text = "Sessione scaduta" }
++        else if Self.rejectMethod == method { status = 400; text = "Modifica rifiutata" }
 +        else if ["setTaskStatus", "setRoutineCheck", "paintShift", "saveHealthEntry"].contains(method) { text = "true" }
          else if method == "saveTransaction" { Self.writes += 1; text = "true" }
          else if ["getShiftCalendar", "publishShiftCalendar", "rotateShiftCalendarLink"].contains(method) { text = #"{"path":"/calendar/turni/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.ics","publishedAt":"2026-10-23T12:00:00Z"}"# }
          else if method == "getLifeData" { text = #"{"tasks":[],"categories":[],"routines":[],"events":[],"shifts":[],"upcomingEvents":[]}"# }
-@@ -32,6 +36,18 @@
+@@ -32,6 +38,18 @@
          }
          Self.lock.unlock()
          let response = HTTPURLResponse(url: request.url!, statusCode: status, httpVersion: nil, headerFields: ["Content-Type": status == 200 ? "application/json" : "text/plain", "Set-Cookie": method == "login" && status == 200 ? "liquidita_session=mock-session; Path=/; Max-Age=3600; Secure; HttpOnly; SameSite=Strict" : "", "X-LifeOS-Data-Source": "shared"])!
@@ -853,7 +941,7 @@
          client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
          client?.urlProtocol(self, didLoad: Data(text.utf8))
          client?.urlProtocolDidFinishLoading(self)
-@@ -42,7 +58,7 @@
+@@ -42,7 +60,7 @@
  @MainActor final class NativeStoreTests: XCTestCase {
      func testShiftPublicationDoesNotRefreshFinanceOrRetryWrites() async throws {
          let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
@@ -862,10 +950,28 @@
          try store.configure("https://lifeos-test.invalid")
          let result = try await store.updateShiftCalendar("publishShiftCalendar", month: "2026-10")
          XCTAssertFalse(result.text("path").isEmpty)
-@@ -58,14 +74,88 @@
+@@ -58,14 +76,107 @@
          _ = try await store.updateShiftCalendar("publishShiftCalendar", month: "2026-10")
          XCTAssertEqual(MockAPI.calls.count, 3)
      }
++    func testRejectedSetterPreservesOrderForSameKeyButDoesNotBlockFinance() async throws {
++        let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
++        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
++        try store.configure("https://lifeos-test.invalid")
++        for kind in ["morning", "night"] { try await store.perform("paintShift", ["day": .string(CivilDate.day()), "kind": .string(kind)]) }
++        try await store.perform("saveTransaction", payload)
++        MockAPI.rejectMethod = "paintShift"
++        await store.sync()
++        XCTAssertEqual(MockAPI.calls.filter { $0 == "paintShift" }.count, 1)
++        XCTAssertEqual(MockAPI.writes, 1)
++        XCTAssertEqual(store.state.pending.map(\.method), ["paintShift", "paintShift"])
++        XCTAssertEqual(store.shift(CivilDate.day()), .night)
++        MockAPI.rejectMethod = nil
++        await store.sync()
++        XCTAssertTrue(store.state.pending.isEmpty)
++        XCTAssertEqual(MockAPI.calls.filter { $0 == "paintShift" }.count, 3)
++        XCTAssertEqual(MockAPI.writes, 1)
++    }
 +    func testLocalWriteDuringSlowRefreshIsImmediateAndCannotBeOverwritten() async throws {
 +        let (directory, session) = try setup(); defer { MockAPI.resume(); try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
 +        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
@@ -921,6 +1027,7 @@
 +        MockAPI.failAll = true
 +        await store.sync(automatic: true)
 +        XCTAssertEqual(store.state.pending.count, 4)
++        XCTAssertTrue(store.financialPending.isEmpty)
 +        XCTAssertEqual(store.shift(CivilDate.day()), .afternoon)
 +        XCTAssertNil(store.error)
 +        XCTAssertNotNil(store.notice)
@@ -949,11 +1056,11 @@
      }
      private func setup() throws -> (URL, URLSession) {
 -        MockAPI.lock.lock(); MockAPI.writes = 0; MockAPI.failAfterWrite = false; MockAPI.failAll = false; MockAPI.calls = []; MockAPI.timeoutOnce = nil; MockAPI.lock.unlock()
-+        MockAPI.lock.lock(); MockAPI.writes = 0; MockAPI.failAfterWrite = false; MockAPI.failAll = false; MockAPI.calls = []; MockAPI.timeoutOnce = nil; MockAPI.pauseMethod = nil; MockAPI.paused = nil; MockAPI.lock.unlock()
++        MockAPI.lock.lock(); MockAPI.writes = 0; MockAPI.failAfterWrite = false; MockAPI.failAll = false; MockAPI.calls = []; MockAPI.timeoutOnce = nil; MockAPI.pauseMethod = nil; MockAPI.paused = nil; MockAPI.rejectMethod = nil; MockAPI.lock.unlock()
          let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
          try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
          let config = URLSessionConfiguration.ephemeral; config.protocolClasses = [MockAPI.self]
-@@ -73,7 +163,7 @@
+@@ -73,7 +184,7 @@
      }
      func testDashboardCapsHighlightsAtThreeAndPrioritizesSevenDayEvents() async throws {
          let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
@@ -962,7 +1069,7 @@
          store.seedVisualTasks()
          XCTAssertLessThanOrEqual(store.highlights.count, 3)
          XCTAssertEqual(store.highlights.first?.text("highlightKind"), "event")
-@@ -82,7 +172,7 @@
+@@ -82,7 +193,7 @@
      private var payload: Record { ["requestId": .string("regression-12345678"), "type": .string("Spesa"), "name": .string("Spesa da conservare"), "amount": .number(2), "account": .string("Trade Republic"), "category": .string("Altro"), "date": .string(CivilDate.day())] }
      func testNativeSignInReceivesSecureCookieWithoutLoadingWebPage() async throws {
          let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
@@ -971,7 +1078,7 @@
          try store.configure("https://lifeos-test.invalid")
          try await store.signIn(password: "not-a-real-password-for-unit-tests")
          XCTAssertEqual(MockAPI.calls, ["login"])
-@@ -93,7 +183,7 @@
+@@ -93,7 +204,7 @@
      }
      func testRefreshUsesOneLightFinanceReadAndEmbeddedPlan() async throws {
          let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
@@ -980,7 +1087,7 @@
          try store.configure("https://lifeos-test.invalid")
          await store.sync()
          XCTAssertNil(store.error)
-@@ -104,18 +194,19 @@
+@@ -104,18 +215,19 @@
      }
      func testLifeMutationDoesNotFetchFinanceOrAnalytics() async throws {
          let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
@@ -1002,7 +1109,7 @@
          try store.configure("https://lifeos-test.invalid")
          MockAPI.timeoutOnce = "getLifeData"
          _ = try await store.read("getLifeData")
-@@ -127,10 +218,11 @@
+@@ -127,10 +239,11 @@
      }
      func testAutomaticAuthenticationFailureKeepsCacheAndQueueWithoutModalError() async throws {
          let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
@@ -1015,7 +1122,7 @@
          XCTAssertNil(store.error)
          XCTAssertNotNil(store.notice)
          XCTAssertEqual(store.state.pending.first?.payload, payload)
-@@ -140,11 +232,11 @@
+@@ -140,11 +253,11 @@
          let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
          let initial = NativeArchive(pending: [PendingWrite(id: "regression-12345678", method: "saveTransaction", payload: payload)], demo: false)
          try JSONEncoder().encode(initial).write(to: directory.appendingPathComponent("lifeos-native-v2.json"))
@@ -1029,7 +1136,7 @@
          XCTAssertEqual(relaunched.state.endpoint, "https://lifeos-test.invalid")
          XCTAssertEqual(relaunched.state.pending.first?.id, "regression-12345678")
          XCTAssertEqual(relaunched.state.pending.first?.payload.amount("amount"), 2)
-@@ -160,13 +252,13 @@
+@@ -160,13 +273,13 @@
          let file = directory.appendingPathComponent("lifeos-native-v2.json")
          try JSONEncoder().encode(initial).write(to: file)
          let original = try Data(contentsOf: file)
@@ -1045,7 +1152,7 @@
          await store.changeMonth(-1, finance: true)
          await store.changeMonth(1, finance: false)
          try store.configure("https://lifeos-test.invalid")
-@@ -176,14 +268,15 @@
+@@ -176,14 +289,15 @@
      }
      func testConfirmedWriteSurvivesFailedRefreshAndRelaunchWithoutResending() async throws {
          let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
@@ -1063,7 +1170,7 @@
          await relaunched.sync()
          XCTAssertTrue(relaunched.state.pending.isEmpty)
          XCTAssertNil(relaunched.error)
-@@ -191,10 +284,11 @@
+@@ -191,10 +305,11 @@
      }
      func testDemoSwitchAndRestoreKeepUnsentWriteAndEndpoint() async throws {
          let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
@@ -1076,7 +1183,7 @@
          XCTAssertEqual(store.state.pending.count, 1)
          XCTAssertThrowsError(try store.configure("https://different-test.invalid"))
          try store.configure("https://lifeos-test.invalid/")
-@@ -212,7 +306,7 @@
+@@ -212,7 +327,7 @@
          let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
          let initial = NativeArchive(pending: [PendingWrite(id: "regression-12345678", method: "saveTransaction", payload: payload)], demo: false)
          try JSONEncoder().encode(initial).write(to: directory.appendingPathComponent("lifeos-native-v2.json"))
@@ -1085,7 +1192,7 @@
          let data = Data(#"{"summary":{"budget":1000,"committedCurrent":200,"remainingFree":800},"transactions":[]}"#.utf8)
          try store.importFinance(data)
          XCTAssertEqual(store.state.pending.first?.id, "regression-12345678")
-@@ -233,7 +327,7 @@
+@@ -233,7 +348,7 @@
          let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
          let file = directory.appendingPathComponent("lifeos-native-v2.json"), original = Data("JSON incompleto".utf8)
          try original.write(to: file)
@@ -1176,15 +1283,18 @@
      }
      func testKeyboardAndLocalMovementFlow() {
          let app = launch()
-@@ -215,7 +220,7 @@
+@@ -215,9 +220,9 @@
  
      func testRepeatedBoundaryScrollingKeepsNavigationStable() {
          let app = launch(["--dark"])
 -        for tab in ["Dashboard", "Finanza"] {
 +        for tab in ["Dashboard", "Attività", "Finanza"] {
              app.tabBars.buttons[tab].tap()
-             let scroll = app.scrollViews[tab == "Dashboard" ? "dashboard-scroll" : "finance-scroll"]
+-            let scroll = app.scrollViews[tab == "Dashboard" ? "dashboard-scroll" : "finance-scroll"]
++            let scroll = tab == "Attività" ? app.collectionViews.firstMatch : app.scrollViews[tab == "Dashboard" ? "dashboard-scroll" : "finance-scroll"]
              for _ in 0..<4 { scroll.swipeUp(velocity: .fast) }
+             for _ in 0..<4 { scroll.swipeDown(velocity: .fast) }
+             XCTAssertTrue(app.tabBars.buttons["Dashboard"].isHittable)
 @@ -233,7 +238,7 @@
          let publish = app.buttons["publish-shift-calendar"]
          XCTAssertTrue(publish.isHittable)
