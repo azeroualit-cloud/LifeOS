@@ -1,0 +1,68 @@
+name: Life OS - Link diretto IPA build 60
+on:
+  push:
+    paths: ['.github/workflows/lifeos-ipa-link60.yml']
+permissions:
+  actions: read
+  contents: read
+jobs:
+  publish:
+    # Single-use publication: this branch, first push only, no retries or manual input.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/codex/native-build60' && github.run_number == 1 && github.run_attempt == 1
+    permissions:
+      actions: read
+      contents: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Scarica IPA verificata
+        uses: actions/download-artifact@v5
+        with:
+          name: LifeOS-IPA-per-Signulous
+          run-id: 40129522914
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: ipa
+      # All screenshots use isolated --visual-test fixtures, with no live server.
+      - name: Scarica anteprime dei simulatori
+        uses: actions/download-artifact@v5
+        with:
+          name: LifeOS-anteprima
+          run-id: 40129522914
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: preview/current
+      - name: Scarica anteprime della suite completa sulla stessa app
+        uses: actions/download-artifact@v5
+        with:
+          name: LifeOS-anteprima
+          run-id: 40123920833
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: preview/baseline
+      - name: Controlla e prepara file diretto
+        run: |
+          python3 - <<'PY'
+          import pathlib, hashlib, zipfile, shutil
+          files = list(pathlib.Path('ipa').rglob('*.ipa'))
+          assert len(files) == 1
+          expected = 'ae2d04cfd0f01e48e7bd4c0848b91817b57c2b886f66489eda56f0fbbf88e14f'
+          assert hashlib.sha256(files[0].read_bytes()).hexdigest() == expected
+          with zipfile.ZipFile(files[0]) as archive:
+              assert archive.testzip() is None
+          shutil.copyfile(files[0], 'LifeOS-build60.ipa')
+          pathlib.Path('SHA256.txt').write_text(expected + '  LifeOS-build60.ipa\n')
+          with zipfile.ZipFile('LifeOS-preview.zip', 'w', zipfile.ZIP_DEFLATED) as output:
+              for image in sorted(pathlib.Path('preview').rglob('*')):
+                  if image.is_file() and image.suffix.lower() in {'.png', '.json'}:
+                      output.write(image, image.relative_to('preview'))
+          PY
+      - name: Pubblica IPA per firma tramite link
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          test "$(gh api repos/$GH_REPO/actions/runs/40129522914 --jq .conclusion)" = success
+          test "$(gh api repos/$GH_REPO/actions/runs/40129522914 --jq .head_sha)" = 5bf2f3fbb4c306636f55f36a69d5ffc4911c665b
+          if gh release view native-0.9.9-build60-restored >/dev/null 2>&1; then exit 0; fi
+          gh release create native-0.9.9-build60-restored LifeOS-build60.ipa SHA256.txt LifeOS-preview.zip --target 5bf2f3fbb4c306636f55f36a69d5ffc4911c665b --title 'Life OS — 0.9.9 build 60' --notes 'IPA unsigned per Signulous. Struttura della release 59 con quattro sezioni, peso e calorie Apple Health, aggiunta peso nel grafico. Conserva salvataggi locali, notifiche, Siri e widget rapidi. Nessun deploy web. Aggiornare senza disinstallare e conservare HealthKit e widget durante la firma; collaudo sul dispositivo necessario.' --latest=false
