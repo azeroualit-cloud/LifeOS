@@ -1,6 +1,6 @@
 # Life OS 0.9.0 build 53 — verifica Apple completata
 
-[IPA unica per Signulous](https://github.com/azeroualit-cloud/LifeOS/actions/runs/40115963503/artifacts/12569329900) · [build e test Apple](https://github.com/azeroualit-cloud/LifeOS/actions/runs/40115963503) · [verifica indipendente](https://github.com/azeroualit-cloud/LifeOS/actions/runs/40119827193) · [PR 1](https://github.com/azeroualit-cloud/LifeOS/pull/1).
+[IPA unica per Signulous](https://github.com/azeroualit-cloud/LifeOS/releases/download/native-0.9.0-build53-unified/LifeOS-build53.ipa) · [build e test Apple](https://github.com/azeroualit-cloud/LifeOS/actions/runs/40115963503) · [verifica indipendente](https://github.com/azeroualit-cloud/LifeOS/actions/runs/40119827193) · [PR 1](https://github.com/azeroualit-cloud/LifeOS/pull/1).
 
 ## Comportamento
 
@@ -26,7 +26,7 @@ Il controllo indipendente con soli permessi actions:read scarica IPA e log dalla
 - Commit sorgenti verificato: `eb3c04b27c356ae70eebd4d044745e081f4284c8`; il ramo isolato di retry contiene lo stesso commit della PR. I successivi commit di verifica/documentazione conservano il pacchetto nativo.
 - SHA-256 sorgenti: `2128d852538cfc3f1bcc7b91b186ff2109f6c0f5b82bbcb5895152bcefd87cad`.
 - SHA-256 IPA: `f03526c498984242c0bc80266324ac467299ef15202d4265c6f73fafec315897`.
-- Artefatto IPA disponibile fino al 31 ottobre 2026, salvo modifiche alla conservazione su GitHub.
+- IPA diretta pubblicata nella release native-0.9.0-build53-unified, con lo stesso checksum verificato. Il link della release non dipende dalla scadenza degli artefatti CI; la copia negli artefatti rimane disponibile fino al 31 ottobre 2026, salvo modifiche alla conservazione.
 - Guard del design system, ZIP sorgenti, digest CI e controlli locali passati. Il controllo whitespace esclude i .diff generati: le righe di contesto vuote contengono per formato uno spazio. Nessuna lettura live del backend con credenziali nella CI.
 
 ## Attivazione e limiti
