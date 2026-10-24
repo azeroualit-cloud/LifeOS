@@ -42,7 +42,7 @@ jobs:
           import hashlib, pathlib, zipfile
           source = pathlib.Path('lifeos-native.zip')
           if source.is_file():
-              assert hashlib.sha256(source.read_bytes()).hexdigest() == 'dd2c74c85e1c31473cc6768bf41d4d470363f76156f27babf039a632a79710bb', 'ZIP sorgenti diverso da quello previsto'
+              assert hashlib.sha256(source.read_bytes()).hexdigest() == 'd85cdec7ed915c654183193e387906dcd18e4078c0e7e0a74d6d1a1501a778f0', 'ZIP sorgenti diverso da quello previsto'
               with zipfile.ZipFile(source) as archive:
                   for name in archive.namelist():
                       p = pathlib.PurePosixPath(name)
@@ -161,6 +161,8 @@ jobs:
               info = plistlib.loads(z.read(app + 'Info.plist'))
               assert info['CFBundleIdentifier'] == 'com.nas.lifeos.probe'
               assert info['CFBundleVersion'] == '53'
+              assert info['CFBundleDevelopmentRegion'] == 'it'
+              assert any(name.startswith(app + 'Metadata.appintents/') for name in z.namelist())
               assert any('lifeos' in x.get('CFBundleURLSchemes', []) for x in info['CFBundleURLTypes'])
               widget = app + 'PlugIns/LifeOSWidget.appex/'
               extension = plistlib.loads(z.read(widget + 'Info.plist'))

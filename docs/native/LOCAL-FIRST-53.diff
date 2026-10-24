@@ -1401,7 +1401,14 @@
 +}
 --- a/project.yml
 +++ b/project.yml
-@@ -17,13 +17,38 @@
+@@ -1,5 +1,6 @@
+ name: LifeOSProbe
+ options:
++  developmentLanguage: it
+   bundleIdPrefix: com.nas.lifeos
+   deploymentTarget:
+     iOS: '17.0'
+@@ -17,13 +18,40 @@
          PRODUCT_BUNDLE_IDENTIFIER: com.nas.lifeos.probe
          GENERATE_INFOPLIST_FILE: YES
          MARKETING_VERSION: '0.9.0'
@@ -1429,6 +1436,8 @@
 +      path: WidgetInfo.plist
 +      properties:
 +        CFBundleDisplayName: Life OS Azioni rapide
++        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
++        CFBundleShortVersionString: $(MARKETING_VERSION)
 +        NSExtension:
 +          NSExtensionPointIdentifier: com.apple.widgetkit-extension
 +    settings:
