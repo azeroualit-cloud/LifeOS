@@ -455,6 +455,7 @@ import SwiftUI
             try DemoActions.apply(method, payload, args: args, state: &next)
             next.refreshedAt = Date(); try save(next); return
         }
+        try NativeServerFeaturePolicy.validate(method, payload: payload, life: life)
         if LocalLifeMutation.supports(method) {
             guard server != nil else { throw Message(text: "Collega il server per sincronizzare le modifiche.") }
             var next = state
