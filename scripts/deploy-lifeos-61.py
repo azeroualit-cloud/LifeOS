@@ -74,6 +74,9 @@ def main():
             changed.append((filename,kind,data))
         if found!=1:raise RuntimeError('Modulo Life OS non univoco.')
         prepared.append((name,settings,entry,original,changed))
+    if os.environ.get("LIFEOS_BACKEND_AUDIT_ONLY") == "1":
+        print("LIVE_BACKEND_CONTEXT_VERIFIED; no code or database writes.")
+        return
     def upload(item,parts):
         name,settings,entry,_,_=item
         metadata={k:settings[k] for k in ['compatibility_date','compatibility_flags','observability','limits','placement'] if k in settings}
