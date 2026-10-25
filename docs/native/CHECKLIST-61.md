@@ -38,3 +38,9 @@ Baseline: archivio pubblico build 60, commit 02c2c089841833a67fc9a223b367710edf7
 57 test Foundation superati, inclusi catalogo attività, programmazione abitudini, notifiche e routing. Worker reale su SQLite: migrazione idempotente, conservazione completate, sezione originale, programmazione abitudini e orari preservati nelle modifiche. Due test del deploy con controlli di contesto/idempotenza e round trip multipart superati. Playwright: tre viewport, zero errori. Parsing Swift, controllo design system e sintassi workflow superati.
 
 Compilazione SwiftUI, test UI, metriche e distribuzione sono in attesa della CI Apple. Non equivalgono al parsing locale.
+
+## Evidenza Apple cumulativa
+
+Esecuzione 40219809250 sul medesimo codice funzionale: 163 test unitari e 40 test UI principali superati; due prove compatte fallivano perché cercavano un'attività completata senza scorrere fino alla sua nuova posizione in fondo. Le prove sono state aggiornate per verificarne raggiungibilità e riapertura. La revisione visiva ha inoltre ridotto lo stile delle icone inline eliminando la spaziatura aggiunta da bordered. Dopo questa modifica locale, la CI riesegue tutti i test unitari, le due prove UI interessate, le sette regressioni mirate e l'intera suite compatta. Le altre 38 prove UI e le metriche calendario hanno già evidenza sul codice funzionale invariato; non si dichiara una nuova esecuzione completa di queste prove.
+
+Distribuzione backend ed esportazione cifrata dei sorgenti live bloccate dalla revisione automatica per mancanza di autorizzazione esplicita. Workflow finale limitato alla build dell'app; nessun deploy né esportazione di sorgenti live. Confronto in sola lettura 40230170470 interrotto su contesto diverso (patch 0), senza scritture.

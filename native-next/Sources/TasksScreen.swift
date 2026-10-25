@@ -122,7 +122,7 @@ private struct NativeTaskControls: View {
                     } label: { Image(systemName: NativeTaskList.section(record) == "waiting" ? "play" : "pause").frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget) }.accessibilityLabel(NativeTaskList.section(record) == "waiting" ? "Riattiva" : "In attesa")
                     Button { router.sheet = .settings } label: { Image(systemName: "bell").frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget) }.accessibilityLabel("Impostazioni notifiche")
                     Button(role: .destructive) { Task { await store.run("deleteTask", args: [.int(record.integer("id"))]) } } label: { Image(systemName: "trash").foregroundStyle(NativeDesign.danger).frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget) }.accessibilityLabel("Elimina attività")
-                }.buttonStyle(.bordered).buttonBorderShape(.capsule).tint(NativeDesign.accent)
+                }.buttonStyle(NativePressStyle()).tint(NativeDesign.accent)
             }
             if title != record.text("title") || notes != record.text("notes") {
                 Button("Salva modifiche") {
