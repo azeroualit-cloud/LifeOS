@@ -3,7 +3,8 @@
   "type": "module",
   "scripts": {
     "test": "node tests/interface.mjs",
-    "build": "python3 build.py"
+    "build": "python3 build.py",
+    "test:tasks": "node tests/task-retention.mjs"
   },
   "devDependencies": {
     "playwright": "1.64.1"

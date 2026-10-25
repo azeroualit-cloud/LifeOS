@@ -1,3 +1,9 @@
+# Revisione 25 ottobre 2026
+
+Accento blu, superfici scure e attività completate conservate nelle sezioni Attivo/In attesa. `npm run test:tasks` esegue le funzioni reali del Worker contro SQLite isolato (Node 24); `npm test` include regressioni di ordinamento, riapertura e contrasto del testo. Il backend ora differisce dalla baseline storica descritta sotto: rimozione della cancellazione automatica dopo cinque giorni e migrazione additiva section_status. Non distribuito. Il calendario continuo e i comandi inline sono implementati nel client nativo; il calendario web resta invariato.
+
+---
+
 # Webapp Life OS
 
 `worker.mjs` conserva il backend del sorgente fornito il 17 ottobre 2026; `app.html` è il suo APP_HTML leggibile. Modificare HTML e rigenerare la costante prima del deploy. Non distribuire con nuovi binding: il worker `lifeos` deve mantenere DB, segreti e Cloudflare Access esistenti.
