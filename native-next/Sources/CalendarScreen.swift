@@ -44,7 +44,6 @@ struct CalendarScreen: View {
             .accessibilityIdentifier("calendar-scroll")
             .safeAreaInset(edge: .top, spacing: NativeDesign.Space.none) {
                 VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-                    monthHeader
                     brushPanel
                     if loading { ProgressView("Aggiornamento calendario").font(.caption) }
                     if let loadError {
@@ -142,13 +141,6 @@ struct CalendarScreen: View {
             })
         })
     }
-    private var monthHeader: some View {
-        HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.small) {
-            Spacer(minLength: NativeDesign.Space.small)
-            NativeIconButton(symbol: "chevron.left", label: "Mese precedente") { jumpMonth = NativeCalendarWindow.offset(focusMonth, by: -1) }
-            NativeIconButton(symbol: "chevron.right", label: "Mese successivo") { jumpMonth = NativeCalendarWindow.offset(focusMonth, by: 1) }
-        }.disabled(store.busy).accessibilityElement(children: .contain)
-    }
     private func goToToday() {
         selected = CivilDate.day(); router.calendarDay = selected
         jumpMonth = String(selected.prefix(7))
@@ -194,9 +186,11 @@ struct CalendarScreen: View {
                     Text("Oggi").frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle())
                 }
                     .accessibilityIdentifier("calendar-today").disabled(store.busy)
-                Button { withAnimation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration)) { painting.toggle(); brush = painting ? "morning" : "consult" } } label: { Label(painting ? "Fine" : "Dipingi turni", systemImage: "paintbrush.pointed").frame(minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle()) }.accessibilityIdentifier("toggle-shift-paint")
+                Button { withAnimation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration)) { painting.toggle(); brush = painting ? "morning" : "consult" } } label: { Label(painting ? "Fine" : "Dipingi turni", systemImage: "paintbrush.pointed").labelStyle(.iconOnly).frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle()) }.accessibilityIdentifier("toggle-shift-paint")
                 Spacer()
                 if let lastShift { Button("Annulla") { Task { await store.run("paintShift", ["day": .string(lastShift.0), "kind": .string(lastShift.1)]); if store.error == nil { self.lastShift = nil } } }.disabled(store.busy) }
+                NativeIconButton(symbol: "chevron.left", label: "Mese precedente") { jumpMonth = NativeCalendarWindow.offset(focusMonth, by: -1) }.disabled(store.busy)
+                NativeIconButton(symbol: "chevron.right", label: "Mese successivo") { jumpMonth = NativeCalendarWindow.offset(focusMonth, by: 1) }.disabled(store.busy)
             }.font(.subheadline).frame(minHeight: NativeDesign.Layout.touchTarget)
             if painting {
                 Text("Scegli un turno, poi tocca i giorni da assegnare. Usa Cancella per rimuoverlo.").font(.caption).foregroundStyle(NativeDesign.secondary)
