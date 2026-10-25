@@ -22,7 +22,7 @@ struct NativeIntegrationSettings: View {
             Text(status).font(.caption).foregroundStyle(NativeDesign.secondary)
             Text("Attività all’orario scelto (altrimenti alle 9 del giorno programmato o della scadenza), eventi 15 minuti prima, turni un’ora prima. Sono programmati i prossimi 48 avvisi dai dati presenti su questo iPhone. Apri l’app dopo modifiche dal web per aggiornarli.").font(.caption).foregroundStyle(NativeDesign.secondary)
             if let url = URL(string: UIApplication.openSettingsURLString) { Link("Impostazioni notifiche di iPhone", destination: url) }
-            NavigationLink { ShiftCalendarPanel().navigationTitle("Esporta turni").navigationBarTitleDisplayMode(.inline) } label: {
+            NavigationLink { Form { ShiftCalendarPanel() }.modifier(NativeListAppearance()).navigationTitle("Esporta turni").navigationBarTitleDisplayMode(.inline) } label: {
                 Label("Esporta turni su Apple", systemImage: "calendar.badge.plus")
             }.accessibilityIdentifier("shift-export-settings")
             ShortcutsLink()

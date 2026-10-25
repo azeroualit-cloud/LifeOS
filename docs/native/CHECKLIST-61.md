@@ -31,13 +31,13 @@ Baseline: archivio pubblico build 60, commit 02c2c089841833a67fc9a223b367710edf7
 25. Palette, cambio turno e annullamento mantengono animazioni e feedback.
 26. Presentazioni e chiusure native degli editor conservate.
 27. Test per testo grande, Riduci movimento, geometria e prestazioni dello scroll; le metriche del simulatore non attestano gli FPS su un iPhone fisico.
-28. Patch server con confronto puntuale e rollback: conservazione completate, programmazione abitudini e orario notifiche. Preserva autenticazione, binding e aggiornamenti live estranei. Distribuzione da verificare nel workflow; non sostituire il modulo live con una baseline vecchia.
+28. Patch server con confronto puntuale e rollback: conservazione completate, programmazione abitudini e orario notifiche. Preserva autenticazione, binding e aggiornamenti live estranei. Distribuzione NON eseguita: contesto live diverso, autorizzazione esplicita ancora necessaria dopo il blocco della revisione automatica. Non sostituire il modulo live con una baseline vecchia.
 
 ## Verifiche locali
 
-57 test Foundation superati, inclusi catalogo attività, programmazione abitudini, notifiche e routing. Worker reale su SQLite: migrazione idempotente, conservazione completate, sezione originale, programmazione abitudini e orari preservati nelle modifiche. Due test del deploy con controlli di contesto/idempotenza e round trip multipart superati. Playwright: tre viewport, zero errori. Parsing Swift, controllo design system e sintassi workflow superati.
+59 test Foundation superati, inclusi catalogo attività, programmazione abitudini, notifiche e routing. Worker reale su SQLite: migrazione idempotente, conservazione completate, sezione originale, programmazione abitudini e orari preservati nelle modifiche. Due test del deploy con controlli di contesto/idempotenza e round trip multipart superati. Playwright: tre viewport, zero errori. Parsing Swift, controllo design system e sintassi workflow superati.
 
-Compilazione SwiftUI, test UI, metriche e distribuzione sono in attesa della CI Apple. Non equivalgono al parsing locale.
+Compilazione SwiftUI e archivio Release superati nella CI Apple 40235736129; 165 test unitari, 7 regressioni, 2 prove UI principali aggiornate e 14 prove compatte senza fallimenti. La verifica finale aggiunge soltanto la raggiungibilità dell’esportazione dalle Impostazioni. Distribuzione backend ancora bloccata.
 
 ## Evidenza Apple cumulativa
 
@@ -48,3 +48,7 @@ Distribuzione backend ed esportazione cifrata dei sorgenti live bloccate dalla r
 ## Ultimo controllo di raggiungibilità
 
 Run 40235736129: regressioni calendario/attività, Finanza, test unitari e righe modificate, oltre a tutti i 14 casi compatti, superati. Aggiunto accesso stabile a Esporta turni nelle Impostazioni: la lista dei mesi si estende e il comando in fondo non deve essere l’unico percorso. Per questa sola aggiunta si ripetono compilazione, unit test e navigazione dedicata sui due simulatori; le suite precedenti restano nel codice. Nessuna pubblicazione o lettura privata in questa verifica demo.
+
+Run finale 40238702185, commit 9df60f95628b4d5da34b55bd87c86edc902b1972: compilazione Apple, suite unitaria e accesso a Esporta turni dalle Impostazioni su entrambi i simulatori superati. Nessun’altra modifica funzionale rispetto alla suite precedente.
+
+Controllo visivo finale: il nuovo accesso nelle Impostazioni usa Form per margini e scorrimento nativi, anche con i comandi aggiuntivi di un server collegato. Per questa sola composizione UI, si ripetono compilazione e le due prove dedicate; 165 unitari già superati sul codice logico invariato.
