@@ -135,7 +135,7 @@ struct NativeCheckmark: View {
     @Environment(\.nativeReduceMotion) private var reduceMotion
     let checked: Bool
     var body: some View {
-        Image(systemName: checked ? "checkmark.circle.fill" : "circle")
+        Image(systemName: checked ? "largecircle.fill.circle" : "circle")
             .symbolRenderingMode(.monochrome).font(.title2.weight(.regular))
             .foregroundStyle(checked ? NativeDesign.accent : NativeDesign.secondary)
             .contentTransition(reduceMotion ? .identity : .symbolEffect(.replace))
