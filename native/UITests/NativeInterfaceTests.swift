@@ -355,7 +355,8 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Modifica attività"].waitForExistence(timeout: 10))
         capture("long-task-editor")
         app.buttons["Annulla"].tap()
-        XCTAssertTrue(app.staticTexts[title].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons[title].waitForExistence(timeout: 10))
+        XCTAssertEqual(app.buttons["Cambia completamento " + title].value as? String, "Da completare")
     }
     func testDashboardDayRestoresCalendarMonthAndSelection() {
         let app = launch()
