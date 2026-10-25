@@ -109,7 +109,7 @@ private struct NativeTaskControls: View {
     var body: some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
             HStack {
-                TextField("Titolo", text: $title, axis: .vertical).accessibilityIdentifier("inline-task-title")
+                TextField("Titolo", text: $title, axis: .vertical).foregroundStyle(record.text("status") == "done" ? NativeDesign.secondary : Color.primary).accessibilityIdentifier("inline-task-title")
                 Button(action: onClose) { Image(systemName: "chevron.up").frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget) }.accessibilityLabel("Chiudi comandi attività")
             }
             TextField("Aggiungi nota", text: $notes, axis: .vertical).font(.subheadline).foregroundStyle(NativeDesign.secondary)
