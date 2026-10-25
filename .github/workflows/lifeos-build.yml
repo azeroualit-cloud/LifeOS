@@ -12,7 +12,7 @@ jobs:
   build:
     if: github.event.repository.private == false
     runs-on: macos-15
-    timeout-minutes: 75
+    timeout-minutes: 110
     defaults:
       run:
         shell: bash
@@ -142,6 +142,7 @@ jobs:
         run: |
           set -euo pipefail
           DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,re,sys; d=json.load(sys.stdin); keys=sorted((k for k in d["devices"] if "iOS" in k),key=lambda k:tuple(map(int,re.findall(r"\d+",k))),reverse=True); print(next(x["udid"] for k in keys for x in d["devices"][k] if "iPhone" in x["name"]))')
+          echo "MAIN_DEVICE=$DEVICE" >> "$GITHUB_ENV"
           xcodebuild build-for-testing -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compile.log
       - name: Verifica regressioni calendario e attività
         timeout-minutes: 12
@@ -157,29 +158,33 @@ jobs:
         working-directory: app
         run: |
           set -euo pipefail
+          xcrun simctl shutdown "$MAIN_DEVICE"
           RUNTIME=$(xcrun simctl list runtimes -j | python3 -c 'import json,sys; r=[x for x in json.load(sys.stdin)["runtimes"] if x.get("isAvailable") and x["name"].startswith("iOS")]; print(sorted(r,key=lambda x:tuple(map(int,x["version"].split("."))),reverse=True)[0]["identifier"])')
           COMPACT=$(xcrun simctl create 'LifeOS compact' 'com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation' "$RUNTIME")
           echo "COMPACT=$COMPACT" >> "$GITHUB_ENV"
           xcrun simctl boot "$COMPACT"
           xcrun simctl bootstatus "$COMPACT" -b
           xcodebuild test-without-building -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT" -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFinanceOverviewSupportsLargeTextAndEmptySnapshot -resultBundlePath build/Focused.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/focused-tests.log
+          xcrun simctl shutdown "$COMPACT"
       - name: Compila ed esegui tutti i test
-        timeout-minutes: 35
+        timeout-minutes: 50
         working-directory: app
         run: |
           set -euo pipefail
           DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,re,sys; d=json.load(sys.stdin); keys=sorted((k for k in d["devices"] if "iOS" in k),key=lambda k:tuple(map(int,re.findall(r"\d+",k))),reverse=True); print(next(x["udid"] for k in keys for x in d["devices"][k] if "iPhone" in x["name"]))')
+          xcrun simctl boot "$DEVICE"
+          xcrun simctl bootstatus "$DEVICE" -b
           xcodebuild test -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -parallel-testing-enabled NO -resultBundlePath build/Tests.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/tests.log
       - name: Esporta anteprima principale
         if: always()
         continue-on-error: true
         working-directory: app
         run: |
-          if [ -d build/Tests.xcresult ]; then
+          if [ -f build/Tests.xcresult/Info.plist ]; then
             xcrun xcresulttool export attachments --path build/Tests.xcresult --output-path build/screenshots
-          elif [ -d build/Regression.xcresult ]; then
+          elif [ -f build/Regression.xcresult/Info.plist ]; then
             xcrun xcresulttool export attachments --path build/Regression.xcresult --output-path build/screenshots
-          elif [ -d build/Focused.xcresult ]; then
+          elif [ -f build/Focused.xcresult/Info.plist ]; then
             xcrun xcresulttool export attachments --path build/Focused.xcresult --output-path build/screenshots
           fi
       - name: Anteprima principale durante la verifica compatta
@@ -195,13 +200,16 @@ jobs:
         working-directory: app
         run: |
           set -euo pipefail
+          xcrun simctl shutdown "$MAIN_DEVICE"
+          xcrun simctl boot "$COMPACT"
+          xcrun simctl bootstatus "$COMPACT" -b
           xcodebuild test -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFourSectionsInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarEventCanBeCreatedAfterBoundaryScroll -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testLargeTextAndSixWeekCalendar -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeSummaryAndVerticalRoutinesInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarSelectionUpdatesImmediatelyAndKeepsEventIndex -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeEmptyStatesRemainActionable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeManyEventsAndTasksStayBoundedAndReachable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testSharedRowsAndCategoryChoicesKeepAccessibleTargets -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testNavigationKeepsSelectionAndGeometryWhenChangingTabs -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFinanceOverviewSupportsLargeTextAndEmptySnapshot -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeRestoresNeutralNextTimeWithoutArabicNames -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testReducedMotionKeepsChecklistAndFinanceActionsFunctional -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarTodayRestoresMonthAndSelection -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testNativeToolbarRespondsAcross44PointTouchRegion -resultBundlePath build/Compact.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compact.log
       - name: Esporta schermate del simulatore
         if: always()
         continue-on-error: true
         working-directory: app
         run: |
-          if [ -d build/Compact.xcresult ]; then
+          if [ -f build/Compact.xcresult/Info.plist ]; then
             xcrun xcresulttool export attachments --path build/Compact.xcresult --output-path build/compact-screenshots
           fi
       - name: Crea una sola IPA per iPhone
