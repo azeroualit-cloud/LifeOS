@@ -1,3 +1,7 @@
+## Revisione 25 ottobre 2026 — build 52 in verifica
+
+Implementati nel sorgente nativo contrasto/accento, completamento reversibile in Attivo/In attesa, comandi inline e calendario continuo. Backend aggiornato per conservare le completate senza scadenza e ricordare la sezione; web allineato alla nuova logica delle attività. 62 test Foundation, regressione del Worker su SQLite isolato, parsing Swift, design check e browser 320/375/1280 passati. L’utente ha autorizzato esplicitamente build Apple e pubblicazione di IPA, log, risultati e screenshot demo sul repository pubblico. Preparazione della CI in corso; backend non distribuito. Dettagli e limiti: native/REVISIONE-0.9.0-52.md.
+
 ## Webapp — revisione locale 17 ottobre 2026
 
 Sorgente completo recuperato dal file allegato e versionato in `web/worker.mjs`, HTML leggibile in `web/app.html`. Palette platino, Finanza aperta senza card, Budget/Extra/Spesa (Spesa a destra), Budget separato, grafici esistenti in Analisi; calendario uniforme senza fondi weekend e selezione sul numero; più contestuale nell’intestazione e microanimazioni con Riduci movimento. Rimossi dalla UI il Sankey storico e il riepilogo annuale. Backend identico alla baseline allegata.

@@ -27,6 +27,29 @@ for(const [width,height] of [[375,812],[320,568],[1280,900]]) {
 
  if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw Error('Calendar overflow '+width);
 }
+// Completion remains in its section, follows open tasks, and can be reopened.
+await page.evaluate(()=>{
+ life.data.categories=[{key:'action',label:'Attività'}]; life.category='action';
+ life.data.tasks=[
+  {id:1,title:'Pasta',list_kind:'action',status:'done',sort_order:0},
+  {id:2,title:'Kiwi',list_kind:'action',status:'todo',sort_order:1},
+  {id:3,title:'Riso',list_kind:'action',status:'done',section_status:'waiting',sort_order:2},
+  {id:4,title:'Banane',list_kind:'action',status:'waiting',sort_order:3}
+ ]; setView('tasks'); renderLifeOS();
+});
+const sections=page.locator('#tasks .os-task-section');
+if(await sections.count()!==2)throw Error('Only Active and Waiting sections expected');
+if(await sections.nth(0).locator('.os-task-title').allTextContents().then(t=>t.join(','))!=='Kiwi,Pasta')throw Error('Active ordering');
+if(await sections.nth(1).locator('.os-task-title').allTextContents().then(t=>t.join(','))!=='Banane,Riso')throw Error('Waiting ordering');
+if(await page.locator('.os-completed').count())throw Error('Completed must not be a separate section');
+if(await page.locator('[data-life-status="3:waiting"]').count()!==1)throw Error('Reopening must restore Waiting');
+if(await page.locator('#tasks .done .os-task-title').first().evaluate(e=>getComputedStyle(e).textDecorationLine)!=='none')throw Error('Completed text must not be struck through');
+for(const width of [320,375,1280]) {
+ await page.setViewportSize({width,height:812});
+ if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw Error('Tasks overflow '+width);
+}
+await page.setViewportSize({width:375,height:812});
+await page.screenshot({path:new URL('../previews/attivita.png',import.meta.url).pathname,fullPage:true});
 await page.emulateMedia({reducedMotion:'reduce'});
 if(await page.locator('.theme-toggle').evaluate(e=>getComputedStyle(e).transitionDuration)!=='0s')throw Error('Reduced motion');
 console.log(JSON.stringify({viewports:3,errors}));await browser.close();if(errors.length)process.exitCode=1;

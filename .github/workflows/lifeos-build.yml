@@ -2,7 +2,7 @@ name: Life OS - App nativa
 on:
   workflow_dispatch:
   push:
-    paths: ['lifeos-native.zip', '.github/workflows/lifeos-build.yml', '.github/workflows/ios.yml', 'Sources/**', 'Tests/**', 'Assets.xcassets/**', 'project.yml']
+    paths: ['lifeos-native.zip', '.github/workflows/lifeos-build.yml', '.github/workflows/ios.yml', 'Sources/**', 'Tests/**', 'Assets.xcassets/**', 'project.yml', 'native/**']
 permissions:
   contents: read
 concurrency:
@@ -48,6 +48,14 @@ jobs:
                       p = pathlib.PurePosixPath(name)
                       assert not p.is_absolute() and '..' not in p.parts
                   archive.extractall('app')
+              # Apply only the reviewed changes; never republish unchanged private configuration.
+              import shutil
+              overlay = pathlib.Path('native')
+              for path in overlay.rglob('*'):
+                  if path.is_file() and path.parts[1] in ['Sources', 'Tests', 'UITests', 'project.yml', 'DESIGN-SYSTEM.md']:
+                      target = pathlib.Path('app') / path.relative_to(overlay)
+                      target.parent.mkdir(parents=True, exist_ok=True)
+                      shutil.copy2(path, target)
           elif pathlib.Path('project.yml').is_file():
               import shutil
               pathlib.Path('app').mkdir()
@@ -59,6 +67,11 @@ jobs:
           else:
               raise SystemExit('Manca lifeos-native.zip nella radice del repository.')
           PY
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verifica conservazione attività su database isolato
+        run: node web/tests/task-retention.mjs
       - name: Verifica design system
         working-directory: app
         run: python3 scripts/check-design-system.py
@@ -70,7 +83,9 @@ jobs:
           xcodegen generate
           mkdir -p build
       - name: Verifica contratto nativo sul database condiviso
-        if: github.repository == 'azeroualit-cloud/LifeOS'
+        # The legacy live getLifeData deletes completed tasks after five days.
+        # Keep the live contract opt-in until the retention backend is deployed.
+        if: github.repository == 'azeroualit-cloud/LifeOS' && github.event_name == 'workflow_dispatch'
         working-directory: app
         env:
           LIFEOS_TEST_PASSWORD: ${{ secrets.LIFEOS_TEST_PASSWORD }}
