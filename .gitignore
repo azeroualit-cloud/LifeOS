@@ -1,0 +1,6 @@
+web/node_modules/
+native/.build/
+native/build/
+native/*.xcodeproj/
+__pycache__/
+web/previews/attivita.png

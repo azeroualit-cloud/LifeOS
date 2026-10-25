@@ -39,12 +39,12 @@ One design system owns layout and components. Finance and Life OS logic are pres
 <style id="lifeos-design-system">/* Life OS: one set of tokens, one layout, one component system. */
 :root {
  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:14px;line-height:1.45;
- --os-bg:#0c0c0e;--os-panel:#171719;--os-panel-2:#222225;--ink:#f4f5f7;--muted:#a2a2a9;--line:#303034;--os-accent:#a5aeed;--os-focus:#a5aeed;--green:var(--os-accent);--red:#ee858e;
+ --os-bg:#0c0c0e;--os-panel:#171719;--os-panel-2:#222225;--ink:#f4f5f7;--muted:#a2a2a9;--line:#303034;--os-accent:#dedede;--os-focus:#dedede;--green:var(--os-accent);--red:#ee858e;
  --surface:var(--os-panel);--blue:var(--os-accent);--os-secondary:var(--muted);--os-border:var(--line);--os-text:var(--ink);
  --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--page-gutter:20px;--card-padding:20px;--card-radius:22px;--space:16px;--nav-height:72px;
  color-scheme:dark;background:var(--os-bg);color:var(--ink);
 }
-html[data-theme="light"] {--os-bg:#f3f3f5;--os-panel:#fff;--os-panel-2:#e8e8ec;--ink:#202024;--muted:#64646d;--line:#dcdce1;--os-accent:#565f9c;--os-focus:#565f9c;--green:var(--os-accent);--red:#b53747;color-scheme:light;}
+html[data-theme="light"] {--os-bg:#f3f3f5;--os-panel:#fff;--os-panel-2:#e8e8ec;--ink:#202024;--muted:#64646d;--line:#dcdce1;--os-accent:#3b3b3b;--os-focus:#3b3b3b;--green:var(--os-accent);--red:#b53747;color-scheme:light;}
 *,*::before,*::after {box-sizing:border-box;} body {margin:0;background:var(--os-bg);color:var(--ink);-webkit-text-size-adjust:100%;}
 button,input,select,textarea {font:inherit;}button {cursor:pointer;color:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
 button {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:9px 14px;background:transparent;border:1px solid var(--line);border-radius:12px;}
@@ -125,14 +125,16 @@ html:not([data-theme="light"]) [data-kind="holiday"] {--shift-color:#d7bf52;}
 </style>
   <style id="native-web-parity">
 /* Web parity with native 0.9.0. Shift palette and data contracts are unchanged. */
-:root {--os-bg:#0b0b0b;--os-panel:#1c1c1e;--os-panel-2:#272729;--ink:#f4f4f5;--muted:#adadad;--os-accent:#dedede;--os-focus:#dedede;--green:#8cbaa1;--red:#d4928f;--card-radius:24px;font-size:17px;}
-html[data-theme="light"] {--os-accent:#3b3b3b;--os-focus:#3b3b3b;--green:#387354;--red:#a14947;}
+:root {--os-bg:#0b0b0b;--os-panel:#131313;--os-panel-2:#272729;--ink:#f4f4f5;--muted:#adadad;--os-accent:#40a6ff;--os-focus:#40a6ff;--green:#8cbaa1;--red:#d4928f;--card-radius:24px;font-size:17px;}
+html[data-theme="light"] {--os-accent:#005cc2;--os-focus:#005cc2;--green:#387354;--red:#a14947;}
 button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {font-size:17px;}button {transition:opacity .18s,background-color .16s,transform .18s;}button:active:not(:disabled) {transform:scale(.985);opacity:.75;}
 .finance-tabs {display:none!important;}.finance-open {max-width:720px;margin-inline:auto;}.finance-heading {display:flex;align-items:center;justify-content:space-between;gap:16px;}.finance-heading>button {border:0;}.finance-hero {padding:32px 0 24px;text-align:center;}.finance-hero h2 {color:var(--muted);font-weight:500;}.finance-value {display:block;font-size:clamp(32px,7vw,56px);line-height:1.2;letter-spacing:-1.5px;margin:12px 0;overflow-wrap:anywhere;}.finance-hero p {font-size:15px;}.finance-account {display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:16px 0 24px;}.finance-account>div {flex:1;min-width:0;}.finance-account h2 {color:var(--muted);font-size:15px;font-weight:500;}.finance-account strong {font-size:28px;overflow-wrap:anywhere;}.finance-account>small {flex-basis:100%;}.finance-actions {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;padding:8px 0 32px;}.finance-actions button {display:flex;flex-direction:column;border:0;padding:0;min-width:0;background:transparent;}.finance-actions span {display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--os-panel-2);font-size:28px;border:1px solid var(--line);}.finance-recent {padding-top:16px;}.finance-movement {display:flex;width:100%;justify-content:space-between;gap:16px;text-align:left;border:0;border-radius:0;border-bottom:1px solid var(--line);padding:16px 0;background:transparent;}.finance-movement>span {min-width:0;}.finance-movement strong {display:block;overflow-wrap:anywhere;}.finance-movement small {display:block;}.finance-movement>b {flex-shrink:0;font-size:15px;}
 :is(#budget,#analysis,#extras,#movements) .card {background:transparent;border:0;border-radius:0;padding:20px 0;border-bottom:1px solid var(--line);}.overview-analysis-grid,.chart-pair {gap:24px;}.os-calendar-week {background:transparent;border:0;border-top:1px solid var(--line);border-radius:0;padding:8px 0;gap:0;}.os-days {gap:0;}.os-day {height:64px;min-height:64px;background:transparent;border-radius:0;}.os-calendar-week>.os-day:nth-child(n+6),.os-calendar-week>.os-day:nth-child(n+6).selected,.os-day.selected {background:transparent;box-shadow:none;}.os-day b {width:26px;height:26px;border-radius:50%;font-size:15px;}.os-day.today b {background:transparent;color:var(--ink);outline:1px solid var(--muted);}.os-day.selected b {background:var(--os-accent);color:var(--os-bg);outline:0;}.os-day .os-shift {border-radius:6px;height:20px;}.os-day-mark {color:var(--shift-color,var(--muted));}.os-calendar-week>.os-day:nth-child(n+6):not(.selected) b {color:var(--muted);}#calendar>.os-card {background:transparent;border:0;padding:0;}.os-calendar-details {padding-top:24px;}.os-month-header h2 {font-size:26px;}.os-home-week .os-day {background:transparent;}
 @supports ((backdrop-filter:blur(20px)) or (-webkit-backdrop-filter:blur(20px))) {.theme-toggle,.fab-button {background:color-mix(in srgb,var(--os-panel-2) 72%,transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}}
 @media(max-width:760px) {.nav {background:color-mix(in srgb,var(--os-panel) 90%,transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}main {padding-inline:20px;}.overview-analysis-grid,.chart-pair {grid-template-columns:minmax(0,1fr);}.finance-hero {padding-top:24px;}.os-day {min-height:58px;height:58px;}}
 .header-tools .page-fab {position:static;z-index:auto;}.header-tools .page-fab .fab-button {width:44px;height:44px;min-height:44px;border:1px solid var(--line);box-shadow:none;color:var(--os-accent);background:var(--os-panel-2);}.header-tools .theme-toggle {width:44px;height:44px;min-height:44px;}.header-tools .os-more-menu summary {width:44px;height:44px;}
+.os-task.done {background:transparent;opacity:1;}.os-task.done .os-task-title {color:var(--muted);text-decoration:none;}.os-task.done .os-check {background:var(--os-accent);border-color:var(--os-accent);color:var(--os-bg);}
+.os-task-section .os-task {grid-template-columns:26px minmax(0,1fr) 44px;}.os-task-section .os-task:has(.os-drag-handle) {grid-template-columns:28px 26px minmax(0,1fr) 44px;}.os-wait,.os-task-delete {width:44px;min-height:44px;padding:0;}
 @media(prefers-reduced-motion:reduce) {*,*::before,*::after {animation:none!important;transition:none!important;scroll-behavior:auto!important;}}
 </style></head>
   <body class="dashboard-mode">
@@ -709,6 +711,13 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         }
       }
 
+      function osRoutineDue(schedule, day) {
+        if (!day || (schedule.startDate && day < schedule.startDate)) return false;
+        if (schedule.mode === "daily") return true;
+        if (schedule.mode === "weekdays") return (schedule.weekdays || []).includes((new Date(day+"T12:00:00Z").getUTCDay()+6)%7+1);
+        if (schedule.mode === "interval" && schedule.intervalDays > 0) return Math.round((Date.parse(day+"T12:00:00Z")-Date.parse(schedule.startDate+"T12:00:00Z"))/86400000)%schedule.intervalDays === 0;
+        return false;
+      }
       /** Markup dashboard: routine, oggi/domani, tre attività, eventi e saldi. */
       function osToday() {
         const d = life.data,
@@ -722,7 +731,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
             (t) => t.status === "waiting" && t.list_kind === "action",
           ),
           upcoming = (d.upcomingEvents || []).slice(0, 3);
-        const habits = d.routines || [],
+        const habits = (d.routines || []).filter(h => !h.schedule || osRoutineDue(h.schedule, d.today)),
           complete = habits.filter((h) => h.checked).length;
         const finance = life.finance?.summary;
         const shiftLabel = (v) =>
@@ -806,8 +815,8 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
 
       /** Riga attività; escaping obbligatorio per titolo e attributi utente. */
       function osTaskRow(t) {
-        const waiting = t.status === "waiting";
-        return `<div class="os-task ${t.status === "done" ? "done" : ""}" data-life-drag-row="${t.id}">${t.status === "todo" ? `<button type="button" class="os-drag-handle" data-life-drag-handle="${t.id}" aria-label="Riordina ${osSafe(t.title)}. Trascina o usa Alt più freccia su o giù" title="Trascina per riordinare"><svg viewBox="0 0 20 24" width="16" height="22" fill="currentColor" aria-hidden="true"><circle cx="6" cy="5" r="1.4"/><circle cx="14" cy="5" r="1.4"/><circle cx="6" cy="12" r="1.4"/><circle cx="14" cy="12" r="1.4"/><circle cx="6" cy="19" r="1.4"/><circle cx="14" cy="19" r="1.4"/></svg></button>` : ""}<button class="os-check" data-life-status="${t.id}:${t.status === "done" ? "todo" : "done"}" aria-label="${t.status === "done" ? "Riapri" : "Completa"} ${osSafe(t.title)}">${t.status === "done" ? "✓" : ""}</button><button class="os-task-title" data-life-task="${t.id}">${osSafe(t.title)}${osDueBadge(t.due_date || t.scheduled_date, t.status)}</button>${t.status !== "done" ? `<button class="os-wait ${waiting ? "waiting" : ""}" data-life-status="${t.id}:${waiting ? "todo" : "waiting"}" title="${waiting ? "Riporta in Da fare" : "Metti in attesa"}" aria-label="${waiting ? "Riporta in Da fare" : "Metti in attesa"} ${osSafe(t.title)}" aria-pressed="${waiting}"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12M6 21h12M7 3v4c0 2 2 3 5 5-3 2-5 3-5 5v4M17 3v4c0 2-2 3-5 5 3 2 5 3 5 5v4"/></svg></button>` : `<button class="os-task-delete" data-life-delete-task="${t.id}" aria-label="Elimina ${osSafe(t.title)}" title="Elimina attività"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 4h4M6 7l1 13h10l1-13M10 11v5M14 11v5"/></svg></button>`}</div>`;
+        const waiting = (t.status === "done" ? t.section_status : t.status) === "waiting";
+        return `<div class="os-task ${t.status === "done" ? "done" : ""}" data-life-drag-row="${t.id}">${t.status === "todo" ? `<button type="button" class="os-drag-handle" data-life-drag-handle="${t.id}" aria-label="Riordina ${osSafe(t.title)}. Trascina o usa Alt più freccia su o giù" title="Trascina per riordinare"><svg viewBox="0 0 20 24" width="16" height="22" fill="currentColor" aria-hidden="true"><circle cx="6" cy="5" r="1.4"/><circle cx="14" cy="5" r="1.4"/><circle cx="6" cy="12" r="1.4"/><circle cx="14" cy="12" r="1.4"/><circle cx="6" cy="19" r="1.4"/><circle cx="14" cy="19" r="1.4"/></svg></button>` : ""}<button class="os-check" data-life-status="${t.id}:${t.status === "done" ? (t.section_status === "waiting" ? "waiting" : "todo") : "done"}" aria-label="${t.status === "done" ? "Riapri" : "Completa"} ${osSafe(t.title)}">${t.status === "done" ? "✓" : ""}</button><button class="os-task-title" data-life-task="${t.id}">${osSafe(t.title)}${osDueBadge(t.due_date || t.scheduled_date, t.status)}</button>${t.status !== "done" ? `<button class="os-wait ${waiting ? "waiting" : ""}" data-life-status="${t.id}:${waiting ? "todo" : "waiting"}" title="${waiting ? "Riporta in Da fare" : "Metti in attesa"}" aria-label="${waiting ? "Riporta in Da fare" : "Metti in attesa"} ${osSafe(t.title)}" aria-pressed="${waiting}"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12M6 21h12M7 3v4c0 2 2 3 5 5-3 2-5 3-5 5v4M17 3v4c0 2-2 3-5 5 3 2 5 3 5 5v4"/></svg></button>` : `<button class="os-task-delete" data-life-delete-task="${t.id}" aria-label="Elimina ${osSafe(t.title)}" title="Elimina attività"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 4h4M6 7l1 13h10l1-13M10 11v5M14 11v5"/></svg></button>`}</div>`;
       }
 
       /** Lista della categoria selezionata; azioni secondarie nel menu Opzioni. */
@@ -817,10 +826,9 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
           life.category = d.categories[0]?.key || "action";
         const active = d.categories.find((c) => c.key === life.category),
           items = d.tasks.filter((t) => t.list_kind === life.category),
-          todo = items.filter((t) => t.status === "todo"),
-          waiting = items.filter((t) => t.status === "waiting"),
-          done = items.filter((t) => t.status === "done");
-        return `<div class="os-category-navigation"><nav class="os-category-tabs" aria-label="Categorie attività">${d.categories.map((c) => `<button data-life-select-category="${osSafe(c.key)}" class="${life.category === c.key ? "active" : ""}" aria-current="${life.category === c.key ? "page" : "false"}">${osSafe(c.label)}</button>`).join("")}</nav><button data-life-category class="os-category-add" aria-label="Aggiungi e ordina categorie">+</button></div><div class="os-card os-category-page ${life.reorder ? "is-reordering" : ""}">${todo.length ? todo.map(osTaskRow).join("") : !waiting.length ? '<p class="os-task-empty">Nessuna attività.</p>' : ""}${waiting.length ? `<section class="os-task-section"><h3>In attesa</h3>${waiting.map(osTaskRow).join("")}</section>` : ""}${done.length ? `<details class="os-completed"><summary>Completate · ${done.length}</summary>${done.map(osTaskRow).join("")}<button class="os-delete-completed" data-life-delete-completed="${osSafe(life.category)}">Elimina completate</button></details>` : ""}</div>`;
+          todo = items.filter((t) => t.status === "todo" || (t.status === "done" && t.section_status !== "waiting")).sort((a,b) => Number(a.status === "done") - Number(b.status === "done") || a.sort_order - b.sort_order || a.id - b.id),
+          waiting = items.filter((t) => t.status === "waiting" || (t.status === "done" && t.section_status === "waiting")).sort((a,b) => Number(a.status === "done") - Number(b.status === "done") || a.sort_order - b.sort_order || a.id - b.id);
+        return `<div class="os-category-navigation"><nav class="os-category-tabs" aria-label="Categorie attività">${d.categories.map((c) => `<button data-life-select-category="${osSafe(c.key)}" class="${life.category === c.key ? "active" : ""}" aria-current="${life.category === c.key ? "page" : "false"}">${osSafe(c.label)}</button>`).join("")}</nav><button data-life-category class="os-category-add" aria-label="Aggiungi e ordina categorie">+</button></div><div class="os-card os-category-page ${life.reorder ? "is-reordering" : ""}"><section class="os-task-section"><h3>Attivo</h3>${todo.length ? todo.map(osTaskRow).join("") : '<p class="os-task-empty">Nessuna attività attiva.</p>'}</section>${waiting.length ? `<section class="os-task-section"><h3>In attesa</h3>${waiting.map(osTaskRow).join("")}</section>` : ""}</div>`;
       }
 
       /** Editor evento o serie; una modifica da qui passa split_from al server. */
@@ -1220,6 +1228,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
           if (el.closest(".os-dialog")) osClose();
           return osWrite("setTaskStatus", { id: Number(id), status }, () => {
             const t = life.data.tasks.find((t) => t.id === Number(id));
+            t.section_status = status === "done" ? (t.status === "waiting" ? "waiting" : t.section_status || "todo") : status;
             t.status = status;
             t.completed_at =
               status === "done" ? new Date().toISOString() : null;

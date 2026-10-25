@@ -1,0 +1,53 @@
+name: LifeOSProbe
+options:
+  bundleIdPrefix: com.nas.lifeos
+  deploymentTarget:
+    iOS: '17.0'
+settings:
+  base:
+    SWIFT_VERSION: '5.0'
+    TARGETED_DEVICE_FAMILY: '1'
+targets:
+  LifeOSProbe:
+    type: application
+    platform: iOS
+    sources: [Sources, Assets.xcassets]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.nas.lifeos.probe
+        GENERATE_INFOPLIST_FILE: YES
+        MARKETING_VERSION: '0.9.0'
+        CURRENT_PROJECT_VERSION: '52'
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        INFOPLIST_KEY_CFBundleDisplayName: Life OS
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+    dependencies:
+      - sdk: libsqlite3.tbd
+  LifeOSProbeTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [Tests]
+    dependencies:
+      - target: LifeOSProbe
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+  LifeOSProbeUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [UITests]
+    dependencies:
+      - target: LifeOSProbe
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  LifeOSProbe:
+    build:
+      targets:
+        LifeOSProbe: all
+        LifeOSProbeTests: [test]
+        LifeOSProbeUITests: [test]
+    test:
+      targets: [LifeOSProbeTests, LifeOSProbeUITests]

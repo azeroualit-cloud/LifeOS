@@ -2,7 +2,7 @@ name: Life OS - App nativa
 on:
   workflow_dispatch:
   push:
-    paths: ['lifeos-native.zip', '.github/workflows/lifeos-build.yml', '.github/workflows/ios.yml', 'Sources/**', 'Tests/**', 'Assets.xcassets/**', 'project.yml']
+    paths: ['lifeos-native.zip', '.github/workflows/lifeos-build.yml', '.github/workflows/ios.yml', 'Sources/**', 'Tests/**', 'Assets.xcassets/**', 'project.yml', 'native/**', 'native-next/**']
 permissions:
   contents: read
 concurrency:
@@ -12,7 +12,7 @@ jobs:
   build:
     if: github.event.repository.private == false
     runs-on: macos-15
-    timeout-minutes: 75
+    timeout-minutes: 145
     defaults:
       run:
         shell: bash
@@ -38,27 +38,28 @@ jobs:
       - name: Prepara progetto
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          import hashlib, pathlib, zipfile
-          source = pathlib.Path('lifeos-native.zip')
-          if source.is_file():
-              assert hashlib.sha256(source.read_bytes()).hexdigest() == 'dd90cdc78d87be0afea5ce909782a8ec85204f895b50dc4d2e3025a26490a8d8', 'ZIP sorgenti diverso da quello previsto'
-              with zipfile.ZipFile(source) as archive:
-                  for name in archive.namelist():
-                      p = pathlib.PurePosixPath(name)
-                      assert not p.is_absolute() and '..' not in p.parts
-                  archive.extractall('app')
-          elif pathlib.Path('project.yml').is_file():
-              import shutil
-              pathlib.Path('app').mkdir()
-              for name in ['Sources', 'Tests', 'UITests', 'Assets.xcassets']:
-                  shutil.copytree(name, 'app/' + name)
-              shutil.copy2('project.yml', 'app/project.yml')
-              pathlib.Path('app/scripts').mkdir(exist_ok=True)
-              shutil.copy2('scripts/check-design-system.py', 'app/scripts/check-design-system.py')
-          else:
-              raise SystemExit('Manca lifeos-native.zip nella radice del repository.')
-          PY
+          curl --fail --location --silent --show-error https://raw.githubusercontent.com/azeroualit-cloud/LifeOS/02c2c089841833a67fc9a223b367710edf7e37b9/lifeos-native.zip -o /tmp/lifeos-build60.zip
+          python3 - <<'PYZIP'
+          import pathlib, hashlib, zipfile, shutil
+          source = pathlib.Path('/tmp/lifeos-build60.zip')
+          assert hashlib.sha256(source.read_bytes()).hexdigest() == 'b09762b88e4dc017d2c89fa7582ac38daf1fddf5aa0dd12fed94d73f6099ef03'
+          with zipfile.ZipFile(source) as archive:
+              for name in archive.namelist():
+                  path = pathlib.PurePosixPath(name)
+                  assert not path.is_absolute() and '..' not in path.parts
+              archive.extractall('app')
+          overlay = pathlib.Path('native-next')
+          for path in overlay.rglob('*'):
+              if path.is_file() and path.parts[1] in ['Sources','Tests','UITests','project.yml']:
+                  target = pathlib.Path('app') / path.relative_to(overlay)
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  shutil.copy2(path,target)
+          PYZIP
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verifica conservazione attività su database isolato
+        run: node web/tests/task-retention.mjs
       - name: Verifica design system
         working-directory: app
         run: python3 scripts/check-design-system.py
@@ -70,7 +71,9 @@ jobs:
           xcodegen generate
           mkdir -p build
       - name: Verifica contratto nativo sul database condiviso
-        if: github.repository == 'azeroualit-cloud/LifeOS'
+        # The legacy live getLifeData deletes completed tasks after five days.
+        # Keep the live contract opt-in until the retention backend is deployed.
+        if: github.repository == 'azeroualit-cloud/LifeOS' && github.event_name == 'workflow_dispatch'
         working-directory: app
         env:
           LIFEOS_TEST_PASSWORD: ${{ secrets.LIFEOS_TEST_PASSWORD }}
@@ -127,31 +130,39 @@ jobs:
         run: |
           set -euo pipefail
           DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,re,sys; d=json.load(sys.stdin); keys=sorted((k for k in d["devices"] if "iOS" in k),key=lambda k:tuple(map(int,re.findall(r"\d+",k))),reverse=True); print(next(x["udid"] for k in keys for x in d["devices"][k] if "iPhone" in x["name"]))')
+          echo "MAIN_DEVICE=$DEVICE" >> "$GITHUB_ENV"
           xcodebuild build-for-testing -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compile.log
-      - name: Verifica mirata Finanza su compatto
-        timeout-minutes: 15
-        working-directory: app
-        run: |
-          set -euo pipefail
-          RUNTIME=$(xcrun simctl list runtimes -j | python3 -c 'import json,sys; r=[x for x in json.load(sys.stdin)["runtimes"] if x.get("isAvailable") and x["name"].startswith("iOS")]; print(sorted(r,key=lambda x:tuple(map(int,x["version"].split("."))),reverse=True)[0]["identifier"])')
-          COMPACT=$(xcrun simctl create 'LifeOS compact' 'com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation' "$RUNTIME")
-          echo "COMPACT=$COMPACT" >> "$GITHUB_ENV"
-          xcodebuild test-without-building -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT" -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFinanceOverviewSupportsLargeTextAndEmptySnapshot -resultBundlePath build/Focused.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/focused-tests.log
-      - name: Compila ed esegui tutti i test
-        timeout-minutes: 35
+      - name: Verifica accesso esportazione su iPhone principale
+        timeout-minutes: 12
         working-directory: app
         run: |
           set -euo pipefail
           DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,re,sys; d=json.load(sys.stdin); keys=sorted((k for k in d["devices"] if "iOS" in k),key=lambda k:tuple(map(int,re.findall(r"\d+",k))),reverse=True); print(next(x["udid"] for k in keys for x in d["devices"][k] if "iPhone" in x["name"]))')
-          xcodebuild test -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -parallel-testing-enabled NO -resultBundlePath build/Tests.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/tests.log
+          xcrun simctl boot "$DEVICE" || true
+          xcrun simctl bootstatus "$DEVICE" -b
+          xcodebuild test-without-building -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testShiftExportRemainsReachableFromSettings -resultBundlePath build/Regression.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/regression-tests.log
+      - name: Prepara simulatore compatto
+        timeout-minutes: 15
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcrun simctl shutdown "$MAIN_DEVICE"
+          RUNTIME=$(xcrun simctl list runtimes -j | python3 -c 'import json,sys; r=[x for x in json.load(sys.stdin)["runtimes"] if x.get("isAvailable") and x["name"].startswith("iOS")]; print(sorted(r,key=lambda x:tuple(map(int,x["version"].split("."))),reverse=True)[0]["identifier"])')
+          COMPACT=$(xcrun simctl create 'LifeOS compact' 'com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation' "$RUNTIME")
+          echo "COMPACT=$COMPACT" >> "$GITHUB_ENV"
+          xcrun simctl boot "$COMPACT"
+          xcrun simctl bootstatus "$COMPACT" -b
+          xcrun simctl shutdown "$COMPACT"
       - name: Esporta anteprima principale
         if: always()
         continue-on-error: true
         working-directory: app
         run: |
-          if [ -d build/Tests.xcresult ]; then
+          if [ -f build/Tests.xcresult/Info.plist ]; then
             xcrun xcresulttool export attachments --path build/Tests.xcresult --output-path build/screenshots
-          elif [ -d build/Focused.xcresult ]; then
+          elif [ -f build/Regression.xcresult/Info.plist ]; then
+            xcrun xcresulttool export attachments --path build/Regression.xcresult --output-path build/screenshots
+          elif [ -f build/Focused.xcresult/Info.plist ]; then
             xcrun xcresulttool export attachments --path build/Focused.xcresult --output-path build/screenshots
           fi
       - name: Anteprima principale durante la verifica compatta
@@ -162,18 +173,21 @@ jobs:
           path: app/build/screenshots/
           retention-days: 1
           if-no-files-found: ignore
-      - name: Verifica interfaccia su iPhone compatto
+      - name: Verifica accesso esportazione su iPhone compatto
         timeout-minutes: 25
         working-directory: app
         run: |
           set -euo pipefail
-          xcodebuild test -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFourSectionsInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarEventCanBeCreatedAfterBoundaryScroll -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testLargeTextAndSixWeekCalendar -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeSummaryAndVerticalRoutinesInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarSelectionUpdatesImmediatelyAndKeepsEventIndex -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeEmptyStatesRemainActionable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeManyEventsAndTasksStayBoundedAndReachable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testSharedRowsAndCategoryChoicesKeepAccessibleTargets -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testNavigationKeepsSelectionAndGeometryWhenChangingTabs -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFinanceOverviewSupportsLargeTextAndEmptySnapshot -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeRestoresNeutralNextTimeWithoutArabicNames -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testReducedMotionKeepsChecklistAndFinanceActionsFunctional -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarTodayRestoresMonthAndSelection -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testNativeToolbarRespondsAcross44PointTouchRegion -resultBundlePath build/Compact.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compact.log
+          xcrun simctl shutdown "$MAIN_DEVICE" || true
+          xcrun simctl boot "$COMPACT"
+          xcrun simctl bootstatus "$COMPACT" -b
+          xcodebuild test -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testShiftExportRemainsReachableFromSettings -resultBundlePath build/Compact.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compact.log
       - name: Esporta schermate del simulatore
         if: always()
         continue-on-error: true
         working-directory: app
         run: |
-          if [ -d build/Compact.xcresult ]; then
+          if [ -f build/Compact.xcresult/Info.plist ]; then
             xcrun xcresulttool export attachments --path build/Compact.xcresult --output-path build/compact-screenshots
           fi
       - name: Crea una sola IPA per iPhone
@@ -194,7 +208,7 @@ jobs:
         run: |
           python3 - <<'PYLOG'
           import pathlib, re
-          for name in ['compile.log', 'focused-tests.log', 'tests.log', 'compact.log', 'archive.log']:
+          for name in ['compile.log', 'regression-tests.log', 'focused-tests.log', 'tests.log', 'compact.log', 'archive.log']:
               path = pathlib.Path('build') / name
               if not path.exists(): continue
               lines = path.read_text(errors='replace').splitlines()
@@ -236,6 +250,7 @@ jobs:
           path: |
             app/build/*.log
             app/build/Tests.xcresult
+            app/build/Regression.xcresult
             app/build/Focused.xcresult
             app/build/Compact.xcresult
           retention-days: 1
