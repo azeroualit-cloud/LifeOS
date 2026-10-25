@@ -8,7 +8,6 @@ struct CalendarScreen: View {
     @State private var selected = ""
     @State private var brush = "consult"
     @State private var lastShift: (String, String)?
-    @Environment(\.nativeReduceMotion) private var reduceMotion
     @State private var months: [String] = []
     @State private var visibleMonth: String?
     @State private var jumpMonth: String?
@@ -36,7 +35,7 @@ struct CalendarScreen: View {
                             if selected.hasPrefix(month) { dayCard }
                         }.id(month)
                     }
-                    DisclosureGroup("Esporta turni su Apple (facoltativo)") { ShiftCalendarPanel() }
+                    DisclosureGroup("Esporta turni su Apple (facoltativo)", isExpanded: $appleExport) { ShiftCalendarPanel() }
                 }.scrollTargetLayout()
                     .padding(.horizontal, NativeDesign.Layout.screenInset)
                     .padding(.bottom, NativeDesign.Layout.scrollClearance)
