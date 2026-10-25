@@ -2,7 +2,7 @@ name: Life OS - App nativa
 on:
   workflow_dispatch:
   push:
-    paths: ['lifeos-native.zip', '.github/workflows/lifeos-build.yml', '.github/workflows/ios.yml', 'Sources/**', 'Tests/**', 'Assets.xcassets/**', 'project.yml', 'native/**']
+    paths: ['lifeos-native.zip', '.github/workflows/lifeos-build.yml', '.github/workflows/ios.yml', 'Sources/**', 'Tests/**', 'Assets.xcassets/**', 'project.yml', 'native/**', 'native-next/**']
 permissions:
   contents: read
 concurrency:
@@ -12,7 +12,7 @@ jobs:
   build:
     if: github.event.repository.private == false
     runs-on: macos-15
-    timeout-minutes: 110
+    timeout-minutes: 145
     defaults:
       run:
         shell: bash
@@ -38,35 +38,23 @@ jobs:
       - name: Prepara progetto
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          import hashlib, pathlib, zipfile
-          source = pathlib.Path('lifeos-native.zip')
-          if source.is_file():
-              assert hashlib.sha256(source.read_bytes()).hexdigest() == 'dd90cdc78d87be0afea5ce909782a8ec85204f895b50dc4d2e3025a26490a8d8', 'ZIP sorgenti diverso da quello previsto'
-              with zipfile.ZipFile(source) as archive:
-                  for name in archive.namelist():
-                      p = pathlib.PurePosixPath(name)
-                      assert not p.is_absolute() and '..' not in p.parts
-                  archive.extractall('app')
-              # Apply only the reviewed changes; never republish unchanged private configuration.
-              import shutil
-              overlay = pathlib.Path('native')
-              for path in overlay.rglob('*'):
-                  if path.is_file() and path.parts[1] in ['Sources', 'Tests', 'UITests', 'project.yml', 'DESIGN-SYSTEM.md']:
-                      target = pathlib.Path('app') / path.relative_to(overlay)
-                      target.parent.mkdir(parents=True, exist_ok=True)
-                      shutil.copy2(path, target)
-          elif pathlib.Path('project.yml').is_file():
-              import shutil
-              pathlib.Path('app').mkdir()
-              for name in ['Sources', 'Tests', 'UITests', 'Assets.xcassets']:
-                  shutil.copytree(name, 'app/' + name)
-              shutil.copy2('project.yml', 'app/project.yml')
-              pathlib.Path('app/scripts').mkdir(exist_ok=True)
-              shutil.copy2('scripts/check-design-system.py', 'app/scripts/check-design-system.py')
-          else:
-              raise SystemExit('Manca lifeos-native.zip nella radice del repository.')
-          PY
+          curl --fail --location --silent --show-error https://raw.githubusercontent.com/azeroualit-cloud/LifeOS/02c2c089841833a67fc9a223b367710edf7e37b9/lifeos-native.zip -o /tmp/lifeos-build60.zip
+          python3 - <<'PYZIP'
+          import pathlib, hashlib, zipfile, shutil
+          source = pathlib.Path('/tmp/lifeos-build60.zip')
+          assert hashlib.sha256(source.read_bytes()).hexdigest() == 'b09762b88e4dc017d2c89fa7582ac38daf1fddf5aa0dd12fed94d73f6099ef03'
+          with zipfile.ZipFile(source) as archive:
+              for name in archive.namelist():
+                  path = pathlib.PurePosixPath(name)
+                  assert not path.is_absolute() and '..' not in path.parts
+              archive.extractall('app')
+          overlay = pathlib.Path('native-next')
+          for path in overlay.rglob('*'):
+              if path.is_file() and path.parts[1] in ['Sources','Tests','UITests','project.yml']:
+                  target = pathlib.Path('app') / path.relative_to(overlay)
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  shutil.copy2(path,target)
+          PYZIP
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -152,7 +140,7 @@ jobs:
           DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,re,sys; d=json.load(sys.stdin); keys=sorted((k for k in d["devices"] if "iOS" in k),key=lambda k:tuple(map(int,re.findall(r"\d+",k))),reverse=True); print(next(x["udid"] for k in keys for x in d["devices"][k] if "iPhone" in x["name"]))')
           xcrun simctl boot "$DEVICE" || true
           xcrun simctl bootstatus "$DEVICE" -b
-          xcodebuild test-without-building -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarEventCanBeCreatedAfterBoundaryScroll -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarSelectionUpdatesImmediatelyAndKeepsEventIndex -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarTodayRestoresMonthAndSelection -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testLongTaskOpensAfterScrollingWithoutTriggeringCompletion -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testVisibleShiftBrushPaintsAndUndoRestoresDay -resultBundlePath build/Regression.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/regression-tests.log
+          xcodebuild test-without-building -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarEventCanBeCreatedAfterBoundaryScroll -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarSelectionUpdatesImmediatelyAndKeepsEventIndex -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarTodayRestoresMonthAndSelection -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testLongTaskOpensAfterScrollingWithoutTriggeringCompletion -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testVisibleShiftBrushPaintsAndUndoRestoresDay -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testOffDayHabitIsHiddenButRemainsManageable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarDayCanBeDeselectedWithASecondTap -resultBundlePath build/Regression.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/regression-tests.log
       - name: Verifica mirata Finanza su compatto
         timeout-minutes: 15
         working-directory: app
@@ -167,7 +155,7 @@ jobs:
           xcodebuild test-without-building -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT" -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFinanceOverviewSupportsLargeTextAndEmptySnapshot -resultBundlePath build/Focused.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/focused-tests.log
           xcrun simctl shutdown "$COMPACT"
       - name: Compila ed esegui tutti i test
-        timeout-minutes: 50
+        timeout-minutes: 75
         working-directory: app
         run: |
           set -euo pipefail
@@ -224,6 +212,13 @@ jobs:
           zip -qr ../download/LifeOS-unsigned.ipa Payload
           cd ../download
           shasum -a 256 LifeOS-unsigned.ipa > SHA256.txt
+      - name: Distribuisci backend con confronto e rollback
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s scripts -p test_deploy_lifeos_61.py -v
+          python3 scripts/deploy-lifeos-61.py
       - name: Errori XCTest in annotazioni
         if: always()
         working-directory: app

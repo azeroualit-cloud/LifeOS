@@ -43,5 +43,29 @@ assert.equal((await worker.lifeRead(env, '2026-10')).tasks.length, 3);
 // Explicit deletion is still possible, never a side effect of reading or completion.
 await worker.lifeAction(env, 'deleteTask', [1]);
 assert.equal((await worker.lifeRead(env, '2026-10')).tasks.length, 2);
-sqlite.close();
+
 console.log('TASK_RETENTION_OK: real Worker migrations, old completion retention, section restoration, edit preservation, validation and explicit deletion');
+// Scheduling is persisted by the real backend, survives renaming and is enforced.
+const futureSchedule = {mode:'weekdays',startDate:'2099-01-01',weekdays:[1],intervalDays:1};
+const habitID = sqlite.prepare('SELECT id FROM os_routines ORDER BY id LIMIT 1').get().id;
+await worker.lifeAction(env, 'saveRoutine', [{id:habitID,title:'Lettura',schedule:futureSchedule}]);
+let scheduledHabit = (await worker.lifeRead(env,'2026-10')).routines.find(r=>r.id===habitID);
+assert.deepEqual(scheduledHabit.schedule,futureSchedule);
+await worker.lifeAction(env,'saveRoutine',[{id:habitID,title:'Lettura rinominata'}]);
+assert.deepEqual((await worker.lifeRead(env,'2026-10')).routines.find(r=>r.id===habitID).schedule,futureSchedule);
+const today = (await worker.lifeRead(env,'2026-10')).today;
+await assert.rejects(worker.lifeAction(env,'setRoutineCheck',[{id:habitID,day:today,checked:true}]),/non è prevista/);
+await assert.rejects(worker.lifeAction(env,'saveRoutine',[{id:habitID,title:'Invalida',schedule:{mode:'interval',intervalDays:0,startDate:today}}]));
+await worker.lifeAction(env,'saveRoutine',[{title:'Nuova abitudine',schedule:futureSchedule}]);
+assert.deepEqual((await worker.lifeRead(env,'2026-10')).routines.find(r=>r.title==='Nuova abitudine').schedule,futureSchedule);
+console.log('ROUTINE_SCHEDULE_PERSISTENCE_OK');
+
+
+
+await worker.lifeAction(env,'saveTask',[{id:2,title:'Riso',list_kind:'action',scheduled_date:'2026-10-26',scheduled_time:'16:30'}]);
+assert.equal((await worker.lifeRead(env,'2026-10')).tasks.find(t=>t.id===2).scheduled_time,'16:30');
+await worker.lifeAction(env,'saveTask',[{id:2,title:'Riso rinominato',list_kind:'action',scheduled_date:'2026-10-26'}]);
+assert.equal((await worker.lifeRead(env,'2026-10')).tasks.find(t=>t.id===2).scheduled_time,'16:30');
+await assert.rejects(worker.lifeAction(env,'saveTask',[{id:2,title:'Riso',list_kind:'action',scheduled_time:'25:99'}]));
+console.log('TASK_NOTIFICATION_TIME_PERSISTENCE_OK');
+sqlite.close();

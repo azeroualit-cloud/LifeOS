@@ -39,12 +39,12 @@ One design system owns layout and components. Finance and Life OS logic are pres
 <style id="lifeos-design-system">/* Life OS: one set of tokens, one layout, one component system. */
 :root {
  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:14px;line-height:1.45;
- --os-bg:#0c0c0e;--os-panel:#171719;--os-panel-2:#222225;--ink:#f4f5f7;--muted:#a2a2a9;--line:#303034;--os-accent:#a5aeed;--os-focus:#a5aeed;--green:var(--os-accent);--red:#ee858e;
+ --os-bg:#0c0c0e;--os-panel:#171719;--os-panel-2:#222225;--ink:#f4f5f7;--muted:#a2a2a9;--line:#303034;--os-accent:#dedede;--os-focus:#dedede;--green:var(--os-accent);--red:#ee858e;
  --surface:var(--os-panel);--blue:var(--os-accent);--os-secondary:var(--muted);--os-border:var(--line);--os-text:var(--ink);
  --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--page-gutter:20px;--card-padding:20px;--card-radius:22px;--space:16px;--nav-height:72px;
  color-scheme:dark;background:var(--os-bg);color:var(--ink);
 }
-html[data-theme="light"] {--os-bg:#f3f3f5;--os-panel:#fff;--os-panel-2:#e8e8ec;--ink:#202024;--muted:#64646d;--line:#dcdce1;--os-accent:#565f9c;--os-focus:#565f9c;--green:var(--os-accent);--red:#b53747;color-scheme:light;}
+html[data-theme="light"] {--os-bg:#f3f3f5;--os-panel:#fff;--os-panel-2:#e8e8ec;--ink:#202024;--muted:#64646d;--line:#dcdce1;--os-accent:#3b3b3b;--os-focus:#3b3b3b;--green:var(--os-accent);--red:#b53747;color-scheme:light;}
 *,*::before,*::after {box-sizing:border-box;} body {margin:0;background:var(--os-bg);color:var(--ink);-webkit-text-size-adjust:100%;}
 button,input,select,textarea {font:inherit;}button {cursor:pointer;color:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
 button {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:9px 14px;background:transparent;border:1px solid var(--line);border-radius:12px;}
@@ -711,6 +711,13 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         }
       }
 
+      function osRoutineDue(schedule, day) {
+        if (!day || (schedule.startDate && day < schedule.startDate)) return false;
+        if (schedule.mode === "daily") return true;
+        if (schedule.mode === "weekdays") return (schedule.weekdays || []).includes((new Date(day+"T12:00:00Z").getUTCDay()+6)%7+1);
+        if (schedule.mode === "interval" && schedule.intervalDays > 0) return Math.round((Date.parse(day+"T12:00:00Z")-Date.parse(schedule.startDate+"T12:00:00Z"))/86400000)%schedule.intervalDays === 0;
+        return false;
+      }
       /** Markup dashboard: routine, oggi/domani, tre attività, eventi e saldi. */
       function osToday() {
         const d = life.data,
@@ -724,7 +731,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
             (t) => t.status === "waiting" && t.list_kind === "action",
           ),
           upcoming = (d.upcomingEvents || []).slice(0, 3);
-        const habits = d.routines || [],
+        const habits = (d.routines || []).filter(h => !h.schedule || osRoutineDue(h.schedule, d.today)),
           complete = habits.filter((h) => h.checked).length;
         const finance = life.finance?.summary;
         const shiftLabel = (v) =>
