@@ -36,6 +36,17 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertTrue(action.isHittable); action.tap()
         XCTAssertTrue(app.navigationBars["Budget"].waitForExistence(timeout: 10))
     }
+    private func revealChecklistButton(_ button: XCUIElement, in app: XCUIApplication, towardTop: Bool = false) {
+        let list = app.collectionViews.firstMatch
+        let upper = app.navigationBars.firstMatch.frame.maxY
+        let lower = app.tabBars.firstMatch.frame.minY
+        for _ in 0..<16 {
+            if button.exists && button.isHittable && button.frame.minY >= upper && button.frame.maxY <= lower { return }
+            if towardTop || (button.exists && button.frame.minY < upper) { list.swipeDown(velocity: .slow) }
+            else { list.swipeUp(velocity: .slow) }
+        }
+        XCTAssertTrue(button.exists && button.isHittable, "Il completamento deve restare raggiungibile nella propria sezione")
+    }
     private func capture(_ name: String) {
         let shot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
         shot.name = name; shot.lifetime = .keepAlways; add(shot)
@@ -427,9 +438,11 @@ final class NativeInterfaceTests: XCTestCase {
         completion.tap()
         XCTAssertTrue(app.staticTexts["Attivo"].waitForExistence(timeout: 10))
         XCTAssertFalse(app.staticTexts["Completate"].exists)
+        revealChecklistButton(completion, in: app)
         XCTAssertEqual(completion.value as? String, "Completata")
         capture("shared-completed-task-rows")
         completion.tap()
+        revealChecklistButton(completion, in: app, towardTop: true)
         XCTAssertEqual(completion.value as? String, "Da completare")
     }
     func testRepeatedBoundaryScrollingKeepsNavigationStable() {
@@ -868,9 +881,10 @@ final class NativeInterfaceTests: XCTestCase {
         completion.tap()
         XCTAssertTrue(app.staticTexts["Attivo"].waitForExistence(timeout: 10))
         XCTAssertFalse(app.staticTexts["Completate"].exists)
+        revealChecklistButton(completion, in: app)
         XCTAssertEqual(completion.value as? String, "Completata")
         XCTAssertFalse(app.navigationBars["Modifica attività"].exists)
-        completion.tap(); XCTAssertEqual(completion.value as? String, "Da completare")
+        completion.tap(); revealChecklistButton(completion, in: app, towardTop: true); XCTAssertEqual(completion.value as? String, "Da completare")
         app.tabBars.buttons["Finanza"].tap()
         let expense = app.buttons["finance-expense"]
         for _ in 0..<5 { if expense.isHittable { break }; app.scrollViews["finance-scroll"].swipeUp() }
