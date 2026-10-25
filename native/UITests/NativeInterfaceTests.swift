@@ -332,10 +332,13 @@ final class NativeInterfaceTests: XCTestCase {
         app.buttons["Calendario"].tap()
         let cells = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "calendar-day-"))
         XCTAssertGreaterThanOrEqual(cells.count, 28)
-        // Repeated day changes exercise selection without changing the month/data indexes.
+        // Resolve each date by identity: lazy months can enter/leave the accessibility tree.
+        app.buttons["calendar-today"].tap()
+        let formatter = DateFormatter(); formatter.locale = Locale(identifier: "en_US_POSIX"); formatter.timeZone = TimeZone(identifier: "Europe/Rome"); formatter.dateFormat = "yyyy-MM"
+        let month = formatter.string(from: Date())
         for index in [9, 10, 11, 10] {
-            let cell = cells.element(boundBy: index)
-            let day = String(cell.identifier.dropFirst("calendar-day-".count))
+            let day = month + String(format: "-%02d", index + 1)
+            let cell = app.buttons["calendar-day-" + day]
             cell.tap()
             XCTAssertTrue(cell.isSelected, "Il giorno deve essere selezionato al termine del tocco: \(day)")
         }
@@ -352,7 +355,7 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Modifica attività"].waitForExistence(timeout: 10))
         capture("long-task-editor")
         app.buttons["Annulla"].tap()
-        XCTAssertTrue(app.staticTexts[title].exists)
+        XCTAssertTrue(app.staticTexts[title].waitForExistence(timeout: 10))
     }
     func testDashboardDayRestoresCalendarMonthAndSelection() {
         let app = launch()

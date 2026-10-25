@@ -143,6 +143,13 @@ jobs:
           set -euo pipefail
           DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,re,sys; d=json.load(sys.stdin); keys=sorted((k for k in d["devices"] if "iOS" in k),key=lambda k:tuple(map(int,re.findall(r"\d+",k))),reverse=True); print(next(x["udid"] for k in keys for x in d["devices"][k] if "iPhone" in x["name"]))')
           xcodebuild build-for-testing -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compile.log
+      - name: Verifica regressioni calendario e attività
+        timeout-minutes: 12
+        working-directory: app
+        run: |
+          set -euo pipefail
+          DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,re,sys; d=json.load(sys.stdin); keys=sorted((k for k in d["devices"] if "iOS" in k),key=lambda k:tuple(map(int,re.findall(r"\d+",k))),reverse=True); print(next(x["udid"] for k in keys for x in d["devices"][k] if "iPhone" in x["name"]))')
+          xcodebuild test-without-building -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarEventCanBeCreatedAfterBoundaryScroll -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarSelectionUpdatesImmediatelyAndKeepsEventIndex -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarTodayRestoresMonthAndSelection -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testLongTaskOpensAfterScrollingWithoutTriggeringCompletion -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testVisibleShiftBrushPaintsAndUndoRestoresDay -resultBundlePath build/Regression.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/regression-tests.log
       - name: Verifica mirata Finanza su compatto
         timeout-minutes: 15
         working-directory: app
@@ -166,6 +173,8 @@ jobs:
         run: |
           if [ -d build/Tests.xcresult ]; then
             xcrun xcresulttool export attachments --path build/Tests.xcresult --output-path build/screenshots
+          elif [ -d build/Regression.xcresult ]; then
+            xcrun xcresulttool export attachments --path build/Regression.xcresult --output-path build/screenshots
           elif [ -d build/Focused.xcresult ]; then
             xcrun xcresulttool export attachments --path build/Focused.xcresult --output-path build/screenshots
           fi
@@ -209,7 +218,7 @@ jobs:
         run: |
           python3 - <<'PYLOG'
           import pathlib, re
-          for name in ['compile.log', 'focused-tests.log', 'tests.log', 'compact.log', 'archive.log']:
+          for name in ['compile.log', 'regression-tests.log', 'focused-tests.log', 'tests.log', 'compact.log', 'archive.log']:
               path = pathlib.Path('build') / name
               if not path.exists(): continue
               lines = path.read_text(errors='replace').splitlines()
@@ -251,6 +260,7 @@ jobs:
           path: |
             app/build/*.log
             app/build/Tests.xcresult
+            app/build/Regression.xcresult
             app/build/Focused.xcresult
             app/build/Compact.xcresult
           retention-days: 1

@@ -39,6 +39,7 @@ struct CalendarScreen: View {
                     .padding(.bottom, NativeDesign.Layout.scrollClearance)
             }
             .scrollPosition(id: $visibleMonth, anchor: .top)
+            .accessibilityIdentifier("calendar-scroll")
             .safeAreaInset(edge: .top, spacing: NativeDesign.Space.none) {
                 VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
                     monthHeader
@@ -61,7 +62,7 @@ struct CalendarScreen: View {
                 visibleMonth = month
                 jumpMonth = nil
             }
-        }.background(NativeDesign.canvas).accessibilityIdentifier("calendar-scroll")
+        }.background(NativeDesign.canvas)
         .onAppear {
             if months.isEmpty {
                 let month = store.calendarMonth
@@ -128,8 +129,8 @@ struct CalendarScreen: View {
             for event in source { allEvents[String(event.integer("id")) + ":" + event.text("day")] = event }
             for shift in (store.isDemo ? store.life : data).records("shifts") where shift.text("day").hasPrefix(month) { allShifts[shift.text("day")] = shift.text("kind") }
         }
-        // A successful mutation refreshes store.life; prefer it over cached month data.
-        for shift in store.life.records("shifts") { allShifts[shift.text("day")] = shift.text("kind") }
+        // Mutations already invalidate and reseed monthData in onChange(store.life).
+        // Keep a newer monthly read authoritative over the older global snapshot.
         eventsByDay = Dictionary(grouping: Array(allEvents.values).sorted { ($0.text("start_time"), $0.integer("id")) < ($1.text("start_time"), $1.integer("id")) }, by: { $0.text("day") })
         let today = CivilDate.day()
         monthDays = Dictionary(uniqueKeysWithValues: months.map { month in
