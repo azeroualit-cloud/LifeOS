@@ -22,6 +22,9 @@ struct NativeIntegrationSettings: View {
             Text(status).font(.caption).foregroundStyle(NativeDesign.secondary)
             Text("Attività all’orario scelto (altrimenti alle 9 del giorno programmato o della scadenza), eventi 15 minuti prima, turni un’ora prima. Sono programmati i prossimi 48 avvisi dai dati presenti su questo iPhone. Apri l’app dopo modifiche dal web per aggiornarli.").font(.caption).foregroundStyle(NativeDesign.secondary)
             if let url = URL(string: UIApplication.openSettingsURLString) { Link("Impostazioni notifiche di iPhone", destination: url) }
+            NavigationLink { ShiftCalendarPanel().navigationTitle("Esporta turni").navigationBarTitleDisplayMode(.inline) } label: {
+                Label("Esporta turni su Apple", systemImage: "calendar.badge.plus")
+            }.accessibilityIdentifier("shift-export-settings")
             ShortcutsLink()
             Text("Con Siri: “Registra il peso in Life OS” oppure “Prepara un’attività in Life OS”. Il peso viene scritto in Apple Health dopo il consenso. Per le attività conferma il salvataggio nell’app.").font(.caption).foregroundStyle(NativeDesign.secondary)
             Text("Widget: aggiungi “Life OS · Azioni rapide” alla schermata Home. Apre attività, peso e calendario. La disponibilità va verificata dopo la firma Signulous.").font(.caption).foregroundStyle(NativeDesign.secondary)

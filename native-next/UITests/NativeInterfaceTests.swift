@@ -51,6 +51,18 @@ final class NativeInterfaceTests: XCTestCase {
         let shot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
         shot.name = name; shot.lifetime = .keepAlways; add(shot)
     }
+    func testShiftExportRemainsReachableFromSettings() {
+        let app = launch(["--dark"])
+        app.buttons["Impostazioni"].tap()
+        let action = app.buttons["shift-export-settings"]
+        let form = app.collectionViews.firstMatch
+        for _ in 0..<12 { if action.isHittable { break }; form.swipeUp(velocity: .slow) }
+        XCTAssertTrue(action.waitForExistence(timeout: 10))
+        XCTAssertTrue(action.isHittable)
+        action.tap()
+        XCTAssertTrue(app.navigationBars["Esporta turni"].waitForExistence(timeout: 10))
+        capture("shift-export-settings-reachable")
+    }
     func testOffDayHabitIsHiddenButRemainsManageable() {
         let app = launch(["--dark", "--off-day-habit"])
         XCTAssertFalse(app.buttons["home-routine-999"].exists)
