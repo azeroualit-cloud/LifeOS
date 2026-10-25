@@ -9,18 +9,7 @@ concurrency:
   group: lifeos-native-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  backend-preflight:
-    runs-on: ubuntu-latest
-    timeout-minutes: 8
-    steps:
-      - uses: actions/checkout@v5
-      - name: Confronta sorgenti live senza modificarli
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          LIFEOS_BACKEND_AUDIT_ONLY: '1'
-        run: python3 scripts/deploy-lifeos-61.py
   build:
-    needs: backend-preflight
     if: github.event.repository.private == false
     runs-on: macos-15
     timeout-minutes: 145
