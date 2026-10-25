@@ -309,7 +309,19 @@ final class NativeInterfaceTests: XCTestCase {
         // A single-line native Button exposes its title as the button label, not a child StaticText.
         let eventTitle = app.buttons.matching(NSPredicate(format: "label == %@", "Evento dopo scorrimento")).firstMatch
         app.buttons["calendar-today"].tap()
-        for _ in 0..<8 { if eventTitle.isHittable { break }; scroll.swipeUp(velocity: .slow) }
+        // SwiftUI can report a clipped button as hittable beneath a safe-area inset.
+        // Keep the complete row inside the visible content before tapping it.
+        let upperEdge = app.buttons["calendar-today"].frame.maxY + 60
+        let lowerEdge = app.tabBars.firstMatch.frame.minY
+        for _ in 0..<16 {
+            let frame = eventTitle.frame
+            if eventTitle.exists && frame.minY >= upperEdge && frame.maxY <= lowerEdge { break }
+            let start = scroll.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.6))
+            let delta: CGFloat = frame.minY < upperEdge ? 0.14 : -0.14
+            start.press(forDuration: 0.05, thenDragTo: scroll.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.6 + delta)))
+        }
+        XCTAssertGreaterThanOrEqual(eventTitle.frame.minY, upperEdge)
+        XCTAssertLessThanOrEqual(eventTitle.frame.maxY, lowerEdge)
         XCTAssertTrue(eventTitle.waitForExistence(timeout: 10))
         XCTAssertTrue(eventTitle.isHittable)
         let titleFrame = eventTitle.frame
