@@ -73,7 +73,8 @@ final class NativeInterfaceTests: XCTestCase {
         capture("agenda-completed-expanded")
         completion.tap()
         XCTAssertTrue(app.buttons["toggle-completed-tasks"].waitForNonExistence(timeout: 10))
-        XCTAssertTrue(app.staticTexts["In attesa libera"].exists)
+        revealChecklistButton(completion, in: app, towardTop: true)
+        XCTAssertEqual(completion.value as? String, "Da completare")
     }
     func testShiftExportRemainsReachableFromSettings() {
         let app = launch(["--dark"])

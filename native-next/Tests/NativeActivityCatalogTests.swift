@@ -39,4 +39,15 @@ final class NativeActivityCatalogTests: XCTestCase {
         }
         XCTAssertEqual(NativeTaskList.reorderIDs(tasks:rows,category:"action",visibleIDs:[3,1]),[3,1,2])
     }
+    func testOfflineCompletionUpdatesTheOperationalProjectionAndKeepsNextOccurrence() throws {
+        let day = CivilDate.day(), next = CivilDate.adding(7,to:day)
+        let current: Record = ["id":.int(1),"day":.string(day)]
+        let future: Record = ["id":.int(1),"day":.string(next)]
+        var life: Record = ["activityEvents":.array([.object(current),.object(future)])]
+        try LocalLifeMutation.apply("setEventOccurrence",["id":.int(1),"day":.string(day),"status":.string("done")],to:&life)
+        let rows = NativeActivityCatalog.rows(tasks:[],events:life.records("activityEvents"),category:"action",section:"todo",today:day)
+        XCTAssertEqual(rows.map { $0.record.text("day") },[next])
+        try LocalLifeMutation.apply("setEventOccurrence",["id":.int(1),"day":.string(day),"status":.string("open")],to:&life)
+        XCTAssertEqual(NativeActivityCatalog.rows(tasks:[],events:life.records("activityEvents"),category:"action",section:"todo",today:day).count,2)
+    }
 }

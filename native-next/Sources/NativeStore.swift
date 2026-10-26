@@ -178,10 +178,9 @@ import SwiftUI
         try data.write(to: file, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
         state = next
     }
-    func rollover() {
-        // A finance-only archive has no daily habit state to migrate.
-        guard state.demo || !routines.isEmpty else { return }
-        let today = CivilDate.day()
+    func rollover(today: String = CivilDate.day()) {
+        // Activities also change priority at midnight, even without routines.
+        guard state.demo || ["tasks", "routines", "events", "activityEvents", "upcomingEvents"].contains(where: { !life.records($0).isEmpty }) else { return }
         let previousDay = state.demo ? state.routineDay : state.life.text("today", fallback: state.routineDay)
         guard previousDay != today else { return }
         var next = state

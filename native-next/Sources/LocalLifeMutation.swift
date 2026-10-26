@@ -39,7 +39,7 @@ enum LocalLifeMutation {
             life["shifts"] = .array(rows.map(JSONValue.object))
         case "setEventOccurrence":
             guard p.integer("id") > 0, validDay(p.text("day")), ["open", "done"].contains(p.text("status")) else { throw Message(text: "Occorrenza non valida.") }
-            for key in ["events", "upcomingEvents"] {
+            for key in ["events", "upcomingEvents", "activityEvents"] {
                 life[key] = .array(life.records(key).map { event in
                     var row = event
                     if row.integer("id") == p.integer("id") && row.text("day") == p.text("day") { row["occurrence_status"] = p["status"] }
