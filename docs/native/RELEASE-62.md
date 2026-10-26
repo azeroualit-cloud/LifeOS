@@ -4,4 +4,4 @@ Calendario scorrevole con mesi abbreviati (Set, Ott, Nov); VoiceOver conserva me
 
 Verifica finale: CI 40374895382 riuscita sulla revisione d440a7625d7c8d48151f4165f66b1a405c55e398. 171 test unitari e 6 test UI superati. Anteprime controllate su iPhone principale e compatto. IPA e widget 0.10.1 (62), ZIP integro, SHA256 corrispondente all’artefatto CI.
 
-Nessun deploy Worker automatico per questa revisione. L’aggiornamento backend manuale resta necessario per la settimana operativa indipendente dal mese del calendario e la riprogrammazione degli eventi conclusi; il file completo è preparato ma la sua pubblicazione pubblica è in attesa di consenso specifico.
+Worker completo pubblicato in manual/build-62/worker.js con consenso esplicito dell’utente. Nessun deploy automatico: seguire manual/build-62/README.md per aggiornare manualmente lifeos e lifeos-native-test. Test Worker e browser su SQLite isolato superati.
