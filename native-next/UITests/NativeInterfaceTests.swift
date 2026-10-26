@@ -103,6 +103,20 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertEqual(app.switches["Orario promemoria"].value as? String, "1")
         XCTAssertFalse(app.navigationBars["Impostazioni"].exists)
     }
+    func testCalendarRepeatedScrollingKeepsMonthAnchorsAndReturnsToToday() {
+        let app = launch(["--dark"])
+        app.tabBars.buttons["Calendario"].tap()
+        let scroll = app.scrollViews["calendar-scroll"]
+        XCTAssertTrue(scroll.waitForExistence(timeout: 10))
+        for _ in 0..<8 { scroll.swipeUp(velocity: .fast) }
+        for _ in 0..<8 { scroll.swipeDown(velocity: .fast) }
+        app.buttons["calendar-today"].tap()
+        let formatter = DateFormatter(); formatter.locale = Locale(identifier: "en_US_POSIX"); formatter.timeZone = TimeZone(identifier: "Europe/Rome"); formatter.dateFormat = "yyyy-MM-dd"
+        let day = formatter.string(from: Date()), cell = app.buttons["calendar-day-" + day]
+        XCTAssertTrue(cell.waitForExistence(timeout: 10)); XCTAssertTrue(cell.isSelected)
+        XCTAssertEqual(app.buttons.matching(identifier: "calendar-day-" + day).count,1)
+        capture("calendar-after-repeated-scroll-and-today")
+    }
     func testShiftExportRemainsReachableFromSettings() {
         let app = launch(["--dark"])
         app.buttons["Impostazioni"].tap()

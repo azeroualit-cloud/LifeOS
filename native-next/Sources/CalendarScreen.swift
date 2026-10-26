@@ -30,9 +30,6 @@ struct CalendarScreen: View {
                             Text(NativeCalendarWindow.monthLabel(month)).font(.title2.bold()).foregroundStyle(Color.primary)
                                 .accessibilityLabel(CivilDate.monthTitle(month))
                             monthGrid(month)
-                            if monthData[month] == nil && !store.isDemo {
-                                Text("Eventi e turni di questo mese non ancora caricati").font(.caption).foregroundStyle(NativeDesign.secondary)
-                            }
                             if selected.hasPrefix(month) { dayCard }
                         }.id(month)
                     }
@@ -46,7 +43,9 @@ struct CalendarScreen: View {
             .safeAreaInset(edge: .top, spacing: NativeDesign.Space.none) {
                 VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
                     brushPanel
-                    if loading { ProgressView("Aggiornamento calendario").font(.caption) }
+                    ProgressView().progressViewStyle(.linear).frame(height: NativeDesign.Space.xxs)
+                        .opacity(loading ? 1 : 0).accessibilityLabel("Aggiornamento calendario")
+                        .accessibilityHidden(!loading).allowsHitTesting(false)
                     if let loadError {
                         HStack { NativeInlineMessage(text: loadError); Button("Riprova") { reload += 1 } }
                     }
@@ -79,7 +78,7 @@ struct CalendarScreen: View {
             selected = day; jumpMonth = String(day.prefix(7))
         }
         .onChange(of: visibleMonth) { _, month in if let month { ensureWindow(around: month) } }
-        .onChange(of: store.life) { _, _ in
+        .onChange(of: NativeCalendarSource(life: store.life, demo: store.isDemo, origin: store.server?.absoluteString)) { _, _ in
             monthData = [:]; seedSnapshot(); rebuildMonth(); reload += 1
         }
         .task(id: focusMonth + "-" + String(reload)) { await loadMonth(focusMonth) }
@@ -89,10 +88,14 @@ struct CalendarScreen: View {
         return CivilDate.day().hasPrefix(month) ? CivilDate.day() : month + "-01"
     }
     private func ensureWindow(around month: String) {
-        if !months.contains(month) || month == months.first || month == months.last {
-            months = Array(Set(months + NativeCalendarWindow.months(around: month))).sorted()
-            rebuildMonth()
-        }
+        if let index = months.firstIndex(of: month), index >= 2 && index < months.count - 2 { return }
+        let next = NativeCalendarWindow.extended(months, around: month)
+        guard next != months else { return }
+        let added = Set(next).subtracting(months)
+        months = next
+        let retained = Set(next)
+        monthData = monthData.filter { retained.contains($0.key) }
+        rebuildMonth(changed: added)
     }
     private func seedSnapshot() {
         let month = store.life.text("month", fallback: store.calendarMonth)
@@ -111,14 +114,14 @@ struct CalendarScreen: View {
             let data = result.object
             guard case .array? = data["events"], case .array? = data["shifts"] else { throw Message(text: "Risposta calendario non valida.") }
             for key in NativeCalendarWindow.months(around: month, radius: 1) { monthData[key] = data }
-            rebuildMonth(); loading = false
+            rebuildMonth(changed: Set(NativeCalendarWindow.months(around: month, radius: 1))); loading = false
         } catch is CancellationError { }
         catch {
             guard !Task.isCancelled else { return }
             loading = false; loadError = error.localizedDescription
         }
     }
-    private func rebuildMonth() {
+    private func rebuildMonth(changed: Set<String>? = nil) {
         tasksByDay = Dictionary(grouping: store.tasks, by: { $0.text("scheduled_date") })
         var allEvents: [String: Record] = [:]
         var allShifts: [String: String] = [:]
@@ -135,12 +138,15 @@ struct CalendarScreen: View {
         // Keep a newer monthly read authoritative over the older global snapshot.
         eventsByDay = Dictionary(grouping: Array(allEvents.values).sorted { ($0.text("start_time"), $0.integer("id")) < ($1.text("start_time"), $1.integer("id")) }, by: { $0.text("day") })
         let today = CivilDate.day()
-        monthDays = Dictionary(uniqueKeysWithValues: months.map { month in
-            (month, CivilDate.grid(month).map { day in
-                let weekday = CivilDate.calendar.component(.weekday, from: CivilDate.date(day))
-                return CalendarDayPresentation(day: day, label: CivilDate.label(day), shift: allShifts[day].flatMap(ShiftKind.init(rawValue:)), hasEvents: !(eventsByDay[day] ?? []).isEmpty || !(tasksByDay[day] ?? []).isEmpty, isToday: day == today, isWeekend: weekday == 1 || weekday == 7, isCurrentMonth: day.hasPrefix(month))
-            })
-        })
+        var grids = monthDays.filter { months.contains($0.key) }
+        for month in months where grids[month] == nil || changed?.contains(month) != false {
+            grids[month] = CivilDate.gridDates(month).map { date in
+                let day = CivilDate.day(date)
+                let weekday = CivilDate.calendar.component(.weekday, from: date)
+                return CalendarDayPresentation(day: day, label: CivilDate.label(date), shift: allShifts[day].flatMap(ShiftKind.init(rawValue:)), hasEvents: !(eventsByDay[day] ?? []).isEmpty || !(tasksByDay[day] ?? []).isEmpty, isToday: day == today, isWeekend: weekday == 1 || weekday == 7, isCurrentMonth: day.hasPrefix(month))
+            }
+        }
+        monthDays = grids
     }
     private func goToToday() {
         selected = CivilDate.day(); router.calendarDay = selected

@@ -2,12 +2,16 @@ import Foundation
 
 /// Stable civil month identifiers keep scroll anchors intact when extending the range.
 enum NativeCalendarWindow {
-    static func monthLabel(_ month: String) -> String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "it_IT")
-        formatter.timeZone = CivilDate.calendar.timeZone
-        formatter.dateFormat = "LLL"
-        return formatter.string(from: CivilDate.date(month + "-01")).replacingOccurrences(of: ".", with: "").capitalized
+    static func monthLabel(_ month: String) -> String { CivilDate.monthAbbreviation(month) }
+    /// Keep neighbouring identities stable while bounding grids and server snapshots.
+    static let capacity = 13
+    static func extended(_ current: [String], around month: String) -> [String] {
+        guard current.contains(month) else { return months(around: month) }
+        let limit = capacity
+        let combined = Array(Set(current + months(around: month))).sorted()
+        guard combined.count > limit, let index = combined.firstIndex(of: month) else { return combined }
+        let first = max(0, min(index - limit / 2, combined.count - limit))
+        return Array(combined[first..<(first + limit)])
     }
     static func offset(_ month: String, by delta: Int) -> String {
         String(CivilDate.adding(delta, to: month + "-01", component: .month).prefix(7))

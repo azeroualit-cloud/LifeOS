@@ -79,20 +79,6 @@ struct NativeIcon: View {
             .accessibilityHidden(true)
     }
 }
-struct NativeSectionHeading: View {
-    let title: String
-    var body: some View { Text(title).font(.headline).frame(maxWidth: .infinity, alignment: .leading) }
-}
-struct NativeNavigationLabel: View {
-    let title: String
-    let symbol: String
-    var body: some View {
-        HStack(spacing: NativeDesign.Space.medium) {
-            NativeIcon(name: symbol)
-            Text(title).font(NativeDesign.body)
-        }.frame(minHeight: NativeDesign.Layout.touchTarget)
-    }
-}
 struct NativeListAppearance: ViewModifier {
     func body(content: Content) -> some View {
         content.listStyle(.insetGrouped).listSectionSpacing(NativeDesign.gap)
