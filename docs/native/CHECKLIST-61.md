@@ -1,3 +1,7 @@
+## Stato aggiornato — 26 ottobre 2026
+
+Backend distribuito con autorizzazione esplicita: run 40356025119. Sorgenti, moduli, configurazione e binding verificati dopo il deploy. Ultima verifica applicativa autenticata fallita e ripetizione diagnostica bloccata dalla revisione automatica: checklist non dichiarata interamente conclusa. Rapporto aggiornato: BACKEND-61-REVIEW.md. Le note di blocco successive descrivono gli stati precedenti.
+
 # Revisione 0.10.0 (61)
 
 Baseline: archivio pubblico build 60, commit 02c2c089841833a67fc9a223b367710edf7e37b9; integrazione con calendario continuo e completamento persistente del ramo apple-calendar-reminders. Overlay pubblicabile in native-next; integration-53 è una copia di lavoro ignorata da Git.
@@ -52,3 +56,5 @@ Run 40235736129: regressioni calendario/attività, Finanza, test unitari e righe
 Run finale 40238702185, commit 9df60f95628b4d5da34b55bd87c86edc902b1972: compilazione Apple, suite unitaria e accesso a Esporta turni dalle Impostazioni su entrambi i simulatori superati. Nessun’altra modifica funzionale rispetto alla suite precedente.
 
 Controllo visivo finale: il nuovo accesso nelle Impostazioni usa Form per margini e scorrimento nativi, anche con i comandi aggiuntivi di un server collegato. Per questa sola composizione UI, si ripetono compilazione e le due prove dedicate; 165 unitari già superati sul codice logico invariato.
+
+Run 40241234494 sul commit 8b98a3b54716899e76aebb910be1761ffbda268f: compilazione e navigazione del Form su iPhone principale e compatto superate; revisione visiva della nuova pagina confermata. Logica invariata rispetto ai 165 unitari del run 40238702185.

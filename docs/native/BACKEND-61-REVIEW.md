@@ -1,6 +1,6 @@
 # Backend 61 — patch sulla versione live verificata
 
-Stato al 26 ottobre 2026: sorgenti recuperati con consenso esplicito, audit cifrato completato, patch preparata e verificata. Nessun deploy eseguito.
+Stato al 26 ottobre 2026: aggiornamento esplicitamente autorizzato ed eseguito su entrambi i Worker. Codice, moduli aggiuntivi, configurazione e binding verificati dopo il deploy. Ultima verifica del contratto applicativo autenticato fallita; causa ancora da isolare, quindi la checklist non è dichiarata interamente conclusa.
 
 ## Risultato dell'analisi
 
@@ -28,8 +28,15 @@ Le entrypoint dei due Worker condividono il bundle verificato. Il modulo aggiunt
 Originale SHA256: 373384c74fe55aa66f2d1a6b8c12e778b4f33dbcf699e28696c5f12aa632f73f
 Patch SHA256: 2fffe32f48461693444363457451c4787b25feb9196a1dda71e1d6175779a1e6
 
-## Aggiornamento da autorizzare
+## Aggiornamento autorizzato ed eseguito
 
-Applicare la patch ai Worker lifeos-native-test e lifeos, nell'ordine, conservando tutti gli altri moduli e la configurazione nel processo, senza esportarla. Il comando di deploy richiede --apply; senza questa opzione ammette solo GET. Confronta nuovamente sorgente e configurazione prima di ogni aggiornamento; se divergono si ferma. Verifica i moduli e i binding dopo ogni aggiornamento. In caso di errore ripristina e verifica il codice originale quando non ci sono cambiamenti concorrenti. Le colonne additive, se già create da una successiva lettura applicativa, restano compatibili con il codice precedente.
+Applicata la patch ai Worker lifeos-native-test e lifeos, nell'ordine, conservando tutti gli altri moduli e la configurazione nel processo, senza esportarla. Il comando di deploy richiede --apply; senza questa opzione ammette solo GET. Confronta nuovamente sorgente e configurazione prima di ogni aggiornamento; se divergono si ferma. Verifica i moduli e i binding dopo ogni aggiornamento. In caso di errore ripristina e verifica il codice originale quando non ci sono cambiamenti concorrenti. Le colonne additive, se già create da una successiva lettura applicativa, restano compatibili con il codice precedente.
 
-La revisione automatica ha rifiutato l'esportazione delle impostazioni, fuori dal consenso dato per i sorgenti: tale estensione è stata esclusa. Il consenso per il deploy online è ancora da ottenere; la checklist non è chiusa finché l'aggiornamento e il contratto online non sono verificati.
+La revisione automatica ha rifiutato l'esportazione delle impostazioni, fuori dal consenso dato per i sorgenti: tale estensione è stata esclusa. Il consenso per il deploy è stato ottenuto ed eseguito. La ripetizione della verifica autenticata con diagnostica più precisa è stata successivamente rifiutata dalla revisione automatica per accesso con password ai dati live. Rimane necessaria un’autorizzazione esplicita per quella verifica in sola lettura, senza esportazione dei dati.
+
+
+## Esecuzione del deploy
+
+Run 40356025119, commit c8aefb31bc0666800fe0505314e8b4920494d60e: 9 test su fixture superati; aggiornamento effettivo e verifica di entrambi i Worker riusciti (LIVE_61_DEPLOYED_AND_VERIFIED). Il job complessivo risulta fallito per il successivo controllo applicativo autenticato; non va presentato come interamente verde. Non sono state effettuate altre modifiche al codice dei Worker durante la diagnosi. Workflow di deploy una tantum rimosso dopo l’esecuzione.
+
+Run 40357068529: pagine pubbliche rispondenti; controllo senza credenziali, senza lettura di API private o dei contenuti delle pagine. Questa prova non sostituisce il contratto autenticato ancora non verificato.
