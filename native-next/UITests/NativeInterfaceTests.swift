@@ -93,7 +93,7 @@ final class NativeInterfaceTests: XCTestCase {
         app.buttons["Annulla"].tap()
         let task = app.buttons["Cambia completamento Da fare libera"]
         revealChecklistButton(task, in: app)
-        app.staticTexts["Da fare libera"].tap()
+        app.buttons["Da fare libera"].tap()
         let reminder = app.buttons["inline-task-reminder"]
         XCTAssertTrue(reminder.waitForExistence(timeout: 10)); assertMinimumTouchTarget(reminder)
         capture("task-context-action-chips")
