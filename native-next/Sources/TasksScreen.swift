@@ -11,6 +11,8 @@ struct TasksScreen: View {
     private func rows(_ status: String) -> [Record] { NativeTaskList.rows(store.tasks, category: category, section: status) }
     private func activities(_ status: String) -> [NativeActivity] { NativeActivityCatalog.rows(tasks: store.tasks, events: store.activityEvents, category: category, section: status) }
     var body: some View {
+        let active = activities("todo"), waiting = activities("waiting")
+        let completed = rows("done").map { DisplayRecord($0) }
         List {
             Section {
                 HStack(spacing: NativeDesign.Space.small) {
@@ -27,23 +29,23 @@ struct TasksScreen: View {
                     }
                 }.listRowSeparator(.hidden)
             }.listRowBackground(Color.clear).listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-            if !activities("todo").isEmpty { Section {
-                ForEach(activities("todo")) { item in activityRow(item).moveDisabled(item.isEvent || item.completed) }
+            if !active.isEmpty { Section {
+                ForEach(Array(active.enumerated()), id: \.element.id) { index, item in activityRow(item, first: index == 0, last: index == active.count - 1).moveDisabled(item.isEvent || item.completed) }
                     .onMove { indexes, destination in
-                        var visible = activities("todo"); visible.move(fromOffsets: indexes, toOffset: destination)
+                        var visible = active; visible.move(fromOffsets: indexes, toOffset: destination)
                         let ordered = visible.filter { !$0.isEvent }.map(\.record)
                         let ids = NativeTaskList.reorderIDs(tasks: store.tasks, category: category, visibleIDs: ordered.map { $0.integer("id") })
                         Task { await store.run("reorderTasks", ["category": .string(category), "ids": .array(ids.map(JSONValue.int))]) }
                     }
             } header: { checklistHeading("Attivo") } }
-            if !activities("waiting").isEmpty {
-                Section { ForEach(activities("waiting")) { item in activityRow(item) } }
+            if !waiting.isEmpty {
+                Section { ForEach(Array(waiting.enumerated()), id: \.element.id) { index, item in activityRow(item, first: index == 0, last: index == waiting.count - 1) } }
                 header: { checklistHeading("In attesa") }
             }
-            if !rows("done").isEmpty {
+            if !completed.isEmpty {
                 Section {
                     if completedExpanded {
-                        ForEach(rows("done").map { DisplayRecord($0) }) { item in taskRow(item.value) }
+                        ForEach(Array(completed.enumerated()), id: \.element.id) { index, item in taskRow(item.value, first: index == 0, last: index == completed.count - 1) }
                     }
                 } header: {
                     Button {
@@ -51,7 +53,7 @@ struct TasksScreen: View {
                     } label: {
                         NativeSectionHeader("Completate", titleIdentifier: "task-heading-Completate") {
                             HStack(spacing: NativeDesign.Space.small) {
-                                Text(String(rows("done").count))
+                                Text(String(completed.count))
                                 Image(systemName: completedExpanded ? "chevron.up" : "chevron.down")
                             }
                         }.foregroundStyle(NativeDesign.secondary).textCase(nil)
@@ -62,7 +64,7 @@ struct TasksScreen: View {
                         .accessibilityValue(completedExpanded ? "Aperta" : "Chiusa")
                 }
             }
-            if activities("todo").isEmpty && activities("waiting").isEmpty && rows("done").isEmpty {
+            if active.isEmpty && waiting.isEmpty && completed.isEmpty {
                 Text("Nessuna attività da mostrare").foregroundStyle(NativeDesign.secondary).listRowBackground(Color.clear)
             }
         }
@@ -93,11 +95,9 @@ struct TasksScreen: View {
     private func toggleExpanded(_ id: String) {
         withAnimation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration)) { expandedID = expandedID == id ? nil : id }
     }
-    @ViewBuilder private func activityRow(_ item: NativeActivity) -> some View {
+    @ViewBuilder private func activityRow(_ item: NativeActivity, first: Bool, last: Bool) -> some View {
         if item.isEvent {
             let r = item.record
-            let section = r.text("day") <= CivilDate.adding(1, to: CivilDate.day()) ? "todo" : "waiting"
-            let siblings = activities(section)
             VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
                 NativeChecklistRow(title: r.text("title"), subtitle: CivilDate.label(r.text("day")) + (r.text("start_time").isEmpty ? "" : " · " + r.text("start_time")), checked: item.completed, showsDisclosure: false, completionLabel: "Cambia completamento evento " + r.text("title"), onComplete: {
                     expandedID = nil
@@ -107,12 +107,11 @@ struct TasksScreen: View {
                     NativeEventControls(record: r).padding(.leading, NativeDesign.Layout.touchTarget + NativeDesign.Space.small).transition(.opacity)
                 }
             }
-            .modifier(NativeChecklistListRow(first: siblings.first?.id == item.id, last: siblings.last?.id == item.id))
+            .modifier(NativeChecklistListRow(first: first, last: last))
             .disabled(store.busy)
-        } else { taskRow(item.record) }
+        } else { taskRow(item.record, first: first, last: last) }
     }
-    private func taskRow(_ r: Record) -> some View {
-        let siblings = rows(r.text("status") == "done" ? "done" : NativeTaskList.section(r))
+    private func taskRow(_ r: Record, first: Bool, last: Bool) -> some View {
         let expanded = expandedID == "task:\(r.integer("id"))"
         return VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
             if !expanded { NativeChecklistRow(title: r.text("title"), subtitle: expanded ? "" : r.text("notes"), checked: r.text("status") == "done", dueDay: r.text("due_date"), showsDisclosure: false, completionLabel: "Cambia completamento " + r.text("title"), onComplete: {
@@ -134,7 +133,7 @@ struct TasksScreen: View {
                 }.padding(.vertical, NativeDesign.Space.small).background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius)).transition(.opacity)
             }
         }
-        .modifier(NativeChecklistListRow(first: siblings.first?.integer("id") == r.integer("id"), last: siblings.last?.integer("id") == r.integer("id")))
+        .modifier(NativeChecklistListRow(first: first, last: last))
         .disabled(store.busy)
     }
 }
