@@ -1,0 +1,23 @@
+name: Life OS - Verifica patch live senza deploy
+on:
+  push:
+    paths: ['scripts/prepare-lifeos-live-61.py', 'scripts/deploy-lifeos-live-61.py', 'scripts/test_deploy_lifeos_live_61.py', '.github/workflows/lifeos-live-preflight.yml']
+permissions:
+  contents: read
+jobs:
+  preflight:
+    if: github.repository == 'azeroualit-cloud/LifeOS'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Prova aggiornamento e rollback su fixture isolate
+        run: python3 -m unittest discover -s scripts -p test_deploy_lifeos_live_61.py
+      - name: Confronta sorgenti e configurazione in memoria senza esportarla
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        # No --apply: the script rejects all non-GET requests in default mode.
+        run: python3 scripts/deploy-lifeos-live-61.py
