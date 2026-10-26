@@ -1,0 +1,30 @@
+name: Life OS - Audit cifrato sorgenti live
+on:
+  push:
+    paths: ['scripts/audit-lifeos-source.py', 'scripts/test_audit_lifeos_source.py', 'scripts/lifeos-audit-public.pem', '.github/workflows/lifeos-source-audit.yml']
+permissions:
+  contents: read
+jobs:
+  audit:
+    if: github.repository == 'azeroualit-cloud/LifeOS'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Prepara cifratura autenticata
+        run: python3 -m pip install --disable-pip-version-check 'cryptography>=44,<47'
+      - name: Verifica cifratura e richieste in sola lettura
+        run: python3 -m unittest discover -s scripts -p test_audit_lifeos_source.py
+      - name: Recupera e cifra prima di esportare
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: python3 scripts/audit-lifeos-source.py
+      - uses: actions/upload-artifact@v5
+        with:
+          name: LifeOS-sorgenti-live-cifrati
+          path: audit-encrypted/lifeos-live.enc.json
+          retention-days: 1
+          if-no-files-found: error
