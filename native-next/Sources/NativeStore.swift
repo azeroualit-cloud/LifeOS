@@ -57,7 +57,7 @@ import SwiftUI
     }
     var activityEvents: [Record] {
         let today = CivilDate.day()
-        return isDemo ? expandedEvents(low: today, high: CivilDate.adding(8, to: today), source: life.records("events")) : life.records("events") + life.records("upcomingEvents")
+        return isDemo ? expandedEvents(low: today, high: CivilDate.adding(8, to: today), source: life.records("events")) : life.records("activityEvents") + life.records("events") + life.records("upcomingEvents")
     }
     var highlights: [Record] {
         let upcoming: [Record]

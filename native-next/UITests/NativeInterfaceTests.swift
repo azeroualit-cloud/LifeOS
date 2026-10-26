@@ -72,7 +72,7 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertEqual(completion.value as? String, "Completata")
         capture("agenda-completed-expanded")
         completion.tap()
-        XCTAssertFalse(app.buttons["toggle-completed-tasks"].exists)
+        XCTAssertTrue(app.buttons["toggle-completed-tasks"].waitForNonExistence(timeout: 10))
         XCTAssertTrue(app.staticTexts["In attesa libera"].exists)
     }
     func testShiftExportRemainsReachableFromSettings() {
