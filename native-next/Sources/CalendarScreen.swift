@@ -27,7 +27,8 @@ struct CalendarScreen: View {
                 LazyVStack(alignment: .leading, spacing: NativeDesign.Space.section) {
                     ForEach(months, id: \.self) { month in
                         VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-                            Text(CivilDate.monthTitle(month)).font(.title2.bold()).foregroundStyle(Color.primary)
+                            Text(NativeCalendarWindow.monthLabel(month)).font(.title2.bold()).foregroundStyle(Color.primary)
+                                .accessibilityLabel(CivilDate.monthTitle(month))
                             monthGrid(month)
                             if monthData[month] == nil && !store.isDemo {
                                 Text("Eventi e turni di questo mese non ancora caricati").font(.caption).foregroundStyle(NativeDesign.secondary)
