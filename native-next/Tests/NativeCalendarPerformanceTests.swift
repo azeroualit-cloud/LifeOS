@@ -14,6 +14,13 @@ final class NativeCalendarPerformanceTests: XCTestCase {
         }
         XCTAssertEqual(NativeCalendarWindow.extended(window, around: "2099-01"), NativeCalendarWindow.months(around:"2099-01"))
     }
+    func testSnapshotsOutsideTheRetainedWindowCannotGrowTheCache() {
+        let window = NativeCalendarWindow.months(around: "2028-03", radius: 6)
+        XCTAssertTrue(NativeCalendarWindow.coveredMonths(around:"2026-10", within:window).isEmpty)
+        var keys = Set<String>()
+        for month in window { keys.formUnion(NativeCalendarWindow.coveredMonths(around:month, within:window)) }
+        XCTAssertEqual(keys,Set(window)); XCTAssertEqual(keys.count,NativeCalendarWindow.capacity)
+    }
     func testNonCalendarUpdatesDoNotInvalidateMonthlySnapshots() {
         let life: Record = ["month": .string("2026-10"), "events": .array([]), "shifts": .array([]), "tasks": .array([])]
         let key = NativeCalendarSource(life:life,demo:false,origin:"https://example.com")

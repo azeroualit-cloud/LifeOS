@@ -99,7 +99,7 @@ struct CalendarScreen: View {
     }
     private func seedSnapshot() {
         let month = store.life.text("month", fallback: store.calendarMonth)
-        for key in NativeCalendarWindow.months(around: month, radius: 1) { monthData[key] = store.life }
+        for key in NativeCalendarWindow.coveredMonths(around: month, within: months) { monthData[key] = store.life }
     }
     private func loadMonth(_ month: String) async {
         guard !months.isEmpty else { return }
@@ -113,8 +113,8 @@ struct CalendarScreen: View {
             try Task.checkCancellation()
             let data = result.object
             guard case .array? = data["events"], case .array? = data["shifts"] else { throw Message(text: "Risposta calendario non valida.") }
-            for key in NativeCalendarWindow.months(around: month, radius: 1) { monthData[key] = data }
-            rebuildMonth(changed: Set(NativeCalendarWindow.months(around: month, radius: 1))); loading = false
+            for key in NativeCalendarWindow.coveredMonths(around: month, within: months) { monthData[key] = data }
+            rebuildMonth(changed: Set(NativeCalendarWindow.coveredMonths(around: month, within: months))); loading = false
         } catch is CancellationError { }
         catch {
             guard !Task.isCancelled else { return }
