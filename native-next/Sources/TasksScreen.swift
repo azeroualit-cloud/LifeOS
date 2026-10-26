@@ -6,7 +6,7 @@ struct TasksScreen: View {
     @State private var category = "action"
     @State private var editMode: EditMode = .inactive
     @Environment(\.nativeReduceMotion) private var reduceMotion
-    @State private var expandedID: Int?
+    @State private var expandedID: String?
     @State private var completedExpanded = false
     private func rows(_ status: String) -> [Record] { NativeTaskList.rows(store.tasks, category: category, section: status) }
     private func activities(_ status: String) -> [NativeActivity] { NativeActivityCatalog.rows(tasks: store.tasks, events: store.activityEvents, category: category, section: status) }
@@ -36,8 +36,8 @@ struct TasksScreen: View {
                         Task { await store.run("reorderTasks", ["category": .string(category), "ids": .array(ids.map(JSONValue.int))]) }
                     }
             } header: { checklistHeading("Attivo") } }
-            if !rows("waiting").isEmpty {
-                Section { ForEach(rows("waiting").map { DisplayRecord($0) }) { item in taskRow(item.value) } }
+            if !activities("waiting").isEmpty {
+                Section { ForEach(activities("waiting")) { item in activityRow(item) } }
                 header: { checklistHeading("In attesa") }
             }
             if !rows("done").isEmpty {
@@ -57,11 +57,12 @@ struct TasksScreen: View {
                         }.foregroundStyle(NativeDesign.secondary).textCase(nil)
                             .padding(.horizontal, NativeDesign.Layout.screenInset)
                             .frame(minHeight: NativeDesign.Layout.touchTarget)
-                    }.buttonStyle(.plain).accessibilityIdentifier("toggle-completed-tasks")
+                            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                    }.buttonStyle(.plain).listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)).accessibilityIdentifier("toggle-completed-tasks")
                         .accessibilityValue(completedExpanded ? "Aperta" : "Chiusa")
                 }
             }
-            if activities("todo").isEmpty && rows("waiting").isEmpty && rows("done").isEmpty {
+            if activities("todo").isEmpty && activities("waiting").isEmpty && rows("done").isEmpty {
                 Text("Nessuna attività da mostrare").foregroundStyle(NativeDesign.secondary).listRowBackground(Color.clear)
             }
         }
@@ -89,23 +90,37 @@ struct TasksScreen: View {
             .padding(.horizontal, NativeDesign.Layout.screenInset)
             .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
     }
+    private func toggleExpanded(_ id: String) {
+        withAnimation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration)) { expandedID = expandedID == id ? nil : id }
+    }
     @ViewBuilder private func activityRow(_ item: NativeActivity) -> some View {
         if item.isEvent {
-            NativeChecklistRow(title: item.record.text("title"), subtitle: CivilDate.label(item.record.text("day")), checked: item.completed, showsDisclosure: false, completionLabel: "Cambia completamento evento " + item.record.text("title"), onComplete: {
-                Task { await store.run("setEventOccurrence", ["id": .int(item.record.integer("id")), "day": .string(item.record.text("day")), "status": .string(item.completed ? "open" : "done")]) }
-            }, onOpen: { router.sheet = .event(item.record) }).listRowBackground(Color.clear)
+            let r = item.record
+            let section = r.text("day") <= CivilDate.adding(1, to: CivilDate.day()) ? "todo" : "waiting"
+            let siblings = activities(section)
+            VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+                NativeChecklistRow(title: r.text("title"), subtitle: CivilDate.label(r.text("day")) + (r.text("start_time").isEmpty ? "" : " · " + r.text("start_time")), checked: item.completed, showsDisclosure: false, completionLabel: "Cambia completamento evento " + r.text("title"), onComplete: {
+                    expandedID = nil
+                    Task { await store.run("setEventOccurrence", ["id": .int(r.integer("id")), "day": .string(r.text("day")), "status": .string("done")]) }
+                }, onOpen: { toggleExpanded(item.id) })
+                if expandedID == item.id {
+                    NativeEventControls(record: r).padding(.leading, NativeDesign.Layout.touchTarget + NativeDesign.Space.small).transition(.opacity)
+                }
+            }
+            .modifier(NativeChecklistListRow(first: siblings.first?.id == item.id, last: siblings.last?.id == item.id))
+            .disabled(store.busy)
         } else { taskRow(item.record) }
     }
     private func taskRow(_ r: Record) -> some View {
         let siblings = rows(r.text("status") == "done" ? "done" : NativeTaskList.section(r))
-        let expanded = expandedID == r.integer("id")
+        let expanded = expandedID == "task:\(r.integer("id"))"
         return VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
             if !expanded { NativeChecklistRow(title: r.text("title"), subtitle: expanded ? "" : r.text("notes"), checked: r.text("status") == "done", dueDay: r.text("due_date"), showsDisclosure: false, completionLabel: "Cambia completamento " + r.text("title"), onComplete: {
                 expandedID = nil
                 Task { await store.run("setTaskStatus", ["id": .int(r.integer("id")), "status": .string(NativeTaskList.completionStatus(r))]) }
             }, onOpen: {
                 withAnimation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration)) {
-                    expandedID = expanded ? nil : r.integer("id")
+                    expandedID = expanded ? nil : "task:\(r.integer("id"))"
                 }
             })
             }
@@ -116,7 +131,7 @@ struct TasksScreen: View {
                         Task { await store.run("setTaskStatus", ["id": .int(r.integer("id")), "status": .string(NativeTaskList.completionStatus(r))]) }
                     }
                     NativeTaskControls(record: r) { withAnimation(reduceMotion ? nil : .snappy) { expandedID = nil } }
-                }.padding(NativeDesign.Space.small).background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius)).transition(.opacity)
+                }.padding(.vertical, NativeDesign.Space.small).background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius)).transition(.opacity)
             }
         }
         .modifier(NativeChecklistListRow(first: siblings.first?.integer("id") == r.integer("id"), last: siblings.last?.integer("id") == r.integer("id")))
@@ -133,6 +148,11 @@ private struct NativeTaskControls: View {
     @State private var title = ""
     @State private var notes = ""
     @State private var error: String?
+    @State private var confirmDelete = false
+    private func edit(_ section: String) {
+        var value = record; value["title"] = .string(title); value["notes"] = .string(notes)
+        value["_editorSection"] = .string(section); router.sheet = .task(value)
+    }
     var body: some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
             HStack {
@@ -142,14 +162,15 @@ private struct NativeTaskControls: View {
             TextField("Aggiungi nota", text: $notes, axis: .vertical).font(.subheadline).foregroundStyle(NativeDesign.secondary)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: NativeDesign.Space.small) {
-                    Button { router.sheet = .task(record) } label: { Label(record.text("due_date").isEmpty ? "Data e dettagli" : record.text("due_date"), systemImage: "calendar").labelStyle(.iconOnly).frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget) }
+                    NativeInlineAction(symbol: "calendar", title: record.text("scheduled_date").isEmpty ? "Data" : CivilDate.label(record.text("scheduled_date")), label: "Data e dettagli attività") { edit("dates") }
                         .accessibilityIdentifier("inline-task-details")
-                    Button {
+                    NativeInlineAction(symbol: "clock", title: record.text("scheduled_time"), label: "Orario promemoria attività") { edit("reminder") }
+                        .accessibilityIdentifier("inline-task-reminder")
+                    NativeInlineAction(symbol: NativeTaskList.section(record) == "waiting" ? "play.fill" : "pause.fill", label: NativeTaskList.section(record) == "waiting" ? "Riattiva" : "In attesa") {
                         Task { await store.run("setTaskStatus", ["id": .int(record.integer("id")), "status": .string(NativeTaskList.section(record) == "waiting" ? "todo" : "waiting")]) }
-                    } label: { Image(systemName: NativeTaskList.section(record) == "waiting" ? "play" : "pause").frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget) }.accessibilityLabel(NativeTaskList.section(record) == "waiting" ? "Riattiva" : "In attesa")
-                    Button { router.sheet = .settings } label: { Image(systemName: "bell").frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget) }.accessibilityLabel("Impostazioni notifiche")
-                    Button(role: .destructive) { Task { await store.run("deleteTask", args: [.int(record.integer("id"))]) } } label: { Image(systemName: "trash").foregroundStyle(NativeDesign.danger).frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget) }.accessibilityLabel("Elimina attività")
-                }.buttonStyle(NativePressStyle()).tint(NativeDesign.accent)
+                    }
+                    NativeInlineAction(symbol: "trash", label: "Elimina attività", destructive: true) { confirmDelete = true }
+                }
             }
             if title != record.text("title") || notes != record.text("notes") {
                 Button("Salva modifiche") {
@@ -164,6 +185,28 @@ private struct NativeTaskControls: View {
             if let error { NativeInlineMessage(text: error) }
         }.font(.subheadline).padding(.bottom, NativeDesign.Space.small)
             .onAppear { title = record.text("title"); notes = record.text("notes") }
+            .confirmationDialog("Eliminare questa attività?", isPresented: $confirmDelete, titleVisibility: .visible) {
+                Button("Elimina attività", role: .destructive) { Task { await store.run("deleteTask", args: [.int(record.integer("id"))]) } }
+            }
+    }
+}
+
+/// Same contextual action chips for calendar activities; deletion retains occurrence/series choices.
+private struct NativeEventControls: View {
+    @EnvironmentObject var router: NativeRouter
+    let record: Record
+    private func edit(_ section: String) {
+        var value = record; value["_editorSection"] = .string(section); router.sheet = .event(value)
+    }
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: NativeDesign.Space.small) {
+                NativeInlineAction(symbol: "calendar", title: CivilDate.label(record.text("day")), label: "Data e dettagli evento") { edit("dates") }.accessibilityIdentifier("inline-event-details")
+                NativeInlineAction(symbol: "clock", title: record.text("start_time"), label: "Orario evento") { edit("time") }.accessibilityIdentifier("inline-event-time")
+                NativeInlineAction(symbol: "repeat", label: "Ripetizione evento") { edit("repeat") }.accessibilityIdentifier("inline-event-repeat")
+                NativeInlineAction(symbol: "trash", label: "Elimina evento", destructive: true) { edit("actions") }.accessibilityIdentifier("inline-event-delete")
+            }
+        }
     }
 }
 
@@ -183,15 +226,16 @@ struct TaskEditor: View {
     @State private var saving = false
     @State private var error: String?
     var body: some View {
+        ScrollViewReader { scroll in
         Form {
             Section { TextField("Titolo", text: $title); Picker("Categoria", selection: $category) { ForEach(store.categories.map { DisplayRecord($0, key: "key") }) { item in Text(item.value.text("label")).tag(item.value.text("key")) } } }
             Section("Date") {
-                Toggle("Scadenza", isOn: $hasDue)
+                Toggle("Scadenza", isOn: $hasDue).id("dates")
                 if hasDue { DatePicker("Scade il", selection: $due, displayedComponents: .date) }
                 Toggle("Mostra nel calendario", isOn: $hasScheduled)
                 if hasScheduled { DatePicker("Giorno", selection: $scheduled, displayedComponents: .date) }
                 if hasDue || hasScheduled {
-                    Toggle("Orario promemoria", isOn: $hasTime)
+                    Toggle("Orario promemoria", isOn: $hasTime).id("reminder")
                     if hasTime { DatePicker("Ora", selection: $notificationTime, displayedComponents: .hourAndMinute) }
                     Text("Il promemoria segue il giorno programmato, oppure la scadenza. Senza orario usa le 9:00, se le notifiche sono abilitate.").font(.caption).foregroundStyle(NativeDesign.secondary)
                 }
@@ -207,10 +251,19 @@ struct TaskEditor: View {
             hasDue = !record.text("due_date").isEmpty; hasScheduled = !record.text("scheduled_date").isEmpty
             if hasDue { due = CivilDate.date(record.text("due_date")) }; if hasScheduled { scheduled = CivilDate.date(record.text("scheduled_date")) }
             hasTime = !record.text("scheduled_time").isEmpty
+            if record.text("_editorSection") == "reminder" {
+                if !hasDue && !hasScheduled { hasScheduled = true }; hasTime = true
+            }
             if hasTime {
                 let parts = record.text("scheduled_time").split(separator: ":").compactMap { Int($0) }
                 if parts.count == 2, let time = CivilDate.calendar.date(bySettingHour: parts[0], minute: parts[1], second: 0, of: Date()) { notificationTime = time }
             }
+        }
+        .task {
+            if !record.text("_editorSection").isEmpty {
+                await Task.yield(); scroll.scrollTo(record.text("_editorSection"), anchor: .center)
+            }
+        }
         }
     }
     private func save() async {

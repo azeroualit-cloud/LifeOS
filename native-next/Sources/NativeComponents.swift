@@ -270,6 +270,28 @@ struct NativeCategoryChip: View {
             .sensoryFeedback(.selection, trigger: touchFeedback)
     }
 }
+/// Contextual Apple-style chips: visible surface and a full 44 pt touch target.
+struct NativeInlineAction: View {
+    let symbol: String
+    var title = ""
+    let label: String
+    var destructive = false
+    let action: () -> Void
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: NativeDesign.Space.small) {
+                Image(systemName: symbol).font(.body.weight(.medium))
+                if !title.isEmpty { Text(title).font(.subheadline.weight(.medium)).fixedSize() }
+            }
+            .foregroundStyle(destructive ? NativeDesign.danger : NativeDesign.accent)
+            .padding(.horizontal, NativeDesign.Space.medium)
+            .frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget)
+            .background(NativeDesign.actionSurface, in: Capsule())
+            .contentShape(Capsule())
+        }.buttonStyle(NativePressStyle()).accessibilityLabel(label)
+    }
+}
+
 struct NativeInlineMessage: View {
     let text: String
     var tone: NativeTone = .danger

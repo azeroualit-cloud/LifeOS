@@ -76,6 +76,33 @@ final class NativeInterfaceTests: XCTestCase {
         revealChecklistButton(completion, in: app, towardTop: true)
         XCTAssertEqual(completion.value as? String, "Da completare")
     }
+    func testEventContextActionsUseFullSizeChipsAndOwnEditor() {
+        let app = launch(["--dark", "--activity-agenda"])
+        app.tabBars.buttons["Attività"].tap()
+        app.staticTexts["Evento oggi"].tap()
+        let details = app.buttons["inline-event-details"]
+        XCTAssertTrue(details.waitForExistence(timeout: 10)); assertMinimumTouchTarget(details)
+        XCTAssertFalse(app.navigationBars["Modifica evento"].exists)
+        let time = app.buttons["inline-event-time"]
+        assertMinimumTouchTarget(time)
+        capture("event-context-action-chips")
+        time.tap()
+        XCTAssertTrue(app.navigationBars["Modifica evento"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.switches["Ora iniziale"].waitForExistence(timeout: 10))
+        XCTAssertEqual(app.switches["Ora iniziale"].value as? String, "1")
+        app.buttons["Annulla"].tap()
+        let task = app.buttons["Cambia completamento Da fare libera"]
+        revealChecklistButton(task, in: app)
+        app.staticTexts["Da fare libera"].tap()
+        let reminder = app.buttons["inline-task-reminder"]
+        XCTAssertTrue(reminder.waitForExistence(timeout: 10)); assertMinimumTouchTarget(reminder)
+        capture("task-context-action-chips")
+        reminder.tap()
+        XCTAssertTrue(app.navigationBars["Modifica attività"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.switches["Orario promemoria"].waitForExistence(timeout: 10))
+        XCTAssertEqual(app.switches["Orario promemoria"].value as? String, "1")
+        XCTAssertFalse(app.navigationBars["Impostazioni"].exists)
+    }
     func testShiftExportRemainsReachableFromSettings() {
         let app = launch(["--dark"])
         app.buttons["Impostazioni"].tap()

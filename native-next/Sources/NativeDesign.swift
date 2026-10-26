@@ -10,6 +10,7 @@ enum NativeDesign {
     static let secondary = Color(uiColor: UIColor { traits in
         UIColor(white: traits.userInterfaceStyle == .dark ? 0.68 : 0.37, alpha: 1)
     })
+    static let actionSurface = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor(white: 0.17, alpha: 1) : .tertiarySystemFill })
     static let inset = Color.primary.opacity(0.045)
     // Financial direction only: red = outflow/decline, green = available/inflow/growth.
     static let financialRed = Color(uiColor: UIColor { trait in

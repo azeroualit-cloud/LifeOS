@@ -353,8 +353,9 @@ struct EventEditor: View {
     @State private var error: String?
     @State private var confirmDelete = false
     var body: some View {
+        ScrollViewReader { scroll in
         Form {
-            Section { TextField("Titolo", text: $title); DatePicker("Giorno", selection: $date, displayedComponents: .date); TextField("Luogo", text: $location) }
+            Section { TextField("Titolo", text: $title); DatePicker("Giorno", selection: $date, displayedComponents: .date); TextField("Luogo", text: $location) }.id("dates")
             Section("Orario") {
                 Toggle("Ora iniziale", isOn: $hasTime)
                 if hasTime {
@@ -363,6 +364,7 @@ struct EventEditor: View {
                     if hasEnd { DatePicker("Fine", selection: $end, displayedComponents: .hourAndMinute) }
                 }
             }
+            .id("time")
             Section("Ripetizione") {
                 Picker("Frequenza", selection: $frequency) { Text("Mai").tag("none"); Text("Ogni settimana").tag("weekly"); Text("Ogni mese").tag("monthly"); Text("Ogni anno").tag("yearly") }
                 if frequency != "none" { Toggle("Data finale", isOn: $hasUntil); if hasUntil { DatePicker("Fino al", selection: $until, in: date..., displayedComponents: .date) } }
@@ -371,6 +373,7 @@ struct EventEditor: View {
                     Text("Le occorrenze precedenti restano nello storico.").font(.caption).foregroundStyle(NativeDesign.secondary)
                 }
             }
+            .id("repeat")
             Section("Note") { TextEditor(text: $notes).frame(minHeight: 90) }
             if record.integer("id") > 0 {
                 Section {
@@ -383,7 +386,7 @@ struct EventEditor: View {
                     }
                     Button("Elimina solo questa occorrenza", role: .destructive) { Task { await store.run("setEventOccurrence", ["id": .int(record.integer("id")), "day": .string(record.text("day")), "status": .string("skipped")]); if store.error == nil { dismiss() } } }
                     Button("Elimina intera serie", role: .destructive) { confirmDelete = true }
-                }.disabled(saving || store.busy)
+                }.id("actions").disabled(saving || store.busy)
             }
             if let error { NativeInlineMessage(text: error) }
         }.modifier(NativeListAppearance()).navigationTitle(record.integer("id") > 0 ? "Modifica evento" : "Nuovo evento").navigationBarTitleDisplayMode(.inline)
@@ -398,7 +401,14 @@ struct EventEditor: View {
             date = CivilDate.date(record.text("series_day", fallback: record.text("day", fallback: CivilDate.day())))
             frequency = record.text("frequency", fallback: "none"); hasTime = !record.text("start_time").isEmpty; hasEnd = !record.text("end_time").isEmpty
             start = clockDate(record.text("start_time", fallback: "09:00")); end = clockDate(record.text("end_time", fallback: "10:00"))
+            if record.text("_editorSection") == "time" { hasTime = true }
             hasUntil = !record.text("until_day").isEmpty; until = CivilDate.date(record.text("until_day", fallback: CivilDate.adding(365, to: CivilDate.day())))
+        }
+        .task {
+            if !record.text("_editorSection").isEmpty {
+                await Task.yield(); scroll.scrollTo(record.text("_editorSection"), anchor: .center)
+            }
+        }
         }
     }
     private func clockDate(_ text: String) -> Date {
