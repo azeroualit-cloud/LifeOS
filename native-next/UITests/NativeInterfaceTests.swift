@@ -51,6 +51,30 @@ final class NativeInterfaceTests: XCTestCase {
         let shot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
         shot.name = name; shot.lifetime = .keepAlways; add(shot)
     }
+    func testActivityAgendaShowsOnlyRelevantItemsAndFoldsCompleted() {
+        let app = launch(["--dark", "--activity-agenda"])
+        app.tabBars.buttons["Attività"].tap()
+        XCTAssertTrue(app.staticTexts["Evento oggi"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["Evento domani"].exists)
+        XCTAssertLessThan(app.staticTexts["Evento oggi"].frame.minY, app.staticTexts["Evento domani"].frame.minY)
+        for title in ["Attività futura nascosta", "Evento oltre settimana", "Evento passato", "Evento già completato", "Attività archiviata"] {
+            XCTAssertFalse(app.staticTexts[title].exists)
+        }
+        let week = app.buttons["Cambia completamento evento Evento fra sette giorni"]
+        revealChecklistButton(week, in: app)
+        let archived = app.buttons["toggle-completed-tasks"]
+        revealChecklistButton(archived, in: app)
+        XCTAssertEqual(archived.value as? String, "Chiusa")
+        capture("agenda-rolling-week-completed-collapsed")
+        archived.tap()
+        let completion = app.buttons["Cambia completamento Attività archiviata"]
+        revealChecklistButton(completion, in: app)
+        XCTAssertEqual(completion.value as? String, "Completata")
+        capture("agenda-completed-expanded")
+        completion.tap()
+        XCTAssertFalse(app.buttons["toggle-completed-tasks"].exists)
+        XCTAssertTrue(app.staticTexts["In attesa libera"].exists)
+    }
     func testShiftExportRemainsReachableFromSettings() {
         let app = launch(["--dark"])
         app.buttons["Impostazioni"].tap()
@@ -449,7 +473,10 @@ final class NativeInterfaceTests: XCTestCase {
         capture("shared-task-rows")
         completion.tap()
         XCTAssertTrue(app.staticTexts["Attivo"].waitForExistence(timeout: 10))
-        XCTAssertFalse(app.staticTexts["Completate"].exists)
+        let archived = app.buttons["toggle-completed-tasks"]
+        revealChecklistButton(archived, in: app)
+        XCTAssertEqual(archived.value as? String, "Chiusa")
+        archived.tap()
         revealChecklistButton(completion, in: app)
         XCTAssertEqual(completion.value as? String, "Completata")
         capture("shared-completed-task-rows")
@@ -892,7 +919,10 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertTrue(completion.waitForExistence(timeout: 10))
         completion.tap()
         XCTAssertTrue(app.staticTexts["Attivo"].waitForExistence(timeout: 10))
-        XCTAssertFalse(app.staticTexts["Completate"].exists)
+        let archived = app.buttons["toggle-completed-tasks"]
+        revealChecklistButton(archived, in: app)
+        XCTAssertEqual(archived.value as? String, "Chiusa")
+        archived.tap()
         revealChecklistButton(completion, in: app)
         XCTAssertEqual(completion.value as? String, "Completata")
         XCTAssertFalse(app.navigationBars["Modifica attività"].exists)

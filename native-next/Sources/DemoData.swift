@@ -140,7 +140,7 @@ enum DemoActions {
                 guard !future else { throw Message(text: "Riapri prima le occorrenze future già segnate.") }
                 rows[i]["until_day"] = .string(CivilDate.adding(-1, to: from)); p["id"] = .int(nextID(rows)); rows.append(p)
             } else if let i = rows.firstIndex(where: { $0.integer("id") == id }) {
-                if rows[i].text("day") != p.text("day") || rows[i].text("frequency") != p.text("frequency") {
+                if (rows[i].text("day") != p.text("day") || rows[i].text("frequency") != p.text("frequency")) && (rows[i].text("frequency", fallback: "none") != "none" || p.text("frequency", fallback: "none") != "none") {
                     guard !state.life.record("occurrences").keys.contains(where: { $0.hasPrefix("\(id):") }) else { throw Message(text: "Usa Modifica da qui per preservare le occorrenze segnate.") }
                 }
                 rows[i] = p

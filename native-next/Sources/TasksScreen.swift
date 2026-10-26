@@ -7,8 +7,9 @@ struct TasksScreen: View {
     @State private var editMode: EditMode = .inactive
     @Environment(\.nativeReduceMotion) private var reduceMotion
     @State private var expandedID: Int?
+    @State private var completedExpanded = false
     private func rows(_ status: String) -> [Record] { NativeTaskList.rows(store.tasks, category: category, section: status) }
-    private func activities(_ status: String) -> [NativeActivity] { NativeActivityCatalog.rows(tasks: store.tasks, events: store.events, category: category, section: status) }
+    private func activities(_ status: String) -> [NativeActivity] { NativeActivityCatalog.rows(tasks: store.tasks, events: store.activityEvents, category: category, section: status) }
     var body: some View {
         List {
             Section {
@@ -26,25 +27,49 @@ struct TasksScreen: View {
                     }
                 }.listRowSeparator(.hidden)
             }.listRowBackground(Color.clear).listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-            Section {
-                if activities("todo").isEmpty { Text("Nessuna attività attiva").foregroundStyle(NativeDesign.secondary).modifier(NativeChecklistListRow(first: true, last: true)) }
+            if !activities("todo").isEmpty { Section {
                 ForEach(activities("todo")) { item in activityRow(item).moveDisabled(item.isEvent || item.completed) }
                     .onMove { indexes, destination in
                         var visible = activities("todo"); visible.move(fromOffsets: indexes, toOffset: destination)
                         let ordered = visible.filter { !$0.isEvent }.map(\.record)
-                        Task { await store.run("reorderTasks", ["category": .string(category), "ids": .array(ordered.filter { $0.text("status") == "todo" }.map { .int($0.integer("id")) })]) }
+                        let ids = NativeTaskList.reorderIDs(tasks: store.tasks, category: category, visibleIDs: ordered.map { $0.integer("id") })
+                        Task { await store.run("reorderTasks", ["category": .string(category), "ids": .array(ids.map(JSONValue.int))]) }
                     }
-            } header: { checklistHeading("Attivo") }
+            } header: { checklistHeading("Attivo") } }
             if !rows("waiting").isEmpty {
                 Section { ForEach(rows("waiting").map { DisplayRecord($0) }) { item in taskRow(item.value) } }
                 header: { checklistHeading("In attesa") }
+            }
+            if !rows("done").isEmpty {
+                Section {
+                    if completedExpanded {
+                        ForEach(rows("done").map { DisplayRecord($0) }) { item in taskRow(item.value) }
+                    }
+                } header: {
+                    Button {
+                        withAnimation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration)) { completedExpanded.toggle() }
+                    } label: {
+                        NativeSectionHeader("Completate", titleIdentifier: "task-heading-Completate") {
+                            HStack(spacing: NativeDesign.Space.small) {
+                                Text(String(rows("done").count))
+                                Image(systemName: completedExpanded ? "chevron.up" : "chevron.down")
+                            }
+                        }.foregroundStyle(NativeDesign.secondary).textCase(nil)
+                            .padding(.horizontal, NativeDesign.Layout.screenInset)
+                            .frame(minHeight: NativeDesign.Layout.touchTarget)
+                    }.buttonStyle(.plain).accessibilityIdentifier("toggle-completed-tasks")
+                        .accessibilityValue(completedExpanded ? "Aperta" : "Chiusa")
+                }
+            }
+            if activities("todo").isEmpty && rows("waiting").isEmpty && rows("done").isEmpty {
+                Text("Nessuna attività da mostrare").foregroundStyle(NativeDesign.secondary).listRowBackground(Color.clear)
             }
         }
         .modifier(NativeChecklistListAppearance())
         .environment(\.editMode, $editMode)
         .scrollDismissesKeyboard(.interactively)
         .animation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration), value: store.tasks)
-        .onChange(of: category) { _, _ in expandedID = nil }
+        .onChange(of: category) { _, _ in expandedID = nil; completedExpanded = false }
         
         .onAppear {
             let keys = store.categories.map { $0.text("key") }
@@ -72,10 +97,11 @@ struct TasksScreen: View {
         } else { taskRow(item.record) }
     }
     private func taskRow(_ r: Record) -> some View {
-        let siblings = rows(NativeTaskList.section(r))
+        let siblings = rows(r.text("status") == "done" ? "done" : NativeTaskList.section(r))
         let expanded = expandedID == r.integer("id")
         return VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
             if !expanded { NativeChecklistRow(title: r.text("title"), subtitle: expanded ? "" : r.text("notes"), checked: r.text("status") == "done", dueDay: r.text("due_date"), showsDisclosure: false, completionLabel: "Cambia completamento " + r.text("title"), onComplete: {
+                expandedID = nil
                 Task { await store.run("setTaskStatus", ["id": .int(r.integer("id")), "status": .string(NativeTaskList.completionStatus(r))]) }
             }, onOpen: {
                 withAnimation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration)) {
@@ -86,6 +112,7 @@ struct TasksScreen: View {
             if expanded {
                 HStack(alignment: .top, spacing: NativeDesign.Space.small) {
                     NativeCompletionButton(checked: r.text("status") == "done", label: "Cambia completamento " + r.text("title")) {
+                        expandedID = nil
                         Task { await store.run("setTaskStatus", ["id": .int(r.integer("id")), "status": .string(NativeTaskList.completionStatus(r))]) }
                     }
                     NativeTaskControls(record: r) { withAnimation(reduceMotion ? nil : .snappy) { expandedID = nil } }

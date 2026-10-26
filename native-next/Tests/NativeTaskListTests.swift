@@ -5,17 +5,18 @@ final class NativeTaskListTests: XCTestCase {
     private func row(_ id: Int, status: String, section: String = "todo", order: Int = 0, category: String = "shopping") -> Record {
         ["id": .int(id), "status": .string(status), "section_status": .string(section), "sort_order": .int(order), "list_kind": .string(category), "title": .string("Articolo \(id)")]
     }
-    func testCompletedItemsRemainAtBottomOfTheirOwnSection() {
+    func testCompletedItemsHaveTheirOwnArchiveAndRememberOrigin() {
         let tasks = [row(1, status: "done", order: 0), row(2, status: "todo", order: 5), row(3, status: "done", section: "waiting"), row(4, status: "waiting"), row(5, status: "todo", category: "action")]
-        XCTAssertEqual(NativeTaskList.rows(tasks, category: "shopping", section: "todo").map { $0.integer("id") }, [2, 1])
-        XCTAssertEqual(NativeTaskList.rows(tasks, category: "shopping", section: "waiting").map { $0.integer("id") }, [4, 3])
+        XCTAssertEqual(NativeTaskList.rows(tasks, category: "shopping", section: "todo").map { $0.integer("id") }, [2])
+        XCTAssertEqual(NativeTaskList.rows(tasks, category: "shopping", section: "waiting").map { $0.integer("id") }, [4])
+        XCTAssertEqual(NativeTaskList.rows(tasks, category: "shopping", section: "done").map { $0.integer("id") }, [1, 3])
         XCTAssertEqual(NativeTaskList.completionStatus(tasks[2]), "waiting")
         XCTAssertEqual(NativeTaskList.completionStatus(tasks[0]), "todo")
     }
     func testLegacyCompletionsRemainVisibleAndOrderingIsDeterministic() {
         var legacy = row(1, status: "done"); legacy.removeValue(forKey: "section_status")
         XCTAssertEqual(NativeTaskList.section(legacy), "todo")
-        XCTAssertEqual(NativeTaskList.rows([row(3, status: "todo"), legacy, row(2, status: "todo")], category: "shopping", section: "todo").map { $0.integer("id") }, [2, 3, 1])
+        XCTAssertEqual(NativeTaskList.rows([row(3, status: "todo"), legacy, row(2, status: "todo")], category: "shopping", section: "todo").map { $0.integer("id") }, [2, 3])
     }
     func testWaitingCompletionSurvivesEditingAndArchiveRoundTrip() throws {
         var state = DemoData.make()

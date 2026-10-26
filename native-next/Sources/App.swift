@@ -18,6 +18,7 @@ import UIKit
         let value = directory == nil ? NativeServices.store : NativeStore(directory: directory, migrateLegacy: false)
         _health = StateObject(wrappedValue: directory == nil ? NativeServices.health : NativeHealthStore())
         #if DEBUG
+        if args.contains("--activity-agenda") { value.seedVisualActivityAgenda() }
         if args.contains("--off-day-habit") { value.seedVisualOffDayHabit() }
         if args.contains("--stress-content") { value.seedVisualTasks() }
         if args.contains("--stress-money") { value.seedVisualMoney() }

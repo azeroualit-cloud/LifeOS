@@ -50,10 +50,14 @@ import SwiftUI
         return isDemo ? expandedEvents(low: today, high: CivilDate.adding(7, to: today), source: life.records("events")) : life.records("upcomingEvents")
     }
     var events: [Record] {
-        guard isDemo else { return life.records("events") }
+        guard isDemo else { return life.records("events").map { NativeActivityCatalog.calendarRecord($0) } }
         let low = CivilDate.adding(-1, to: calendarMonth + "-01", component: .month)
         let high = CivilDate.adding(2, to: calendarMonth + "-01", component: .month)
         return expandedEvents(low: low, high: high, source: life.records("events"))
+    }
+    var activityEvents: [Record] {
+        let today = CivilDate.day()
+        return isDemo ? expandedEvents(low: today, high: CivilDate.adding(8, to: today), source: life.records("events")) : life.records("events") + life.records("upcomingEvents")
     }
     var highlights: [Record] {
         let upcoming: [Record]
@@ -67,7 +71,7 @@ import SwiftUI
         let priority = upcoming.filter { $0.text("day") >= first && $0.text("day") <= last && $0.text("occurrence_status", fallback: "open") == "open" }
             .sorted { ($0.text("day"), $0.text("start_time")) < ($1.text("day"), $1.text("start_time")) }
         let events = priority.prefix(3).map { row -> Record in var r = row; r["highlightKind"] = .string("event"); return r }
-        let todo = tasks.filter { $0.text("list_kind") == "action" && $0.text("status") == "todo" }.sorted {
+        let todo = NativeTaskList.rows(tasks, category: "action", section: "todo").sorted {
             let a = $0.text("due_date", fallback: "9999"), b = $1.text("due_date", fallback: "9999")
             return a == b ? $0.amount("sort_order") < $1.amount("sort_order") : a < b
         }.prefix(max(0, 3 - events.count)).map { row -> Record in var r = row; r["highlightKind"] = .string("task"); return r }
@@ -110,6 +114,22 @@ import SwiftUI
         } catch { archiveWritable = false; self.error = "Archivio non disponibile: \(error.localizedDescription). I dati precedenti non sono stati cancellati." }
     }
     #if DEBUG
+    func seedVisualActivityAgenda() {
+        guard isDemo else { return }
+        var demo = state
+        let today = CivilDate.day()
+        func task(_ id: Int, _ title: String, _ status: String, _ day: String = "") -> Record {
+            ["id": .int(id), "title": .string(title), "status": .string(status), "section_status": .string("waiting"), "list_kind": .string("action"), "scheduled_date": .string(day), "sort_order": .int(id)]
+        }
+        let tasks = [task(101, "Da fare libera", "todo"), task(102, "Attività futura nascosta", "todo", CivilDate.adding(1, to: today)), task(103, "In attesa libera", "waiting"), task(104, "Attività archiviata", "done")]
+        let events: [Record] = [(201, "Evento oggi", 0), (202, "Evento domani", 1), (203, "Evento fra sette giorni", 7), (204, "Evento oltre settimana", 8), (205, "Evento passato", -1), (206, "Evento già completato", 2)].map { id, title, delta in
+            ["id": .int(id), "title": .string(title), "day": .string(CivilDate.adding(delta, to: today)), "frequency": .string("none")]
+        }
+        demo.life["tasks"] = .array(tasks.map(JSONValue.object))
+        demo.life["events"] = .array(events.map(JSONValue.object))
+        demo.life["occurrences"] = .object(["206:" + CivilDate.adding(2, to: today): .string("done")])
+        do { try save(demo) } catch { self.error = error.localizedDescription }
+    }
     func seedVisualOffDayHabit() {
         guard isDemo else { return }
         var demo = state
@@ -582,7 +602,7 @@ import SwiftUI
                 let key = "\(event.integer("id")):\(day)"
                 let status = life.record("occurrences").text(key, fallback: "open")
                 if status == "skipped" { return nil }
-                e["occurrence_status"] = .string(status); return e
+                e["occurrence_status"] = .string(status); return NativeActivityCatalog.calendarRecord(e)
             }
         }.sorted { ($0.text("day"), $0.text("start_time")) < ($1.text("day"), $1.text("start_time")) }
     }

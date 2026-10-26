@@ -259,6 +259,7 @@ struct CalendarScreen: View {
             RoundedRectangle(cornerRadius: NativeDesign.progressRadius).fill(NativeDesign.accent.opacity(0.65))
                 .frame(width: NativeDesign.Layout.calendarMarker, height: NativeDesign.Layout.touchTarget).accessibilityHidden(true)
             NativeCompletionButton(checked: r.text("occurrence_status") == "done", label: "Cambia completamento evento " + r.text("title")) {
+                if r.text("day") < CivilDate.day() { router.sheet = .event(r); return }
                 Task { await store.run("setEventOccurrence", ["id": .int(r.integer("id")), "day": .string(r.text("day")), "status": .string(r.text("occurrence_status") == "done" ? "open" : "done")]) }
             }.accessibilityIdentifier("event-check-" + String(r.integer("id")))
             Button { router.sheet = .event(r) } label: {
@@ -372,8 +373,12 @@ struct EventEditor: View {
             Section("Note") { TextEditor(text: $notes).frame(minHeight: 90) }
             if record.integer("id") > 0 {
                 Section {
+                    if record.text("day") < CivilDate.day() {
+                        Text("Evento passato. Per riattivarlo scegli una data futura e salva.").font(.caption).foregroundStyle(NativeDesign.secondary)
+                    } else {
                     Button(record.text("occurrence_status") == "done" ? "Riapri questa occorrenza" : "Segna fatta questa occorrenza") {
                         Task { await store.run("setEventOccurrence", ["id": .int(record.integer("id")), "day": .string(record.text("day")), "status": .string(record.text("occurrence_status") == "done" ? "open" : "done")]); if store.error == nil { dismiss() } }
+                    }
                     }
                     Button("Elimina solo questa occorrenza", role: .destructive) { Task { await store.run("setEventOccurrence", ["id": .int(record.integer("id")), "day": .string(record.text("day")), "status": .string("skipped")]); if store.error == nil { dismiss() } } }
                     Button("Elimina intera serie", role: .destructive) { confirmDelete = true }
