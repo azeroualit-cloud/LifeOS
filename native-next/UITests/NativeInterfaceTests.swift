@@ -347,12 +347,26 @@ final class NativeInterfaceTests: XCTestCase {
             from.press(forDuration: 0.1, thenDragTo: to)
         }
     }
+    func testDashboardFocusTimelineOpensEventWithoutDuplicateSummary() {
+        let app = launch(["--dark"])
+        let focus = app.buttons["home-focus"]
+        XCTAssertTrue(focus.waitForExistence(timeout: 10))
+        assertMinimumTouchTarget(focus)
+        XCTAssertFalse(app.staticTexts["home-summary"].exists)
+        let event = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-agenda-")).firstMatch
+        reveal(event, in: app)
+        XCTAssertTrue(event.isHittable); assertMinimumTouchTarget(event)
+        capture("dashboard-focus-timeline-dark")
+        event.tap()
+        XCTAssertTrue(app.navigationBars["Modifica evento"].waitForExistence(timeout: 10))
+        capture("dashboard-timeline-event-editor")
+    }
     func testHomeSummaryAndVerticalRoutinesInBothThemes() {
         for dark in [false, true] {
             let app = launch(dark ? ["--dark"] : [])
-            let summary = app.staticTexts["home-summary"]
+            let summary = app.buttons["home-focus"]
             XCTAssertTrue(summary.waitForExistence(timeout: 10))
-            XCTAssertTrue(summary.label.contains("Allenamento"))
+            XCTAssertTrue(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-agenda-")).firstMatch.exists)
             XCTAssertFalse(summary.label.contains("dalle"))
             XCTAssertFalse(app.otherElements["today-condition"].exists)
             let days = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "dashboard-day-"))
@@ -392,9 +406,9 @@ final class NativeInterfaceTests: XCTestCase {
     }
     func testHomeEmptyStatesRemainActionable() {
         let app = launch(["--empty-home", "--dark"])
-        let summary = app.staticTexts["home-summary"]
+        let summary = app.buttons["home-focus"]
         XCTAssertTrue(summary.waitForExistence(timeout: 10))
-        XCTAssertTrue(summary.label.contains("Nessun appuntamento"))
+        XCTAssertTrue(app.staticTexts["home-agenda-empty"].exists)
         XCTAssertTrue(summary.label.contains("Turni non disponibili"))
         XCTAssertFalse(app.buttons["home-events"].exists)
         let routines = app.buttons["home-empty-routines"]
@@ -483,10 +497,10 @@ final class NativeInterfaceTests: XCTestCase {
     }
     func testHomeManyEventsAndTasksStayBoundedAndReachable() {
         let app = launch(["--busy-home", "--stress-content", "--dark"])
-        let summary = app.staticTexts["home-summary"]
+        let summary = app.buttons["home-focus"]
         XCTAssertTrue(summary.waitForExistence(timeout: 10))
-        XCTAssertTrue(summary.label.contains("Appuntamento 5"))
-        XCTAssertFalse(summary.label.contains("Appuntamento 10"))
+        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-agenda-")).count, 3)
+        XCTAssertFalse(app.staticTexts["home-summary"].exists)
         XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-todo-")).count, 0)
         XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-routine-")).count, 8)
         let events = app.buttons["home-events"]
