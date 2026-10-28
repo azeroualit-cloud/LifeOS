@@ -130,11 +130,12 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertEqual(title.value as? String, "Da fare libera")
         XCTAssertEqual(title.frame.minX,before.minX,accuracy:2)
         XCTAssertEqual(title.frame.width,before.width,accuracy:2)
-        XCTAssertEqual(title.frame.height,before.height,accuracy:2)
+        XCTAssertEqual(title.frame.midY,before.midY,accuracy:2)
+        XCTAssertEqual(app.buttons["Cambia completamento Da fare libera"].frame.midY,title.frame.midY,accuracy:2)
         capture("task-title-during-edit")
-        title.tap(); title.typeText(" prova")
+        title.tap(); title.typeText("2028")
         let edited = title.value as? String
-        XCTAssertTrue(edited?.contains("prova") == true)
+        XCTAssertTrue(edited?.contains("2028") == true)
         app.collectionViews.firstMatch.swipeUp(velocity: .slow)
         for target in ["Calendario","Finanza","Dashboard","Attività"] {
             let tab = app.tabBars.buttons[target]

@@ -132,7 +132,9 @@ struct NativeCompletionButton: View {
     let action: () -> Void
     var body: some View {
         Button { touchFeedback &+= 1; action() } label: { NativeCheckmark(checked: checked) }
-            .buttonStyle(.borderless).accessibilityLabel(label)
+            .buttonStyle(.borderless)
+            .frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget)
+            .accessibilityLabel(label)
             .sensoryFeedback(.selection, trigger: touchFeedback)
             .accessibilityValue(checked ? "Completata" : "Da completare")
     }
