@@ -3753,6 +3753,7 @@ function reservePayment(state, plan, input, today, id) {
     recovery,
     requestId: id,
     existingMovementId,
+    cashIncludedInSnapshot: input.originalIncludedInSnapshot === true,
     cashNote: String(input.originalNote || "").slice(0,1000),
     cashName: input.originalName ? String(input.originalName).trim().slice(0, 120) : null
   };
@@ -4031,6 +4032,7 @@ var PlanService = class {
       requestId: p.requestId,
       name: p.cashName || plan.name,
       note: p.cashNote,
+      includedInSnapshot: p.cashIncludedInSnapshot,
       category: plan.category,
       amountCents: p.amountCents,
       date: p.date,
@@ -4146,6 +4148,7 @@ function withFinancePlans(base, { repositoryFactory = (env) => new D1PlanReposit
           account: "Trade Republic",
           months: p.competenceMonths,
           budgetTreatment: "savings",
+          includedInSnapshot: p.includedInSnapshot,
           note: p.note || "Piano " + p.planId
         };
         let result;
@@ -4354,7 +4357,7 @@ function createExpenseRouting({ PlanError, balance, command, completePayment, co
       await service.change(state => { const next=structuredClone(state); next.expenseRoutingCommands[key].pending=false;return {state:next,result:{}}; });
       return true;
     }
-    const paymentInput = { requestId:input.requestId, planId:input.planId, amountCents:checked.amount, date:checked.date, cycleMonth:checked.date.slice(0,7), competenceMonths:checked.competenceMonths, originalName:String(input.name ?? ''), originalNote:String(input.note ?? '') };
+    const paymentInput = { requestId:input.requestId, planId:input.planId, amountCents:checked.amount, date:checked.date, cycleMonth:checked.date.slice(0,7), competenceMonths:checked.competenceMonths, originalName:String(input.name ?? ''), originalNote:String(input.note ?? ''), originalIncludedInSnapshot:input.includedInSnapshot===true };
     const result = await service.change(state => {
       if (state.expenseRoutingCommands?.[input.requestId]) fail('Questa operazione appartiene già al budget ordinario.',409);
       const existing = state.payments[input.requestId];

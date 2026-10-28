@@ -80,7 +80,7 @@ export function createExpenseRouting({ PlanError, balance, command, completePaym
       await service.change(state => { const next=structuredClone(state); next.expenseRoutingCommands[key].pending=false;return {state:next,result:{}}; });
       return true;
     }
-    const paymentInput = { requestId:input.requestId, planId:input.planId, amountCents:checked.amount, date:checked.date, cycleMonth:checked.date.slice(0,7), competenceMonths:checked.competenceMonths, originalName:String(input.name ?? ''), originalNote:String(input.note ?? '') };
+    const paymentInput = { requestId:input.requestId, planId:input.planId, amountCents:checked.amount, date:checked.date, cycleMonth:checked.date.slice(0,7), competenceMonths:checked.competenceMonths, originalName:String(input.name ?? ''), originalNote:String(input.note ?? ''), originalIncludedInSnapshot:input.includedInSnapshot===true };
     const result = await service.change(state => {
       if (state.expenseRoutingCommands?.[input.requestId]) fail('Questa operazione appartiene già al budget ordinario.',409);
       const existing = state.payments[input.requestId];

@@ -91,7 +91,7 @@ struct NativeExpenseDestinationEditor: View {
                 LabeledContent(record.text("description", fallback: record.text("name")), value: (Double(amount) / 100).euro)
                 Text("Cambia il fondo utilizzato mantenendo lo stesso movimento bancario.").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
             }
-            NativeExpenseRouteSection(category: record.text("category"), day: record.text("actual_date", fallback: record.text("date")), amount: amount, movementID: record.integer("source_row") == 0 ? record.integer("row") : record.integer("source_row"), selected: $selected, competenceMonths: $months, ready: $ready).disabled(submitted)
+            NativeExpenseRouteSection(category: record.text("category"), day: String(record.text("actual_date", fallback: record.text("date")).prefix(10)), amount: amount, movementID: record.integer("source_row") == 0 ? record.integer("row") : record.integer("source_row"), selected: $selected, competenceMonths: $months, ready: $ready).disabled(submitted)
             if let issue { NativeInlineMessage(text: issue) }
         }.modifier(NativeListAppearance()).navigationTitle("Destinazione della spesa").navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -103,7 +103,7 @@ struct NativeExpenseDestinationEditor: View {
     private func save() async {
         saving = true; submitted = true; defer { saving = false }
         var payload = NativeExpenseRouting.destination(selected)
-        payload["expectedAmountCents"] = .int(amount); payload["expectedCategory"] = record["category"]; payload["expectedDate"] = .string(record.text("actual_date", fallback: record.text("date")))
+        payload["expectedAmountCents"] = .int(amount); payload["expectedCategory"] = record["category"]; payload["expectedDate"] = .string(String(record.text("actual_date", fallback: record.text("date")).prefix(10)))
         payload["requestId"] = .string(requestID); payload["expectedPaymentId"] = .string(record.text("financePlanPaymentId")); payload["movementId"] = .int(record.integer("source_row") == 0 ? record.integer("row") : record.integer("source_row")); payload["competenceMonths"] = .int(months)
         do { try await store.perform("changeExpenseDestination", payload); onSaved(); dismiss() }
         catch { issue = error.localizedDescription }

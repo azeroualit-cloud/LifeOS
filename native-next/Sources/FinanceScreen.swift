@@ -273,7 +273,7 @@ struct MovementEditor: View {
         }
     }
     private var destinationUnchanged: Bool {
-        name == detail.text("description", fallback: detail.text("name")) && Input.cents(amount) == Int((abs(detail.amount("amount")) * 100).rounded()) && category == detail.text("category") && CivilDate.day(date) == detail.text("actual_date", fallback: detail.text("date")) && note == detail.text("notes", fallback: detail.text("note"))
+        name == detail.text("description", fallback: detail.text("name")) && Input.cents(amount) == Int((abs(detail.amount("amount")) * 100).rounded()) && category == detail.text("category") && CivilDate.day(date) == String(detail.text("actual_date", fallback: detail.text("date")).prefix(10)) && note == detail.text("notes", fallback: detail.text("note"))
     }
     private func populate(_ value: Record) {
         var r = value

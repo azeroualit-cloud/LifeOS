@@ -14,9 +14,10 @@ insert='''      const routingContext = { input: args[0] ?? {}, repository, servi
       if (method === "saveTransaction" && args[0]?.expenseRoutingVersion === 1) return json(await expenseRouting.save(routingContext));
 '''
 assert base.count(needle)==1;base=base.replace(needle,insert+needle)
-base=base.replace('    cashName: input.originalName ?','    cashNote: String(input.originalNote || "").slice(0,1000),\n    cashName: input.originalName ?',1)
-base=base.replace('      name: p.cashName || plan.name,','      name: p.cashName || plan.name,\n      note: p.cashNote,',1)
+base=base.replace('    cashName: input.originalName ?','    cashIncludedInSnapshot: input.originalIncludedInSnapshot === true,\n    cashNote: String(input.originalNote || "").slice(0,1000),\n    cashName: input.originalName ?',1)
+base=base.replace('      name: p.cashName || plan.name,','      name: p.cashName || plan.name,\n      note: p.cashNote,\n      includedInSnapshot: p.cashIncludedInSnapshot,',1)
 base=base.replace('          note: "Piano " + p.planId','          note: p.note || "Piano " + p.planId',1)
+base=base.replace('          budgetTreatment: "savings",\n          note: p.note', '          budgetTreatment: "savings",\n          includedInSnapshot: p.includedInSnapshot,\n          note: p.note',1)
 base=base.replace('Object.values(state.payments).some((p) => p.movementId === existingMovementId || p.existingMovementId === existingMovementId)', 'Object.values(state.payments).some((p) => p.status !== "deleted" && (p.movementId === existingMovementId || p.existingMovementId === existingMovementId))')
 Path('manual/build-67/worker.js').write_text(prefix+base)
 print('Generated Worker 67 with the existing private configuration unchanged.')

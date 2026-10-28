@@ -23,17 +23,17 @@ function database() {
 async function fixture() {
  const {db,sqlite}=database(), repository=new core.D1PlanRepository(db);await repository.initialize();
  const state=core.initialState();state.plans.water={id:'water',name:'Acqua',category:'Acqua',kind:'estimated',status:'active',startMonth:'2026-10',amountCents:2000,rateChanges:[]};
- await repository.compareAndSet(0,state);let count=100,failAfterBank=false;
+ await repository.compareAndSet(0,state);let count=100,failAfterBank=false,lastCash;
  const recordTransaction=async(_env,p)=>{
   const prior=sqlite.prepare('SELECT source_row FROM movements WHERE import_id=?').get('APP-'+p.requestId);if(prior)return prior.source_row;
   const row=++count;sqlite.prepare('INSERT INTO movements VALUES(?,?,?,?,?,?,?,?,?,?)').run(row,-p.amount,p.date,p.category,'Trade Republic','Spesa','Eseguito',p.name,p.note??'','APP-'+p.requestId);
   sqlite.prepare('INSERT INTO movement_budget_policies VALUES(?,?,?)').run(row,p.budgetTreatment,'[]');sqlite.prepare('INSERT INTO finance_write_requests VALUES(?,?)').run(p.requestId,JSON.stringify(p));return row;
  };
- const cash={async record(p){const row=await recordTransaction({}, {requestId:p.requestId,amount:p.amountCents/100,date:p.date,category:p.category,name:p.name,note:p.note,budgetTreatment:'savings'});if(failAfterBank){failAfterBank=false;throw new core.PlanError('Simulated lost response',503);}return row;}};
+ const cash={async record(p){lastCash=p;const row=await recordTransaction({}, {requestId:p.requestId,amount:p.amountCents/100,date:p.date,category:p.category,name:p.name,note:p.note,budgetTreatment:'savings'});if(failAfterBank){failAfterBank=false;throw new core.PlanError('Simulated lost response',503);}return row;}};
  const service=new core.PlanService(repository,cash,'2026-10-28');
  const ctx={repository,service,db,today:'2026-10-28',recordTransaction,env:{}};
  const payload={requestId:'water-request-0001',expenseDestination:'plan',expenseRoutingVersion:1,planId:'water',type:'Spesa',account:'Trade Republic',category:'Acqua',amount:30,name:'Bolletta acqua',note:'Nota conservata',date:'2026-10-28',competenceMonths:1};
- return {ctx,payload,sqlite,repository,setFailure(){failAfterBank=true;}};
+ return {ctx,payload,sqlite,repository,getCash(){return lastCash;},setFailure(){failAfterBank=true;}};
 }
 test('water preview proposes reserve 20 and savings 10; generic category is not matched',async()=>{
  const {ctx}=await fixture();const r=await core.expenseRouting.preview({...ctx,input:{category:'Acqua',amountCents:3000,date:'2026-10-28'}});
@@ -107,4 +107,9 @@ test('changed amount and invalid calendar dates cannot be silently accepted',asy
  const {ctx,payload,sqlite}=await fixture();const ordinary={...payload,expenseDestination:'ordinary'};delete ordinary.planId;await core.expenseRouting.save({...ctx,input:ordinary});const row=sqlite.prepare('SELECT * FROM movements').get();
  await assert.rejects(core.expenseRouting.change({...ctx,input:{requestId:'stale-amount-0001',movementId:row.source_row,expectedPaymentId:'',expectedAmountCents:2000,expectedDate:'2026-10-28',expectedCategory:'Acqua',expenseDestination:'plan',planId:'water'}}),/movimento è cambiato/);
  await assert.rejects(core.expenseRouting.preview({...ctx,input:{category:'Acqua',amountCents:3000,date:'2026-02-31'}}),/Data non valida/);
+});
+
+test('planned expense preserves the already-in-bank-snapshot flag through reservation and resume',async()=>{
+ const {ctx,payload,getCash}=await fixture();await core.expenseRouting.save({...ctx,input:{...payload,includedInSnapshot:true}});
+ assert.equal(getCash().includedInSnapshot,true);
 });
