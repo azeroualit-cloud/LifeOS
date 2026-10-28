@@ -157,3 +157,12 @@ test('the actual Worker cash bridge preserves blank notes and the bank-snapshot 
  const response=await worker.fetch(request,{DB:ctx.db},{});assert.equal(response.status,200);assert.equal(await response.json(),true);
  assert.equal(sent.includedInSnapshot,true);assert.equal(sqlite.prepare('SELECT notes FROM movements').get().notes,'');
 });
+
+test('movement detail exposes the original plan billing period for destination changes',async()=>{
+ const {ctx,payload,sqlite,repository}=await fixture();await core.expenseRouting.save({...ctx,input:{...payload,competenceMonths:3}});const row=sqlite.prepare('SELECT * FROM movements').get();
+ const base={async fetch(request){return new Response(JSON.stringify(new URL(request.url).pathname==='/api/getMovement'?{...row,competence_months:1}:{summary:{monthlyRemaining:900,monthlyCommitted:20},transactions:[]}),{headers:{'Content-Type':'application/json'}});}};
+ const worker=core.withFinancePlans(base,{repositoryFactory:()=>repository,clock:()=>ctx.today});
+ const response=await worker.fetch(new Request('https://example.test/api/getMovement',{method:'POST',headers:{Origin:'https://example.test'},body:JSON.stringify([row.source_row])}),{DB:ctx.db},{});
+ assert.equal(response.status,200);assert.equal((await response.json()).financePlanCompetenceMonths,3);
+ const {state}=await repository.read();assert.equal(state.plans.water.rateChanges[0].amountCents,1000);
+});

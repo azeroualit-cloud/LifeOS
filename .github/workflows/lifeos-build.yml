@@ -6,7 +6,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: lifeos-native-67-final-${{ github.ref }}
+  group: lifeos-native-67-period-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   build:

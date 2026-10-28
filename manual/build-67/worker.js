@@ -4184,7 +4184,7 @@ function withFinancePlans(base, { repositoryFactory = (env) => new D1PlanReposit
         if (!response2.ok) return response2;
         const row = await response2.json(), { state } = await repository.read();
         const payment = Object.values(state.payments).find((p) => p.status !== "deleted" && (p.movementId === Number(args[0]) || p.existingMovementId === Number(args[0])));
-        return json(payment ? { ...row, financePlanId: payment.planId, financePlanPaymentId: payment.id } : row);
+        return json(payment ? { ...row, financePlanId: payment.planId, financePlanPaymentId: payment.id, financePlanCompetenceMonths: payment.competenceMonths ?? row.competence_months } : row);
       }
       if (quickWrites.has(method)) {
         if (method === "saveTransaction" && args[0]?.type === "Spesa") {

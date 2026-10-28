@@ -21,5 +21,6 @@ base=base.replace('          budgetTreatment: "savings",\n          note: p.note
 base=base.replace('Object.values(state.payments).some((p) => p.movementId === existingMovementId || p.existingMovementId === existingMovementId)', 'Object.values(state.payments).some((p) => p.status !== "deleted" && (p.movementId === existingMovementId || p.existingMovementId === existingMovementId))')
 base=base.replace('Object.values(state.payments).some((p) => p.movementId === r.source_row || p.existingMovementId === r.source_row)', 'Object.values(state.payments).some((p) => p.status !== "deleted" && (p.movementId === r.source_row || p.existingMovementId === r.source_row))')
 base=base.replace('Object.values(state.payments).some((p) => p.movementId === movementId || p.existingMovementId === movementId || row?.import_id === "APP-" + p.requestId)', 'Object.values(state.payments).some((p) => p.status !== "deleted" && (p.movementId === movementId || p.existingMovementId === movementId || row?.import_id === "APP-" + p.requestId))')
+base=base.replace('financePlanPaymentId: payment.id } : row', 'financePlanPaymentId: payment.id, financePlanCompetenceMonths: payment.competenceMonths ?? row.competence_months } : row',1)
 Path('manual/build-67/worker.js').write_text(prefix+base)
 print('Generated Worker 67 with the existing private configuration unchanged.')

@@ -101,7 +101,7 @@ struct NativeExpenseDestinationEditor: View {
                 ToolbarItem(placement: .cancellationAction) { Button("Chiudi") { dismiss() }.disabled(saving) }
                 ToolbarItem(placement: .confirmationAction) { Button(submitted ? "Riprova" : "Conferma") { Task { await save() } }.disabled(!ready || selected.isEmpty || saving).accessibilityIdentifier("expense-destination-confirm") }
             }
-            .onAppear { selected = record.text("financePlanId").isEmpty ? NativeExpenseRouting.ordinary : record.text("financePlanId") }
+            .onAppear { months = NativeExpenseRouting.coveredMonths(record); selected = record.text("financePlanId").isEmpty ? NativeExpenseRouting.ordinary : record.text("financePlanId") }
     }
     private func save() async {
         saving = true; submitted = true; defer { saving = false }

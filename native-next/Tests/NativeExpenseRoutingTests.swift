@@ -10,6 +10,12 @@ final class NativeExpenseRoutingTests: XCTestCase {
         XCTAssertEqual(NativeExpenseRouting.split(amount: 3000, plan: ["availableCents": .int(2000)]).savings, 1000)
         XCTAssertEqual(NativeExpenseRouting.split(amount: 3000, plan: ["availableCents": .int(9000)]).fund, 3000)
     }
+    func testExistingBillKeepsItsRegisteredCompetenceMonths() {
+        XCTAssertEqual(NativeExpenseRouting.coveredMonths(["financePlanCompetenceMonths": .int(3), "competence_months": .int(1)]), 3)
+        XCTAssertEqual(NativeExpenseRouting.coveredMonths(["competence_months": .int(6)]), 6)
+        XCTAssertEqual(NativeExpenseRouting.coveredMonths(["months": .int(4)]), 4)
+        XCTAssertEqual(NativeExpenseRouting.coveredMonths([:]), 1)
+    }
     private func fixture() throws -> NativeArchive {
         var state = DemoData.make()
         try NativePlanDemo.apply("saveFinancePlan", payload: ["requestId": .string("water-plan-demo"), "kind": .string("estimated"), "category": .string("Acqua"), "name": .string("Acqua"), "amountCents": .int(2000), "startMonth": .string(CivilDate.month())], state: &state)

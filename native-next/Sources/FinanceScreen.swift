@@ -288,7 +288,7 @@ struct MovementEditor: View {
     private func populate(_ value: Record) {
         var r = value
         if store.isDemo, let payment = store.finance.record("plansV2").records("payments").first(where: { $0.integer("movementId") == r.integer("row") }) {
-            r["financePlanId"] = payment["planId"]; r["financePlanPaymentId"] = payment["id"]
+            r["financePlanId"] = payment["planId"]; r["financePlanPaymentId"] = payment["id"]; r["financePlanCompetenceMonths"] = payment["competenceMonths"]
         }
         included = !editing && r.flag("includedInSnapshot")
         detail = r; name = r.text("description", fallback: r.text("name")); amount = r.isEmpty ? "" : String(format: "%.2f", abs(r.amount("amount"))).replacingOccurrences(of: ".", with: ",")
@@ -296,7 +296,7 @@ struct MovementEditor: View {
         if r.text("notes").hasPrefix("Rimborso / restituzione:") { type = "Rimborso" }
         account = r.text("account", fallback: "Trade Republic"); category = r.text("category", fallback: "Altro")
         date = CivilDate.date(r.text("actual_date", fallback: r.text("date", fallback: CivilDate.day())))
-        note = r.text("notes", fallback: r.text("note")); months = max(1, r.integer("competence_months") == 0 ? r.integer("months") : r.integer("competence_months"))
+        note = r.text("notes", fallback: r.text("note")); months = NativeExpenseRouting.coveredMonths(r)
         treatment = editing ? r.text("budgetTreatment", fallback: "auto") : "ordinary"; recovery = r.text("recoveryMonths"); recoveryAmount = String(r.amount("recoveryAmount")); counterpart = r.text("counterparty_account", fallback: r.text("counterpart", fallback: "Trade Republic"))
     }
     private func save() async {
