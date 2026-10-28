@@ -29,6 +29,13 @@ export function createExpenseRouting({ PlanError, balance, command, completePaym
       return true;
     }).sort((a,b) => a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
   }
+  function available(state,plan,throughMonth) {
+    const pending=Object.values(state.payments).filter(p=>p.planId===plan.id && p.status==='pending' && p.date.slice(0,7)<=throughMonth).reduce((sum,p)=>sum+p.amountCents,0);
+    return Math.max(0,balance(state,plan,throughMonth).fundCents-pending);
+  }
+  function checkQuote(state,plan,checked,input) {
+    if(!Number.isSafeInteger(input.expectedAvailableCents) || input.expectedAvailableCents!==available(state,plan,checked.date.slice(0,7))) fail('La disponibilità del fondo è cambiata. Aggiorna l’anteprima prima di confermare.',409);
+  }
   async function movement(db, id) {
     if (!Number.isSafeInteger(id) || id < 2) fail('Movimento non valido.');
     const row = await db.prepare("SELECT m.*,p.treatment FROM movements m LEFT JOIN movement_budget_policies p ON p.movement_source_row=m.source_row WHERE m.source_row=?").bind(id).first();
@@ -46,8 +53,8 @@ export function createExpenseRouting({ PlanError, balance, command, completePaym
       if (payments[0]) state = detach(state, payments[0], 'preview-detach-' + row.source_row, today);
     }
     return { version: 1, category: checked.category, amountCents:checked.amount, date:checked.date, plans: candidates(state, checked).map(p => {
-      const available = balance(state, p, checked.date.slice(0,7)).fundCents;
-      return { id:p.id, name:p.name, kind:p.kind, availableCents:available, fromFundCents:Math.min(available,checked.amount), fromSavingsCents:Math.max(0,checked.amount-available) };
+      const funds = available(state, p, checked.date.slice(0,7));
+      return { id:p.id, name:p.name, kind:p.kind, availableCents:funds, fromFundCents:Math.min(funds,checked.amount), fromSavingsCents:Math.max(0,checked.amount-funds) };
     }) };
   }
   async function status({ input, repository, db }) {
@@ -87,6 +94,7 @@ export function createExpenseRouting({ PlanError, balance, command, completePaym
       const existing = state.payments[input.requestId];
       if (existing && state.plans[existing.planId]?.category !== checked.category) fail('Categoria non coerente con il pagamento in corso.',409);
       if (!existing && !candidates(state,checked).some(p => p.id === input.planId)) fail('Il piano scelto non è più disponibile per questa categoria e data. Aggiorna la destinazione.',409);
+      if (!existing) checkQuote(state,state.plans[input.planId],checked,input);
       return command(state,'pay',paymentInput,today);
     });
     await service.finish(result.paymentId);
@@ -108,6 +116,7 @@ export function createExpenseRouting({ PlanError, balance, command, completePaym
       if(input.expenseDestination==='plan') {
         if (checked.date.slice(0,7)<today.slice(0,7) && row.treatment!=='savings' && !payment) fail('Per cambiare una spesa ordinaria di un mese passato occorre prima una verifica del budget storico.');
         if (!candidates(next,checked).some(p=>p.id===input.planId)) fail('Piano non disponibile per questa spesa.',409);
+        checkQuote(next,next.plans[input.planId],checked,input);
         const added=command(next,'pay',{requestId:id+'-attach',planId:input.planId,amountCents:checked.amount,date:checked.date,cycleMonth:checked.date.slice(0,7),competenceMonths:checked.competenceMonths,movementId:rowID},today);
         next=completePayment(added.state,added.result.paymentId,rowID,today);
       } else if (input.planId) fail('Destinazione e piano non coerenti.');

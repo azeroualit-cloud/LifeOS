@@ -17,7 +17,7 @@ final class NativeExpenseRoutingTests: XCTestCase {
     }
     private func expense(_ selected: String) -> Record {
         var result = NativeExpenseRouting.destination(selected)
-        result.merge(["requestId": .string("water-payment-demo"), "type": .string("Spesa"), "account": .string("Trade Republic"), "category": .string("Acqua"), "amount": .number(30), "name": .string("Bolletta acqua"), "date": .string(CivilDate.day()), "note": .string("Nota personale"), "competenceMonths": .int(1)]) { _, value in value }
+        result.merge(["requestId": .string("water-payment-demo"), "type": .string("Spesa"), "account": .string("Trade Republic"), "category": .string("Acqua"), "amount": .number(30), "name": .string("Bolletta acqua"), "date": .string(CivilDate.day()), "note": .string("Nota personale"), "competenceMonths": .int(1), "expectedAvailableCents": .int(2000)]) { _, value in value }
         return result
     }
     func testDemoWaterUsesFundAndSavingsWithoutSecondBudgetChargeOrDuplicate() throws {
@@ -37,7 +37,7 @@ final class NativeExpenseRoutingTests: XCTestCase {
         try NativeExpenseDemo.apply("saveTransaction", payload: expense(NativeExpenseRouting.ordinary), state: &state)
         let original = state.finance.records("transactions").last!, bank = state.finance.record("summary").amount("budget"), remaining = state.finance.record("summary").amount("monthlyRemaining")
         var route = NativeExpenseRouting.destination("water-plan-demo")
-        route["requestId"] = .string("attach-water-demo"); route["movementId"] = original["row"]; route["expectedPaymentId"] = .string(""); route["competenceMonths"] = .int(1)
+        route["requestId"] = .string("attach-water-demo"); route["movementId"] = original["row"]; route["expectedPaymentId"] = .string(""); route["competenceMonths"] = .int(1); route["expectedAvailableCents"] = .int(2000)
         try NativeExpenseDemo.apply("changeExpenseDestination", payload: route, state: &state)
         XCTAssertEqual(state.finance.record("summary").amount("budget"), bank, accuracy: 0.001)
         XCTAssertEqual(state.finance.record("summary").amount("monthlyRemaining"), remaining + 30, accuracy: 0.001)

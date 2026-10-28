@@ -9,7 +9,6 @@ const temp=await mkdtemp(join(tmpdir(),'lifeos-routing67-'));
 const source=await readFile(new URL('../../../manual/build-67/worker.js',import.meta.url),'utf8');
 await writeFile(join(temp,'worker.mjs'),source+'\nexport { expenseRouting, D1PlanRepository, PlanService, initialState, balance, monthlyBudgetAmounts, withFinancePlans, PlanError };');
 const core=await import(pathToFileURL(join(temp,'worker.mjs')));
-process.on('exit',()=>{});
 test.after(async()=>rm(temp,{recursive:true,force:true}));
 function database() {
  const sqlite=new DatabaseSync(':memory:');
@@ -32,7 +31,7 @@ async function fixture() {
  const cash={async record(p){lastCash=p;const row=await recordTransaction({}, {requestId:p.requestId,amount:p.amountCents/100,date:p.date,category:p.category,name:p.name,note:p.note,budgetTreatment:'savings'});if(failAfterBank){failAfterBank=false;throw new core.PlanError('Simulated lost response',503);}return row;}};
  const service=new core.PlanService(repository,cash,'2026-10-28');
  const ctx={repository,service,db,today:'2026-10-28',recordTransaction,env:{}};
- const payload={requestId:'water-request-0001',expenseDestination:'plan',expenseRoutingVersion:1,planId:'water',type:'Spesa',account:'Trade Republic',category:'Acqua',amount:30,name:'Bolletta acqua',note:'Nota conservata',date:'2026-10-28',competenceMonths:1};
+ const payload={requestId:'water-request-0001',expenseDestination:'plan',expenseRoutingVersion:1,planId:'water',type:'Spesa',account:'Trade Republic',category:'Acqua',amount:30,name:'Bolletta acqua',note:'Nota conservata',date:'2026-10-28',competenceMonths:1,expectedAvailableCents:2000};
  return {ctx,payload,sqlite,repository,getCash(){return lastCash;},setFailure(){failAfterBank=true;}};
 }
 test('water preview proposes reserve 20 and savings 10; generic category is not matched',async()=>{
@@ -58,7 +57,7 @@ test('ordinary choice remains ordinary and the request cannot be replayed throug
 test('ordinary movement can attach, detach and attach again atomically without changing the bank ledger',async()=>{
  const {ctx,payload,sqlite,repository}=await fixture();const ordinary={...payload,expenseDestination:'ordinary'};delete ordinary.planId;
  await core.expenseRouting.save({...ctx,input:ordinary});const row=sqlite.prepare('SELECT * FROM movements').get();
- const attach={requestId:'attach-existing-0001',movementId:row.source_row,expectedAmountCents:3000,expectedDate:'2026-10-28',expectedCategory:'Acqua',expectedPaymentId:'',expenseDestination:'plan',planId:'water'};
+ const attach={requestId:'attach-existing-0001',movementId:row.source_row,expectedAmountCents:3000,expectedDate:'2026-10-28',expectedCategory:'Acqua',expectedPaymentId:'',expenseDestination:'plan',planId:'water',expectedAvailableCents:2000};
  await core.expenseRouting.change({...ctx,input:attach});await core.expenseRouting.change({...ctx,input:attach});
  assert.equal(sqlite.prepare('SELECT treatment FROM movement_budget_policies').get().treatment,'savings');
  const unlink={requestId:'detach-existing-0001',movementId:row.source_row,expectedAmountCents:3000,expectedDate:'2026-10-28',expectedCategory:'Acqua',expectedPaymentId:attach.requestId+'-attach',expenseDestination:'ordinary'};
@@ -95,7 +94,7 @@ test('atomic destination transaction rolls back plan state if policy write fails
  const {ctx,payload,sqlite,repository}=await fixture();const ordinary={...payload,expenseDestination:'ordinary'};delete ordinary.planId;await core.expenseRouting.save({...ctx,input:ordinary});
  const row=sqlite.prepare('SELECT * FROM movements').get(),before=await repository.read();
  sqlite.exec("CREATE TRIGGER policy_failure BEFORE UPDATE ON movement_budget_policies BEGIN SELECT RAISE(ABORT,'simulated policy failure'); END");
- await assert.rejects(core.expenseRouting.change({...ctx,input:{requestId:'atomic-destination-0001',movementId:row.source_row,expectedPaymentId:'',expectedAmountCents:3000,expectedDate:'2026-10-28',expectedCategory:'Acqua',expenseDestination:'plan',planId:'water'}}),/policy failure/);
+ await assert.rejects(core.expenseRouting.change({...ctx,input:{requestId:'atomic-destination-0001',movementId:row.source_row,expectedPaymentId:'',expectedAmountCents:3000,expectedDate:'2026-10-28',expectedCategory:'Acqua',expenseDestination:'plan',planId:'water',expectedAvailableCents:2000}}),/policy failure/);
  assert.deepEqual(await repository.read(),before);assert.equal(sqlite.prepare('SELECT treatment FROM movement_budget_policies').get().treatment,'ordinary');assert.deepEqual(sqlite.prepare('SELECT * FROM movements').get(),row);
 });
 test('simultaneous ordinary/plan replay has one winner and one bank debit',async()=>{
@@ -105,7 +104,7 @@ test('simultaneous ordinary/plan replay has one winner and one bank debit',async
 });
 test('changed amount and invalid calendar dates cannot be silently accepted',async()=>{
  const {ctx,payload,sqlite}=await fixture();const ordinary={...payload,expenseDestination:'ordinary'};delete ordinary.planId;await core.expenseRouting.save({...ctx,input:ordinary});const row=sqlite.prepare('SELECT * FROM movements').get();
- await assert.rejects(core.expenseRouting.change({...ctx,input:{requestId:'stale-amount-0001',movementId:row.source_row,expectedPaymentId:'',expectedAmountCents:2000,expectedDate:'2026-10-28',expectedCategory:'Acqua',expenseDestination:'plan',planId:'water'}}),/movimento è cambiato/);
+ await assert.rejects(core.expenseRouting.change({...ctx,input:{requestId:'stale-amount-0001',movementId:row.source_row,expectedPaymentId:'',expectedAmountCents:2000,expectedDate:'2026-10-28',expectedCategory:'Acqua',expenseDestination:'plan',planId:'water',expectedAvailableCents:2000}}),/movimento è cambiato/);
  await assert.rejects(core.expenseRouting.preview({...ctx,input:{category:'Acqua',amountCents:3000,date:'2026-02-31'}}),/Data non valida/);
 });
 
@@ -123,4 +122,15 @@ test('detached movement becomes editable and available in the existing plan pick
  function request(method,args){return new Request('https://example.test/api/'+method,{method:'POST',headers:{Origin:'https://example.test','Content-Type':'application/json'},body:JSON.stringify(args)});}
  const edited=await worker.fetch(request('editMovement',[{row:row.source_row}]),{DB:ctx.db},{});assert.equal(edited.status,200);assert.equal(editReached,true);
  const picker=await worker.fetch(request('getFinancePlanMovements',['2026-10']),{DB:ctx.db},{});assert.equal(picker.status,200);assert.equal((await picker.json()).movements[0].row,row.source_row);
+});
+
+test('a changed reserve or another pending payment requires a fresh quote before any debit',async()=>{
+ const {ctx,payload,sqlite,setFailure}=await fixture();
+ await assert.rejects(core.expenseRouting.save({...ctx,input:{...payload,expectedAvailableCents:1000}}),/disponibilità/);
+ assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM movements').get().n,0);
+ setFailure();await assert.rejects(core.expenseRouting.save({...ctx,input:payload}),/lost response/);
+ const pending=await core.expenseRouting.preview({...ctx,input:{category:'Acqua',amountCents:3000,date:'2026-10-28'}});
+ // The monthly estimated cycle is already reserved; it cannot be paid twice.
+ assert.equal(pending.plans.length,0);
+ await core.expenseRouting.save({...ctx,input:payload});assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM movements').get().n,1);
 });

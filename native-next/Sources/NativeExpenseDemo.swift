@@ -28,7 +28,8 @@ enum NativeExpenseDemo {
         if method == "changeExpenseDestination" { try DemoActions.apply("editMovement", movement, args: nil, state: &next) }
         if planned {
             let candidates = preview(state: next, category: movement.text("category"), day: movement.text("date"), movementID: 0)
-            guard candidates.contains(where: { $0.text("id") == payload.text("planId") }) else { throw Message(text: "Piano non compatibile.") }
+            guard let plan = candidates.first(where: { $0.text("id") == payload.text("planId") }) else { throw Message(text: "Piano non compatibile.") }
+            guard payload["expectedAvailableCents"] != nil, payload.integer("expectedAvailableCents") == NativeExpenseRouting.available(plan) else { throw Message(text: "La disponibilità del fondo è cambiata. Aggiorna l’anteprima.") }
             var payment: Record = ["requestId": .string(id), "planId": payload["planId"]!, "amountCents": .int(Int((movement.amount("amount") * 100).rounded())), "date": movement["date"]!, "cycleMonth": .string(String(movement.text("date").prefix(7))), "competenceMonths": .int(max(1, payload.integer("competenceMonths")))]
             if method == "changeExpenseDestination" { payment["movementId"] = payload["movementId"] }
             try NativePlanDemo.apply("recordFinancePlanPayment", payload: payment, state: &next)

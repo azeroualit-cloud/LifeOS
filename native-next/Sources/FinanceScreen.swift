@@ -121,8 +121,17 @@ struct FinanceScreen: View {
         }
         if !store.financialPending.isEmpty {
             Section("Salvati sul dispositivo") {
+                Button("Riprova invio") { Task { await store.sync(scope: .finance) } }.disabled(store.busy || store.syncing)
                 ForEach(store.financialPending) { pending in
-                    HStack { VStack(alignment: .leading) { Text(pending.payload.text("name")); Text(pending.accepted ? "Inviato · aggiornamento da completare" : "Da sincronizzare").font(.caption).foregroundStyle(NativeDesign.secondary) }; Spacer(); MoneyText(amount: pending.payload.amount("amount")) }
+                    VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+                        HStack { VStack(alignment: .leading) { Text(pending.payload.text("name")); Text(pending.accepted ? "Inviato · aggiornamento da completare" : "Conferma del server in attesa").font(.caption).foregroundStyle(NativeDesign.secondary) }; Spacer(); MoneyText(amount: pending.payload.amount("amount")) }
+                        if !pending.accepted && pending.payload.integer("expenseRoutingVersion") == 1 {
+                            Button("Correggi destinazione") {
+                                Task { do { try await store.cancelPendingExpense(pending.id); router.sheet = .movement(pending.payload) } catch { store.error = error.localizedDescription } }
+                            }.disabled(store.busy || store.syncing)
+                            Text("La correzione conserva i campi e si apre solo se il server non ha ancora iniziato il pagamento.").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
+                        }
+                    }
                 }
             }
         }
@@ -173,6 +182,7 @@ struct MovementEditor: View {
     @State private var detail: Record = [:]
     @State private var destination = ""
     @State private var routeReady = false
+    @State private var quotedAvailable = 0
     @State private var changingDestination = false
     private enum InputField { case amount, name, note }
     @FocusState private var editingInput: InputField?
@@ -227,7 +237,7 @@ struct MovementEditor: View {
                 else { Picker("Categoria", selection: $category) { ForEach(options, id: \.self) { Text($0) } }.accessibilityIdentifier("movement-category") }
             }.disabled(linkedPayment)
             if !editing && type == "Spesa" {
-                NativeExpenseRouteSection(category: category, day: CivilDate.day(date), amount: Input.cents(amount) ?? 0, selected: $destination, competenceMonths: $months, ready: $routeReady)
+                NativeExpenseRouteSection(category: category, day: CivilDate.day(date), amount: Input.cents(amount) ?? 0, selected: $destination, competenceMonths: $months, ready: $routeReady, quotedAvailable: $quotedAvailable)
             }
             if editing && type == "Spesa" && account == "Trade Republic" {
                 Section("Destinazione") {
@@ -280,6 +290,7 @@ struct MovementEditor: View {
         if store.isDemo, let payment = store.finance.record("plansV2").records("payments").first(where: { $0.integer("movementId") == r.integer("row") }) {
             r["financePlanId"] = payment["planId"]; r["financePlanPaymentId"] = payment["id"]
         }
+        included = !editing && r.flag("includedInSnapshot")
         detail = r; name = r.text("description", fallback: r.text("name")); amount = r.isEmpty ? "" : String(format: "%.2f", abs(r.amount("amount"))).replacingOccurrences(of: ".", with: ",")
         type = r.text("movement_type", fallback: r.text("type", fallback: "Spesa"))
         if r.text("notes").hasPrefix("Rimborso / restituzione:") { type = "Rimborso" }
@@ -298,6 +309,7 @@ struct MovementEditor: View {
             guard routeReady && !destination.isEmpty else { error = "Verifica la destinazione prima di salvare."; return }
             payload.merge(NativeExpenseRouting.destination(destination)) { _, new in new }
             payload["competenceMonths"] = .int(months)
+            payload["expectedAvailableCents"] = .int(quotedAvailable)
         }
         if treatment == "recovery" && type == "Spesa" {
             payload["recoveryMonths"] = .string(recovery)

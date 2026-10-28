@@ -9,6 +9,7 @@ struct NativeExpenseRouteSection: View {
     @Binding var selected: String
     @Binding var competenceMonths: Int
     @Binding var ready: Bool
+    @Binding var quotedAvailable: Int
     @State private var plans: [Record] = []
     @State private var loading = false
     @State private var issue: String?
@@ -42,7 +43,7 @@ struct NativeExpenseRouteSection: View {
             .onChange(of: selected) { _, _ in updateReady() }
             .onChange(of: category + day) { _, _ in selected = ""; ready = false }
     }
-    private func updateReady() { ready = !loading && issue == nil && (selected == NativeExpenseRouting.ordinary || chosen != nil) }
+    private func updateReady() { quotedAvailable = chosen.map(NativeExpenseRouting.available) ?? 0; ready = !loading && issue == nil && (selected == NativeExpenseRouting.ordinary || chosen != nil) }
     private func load() async {
         loading = true; ready = false; issue = nil
         do {
@@ -80,6 +81,8 @@ struct NativeExpenseDestinationEditor: View {
     @State private var selected = ""
     @State private var months = 1
     @State private var ready = false
+    @State private var quotedAvailable = 0
+    @State private var quoteGeneration = 0
     @State private var saving = false
     @State private var submitted = false
     @State private var requestID = UUID().uuidString
@@ -91,7 +94,7 @@ struct NativeExpenseDestinationEditor: View {
                 LabeledContent(record.text("description", fallback: record.text("name")), value: (Double(amount) / 100).euro)
                 Text("Cambia il fondo utilizzato mantenendo lo stesso movimento bancario.").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
             }
-            NativeExpenseRouteSection(category: record.text("category"), day: String(record.text("actual_date", fallback: record.text("date")).prefix(10)), amount: amount, movementID: record.integer("source_row") == 0 ? record.integer("row") : record.integer("source_row"), selected: $selected, competenceMonths: $months, ready: $ready).disabled(submitted)
+            NativeExpenseRouteSection(category: record.text("category"), day: String(record.text("actual_date", fallback: record.text("date")).prefix(10)), amount: amount, movementID: record.integer("source_row") == 0 ? record.integer("row") : record.integer("source_row"), selected: $selected, competenceMonths: $months, ready: $ready, quotedAvailable: $quotedAvailable).id(quoteGeneration).disabled(submitted)
             if let issue { NativeInlineMessage(text: issue) }
         }.modifier(NativeListAppearance()).navigationTitle("Destinazione della spesa").navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -103,9 +106,15 @@ struct NativeExpenseDestinationEditor: View {
     private func save() async {
         saving = true; submitted = true; defer { saving = false }
         var payload = NativeExpenseRouting.destination(selected)
+        payload["expectedAvailableCents"] = .int(quotedAvailable)
         payload["expectedAmountCents"] = .int(amount); payload["expectedCategory"] = record["category"]; payload["expectedDate"] = .string(String(record.text("actual_date", fallback: record.text("date")).prefix(10)))
         payload["requestId"] = .string(requestID); payload["expectedPaymentId"] = .string(record.text("financePlanPaymentId")); payload["movementId"] = .int(record.integer("source_row") == 0 ? record.integer("row") : record.integer("source_row")); payload["competenceMonths"] = .int(months)
         do { try await store.perform("changeExpenseDestination", payload); onSaved(); dismiss() }
-        catch { issue = error.localizedDescription }
+        catch {
+            issue = error.localizedDescription
+            if error is NativeRequestRejected, let status = try? await store.read("getExpenseRequestStatus", args: [.object(["requestId": .string(requestID)])]), !status.object.flag("started") {
+                submitted = false; requestID = UUID().uuidString; quoteGeneration += 1
+            }
+        }
     }
 }
