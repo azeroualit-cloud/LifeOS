@@ -1,5 +1,7 @@
 import SwiftUI
 
+private extension Notification.Name { static let nativeTaskEditorSaved = Notification.Name("lifeos.native.task-editor-saved") }
+
 struct TasksScreen: View {
     @EnvironmentObject var store: NativeStore
     @EnvironmentObject var router: NativeRouter
@@ -75,6 +77,9 @@ struct TasksScreen: View {
         .animation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration), value: store.tasks)
         .onChange(of: category) { _, _ in expandedID = nil; completedExpanded = false }
         .onChange(of: store.tasks.map { $0.integer("id") }) { _, ids in drafts = drafts.filter { ids.contains($0.key) } }
+        .onReceive(NotificationCenter.default.publisher(for: .nativeTaskEditorSaved)) { note in
+            if let id = note.object as? Int { drafts.removeValue(forKey: id) }
+        }
         
         .onAppear {
             let keys = store.categories.map { $0.text("key") }
@@ -163,6 +168,7 @@ private struct NativeTaskControls: View {
             do {
                 var payload = record; payload["title"] = .string(title); payload["notes"] = .string(notes)
                 try await store.perform("saveTask", payload); error = nil
+                if let saved = store.tasks.first(where: { $0.integer("id") == record.integer("id") }) { draft = NativeTaskDraft(saved) }
                 if close { onClose() }
             } catch { self.error = error.localizedDescription }
         }
@@ -315,6 +321,7 @@ struct TaskEditor: View {
         saving = true; defer { saving = false }
         do {
             try await store.perform("saveTask", ["id": .int(record.integer("id")), "title": .string(title), "notes": .string(notes), "list_kind": .string(category), "due_date": hasDue ? .string(CivilDate.day(due)) : .null, "scheduled_date": hasScheduled ? .string(CivilDate.day(scheduled)) : .null, "scheduled_time": hasTime && (hasScheduled || hasDue) ? .string(String(format: "%02d:%02d", CivilDate.calendar.component(.hour, from: notificationTime), CivilDate.calendar.component(.minute, from: notificationTime))) : .null])
+            NotificationCenter.default.post(name: .nativeTaskEditorSaved, object: record.integer("id"))
             dismiss()
         } catch { self.error = error.localizedDescription }
     }

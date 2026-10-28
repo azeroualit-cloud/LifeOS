@@ -136,10 +136,14 @@ final class NativeInterfaceTests: XCTestCase {
         title.tap(); title.typeText("2028")
         let edited = title.value as? String
         XCTAssertTrue(edited?.contains("2028") == true)
-        app.collectionViews.firstMatch.swipeUp(velocity: .slow)
+        for _ in 0..<3 {
+            if !app.keyboards.firstMatch.exists { break }
+            app.collectionViews.firstMatch.swipeDown(velocity: .slow)
+        }
+        XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout:10))
         for target in ["Calendario","Finanza","Dashboard","Attività"] {
             let tab = app.tabBars.buttons[target]
-            XCTAssertTrue(tab.waitForExistence(timeout:10)); tab.tap(); XCTAssertTrue(tab.isSelected)
+            XCTAssertTrue(tab.waitForExistence(timeout:10)); XCTAssertTrue(tab.isHittable); tab.tap(); XCTAssertTrue(tab.isSelected)
         }
         XCTAssertTrue(title.waitForExistence(timeout:10))
         XCTAssertEqual(title.value as? String,edited)
@@ -152,6 +156,14 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertEqual(open.label,edited)
         open.tap()
         XCTAssertEqual(title.value as? String,edited)
+        app.buttons["inline-task-details"].tap()
+        XCTAssertTrue(app.navigationBars["Modifica attività"].waitForExistence(timeout:10))
+        let detailTitle = app.textFields["Titolo"]
+        detailTitle.tap(); detailTitle.typeText("9")
+        let savedInDetails = detailTitle.value as? String
+        app.navigationBars["Modifica attività"].buttons["Salva"].tap()
+        XCTAssertTrue(app.navigationBars["Modifica attività"].waitForNonExistence(timeout:10))
+        XCTAssertEqual(title.value as? String,savedInDetails)
         capture("task-title-saved-after-tab-switches")
     }
     func testRepeatedTabSwitchesKeepNativeDestinationsUsable() {
