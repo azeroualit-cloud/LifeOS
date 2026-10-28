@@ -17,7 +17,7 @@ struct TasksScreen: View {
     private var checklist: some View {
         let active = activities("todo"), waiting = activities("waiting")
         let completed = rows("done").map { DisplayRecord($0) }
-        List {
+        return List {
             Section {
                 HStack(spacing: NativeDesign.Space.small) {
                     Text("Categorie").font(NativeDesign.heading)
