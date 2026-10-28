@@ -79,6 +79,9 @@ struct DashboardScreen: View {
             Text(summary.greeting).font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary).accessibilityIdentifier("home-greeting")
             Text(CivilDate.label(today).capitalized)
                 .font(NativeDesign.value).accessibilityAddTraits(.isHeader)
+            if let weather = summary.phrases.first(where: { $0.lead == "A Empoli, " }) {
+                Text(weather.text).font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
+            }
         }
     }
     private func focus(now: Date, today: String) -> some View {
