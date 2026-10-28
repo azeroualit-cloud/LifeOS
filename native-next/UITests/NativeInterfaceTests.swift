@@ -381,7 +381,10 @@ final class NativeInterfaceTests: XCTestCase {
         capture("activity-actions-all-visible")
         trash.tap()
         XCTAssertTrue(app.buttons["Elimina attività"].waitForExistence(timeout: 5))
-        app.buttons["Annulla"].tap()
+        // iOS can present this confirmation as a popover without a Cancel row.
+        // Dismiss outside and verify the task remains intact.
+        app.navigationBars["Attività"].coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        XCTAssertTrue(app.textFields["inline-task-title"].exists)
     }
     func testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination() {
         let app = launch(["--dark", "--expense-routing"])

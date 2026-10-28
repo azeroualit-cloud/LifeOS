@@ -134,3 +134,17 @@ test('a changed reserve or another pending payment requires a fresh quote before
  assert.equal(pending.plans.length,0);
  await core.expenseRouting.save({...ctx,input:payload});assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM movements').get().n,1);
 });
+test('pending fund payments reserve availability before the next payment can start',async()=>{
+ const {ctx,payload,sqlite,repository,setFailure}=await fixture();const initial=await repository.read();initial.state.plans.water.kind='fund';await repository.compareAndSet(initial.revision,initial.state);
+ setFailure();await assert.rejects(core.expenseRouting.save({...ctx,input:payload}),/lost response/);
+ const preview=await core.expenseRouting.preview({...ctx,input:{category:'Acqua',amountCents:3000,date:'2026-10-28'}});
+ assert.equal(preview.plans.length,1);assert.equal(preview.plans[0].availableCents,0);
+ await assert.rejects(core.expenseRouting.save({...ctx,input:{...payload,requestId:'second-fund-payment-0001'}}),/disponibilità/);
+ assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM movements').get().n,1);
+ await core.expenseRouting.save({...ctx,input:payload});
+});
+test('multiple matching plans are returned without choosing one on the server',async()=>{
+ const {ctx,payload,repository,sqlite}=await fixture();const initial=await repository.read();initial.state.plans.other={...initial.state.plans.water,id:'other',name:'Acqua seconda'};await repository.compareAndSet(initial.revision,initial.state);
+ const preview=await core.expenseRouting.preview({...ctx,input:{category:'Acqua',amountCents:3000,date:'2026-10-28'}});assert.equal(preview.plans.length,2);
+ const ambiguous={...payload};delete ambiguous.planId;await assert.rejects(core.expenseRouting.save({...ctx,input:ambiguous}),/non è più disponibile/);assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM movements').get().n,0);
+});
