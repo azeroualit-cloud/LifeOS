@@ -13,7 +13,7 @@ struct NativeExpenseRouteSection: View {
     @State private var loading = false
     @State private var issue: String?
     @State private var retry = 0
-    private var query: String { category + day + String(amount) + String(movementID) + String(retry) }
+    private var query: String { category + day + String(movementID) + String(retry) }
     private var chosen: Record? { plans.first { $0.text("id") == selected } }
     var body: some View {
         Section("Da dove viene pagata") {
