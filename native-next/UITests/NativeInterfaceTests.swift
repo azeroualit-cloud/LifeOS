@@ -136,10 +136,9 @@ final class NativeInterfaceTests: XCTestCase {
         title.tap(); title.typeText("2028")
         let edited = title.value as? String
         XCTAssertTrue(edited?.contains("2028") == true)
-        for _ in 0..<3 {
-            if !app.keyboards.firstMatch.exists { break }
-            app.collectionViews.firstMatch.swipeDown(velocity: .slow)
-        }
+        let hideKeyboard = app.buttons["hide-task-keyboard"]
+        XCTAssertTrue(hideKeyboard.waitForExistence(timeout:10))
+        hideKeyboard.tap()
         XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout:10))
         for target in ["Calendario","Finanza","Dashboard","Attività"] {
             let tab = app.tabBars.buttons[target]

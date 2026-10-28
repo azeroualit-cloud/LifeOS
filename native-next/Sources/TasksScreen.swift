@@ -11,6 +11,7 @@ struct TasksScreen: View {
     @State private var expandedID: String?
     @State private var completedExpanded = false
     @State private var drafts: [Int: NativeTaskDraft] = [:]
+    @FocusState private var focusedTaskField: NativeTaskField?
     private func rows(_ status: String) -> [Record] { NativeTaskList.rows(store.tasks, category: category, section: status) }
     private func activities(_ status: String) -> [NativeActivity] { NativeActivityCatalog.rows(tasks: store.tasks, events: store.activityEvents, category: category, section: status) }
     var body: some View {
@@ -74,6 +75,18 @@ struct TasksScreen: View {
         .modifier(NativeChecklistListAppearance())
         .environment(\.editMode, $editMode)
         .scrollDismissesKeyboard(.interactively)
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                if focusedTaskField != nil && router.sheet?.id == nil {
+                    Spacer()
+                    NativeIconButton(symbol: "keyboard.chevron.compact.down", label: "Nascondi tastiera") { focusedTaskField = nil }
+                        .accessibilityIdentifier("hide-task-keyboard")
+                }
+            }
+        }
+        .onChange(of: expandedID) { _, _ in focusedTaskField = nil }
+        .onChange(of: router.tab) { _, tab in if tab != .tasks { focusedTaskField = nil } }
+        .onChange(of: router.sheet?.id) { _, sheet in if sheet != nil { focusedTaskField = nil } }
         .animation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration), value: store.tasks)
         .onChange(of: category) { _, _ in expandedID = nil; completedExpanded = false }
         .onChange(of: store.tasks.map { $0.integer("id") }) { _, ids in drafts = drafts.filter { ids.contains($0.key) } }
@@ -132,7 +145,7 @@ struct TasksScreen: View {
                 expandedID = nil
                 Task { await store.run("setTaskStatus", ["id": .int(r.integer("id")), "status": .string(NativeTaskList.completionStatus(r))]) }
             }
-            NativeTaskControls(record: r, draft: draftBinding(r), expanded: expanded, onOpen: { toggleExpanded("task:\(r.integer("id"))") }) {
+            NativeTaskControls(record: r, draft: draftBinding(r), focus: $focusedTaskField, expanded: expanded, onOpen: { toggleExpanded("task:\(r.integer("id"))") }) {
                 withAnimation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration)) { expandedID = nil }
             }
         }
@@ -141,6 +154,8 @@ struct TasksScreen: View {
         .disabled(store.busy)
     }
 }
+
+private enum NativeTaskField: Hashable { case title(Int), notes(Int) }
 
 private struct NativeTaskDraft: Equatable {
     var title: String
@@ -154,6 +169,7 @@ private struct NativeTaskControls: View {
     @EnvironmentObject var router: NativeRouter
     let record: Record
     @Binding var draft: NativeTaskDraft
+    let focus: FocusState<NativeTaskField?>.Binding
     let expanded: Bool
     var onOpen: () -> Void
     var onClose: () -> Void
@@ -183,6 +199,7 @@ private struct NativeTaskControls: View {
             Group {
                 if expanded {
                     TextField("Titolo", text: $draft.title, axis: .vertical).textFieldStyle(.plain)
+                        .focused(focus, equals: .title(record.integer("id")))
                         .font(NativeDesign.body).foregroundStyle(record.text("status") == "done" ? NativeDesign.secondary : Color.primary)
                         .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
                         .accessibilityIdentifier("inline-task-title").transition(.identity)
@@ -197,7 +214,7 @@ private struct NativeTaskControls: View {
                 }
             }.transaction { $0.animation = nil; $0.disablesAnimations = true }
             if expanded {
-                TextField("Aggiungi nota", text: $draft.notes, axis: .vertical).textFieldStyle(.plain).font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
+                TextField("Aggiungi nota", text: $draft.notes, axis: .vertical).textFieldStyle(.plain).focused(focus, equals: .notes(record.integer("id"))).font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
             } else if !notes.isEmpty {
                 Text(notes).font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary).lineLimit(2).fixedSize(horizontal: false, vertical: true)
             }
