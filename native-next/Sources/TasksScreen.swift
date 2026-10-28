@@ -8,6 +8,7 @@ struct TasksScreen: View {
     @Environment(\.nativeReduceMotion) private var reduceMotion
     @State private var expandedID: String?
     @State private var completedExpanded = false
+    @State private var drafts: [Int: NativeTaskDraft] = [:]
     private func rows(_ status: String) -> [Record] { NativeTaskList.rows(store.tasks, category: category, section: status) }
     private func activities(_ status: String) -> [NativeActivity] { NativeActivityCatalog.rows(tasks: store.tasks, events: store.activityEvents, category: category, section: status) }
     var body: some View {
@@ -73,6 +74,7 @@ struct TasksScreen: View {
         .scrollDismissesKeyboard(.interactively)
         .animation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration), value: store.tasks)
         .onChange(of: category) { _, _ in expandedID = nil; completedExpanded = false }
+        .onChange(of: store.tasks.map { $0.integer("id") }) { _, ids in drafts = drafts.filter { ids.contains($0.key) } }
         
         .onAppear {
             let keys = store.categories.map { $0.text("key") }
@@ -111,31 +113,34 @@ struct TasksScreen: View {
             .disabled(store.busy)
         } else { taskRow(item.record, first: first, last: last) }
     }
+    private func draftBinding(_ record: Record) -> Binding<NativeTaskDraft> {
+        let id = record.integer("id")
+        return Binding(get: { drafts[id] ?? NativeTaskDraft(record) }, set: { value in
+            if value == NativeTaskDraft(record) { drafts.removeValue(forKey: id) }
+            else { drafts[id] = value }
+        })
+    }
     private func taskRow(_ r: Record, first: Bool, last: Bool) -> some View {
         let expanded = expandedID == "task:\(r.integer("id"))"
-        return VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-            if !expanded { NativeChecklistRow(title: r.text("title"), subtitle: expanded ? "" : r.text("notes"), checked: r.text("status") == "done", dueDay: r.text("due_date"), showsDisclosure: false, completionLabel: "Cambia completamento " + r.text("title"), onComplete: {
+        return HStack(alignment: .top, spacing: NativeDesign.Space.small) {
+            NativeCompletionButton(checked: r.text("status") == "done", label: "Cambia completamento " + r.text("title")) {
                 expandedID = nil
                 Task { await store.run("setTaskStatus", ["id": .int(r.integer("id")), "status": .string(NativeTaskList.completionStatus(r))]) }
-            }, onOpen: {
-                withAnimation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration)) {
-                    expandedID = expanded ? nil : "task:\(r.integer("id"))"
-                }
-            })
             }
-            if expanded {
-                HStack(alignment: .top, spacing: NativeDesign.Space.small) {
-                    NativeCompletionButton(checked: r.text("status") == "done", label: "Cambia completamento " + r.text("title")) {
-                        expandedID = nil
-                        Task { await store.run("setTaskStatus", ["id": .int(r.integer("id")), "status": .string(NativeTaskList.completionStatus(r))]) }
-                    }
-                    NativeTaskControls(record: r) { withAnimation(reduceMotion ? nil : .snappy) { expandedID = nil } }
-                }.padding(.vertical, NativeDesign.Space.small).background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius)).transition(.opacity)
+            NativeTaskControls(record: r, draft: draftBinding(r), expanded: expanded, onOpen: { toggleExpanded("task:\(r.integer("id"))") }) {
+                withAnimation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration)) { expandedID = nil }
             }
         }
+        .background(expanded ? NativeDesign.surface : Color.clear, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
         .modifier(NativeChecklistListRow(first: first, last: last))
         .disabled(store.busy)
     }
+}
+
+private struct NativeTaskDraft: Equatable {
+    var title: String
+    var notes: String
+    init(_ record: Record) { title = record.text("title"); notes = record.text("notes") }
 }
 
 /// Contextual editing stays under its task; full date/category editing reuses TaskEditor.
@@ -143,22 +148,57 @@ private struct NativeTaskControls: View {
     @EnvironmentObject var store: NativeStore
     @EnvironmentObject var router: NativeRouter
     let record: Record
+    @Binding var draft: NativeTaskDraft
+    let expanded: Bool
+    var onOpen: () -> Void
     var onClose: () -> Void
-    @State private var title = ""
-    @State private var notes = ""
+    private enum Confirmation { case close, delete }
+    @State private var confirmation: Confirmation?
+    private var title: String { draft.title }
+    private var notes: String { draft.notes }
+    private var dirty: Bool { title != record.text("title") || notes != record.text("notes") }
+    private func requestClose() { if dirty { confirmation = .close } else { onClose() } }
+    private func save(close: Bool) {
+        Task {
+            do {
+                var payload = record; payload["title"] = .string(title); payload["notes"] = .string(notes)
+                try await store.perform("saveTask", payload); error = nil
+                if close { onClose() }
+            } catch { self.error = error.localizedDescription }
+        }
+    }
     @State private var error: String?
-    @State private var confirmDelete = false
     private func edit(_ section: String) {
         var value = record; value["title"] = .string(title); value["notes"] = .string(notes)
         value["_editorSection"] = .string(section); router.sheet = .task(value)
     }
     var body: some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-            HStack {
-                TextField("Titolo", text: $title, axis: .vertical).foregroundStyle(record.text("status") == "done" ? NativeDesign.secondary : Color.primary).accessibilityIdentifier("inline-task-title")
-                Button(action: onClose) { Image(systemName: "chevron.up").frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget) }.accessibilityLabel("Chiudi comandi attività")
+            Group {
+                if expanded {
+                    TextField("Titolo", text: $draft.title, axis: .vertical).textFieldStyle(.plain)
+                        .font(NativeDesign.body).foregroundStyle(record.text("status") == "done" ? NativeDesign.secondary : Color.primary)
+                        .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
+                        .accessibilityIdentifier("inline-task-title").transition(.identity)
+                } else {
+                    Button(action: onOpen) {
+                        Text(title).font(NativeDesign.body).foregroundStyle(record.text("status") == "done" ? NativeDesign.secondary : Color.primary)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
+                            .multilineTextAlignment(.leading).contentShape(Rectangle())
+                    }.buttonStyle(.borderless).accessibilityLabel(title)
+                        .accessibilityIdentifier("task-open-" + String(record.integer("id"))).transition(.identity)
+                }
+            }.transaction { $0.animation = nil; $0.disablesAnimations = true }
+            if expanded {
+                TextField("Aggiungi nota", text: $draft.notes, axis: .vertical).textFieldStyle(.plain).font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
+            } else if !notes.isEmpty {
+                Text(notes).font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary).lineLimit(2).fixedSize(horizontal: false, vertical: true)
             }
-            TextField("Aggiungi nota", text: $notes, axis: .vertical).font(.subheadline).foregroundStyle(NativeDesign.secondary)
+            if dirty && !expanded { Text("Modifiche non salvate").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary) }
+            if !record.text("due_date").isEmpty { NativeDueBadge(day: record.text("due_date")) }
+            if expanded {
+            HStack(alignment: .top, spacing: NativeDesign.Space.small) {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: NativeDesign.Space.small) {
                     NativeInlineAction(symbol: "calendar", title: record.text("scheduled_date").isEmpty ? "Data" : CivilDate.label(record.text("scheduled_date")), label: "Data e dettagli attività") { edit("dates") }
@@ -168,25 +208,31 @@ private struct NativeTaskControls: View {
                     NativeInlineAction(symbol: NativeTaskList.section(record) == "waiting" ? "play.fill" : "pause.fill", label: NativeTaskList.section(record) == "waiting" ? "Riattiva" : "In attesa") {
                         Task { await store.run("setTaskStatus", ["id": .int(record.integer("id")), "status": .string(NativeTaskList.section(record) == "waiting" ? "todo" : "waiting")]) }
                     }
-                    NativeInlineAction(symbol: "trash", label: "Elimina attività", destructive: true) { confirmDelete = true }
+                    NativeInlineAction(symbol: "trash", label: "Elimina attività", destructive: true) { confirmation = .delete }
                 }
             }
-            if title != record.text("title") || notes != record.text("notes") {
-                Button("Salva modifiche") {
-                    Task {
-                        do {
-                            var payload = record; payload["title"] = .string(title); payload["notes"] = .string(notes)
-                            try await store.perform("saveTask", payload); error = nil
-                        } catch { self.error = error.localizedDescription }
-                    }
-                }.disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            NativeInlineAction(symbol: "chevron.up", label: "Chiudi comandi attività") { requestClose() }
+                .accessibilityIdentifier("inline-task-close")
+            }
+            if dirty {
+                Button("Salva modifiche") { save(close: false) }
+                    .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
             if let error { NativeInlineMessage(text: error) }
-        }.font(.subheadline).padding(.bottom, NativeDesign.Space.small)
-            .onAppear { title = record.text("title"); notes = record.text("notes") }
-            .confirmationDialog("Eliminare questa attività?", isPresented: $confirmDelete, titleVisibility: .visible) {
-                Button("Elimina attività", role: .destructive) { Task { await store.run("deleteTask", args: [.int(record.integer("id"))]) } }
             }
+        }
+        .onChange(of: record) { old, new in
+            if draft == NativeTaskDraft(old) || draft == NativeTaskDraft(new) { draft = NativeTaskDraft(new) }
+        }
+        .confirmationDialog(confirmation == .delete ? "Eliminare questa attività?" : "Salvare le modifiche all’attività?", isPresented: Binding(get: { confirmation != nil }, set: { if !$0 { confirmation = nil } }), titleVisibility: .visible) {
+            if confirmation == .delete {
+                Button("Elimina attività", role: .destructive) { Task { await store.run("deleteTask", args: [.int(record.integer("id"))]) } }
+            } else {
+                Button("Salva e chiudi") { save(close: true) }.disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                Button("Scarta modifiche", role: .destructive) { draft = NativeTaskDraft(record); onClose() }
+                Button("Continua a modificare", role: .cancel) { }
+            }
+        }
     }
 }
 

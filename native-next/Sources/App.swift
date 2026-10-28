@@ -175,10 +175,10 @@ struct NativeRoot: View {
             finance.tabItem { Label("Finanza", systemImage: "chart.bar") }.tag(NativeTab.finance)
         }
     }
-    private var dashboard: some View { NavigationStack { DashboardScreen().modifier(NativeDestinationMotion(tab: .dashboard)).toolbar { tools }.navigationTitle("Dashboard").navigationBarTitleDisplayMode(.inline) } }
-    private var tasks: some View { NavigationStack { TasksScreen().modifier(NativeDestinationMotion(tab: .tasks)).toolbar { tools }.navigationTitle("Attività").navigationBarTitleDisplayMode(.inline) } }
-    private var calendar: some View { NavigationStack { CalendarScreen().modifier(NativeDestinationMotion(tab: .calendar)).toolbar { tools }.navigationTitle("Calendario").navigationBarTitleDisplayMode(.inline) } }
-    private var finance: some View { NavigationStack { FinanceScreen().modifier(NativeDestinationMotion(tab: .finance)).toolbar { tools }.navigationTitle("Finanza").navigationBarTitleDisplayMode(.inline) } }
+    private var dashboard: some View { NavigationStack { DashboardScreen().toolbar { tools }.navigationTitle("Dashboard").navigationBarTitleDisplayMode(.inline) } }
+    private var tasks: some View { NavigationStack { TasksScreen().toolbar { tools }.navigationTitle("Attività").navigationBarTitleDisplayMode(.inline) } }
+    private var calendar: some View { NavigationStack { CalendarScreen().toolbar { tools }.navigationTitle("Calendario").navigationBarTitleDisplayMode(.inline) } }
+    private var finance: some View { NavigationStack { FinanceScreen().toolbar { tools }.navigationTitle("Finanza").navigationBarTitleDisplayMode(.inline) } }
     @ToolbarContentBuilder private var tools: some ToolbarContent {
         if #available(iOS 26.0, *) {
             ToolbarItem(placement: .topBarTrailing) { addControl }
