@@ -14,7 +14,7 @@ struct TasksScreen: View {
     @FocusState private var focusedTaskField: NativeTaskField?
     private func rows(_ status: String) -> [Record] { NativeTaskList.rows(store.tasks, category: category, section: status) }
     private func activities(_ status: String) -> [NativeActivity] { NativeActivityCatalog.rows(tasks: store.tasks, events: store.activityEvents, category: category, section: status) }
-    var body: some View {
+    private var checklist: some View {
         let active = activities("todo"), waiting = activities("waiting")
         let completed = rows("done").map { DisplayRecord($0) }
         List {
@@ -72,18 +72,13 @@ struct TasksScreen: View {
                 Text("Nessuna attività da mostrare").foregroundStyle(NativeDesign.secondary).listRowBackground(Color.clear)
             }
         }
+    }
+    var body: some View {
+        checklist
         .modifier(NativeChecklistListAppearance())
         .environment(\.editMode, $editMode)
         .scrollDismissesKeyboard(.interactively)
-        .toolbar {
-            ToolbarItemGroup(placement: .keyboard) {
-                if focusedTaskField != nil && router.sheet?.id == nil {
-                    Spacer()
-                    NativeIconButton(symbol: "keyboard.chevron.compact.down", label: "Nascondi tastiera") { focusedTaskField = nil }
-                        .accessibilityIdentifier("hide-task-keyboard")
-                }
-            }
-        }
+        .toolbar { editingKeyboardToolbar }
         .onChange(of: expandedID) { _, _ in focusedTaskField = nil }
         .onChange(of: router.tab) { _, tab in if tab != .tasks { focusedTaskField = nil } }
         .onChange(of: router.sheet?.id) { _, sheet in if sheet != nil { focusedTaskField = nil } }
@@ -104,6 +99,15 @@ struct TasksScreen: View {
             if store.categories.contains(where: { $0.text("key") == value }) { category = value }
         }
         .onChange(of: store.categories.map { $0.text("key") }) { _, keys in if !keys.contains(category) { category = keys.first ?? "action" } }
+    }
+    @ToolbarContentBuilder private var editingKeyboardToolbar: some ToolbarContent {
+        ToolbarItemGroup(placement: .keyboard) {
+            if focusedTaskField != nil && router.sheet?.id == nil {
+                Spacer()
+                NativeIconButton(symbol: "keyboard.chevron.compact.down", label: "Nascondi tastiera") { focusedTaskField = nil }
+                    .accessibilityIdentifier("hide-task-keyboard")
+            }
+        }
     }
     private func checklistHeading(_ title: String) -> some View {
         NativeSectionHeader(title, titleIdentifier: "task-heading-" + title) { EmptyView() }
