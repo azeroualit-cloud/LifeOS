@@ -96,7 +96,7 @@ struct NativeExpenseDestinationEditor: View {
             }
             NativeExpenseRouteSection(category: record.text("category"), day: String(record.text("actual_date", fallback: record.text("date")).prefix(10)), amount: amount, movementID: record.integer("source_row") == 0 ? record.integer("row") : record.integer("source_row"), selected: $selected, competenceMonths: $months, ready: $ready, quotedAvailable: $quotedAvailable).id(quoteGeneration).disabled(submitted)
             if let issue { NativeInlineMessage(text: issue) }
-        }.modifier(NativeListAppearance()).navigationTitle("Destinazione della spesa").navigationBarTitleDisplayMode(.inline)
+        }.modifier(NativeListAppearance()).navigationTitle("Destinazione").navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Chiudi") { dismiss() }.disabled(saving) }
                 ToolbarItem(placement: .confirmationAction) { Button(submitted ? "Riprova" : "Conferma") { Task { await save() } }.disabled(!ready || selected.isEmpty || saving).accessibilityIdentifier("expense-destination-confirm") }

@@ -384,7 +384,7 @@ final class NativeInterfaceTests: XCTestCase {
         // iOS can present this confirmation as a popover without a Cancel row.
         // Dismiss outside and verify the task remains intact.
         app.navigationBars["Attività"].coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
-        XCTAssertTrue(app.textFields["inline-task-title"].exists)
+        XCTAssertEqual(app.textFields["inline-task-title"].value as? String, "Organizzare la settimana")
     }
     func testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination() {
         let app = launch(["--dark", "--expense-routing"])
