@@ -19,5 +19,7 @@ base=base.replace('      name: p.cashName || plan.name,','      name: p.cashName
 base=base.replace('          note: "Piano " + p.planId','          note: p.note || "Piano " + p.planId',1)
 base=base.replace('          budgetTreatment: "savings",\n          note: p.note', '          budgetTreatment: "savings",\n          includedInSnapshot: p.includedInSnapshot,\n          note: p.note',1)
 base=base.replace('Object.values(state.payments).some((p) => p.movementId === existingMovementId || p.existingMovementId === existingMovementId)', 'Object.values(state.payments).some((p) => p.status !== "deleted" && (p.movementId === existingMovementId || p.existingMovementId === existingMovementId))')
+base=base.replace('Object.values(state.payments).some((p) => p.movementId === r.source_row || p.existingMovementId === r.source_row)', 'Object.values(state.payments).some((p) => p.status !== "deleted" && (p.movementId === r.source_row || p.existingMovementId === r.source_row))')
+base=base.replace('Object.values(state.payments).some((p) => p.movementId === movementId || p.existingMovementId === movementId || row?.import_id === "APP-" + p.requestId)', 'Object.values(state.payments).some((p) => p.status !== "deleted" && (p.movementId === movementId || p.existingMovementId === movementId || row?.import_id === "APP-" + p.requestId))')
 Path('manual/build-67/worker.js').write_text(prefix+base)
 print('Generated Worker 67 with the existing private configuration unchanged.')

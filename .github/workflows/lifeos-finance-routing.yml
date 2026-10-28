@@ -1,0 +1,19 @@
+name: LifeOS expense routing
+on:
+  push:
+    paths: ['backend/expense-routing/**', 'manual/build-67/worker.js', 'scripts/build-worker-67.py', '.github/workflows/lifeos-finance-routing.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  finance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify Worker syntax
+        run: node --input-type=module --check < manual/build-67/worker.js
+      - name: Verify routing, replay, concurrency and atomic rollback
+        run: node backend/expense-routing/tests/routing.test.mjs

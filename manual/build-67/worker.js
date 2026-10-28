@@ -4224,7 +4224,7 @@ function withFinancePlans(base, { repositoryFactory = (env) => new D1PlanReposit
       if (method === "getFinancePlanMovements") {
         const selected2 = month(args[0] ?? current), { state } = await repository.read();
         const rows = await env.DB.prepare("SELECT m.*,p.treatment FROM movements m LEFT JOIN movement_budget_policies p ON p.movement_source_row=m.source_row WHERE m.account='Trade Republic' AND m.status='Eseguito' AND m.movement_type='Spesa' AND m.amount<0 AND substr(m.actual_date,1,7)=? AND m.actual_date<=? AND NOT EXISTS(SELECT 1 FROM extraordinary_movement_links l WHERE l.movement_source_row=m.source_row) ORDER BY m.actual_date DESC,m.source_row DESC LIMIT 100").bind(selected2, today).all();
-        return json({ movements: rows.results.filter((r) => r.treatment !== "recovery" && !Object.values(state.payments).some((p) => p.movementId === r.source_row || p.existingMovementId === r.source_row) && (selected2 >= current || r.treatment === "savings" || (!r.treatment || r.treatment === "auto") && ["Assicurazione", "Bollo", "Manutenzione auto", "Dentista", "Straordinarie"].includes(r.category))).map((r) => ({ row: r.source_row, name: r.description, date: String(r.actual_date).slice(0, 10), amountCents: Math.round(-r.amount * 100) })) });
+        return json({ movements: rows.results.filter((r) => r.treatment !== "recovery" && !Object.values(state.payments).some((p) => p.status !== "deleted" && (p.movementId === r.source_row || p.existingMovementId === r.source_row)) && (selected2 >= current || r.treatment === "savings" || (!r.treatment || r.treatment === "auto") && ["Assicurazione", "Bollo", "Manutenzione auto", "Dentista", "Straordinarie"].includes(r.category))).map((r) => ({ row: r.source_row, name: r.description, date: String(r.actual_date).slice(0, 10), amountCents: Math.round(-r.amount * 100) })) });
       }
       if (legacyWrites.has(method)) {
         const { state } = await repository.read(), cycleId = Number(args[0]?.cycleId);
@@ -4235,7 +4235,7 @@ function withFinancePlans(base, { repositoryFactory = (env) => new D1PlanReposit
       if (protectedCash.has(method)) {
         const movementId = Number(method === "deleteMovement" ? args[0] : args[0]?.row), { state } = await repository.read();
         const row = env.DB ? await env.DB.prepare("SELECT import_id FROM movements WHERE source_row=?").bind(movementId).first() : null;
-        if (Object.values(state.payments).some((p) => p.movementId === movementId || p.existingMovementId === movementId || row?.import_id === "APP-" + p.requestId)) throw new PlanError("Movimento collegato a un piano: modifica o eliminazione diretta non consentita.", 409);
+        if (Object.values(state.payments).some((p) => p.status !== "deleted" && (p.movementId === movementId || p.existingMovementId === movementId || row?.import_id === "APP-" + p.requestId))) throw new PlanError("Movimento collegato a un piano: modifica o eliminazione diretta non consentita.", 409);
         return base.fetch(request, env, ctx);
       }
       if (method === "saveFinancePlan") {
@@ -4329,6 +4329,7 @@ function createExpenseRouting({ PlanError, balance, command, completePayment, co
   }
   async function status({ input, repository, db }) {
     const id = requestKey(input.requestId), { state } = await repository.read();
+    if (state.expenseRoutingCommands?.[id]?.cancelled) return { started:false, complete:false, cancelled:true };
     if (state.expenseRoutingCommands?.[id]) return { started:true, complete:!state.expenseRoutingCommands[id].pending };
     const payment = state.payments[id];
     if (state.commands[id] || payment) return { started:true, complete:payment?.status === 'posted' };

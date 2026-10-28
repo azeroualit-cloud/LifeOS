@@ -52,6 +52,7 @@ export function createExpenseRouting({ PlanError, balance, command, completePaym
   }
   async function status({ input, repository, db }) {
     const id = requestKey(input.requestId), { state } = await repository.read();
+    if (state.expenseRoutingCommands?.[id]?.cancelled) return { started:false, complete:false, cancelled:true };
     if (state.expenseRoutingCommands?.[id]) return { started:true, complete:!state.expenseRoutingCommands[id].pending };
     const payment = state.payments[id];
     if (state.commands[id] || payment) return { started:true, complete:payment?.status === 'posted' };

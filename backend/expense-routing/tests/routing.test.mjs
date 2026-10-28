@@ -113,3 +113,14 @@ test('planned expense preserves the already-in-bank-snapshot flag through reserv
  const {ctx,payload,getCash}=await fixture();await core.expenseRouting.save({...ctx,input:{...payload,includedInSnapshot:true}});
  assert.equal(getCash().includedInSnapshot,true);
 });
+
+test('detached movement becomes editable and available in the existing plan picker',async()=>{
+ const {ctx,payload,sqlite,repository}=await fixture();await core.expenseRouting.save({...ctx,input:payload});const row=sqlite.prepare('SELECT * FROM movements').get();
+ await core.expenseRouting.change({...ctx,input:{requestId:'detach-for-edit-0001',movementId:row.source_row,expectedPaymentId:payload.requestId,expectedAmountCents:3000,expectedDate:'2026-10-28',expectedCategory:'Acqua',expenseDestination:'ordinary'}});
+ let editReached=false;
+ const base={async fetch(request){if(new URL(request.url).pathname==='/api/editMovement'){editReached=true;return new Response('true',{headers:{'Content-Type':'application/json'}});}return new Response(JSON.stringify({summary:{monthlyRemaining:900,monthlyCommitted:20},transactions:[]}),{headers:{'Content-Type':'application/json'}});}};
+ const worker=core.withFinancePlans(base,{repositoryFactory:()=>repository,clock:()=>ctx.today});
+ function request(method,args){return new Request('https://example.test/api/'+method,{method:'POST',headers:{Origin:'https://example.test','Content-Type':'application/json'},body:JSON.stringify(args)});}
+ const edited=await worker.fetch(request('editMovement',[{row:row.source_row}]),{DB:ctx.db},{});assert.equal(edited.status,200);assert.equal(editReached,true);
+ const picker=await worker.fetch(request('getFinancePlanMovements',['2026-10']),{DB:ctx.db},{});assert.equal(picker.status,200);assert.equal((await picker.json()).movements[0].row,row.source_row);
+});
