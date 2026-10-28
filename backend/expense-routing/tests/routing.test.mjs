@@ -148,3 +148,12 @@ test('multiple matching plans are returned without choosing one on the server',a
  const preview=await core.expenseRouting.preview({...ctx,input:{category:'Acqua',amountCents:3000,date:'2026-10-28'}});assert.equal(preview.plans.length,2);
  const ambiguous={...payload};delete ambiguous.planId;await assert.rejects(core.expenseRouting.save({...ctx,input:ambiguous}),/non è più disponibile/);assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM movements').get().n,0);
 });
+test('the actual Worker cash bridge preserves blank notes and the bank-snapshot flag',async()=>{
+ const {ctx,payload,sqlite,repository}=await fixture();let sent;
+ const base={async fetch(){return new Response(JSON.stringify({summary:{monthlyRemaining:900,monthlyCommitted:20},transactions:[]}),{headers:{'Content-Type':'application/json'}});}};
+ const worker=core.withFinancePlans(base,{repositoryFactory:()=>repository,clock:()=>ctx.today,recordTransaction:async(env,input)=>{sent=input;return ctx.recordTransaction(env,input);}});
+ const input={...payload,note:'',includedInSnapshot:true};
+ const request=new Request('https://example.test/api/saveTransaction',{method:'POST',headers:{Origin:'https://example.test','Content-Type':'application/json','X-LifeOS-Plans-Version':'2'},body:JSON.stringify([input])});
+ const response=await worker.fetch(request,{DB:ctx.db},{});assert.equal(response.status,200);assert.equal(await response.json(),true);
+ assert.equal(sent.includedInSnapshot,true);assert.equal(sqlite.prepare('SELECT notes FROM movements').get().notes,'');
+});

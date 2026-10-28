@@ -4149,7 +4149,7 @@ function withFinancePlans(base, { repositoryFactory = (env) => new D1PlanReposit
           months: p.competenceMonths,
           budgetTreatment: "savings",
           includedInSnapshot: p.includedInSnapshot,
-          note: p.note || "Piano " + p.planId
+          note: p.note ?? ""
         };
         let result;
         if (recordTransaction) result = await recordTransaction(env, input);
