@@ -114,6 +114,13 @@ import SwiftUI
         } catch { archiveWritable = false; self.error = "Archivio non disponibile: \(error.localizedDescription). I dati precedenti non sono stati cancellati." }
     }
     #if DEBUG
+    func seedVisualExpenseRouting() {
+        var demo = state
+        do {
+            try NativePlanDemo.apply("saveFinancePlan", payload: ["requestId": .string("water-plan-fixture"), "kind": .string("estimated"), "name": .string("Acqua"), "category": .string("Acqua"), "amountCents": .int(2000), "startMonth": .string(CivilDate.month())], state: &demo)
+            try save(demo)
+        } catch { self.error = error.localizedDescription }
+    }
     func seedVisualActivityAgenda() {
         guard isDemo else { return }
         var demo = state
@@ -471,7 +478,9 @@ import SwiftUI
         error = nil
         if isDemo {
             var next = state
-            try DemoActions.apply(method, payload, args: args, state: &next)
+            if method == "changeExpenseDestination" || method == "saveTransaction" && payload.integer("expenseRoutingVersion") == 1 {
+                try NativeExpenseDemo.apply(method, payload: payload, state: &next)
+            } else { try DemoActions.apply(method, payload, args: args, state: &next) }
             next.refreshedAt = Date(); try save(next); return
         }
         try NativeServerFeaturePolicy.validate(method, payload: payload, life: life)
@@ -505,6 +514,14 @@ import SwiftUI
         guard result != .bool(false) else { throw Message(text: "Il server non ha confermato la modifica.") }
         do { try await refresh(NativeSyncPolicy.scope(for: method)) }
         catch { notice = "Operazione inviata. Aggiornamento non riuscito: sincronizza prima di ripetere l’azione." }
+    }
+    func cancelPendingExpense(_ id: String) async throws {
+        guard !busy, !syncing, let write = state.pending.first(where: { $0.id == id }), !write.accepted, write.payload.integer("expenseRoutingVersion") == 1 else { throw Message(text: "Attendi la sincronizzazione in corso.") }
+        busy = true; defer { busy = false }
+        let result = try await read("cancelExpenseRequest", args: [.object(["requestId": .string(id)])])
+        guard result == .bool(true) else { throw Message(text: "Annullamento non confermato.") }
+        var next = state; next.pending.removeAll { $0.id == id }; try save(next)
+        notice = "Invio annullato prima della registrazione. Puoi reinserire la spesa con la destinazione corretta."
     }
     private func preserveLegacyMeasurements() throws {
         var next = state

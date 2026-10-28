@@ -153,7 +153,7 @@ struct TasksScreen: View {
                 withAnimation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration)) { expandedID = nil }
             }
         }
-        .background(expanded ? NativeDesign.surface : Color.clear, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
+        
         .modifier(NativeChecklistListRow(first: first, last: last))
         .disabled(store.busy)
     }
@@ -225,21 +225,14 @@ private struct NativeTaskControls: View {
             if dirty && !expanded { Text("Modifiche non salvate").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary) }
             if !record.text("due_date").isEmpty { NativeDueBadge(day: record.text("due_date")) }
             if expanded {
-            HStack(alignment: .top, spacing: NativeDesign.Space.small) {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: NativeDesign.Space.small) {
-                    NativeInlineAction(symbol: "calendar", title: record.text("scheduled_date").isEmpty ? "Data" : CivilDate.label(record.text("scheduled_date")), label: "Data e dettagli attività") { edit("dates") }
-                        .accessibilityIdentifier("inline-task-details")
-                    NativeInlineAction(symbol: "clock", title: record.text("scheduled_time"), label: "Orario promemoria attività") { edit("reminder") }
-                        .accessibilityIdentifier("inline-task-reminder")
-                    NativeInlineAction(symbol: NativeTaskList.section(record) == "waiting" ? "play.fill" : "pause.fill", label: NativeTaskList.section(record) == "waiting" ? "Riattiva" : "In attesa") {
-                        Task { await store.run("setTaskStatus", ["id": .int(record.integer("id")), "status": .string(NativeTaskList.section(record) == "waiting" ? "todo" : "waiting")]) }
-                    }
-                    NativeInlineAction(symbol: "trash", label: "Elimina attività", destructive: true) { confirmation = .delete }
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: NativeDesign.Layout.touchTarget), spacing: NativeDesign.Space.xs)], alignment: .leading, spacing: NativeDesign.Space.xs) {
+                NativeInlineAction(symbol: "calendar", label: "Data e dettagli attività") { edit("dates") }.accessibilityIdentifier("inline-task-details")
+                NativeInlineAction(symbol: "clock", label: "Orario promemoria attività") { edit("reminder") }.accessibilityIdentifier("inline-task-reminder")
+                NativeInlineAction(symbol: NativeTaskList.section(record) == "waiting" ? "play" : "pause", label: NativeTaskList.section(record) == "waiting" ? "Riattiva" : "In attesa") {
+                    Task { await store.run("setTaskStatus", ["id": .int(record.integer("id")), "status": .string(NativeTaskList.section(record) == "waiting" ? "todo" : "waiting")]) }
                 }
-            }
-            NativeInlineAction(symbol: "chevron.up", label: "Chiudi comandi attività") { requestClose() }
-                .accessibilityIdentifier("inline-task-close")
+                NativeInlineAction(symbol: "trash", label: "Elimina attività", destructive: true) { confirmation = .delete }.accessibilityIdentifier("inline-task-delete")
+                NativeInlineAction(symbol: "chevron.up", label: "Chiudi comandi attività") { requestClose() }.accessibilityIdentifier("inline-task-close")
             }
             if dirty {
                 Button("Salva modifiche") { save(close: false) }
@@ -271,13 +264,11 @@ private struct NativeEventControls: View {
         var value = record; value["_editorSection"] = .string(section); router.sheet = .event(value)
     }
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: NativeDesign.Space.small) {
-                NativeInlineAction(symbol: "calendar", title: CivilDate.label(record.text("day")), label: "Data e dettagli evento") { edit("dates") }.accessibilityIdentifier("inline-event-details")
-                NativeInlineAction(symbol: "clock", title: record.text("start_time"), label: "Orario evento") { edit("time") }.accessibilityIdentifier("inline-event-time")
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: NativeDesign.Layout.touchTarget), spacing: NativeDesign.Space.xs)], alignment: .leading, spacing: NativeDesign.Space.xs) {
+                NativeInlineAction(symbol: "calendar", label: "Data e dettagli evento") { edit("dates") }.accessibilityIdentifier("inline-event-details")
+                NativeInlineAction(symbol: "clock", label: "Orario evento") { edit("time") }.accessibilityIdentifier("inline-event-time")
                 NativeInlineAction(symbol: "repeat", label: "Ripetizione evento") { edit("repeat") }.accessibilityIdentifier("inline-event-repeat")
                 NativeInlineAction(symbol: "trash", label: "Elimina evento", destructive: true) { edit("actions") }.accessibilityIdentifier("inline-event-delete")
-            }
         }
     }
 }

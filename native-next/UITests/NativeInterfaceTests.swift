@@ -348,7 +348,7 @@ final class NativeInterfaceTests: XCTestCase {
         }
     }
     func testDashboardFocusTimelineOpensEventWithoutDuplicateSummary() {
-        let app = launch(["--dark"])
+        let app = launch(["--dark", "--active-shift"])
         let focus = app.buttons["home-focus"]
         XCTAssertTrue(focus.waitForExistence(timeout: 10))
         assertMinimumTouchTarget(focus)
@@ -361,10 +361,65 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Modifica evento"].waitForExistence(timeout: 10))
         capture("dashboard-timeline-event-editor")
     }
+    func testCompactDashboardPriorityAndActivityActionsStayVisible() {
+        let app = launch(["--dark", "--inactive-shift"])
+        XCTAssertTrue(app.staticTexts["home-greeting"].waitForExistence(timeout: 10))
+        XCTAssertFalse(app.buttons["home-focus"].exists)
+        XCTAssertLessThan(app.staticTexts["home-routines-heading"].frame.minY, app.staticTexts["home-agenda-heading"].frame.minY)
+        capture("dashboard-compact-priority")
+        app.tabBars.buttons["Attività"].tap()
+        let title = app.buttons["task-open-1"]
+        revealChecklistButton(title, in: app); title.tap()
+        let trash = app.buttons["inline-task-delete"]
+        revealChecklistButton(trash, in: app)
+        for id in ["inline-task-details", "inline-task-reminder", "inline-task-delete", "inline-task-close"] {
+            let button = app.buttons[id]
+            XCTAssertTrue(button.isHittable); assertMinimumTouchTarget(button)
+            XCTAssertGreaterThanOrEqual(button.frame.minX, 0)
+            XCTAssertLessThanOrEqual(button.frame.maxX, app.frame.maxX)
+        }
+        capture("activity-actions-all-visible")
+        trash.tap()
+        XCTAssertTrue(app.buttons["Elimina attività"].waitForExistence(timeout: 5))
+        app.buttons["Annulla"].tap()
+    }
+    func testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination() {
+        let app = launch(["--dark", "--expense-routing"])
+        addButton(app).tap()
+        let amount = app.textFields["movement-amount"]
+        XCTAssertTrue(amount.waitForExistence(timeout: 10)); amount.tap(); amount.typeText("30")
+        let name = app.textFields["movement-name"]; name.tap(); name.typeText("Acqua UI67")
+        app.buttons["movement-hide-keyboard"].tap()
+        let category = app.buttons["movement-category"]
+        for _ in 0..<5 { if category.isHittable { break }; app.collectionViews.firstMatch.swipeUp() }
+        category.tap(); app.buttons["Acqua"].tap()
+        for _ in 0..<6 { if app.staticTexts["Dagli altri risparmi"].isHittable { break }; app.collectionViews.firstMatch.swipeUp() }
+        XCTAssertTrue(app.staticTexts["Dagli altri risparmi"].exists)
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "10,00")).firstMatch.exists)
+        XCTAssertTrue(app.buttons["expense-destination"].label.contains("Acqua"))
+        capture("expense-water-fund-and-savings-preview")
+        app.buttons["Salva"].tap()
+        XCTAssertTrue(app.tabBars.buttons["Finanza"].waitForExistence(timeout: 10)); app.tabBars.buttons["Finanza"].tap()
+        let all = app.buttons["all-movements"]
+        for _ in 0..<6 { if all.isHittable { break }; app.scrollViews["finance-scroll"].swipeUp() }
+        all.tap()
+        let row = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Acqua UI67")).firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 10)); row.tap()
+        let change = app.buttons["movement-change-destination"]
+        for _ in 0..<6 { if change.isHittable { break }; app.collectionViews.firstMatch.swipeUp() }
+        XCTAssertTrue(change.isHittable); change.tap()
+        let destination = app.buttons["expense-destination"]
+        XCTAssertTrue(destination.waitForExistence(timeout: 10)); destination.tap(); app.buttons["Budget mensile"].tap()
+        capture("expense-change-existing-destination")
+        let confirm = app.buttons["expense-destination-confirm"]
+        XCTAssertTrue(confirm.isEnabled); confirm.tap()
+        XCTAssertTrue(app.navigationBars["Modifica movimento"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["Budget mensile"].exists)
+    }
     func testHomeSummaryAndVerticalRoutinesInBothThemes() {
         for dark in [false, true] {
             let app = launch(dark ? ["--dark"] : [])
-            let summary = app.buttons["home-focus"]
+            let summary = app.staticTexts["home-greeting"]
             XCTAssertTrue(summary.waitForExistence(timeout: 10))
             XCTAssertTrue(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-agenda-")).firstMatch.exists)
             XCTAssertFalse(summary.label.contains("dalle"))
@@ -406,10 +461,10 @@ final class NativeInterfaceTests: XCTestCase {
     }
     func testHomeEmptyStatesRemainActionable() {
         let app = launch(["--empty-home", "--dark"])
-        let summary = app.buttons["home-focus"]
+        let summary = app.staticTexts["home-greeting"]
         XCTAssertTrue(summary.waitForExistence(timeout: 10))
         XCTAssertTrue(app.staticTexts["home-agenda-empty"].exists)
-        XCTAssertTrue(summary.label.contains("Turni non disponibili"))
+        XCTAssertFalse(app.buttons["home-focus"].exists)
         XCTAssertFalse(app.buttons["home-events"].exists)
         let routines = app.buttons["home-empty-routines"]
         reveal(routines, in: app); XCTAssertTrue(routines.isHittable)
@@ -497,7 +552,7 @@ final class NativeInterfaceTests: XCTestCase {
     }
     func testHomeManyEventsAndTasksStayBoundedAndReachable() {
         let app = launch(["--busy-home", "--stress-content", "--dark"])
-        let summary = app.buttons["home-focus"]
+        let summary = app.staticTexts["home-greeting"]
         XCTAssertTrue(summary.waitForExistence(timeout: 10))
         XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-agenda-")).count, 3)
         XCTAssertFalse(app.staticTexts["home-summary"].exists)

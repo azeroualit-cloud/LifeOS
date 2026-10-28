@@ -272,7 +272,7 @@ struct NativeInlineAction: View {
                 if !title.isEmpty { Text(title).font(.subheadline.weight(.medium)).fixedSize() }
             }
             .foregroundStyle(destructive ? NativeDesign.danger : NativeDesign.accent)
-            .padding(.horizontal, NativeDesign.Space.medium)
+            .padding(.horizontal, title.isEmpty ? NativeDesign.Space.none : NativeDesign.Space.small)
             .frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget)
             .background(NativeDesign.actionSurface, in: Capsule())
             .contentShape(Capsule())

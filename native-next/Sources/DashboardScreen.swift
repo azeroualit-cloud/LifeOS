@@ -7,6 +7,7 @@ struct DashboardScreen: View {
     @State private var routineFeedback = false
     @State private var showingTimes = false
     @EnvironmentObject private var health: NativeHealthStore
+    @Environment(\.nativeReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -14,13 +15,12 @@ struct DashboardScreen: View {
             let now = context.date, today = CivilDate.day(now)
             let summary = NativeHomeSummary(now: now, todayShift: store.shift(today), tomorrowShift: store.shift(CivilDate.adding(1, to: today)), previousShift: store.shift(CivilDate.adding(-1, to: today)), events: store.dashboardEvents, weather: store.weather == "Meteo non disponibile" ? nil : store.weatherDetails, weatherDate: store.weatherDate, calendarAvailable: NativeHomeSummary.hasCalendarData(life: store.life, demo: store.isDemo))
             ScrollView {
-                VStack(alignment: .leading, spacing: NativeDesign.Space.section) {
-                    heading(summary, today: today)
+                VStack(alignment: .leading, spacing: NativeDesign.Space.large) {
+                    heading(summary, today: today, now: now)
                     rollingCalendar(today)
-                    focus(now: now, today: today)
+                    routines
                     agenda(summary, today: today)
                     nextTime(context.date)
-                    routines
                     NativeHealthCard(health: health, demo: NativeHealthLaunchPolicy.simulated)
                     NativeConnectionBadge()
                     if let notice = store.notice { Text(notice).font(.caption).foregroundStyle(NativeDesign.secondary) }
@@ -45,11 +45,6 @@ struct DashboardScreen: View {
         let days = NativeHomeSummary.rollingDays(today)
         let marked = Set(store.events.map { $0.text("day") } + store.tasks.map { $0.text("scheduled_date") })
         return VStack(spacing: NativeDesign.Space.small) {
-            HStack {
-                Text(CivilDate.monthTitle(String(today.prefix(7)))).font(.subheadline).foregroundStyle(NativeDesign.secondary)
-                Spacer()
-                NativeIconButton(symbol: "calendar", label: "Apri calendario") { openCalendar(today) }
-            }
             HStack(spacing: NativeDesign.Space.xs) {
                 ForEach(days, id: \.self) { day in
                     let current = day == today, shift = store.shift(day)
@@ -74,47 +69,53 @@ struct DashboardScreen: View {
         store.calendarMonth = String(day.prefix(7)); router.calendarDay = day; router.tab = .calendar
         Task { await store.sync(scope: .life) }
     }
-    private func heading(_ summary: NativeHomeSummary, today: String) -> some View {
-        VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-            Text(summary.greeting).font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary).accessibilityIdentifier("home-greeting")
-            Text(CivilDate.label(today).capitalized)
-                .font(NativeDesign.value).accessibilityAddTraits(.isHeader)
-            if let weather = summary.phrases.first(where: { $0.lead == "A Empoli, " }) {
-                Text(weather.text).font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
+    private func heading(_ summary: NativeHomeSummary, today: String, now: Date) -> some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .top, spacing: NativeDesign.Space.medium) {
+                headingText(summary, today: today)
+                Spacer(minLength: NativeDesign.Space.small)
+                activeShift(now: now, today: today)
+            }
+            VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+                headingText(summary, today: today)
+                activeShift(now: now, today: today)
             }
         }
     }
-    private func focus(now: Date, today: String) -> some View {
-        let model = NativeDashboardFocus(now: now, todayShift: store.shift(today), previousShift: store.shift(CivilDate.adding(-1, to: today)))
-        return Button { openCalendar(today) } label: {
-            VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
-                HStack {
-                    Text(model.phase).font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
-                    Spacer()
-                    Image(systemName: "arrow.up.right").foregroundStyle(NativeDesign.secondary).accessibilityHidden(true)
-                }
-                HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.small) {
-                    if let shift = model.shift {
-                        Text(shift.letter).font(NativeDesign.heading).foregroundStyle(shift.color)
-                    }
-                    Text(model.title).font(NativeDesign.value).foregroundStyle(Color.primary)
-                }
-                if model.interval != nil {
-                    Text(model.shift?.time ?? "").font(NativeDesign.body).monospacedDigit().foregroundStyle(NativeDesign.secondary)
-                    Text(model.remainingText).font(NativeDesign.heading).monospacedDigit().foregroundStyle(Color.primary)
-                    Text(model.countdownLabel).font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
-                } else {
-                    Text(model.detail).font(NativeDesign.body).foregroundStyle(NativeDesign.secondary)
-                }
-            }.frame(maxWidth: .infinity, alignment: .leading)
-                .padding(NativeDesign.Layout.cardInset)
-                .background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.cardRadius))
-                .contentShape(Rectangle())
-        }.buttonStyle(NativePressStyle()).accessibilityIdentifier("home-focus")
-            .accessibilityHint("Apre il giorno nel calendario")
+    private func headingText(_ summary: NativeHomeSummary, today: String) -> some View {
+        VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
+            Text(summary.greeting).font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary).accessibilityIdentifier("home-greeting")
+            Text(CivilDate.label(today).capitalized).font(NativeDesign.value).accessibilityAddTraits(.isHeader)
+            if let weather = summary.phrases.first(where: { $0.lead == "A Empoli, " }) {
+                Text(weather.detail).font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
+            }
+        }
+    }
+    private func focusDate(_ now: Date) -> Date {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--active-shift") { return CivilDate.calendar.date(bySettingHour: 13, minute: 40, second: 0, of: now)! }
+        if ProcessInfo.processInfo.arguments.contains("--inactive-shift") { return CivilDate.calendar.date(bySettingHour: 16, minute: 0, second: 0, of: now)! }
+        #endif
+        return now
+    }
+    @ViewBuilder private func activeShift(now: Date, today: String) -> some View {
+        let focusNow = focusDate(now)
+        let model = NativeDashboardFocus(now: focusNow, todayShift: store.shift(today), previousShift: store.shift(CivilDate.adding(-1, to: today)))
+        ZStack(alignment: .trailing) {
+        if model.phase == "Adesso" {
+            Button { openCalendar(today) } label: {
+                VStack(alignment: .trailing, spacing: NativeDesign.Space.xs) {
+                    Text(model.title).font(NativeDesign.heading).foregroundStyle(model.shift?.color ?? NativeDesign.accent)
+                    Text(model.remainingText + " alla fine").font(NativeDesign.metadata).monospacedDigit().foregroundStyle(NativeDesign.secondary)
+                }.frame(minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle())
+            }.buttonStyle(.plain).accessibilityIdentifier("home-focus")
+                .accessibilityHint("Apre il giorno nel calendario")
+                .transition(reduceMotion ? .identity : .opacity.combined(with: .scale(scale: NativeDesign.Motion.pressedScale)))
+        }
+        }.animation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration), value: model.phase)
     }
     private func agenda(_ summary: NativeHomeSummary, today: String) -> some View {
-        VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
+        VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
             NativeSectionHeader("Prossimi impegni", titleIdentifier: "home-agenda-heading") {
                 if !summary.events.isEmpty {
                     NavigationLink { HomeAgendaScreen() } label: {
@@ -129,15 +130,8 @@ struct DashboardScreen: View {
                 ForEach(Array(summary.events.prefix(3).enumerated()), id: \.offset) { _, event in
                     Button { router.sheet = .event(event) } label: {
                         VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
+                            Text(event.text("title", fallback: "Appuntamento")).font(NativeDesign.body).foregroundStyle(Color.primary).fixedSize(horizontal: false, vertical: true)
                             Text(agendaDate(event, today: today)).font(NativeDesign.metadata).monospacedDigit().foregroundStyle(NativeDesign.secondary)
-                            HStack(alignment: .top, spacing: NativeDesign.Space.small) {
-                                Image(systemName: "circle.fill").font(.caption2).foregroundStyle(NativeDesign.accent).accessibilityHidden(true)
-                                VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-                                    Text(event.text("title", fallback: "Appuntamento")).font(NativeDesign.heading).foregroundStyle(Color.primary).fixedSize(horizontal: false, vertical: true)
-                                    if !event.text("location").isEmpty { Text(event.text("location")).font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary) }
-                                }
-                                Spacer(minLength: 0)
-                            }
                         }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
                             .padding(.vertical, NativeDesign.Space.small).contentShape(Rectangle())
                     }.buttonStyle(NativePressStyle()).accessibilityIdentifier("home-agenda-" + String(event.integer("id")) + "-" + event.text("day"))
@@ -185,7 +179,7 @@ struct DashboardScreen: View {
     }
     private var routines: some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
-            NativeSectionHeader("Abitudini", titleIdentifier: "home-routines-heading") {
+            NativeSectionHeader("Abitudini di oggi", titleIdentifier: "home-routines-heading") {
                 NavigationLink { RoutinesEditor() } label: { Text("Gestisci").font(.subheadline).frame(minHeight: NativeDesign.Layout.touchTarget) }.accessibilityIdentifier("home-manage-routines")
             }
             if store.routines.isEmpty {
@@ -193,7 +187,7 @@ struct DashboardScreen: View {
             } else if store.todayRoutines.isEmpty {
                 Text("Nessuna abitudine prevista per oggi.").font(.subheadline).foregroundStyle(NativeDesign.secondary)
             } else {
-                NativeGroupedCard {
+                VStack(spacing: NativeDesign.Space.none) {
                     ForEach(Array(store.todayRoutines.enumerated()), id: \.element.integerID) { index, record in
                         if index > 0 { Divider().padding(.leading, NativeDesign.Layout.touchTarget + NativeDesign.Space.small) }
                         Button { checkRoutine(record) } label: {
