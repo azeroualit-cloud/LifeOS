@@ -40,15 +40,18 @@ jobs:
           origin='https://lifeos-native-test.a-zeroual-it.workers.dev'
           client=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
           def post(path,payload):
-              request=urllib.request.Request(origin+path,data=json.dumps(payload).encode(),method='POST',headers={'Origin':origin,'Content-Type':'application/json'})
+              request=urllib.request.Request(origin+path,data=json.dumps(payload).encode(),method='POST',headers={'Origin':origin,'Content-Type':'application/json','User-Agent':'LifeOS-Native-Check/1.0'})
               with client.open(request,timeout=90) as response:return response.read()
+          stage='login'
           try:
               password=os.environ['LIFEOS_TEST_PASSWORD'];assert password
               post('/auth/login',{'user':'nas','password':password})
+              stage='read'
               month=datetime.datetime.now(ZoneInfo('Europe/Rome')).strftime('%Y-%m')
               snapshot=json.loads(post('/api/getLifeData',[month]))
               assert snapshot['capabilities']['unifiedActivities']==1
               assert all(isinstance(snapshot[k],list) for k in ['tasks','events','upcomingEvents'])
+              stage='validation'
               try:
                   post('/api/saveActivity',[{'uid':'validation-probe','requestId':str(uuid.uuid4()),'source':'task','sourceId':0,'title':''}])
                   raise AssertionError('Il server ha accettato un titolo vuoto.')
@@ -58,5 +61,5 @@ jobs:
                   assert 'Attività non valida' in rejected.get('error','')
               print('UNIFIED_ACTIVITY_READ_AND_VALIDATION_CONTRACT_OK; no private data logged; no test activities created.')
           except Exception as error:
-              raise SystemExit('Verifica API fallita: '+type(error).__name__)
+              raise SystemExit('Verifica API fallita: stage='+stage+' class='+type(error).__name__+' HTTP='+str(getattr(error,'code','n/a')))
           PY
