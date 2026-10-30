@@ -73,7 +73,7 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           LIFEOS_BACKEND_AUDIT_ONLY: '1'
-        run: python3 scripts/deploy-activities-68.py
+        run: python3 scripts/deploy-unified-activities.py
       - name: Verifica design system
         working-directory: app
         run: python3 scripts/check-design-system.py
@@ -156,6 +156,14 @@ jobs:
           DEVICE="$MAIN_DEVICE"
           echo "MAIN_DEVICE=$DEVICE" >> "$GITHUB_ENV"
           xcodebuild build-for-testing -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compile.log
+      - name: Verifica editor unificato e Salute prima delle regressioni
+        timeout-minutes: 15
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcrun simctl boot "$MAIN_DEVICE" || true
+          xcrun simctl bootstatus "$MAIN_DEVICE" -b
+          xcodebuild test-without-building -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testUnifiedActivityEditorPreservesDescriptionWhenAddingAndRemovingDate -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testStandardizedHealthAndCompactShiftPalette -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeHealthCardRemainsCompactAndOpensDetail -resultBundlePath build/Focused.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/focused-tests.log
       - name: Verifica logica e flussi agenda su iPhone principale
         timeout-minutes: 35
         working-directory: app
@@ -164,7 +172,7 @@ jobs:
           DEVICE="$MAIN_DEVICE"
           xcrun simctl boot "$DEVICE" || true
           xcrun simctl bootstatus "$DEVICE" -b
-          xcodebuild test-without-building -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeTests -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testUnifiedActivityEditorPreservesDescriptionWhenAddingAndRemovingDate -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testStandardizedHealthAndCompactShiftPalette -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeHealthCardRemainsCompactAndOpensDetail -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCompactDashboardPriorityAndActivityActionsStayVisible -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testDashboardFocusTimelineOpensEventWithoutDuplicateSummary -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeSummaryAndVerticalRoutinesInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeEmptyStatesRemainActionable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeManyEventsAndTasksStayBoundedAndReachable -resultBundlePath build/Regression.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/regression-tests.log
+          xcodebuild test-without-building -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeTests -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCompactDashboardPriorityAndActivityActionsStayVisible -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testDashboardFocusTimelineOpensEventWithoutDuplicateSummary -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeSummaryAndVerticalRoutinesInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeEmptyStatesRemainActionable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeManyEventsAndTasksStayBoundedAndReachable -resultBundlePath build/Regression.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/regression-tests.log
       - name: Prepara simulatore compatto
         timeout-minutes: 15
         working-directory: app
@@ -189,13 +197,21 @@ jobs:
           elif [ -f build/Focused.xcresult/Info.plist ]; then
             xcrun xcresulttool export attachments --path build/Focused.xcresult --output-path build/screenshots
           fi
+      - name: Esporta schermate editor e Salute
+        if: always()
+        continue-on-error: true
+        working-directory: app
+        run: |
+          if [ -f build/Focused.xcresult/Info.plist ]; then
+            xcrun xcresulttool export attachments --path build/Focused.xcresult --output-path build/focused-screenshots
+          fi
       - name: Anteprime UI nei log
         if: always()
         working-directory: app
         run: |
           python3 - <<'PYQA'
           import base64,json,pathlib,subprocess
-          root=pathlib.Path('build/screenshots'); manifest=root/'manifest.json'
+          root=pathlib.Path('build/focused-screenshots') if pathlib.Path('build/focused-screenshots/manifest.json').exists() else pathlib.Path('build/screenshots'); manifest=root/'manifest.json'
           if not manifest.exists(): raise SystemExit(0)
           def find(node,name):
               if isinstance(node,dict):
@@ -211,7 +227,7 @@ jobs:
                       r=find(v,name)
                       if r:return r
           data=json.loads(manifest.read_text())
-          for name in ['unified-activity-editor-dark','health-standardized-dark','compact-shift-palette-dark','dashboard-focus-timeline-dark']:
+          for name in ['unified-activity-editor-dark','health-standardized-dark','compact-shift-palette-dark','dashboard-weekly-structure-dark']:
               source=find(data,name)
               if not source:continue
               dest=pathlib.Path('build')/(name+'.png')
@@ -226,7 +242,9 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: LifeOS-anteprima-principale
-          path: app/build/screenshots/
+          path: |
+            app/build/screenshots/
+            app/build/focused-screenshots/
           retention-days: 1
           if-no-files-found: ignore
       - name: Verifica agenda e archivio su iPhone compatto
@@ -285,6 +303,8 @@ jobs:
         with:
           name: LifeOS-anteprima
           path: |
+            app/build/focused-screenshots/*.png
+            app/build/focused-screenshots/manifest.json
             app/build/screenshots/*.png
             app/build/screenshots/manifest.json
             app/build/compact-screenshots/*.png

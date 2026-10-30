@@ -85,6 +85,7 @@ final class NativeInterfaceTests: XCTestCase {
     }
     func testStandardizedHealthAndCompactShiftPalette() {
         let app = launch(["--dark"])
+        capture("dashboard-weekly-structure-dark")
         let health = app.buttons["home-health-detail"]
         reveal(health, in: app)
         XCTAssertTrue(health.exists)
@@ -602,7 +603,7 @@ final class NativeInterfaceTests: XCTestCase {
         let app = launch(["--busy-home", "--stress-content", "--dark"])
         let summary = app.staticTexts["home-greeting"]
         XCTAssertTrue(summary.waitForExistence(timeout: 10))
-        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-agenda-")).count, 3)
+        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-agenda-")).count, 12, "The weekly agenda must retain every appointment in the fixture")
         XCTAssertFalse(app.staticTexts["home-summary"].exists)
         XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-todo-")).count, 0)
         XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-routine-")).count, 8)

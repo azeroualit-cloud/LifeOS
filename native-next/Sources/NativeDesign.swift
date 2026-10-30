@@ -49,7 +49,7 @@ enum NativeDesign {
         static let healthChartHeight: CGFloat = 200
         static let categoryWidth: CGFloat = 88
         static let navigationInset = Space.large
-        static let pastDayOpacity = 0.62
+        static let pastDayOpacity = 0.90
         static let activityDescriptionHeight: CGFloat = 90
         static let shiftBrushWidth: CGFloat = 44
         static let shiftBrushHeight: CGFloat = 60
