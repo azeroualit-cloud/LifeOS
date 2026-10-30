@@ -111,16 +111,19 @@ final class NativeInterfaceTests: XCTestCase {
     }
     private func revealCalendarDay(_ day: String, in app: XCUIApplication) {
         let cell = app.buttons["calendar-day-" + day], surface = app.scrollViews["calendar-scroll"]
-        for _ in 0..<20 {
+        for attempt in 0..<20 {
             let heading = app.staticTexts["calendar-month-heading-" + String(day.prefix(7))]
             let top = max(surface.frame.minY, heading.exists && heading.frame.minY < surface.frame.minY + 60 ? heading.frame.maxY : surface.frame.minY)
             if cell.exists && cell.isHittable && cell.frame.minY >= top && cell.frame.maxY <= surface.frame.maxY { return }
             let offset: CGFloat
             if cell.exists && cell.frame.height > 0 { offset = cell.frame.midY - (top + surface.frame.maxY) / 2 }
             else { offset = day < Self.today() ? -60 : 60 }
-            let distance = min(60, max(-60, offset))
-            let start = surface.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.6))
-            start.press(forDuration: 0.05, thenDragTo: start.withOffset(CGVector(dx: 0, dy: -distance)))
+            let limit = min(60, surface.frame.height * 0.35)
+            let distance = min(limit, max(-limit, offset))
+            let start = surface.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            print("QA_CALENDAR_SCROLL step=\(attempt) day=\(day) cell=\(cell.frame) viewport=\(surface.frame) distance=\(distance)")
+            // Holding before release removes the fling that overshot both sides of small panes.
+            start.press(forDuration: 0.05, thenDragTo: start.withOffset(CGVector(dx: 0, dy: -distance)), withVelocity: .slow, thenHoldForDuration: 0.25)
         }
         print("QA_CALENDAR_GEOMETRY day=\(day) cell=\(cell.frame) viewport=\(surface.frame)")
         capture("calendar-date-unreachable")
