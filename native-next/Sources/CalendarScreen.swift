@@ -6,7 +6,10 @@ struct CalendarScreen: View {
     @Environment(\.nativeReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var typeSize
     @State private var appleExport = false
-    @State private var selected = ""
+    private var selected: String {
+        get { router.calendarDay }
+        nonmutating set { router.calendarDay = newValue }
+    }
     @State private var brush = "consult"
     @State private var lastShift: (String, String)?
     @State private var months: [String] = []
@@ -101,14 +104,9 @@ struct CalendarScreen: View {
                 let month = String((router.requestedCalendarDay ?? router.calendarDay).prefix(7))
                 store.calendarMonth = month
                 months = NativeCalendarWindow.months(around: month)
-                selected = preferredDay(in: month); router.calendarDay = selected
+                selected = preferredDay(in: month)
                 seedSnapshot(); rebuildMonth(); visibleMonth = month; jumpMonth = month
             }
-        }
-        .onChange(of: selected) { _, day in router.calendarDay = day }
-        .onChange(of: router.calendarDay) { _, day in
-            guard day != selected, !day.isEmpty else { return }
-            selected = day; jumpMonth = String(day.prefix(7))
         }
         .onChange(of: router.calendarFocusRequest) { _, _ in
             selected = router.calendarDay; jumpMonth = String(selected.prefix(7))
@@ -188,7 +186,7 @@ struct CalendarScreen: View {
         monthDays = grids
     }
     private func goToToday() {
-        selected = CivilDate.day(); router.calendarDay = selected
+        selected = CivilDate.day()
         jumpMonth = String(selected.prefix(7))
     }
     private func weekID(for day: String) -> String {

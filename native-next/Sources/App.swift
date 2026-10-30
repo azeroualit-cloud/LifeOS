@@ -125,7 +125,6 @@ struct NativeRoot: View {
             Button("OK") { store.error = nil }
         } message: { Text(store.error ?? "") }
         .task {
-            if router.requestedCalendarDay == nil { store.calendarMonth = CivilDate.month(); router.calendarDay = CivilDate.day() }
             if let url = NativeIntentDraft.pendingURL { route(url) }
             if NativeIntentDraft.taskTitle != nil { route(URL(string: "lifeos://task")!) }
             await health.start(demo: NativeHealthLaunchPolicy.simulated)

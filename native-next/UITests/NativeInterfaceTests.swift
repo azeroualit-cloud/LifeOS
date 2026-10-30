@@ -75,6 +75,7 @@ final class NativeInterfaceTests: XCTestCase {
         let tomorrow = formatter.string(from: calendar.date(byAdding: .day, value: 1, to: Date())!)
         app.buttons["dashboard-day-" + tomorrow].tap()
         let explicit = app.buttons["calendar-day-" + tomorrow]
+        capture("calendar-explicit-day-first-entry")
         expectation(for: NSPredicate { element, _ in (element as? XCUIElement)?.isSelected == true }, evaluatedWith: explicit)
         waitForExpectations(timeout: 10)
         let details = app.scrollViews["calendar-day-pane"], months = app.scrollViews["calendar-scroll"]
