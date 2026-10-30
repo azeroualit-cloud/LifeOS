@@ -45,6 +45,11 @@ struct CalendarScreen: View {
                     ForEach(months, id: \.self) { month in
                         Section {
                             monthGrid(month)
+                                .background {
+                                    GeometryReader { position in
+                                        Color.clear.preference(key: NativeCalendarMonthPositions.self, value: [month: position.frame(in: .named("calendar-months")).minY])
+                                    }
+                                }
                         } header: {
                             Text(NativeCalendarWindow.monthLabel(month)).font(.title2.bold()).foregroundStyle(Color.primary)
                                 .accessibilityLabel(CivilDate.monthTitle(month)).accessibilityIdentifier("calendar-month-heading-" + month).frame(maxWidth: .infinity, alignment: .leading)
@@ -56,7 +61,12 @@ struct CalendarScreen: View {
                     .padding(.horizontal, NativeDesign.Layout.screenInset)
                     .padding(.bottom, NativeDesign.Layout.scrollClearance)
             }
-            .scrollPosition(id: $visibleMonth, anchor: .top)
+            .coordinateSpace(name: "calendar-months")
+            .onPreferenceChange(NativeCalendarMonthPositions.self) { positions in
+                let passed = positions.filter { $0.value <= 0 }
+                let month = passed.max(by: { $0.value < $1.value })?.key ?? positions.min(by: { $0.value < $1.value })?.key
+                if let month, visibleMonth != month { visibleMonth = month }
+            }
             .accessibilityIdentifier("calendar-scroll")
             .onChange(of: jumpMonth) { _, month in
                 guard let month else { return }
@@ -184,7 +194,7 @@ struct CalendarScreen: View {
     private func weekID(for day: String) -> String {
         let month = String(day.prefix(7)), days = monthDays[month] ?? []
         guard let index = days.firstIndex(where: { $0.day == day }) else { return month }
-        return "week-" + days[index / 7 * 7].day
+        return "week-" + month + "-" + String(index / 7)
     }
     private func monthGrid(_ month: String) -> some View {
         let days = monthDays[month] ?? []
@@ -215,7 +225,7 @@ struct CalendarScreen: View {
                         }
                     }
                 }
-                .id("week-" + days[week * 7].day)
+                .id("week-" + month + "-" + String(week))
                 Divider()
             }
         }.dynamicTypeSize(...DynamicTypeSize.xxxLarge)
@@ -379,4 +389,11 @@ extension ShiftKind {
 struct EventEditor: View {
     let record: Record
     var body: some View { NativeActivityEditor(record: record, source: "event") }
+}
+
+private struct NativeCalendarMonthPositions: PreferenceKey {
+    static var defaultValue: [String: CGFloat] = [:]
+    static func reduce(value: inout [String: CGFloat], nextValue: () -> [String: CGFloat]) {
+        value.merge(nextValue(), uniquingKeysWith: { _, new in new })
+    }
 }

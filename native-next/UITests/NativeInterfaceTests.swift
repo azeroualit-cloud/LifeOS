@@ -123,6 +123,8 @@ final class NativeInterfaceTests: XCTestCase {
         }
         capture("calendar-date-unreachable")
         XCTAssertTrue(cell.isHittable, "Selected calendar date must remain reachable in its own pane")
+        XCTAssertGreaterThanOrEqual(cell.frame.minY, surface.frame.minY)
+        XCTAssertLessThanOrEqual(cell.frame.maxY, surface.frame.maxY)
     }
     func testUnifiedActivityEditorPreservesDescriptionWhenAddingAndRemovingDate() {
         let app = launch(["--dark"])
