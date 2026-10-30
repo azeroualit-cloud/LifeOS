@@ -77,3 +77,8 @@ test('reopening a completed event before removing its date does not resurrect co
  await saveActivity(db,{...p,frequency:'none',requestId:'request-undated-open'});
  assert.equal(sqlite.prepare('SELECT status FROM os_tasks').get().status,'todo');
 });
+test('weekly agenda expands a legacy three-item preview without duplicates or past/completed items',async()=>{
+ const {db}=fixture();const rows=Array.from({length:5},(_,i)=>({id:i+1,title:'Weekly '+i,day:'2026-11-01',start_time:'09:00',occurrence_status:'open'}));
+ const life={today:'2026-10-30',tasks:[],events:[...rows,{id:6,day:'2026-10-29'},{id:7,day:'2026-11-01',occurrence_status:'done'}],upcomingEvents:rows.slice(0,3),activityEvents:rows};
+ const result=await enrichActivities(db,life);assert.deepEqual(result.upcomingEvents.map(r=>r.id),[1,2,3,4,5]);
+});

@@ -66,7 +66,16 @@ export async function enrichActivities(db,life){
  const identities=(await db.prepare('SELECT * FROM os_activity_identity').all()).results;
  const map=new Map(identities.map(r=>[r.kind+':'+r.source_id,r]));
  const enrich=(r,kind)=>{const m=map.get(kind+':'+r.id);return {...(m?JSON.parse(m.metadata):{}),...r,activity_uid:m?.uid??kind+':'+r.id,activity_source:kind};};
- return {...life, tasks:life.tasks.map(r=>enrich(r,'task')),events:life.events.map(r=>enrich(r,'event')),upcomingEvents:life.upcomingEvents.map(r=>enrich(r,'event')),activityEvents:(life.activityEvents??[]).map(r=>enrich(r,'event')),capabilities:{...life.capabilities,unifiedActivities:1}};
+ const today=life.today??new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+ const high=new Date(Date.parse(today+'T12:00:00Z')+7*86400000).toISOString().slice(0,10);
+ const time=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Rome',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date());
+ const candidates=new Map();
+ for(const row of [...(life.activityEvents??[]),...life.upcomingEvents,...life.events]){
+  const key=row.id+':'+row.day;
+  if(!candidates.has(key))candidates.set(key,row);
+ }
+ const upcoming=[...candidates.values()].filter(r=>r.day>=today&&r.day<high&&(r.occurrence_status??'open')==='open'&&(r.day>today||!r.start_time||r.start_time>=time)).sort((a,b)=>a.day.localeCompare(b.day)||(a.start_time??'').localeCompare(b.start_time??'')||a.id-b.id).slice(0,48);
+ return {...life, tasks:life.tasks.map(r=>enrich(r,'task')),events:life.events.map(r=>enrich(r,'event')),upcomingEvents:upcoming.map(r=>enrich(r,'event')),activityEvents:(life.activityEvents??[]).map(r=>enrich(r,'event')),capabilities:{...life.capabilities,unifiedActivities:1}};
 }
 
 export async function splitActivityFields(db,input){
