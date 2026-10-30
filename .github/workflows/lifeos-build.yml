@@ -67,6 +67,7 @@ jobs:
           python3 scripts/build-worker-68.py
           node backend/activities/tests/activities.test.mjs
           node backend/activities/tests/worker.test.mjs
+          LIFEOS_ROUTING_WORKER=manual/build-68/worker.js node backend/expense-routing/tests/routing.test.mjs
           node --input-type=module --check < manual/build-68/worker.js
       - name: Verifica contesto backend live senza scritture
         continue-on-error: true
@@ -163,7 +164,7 @@ jobs:
           set -euo pipefail
           xcrun simctl boot "$MAIN_DEVICE" || true
           xcrun simctl bootstatus "$MAIN_DEVICE" -b
-          xcodebuild test-without-building -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testUnifiedActivityEditorPreservesDescriptionWhenAddingAndRemovingDate -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testStandardizedHealthAndCompactShiftPalette -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeHealthCardRemainsCompactAndOpensDetail -resultBundlePath build/Focused.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/focused-tests.log
+          xcodebuild test-without-building -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testEditingKeepsTaskTitleGeometryAndDraftAcrossTabs -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testUnifiedActivityEditorPreservesDescriptionWhenAddingAndRemovingDate -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testStandardizedHealthAndCompactShiftPalette -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeHealthCardRemainsCompactAndOpensDetail -resultBundlePath build/Focused.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/focused-tests.log
       - name: Verifica logica e flussi agenda su iPhone principale
         timeout-minutes: 35
         working-directory: app

@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 const temp=await mkdtemp(join(tmpdir(),'lifeos-routing67-'));
-const source=await readFile(new URL('../../../manual/build-67/worker.js',import.meta.url),'utf8');
+const source=await readFile(process.env.LIFEOS_ROUTING_WORKER || new URL('../../../manual/build-67/worker.js',import.meta.url),'utf8');
 await writeFile(join(temp,'worker.mjs'),source+'\nexport { expenseRouting, D1PlanRepository, PlanService, initialState, balance, monthlyBudgetAmounts, withFinancePlans, PlanError };');
 const core=await import(pathToFileURL(join(temp,'worker.mjs')));
 test.after(async()=>rm(temp,{recursive:true,force:true}));

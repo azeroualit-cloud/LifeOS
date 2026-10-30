@@ -13,9 +13,11 @@ jobs:
           node-version: '24'
       - name: Verifica attività, spese e selezione modulo
         run: |
+          python3 scripts/build-worker-68.py
           python3 scripts/test_deploy_activities_68.py
           node backend/activities/tests/activities.test.mjs
-          node backend/expense-routing/tests/routing.test.mjs
+          node backend/activities/tests/worker.test.mjs
+          LIFEOS_ROUTING_WORKER=manual/build-68/worker.js node backend/expense-routing/tests/routing.test.mjs
       - name: Audit del contesto attuale senza scritture
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

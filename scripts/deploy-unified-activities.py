@@ -33,6 +33,27 @@ def transform(source):
     for pattern,replacement in substitutions:
         source,count=re.subn(pattern,replacement,source)
         if count!=1:raise RuntimeError('Contesto attività inatteso; nessuna scrittura.')
+    start=source.index('async function lifeAction(')
+    following=re.search(r'\n(?:async )?function \w+\(',source[start+1:])
+    if following is None:raise RuntimeError('Confine attività non riconosciuto; nessuna scrittura.')
+    end=start+1+following.start()
+    body=source[start:end]
+    body,count=re.subn(r'\.slice\(0,\s*140\)', '.slice(0, 160)',body)
+    if count!=2:raise RuntimeError('Limiti eventi inattesi; nessuna scrittura.')
+    category_pattern=r'(env\.DB\.prepare\(\s*"UPDATE os_tasks SET list_kind=\? WHERE list_kind=\?"\s*\)\.bind\(destination,\s*key\),)'
+    category_sql="UPDATE os_activity_identity SET metadata=json_set(metadata,'$.list_kind',?) WHERE json_extract(metadata,'$.list_kind')=?"
+    body,count=re.subn(category_pattern,lambda match:match[0]+'\n      env.DB.prepare('+json.dumps(category_sql)+').bind(destination, key),',body)
+    if count!=1:raise RuntimeError('Spostamento categoria non riconosciuto; nessuna scrittura.')
+    a=body.index('  if (method === "splitEventSeries") {');b=body.index('  if (method === "deleteEvent") {',a)
+    split=body[a:b]
+    split,count=re.subn(r'await env\.DB\.batch\(\[', 'const activity = await splitActivityFields(env.DB, x);\n    await env.DB.batch([',split,count=1)
+    if count!=1:raise RuntimeError('Transazione serie non riconosciuta; nessuna scrittura.')
+    identity_sql="INSERT INTO os_activity_identity(uid,kind,source_id,metadata) VALUES (?,'event',last_insert_rowid(),?)"
+    split,count=re.subn(r'(\)\.bind\(frequency,\s*until\))(\s*\]\);)',lambda match:match[1]+',\n      env.DB.prepare('+json.dumps(identity_sql)+').bind(activity.uid, activity.metadata)'+match[2],split)
+    if count!=1:raise RuntimeError('Identità nuova serie non riconosciuta; nessuna scrittura.')
+    body=body[:a]+split+body[b:]
+    body=body.replace('  await ensureLife(env);','  await ensureLife(env);\n  if (["splitEventSeries", "deleteCategory"].includes(method)) await activitySchema(env.DB);',1)
+    source=source[:start]+body+source[end:]
     return expected+source
 
 def main():

@@ -51,6 +51,20 @@ private final class MockAPI: URLProtocol {
         let config = URLSessionConfiguration.ephemeral; config.protocolClasses = [MockAPI.self]
         return (directory, URLSession(configuration: config))
     }
+    func testDemoEditingExistingActivityKeepsItsIdentifierAndListPosition() async throws {
+        let (directory, session) = try setup()
+        defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
+        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
+        store.seedVisualActivityAgenda()
+        let before = store.tasks.map { $0.integer("id") }
+        var p = try XCTUnwrap(store.tasks.first { $0.integer("id") == 101 })
+        p["title"] = .string("Da fare libera aggiornata")
+        try await store.perform("saveTask", p)
+        XCTAssertEqual(store.tasks.first { $0.integer("id") == 101 }?.text("title"), "Da fare libera aggiornata")
+        XCTAssertEqual(Set(store.tasks.map { $0.integer("id") }), Set(before))
+        XCTAssertEqual(store.tasks.first { $0.integer("id") == 101 }?.amount("sort_order"), p.amount("sort_order"))
+        XCTAssertEqual(store.tasks.filter { $0.integer("id") == 101 }.count, 1)
+    }
     func testActivitySavePersistsOfflineWithoutWaitingForAnyNetworkRequest() async throws {
         let (directory, session) = try setup()
         defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }

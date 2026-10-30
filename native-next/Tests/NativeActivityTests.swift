@@ -45,6 +45,17 @@ final class NativeActivityTests: XCTestCase {
         XCTAssertEqual(life.records("tasks").first?.text("status"), "done")
         XCTAssertEqual(life.records("tasks").first?.text("activity_uid"), "task:7")
     }
+    func testLegacyTaskTitleLimitAndUnicodeMatchTheServerBeforeSaving() {
+        var p = draft
+        p["title"] = .string(String(repeating: "a", count: 160))
+        XCTAssertNoThrow(try NativeActivityDraft.validate(p))
+        p["title"] = .string(String(repeating: "a", count: 161))
+        XCTAssertThrowsError(try NativeActivityDraft.validate(p))
+        p["title"] = .string(String(repeating: "🌱", count: 80))
+        XCTAssertNoThrow(try NativeActivityDraft.validate(p))
+        p["title"] = .string(String(repeating: "🌱", count: 81))
+        XCTAssertThrowsError(try NativeActivityDraft.validate(p))
+    }
     func testInvalidDatesAndEndTimesAreRejectedBeforeEnqueueing() {
         var p = draft
         p["day"] = .string("2026-02-30")

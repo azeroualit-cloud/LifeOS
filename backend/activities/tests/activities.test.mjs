@@ -62,3 +62,18 @@ test('a completed single activity can lose its date without losing completion or
  assert.equal(sqlite.prepare('SELECT status FROM os_tasks').get().status,'done');
  assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM os_event_occurrences').get().n,0);
 });
+
+test('legacy task titles up to 160 UTF-16 units survive conversion without truncation',async()=>{
+ const {db,sqlite,p}=fixture();const title='🌱'.repeat(80);
+ sqlite.prepare("INSERT INTO os_tasks(title,list_kind,status) VALUES(?,'action','todo')").run(title);
+ const q={...p,uid:'task:1',sourceId:1,title};await saveActivity(db,q);
+ await saveActivity(db,{...q,requestId:'request-title-date',day:'2026-11-01'});
+ assert.equal(sqlite.prepare('SELECT title FROM os_events').get().title,title);
+ await assert.rejects(()=>saveActivity(db,{...q,requestId:'request-too-long',title:title+'a'}));
+});
+test('reopening a completed event before removing its date does not resurrect completion',async()=>{
+ const {db,sqlite,p}=fixture();await saveActivity(db,{...p,frequency:'none',completed:true,day:'2026-11-01'});
+ sqlite.exec('DELETE FROM os_event_occurrences');
+ await saveActivity(db,{...p,frequency:'none',requestId:'request-undated-open'});
+ assert.equal(sqlite.prepare('SELECT status FROM os_tasks').get().status,'todo');
+});

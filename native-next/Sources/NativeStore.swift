@@ -501,7 +501,8 @@ import SwiftUI
                 p["localID"] = .int(-1 - ((next.life.records("tasks") + next.life.records("events")).map { abs($0.integer("id")) }.max() ?? 0))
                 try NativeLocalActivity.apply(p, life: &next.life)
                 let key = p.text("day").isEmpty ? "tasks" : "events"
-                let positive = (next.life.records(key).map { $0.integer("id") }.filter { $0 > 0 }.max() ?? 0) + 1
+                let sameKind = p.text("source") == (key == "tasks" ? "task" : "event")
+                let positive = sameKind && p.integer("sourceId") > 0 ? p.integer("sourceId") : (next.life.records(key).map { $0.integer("id") }.filter { $0 > 0 }.max() ?? 0) + 1
                 next.life[key] = .array(next.life.records(key).map { row in var row = row; if row.text("activity_uid") == p.text("uid") { row["id"] = .int(positive); row["pending"] = .bool(false) }; return .object(row) })
             } else if method == "changeExpenseDestination" || method == "saveTransaction" && payload.integer("expenseRoutingVersion") == 1 {
                 try NativeExpenseDemo.apply(method, payload: payload, state: &next)

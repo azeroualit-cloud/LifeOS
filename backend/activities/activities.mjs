@@ -11,7 +11,7 @@ export async function saveActivity(db,input) {
  await activitySchema(db);
  const p={uid:String(input.uid||''),source:String(input.source||'task'),sourceId:Number(input.sourceId||0),title:String(input.title||'').trim(),notes:String(input.notes||''),day:checkDay(input.day),due_date:checkDay(input.due_date),list_kind:String(input.list_kind||'action'),location:String(input.location||''),start_time:clock(input.start_time),end_time:clock(input.end_time),scheduled_time:clock(input.scheduled_time),frequency:input.frequency||'none',until_day:checkDay(input.until_day),completed:input.completed===true,statusIntent:input.statusIntent===true,taskStatus:input.taskStatus||'todo'};
  const requestId=String(input.requestId||'');
- if(!/^[\w:-]{1,100}$/.test(p.uid)||!/^[-\w]{8,100}$/.test(requestId)||!['task','event'].includes(p.source)||!Number.isSafeInteger(p.sourceId)||p.sourceId<0||!p.title||p.title.length>140||p.notes.length>1000||p.location.length>160||!['none','weekly','monthly','yearly'].includes(p.frequency)||!['todo','waiting','done'].includes(p.taskStatus))throw Error('Attività non valida.');
+ if(!/^[\w:-]{1,100}$/.test(p.uid)||!/^[-\w]{8,100}$/.test(requestId)||!['task','event'].includes(p.source)||!Number.isSafeInteger(p.sourceId)||p.sourceId<0||!p.title||p.title.length>160||p.notes.length>1000||p.location.length>160||!['none','weekly','monthly','yearly'].includes(p.frequency)||!['todo','waiting','done'].includes(p.taskStatus))throw Error('Attività non valida.');
  if(p.end_time&&!p.start_time||p.start_time&&p.end_time&&p.end_time<p.start_time||p.until_day&&p.day&&p.until_day<p.day||p.due_date&&p.day&&p.due_date<p.day)throw Error('Controlla inizio e fine.');
  if(!await db.prepare('SELECT key FROM os_categories WHERE key=?').bind(p.list_kind).first())throw Error('Categoria non trovata.');
  const signature=JSON.stringify(p), prior=await db.prepare('SELECT fingerprint FROM os_activity_requests WHERE id=?').bind(requestId).first();
@@ -36,7 +36,7 @@ export async function saveActivity(db,input) {
  if(old){expected+=` AND EXISTS(SELECT 1 FROM ${source==='task'?'os_tasks':'os_events'} WHERE id=?)`;expectedArgs.push(id);}
  const args=[requestId,token],steps=[db.prepare(`INSERT OR IGNORE INTO os_activity_requests(id,fingerprint,token) SELECT ?,?,? WHERE ${expected}`).bind(requestId,signature,token,...expectedArgs)];
  const previous=identity?JSON.parse(identity.metadata):{};
- const status=p.statusIntent?p.taskStatus:(old?.status??(eventDone||input.completed?'done':previous.task_status??'todo'));
+ const status=p.statusIntent?p.taskStatus:(old?.status??(eventDone||input.completed?'done':(previous.task_status==='waiting'?'waiting':'todo')));
  if(target==='task'){
   if(old&&!convert)steps.push(db.prepare(`UPDATE os_tasks SET title=?,notes=?,list_kind=?,due_date=?,scheduled_date=NULL,scheduled_time=?,status=?,completed_at=CASE WHEN ?='done' THEN COALESCE(completed_at,CURRENT_TIMESTAMP) ELSE NULL END,updated_at=CURRENT_TIMESTAMP WHERE id=? AND ${gate}`).bind(p.title,p.notes,p.list_kind,p.due_date,p.scheduled_time,status,status,id,...args));
   else steps.push(db.prepare(`INSERT INTO os_tasks(title,notes,list_kind,status,due_date,scheduled_date,scheduled_time,sort_order) SELECT ?,?,?,?,?,NULL,?,(SELECT COALESCE(MAX(sort_order),0)+1 FROM os_tasks) WHERE ${gate}`).bind(p.title,p.notes,p.list_kind,status,p.due_date,p.scheduled_time,...args));
@@ -67,4 +67,16 @@ export async function enrichActivities(db,life){
  const map=new Map(identities.map(r=>[r.kind+':'+r.source_id,r]));
  const enrich=(r,kind)=>{const m=map.get(kind+':'+r.id);return {...(m?JSON.parse(m.metadata):{}),...r,activity_uid:m?.uid??kind+':'+r.id,activity_source:kind};};
  return {...life, tasks:life.tasks.map(r=>enrich(r,'task')),events:life.events.map(r=>enrich(r,'event')),upcomingEvents:life.upcomingEvents.map(r=>enrich(r,'event')),activityEvents:(life.activityEvents??[]).map(r=>enrich(r,'event')),capabilities:{...life.capabilities,unifiedActivities:1}};
+}
+
+export async function splitActivityFields(db,input){
+ await activitySchema(db);
+ const identity=await db.prepare("SELECT metadata FROM os_activity_identity WHERE kind='event' AND source_id=?").bind(Number(input.id)).first();
+ const previous=identity?JSON.parse(identity.metadata):{};
+ const category=input.list_kind??previous.list_kind??'action';
+ const due=Object.hasOwn(input,'due_date')?checkDay(input.due_date):previous.due_date??null;
+ if(due&&due<checkDay(input.day))throw Error('La scadenza deve seguire la nuova data iniziale.');
+ if(!await db.prepare('SELECT key FROM os_categories WHERE key=?').bind(category).first())throw Error('Categoria non trovata.');
+ const uid=crypto.randomUUID();
+ return {uid,metadata:JSON.stringify({...previous,uid,list_kind:category,due_date:due})};
 }

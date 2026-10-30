@@ -16,6 +16,8 @@ class DeploymentTests(unittest.TestCase):
   self.assertEqual(m.transform(patched),patched)
   self.assertIn('return saveActivity(env.DB, x)',patched)
   self.assertIn('return enrichActivities(env.DB, await lifeRead(env, x))',patched)
+  start=patched.index('async function lifeAction(');end=patched.index('async function saveTransaction',start)
+  self.assertNotIn('.slice(0, 140)',patched[start:end])
  def test_lost_upload_acknowledgement_restores_original_worker(self):
   import json,os,io,contextlib
   from unittest.mock import patch
