@@ -1,3 +1,9 @@
+## Revisione 53 — implementata, verifica Apple in corso
+
+Icone scelte Budget C / Extra B / Spesa A, tradotte in tracciati vettoriali bianchi minimali (nessuna immagine generata inclusa nell’app) con Liquid Glass nativo sui pulsanti e fallback materiale. Movimenti ordinati per identificativo crescente di inserimento, dal più recente, inclusi i movimenti in coda; l’API non espone il timestamp di creazione, quindi non è stata inventata un’ora. Calendario diviso in due regioni indipendenti con pannello giornaliero ancorato e intestazione fissa; ritorno a oggi al cambio tab/riattivazione, preservando i tocchi espliciti dalla Dashboard. Su schermi compatti/testo grande il mese può scorrere nella sua regione senza spostare il pannello.
+
+Dashboard: barra nel colore del turno, segmenti proporzionali da due ore (notturni e cambio ora inclusi), traccia grigia inattiva, piccolo scaling/schiarita/quattro particelle soltanto all’apertura e sull’ultimo blocco completato; memoria persistente e Riduci movimento. Aggiunti tre test del modello turno, uno dell’ordine di inserimento e uno UI sul pannello/calendario di oggi; quest’ultimo entra anche nella verifica compatta. Parsing Swift, design system e sintassi del workflow passati. Compilazione, test e schermate Apple ancora da verificare. Ultima IPA consegnata: build 52 sotto.
+
 ## Widget — build 52, IPA disponibile
 
 **Build Apple e pacchetto IPA riusciti.** [IPA per Signulous](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41025472277/artifacts/12963700996) · [run finale](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41025472277). Versione 0.9.0 build 52, con estensione WidgetKit incorporata. Verificati integrità ZIP, versioni coerenti e binari arm64 di app/widget.

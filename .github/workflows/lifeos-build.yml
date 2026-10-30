@@ -56,7 +56,7 @@ jobs:
           import hashlib, pathlib, zipfile
           source = pathlib.Path('lifeos-native.zip')
           if source.is_file():
-              assert hashlib.sha256(source.read_bytes()).hexdigest() == 'e8084ac7a67620534a33c34be0f3cae8466fb100cff9575bae2cc082137dc0d4', 'ZIP sorgenti diverso da quello previsto'
+              assert hashlib.sha256(source.read_bytes()).hexdigest() == '5542c421657ea6006fc4fd355b79915a81afb2571578aa50d6e6d87dde8bac70', 'ZIP sorgenti diverso da quello previsto'
               with zipfile.ZipFile(source) as archive:
                   for name in archive.namelist():
                       p = pathlib.PurePosixPath(name)
@@ -266,6 +266,44 @@ jobs:
           elif [ -d build/Focused.xcresult ]; then
             xcrun xcresulttool export attachments --path build/Focused.xcresult --output-path build/screenshots
           fi
+      - name: Anteprime UI di verifica nei log
+        if: always()
+        working-directory: app
+        run: |
+          python3 - <<'PYVISUAL'
+          import base64, json, pathlib, subprocess
+          root = pathlib.Path('build/screenshots')
+          manifest = root / 'manifest.json'
+          if not manifest.exists():
+              print('QA_PREVIEW_UNAVAILABLE: no UI attachments')
+              raise SystemExit(0)
+          data = json.loads(manifest.read_text())
+          def find(node, name):
+              if isinstance(node, dict):
+                  values = [v for v in node.values() if isinstance(v, str)]
+                  if any(name in v for v in values):
+                      for value in values:
+                          if value.endswith('.png') and (root / value).is_file():
+                              return root / value
+                  for value in node.values():
+                      result = find(value, name)
+                      if result: return result
+              elif isinstance(node, list):
+                  for value in node:
+                      result = find(value, name)
+                      if result: return result
+          for name in ['finance-actions-vector-dark', 'calendar-fixed-split-dark']:
+              source = find(data, name)
+              if not source:
+                  print('QA_PREVIEW_UNAVAILABLE: ' + name)
+                  continue
+              target = pathlib.Path('build') / (name + '.png')
+              subprocess.run(['sips', '-Z', '900', str(source), '--out', str(target)], check=True, stdout=subprocess.DEVNULL)
+              encoded = base64.b64encode(target.read_bytes()).decode()
+              print('QA_IMAGE_START ' + name)
+              for i in range(0, len(encoded), 16000): print('QA_IMAGE_DATA ' + encoded[i:i+16000])
+              print('QA_IMAGE_END ' + name)
+          PYVISUAL
       - name: Anteprima principale durante la verifica compatta
         if: always()
         uses: actions/upload-artifact@v5
@@ -290,7 +328,7 @@ jobs:
           xcrun simctl shutdown all
           xcrun simctl boot "$COMPACT"
           xcrun simctl bootstatus "$COMPACT" -b
-          COMPACT_SCOPE=(-only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFourSectionsInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarEventCanBeCreatedAfterBoundaryScroll -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testLargeTextAndSixWeekCalendar -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeSummaryAndVerticalRoutinesInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarSelectionUpdatesImmediatelyAndKeepsEventIndex -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeEmptyStatesRemainActionable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeManyEventsAndTasksStayBoundedAndReachable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testSharedRowsAndCategoryChoicesKeepAccessibleTargets -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testNavigationKeepsSelectionAndGeometryWhenChangingTabs -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFinanceOverviewSupportsLargeTextAndEmptySnapshot -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeRestoresNeutralNextTimeWithoutArabicNames -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testReducedMotionKeepsChecklistAndFinanceActionsFunctional -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarTodayRestoresMonthAndSelection -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testNativeToolbarRespondsAcross44PointTouchRegion)
+          COMPACT_SCOPE=(-only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFourSectionsInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarEventCanBeCreatedAfterBoundaryScroll -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testLargeTextAndSixWeekCalendar -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeSummaryAndVerticalRoutinesInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarSelectionUpdatesImmediatelyAndKeepsEventIndex -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeEmptyStatesRemainActionable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeManyEventsAndTasksStayBoundedAndReachable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testSharedRowsAndCategoryChoicesKeepAccessibleTargets -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testNavigationKeepsSelectionAndGeometryWhenChangingTabs -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFinanceOverviewSupportsLargeTextAndEmptySnapshot -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeRestoresNeutralNextTimeWithoutArabicNames -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testReducedMotionKeepsChecklistAndFinanceActionsFunctional -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarTodayRestoresMonthAndSelection -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testNativeToolbarRespondsAcross44PointTouchRegion -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarDetailAnchorAndTodayOnTabReturnAndForeground)
           if [ "$RECOVER_COMPACT" = "true" ]; then
             COMPACT_SCOPE=()
             while IFS= read -r name; do COMPACT_SCOPE+=("-only-testing:LifeOSProbeUITests/NativeInterfaceTests/$name"); done < build/recovery-cases.txt
@@ -324,7 +362,7 @@ jobs:
           widget = plistlib.loads((extension/'Info.plist').read_bytes())
           assert widget['NSExtension']['NSExtensionPointIdentifier'] == 'com.apple.widgetkit-extension'
           assert widget['CFBundleIdentifier'] == main['CFBundleIdentifier'] + '.widget'
-          assert widget['CFBundleVersion'] == main['CFBundleVersion'] == '52'
+          assert widget['CFBundleVersion'] == main['CFBundleVersion'] == '53'
           assert widget['CFBundleShortVersionString'] == main['CFBundleShortVersionString'] == '0.9.0'
           assert any('lifeos' in entry.get('CFBundleURLSchemes', []) for entry in main['CFBundleURLTypes'])
           print('WIDGET_EMBEDDED_AND_VERSIONED_OK')
@@ -340,7 +378,7 @@ jobs:
               assert archive.testzip() is None
               for prefix in ['Payload/LifeOSProbe.app/', 'Payload/LifeOSProbe.app/PlugIns/LifeOSDayWidget.appex/']:
                   info = plistlib.loads(archive.read(prefix + 'Info.plist'))
-                  assert info['CFBundleVersion'] == '52' and info['CFBundleSupportedPlatforms'] == ['iPhoneOS']
+                  assert info['CFBundleVersion'] == '53' and info['CFBundleSupportedPlatforms'] == ['iPhoneOS']
                   binary = archive.read(prefix + info['CFBundleExecutable'])
                   assert binary[:4] == b'\xcf\xfa\xed\xfe' and struct.unpack('<I', binary[4:8])[0] == 0x0100000C
           print('IPA_INTEGRITY_VERSION_AND_ARM64_OK')

@@ -43,7 +43,7 @@ App Group richiesto: `group.com.nas.lifeos.probe`, negli entitlements di entramb
 | Due casi compatti fermati nell’avvio, recuperati su nuovo simulatore | 2/2 | 41023842491 |
 | Archivio Release, estensione, versioni, integrità IPA e arm64 | Passati | 41025472277 |
 
-Totale: 127 test distinti, più il controllo isolato Finanza. I run intermedi hanno registrato un mock che non leggeva il corpo HTTP come stream, timeout di avvio XCTest e una versione widget generata come 1. Il mock ora legge entrambe le forme; le asserzioni sul turno rimangono. I due errori compatti erano alla riga app.launch, prima delle asserzioni; il recupero ha eseguito davvero gli stessi due test dopo installazione/preavvio sul simulatore nuovo. Nessuna modifica Swift/UI per aggirare questi timeout.
+Totale: 127 esecuzioni di test, incluse le ripetizioni UI sul compatto, più il controllo isolato Finanza. I run intermedi hanno registrato un mock che non leggeva il corpo HTTP come stream, timeout di avvio XCTest e una versione widget generata come 1. Il mock ora legge entrambe le forme; le asserzioni sul turno rimangono. I due errori compatti erano alla riga app.launch, prima delle asserzioni; il recupero ha eseguito davvero gli stessi due test dopo installazione/preavvio sul simulatore nuovo. Nessuna modifica Swift/UI per aggirare questi timeout.
 
 La versione del widget è ora collegata esplicitamente a CURRENT_PROJECT_VERSION e MARKETING_VERSION nell’Info generato: app ed estensione risultano 0.9.0 build 52. Il controllo di packaging ha bloccato la versione incoerente prima della consegna e ha poi verificato la correzione.
 
