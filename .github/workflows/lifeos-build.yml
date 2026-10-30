@@ -6,6 +6,10 @@ on:
         description: Reuse the 31 UI tests from run 41014595085 only if app files are identical
         type: boolean
         default: false
+      recover_compact_launch:
+        description: Recover only the two simulator-launch failures from run 41018165365, with identical source ZIP
+        type: boolean
+        default: false
   push:
     paths: ['lifeos-native.zip', '.github/workflows/lifeos-build.yml', '.github/workflows/ios.yml', 'Sources/**', 'Shared/**', 'Widgets/**', 'Tests/**', 'UITests/**', '*.entitlements', 'Assets.xcassets/**', 'project.yml']
 permissions:
@@ -136,7 +140,37 @@ jobs:
           set -euo pipefail
           DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,re,sys; d=json.load(sys.stdin); keys=sorted((k for k in d["devices"] if "iOS" in k),key=lambda k:tuple(map(int,re.findall(r"\d+",k))),reverse=True); print(next(x["udid"] for k in keys for x in d["devices"][k] if "iPhone" in x["name"]))')
           xcodebuild build-for-testing -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compile.log
+      - name: Verifica recupero dei soli avvii del simulatore
+        if: inputs.recover_compact_launch == true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REUSE_UI: ${{ inputs.reuse_verified_ui == true }}
+        run: |
+          set -euo pipefail
+          gh run view 41018165365 --repo azeroualit-cloud/LifeOS --log > app/build/verified-recovery.log
+          python3 - <<'PYRECOVERY'
+          import os, pathlib, re, subprocess
+          assert os.environ['REUSE_UI'] == 'true', 'Il recupero richiede anche la verifica dei 31 UI'
+          commit = '5067b2f78bec2b1e7cd1630333482270b291c221'
+          subprocess.run(['git', 'fetch', '--no-tags', 'origin', commit], check=True)
+          previous = subprocess.check_output(['git', 'show', commit + ':lifeos-native.zip'])
+          assert previous == pathlib.Path('lifeos-native.zip').read_bytes(), 'Pacchetto modificato: eseguire tutti i test'
+          log = pathlib.Path('app/build/verified-recovery.log').read_text()
+          assert 'Executed 82 tests, with 0 failures' in log
+          outcomes = re.findall(r"Test Case '-\[LifeOSProbeUITests.NativeInterfaceTests (\w+)\]' (passed|failed)", log)
+          passed = {name for name, result in outcomes if result == 'passed'}
+          failed = {name for name, result in outcomes if result == 'failed'}
+          expected_failed = {'testCalendarEventCanBeCreatedAfterBoundaryScroll', 'testCalendarSelectionUpdatesImmediatelyAndKeepsEventIndex'}
+          assert failed == expected_failed, failed
+          errors = [line for line in log.splitlines() if 'error: -[LifeOSProbeUITests.NativeInterfaceTests ' in line]
+          assert len(errors) >= 2 and all('Failed to get launch progress' in line and 'NativeInterfaceTests.swift:9:' in line for line in errors), errors
+          required = set(re.findall(r'-only-testing:LifeOSProbeUITests/NativeInterfaceTests/(\w+)', pathlib.Path('.github/workflows/lifeos-build.yml').read_text()))
+          assert len(required) == 14 and passed == required - failed, passed
+          pathlib.Path('app/build/recovery-cases.txt').write_text('\n'.join(sorted(failed)) + '\n')
+          print('VERIFIED_RECOVERY: identical complete source ZIP; 82 unit and 12 compact UI passed; only two prelaunch failures to retry')
+          PYRECOVERY
       - name: Verifica mirata Finanza su compatto
+        if: inputs.recover_compact_launch != true
         timeout-minutes: 15
         working-directory: app
         run: |
@@ -170,6 +204,7 @@ jobs:
           print('VERIFIED_UI_REUSED: 31 UI passed; all app and widget files match byte for byte')
           PYREUSE
       - name: Compila ed esegui tutti i test
+        if: inputs.recover_compact_launch != true
         timeout-minutes: 35
         working-directory: app
         env:
@@ -204,12 +239,28 @@ jobs:
       - name: Verifica interfaccia su iPhone compatto
         timeout-minutes: 25
         working-directory: app
+        env:
+          RECOVER_COMPACT: ${{ inputs.recover_compact_launch == true }}
         run: |
           set -euo pipefail
+          if [ "$RECOVER_COMPACT" = "true" ]; then
+            RUNTIME=$(xcrun simctl list runtimes -j | python3 -c 'import json,sys; r=[x for x in json.load(sys.stdin)["runtimes"] if x.get("isAvailable") and x["name"].startswith("iOS")]; print(sorted(r,key=lambda x:tuple(map(int,x["version"].split("."))),reverse=True)[0]["identifier"])')
+            COMPACT=$(xcrun simctl create 'LifeOS compact recovery' 'com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation' "$RUNTIME")
+            echo "COMPACT=$COMPACT" >> "$GITHUB_ENV"
+          fi
           xcrun simctl shutdown all
           xcrun simctl boot "$COMPACT"
           xcrun simctl bootstatus "$COMPACT" -b
-          xcodebuild test -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFourSectionsInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarEventCanBeCreatedAfterBoundaryScroll -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testLargeTextAndSixWeekCalendar -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeSummaryAndVerticalRoutinesInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarSelectionUpdatesImmediatelyAndKeepsEventIndex -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeEmptyStatesRemainActionable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeManyEventsAndTasksStayBoundedAndReachable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testSharedRowsAndCategoryChoicesKeepAccessibleTargets -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testNavigationKeepsSelectionAndGeometryWhenChangingTabs -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFinanceOverviewSupportsLargeTextAndEmptySnapshot -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeRestoresNeutralNextTimeWithoutArabicNames -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testReducedMotionKeepsChecklistAndFinanceActionsFunctional -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarTodayRestoresMonthAndSelection -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testNativeToolbarRespondsAcross44PointTouchRegion -resultBundlePath build/Compact.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compact.log
+          COMPACT_SCOPE=(-only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFourSectionsInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarEventCanBeCreatedAfterBoundaryScroll -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testLargeTextAndSixWeekCalendar -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeSummaryAndVerticalRoutinesInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarSelectionUpdatesImmediatelyAndKeepsEventIndex -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeEmptyStatesRemainActionable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeManyEventsAndTasksStayBoundedAndReachable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testSharedRowsAndCategoryChoicesKeepAccessibleTargets -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testNavigationKeepsSelectionAndGeometryWhenChangingTabs -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFinanceOverviewSupportsLargeTextAndEmptySnapshot -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeRestoresNeutralNextTimeWithoutArabicNames -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testReducedMotionKeepsChecklistAndFinanceActionsFunctional -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarTodayRestoresMonthAndSelection -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testNativeToolbarRespondsAcross44PointTouchRegion)
+          if [ "$RECOVER_COMPACT" = "true" ]; then
+            COMPACT_SCOPE=()
+            while IFS= read -r name; do COMPACT_SCOPE+=("-only-testing:LifeOSProbeUITests/NativeInterfaceTests/$name"); done < build/recovery-cases.txt
+            APP_PATH=$(xcodebuild -project LifeOSProbe.xcodeproj -target LifeOSProbe -configuration Debug -sdk iphonesimulator -showBuildSettings -json | python3 -c 'import json,sys; s=next(x["buildSettings"] for x in json.load(sys.stdin) if x["target"]=="LifeOSProbe"); print(s["TARGET_BUILD_DIR"]+"/"+s["FULL_PRODUCT_NAME"])')
+            xcrun simctl install "$COMPACT" "$APP_PATH"
+            xcrun simctl launch --terminate-running-process "$COMPACT" com.nas.lifeos.probe --visual-test
+            xcrun simctl io "$COMPACT" screenshot build/preflight.png
+          fi
+          xcodebuild test -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT" -parallel-testing-enabled NO "${COMPACT_SCOPE[@]}" -resultBundlePath build/Compact.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compact.log
       - name: Esporta schermate del simulatore
         if: always()
         continue-on-error: true
@@ -242,7 +293,18 @@ jobs:
           cd build
           zip -qr ../download/LifeOS-unsigned.ipa Payload
           cd ../download
-          shasum -a 256 LifeOS-unsigned.ipa > SHA256.txt
+          python3 - <<'PYIPA'
+          import zipfile, plistlib, struct
+          with zipfile.ZipFile('LifeOS-unsigned.ipa') as archive:
+              assert archive.testzip() is None
+              for prefix in ['Payload/LifeOSProbe.app/', 'Payload/LifeOSProbe.app/PlugIns/LifeOSDayWidget.appex/']:
+                  info = plistlib.loads(archive.read(prefix + 'Info.plist'))
+                  assert info['CFBundleVersion'] == '52' and info['CFBundleSupportedPlatforms'] == ['iPhoneOS']
+                  binary = archive.read(prefix + info['CFBundleExecutable'])
+                  assert binary[:4] == b'\xcf\xfa\xed\xfe' and struct.unpack('<I', binary[4:8])[0] == 0x0100000C
+          print('IPA_INTEGRITY_VERSION_AND_ARM64_OK')
+          PYIPA
+          shasum -a 256 LifeOS-unsigned.ipa | tee SHA256.txt
       - name: Errori XCTest in annotazioni
         if: always()
         working-directory: app
@@ -270,6 +332,7 @@ jobs:
         with:
           name: LifeOS-anteprima
           path: |
+            app/build/preflight.png
             app/build/screenshots/*.png
             app/build/screenshots/manifest.json
             app/build/compact-screenshots/*.png
