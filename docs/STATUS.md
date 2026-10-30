@@ -1,6 +1,10 @@
-## Widget — build 52, implementazione non ancora verificata su Apple
+## Widget — build 52, IPA disponibile
 
-Aggiunti ai sorgenti un solo widget 2×2 con sette turni, progresso abitudini, conteggi attività/scadute e + per Evento/Attività; estensione incorporata, App Group, copia locale minima e aggiornamento dopo salvataggio. Controlli locali su sintassi, configurazione e pacchetto passati; otto test unitari/integrazione e un test UI predisposti ma non eseguiti. Mancano compilazione Xcode, QA del widget reale e conferma firma Signulous/App Group. **Nessuna IPA build 52 verificata: build 51 resta l’ultima consegna verificata.** Dettagli: native/WIDGET-0.9.0-build52.md.
+**Build Apple e pacchetto IPA riusciti.** [IPA per Signulous](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41025472277/artifacts/12963700996) · [run finale](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41025472277). Versione 0.9.0 build 52, con estensione WidgetKit incorporata. Verificati integrità ZIP, versioni coerenti e binari arm64 di app/widget.
+
+Copertura verificata: 82 unitari, 31 UI principali e 14 UI compatti. Gli esiti sono distribuiti tra esecuzioni: i controlli di provenienza confrontano tutti i file pertinenti e riusano solo suite passate su codice identico; l’ultima modifica riguarda esclusivamente i metadati della versione del widget. Nessuna asserzione funzionale rimossa. Dettagli ed esecuzioni: native/WIDGET-0.9.0-build52.md.
+
+**Da verificare sul telefono:** firma Signulous con estensione e App Group conservati, comparsa del widget, layout 2×2 e azione + dalla Home. La prova fisica non è stata eseguita. Artefatto disponibile fino al 6 novembre 2026, ore 09:20 italiane. Aggiornare senza disinstallare.
 
 ## Webapp — revisione locale 17 ottobre 2026
 

@@ -1,6 +1,10 @@
 # Life OS — widget La giornata, build 52
 
-Implementazione nei sorgenti del 30 ottobre 2026. **Non ancora compilata su Apple né verificata su iPhone. Nessuna nuova IPA disponibile.** La build 51 resta l’ultima consegna verificata.
+**IPA 0.9.0 build 52 generata e verificata il 30 ottobre 2026.** [Pacchetto per Signulous](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41025472277/artifacts/12963700996) · [esecuzione finale](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41025472277). Scadenza artefatto: 6 novembre 2026, 09:20 Europe/Rome.
+
+SHA-256 IPA: `03170b87d8fc11d99d4e98f8ce5c8693e14cf169011f34e83685ed7e647f02f8`.
+SHA-256 sorgenti ZIP: `e8084ac7a67620534a33c34be0f3cae8466fb100cff9575bae2cc082137dc0d4`.
+Commit del packaging: `0e13403245481de26ba1b07ff9f880af1485f4e8`. La firma Signulous e la prova fisica restano da verificare.
 
 ## Contratto concordato
 
@@ -29,10 +33,28 @@ App Group richiesto: `group.com.nas.lifeos.probe`, negli entitlements di entramb
 - Controllo design system, esteso anche a Shared e Widgets; `git diff --check`.
 - Revisione del diff e conservazione della palette; backend web invariato.
 
-Predisposti, **non eseguiti**: sette test del modello del widget, un test di integrazione della settimana con calendario lontano e un test UI di apertura dei due editor da avvio a freddo. Preview Xcode per la famiglia reale systemSmall aggiunta al target widget. Non verificati layout renderizzato, Dynamic Type, VoiceOver e tocco effettivo del + su SpringBoard.
+## Verifiche Apple completate
 
-## Gate Apple prima della consegna
+| Suite | Esito | Esecuzione |
+| --- | --- | --- |
+| Unitari, inclusi i sette WidgetSnapshot e l’integrazione settimana | 82/82 | 41018165365 |
+| UI principali, incluso inserimento rapido Evento/Attività | 31/31 | 41014595085 |
+| UI compatti già eseguiti | 12/12 | 41018165365 |
+| Due casi compatti fermati nell’avvio, recuperati su nuovo simulatore | 2/2 | 41023842491 |
+| Archivio Release, estensione, versioni, integrità IPA e arm64 | Passati | 41025472277 |
 
-Eseguire il workflow aggiornato: compilazione, suite esistente e nuovi test, controllo compatto e archivio. Il packaging controlla che LifeOSDayWidget.appex sia presente, con versione e identificatore corretti. Ispezionare il widget reale piccolo nei due temi e su formato compatto; provare il + sia con app chiusa sia aperta, salvataggio e riscontro nel widget. Dopo firma Signulous verificare comparsa nella galleria, accesso al gruppo e aggiornamento dei dati. Non sostituire questi controlli con il mockup generato in chat.
+Totale: 127 test distinti, più il controllo isolato Finanza. I run intermedi hanno registrato un mock che non leggeva il corpo HTTP come stream, timeout di avvio XCTest e una versione widget generata come 1. Il mock ora legge entrambe le forme; le asserzioni sul turno rimangono. I due errori compatti erano alla riga app.launch, prima delle asserzioni; il recupero ha eseguito davvero gli stessi due test dopo installazione/preavvio sul simulatore nuovo. Nessuna modifica Swift/UI per aggirare questi timeout.
+
+La versione del widget è ora collegata esplicitamente a CURRENT_PROJECT_VERSION e MARKETING_VERSION nell’Info generato: app ed estensione risultano 0.9.0 build 52. Il controllo di packaging ha bloccato la versione incoerente prima della consegna e ha poi verificato la correzione.
+
+Il workflow normale conserva tutte le suite. I percorsi manuali di recupero/packaging verificano i log dei run fissati e confrontano i file del pacchetto: nessun cambiamento al codice o ai test UI viene accettato per il riuso. Sono ammesse soltanto le due variabili esplicite dei metadati versione del widget. Il riuso della suite principale precedente alla correzione del mock esclude esclusivamente Tests/ dal confronto; la suite unitaria successiva valida quel mock corretto. Gli altri confronti includono anche tutti i test.
+
+Verificati sul runner Apple: estensione PlugIns/LifeOSDayWidget.appex presente; identificatori coerenti; versioni 52 e 0.9.0 corrispondenti; schema lifeos registrato; integrità CRC dello ZIP IPA; piattaforma iPhoneOS e intestazioni Mach-O arm64 di entrambi gli eseguibili. Upload dell’artefatto completato. Nessuna pubblicazione Cloudflare.
+
+## Verifiche residue sul telefono
+
+Aggiornare l’app esistente tramite Signulous senza disinstallare. La firma deve mantenere l’estensione e autorizzare l’App Group. Aprire e sincronizzare Life OS, poi aggiungere La giornata alla Home. Verificare sette turni, progresso abitudini, conteggi e + con app chiusa/aperta; scegliere e salvare un evento o un’attività e controllare il riscontro. Verificare il piccolo widget nei due temi, la leggibilità e VoiceOver.
+
+La preview Xcode systemSmall è predisposta; non è stato eseguito un controllo visivo del widget realmente ospitato da SpringBoard. Gli screenshot UI e il preavvio dell’app non sono prove del layout del widget. La compatibilità effettiva della firma Signulous/App Group resta da confermare sul dispositivo.
 
 Riferimenti API consultati: https://developer.apple.com/documentation/widgetkit/adding-interactivity-to-widgets-and-live-activities e https://developer.apple.com/documentation/foundation/filemanager/containerurl(forsecurityapplicationgroupidentifier:).
