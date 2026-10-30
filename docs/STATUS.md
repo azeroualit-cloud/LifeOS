@@ -1,3 +1,17 @@
+## Consegna verificata — 30 ottobre 2026, 0.10.7 build 68
+
+[IPA per Signulous](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41052957803/artifacts/12976114405) · [build Apple](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41052957803) · [verifica indipendente IPA](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41056586423) · [distribuzione e controllo API live](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41057450159).
+
+Superati 191 test unitari nativi e 25 esecuzioni UI (10 sul simulatore principale, 15 sul compatto; 18 metodi UI distinti), zero fallimenti. Backend: 11 test attività, 3 verifiche di integrazione sul Worker generato, 17 regressioni finanziarie e 4 test del deploy. Verificate integrità ZIP, checksum, bundle/versione, piattaforma iPhoneOS e binario arm64 dell’IPA Release. Firma Signulous e prova fisica non eseguite.
+
+Sorgente app verificato: `642507c893321bcc78e14613ee9d76dfa62816c0`. Backend finale: `14044ba2a645a8334e2fd1176464cb1ed92d0f9f`; workflow di distribuzione verificato: `f53f3e1b9141a4bd9f0c87fa2b743c1b0bf70cc1`. I commit successivi alla build Apple modificano backend, procedure e documentazione, senza modificare il sorgente nativo verificato.
+
+Dopo l’autorizzazione esplicita dell’utente, aggiornati e verificati entrambi i Worker `lifeos` e `lifeos-native-test`, conservando moduli estranei, autenticazione, binding e segreti. Accesso autenticato, lettura reale, capability delle attività unificate e rifiuto di un titolo vuoto verificati: nessuna attività di prova creata e nessun dato privato pubblicato nei log.
+
+IPA SHA-256: `bb2cb3085f3f358b744d9566d2aa79b0f062936b5c0fb03bc8064d9b1f000670`. Artefatto disponibile fino al 6 novembre 2026, 12:30 UTC. Estrarre `LifeOS-unsigned.ipa` dal pacchetto e aggiornare tramite Signulous senza disinstallare l’app.
+
+Le sezioni seguenti conservano la cronologia precedente.
+
 ## Revisione 25 ottobre 2026 — build 52 in verifica
 
 Implementati nel sorgente nativo contrasto/accento, completamento reversibile in Attivo/In attesa, comandi inline e calendario continuo. Backend aggiornato per conservare le completate senza scadenza e ricordare la sezione; web allineato alla nuova logica delle attività. 62 test Foundation, regressione del Worker su SQLite isolato, parsing Swift, design check e browser 320/375/1280 passati. L’utente ha autorizzato esplicitamente build Apple e pubblicazione di IPA, log, risultati e screenshot demo sul repository pubblico. Preparazione della CI in corso; backend non distribuito. Dettagli e limiti: native/REVISIONE-0.9.0-52.md.
