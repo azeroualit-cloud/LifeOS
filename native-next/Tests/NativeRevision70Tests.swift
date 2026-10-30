@@ -84,4 +84,14 @@ import XCTest
         try Data("broken".utf8).write(to:folder.appendingPathComponent(LifeOSWidgetStorage.filename))
         XCTAssertNil(LifeOSWidgetStorage.read(directory:folder,now:now));XCTAssertNil(LifeOSWidgetStorage.read(directory:nil,now:now))
     }
+    func testOpeningOfflineDoesNotRefreshOldWidgetSourceTime() {
+        let now = moment("2026-10-30",12), old = moment("2026-10-28",12)
+        let life:Record = ["today":.string("2026-10-28"),"upcomingEvents":.array([]),"routines":.array([])]
+        let snapshot = NativeWidgetBridge.snapshot(life:life,demo:false,updatedAt:old,now:now)
+        XCTAssertEqual(snapshot.generatedAt,now);XCTAssertEqual(snapshot.updatedAt,old)
+        XCTAssertTrue(snapshot.isStale(at:now))
+        let unknown = NativeWidgetBridge.snapshot(life:life,demo:false,now:now)
+        XCTAssertTrue(unknown.isStale(at:now))
+    }
+
 }

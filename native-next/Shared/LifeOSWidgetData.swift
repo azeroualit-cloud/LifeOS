@@ -17,12 +17,14 @@ struct LifeOSWidgetSnapshot: Codable, Equatable {
     var demo: Bool
     var days: [LifeOSWidgetDay]
     var ready = true
+    var updatedAt: Date?
     func week(at date: Date) -> [LifeOSWidgetDay] {
         let today = LifeOSWidgetCalendar.day(date)
         return Array(days.filter { $0.day >= today }.prefix(7))
     }
     func isStale(at date: Date) -> Bool {
-        date.timeIntervalSince(generatedAt) > 6 * 3600 || LifeOSWidgetCalendar.day(date) != LifeOSWidgetCalendar.day(generatedAt)
+        guard let updatedAt else { return true }
+        return date.timeIntervalSince(updatedAt) > 6 * 3600 || LifeOSWidgetCalendar.day(date) != LifeOSWidgetCalendar.day(updatedAt)
     }
 }
 enum LifeOSWidgetCalendar {
@@ -66,6 +68,7 @@ enum LifeOSWidgetStorage {
               Set(snapshot.days.map(\.day)).count == snapshot.days.count,
               snapshot.days.map(\.day) == snapshot.days.map(\.day).sorted(),
               snapshot.generatedAt <= now.addingTimeInterval(300),
+              snapshot.updatedAt.map({ $0 <= now.addingTimeInterval(300) }) ?? true,
               snapshot.days.allSatisfy({ LifeOSWidgetCalendar.date($0.day) != nil && $0.routines >= 0 && $0.checked >= 0 && $0.checked <= $0.routines && $0.tasks >= 0 && $0.events >= 0 }) else { return nil }
         return snapshot
     }
@@ -76,8 +79,8 @@ enum LifeOSWidgetStorage {
         for offset in 1...7 {
             if let date = calendar.date(byAdding: .day, value: offset, to: today) { result.append(date) }
         }
-        if let snapshot {
-            let expiry = snapshot.generatedAt.addingTimeInterval(6 * 3600 + 1)
+        if let updatedAt = snapshot?.updatedAt {
+            let expiry = updatedAt.addingTimeInterval(6 * 3600 + 1)
             if expiry > now { result.append(expiry) }
         }
         return Array(Set(result)).sorted()

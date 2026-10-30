@@ -3,7 +3,7 @@ import WidgetKit
 
 @MainActor enum NativeWidgetBridge {
     private(set) static var lastError: String?
-    static func snapshot(life: Record, demo: Bool, now: Date = Date()) -> LifeOSWidgetSnapshot {
+    static func snapshot(life: Record, demo: Bool, updatedAt: Date? = nil, now: Date = Date()) -> LifeOSWidgetSnapshot {
         let today = CivilDate.day(now)
         let routines = life.records("routines"), tasks = life.records("tasks")
         let shifts = life.records("shifts")
@@ -36,15 +36,15 @@ import WidgetKit
                 checked: offset == 0 && life.text("today") == today ? due.filter { $0.flag("checked") }.count : 0,
                 tasks: todo.count, events: events.count, nextTitle: events.first.map { String($0.text("title").prefix(80)) })
         }
-        return LifeOSWidgetSnapshot(generatedAt: now, demo: demo, days: days, ready: demo || life["upcomingEvents"] != nil)
+        return LifeOSWidgetSnapshot(generatedAt: now, demo: demo, days: days, ready: demo || life["upcomingEvents"] != nil, updatedAt: demo ? now : updatedAt)
     }
-    static func publish(life: Record, demo: Bool, now: Date = Date()) {
+    static func publish(life: Record, demo: Bool, updatedAt: Date? = nil, now: Date = Date()) {
         guard let directory = LifeOSWidgetStorage.container() else {
             lastError = "La firma attuale non consente la condivisione dei dati con il widget. Verifica App Groups nel servizio di firma."
             return
         }
         do {
-            try LifeOSWidgetStorage.write(snapshot(life: life, demo: demo, now: now), directory: directory)
+            try LifeOSWidgetStorage.write(snapshot(life: life, demo: demo, updatedAt: updatedAt, now: now), directory: directory)
             lastError = nil; WidgetCenter.shared.reloadTimelines(ofKind: LifeOSWidgetStorage.kind)
         } catch { lastError = "Aggiornamento del widget non riuscito. Riapri l’app per riprovare." }
     }

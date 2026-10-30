@@ -56,7 +56,7 @@ def transform(source):
     source=source[:start]+body+source[end:]
     return expected+source
 
-def main():
+def main(post_verification=None, label="ACTIVITIES_68_DEPLOYED_AND_VERIFIED"):
     token=os.environ.get('CLOUDFLARE_API_TOKEN','')
     if not token:raise RuntimeError('Credenziale Cloudflare non disponibile.')
     def api(path,method='GET',data=None,kind=None):
@@ -102,7 +102,8 @@ def main():
         for item in prepared:
             _,actual=helpers.modules(*api('/workers/scripts/'+item[0]+'/content/v2'))
             if signature(actual)!=signature(item[4]):raise RuntimeError('Verifica upload fallita.')
-        print('ACTIVITIES_68_DEPLOYED_AND_VERIFIED; unrelated modules, auth and bindings preserved.')
+        if post_verification is not None: post_verification()
+        print(label + '; unrelated modules, auth and bindings preserved.')
     except Exception:
         for item in reversed(changed_workers):upload(item,item[3])
         raise

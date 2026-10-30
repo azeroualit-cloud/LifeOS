@@ -21,7 +21,8 @@ struct LifeOSWidgetView: View {
     private var header: String {
         if entry.snapshot?.demo == true { return "Demo" }
         if let snapshot = entry.snapshot, snapshot.isStale(at: entry.date) {
-            return "Agg. " + LifeOSWidgetCalendar.label(snapshot.generatedAt, format: "d/M")
+            guard let updatedAt = snapshot.updatedAt else { return "Da aggiornare" }
+            return "Agg. " + LifeOSWidgetCalendar.label(updatedAt, format: "d/M")
         }
         return LifeOSWidgetCalendar.label(entry.date, format: "EEE d").capitalized
     }

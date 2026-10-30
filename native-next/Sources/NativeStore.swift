@@ -113,7 +113,7 @@ import SwiftUI
             financeMonth = state.financeMonth; calendarMonth = state.calendarMonth
             rollover()
             if persistsSession, let server { acceptCookies(SessionVault.load(origin: server.absoluteString)) }
-            if publishesWidgets { NativeWidgetBridge.publish(life: state.life, demo: state.demo) }
+            if publishesWidgets { NativeWidgetBridge.publish(life: state.life, demo: state.demo, updatedAt: state.lifeRefreshedAt) }
         } catch { archiveWritable = false; self.error = "Archivio non disponibile: \(error.localizedDescription). I dati precedenti non sono stati cancellati." }
     }
     #if DEBUG
@@ -186,9 +186,9 @@ import SwiftUI
         guard archiveWritable else { throw Message(text: "L’archivio esistente non è leggibile. Conserva i file prima di tentare un recupero.") }
         let data = try JSONEncoder().encode(next)
         try data.write(to: file, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
-        let widgetChanged = state.life != next.life || state.demo != next.demo
+        let widgetChanged = state.life != next.life || state.demo != next.demo || state.lifeRefreshedAt != next.lifeRefreshedAt
         state = next
-        if publishesWidgets && widgetChanged { NativeWidgetBridge.publish(life: next.life, demo: next.demo) }
+        if publishesWidgets && widgetChanged { NativeWidgetBridge.publish(life: next.life, demo: next.demo, updatedAt: next.lifeRefreshedAt) }
     }
     func rollover(today: String = CivilDate.day()) {
         // Activities also change priority at midnight, even without routines.

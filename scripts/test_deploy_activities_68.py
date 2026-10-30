@@ -40,4 +40,25 @@ class DeploymentTests(unittest.TestCase):
    with self.assertRaises(RuntimeError):m.main()
   self.assertEqual(len(uploads),2)
   self.assertEqual(current[0],original)
+class PostVerificationTests(unittest.TestCase):
+ def test_failed_live_contract_restores_original_modules(self):
+  import json,os,io,contextlib
+  from unittest.mock import patch
+  original=Path('manual/build-67/worker.js').read_bytes();current=[original];uploads=[]
+  class Response:
+   def __init__(self,data,headers):self.data=data;self.headers=headers
+   def __enter__(self):return self
+   def __exit__(self,*args):pass
+   def read(self):return self.data
+  def request(req,timeout=90):
+   if req.full_url.endswith('/settings'):
+    return Response(json.dumps({'success':True,'result':{'bindings':[{'name':'DB','type':'d1','id':m.helpers.DATABASE}]}}).encode(),{'Content-Type':'application/json'})
+   if req.get_method()=='GET':return Response(current[0],{'Content-Type':'application/javascript','cf-entrypoint':'worker.js'})
+   _,parts=m.helpers.modules(req.data,{'Content-Type':req.headers['Content-type']});current[0]=parts[0][2];uploads.append(current[0])
+   return Response(b'{"success":true,"result":{}}',{'Content-Type':'application/json'})
+  def fail():raise RuntimeError('simulated contract failure')
+  with patch.dict(os.environ,{'CLOUDFLARE_API_TOKEN':'fixture-only','LIFEOS_BACKEND_AUDIT_ONLY':'0'}),patch.object(m.helpers,'WORKERS',['fixture']),patch.object(m.urllib.request,'urlopen',side_effect=request),contextlib.redirect_stdout(io.StringIO()):
+   with self.assertRaises(RuntimeError):m.main(post_verification=fail)
+  self.assertEqual(len(uploads),2);self.assertEqual(current[0],original)
+
 if __name__=='__main__':unittest.main()
