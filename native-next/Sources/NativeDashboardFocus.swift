@@ -7,6 +7,7 @@ struct NativeDashboardFocus {
     let title: String
     let detail: String
     let interval: DateInterval?
+    let workInterval: DateInterval?
     let countdownLabel: String
 
     var remainingText: String {
@@ -30,7 +31,7 @@ struct NativeDashboardFocus {
         default: hours = nil
         }
         guard let hours else {
-            phase = "Oggi"; interval = nil; countdownLabel = ""
+            phase = "Oggi"; interval = nil; workInterval = nil; countdownLabel = ""
             detail = shift == .rest ? "Giornata di riposo" : shift == .holiday ? "Giornata di ferie" : "Apri il calendario per impostare il turno"
             return
         }
@@ -39,6 +40,7 @@ struct NativeDashboardFocus {
         let endDay = shift == .night ? calendar.date(byAdding: .day, value: 1, to: startDay)! : startDay
         let start = calendar.date(bySettingHour: hours.0, minute: 0, second: 0, of: startDay)!
         let end = calendar.date(bySettingHour: hours.1, minute: 0, second: 0, of: endDay)!
+        workInterval = DateInterval(start: start, end: end)
         if now < start {
             phase = "Più tardi"; interval = DateInterval(start: now, end: start); countdownLabel = "all’inizio del turno"; detail = ""
         } else if now < end {

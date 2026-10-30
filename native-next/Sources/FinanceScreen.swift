@@ -73,6 +73,7 @@ struct FinanceScreen: View {
         VStack(spacing: NativeDesign.Space.small) {
             Image(systemName: symbol).font(.title2.weight(.regular))
                 .frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget)
+                .modifier(NativeGlass())
                 .accessibilityHidden(true)
             Text(title).font(.subheadline).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
         }.frame(maxWidth: .infinity).contentShape(Rectangle())

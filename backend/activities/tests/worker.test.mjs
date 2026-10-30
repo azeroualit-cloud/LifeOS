@@ -1,7 +1,7 @@
 import {readFileSync} from 'node:fs';
 import {DatabaseSync} from 'node:sqlite';
 import assert from 'node:assert/strict';
-const source=readFileSync(new URL('../../../manual/build-68/worker.js',import.meta.url),'utf8');
+const source=readFileSync(process.env.LIFEOS_ACTIVITY_WORKER || new URL('../../../manual/build-68/worker.js',import.meta.url),'utf8');
 const worker=await import('data:text/javascript;base64,'+Buffer.from(source+'\nexport {initializeLife,lifeAction};').toString('base64'));
 const sqlite=new DatabaseSync(':memory:');
 class Statement {

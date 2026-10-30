@@ -55,8 +55,8 @@ struct DashboardScreen: View {
                         isCurrentMonth: day.hasPrefix(String(today.prefix(7))))
                     Button { openCalendar(day) } label: {
                         VStack(spacing: NativeDesign.Space.xs) {
-                            Text(["D", "L", "M", "M", "G", "V", "S"][weekday - 1]).font(.caption).foregroundStyle(NativeDesign.secondary)
-                            CalendarDayCell(item: item, active: current).equatable()
+                            Text(["D", "L", "M", "M", "G", "V", "S"][weekday - 1]).font(.caption).foregroundStyle(day < today ? NativeDesign.pastCalendarSecondary : NativeDesign.secondary)
+                            CalendarDayCell(item: item, active: current, appearance: .week).equatable()
                         }.frame(maxWidth: .infinity).contentShape(Rectangle())
                     }.buttonStyle(.plain).opacity(day < today ? NativeDesign.Layout.pastDayOpacity : 1).accessibilityIdentifier("dashboard-day-" + day)
                         .accessibilityLabel(CivilDate.label(day) + ", " + (shift?.title ?? "Turno non disponibile"))
@@ -66,7 +66,7 @@ struct DashboardScreen: View {
         }
     }
     private func openCalendar(_ day: String) {
-        store.calendarMonth = String(day.prefix(7)); router.calendarDay = day; router.tab = .calendar
+        store.calendarMonth = String(day.prefix(7)); router.showCalendar(day: day)
         Task { await store.sync(scope: .life) }
     }
     private func heading(_ summary: NativeHomeSummary, today: String, now: Date) -> some View {
@@ -104,11 +104,13 @@ struct DashboardScreen: View {
         ZStack(alignment: .trailing) {
         if model.phase == "Adesso" {
             Button { openCalendar(today) } label: {
-                VStack(alignment: .trailing, spacing: NativeDesign.Space.xs) {
+                VStack(alignment: .trailing, spacing: NativeDesign.Space.small) {
                     Text(model.title).font(NativeDesign.heading).foregroundStyle(model.shift?.color ?? NativeDesign.accent)
-                    Text(model.remainingText + " alla fine").font(NativeDesign.metadata).monospacedDigit().foregroundStyle(NativeDesign.secondary)
+                    NativeShiftProgressBar(model: model, now: focusNow, activation: router.activationDate)
+                        .frame(width: NativeDesign.Layout.shiftProgressWidth)
                 }.frame(minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle())
             }.buttonStyle(.plain).accessibilityIdentifier("home-focus")
+                .accessibilityLabel(model.title + ", " + model.remainingText + " alla fine")
                 .accessibilityHint("Apre il giorno nel calendario")
                 .transition(reduceMotion ? .identity : .opacity.combined(with: .scale(scale: NativeDesign.Motion.pressedScale)))
         }
@@ -264,7 +266,6 @@ private struct HomeAgendaRow: View {
 
 private struct HomeAgendaScreen: View {
     @EnvironmentObject var store: NativeStore
-    @EnvironmentObject var router: NativeRouter
     private var events: [Record] { NativeHomeSummary(now: Date(), todayShift: nil, tomorrowShift: nil, events: store.dashboardEvents, weather: nil, weatherDate: nil).events }
     var body: some View {
         List {

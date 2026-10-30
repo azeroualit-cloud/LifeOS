@@ -23,6 +23,7 @@ import SwiftUI
     private var weatherBusy = false
     private var analysisGeneration = -1
     private var lastAutomaticSync = Date.distantPast
+    private let publishesWidgets: Bool
     private let persistsSession: Bool
     private let file: URL
     private let session: URLSession
@@ -43,7 +44,7 @@ import SwiftUI
         var r = record; if life.text("today") != CivilDate.day() { r["checked"] = .bool(false) }; return r
     } }
     var todayRoutines: [Record] { routines.filter { NativeRoutineSchedule.due($0) } }
-    var transactions: [Record] { finance.records("transactions").filter { !isDemo || $0.text("date").hasPrefix(financeMonth) }.sorted { $0.text("date") > $1.text("date") } }
+    var transactions: [Record] { NativeMovementOrder.sorted(finance.records("transactions").filter { !isDemo || $0.text("date").hasPrefix(financeMonth) }) }
     var allocations: [Record] { state.plan.records("allocations") }
     var dashboardEvents: [Record] {
         let today = CivilDate.day()
@@ -79,6 +80,7 @@ import SwiftUI
     }
     init(directory: URL? = nil, session injectedSession: URLSession? = nil, migrateLegacy: Bool = true, automaticallySyncsWrites: Bool = true) {
         self.automaticallySyncsWrites = automaticallySyncsWrites
+        publishesWidgets = directory == nil && injectedSession == nil
         let config = URLSessionConfiguration.ephemeral; config.timeoutIntervalForRequest = 40; config.timeoutIntervalForResource = 90
         persistsSession = injectedSession == nil
         session = injectedSession ?? URLSession(configuration: config)
@@ -111,6 +113,7 @@ import SwiftUI
             financeMonth = state.financeMonth; calendarMonth = state.calendarMonth
             rollover()
             if persistsSession, let server { acceptCookies(SessionVault.load(origin: server.absoluteString)) }
+            if publishesWidgets { NativeWidgetBridge.publish(life: state.life, demo: state.demo) }
         } catch { archiveWritable = false; self.error = "Archivio non disponibile: \(error.localizedDescription). I dati precedenti non sono stati cancellati." }
     }
     #if DEBUG
@@ -183,7 +186,9 @@ import SwiftUI
         guard archiveWritable else { throw Message(text: "L’archivio esistente non è leggibile. Conserva i file prima di tentare un recupero.") }
         let data = try JSONEncoder().encode(next)
         try data.write(to: file, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
+        let widgetChanged = state.life != next.life || state.demo != next.demo
         state = next
+        if publishesWidgets && widgetChanged { NativeWidgetBridge.publish(life: next.life, demo: next.demo) }
     }
     func rollover(today: String = CivilDate.day()) {
         // Activities also change priority at midnight, even without routines.

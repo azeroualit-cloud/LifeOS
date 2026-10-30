@@ -4,6 +4,7 @@ import UserNotifications
 
 struct NativeIntegrationSettings: View {
     @EnvironmentObject var store: NativeStore
+    @State private var widgetStatus = "Widget Life OS"
     @Environment(\.scenePhase) private var phase
     @AppStorage("native-reminders-enabled") private var enabled = false
     @State private var status = "Verifica in corso…"
@@ -27,11 +28,12 @@ struct NativeIntegrationSettings: View {
             }.accessibilityIdentifier("shift-export-settings")
             ShortcutsLink()
             Text("Con Siri: “Registra il peso in Life OS” oppure “Prepara un’attività in Life OS”. Il peso viene scritto in Apple Health dopo il consenso. Per le attività conferma il salvataggio nell’app.").font(.caption).foregroundStyle(NativeDesign.secondary)
-            Text("Widget: aggiungi “Life OS · Azioni rapide” alla schermata Home. Apre attività, peso e calendario. La disponibilità va verificata dopo la firma Signulous.").font(.caption).foregroundStyle(NativeDesign.secondary)
+            Text(widgetStatus).font(.caption).foregroundStyle(NativeDesign.secondary)
         }.task { await refreshStatus() }
         .onChange(of: phase) { _, value in if value == .active { Task { await refreshStatus() } } }
     }
     private func refreshStatus() async {
+        widgetStatus = NativeWidgetBridge.status
         let settings = await UNUserNotificationCenter.current().notificationSettings()
         switch settings.authorizationStatus {
         case .authorized, .provisional, .ephemeral: status = enabled ? "Notifiche autorizzate su questo iPhone." : "Promemoria disattivati nell’app."

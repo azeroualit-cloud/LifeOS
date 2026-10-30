@@ -51,6 +51,74 @@ final class NativeInterfaceTests: XCTestCase {
         let shot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
         shot.name = name; shot.lifetime = .keepAlways; add(shot)
     }
+    func testInformativeWidgetFitsBothSmallWidths() {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments = ["--visual-test", "--widget-preview", "--dark", "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"]
+        app.launch()
+        XCTAssertTrue(app.navigationBars["Anteprima widget"].waitForExistence(timeout: 20))
+        let normal = app.otherElements["widget-preview-small"]
+        let compact = app.otherElements["widget-preview-compact"]
+        XCTAssertTrue(normal.exists); XCTAssertTrue(compact.exists)
+        XCTAssertEqual(normal.frame.width, 170, accuracy: 1)
+        XCTAssertEqual(compact.frame.width, 141, accuracy: 1)
+        let actions = app.descendants(matching: .any).matching(identifier: "widget-add")
+        XCTAssertGreaterThanOrEqual(actions.count, 2)
+        assertMinimumTouchTarget(actions.firstMatch)
+        capture("widget-informative-2x2-dark")
+    }
+    func testCalendarDayPaneIsFixedAndTodayRestoresOnEntryAndResume() {
+        let app = launch(["--dark"])
+        let formatter = DateFormatter(); formatter.locale = Locale(identifier: "en_US_POSIX"); formatter.timeZone = TimeZone(identifier: "Europe/Rome"); formatter.dateFormat = "yyyy-MM-dd"
+        let calendar = Calendar(identifier: .gregorian)
+        let today = formatter.string(from: Date())
+        let tomorrow = formatter.string(from: calendar.date(byAdding: .day, value: 1, to: Date())!)
+        app.buttons["dashboard-day-" + tomorrow].tap()
+        let explicit = app.buttons["calendar-day-" + tomorrow]
+        expectation(for: NSPredicate { element, _ in (element as? XCUIElement)?.isSelected == true }, evaluatedWith: explicit)
+        waitForExpectations(timeout: 10)
+        let details = app.scrollViews["calendar-day-pane"], months = app.scrollViews["calendar-scroll"]
+        XCTAssertTrue(details.exists)
+        XCTAssertGreaterThanOrEqual(details.frame.minY, months.frame.maxY - 1)
+        let y = details.frame.minY
+        app.buttons["Mese successivo"].tap()
+        XCTAssertEqual(details.frame.minY, y, accuracy: 1)
+        app.tabBars.buttons["Finanza"].tap(); app.tabBars.buttons["Calendario"].tap()
+        let current = app.buttons["calendar-day-" + today]
+        expectation(for: NSPredicate { element, _ in guard let element = element as? XCUIElement else { return false }; return element.isSelected && element.isHittable }, evaluatedWith: current)
+        waitForExpectations(timeout: 10)
+        app.buttons["Mese successivo"].tap()
+        XCUIDevice.shared.press(.home); app.activate()
+        expectation(for: NSPredicate { element, _ in guard let element = element as? XCUIElement else { return false }; return element.isSelected && element.isHittable }, evaluatedWith: current)
+        waitForExpectations(timeout: 10)
+        XCTAssertEqual(details.frame.minY, y, accuracy: 1)
+        capture("calendar-fixed-day-pane-dark")
+    }
+    func testDashboardWeekShiftProgressAndFinanceGlassActions() {
+        let app = launch(["--dark", "--active-shift"])
+        XCTAssertTrue(app.buttons["home-focus"].waitForExistence(timeout: 10))
+        assertMinimumTouchTarget(app.buttons["home-focus"])
+        XCTAssertFalse(app.staticTexts.matching(NSPredicate(format: "label ENDSWITH %@", "alla fine")).firstMatch.exists)
+        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "dashboard-day-")).count, 7)
+        capture("dashboard-week-80-and-shift-progress")
+        app.tabBars.buttons["Finanza"].tap()
+        for name in ["finance-budget", "finance-new-plan", "finance-expense", "finance-analysis"] {
+            let button = app.buttons[name]; XCTAssertTrue(button.waitForExistence(timeout: 10)); assertMinimumTouchTarget(button)
+        }
+        capture("finance-native-glass-actions")
+    }
+    private func revealCalendarDay(_ day: String, in app: XCUIApplication) {
+        let cell = app.buttons["calendar-day-" + day], surface = app.scrollViews["calendar-scroll"]
+        for _ in 0..<20 {
+            let top = app.buttons["calendar-today"].frame.maxY + 24
+            if cell.exists && cell.isHittable && cell.frame.minY >= top && cell.frame.maxY <= surface.frame.maxY { return }
+            let earlier = cell.exists ? cell.frame.minY < top : day < Self.today()
+            let start = surface.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: earlier ? 0.78 : 0.96))
+            let end = surface.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: earlier ? 0.96 : 0.78))
+            start.press(forDuration: 0.05, thenDragTo: end)
+        }
+        XCTAssertTrue(cell.isHittable, "Selected calendar date must remain reachable in its own pane")
+    }
     func testUnifiedActivityEditorPreservesDescriptionWhenAddingAndRemovingDate() {
         let app = launch(["--dark"])
         app.tabBars.buttons["Attività"].tap()
@@ -844,6 +912,7 @@ final class NativeInterfaceTests: XCTestCase {
         for index in [9, 10, 11, 10] {
             let day = month + String(format: "-%02d", index + 1)
             let cell = app.buttons["calendar-day-" + day]
+            revealCalendarDay(day, in: app)
             cell.tap()
             XCTAssertTrue(cell.isSelected, "Il giorno deve essere selezionato al termine del tocco: \(day)")
         }

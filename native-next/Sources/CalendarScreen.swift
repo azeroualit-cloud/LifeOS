@@ -4,6 +4,7 @@ struct CalendarScreen: View {
     @EnvironmentObject var store: NativeStore
     @EnvironmentObject var router: NativeRouter
     @Environment(\.nativeReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var typeSize
     @State private var appleExport = false
     @State private var selected = ""
     @State private var brush = "consult"
@@ -18,22 +19,23 @@ struct CalendarScreen: View {
     @State private var loading = false
     @State private var loadError: String?
     @State private var reload = 0
-    @ScaledMetric(relativeTo: .caption) private var brushWidth = NativeDesign.Layout.shiftBrushWidth
-    @ScaledMetric(relativeTo: .caption) private var brushHeight = NativeDesign.Layout.shiftBrushHeight
     private var focusMonth: String { visibleMonth ?? store.calendarMonth }
     var body: some View {
+        GeometryReader { geometry in
+        VStack(spacing: NativeDesign.Space.none) {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: NativeDesign.Space.section) {
+                LazyVStack(alignment: .leading, spacing: NativeDesign.Space.small, pinnedViews: [.sectionHeaders]) {
                     ForEach(months, id: \.self) { month in
-                        VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-                            Text(NativeCalendarWindow.monthLabel(month)).font(.title2.bold()).foregroundStyle(Color.primary)
-                                .accessibilityLabel(CivilDate.monthTitle(month))
+                        Section {
                             monthGrid(month)
-                            if selected.hasPrefix(month) { dayCard }
+                        } header: {
+                            Text(NativeCalendarWindow.monthLabel(month)).font(.title2.bold()).foregroundStyle(Color.primary)
+                                .accessibilityLabel(CivilDate.monthTitle(month)).frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.vertical, NativeDesign.Space.xs).background(NativeDesign.canvas)
+                                .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                         }.id(month)
                     }
-                    DisclosureGroup("Esporta turni su Apple (facoltativo)", isExpanded: $appleExport) { ShiftCalendarPanel() }
                 }.scrollTargetLayout()
                     .padding(.horizontal, NativeDesign.Layout.screenInset)
                     .padding(.bottom, NativeDesign.Layout.scrollClearance)
@@ -42,7 +44,7 @@ struct CalendarScreen: View {
             .accessibilityIdentifier("calendar-scroll")
             .safeAreaInset(edge: .top, spacing: NativeDesign.Space.none) {
                 VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-                    brushPanel
+                    brushPanel.dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                     ProgressView().progressViewStyle(.linear).frame(height: NativeDesign.Space.xxs)
                         .opacity(loading ? 1 : 0).accessibilityLabel("Aggiornamento calendario")
                         .accessibilityHidden(!loading).allowsHitTesting(false)
@@ -53,7 +55,7 @@ struct CalendarScreen: View {
                         ForEach(Array(["L", "M", "M", "G", "V", "S", "D"].enumerated()), id: \.offset) { _, name in
                             Text(name).font(.caption).foregroundStyle(NativeDesign.secondary).frame(maxWidth: .infinity)
                         }
-                    }.padding(.vertical, NativeDesign.Space.small)
+                    }.padding(.vertical, NativeDesign.Space.small).dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                 }.padding(.horizontal, NativeDesign.Layout.screenInset).background(NativeDesign.canvas)
             }
             .onChange(of: jumpMonth) { _, month in
@@ -61,12 +63,32 @@ struct CalendarScreen: View {
                 ensureWindow(around: month)
                 withAnimation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration)) { proxy.scrollTo(month, anchor: .top) }
                 visibleMonth = month
+                let day = selected
+                if day.hasPrefix(month) {
+                    Task { @MainActor in
+                        await Task.yield()
+                        guard selected == day else { return }
+                        proxy.scrollTo(day, anchor: .center)
+                    }
+                }
                 jumpMonth = nil
             }
+        }.frame(height: geometry.size.height * NativeDesign.Layout.calendarPaneFraction)
+        Divider()
+        ScrollView {
+            VStack(alignment: .leading, spacing: NativeDesign.Space.large) {
+                if selected.isEmpty {
+                    Text("Seleziona un giorno").font(NativeDesign.body).foregroundStyle(NativeDesign.secondary)
+                } else { dayCard }
+                DisclosureGroup("Esporta turni su Apple (facoltativo)", isExpanded: $appleExport) { ShiftCalendarPanel() }
+            }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.bottom, NativeDesign.Layout.scrollClearance)
+        }.frame(maxWidth: .infinity, maxHeight: .infinity).accessibilityIdentifier("calendar-day-pane")
+        }
         }.background(NativeDesign.canvas)
         .onAppear {
             if months.isEmpty {
-                let month = store.calendarMonth
+                let month = String((router.requestedCalendarDay ?? router.calendarDay).prefix(7))
+                store.calendarMonth = month
                 months = NativeCalendarWindow.months(around: month)
                 selected = preferredDay(in: month); router.calendarDay = selected
                 seedSnapshot(); rebuildMonth(); visibleMonth = month; jumpMonth = month
@@ -76,6 +98,12 @@ struct CalendarScreen: View {
         .onChange(of: router.calendarDay) { _, day in
             guard day != selected, !day.isEmpty else { return }
             selected = day; jumpMonth = String(day.prefix(7))
+        }
+        .onChange(of: router.calendarFocusRequest) { _, _ in
+            selected = router.calendarDay; jumpMonth = String(selected.prefix(7))
+        }
+        .onChange(of: painting) { _, _ in
+            if !selected.isEmpty { jumpMonth = String(selected.prefix(7)) }
         }
         .onChange(of: visibleMonth) { _, month in if let month { ensureWindow(around: month) } }
         .onChange(of: NativeCalendarSource(life: store.life, demo: store.isDemo, origin: store.server?.absoluteString)) { _, _ in
@@ -174,7 +202,7 @@ struct CalendarScreen: View {
                                 }
                             } label: { CalendarDayCell(item: item, active: selected == item.day).equatable() }
                                 .buttonStyle(NativePressStyle()).disabled(painting && (store.busy || (!store.isDemo && monthData[month] == nil)))
-                                .accessibilityIdentifier("calendar-day-" + item.day)
+                                .id(item.day).accessibilityIdentifier("calendar-day-" + item.day)
                                 .accessibilityLabel(item.label + ", " + (item.shift?.title ?? "nessun turno"))
                         } else {
                             Color.clear.frame(maxWidth: .infinity).frame(minHeight: NativeDesign.Layout.calendarDayHeight).accessibilityHidden(true)
@@ -200,17 +228,12 @@ struct CalendarScreen: View {
                 NativeIconButton(symbol: "chevron.right", label: "Mese successivo") { jumpMonth = NativeCalendarWindow.offset(focusMonth, by: 1) }.disabled(store.busy)
             }.font(.subheadline).frame(minHeight: NativeDesign.Layout.touchTarget)
             if painting {
-                Text("Scegli un turno, poi tocca i giorni da assegnare. Usa Cancella per rimuoverlo.").font(.caption).foregroundStyle(NativeDesign.secondary)
+                if !typeSize.isAccessibilitySize {
+                    Text("Scegli un turno, poi tocca i giorni da assegnare. Usa Cancella per rimuoverlo.").font(.caption).foregroundStyle(NativeDesign.secondary)
+                }
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: NativeDesign.Space.xs) { ForEach(ShiftKind.allCases) { kind in
-                        Button { brush = kind.rawValue } label: {
-                            VStack(spacing: NativeDesign.Space.xs) {
-                                Label { Text(String(kind.title.prefix(1))).foregroundStyle(Color.primary) } icon: { Image(systemName: kind.symbol).foregroundStyle(kind.color) }.font(.caption.weight(.semibold))
-                                if !kind.time.isEmpty { Text(kind.time.replacingOccurrences(of: ":00", with: "")).font(.caption2).foregroundStyle(NativeDesign.secondary) }
-                            }
-                                .frame(width: brushWidth, height: brushHeight)
-                                .modifier(NativeSelectionSurface(selected: brush == kind.rawValue, tint: kind.color, outlined: true))
-                        }.buttonStyle(NativePressStyle()).foregroundStyle(kind.color).accessibilityLabel(kind.title + (kind.time.isEmpty ? "" : ", " + kind.time)).accessibilityIdentifier("shift-brush-" + kind.rawValue).accessibilityAddTraits(brush == kind.rawValue ? .isSelected : [])
+                        NativeShiftBrushOption(kind: kind, brush: $brush)
                     } }
                 }
             }
@@ -286,6 +309,25 @@ struct CalendarScreen: View {
     }
 
 }
+private struct NativeShiftBrushOption: View {
+    let kind: ShiftKind
+    @Binding var brush: String
+    @ScaledMetric(relativeTo: .caption) private var width = NativeDesign.Layout.shiftBrushWidth
+    @ScaledMetric(relativeTo: .caption) private var height = NativeDesign.Layout.shiftBrushHeight
+    var body: some View {
+        Button { brush = kind.rawValue } label: {
+            VStack(spacing: NativeDesign.Space.xs) {
+                Label { Text(String(kind.title.prefix(1))).foregroundStyle(Color.primary) } icon: { Image(systemName: kind.symbol).foregroundStyle(kind.color) }.font(.caption.weight(.semibold))
+                if !kind.time.isEmpty { Text(kind.time.replacingOccurrences(of: ":00", with: "")).font(.caption2).foregroundStyle(NativeDesign.secondary) }
+            }.frame(width: width, height: height)
+                .modifier(NativeSelectionSurface(selected: brush == kind.rawValue, tint: kind.color, outlined: true))
+        }.buttonStyle(NativePressStyle()).foregroundStyle(kind.color)
+            .accessibilityLabel(kind.title + (kind.time.isEmpty ? "" : ", " + kind.time))
+            .accessibilityHint("Tocca i giorni per applicare questo turno")
+            .accessibilityIdentifier("shift-brush-" + kind.rawValue).accessibilityAddTraits(brush == kind.rawValue ? .isSelected : [])
+    }
+}
+
 struct CalendarDayPresentation: Equatable {
     let day: String
     let label: String
@@ -295,46 +337,34 @@ struct CalendarDayPresentation: Equatable {
     let isWeekend: Bool
     let isCurrentMonth: Bool
 }
+enum NativeCalendarDayAppearance { case month, week }
+
 struct CalendarDayCell: View, Equatable {
     @Environment(\.nativeReduceMotion) private var reduceMotion
     let item: CalendarDayPresentation
     let active: Bool
+    var appearance: NativeCalendarDayAppearance = .month
     @ScaledMetric(relativeTo: .subheadline) private var numberSize = NativeDesign.Layout.calendarDayNumber
-    static func == (lhs: Self, rhs: Self) -> Bool { lhs.item == rhs.item && lhs.active == rhs.active }
+    static func == (lhs: Self, rhs: Self) -> Bool { lhs.item == rhs.item && lhs.active == rhs.active && lhs.appearance == rhs.appearance }
     var body: some View {
         let color = item.shift?.color ?? NativeDesign.accent
         VStack(spacing: NativeDesign.Space.xxs) {
             Text(String(Int(item.day.suffix(2)) ?? 0)).font(.subheadline.weight(active || item.isToday ? .semibold : .regular)).monospacedDigit()
-                .foregroundStyle(active ? (item.shift == nil ? NativeDesign.canvas : Color.black.opacity(0.85)) : item.isWeekend ? NativeDesign.secondary : Color.primary)
+                .foregroundStyle(active ? (item.shift == nil ? NativeDesign.canvas : Color.black.opacity(0.85)) : appearance == .month && item.isWeekend ? NativeDesign.secondary : Color.primary)
                 .minimumScaleFactor(0.8).lineLimit(1).frame(width: numberSize, height: numberSize)
                 .background(active ? color : .clear, in: Circle())
                 .overlay(Circle().stroke(item.isToday && !active ? color : .clear, lineWidth: 1))
             NativeShiftBadge(shift: item.shift)
             Circle().fill(item.hasEvents ? color : Color.clear).frame(width: NativeDesign.Space.xs, height: NativeDesign.Space.xs)
         }.frame(maxWidth: .infinity).frame(minHeight: NativeDesign.Layout.calendarDayHeight)
-            .contentShape(Rectangle()).opacity(item.isCurrentMonth ? 1 : 0.38)
+            .contentShape(Rectangle()).opacity(appearance == .week || item.isCurrentMonth ? 1 : 0.38)
             .animation(reduceMotion ? nil : .easeOut(duration: NativeDesign.Motion.selectionDuration), value: active)
             .animation(reduceMotion ? nil : .easeOut(duration: NativeDesign.Motion.selectionDuration), value: item.shift)
             .accessibilityAddTraits(active ? .isSelected : [])
     }
 }
 extension ShiftKind {
-    // Same hues as the original Life OS palette, with a restrained saturation increase.
-    var color: Color {
-        let light: UInt32, dark: UInt32
-        switch self {
-        case .morning: light = 0x8FACD9; dark = 0x639BCF
-        case .afternoon: light = 0x9BCB83; dark = 0x6CAF7A
-        case .night: light = 0x727780; dark = 0xADB2BC
-        case .rest: light = 0xE79862; dark = 0xDF986D
-        case .holiday: light = 0xA88B18; dark = 0xDEC34E
-        case .erase: return .secondary
-        }
-        return Color(uiColor: UIColor { traits in
-            let hex = traits.userInterfaceStyle == .dark ? dark : light
-            return UIColor(red: Double((hex >> 16) & 255) / 255, green: Double((hex >> 8) & 255) / 255, blue: Double(hex & 255) / 255, alpha: 1)
-        })
-    }
+    var color: Color { LifeOSShiftPalette.color(rawValue) }
     var symbol: String {
         switch self { case .morning: return "sunrise"; case .afternoon: return "sun.max"; case .night: return "moon"; case .rest: return "leaf"; case .holiday: return "sun.horizon"; case .erase: return "eraser" }
     }

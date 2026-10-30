@@ -6,7 +6,7 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: lifeos-native-69-dashboard-${{ github.ref }}
+  group: lifeos-native-70-completion-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   build:
@@ -50,7 +50,7 @@ jobs:
               archive.extractall('app')
           overlay = pathlib.Path('native-next')
           for path in overlay.rglob('*'):
-              if path.is_file() and path.parts[1] in ['Sources','Tests','UITests','project.yml']:
+              if path.is_file() and path.parts[1] in ['Sources','Tests','UITests','Widget','Shared','project.yml','LifeOS.entitlements','Widget.entitlements']:
                   target = pathlib.Path('app') / path.relative_to(overlay)
                   target.parent.mkdir(parents=True, exist_ok=True)
                   shutil.copy2(path,target)
@@ -69,6 +69,10 @@ jobs:
           node backend/activities/tests/worker.test.mjs
           LIFEOS_ROUTING_WORKER=manual/build-68/worker.js node backend/expense-routing/tests/routing.test.mjs
           node --input-type=module --check < manual/build-68/worker.js
+          python3 scripts/build-worker-70.py
+          node backend/movement-order/tests/creation.test.mjs
+          LIFEOS_ROUTING_WORKER=manual/build-70/worker.js node backend/expense-routing/tests/routing.test.mjs
+          LIFEOS_ACTIVITY_WORKER=manual/build-70/worker.js node backend/activities/tests/worker.test.mjs
       - name: Verifica contesto backend live senza scritture
         continue-on-error: true
         env:
@@ -157,14 +161,14 @@ jobs:
           DEVICE="$MAIN_DEVICE"
           echo "MAIN_DEVICE=$DEVICE" >> "$GITHUB_ENV"
           xcodebuild build-for-testing -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compile.log
-      - name: Verifica apertura agenda raggruppata e anteprima Salute
+      - name: Verifica widget, calendario fisso e Dashboard
         timeout-minutes: 15
         working-directory: app
         run: |
           set -euo pipefail
           xcrun simctl boot "$MAIN_DEVICE" || true
           xcrun simctl bootstatus "$MAIN_DEVICE" -b
-          xcodebuild test-without-building -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeManyEventsAndTasksStayBoundedAndReachable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeHealthCardRemainsCompactAndOpensDetail -resultBundlePath build/Focused.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/focused-tests.log
+          xcodebuild test-without-building -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testInformativeWidgetFitsBothSmallWidths -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarDayPaneIsFixedAndTodayRestoresOnEntryAndResume -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testDashboardWeekShiftProgressAndFinanceGlassActions -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testVisibleShiftBrushPaintsAndUndoRestoresDay -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testDashboardDayRestoresCalendarMonthAndSelection -resultBundlePath build/Focused.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/focused-tests.log
       - name: Verifica logica e flussi agenda su iPhone principale
         timeout-minutes: 35
         working-directory: app
@@ -228,7 +232,7 @@ jobs:
                       r=find(v,name)
                       if r:return r
           data=json.loads(manifest.read_text())
-          for name in ['unified-activity-editor-dark','health-standardized-dark','compact-shift-palette-dark','dashboard-weekly-structure-dark','dashboard-grouped-events-dark','health-preview-light','health-preview-large-text']:
+          for name in ['unified-activity-editor-dark','health-standardized-dark','compact-shift-palette-dark','dashboard-weekly-structure-dark','dashboard-grouped-events-dark','health-preview-light','health-preview-large-text','widget-informative-2x2-dark','calendar-fixed-day-pane-dark','dashboard-week-80-and-shift-progress','finance-native-glass-actions']:
               source=find(data,name)
               if not source:continue
               dest=pathlib.Path('build')/(name+'.png')
@@ -256,7 +260,7 @@ jobs:
           xcrun simctl shutdown "$MAIN_DEVICE" || true
           xcrun simctl boot "$COMPACT"
           xcrun simctl bootstatus "$COMPACT" -b
-          xcodebuild test -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testDashboardFocusTimelineOpensEventWithoutDuplicateSummary -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testUnifiedActivityEditorPreservesDescriptionWhenAddingAndRemovingDate -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testStandardizedHealthAndCompactShiftPalette -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeHealthCardRemainsCompactAndOpensDetail -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testDashboardAgendaGroupsDaysAndCompletesWithoutOpeningEditor -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCompactDashboardPriorityAndActivityActionsStayVisible -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testEditingKeepsTaskTitleGeometryAndDraftAcrossTabs -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testRepeatedTabSwitchesKeepNativeDestinationsUsable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarTodayRestoresMonthAndSelection -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testEventContextActionsUseFullSizeChipsAndOwnEditor -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testActivityAgendaShowsOnlyRelevantItemsAndFoldsCompleted -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testSharedRowsAndCategoryChoicesKeepAccessibleTargets -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testReducedMotionKeepsChecklistAndFinanceActionsFunctional -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarDayCanBeDeselectedWithASecondTap -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarSelectionUpdatesImmediatelyAndKeepsEventIndex -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeManyEventsAndTasksStayBoundedAndReachable -resultBundlePath build/Compact.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compact.log
+          xcodebuild test -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testDashboardFocusTimelineOpensEventWithoutDuplicateSummary -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testUnifiedActivityEditorPreservesDescriptionWhenAddingAndRemovingDate -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testStandardizedHealthAndCompactShiftPalette -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeHealthCardRemainsCompactAndOpensDetail -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testDashboardAgendaGroupsDaysAndCompletesWithoutOpeningEditor -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCompactDashboardPriorityAndActivityActionsStayVisible -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testEditingKeepsTaskTitleGeometryAndDraftAcrossTabs -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testRepeatedTabSwitchesKeepNativeDestinationsUsable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarTodayRestoresMonthAndSelection -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testEventContextActionsUseFullSizeChipsAndOwnEditor -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testActivityAgendaShowsOnlyRelevantItemsAndFoldsCompleted -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testSharedRowsAndCategoryChoicesKeepAccessibleTargets -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testReducedMotionKeepsChecklistAndFinanceActionsFunctional -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarDayCanBeDeselectedWithASecondTap -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarSelectionUpdatesImmediatelyAndKeepsEventIndex -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeManyEventsAndTasksStayBoundedAndReachable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testInformativeWidgetFitsBothSmallWidths -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarDayPaneIsFixedAndTodayRestoresOnEntryAndResume -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testDashboardWeekShiftProgressAndFinanceGlassActions -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testVisibleShiftBrushPaintsAndUndoRestoresDay -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testDashboardDayRestoresCalendarMonthAndSelection -resultBundlePath build/Compact.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compact.log
       - name: Esporta schermate del simulatore
         if: always()
         continue-on-error: true
@@ -332,7 +336,7 @@ jobs:
             app/build/Compact.xcresult
           retention-days: 1
           if-no-files-found: ignore
-      - name: Pubblica link diretto IPA 69 verificata
+      - name: Pubblica link diretto IPA 70 verificata
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -340,5 +344,5 @@ jobs:
           cd app/download
           shasum -a 256 -c SHA256.txt
           unzip -tq LifeOS-unsigned.ipa
-          cp LifeOS-unsigned.ipa LifeOS-69.ipa
-          gh release create ios-0.10.8-build69 LifeOS-69.ipa SHA256.txt --repo azeroualit-cloud/LifeOS --target "$GITHUB_SHA" --title "Life OS 0.10.8 build 69" --notes "Anteprima Salute essenziale e impegni Dashboard raggruppati per giorno con completamento diretto. IPA non firmata per Signulous, pubblicata dopo verifiche Apple. Sorgente: $GITHUB_SHA."
+          cp LifeOS-unsigned.ipa LifeOS-70.ipa
+          gh release create ios-0.10.9-build70 LifeOS-70.ipa SHA256.txt --repo azeroualit-cloud/LifeOS --target "$GITHUB_SHA" --title "Life OS 0.10.9 build 70" --notes "Widget informativo 2x2, calendario a due aree e ritorno a oggi, settimana Dashboard 80%, progresso turno e Finanza ordinata per inserimento. IPA non firmata per Signulous, pubblicata dopo verifiche Apple. Sorgente: $GITHUB_SHA."

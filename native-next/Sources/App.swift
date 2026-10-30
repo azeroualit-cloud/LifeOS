@@ -41,7 +41,8 @@ import UIKit
     }
     @ViewBuilder private var rootContent: some View {
         #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("--signin-preview") { NavigationStack { NativeSignInScreen {} } }
+        if ProcessInfo.processInfo.arguments.contains("--widget-preview") { NativeWidgetPreview() }
+        else if ProcessInfo.processInfo.arguments.contains("--signin-preview") { NavigationStack { NativeSignInScreen {} } }
         else { NativeRoot() }
         #else
         NativeRoot()
@@ -67,6 +68,24 @@ enum NativeSheet: Identifiable {
     @Published var taskCategory = "action"
     @Published var financeSection = "Panoramica"
     @Published var calendarDay = CivilDate.day()
+    @Published var activationDate = Date()
+    @Published var calendarFocusRequest = UUID()
+    var requestedCalendarDay: String?
+    init() {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--six-weeks") { requestedCalendarDay = "2026-03-01"; calendarDay = "2026-03-01" }
+        #endif
+    }
+    func enterCalendar(today: String = CivilDate.day()) -> String {
+        let day = requestedCalendarDay ?? today
+        requestedCalendarDay = nil; calendarDay = day; calendarFocusRequest = UUID()
+        return day
+    }
+    func showCalendar(day: String = CivilDate.day()) {
+        let alreadyOpen = tab == .calendar
+        requestedCalendarDay = alreadyOpen ? nil : day; calendarDay = day; tab = .calendar
+        if alreadyOpen { calendarFocusRequest = UUID() }
+    }
 }
 struct NativeRoot: View {
     @EnvironmentObject var store: NativeStore
@@ -74,6 +93,7 @@ struct NativeRoot: View {
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("native-theme") private var theme = "system"
     @State private var currentDay = CivilDate.day()
+    @State private var returnedFromBackground = false
     @EnvironmentObject private var health: NativeHealthStore
     @AppStorage("native-reminders-enabled") private var remindersEnabled = false
     var body: some View {
@@ -105,6 +125,7 @@ struct NativeRoot: View {
             Button("OK") { store.error = nil }
         } message: { Text(store.error ?? "") }
         .task {
+            if router.requestedCalendarDay == nil { store.calendarMonth = CivilDate.month(); router.calendarDay = CivilDate.day() }
             if let url = NativeIntentDraft.pendingURL { route(url) }
             if NativeIntentDraft.taskTitle != nil { route(URL(string: "lifeos://task")!) }
             await health.start(demo: NativeHealthLaunchPolicy.simulated)
@@ -117,8 +138,20 @@ struct NativeRoot: View {
         .onChange(of: store.life, initial: true) { _, _ in updateReminders() }
         .onChange(of: remindersEnabled) { _, _ in updateReminders() }
         .onChange(of: store.isDemo) { _, _ in updateReminders() }
+        .onChange(of: router.tab) { _, tab in
+            if tab == .calendar {
+                let day = router.enterCalendar()
+                store.calendarMonth = String(day.prefix(7))
+            }
+        }
         .onChange(of: scenePhase) { _, phase in
-            if phase == .active { currentDay = CivilDate.day(); store.rollover(); Task { await store.sync(automatic: true); await store.loadWeather() } }
+            if phase == .background { returnedFromBackground = true }
+            if phase == .active {
+                if returnedFromBackground {
+                    returnedFromBackground = false; router.activationDate = Date()
+                    if router.tab == .calendar { router.calendarDay = CivilDate.day(); router.calendarFocusRequest = UUID(); store.calendarMonth = CivilDate.month() }
+                }
+                currentDay = CivilDate.day(); store.rollover(); Task { await store.sync(automatic: true); await store.loadWeather() } }
         }
         .onReceive(Timer.publish(every: 30, on: .main, in: .common).autoconnect()) { _ in
             let day = CivilDate.day()
@@ -140,7 +173,7 @@ struct NativeRoot: View {
                     router.sheet = .task(record)
                 } else { store.notice = "L’attività non è più disponibile. Aggiorna i dati per verificarla." }
             case .event, .day:
-                router.tab = .calendar; router.calendarDay = target.day; store.calendarMonth = String(target.day.prefix(7))
+                router.showCalendar(day: target.day); store.calendarMonth = String(target.day.prefix(7))
                 if target.kind == .event, let record = store.events.first(where: { $0.integer("id") == target.id && $0.text("day") == target.day }) { router.sheet = .event(record) }
             }
             return
@@ -158,12 +191,12 @@ struct NativeRoot: View {
         switch route {
         case .activities: router.tab = .tasks
         case .task:
-            guard router.sheet == nil else { store.notice = "L’attività dettata è pronta. Chiudi prima la schermata aperta."; return }
+            guard router.sheet == nil else { store.notice = "Chiudi la schermata aperta per aggiungere un’attività."; return }
             var record: Record = ["list_kind": .string(router.taskCategory)]
             if let title = NativeIntentDraft.taskTitle { record["title"] = .string(title); NativeIntentDraft.taskTitle = nil }
             router.tab = .tasks; router.sheet = .task(record)
         case .weight: router.tab = .dashboard; router.sheet = .weight(nil)
-        case .calendar: router.tab = .calendar
+        case .calendar: router.showCalendar()
         case .dashboard: router.tab = .dashboard
         }
     }

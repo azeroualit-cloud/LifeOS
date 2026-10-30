@@ -16,7 +16,7 @@ struct NativeHealthCard: View {
                 NavigationLink { NativeHealthDetail(health: health, demo: demo) } label: {
                     HStack(spacing: NativeDesign.Space.small) {
                         Label("Peso e calorie", systemImage: "figure.arms.open")
-                            .font(NativeDesign.heading).foregroundStyle(NativeDesign.healthGray)
+                            .font(NativeDesign.heading).foregroundStyle(NativeDesign.secondary)
                         Spacer(minLength: NativeDesign.Space.small)
                         if health.loading { ProgressView().controlSize(.small) }
                         NativeDisclosureIndicator()
@@ -49,7 +49,7 @@ struct NativeHealthCard: View {
     private func metric(_ value: String, unit: String) -> some View {
         let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: NativeDesign.Space.xs)) : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xs))
         return layout {
-            Text(value).font(.title2.weight(.semibold)).monospacedDigit().foregroundStyle(Color.primary)
+            Text(value).font(.title2.weight(.semibold)).monospacedDigit().foregroundStyle(NativeDesign.healthGray)
             Text(unit).font(.caption).foregroundStyle(NativeDesign.secondary)
         }
     }
@@ -73,6 +73,10 @@ private struct NativeHealthDashboardChart: View {
                         yEnd: .value("Calorie", data.plottedCalories(day.calories!)))
                     .foregroundStyle(CivilDate.day(day.date) == CivilDate.day(data.today) ? NativeDesign.accent : NativeDesign.healthGray)
                     .clipShape(UnevenRoundedRectangle(topLeadingRadius: NativeDesign.Layout.healthBarRadius, bottomLeadingRadius: 0, bottomTrailingRadius: 0, topTrailingRadius: NativeDesign.Layout.healthBarRadius))
+            }
+            ForEach(data.days.filter { ($0.weight ?? 0) > 0 && ($0.weight?.isFinite ?? false) }) { day in
+                PointMark(x: .value("Data", day.date), y: .value("Peso", day.weight!))
+                    .foregroundStyle(NativeDesign.healthGray).symbolSize(6)
             }
             ForEach(data.trend) { point in
                 LineMark(x: .value("Data", point.date), y: .value("Peso", point.value))

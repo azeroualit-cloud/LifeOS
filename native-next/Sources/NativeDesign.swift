@@ -10,6 +10,10 @@ enum NativeDesign {
     static let secondary = Color(uiColor: UIColor { traits in
         UIColor(white: traits.userInterfaceStyle == .dark ? 0.68 : 0.37, alpha: 1)
     })
+    // Compensate the text base so the requested 80% opacity remains readable.
+    static let pastCalendarSecondary = Color(uiColor: UIColor { traits in
+        UIColor(white: traits.userInterfaceStyle == .dark ? 0.72 : 0.27, alpha: 1)
+    })
     static let actionSurface = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor(white: 0.17, alpha: 1) : .tertiarySystemFill })
     static let healthGray = Color(uiColor: .systemGray)
     static let inset = Color.primary.opacity(0.045)
@@ -49,10 +53,13 @@ enum NativeDesign {
         static let healthChartHeight: CGFloat = 200
         static let categoryWidth: CGFloat = 88
         static let navigationInset = Space.large
-        static let pastDayOpacity = 0.90
+        static let pastDayOpacity = 0.80
         static let activityDescriptionHeight: CGFloat = 90
         static let shiftBrushWidth: CGFloat = 44
         static let shiftBrushHeight: CGFloat = 60
+        static let shiftProgressWidth: CGFloat = 144
+        static let shiftProgressHeight: CGFloat = 8
+        static let calendarPaneFraction: CGFloat = 0.58
         static let healthBarRadius: CGFloat = 2
         static let calendarDayNumber: CGFloat = 26
         static let calendarDayHeight: CGFloat = 54
