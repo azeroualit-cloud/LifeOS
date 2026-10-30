@@ -10,6 +10,10 @@ on:
         description: Recover only the two simulator-launch failures from run 41018165365, with identical source ZIP
         type: boolean
         default: false
+      package_verified_only:
+        description: Package after all 127 tests are verified; only widget version metadata may differ
+        type: boolean
+        default: false
   push:
     paths: ['lifeos-native.zip', '.github/workflows/lifeos-build.yml', '.github/workflows/ios.yml', 'Sources/**', 'Shared/**', 'Widgets/**', 'Tests/**', 'UITests/**', '*.entitlements', 'Assets.xcassets/**', 'project.yml']
 permissions:
@@ -52,7 +56,7 @@ jobs:
           import hashlib, pathlib, zipfile
           source = pathlib.Path('lifeos-native.zip')
           if source.is_file():
-              assert hashlib.sha256(source.read_bytes()).hexdigest() == '1fcbdc18783d756ddf2fabec67ab56e3516a02a176cc8f20090a9c7fe2e63f9f', 'ZIP sorgenti diverso da quello previsto'
+              assert hashlib.sha256(source.read_bytes()).hexdigest() == 'e8084ac7a67620534a33c34be0f3cae8466fb100cff9575bae2cc082137dc0d4', 'ZIP sorgenti diverso da quello previsto'
               with zipfile.ZipFile(source) as archive:
                   for name in archive.namelist():
                       p = pathlib.PurePosixPath(name)
@@ -134,6 +138,7 @@ jobs:
               raise SystemExit('Verifica contratto fallita: stage=%s class=%s HTTP=%s. Nessun dato o credenziale pubblicato.' % (stage,type(error).__name__,getattr(error,'code','n/a')))
           PY
       - name: Compila app e test Apple
+        if: inputs.package_verified_only != true
         timeout-minutes: 12
         working-directory: app
         run: |
@@ -149,12 +154,18 @@ jobs:
           set -euo pipefail
           gh run view 41018165365 --repo azeroualit-cloud/LifeOS --log > app/build/verified-recovery.log
           python3 - <<'PYRECOVERY'
-          import os, pathlib, re, subprocess
+          import io, os, pathlib, re, subprocess, zipfile
           assert os.environ['REUSE_UI'] == 'true', 'Il recupero richiede anche la verifica dei 31 UI'
           commit = '5067b2f78bec2b1e7cd1630333482270b291c221'
           subprocess.run(['git', 'fetch', '--no-tags', 'origin', commit], check=True)
           previous = subprocess.check_output(['git', 'show', commit + ':lifeos-native.zip'])
-          assert previous == pathlib.Path('lifeos-native.zip').read_bytes(), 'Pacchetto modificato: eseguire tutti i test'
+          def files(archive):
+              result = {name: archive.read(name) for name in archive.namelist()}
+              project = result['project.yml'].decode()
+              project = project.replace('        CFBundleDisplayName: Life OS\n        CFBundleVersion: $(CURRENT_PROJECT_VERSION)\n        CFBundleShortVersionString: $(MARKETING_VERSION)\n        NSExtension:', '        CFBundleDisplayName: Life OS\n        NSExtension:', 1)
+              result['project.yml'] = project.encode()
+              return result
+          assert files(zipfile.ZipFile(io.BytesIO(previous))) == files(zipfile.ZipFile('lifeos-native.zip')), 'Sorgenti modificati: eseguire tutti i test'
           log = pathlib.Path('app/build/verified-recovery.log').read_text()
           assert 'Executed 82 tests, with 0 failures' in log
           outcomes = re.findall(r"Test Case '-\[LifeOSProbeUITests.NativeInterfaceTests (\w+)\]' (passed|failed)", log)
@@ -167,7 +178,7 @@ jobs:
           required = set(re.findall(r'-only-testing:LifeOSProbeUITests/NativeInterfaceTests/(\w+)', pathlib.Path('.github/workflows/lifeos-build.yml').read_text()))
           assert len(required) == 14 and passed == required - failed, passed
           pathlib.Path('app/build/recovery-cases.txt').write_text('\n'.join(sorted(failed)) + '\n')
-          print('VERIFIED_RECOVERY: identical complete source ZIP; 82 unit and 12 compact UI passed; only two prelaunch failures to retry')
+          print('VERIFIED_RECOVERY: source files identical except explicit widget version metadata; 82 unit and 12 compact UI passed')
           PYRECOVERY
       - name: Verifica mirata Finanza su compatto
         if: inputs.recover_compact_launch != true
@@ -195,14 +206,41 @@ jobs:
           subprocess.run(['git', 'fetch', '--no-tags', 'origin', commit], check=True)
           previous = zipfile.ZipFile(io.BytesIO(subprocess.check_output(['git', 'show', commit + ':lifeos-native.zip'])))
           current = zipfile.ZipFile('lifeos-native.zip')
+          def files(archive):
+              result = {name: archive.read(name) for name in archive.namelist()}
+              project = result['project.yml'].decode()
+              project = project.replace('        CFBundleDisplayName: Life OS\n        CFBundleVersion: $(CURRENT_PROJECT_VERSION)\n        CFBundleShortVersionString: $(MARKETING_VERSION)\n        NSExtension:', '        CFBundleDisplayName: Life OS\n        NSExtension:', 1)
+              result['project.yml'] = project.encode()
+              return result
           def app_files(archive):
-              return {name: archive.read(name) for name in archive.namelist() if not name.startswith('Tests/')}
+              return {name: value for name, value in files(archive).items() if not name.startswith('Tests/')}
           assert app_files(previous) == app_files(current), 'App modificata: eseguire la suite UI completa'
           log = pathlib.Path('app/build/verified-ui.log').read_text()
           assert 'Executed 31 tests, with 0 failures' in log
           assert 'testWidgetQuickAddColdLaunchReachesBothEditors]\' passed' in log
           print('VERIFIED_UI_REUSED: 31 UI passed; all app and widget files match byte for byte')
           PYREUSE
+      - name: Verifica copertura completa prima del solo packaging
+        if: inputs.package_verified_only == true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RECOVER: ${{ inputs.recover_compact_launch == true }}
+          REUSE_UI: ${{ inputs.reuse_verified_ui == true }}
+        run: |
+          set -euo pipefail
+          gh run view 41023842491 --repo azeroualit-cloud/LifeOS --log > app/build/verified-final-tests.log
+          python3 - <<'PYPACKAGE'
+          import os, pathlib, re
+          assert os.environ['RECOVER'] == os.environ['REUSE_UI'] == 'true'
+          log = pathlib.Path('app/build/verified-final-tests.log').read_text()
+          outcomes = re.findall(r"Test Case '-\[LifeOSProbeUITests.NativeInterfaceTests (\w+)\]' (passed|failed)", log)
+          expected = set(pathlib.Path('app/build/recovery-cases.txt').read_text().splitlines())
+          assert {name for name, status in outcomes if status == 'passed'} == expected
+          assert not any(status == 'failed' for _, status in outcomes)
+          assert 'Executed 2 tests, with 0 failures' in log
+          assert 'VERIFIED_RECOVERY:' in log and 'VERIFIED_UI_REUSED:' in log
+          print('VERIFIED_TEST_COVERAGE_OK: 82 unit + 31 main UI + 14 compact UI; only widget version metadata changed')
+          PYPACKAGE
       - name: Compila ed esegui tutti i test
         if: inputs.recover_compact_launch != true
         timeout-minutes: 35
@@ -237,6 +275,7 @@ jobs:
           retention-days: 1
           if-no-files-found: ignore
       - name: Verifica interfaccia su iPhone compatto
+        if: inputs.package_verified_only != true
         timeout-minutes: 25
         working-directory: app
         env:
@@ -285,7 +324,8 @@ jobs:
           widget = plistlib.loads((extension/'Info.plist').read_bytes())
           assert widget['NSExtension']['NSExtensionPointIdentifier'] == 'com.apple.widgetkit-extension'
           assert widget['CFBundleIdentifier'] == main['CFBundleIdentifier'] + '.widget'
-          assert widget['CFBundleVersion'] == main['CFBundleVersion']
+          assert widget['CFBundleVersion'] == main['CFBundleVersion'] == '52'
+          assert widget['CFBundleShortVersionString'] == main['CFBundleShortVersionString'] == '0.9.0'
           assert any('lifeos' in entry.get('CFBundleURLSchemes', []) for entry in main['CFBundleURLTypes'])
           print('WIDGET_EMBEDDED_AND_VERSIONED_OK')
           PYWIDGET
