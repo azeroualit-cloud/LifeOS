@@ -30,4 +30,17 @@ Salute: metriche a sinistra, grafico a destra. Grigio di sistema per barre stori
 
 Test SQLite del servizio: replay, conversioni reversibili, campi conservati, eccezioni ricorrenti, completamento offline, concorrenza con eliminazione, riapertura, titoli lunghi e rollback. Test dell’effettivo Worker generato: migrazioni, RPC, lettura arricchita, conversione e completamento. Regressioni finanziarie conservate. Test nativi: coda senza attese di rete e riapertura, identità locale e validazione, finestra TDEE, editor, salute e palette nel simulatore principale e compatto.
 
-Il Worker 68 viene generato dalla copia recuperata della 67. La distribuzione non la sovrascrive sul server: scarica il codice live in memoria, applica solo sostituzioni con contesto univoco, conserva moduli estranei, binding e segreti, controlla il database atteso, verifica l’upload e ripristina i moduli originali in caso di errore. L’audit iniziale è in sola lettura; la distribuzione richiede il consenso specifico sui Worker live dopo i test Apple. Esiti Apple e disponibilità IPA ancora da verificare.
+Il Worker 68 viene generato dalla copia recuperata della 67. La distribuzione non la sovrascrive sul server: scarica il codice live in memoria, applica solo sostituzioni con contesto univoco, conserva moduli estranei, binding e segreti, controlla il database atteso, verifica l’upload e ripristina i moduli originali in caso di errore. L’audit iniziale è in sola lettura; la distribuzione è separata dalla build e viene avviata esplicitamente dopo i test Apple e il consenso specifico sui Worker live.
+
+## Consegna verificata — 30 ottobre 2026, 0.10.7 build 68
+
+[IPA per Signulous](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41052957803/artifacts/12976114405) · [build Apple](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41052957803) · [verifica indipendente IPA](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41056586423) · [distribuzione e controllo API live](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41057450159).
+
+Superati 191 test unitari nativi e 25 esecuzioni UI (10 sul simulatore principale, 15 sul compatto; 18 metodi UI distinti), zero fallimenti. Backend: 11 test attività, 3 verifiche di integrazione sul Worker generato, 17 regressioni finanziarie e 4 test del deploy. Verificate integrità ZIP, checksum, bundle/versione, piattaforma iPhoneOS e binario arm64 dell’IPA Release. Firma Signulous e prova fisica non eseguite.
+
+Sorgente app verificato: `642507c893321bcc78e14613ee9d76dfa62816c0`. Backend finale: `14044ba2a645a8334e2fd1176464cb1ed92d0f9f`; workflow di distribuzione verificato: `f53f3e1b9141a4bd9f0c87fa2b743c1b0bf70cc1`. I commit successivi alla build Apple modificano backend, procedure e documentazione, senza modificare il sorgente nativo verificato.
+
+Dopo l’autorizzazione esplicita dell’utente, aggiornati e verificati entrambi i Worker `lifeos` e `lifeos-native-test`, conservando moduli estranei, autenticazione, binding e segreti. Accesso autenticato, lettura reale, capability delle attività unificate e rifiuto di un titolo vuoto verificati: nessuna attività di prova creata e nessun dato privato pubblicato nei log.
+
+IPA SHA-256: `bb2cb3085f3f358b744d9566d2aa79b0f062936b5c0fb03bc8064d9b1f000670`. Artefatto disponibile fino al 6 novembre 2026, 12:30 UTC. Estrarre `LifeOS-unsigned.ipa` dal pacchetto e aggiornare tramite Signulous senza disinstallare l’app.
+
