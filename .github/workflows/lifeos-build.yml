@@ -255,7 +255,8 @@ jobs:
           if [ "$RECOVER_COMPACT" = "true" ]; then
             COMPACT_SCOPE=()
             while IFS= read -r name; do COMPACT_SCOPE+=("-only-testing:LifeOSProbeUITests/NativeInterfaceTests/$name"); done < build/recovery-cases.txt
-            APP_PATH=$(xcodebuild -project LifeOSProbe.xcodeproj -target LifeOSProbe -configuration Debug -sdk iphonesimulator -showBuildSettings -json | python3 -c 'import json,sys; s=next(x["buildSettings"] for x in json.load(sys.stdin) if x["target"]=="LifeOSProbe"); print(s["TARGET_BUILD_DIR"]+"/"+s["FULL_PRODUCT_NAME"])')
+            APP_PATH=$(python3 -c 'from pathlib import Path; p=list(Path.home().glob("Library/Developer/Xcode/DerivedData/LifeOSProbe-*/Build/Products/Debug-iphonesimulator/LifeOSProbe.app")); assert len(p)==1, "Expected exactly one compiled simulator app"; print(p[0])')
+            test -d "$APP_PATH"
             xcrun simctl install "$COMPACT" "$APP_PATH"
             xcrun simctl launch --terminate-running-process "$COMPACT" com.nas.lifeos.probe --visual-test
             xcrun simctl io "$COMPACT" screenshot build/preflight.png
