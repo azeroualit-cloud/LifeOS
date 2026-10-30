@@ -326,6 +326,7 @@ private struct NativeShiftBrushOption: View {
                 if !kind.time.isEmpty { Text(kind.time.replacingOccurrences(of: ":00", with: "")).font(.caption2).foregroundStyle(NativeDesign.secondary) }
             }.frame(width: width, height: height)
                 .modifier(NativeSelectionSurface(selected: brush == kind.rawValue, tint: kind.color, outlined: true))
+                .contentShape(Rectangle())
         }.buttonStyle(NativePressStyle()).foregroundStyle(kind.color)
             .accessibilityLabel(kind.title + (kind.time.isEmpty ? "" : ", " + kind.time))
             .accessibilityHint("Tocca i giorni per applicare questo turno")
@@ -378,4 +379,3 @@ struct EventEditor: View {
     let record: Record
     var body: some View { NativeActivityEditor(record: record, source: "event") }
 }
-

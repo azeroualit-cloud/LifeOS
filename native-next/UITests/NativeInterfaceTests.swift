@@ -981,6 +981,8 @@ final class NativeInterfaceTests: XCTestCase {
         app.buttons["toggle-shift-paint"].tap()
         let brush = app.buttons["shift-brush-afternoon"]
         XCTAssertTrue(brush.waitForExistence(timeout: 10)); brush.tap()
+        expectation(for: NSPredicate { element, _ in (element as? XCUIElement)?.isSelected == true }, evaluatedWith: brush)
+        waitForExpectations(timeout: 10)
         let formatter = DateFormatter(); formatter.locale = Locale(identifier: "en_US_POSIX"); formatter.timeZone = TimeZone(identifier: "Europe/Rome"); formatter.dateFormat = "yyyy-MM-dd"
         let day = app.buttons["calendar-day-" + formatter.string(from: Date())]
         capture("calendar-palette-before-paint")
