@@ -1,0 +1,75 @@
+name: Life OS - Ordinamento inserimento movimenti
+on:
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: Distribuisci dopo la verifica Apple indicata nel workflow
+        type: boolean
+        default: false
+  push:
+    paths: ['.github/workflows/lifeos-movement70.yml']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  stop-superseded:
+    if: contains(github.event.head_commit.message, '[stop-superseded-70]')
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Ferma soltanto la verifica sorgente superata
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$(gh api repos/azeroualit-cloud/LifeOS/actions/runs/41109907852 --jq .status)" != completed ]; then
+            gh api --method POST repos/azeroualit-cloud/LifeOS/actions/runs/41109907852/force-cancel
+          fi
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verifica migrazione, ordinamento e conservazione finanziaria
+        run: |
+          python3 scripts/build-worker-68.py
+          python3 scripts/build-worker-70.py
+          python3 scripts/test_deploy_activities_68.py
+          python3 scripts/test_movement_creation_70.py
+          node backend/movement-order/tests/creation.test.mjs
+          LIFEOS_ROUTING_WORKER=manual/build-70/worker.js node backend/expense-routing/tests/routing.test.mjs
+          LIFEOS_ACTIVITY_WORKER=manual/build-70/worker.js node backend/activities/tests/worker.test.mjs
+      - name: Audit codice e trigger live senza modifiche
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          LIFEOS_BACKEND_AUDIT_ONLY: '1'
+        run: python3 scripts/deploy-movement-creation-70.py
+  deploy:
+    needs: audit
+    if: contains(github.event.head_commit.message, '[deploy-movement-70]') || (github.event_name == 'workflow_dispatch' && inputs.deploy)
+    runs-on: ubuntu-latest
+    env:
+      VERIFIED_NATIVE_RUN: ''
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Richiede la verifica Apple del sorgente nativo corrente
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test -n "$VERIFIED_NATIVE_RUN"
+          gh api "repos/azeroualit-cloud/LifeOS/actions/runs/$VERIFIED_NATIVE_RUN" > /tmp/native-run.json
+          python3 - <<'PY'
+          import json,subprocess
+          run=json.load(open('/tmp/native-run.json'))
+          assert run['conclusion']=='success' and run['path']=='.github/workflows/lifeos-build.yml'
+          subprocess.run(['git','diff','--exit-code',run['head_sha'],'HEAD','--','native-next'],check=True)
+          PY
+      - name: Aggiorna solo metadati di creazione e verifica il contratto reale
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          LIFEOS_TEST_PASSWORD: ${{ secrets.LIFEOS_TEST_PASSWORD }}
+        run: python3 scripts/deploy-movement-creation-70.py
