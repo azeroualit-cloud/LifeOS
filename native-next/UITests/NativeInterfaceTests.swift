@@ -93,8 +93,14 @@ final class NativeInterfaceTests: XCTestCase {
         let app = launch(["--dark"])
         capture("dashboard-weekly-structure-dark")
         let health = app.buttons["home-health-detail"]
-        reveal(health, in: app)
+        let surface = app.scrollViews["dashboard-scroll"]
+        let lower = app.tabBars.firstMatch.frame.minY
+        for _ in 0..<8 {
+            if health.exists && health.frame.maxY < lower { break }
+            surface.swipeUp()
+        }
         XCTAssertTrue(health.exists)
+        XCTAssertLessThan(health.frame.maxY, lower, "The entire Health chart must remain above the tab bar")
         capture("health-standardized-dark")
         app.tabBars.buttons["Calendario"].tap()
         app.buttons["toggle-shift-paint"].tap()

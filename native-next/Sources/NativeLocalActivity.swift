@@ -15,7 +15,7 @@ enum NativeLocalActivity {
         row["id"] = (oldID > 0 && (p.text("day").isEmpty ? "task" : "event") == source) ? .int(oldID) : p["localID"]; row["activity_uid"] = .string(uid); row["pending"] = .bool(true)
         if p.text("day").isEmpty {
             row["activity_source"] = .string("task"); row["scheduled_date"] = .null
-            row["status"] = old?["status"] ?? .string(p.flag("completed") ? "done" : "todo")
+            row["status"] = p.flag("statusIntent") ? .string(p.text("taskStatus", fallback: "todo")) : old?["status"] ?? .string(p.flag("completed") ? "done" : "todo")
             row["sort_order"] = old?["sort_order"] ?? .int(life.records("tasks").count + 1)
             life["tasks"] = .array((life.records("tasks") + [row]).map(JSONValue.object))
         } else {

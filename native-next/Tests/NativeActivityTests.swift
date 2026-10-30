@@ -36,6 +36,15 @@ final class NativeActivityTests: XCTestCase {
         XCTAssertEqual(rows.first?.id, "task:7:" + day)
         XCTAssertTrue(NativeActivityCatalog.rows(tasks: [], events: [event], category: "action", section: "todo", today: day).isEmpty)
     }
+    func testPendingCompletionReplacesLocalStateAndPreservesIdentity() throws {
+        var life = DemoData.emptyLife(), p = draft
+        try NativeLocalActivity.apply(p, life: &life)
+        p["sourceId"] = .int(0); p["statusIntent"] = .bool(true); p["taskStatus"] = .string("done"); p["completed"] = .bool(true)
+        try NativeLocalActivity.apply(p, life: &life)
+        XCTAssertEqual(life.records("tasks").count, 1)
+        XCTAssertEqual(life.records("tasks").first?.text("status"), "done")
+        XCTAssertEqual(life.records("tasks").first?.text("activity_uid"), "task:7")
+    }
     func testInvalidDatesAndEndTimesAreRejectedBeforeEnqueueing() {
         var p = draft
         p["day"] = .string("2026-02-30")

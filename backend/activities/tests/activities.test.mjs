@@ -4,7 +4,7 @@ import {DatabaseSync} from 'node:sqlite';
 import {saveActivity,enrichActivities} from '../activities.mjs';
 function fixture(){
  const sqlite=new DatabaseSync(':memory:');sqlite.exec(`CREATE TABLE os_categories(key TEXT PRIMARY KEY);INSERT INTO os_categories VALUES('action');
- CREATE TABLE os_tasks(id INTEGER PRIMARY KEY AUTOINCREMENT,title TEXT,notes TEXT,list_kind TEXT,status TEXT DEFAULT 'todo',due_date TEXT,scheduled_date TEXT,scheduled_time TEXT,sort_order INT,updated_at TEXT);
+ CREATE TABLE os_tasks(id INTEGER PRIMARY KEY AUTOINCREMENT,title TEXT,notes TEXT,list_kind TEXT,status TEXT DEFAULT 'todo',due_date TEXT,scheduled_date TEXT,scheduled_time TEXT,sort_order INT,updated_at TEXT,completed_at TEXT);
  CREATE TABLE os_events(id INTEGER PRIMARY KEY AUTOINCREMENT,title TEXT,notes TEXT,day TEXT,start_time TEXT,end_time TEXT,location TEXT,updated_at TEXT);
  CREATE TABLE os_event_repeat(event_id INTEGER PRIMARY KEY,frequency TEXT,until_day TEXT);
  CREATE TABLE os_event_occurrences(event_id INTEGER,day TEXT,status TEXT,PRIMARY KEY(event_id,day));`);
@@ -46,4 +46,19 @@ test('deletion between lookup and commit cannot produce a false save receipt',as
  await assert.rejects(()=>saveActivity(db,{...p,uid:'task:1',sourceId:1}));
  assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM os_activity_identity').get().n,0);
  assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM os_activity_requests').get().n,0);
+});
+test('completion after an offline create survives replay and reopening',async()=>{
+ const {db,sqlite,p}=fixture();await saveActivity(db,p);
+ const complete={...p,requestId:'request-complete',statusIntent:true,taskStatus:'done',completed:true};
+ await saveActivity(db,complete);await saveActivity(db,complete);
+ assert.equal(sqlite.prepare('SELECT status FROM os_tasks').get().status,'done');
+ await saveActivity(db,{...p,requestId:'request-reopen',statusIntent:true,taskStatus:'waiting'});
+ assert.equal(sqlite.prepare('SELECT status FROM os_tasks').get().status,'waiting');
+});
+test('a completed single activity can lose its date without losing completion or leaving exceptions',async()=>{
+ const {db,sqlite,p}=fixture();await saveActivity(db,{...p,frequency:'none',completed:true,day:'2026-11-01'});
+ assert.equal(sqlite.prepare('SELECT status FROM os_event_occurrences').get().status,'done');
+ await saveActivity(db,{...p,frequency:'none',requestId:'request-undate'});
+ assert.equal(sqlite.prepare('SELECT status FROM os_tasks').get().status,'done');
+ assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM os_event_occurrences').get().n,0);
 });

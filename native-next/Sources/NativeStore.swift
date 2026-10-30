@@ -482,7 +482,7 @@ import SwiftUI
             p["uid"] = .string(old.text("activity_uid", fallback: payload.integer("id") == 0 ? UUID().uuidString : "task:" + String(payload.integer("id"))))
             p["source"] = .string("task"); p["sourceId"] = .int(max(0, payload.integer("id")))
             p["day"] = p["scheduled_date"]; p["start_time"] = p["scheduled_time"]
-            p["completed"] = .bool(old.text("status") == "done")
+            p["completed"] = .bool(old.text("status") == "done"); p["statusIntent"] = .bool(false)
             try await perform("saveActivity", p); return
         }
         if method == "saveActivity" { try NativeActivityDraft.validate(payload) }
@@ -490,7 +490,8 @@ import SwiftUI
             let row = (tasks + events).first { $0.integer("id") == payload.integer("id") }
             guard var p = row else { throw Message(text: "Attività locale non trovata.") }
             p["uid"] = p["activity_uid"]; p["source"] = .string(method == "setTaskStatus" ? "task" : "event"); p["sourceId"] = .int(0)
-            p["completed"] = .bool(payload.text("status") == "done")
+            p["completed"] = .bool(payload.text("status") == "done"); p["statusIntent"] = .bool(true)
+            p["taskStatus"] = .string(payload.text("status") == "open" ? "todo" : payload.text("status"))
             try await perform("saveActivity", p); return
         }
         if isDemo {
