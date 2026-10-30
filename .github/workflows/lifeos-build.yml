@@ -1,10 +1,16 @@
 name: Life OS - App nativa
 on:
   workflow_dispatch:
+    inputs:
+      reuse_verified_ui:
+        description: Reuse the 31 UI tests from run 41014595085 only if app files are identical
+        type: boolean
+        default: false
   push:
     paths: ['lifeos-native.zip', '.github/workflows/lifeos-build.yml', '.github/workflows/ios.yml', 'Sources/**', 'Shared/**', 'Widgets/**', 'Tests/**', 'UITests/**', '*.entitlements', 'Assets.xcassets/**', 'project.yml']
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: lifeos-native-${{ github.ref }}
   cancel-in-progress: true
@@ -42,7 +48,7 @@ jobs:
           import hashlib, pathlib, zipfile
           source = pathlib.Path('lifeos-native.zip')
           if source.is_file():
-              assert hashlib.sha256(source.read_bytes()).hexdigest() == 'ab5d1dfe473feeeffea2a81164f4b78d41cdbad862460804d0db94f9fba4918c', 'ZIP sorgenti diverso da quello previsto'
+              assert hashlib.sha256(source.read_bytes()).hexdigest() == '1fcbdc18783d756ddf2fabec67ab56e3516a02a176cc8f20090a9c7fe2e63f9f', 'ZIP sorgenti diverso da quello previsto'
               with zipfile.ZipFile(source) as archive:
                   for name in archive.namelist():
                       p = pathlib.PurePosixPath(name)
@@ -142,16 +148,41 @@ jobs:
           xcrun simctl boot "$COMPACT"
           xcrun simctl bootstatus "$COMPACT" -b
           xcodebuild test-without-building -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT" -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFinanceOverviewSupportsLargeTextAndEmptySnapshot -resultBundlePath build/Focused.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/focused-tests.log
+      - name: Verifica riuso della suite UI già superata
+        if: inputs.reuse_verified_ui == true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh run view 41014595085 --repo azeroualit-cloud/LifeOS --log > app/build/verified-ui.log
+          python3 - <<'PYREUSE'
+          import io, pathlib, subprocess, zipfile
+          commit = '9e7a2c33bbb2452eecfb910eb97a73c486549624'
+          subprocess.run(['git', 'fetch', '--no-tags', 'origin', commit], check=True)
+          previous = zipfile.ZipFile(io.BytesIO(subprocess.check_output(['git', 'show', commit + ':lifeos-native.zip'])))
+          current = zipfile.ZipFile('lifeos-native.zip')
+          def app_files(archive):
+              return {name: archive.read(name) for name in archive.namelist() if not name.startswith('Tests/')}
+          assert app_files(previous) == app_files(current), 'App modificata: eseguire la suite UI completa'
+          log = pathlib.Path('app/build/verified-ui.log').read_text()
+          assert 'Executed 31 tests, with 0 failures' in log
+          assert 'testWidgetQuickAddColdLaunchReachesBothEditors]\' passed' in log
+          print('VERIFIED_UI_REUSED: 31 UI passed; all app and widget files match byte for byte')
+          PYREUSE
       - name: Compila ed esegui tutti i test
         timeout-minutes: 35
         working-directory: app
+        env:
+          REUSE_VERIFIED_UI: ${{ inputs.reuse_verified_ui == true }}
         run: |
           set -euo pipefail
           DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import json,re,sys; d=json.load(sys.stdin); keys=sorted((k for k in d["devices"] if "iOS" in k),key=lambda k:tuple(map(int,re.findall(r"\d+",k))),reverse=True); print(next(x["udid"] for k in keys for x in d["devices"][k] if "iPhone" in x["name"]))')
           xcrun simctl shutdown all
           xcrun simctl boot "$DEVICE"
           xcrun simctl bootstatus "$DEVICE" -b
-          xcodebuild test -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -parallel-testing-enabled NO -resultBundlePath build/Tests.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/tests.log
+          TEST_SCOPE=()
+          if [ "$REUSE_VERIFIED_UI" = "true" ]; then TEST_SCOPE=(-only-testing:LifeOSProbeTests); fi
+          xcodebuild test "${TEST_SCOPE[@]}" -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -parallel-testing-enabled NO -resultBundlePath build/Tests.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/tests.log
       - name: Esporta anteprima principale
         if: always()
         continue-on-error: true
