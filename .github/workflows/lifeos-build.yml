@@ -218,7 +218,7 @@ jobs:
           log = pathlib.Path('app/build/verified-ui.log').read_text()
           assert 'Executed 31 tests, with 0 failures' in log
           assert 'testWidgetQuickAddColdLaunchReachesBothEditors]\' passed' in log
-          print('VERIFIED_UI_REUSED: 31 UI passed; all app and widget files match byte for byte')
+          print('VERIFIED_UI_REUSED: 31 UI passed; all code and UI tests byte-identical; only explicit widget version metadata may differ')
           PYREUSE
       - name: Verifica copertura completa prima del solo packaging
         if: inputs.package_verified_only == true
