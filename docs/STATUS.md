@@ -1,3 +1,13 @@
+## Consegna verificata — 30 ottobre 2026, 0.10.8 build 69
+
+[IPA diretta per Signulous](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.8-build69/LifeOS-69.ipa) · [build e test Apple](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41079215196) · [modifiche e verifiche](native/REVISIONE-69.md).
+
+Dashboard: anteprima Peso e calorie con soli valori/unità e mini grafico storico; dettagli e previsioni nella scheda. Prossimi impegni raggruppati per giornata, stile checklist delle abitudini, margini e completamento diretto persistente anche offline. Nessuna modifica al backend in questa revisione.
+
+Superati 192 test unitari e 25 esecuzioni UI: 2 mirate e 6 regressioni sul simulatore principale, 17 sul compatto (19 metodi UI distinti). Zero fallimenti. Schermate reali controllate nei due temi e con testo accessibile. IPA scaricata dal link pubblico: checksum corrispondente, ZIP integro, versione/build corretti, binari arm64 di app e widget, piattaforma iPhoneOS e schema lifeos verificati. Prova fisica/firma Signulous non eseguite.
+
+Codice verificato: `6d3fcb9437e6da92072498a0ec76bb720870c32d`. SHA-256 IPA: `27e2a7fce0f37db66402bf9cde8af1f7f158961c981ed1479456cb95b278812d`. Aggiornare con Signulous sopra l’app esistente, senza disinstallarla. Il link è al singolo file IPA, non all’archivio degli artefatti CI.
+
 ## Consegna verificata — 30 ottobre 2026, 0.10.7 build 68
 
 [IPA per Signulous](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41052957803/artifacts/12976114405) · [build Apple](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41052957803) · [verifica indipendente IPA](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41056586423) · [distribuzione e controllo API live](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41057450159).

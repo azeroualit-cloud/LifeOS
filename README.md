@@ -14,3 +14,5 @@ Su questo ramo la sorgente corrente è `native-next/`, un overlay sulla build 60
 - Servizio backend attività: `backend/activities/activities.mjs`.
 
 [Schema, comportamenti e verifiche della revisione 68](docs/native/STANDARDIZATION-68.md). La distribuzione sui Worker live è separata dalla compilazione: avvio manuale oppure commit esplicito con marcatore dedicato sul workflow. Build 68 e aggiornamento backend verificati dopo l’autorizzazione dell’utente; risultati e link IPA nel documento collegato.
+
+[Dashboard 69: anteprima Salute e impegni raggruppati](docs/native/REVISIONE-69.md) · [IPA diretta 0.10.8 build 69](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.8-build69/LifeOS-69.ipa). Verifiche Apple e integrità del pacchetto completate; backend attività della revisione 68 conservato.
