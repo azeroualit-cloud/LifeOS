@@ -5,11 +5,12 @@ struct NativeHealthCard: View {
     @ObservedObject var health: NativeHealthStore
     let demo: Bool
     @State private var addingWeight = false
+    @Environment(\.dynamicTypeSize) private var typeSize
     private var latest: HealthDay? { health.days.last { $0.weight != nil } }
     var body: some View {
         // Calculate the historical fit once for this render, not once per metric/mark.
         let estimate = health.estimate
-        let chart = NativeHealthDashboardData(days: health.days, estimate: estimate)
+        let chart = NativeHealthDashboardData(days: health.days, estimate: nil)
         NativeCard {
             HStack(spacing: NativeDesign.Space.small) {
                 NavigationLink { NativeHealthDetail(health: health, demo: demo) } label: {
@@ -25,125 +26,63 @@ struct NativeHealthCard: View {
                     .accessibilityIdentifier("home-health-add-weight")
             }
             NavigationLink { NativeHealthDetail(health: health, demo: demo) } label: {
-                VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-                    HStack(alignment: .center, spacing: NativeDesign.Space.medium) {
-                        VStack(alignment: .leading, spacing: NativeDesign.Space.large) { metrics(estimate) }
-                            .frame(width: NativeDesign.Layout.healthMetricWidth, alignment: .leading)
-                        if !chart.days.isEmpty {
-                            NativeHealthDashboardChart(data: chart).frame(maxWidth: .infinity)
-                        } else {
-                            Text("Nessun dato nell’ultimo mese. Apri per collegare Apple Health o aggiungi una pesata con +.")
-                                .font(.subheadline).foregroundStyle(NativeDesign.secondary)
-                        }
-                    }
-                    if let estimate, let predicted = chart.forecast.last {
-                        Text("Tra 1 mese ≈ " + predicted.value.formatted(.number.precision(.fractionLength(1))) + " kg · " + estimate.averageIntake.formatted(.number.precision(.fractionLength(0))) + " kcal/giorno")
-                            .font(.caption).foregroundStyle(NativeDesign.secondary)
-                    } else if !chart.days.isEmpty {
-                        Text("Previsione in attesa di dati sufficienti per stimare il TDEE.")
-                            .font(.caption).foregroundStyle(NativeDesign.secondary)
-                    }
-                    if demo { Text("Dati illustrativi").font(.caption2).foregroundStyle(NativeDesign.secondary) }
-                }.frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle())
+                let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: NativeDesign.Space.large)) : AnyLayout(HStackLayout(alignment: .center, spacing: NativeDesign.Space.large))
+                layout {
+                    VStack(alignment: .leading, spacing: NativeDesign.Space.medium) { metrics(estimate) }
+                        .fixedSize(horizontal: true, vertical: false)
+                    if !chart.days.isEmpty {
+                        NativeHealthDashboardChart(data: chart).frame(maxWidth: .infinity)
+                    } else { Spacer(minLength: 0) }
+                }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.healthOverviewChart, alignment: .leading)
+                    .contentShape(Rectangle())
             }.buttonStyle(NativePressStyle()).accessibilityIdentifier("home-health-detail")
-                .accessibilityLabel(accessibilitySummary(estimate, chart: chart))
+                .accessibilityLabel(accessibilitySummary(estimate))
                 .accessibilityHint("Apre grafici, simulazione e impostazioni Apple Health")
         }.sheet(isPresented: $addingWeight) {
             NativeAddWeightSheet(health: health)
         }
     }
     @ViewBuilder private func metrics(_ estimate: HealthEstimate?) -> some View {
-        VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-            Text("TDEE · kcal/giorno").font(.caption).foregroundStyle(NativeDesign.secondary)
-            Text(estimate.map { "≈ " + (($0.tdee / 50).rounded() * 50).formatted(.number.precision(.fractionLength(0))) } ?? "—")
-                .font(.title2.weight(.semibold)).monospacedDigit().foregroundStyle(NativeDesign.healthGray)
-        }.frame(maxWidth: .infinity, alignment: .leading)
-        VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-            Text("Ultimo peso").font(.caption).foregroundStyle(NativeDesign.secondary)
-            HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xs) {
-                Text(latest?.weight.map { $0.formatted(.number.precision(.fractionLength(1))) } ?? "—").font(NativeDesign.value)
-                Text("kg").font(.subheadline).foregroundStyle(NativeDesign.secondary)
-            }.monospacedDigit().foregroundStyle(NativeDesign.healthGray)
-        }.frame(maxWidth: .infinity, alignment: .leading)
+        metric(estimate.map { (($0.tdee / 50).rounded() * 50).formatted(.number.precision(.fractionLength(0))) } ?? "—", unit: "kcal/giorno")
+        metric(latest?.weight.map { $0.formatted(.number.precision(.fractionLength(1))) } ?? "—", unit: "kg")
     }
-    private func accessibilitySummary(_ estimate: HealthEstimate?, chart: NativeHealthDashboardData) -> String {
+    private func metric(_ value: String, unit: String) -> some View {
+        let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: NativeDesign.Space.xs)) : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xs))
+        return layout {
+            Text(value).font(.title2.weight(.semibold)).monospacedDigit().foregroundStyle(Color.primary)
+            Text(unit).font(.caption).foregroundStyle(NativeDesign.secondary)
+        }
+    }
+    private func accessibilitySummary(_ estimate: HealthEstimate?) -> String {
         var text = "Peso e calorie. Ultimo peso " + (latest?.weight.map { $0.formatted(.number.precision(.fractionLength(1))) + " kg" } ?? "non disponibile")
         if let estimate { text += ". TDEE medio storico stimato " + ((estimate.tdee / 50).rounded() * 50).formatted(.number.precision(.fractionLength(0))) + " kcal al giorno" }
-        text += ". Grafico: peso e calorie dell’ultimo mese, previsione del peso del prossimo mese. Scale indipendenti: kcal a sinistra, kg a destra."
-        if let predicted = chart.forecast.last, let estimate {
-            text += " Tra un mese circa " + predicted.value.formatted(.number.precision(.fractionLength(1))) + " kg con " + estimate.averageIntake.formatted(.number.precision(.fractionLength(0))) + " kcal al giorno."
-        } else { text += " Previsione non disponibile." }
+        text += ". Anteprima peso e calorie dell’ultimo mese. Dettagli e previsioni nella scheda."
+        if demo { text += " Dati illustrativi." }
         return text
     }
 }
 
+/// An axis-free historical preview. Forecasts and full scales belong to the detail screen.
 private struct NativeHealthDashboardChart: View {
     let data: NativeHealthDashboardData
-    private var calorieTicks: [Double] {
-        stride(from: 0.0, through: data.calorieCeiling, by: data.calorieCeiling / 3).map { data.plottedCalories($0) }
-    }
     var body: some View {
-        VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-            HStack {
-                Text("kcal").foregroundStyle(NativeDesign.healthGray)
-                Spacer()
-                Text("kg").foregroundStyle(NativeDesign.healthGray)
-            }.font(.caption2.weight(.medium))
-            Chart {
-                // Draw translucent intake columns first so weight remains legible.
-                ForEach(data.days.filter { ($0.calories ?? 0) > 0 && ($0.calories?.isFinite ?? false) }) { day in
-                    BarMark(x: .value("Data", day.date, unit: .day),
-                            yStart: .value("Base", data.weightDomain.lowerBound),
-                            yEnd: .value("Calorie", data.plottedCalories(day.calories!)))
-                        .foregroundStyle(CivilDate.day(day.date) == CivilDate.day(data.today) ? NativeDesign.accent : NativeDesign.healthGray)
-                        .clipShape(UnevenRoundedRectangle(topLeadingRadius: NativeDesign.Layout.healthBarRadius, bottomLeadingRadius: 0, bottomTrailingRadius: 0, topTrailingRadius: NativeDesign.Layout.healthBarRadius))
-                }
-                ForEach(data.days.filter { ($0.weight ?? 0) > 0 && ($0.weight?.isFinite ?? false) }) { day in
-                    PointMark(x: .value("Data", day.date), y: .value("Peso", day.weight!))
-                        .foregroundStyle(NativeDesign.healthGray.opacity(0.35)).symbolSize(10)
-                }
-                ForEach(data.trend.filter { point in data.transition.first.map { point.date <= $0.date } ?? true }) { point in
-                    LineMark(x: .value("Data", point.date), y: .value("Peso", point.value), series: .value("Serie", "Tendenza"))
-                        .foregroundStyle(NativeDesign.healthGray).lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
-                }
-                ForEach(data.transition) { point in
-                    LineMark(x: .value("Data", point.date), y: .value("Peso", point.value), series: .value("Serie", "Raccordo"))
-                        .foregroundStyle(NativeDesign.healthGray).lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
-                }
-                ForEach(data.forecast) { point in
-                    LineMark(x: .value("Data", point.date), y: .value("Peso", point.value), series: .value("Serie", "Previsione"))
-                        .foregroundStyle(NativeDesign.healthGray).lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round, dash: [4, 4]))
-                }
-                RuleMark(x: .value("Oggi", data.today))
-                    .foregroundStyle(Color.secondary.opacity(0.5)).lineStyle(StrokeStyle(lineWidth: 1, dash: [2, 3]))
-            }.chartXScale(domain: data.start...data.end).chartYScale(domain: data.weightDomain)
-                .chartYAxis {
-                    AxisMarks(position: .trailing, values: .automatic(desiredCount: 3)) { _ in
-                        AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [2, 3])).foregroundStyle(Color.secondary.opacity(0.2))
-                        AxisValueLabel().foregroundStyle(NativeDesign.healthGray)
-                    }
-                    AxisMarks(position: .leading, values: calorieTicks) { tick in
-                        if let position = tick.as(Double.self) {
-                            AxisValueLabel {
-                                Text(((position - data.weightDomain.lowerBound) / (data.weightDomain.upperBound - data.weightDomain.lowerBound) * data.calorieCeiling).formatted(.number.precision(.fractionLength(0))))
-                                    .foregroundStyle(NativeDesign.healthGray)
-                            }
-                        }
-                    }
-                }
-                .chartXAxis {
-                    AxisMarks(values: [data.start, data.today, data.end]) { value in
-                        AxisValueLabel {
-                            if let date = value.as(Date.self) {
-                                Text(date == data.today ? "Oggi" : date.formatted(.dateTime.day().month(.abbreviated)))
-                            }
-                        }
-                    }
-                }
-                .frame(height: NativeDesign.Layout.healthOverviewChart)
-                // The containing link provides the original units and an accessible summary.
-                .accessibilityHidden(true)
-        }
+        Chart {
+            ForEach(data.days.filter { ($0.calories ?? 0) > 0 && ($0.calories?.isFinite ?? false) }) { day in
+                BarMark(x: .value("Data", day.date, unit: .day),
+                        yStart: .value("Base", data.weightDomain.lowerBound),
+                        yEnd: .value("Calorie", data.plottedCalories(day.calories!)))
+                    .foregroundStyle(CivilDate.day(day.date) == CivilDate.day(data.today) ? NativeDesign.accent : NativeDesign.healthGray)
+                    .clipShape(UnevenRoundedRectangle(topLeadingRadius: NativeDesign.Layout.healthBarRadius, bottomLeadingRadius: 0, bottomTrailingRadius: 0, topTrailingRadius: NativeDesign.Layout.healthBarRadius))
+            }
+            ForEach(data.trend) { point in
+                LineMark(x: .value("Data", point.date), y: .value("Peso", point.value))
+                    .foregroundStyle(NativeDesign.healthGray)
+                    .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
+            }
+        }.chartXScale(domain: data.start...data.today).chartYScale(domain: data.weightDomain)
+            .chartXAxis(.hidden).chartYAxis(.hidden).chartLegend(.hidden)
+            .frame(height: NativeDesign.Layout.healthOverviewChart)
+            .accessibilityHidden(true)
     }
 }
 

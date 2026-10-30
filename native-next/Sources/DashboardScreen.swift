@@ -115,7 +115,7 @@ struct DashboardScreen: View {
         }.animation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration), value: model.phase)
     }
     private func agenda(_ summary: NativeHomeSummary, today: String) -> some View {
-        VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+        VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
             NativeSectionHeader("Prossimi impegni", titleIdentifier: "home-agenda-heading") {
                 if !summary.events.isEmpty {
                     NavigationLink { HomeAgendaScreen() } label: {
@@ -127,26 +127,23 @@ struct DashboardScreen: View {
                 Text(NativeHomeSummary.hasCalendarData(life: store.life, demo: store.isDemo) ? "Nessun appuntamento nei prossimi 7 giorni" : "Calendario da aggiornare")
                     .font(NativeDesign.body).foregroundStyle(NativeDesign.secondary).accessibilityIdentifier("home-agenda-empty")
             } else {
-                ForEach(Array(summary.events.enumerated()), id: \.offset) { _, event in
-                    Button { router.sheet = .event(event) } label: {
-                        VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-                            HStack(spacing: NativeDesign.Space.small) {
-                                Text(agendaDate(event, today: today)).font(NativeDesign.metadata).monospacedDigit().foregroundStyle(NativeDesign.secondary)
-                                Rectangle().fill(NativeDesign.secondary.opacity(0.25)).frame(height: NativeDesign.Space.hairline).accessibilityHidden(true)
+                let groups = Dictionary(grouping: summary.events, by: { $0.text("day") })
+                VStack(alignment: .leading, spacing: NativeDesign.Space.section) {
+                    ForEach(groups.keys.sorted(), id: \.self) { day in
+                        VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+                            HomeAgendaDayHeading(day: day, today: today)
+                            VStack(spacing: NativeDesign.Space.none) {
+                                ForEach(Array((groups[day] ?? []).enumerated()), id: \.element.agendaIdentity) { index, event in
+                                    if index > 0 { Divider().padding(.leading, NativeDesign.Layout.touchTarget + NativeDesign.Space.small) }
+                                    HomeAgendaRow(event: event)
+                                        .padding(.vertical, NativeDesign.Space.xs)
+                                }
                             }
-                            Text(event.text("title", fallback: "Appuntamento")).font(NativeDesign.body).foregroundStyle(Color.primary).fixedSize(horizontal: false, vertical: true)
-                                .padding(.leading, NativeDesign.Space.large)
-                        }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
-                            .contentShape(Rectangle())
-                    }.buttonStyle(NativePressStyle()).accessibilityIdentifier("home-agenda-" + String(event.integer("id")) + "-" + event.text("day"))
+                        }
+                    }
                 }
             }
         }
-    }
-    private func agendaDate(_ event: Record, today: String) -> String {
-        let day = event.text("day")
-        let label = day == today ? "Oggi" : day == CivilDate.adding(1, to: today) ? "Domani" : CivilDate.label(day)
-        return label + " · " + (event.text("start_time").isEmpty ? "Tutto il giorno" : event.text("start_time"))
     }
     @ViewBuilder private func nextTime(_ now: Date) -> some View {
         if let next = NativeNextTime.next(now: now) {
@@ -223,7 +220,47 @@ struct DashboardScreen: View {
 
 }
 
-private extension Dictionary where Key == String, Value == JSONValue { var integerID: Int { integer("id") } }
+private extension Dictionary where Key == String, Value == JSONValue {
+    var integerID: Int { integer("id") }
+    var agendaIdentity: String { String(integer("id")) + "-" + text("day") }
+}
+
+private struct HomeAgendaDayHeading: View {
+    let day: String
+    let today: String
+    private var title: String {
+        day == today ? "Oggi" : day == CivilDate.adding(1, to: today) ? "Domani" : CivilDate.label(day)
+    }
+    var body: some View {
+        Text(title).font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
+            .accessibilityAddTraits(.isHeader).accessibilityIdentifier("home-day-" + day)
+    }
+}
+
+private struct HomeAgendaRow: View {
+    @EnvironmentObject private var store: NativeStore
+    @EnvironmentObject private var router: NativeRouter
+    @State private var completing = false
+    let event: Record
+    var body: some View {
+        NativeChecklistRow(title: event.text("title", fallback: "Appuntamento"),
+            subtitle: event.text("start_time"), checked: event.text("occurrence_status") == "done",
+            showsDisclosure: false,
+            completionIdentifier: "home-event-check-" + event.agendaIdentity,
+            openIdentifier: "home-agenda-" + event.agendaIdentity,
+            completionLabel: "Completa evento " + event.text("title"),
+            onComplete: complete, onOpen: { router.sheet = .event(event) })
+            .disabled(completing || store.busy)
+    }
+    private func complete() {
+        guard !completing else { return }
+        completing = true
+        Task {
+            defer { completing = false }
+            await store.run("setEventOccurrence", ["id": .int(event.integer("id")), "day": .string(event.text("day")), "status": .string("done")])
+        }
+    }
+}
 
 private struct HomeAgendaScreen: View {
     @EnvironmentObject var store: NativeStore
@@ -232,10 +269,13 @@ private struct HomeAgendaScreen: View {
     var body: some View {
         List {
             if events.isEmpty { ContentUnavailableView("Nessun appuntamento", systemImage: "calendar") }
-            ForEach(events.map { DisplayRecord($0) }) { item in
-                Button { router.sheet = .event(item.value) } label: {
-                    NativeRowText(title: item.value.text("title"), subtitle: CivilDate.label(item.value.text("day")) + (item.value.text("start_time").isEmpty ? "" : " · " + item.value.text("start_time")))
-                }.buttonStyle(.plain)
+            let groups = Dictionary(grouping: events, by: { $0.text("day") })
+            ForEach(groups.keys.sorted(), id: \.self) { day in
+                Section {
+                    ForEach(groups[day] ?? [], id: \.agendaIdentity) { event in
+                        HomeAgendaRow(event: event)
+                    }
+                } header: { HomeAgendaDayHeading(day: day, today: CivilDate.day()) }
             }
         }.modifier(NativeListAppearance()).navigationTitle("Prossimi appuntamenti").navigationBarTitleDisplayMode(.inline)
     }

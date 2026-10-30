@@ -89,6 +89,35 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertTrue(app.textViews["Descrizione"].waitForExistence(timeout: 10))
         XCTAssertEqual(app.textViews["Descrizione"].value as? String, "Descrizione persistente")
     }
+    func testDashboardAgendaGroupsDaysAndCompletesWithoutOpeningEditor() {
+        let app = launch(["--busy-home", "--dark"])
+        let groups = app.staticTexts.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-day-"))
+        XCTAssertEqual(groups.count, 5, "Each day gets one header, shared by all its events")
+        let today = app.staticTexts.matching(identifier: "home-day-" + Self.today()).firstMatch
+        XCTAssertTrue(today.exists)
+        let row = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-agenda-5-")).firstMatch
+        let check = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-event-check-5-")).firstMatch
+        reveal(check, in: app)
+        assertMinimumTouchTarget(check); assertMinimumTouchTarget(row)
+        XCTAssertEqual(check.value as? String, "Da completare")
+        XCTAssertGreaterThanOrEqual(row.frame.minY - today.frame.maxY, 8)
+        capture("dashboard-grouped-events-dark")
+        check.tap()
+        expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: check)
+        waitForExpectations(timeout: 10)
+        XCTAssertTrue(app.navigationBars["Dashboard"].exists)
+        XCTAssertFalse(app.navigationBars["Modifica attività"].exists)
+        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-agenda-")).count, 11)
+        XCTAssertEqual(groups.count, 5, "The second event today keeps its group")
+        let remaining = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-agenda-10-")).firstMatch
+        reveal(remaining, in: app); remaining.tap()
+        XCTAssertTrue(app.navigationBars["Modifica attività"].waitForExistence(timeout: 10))
+    }
+    private static func today() -> String {
+        let formatter = DateFormatter(); formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.timeZone = TimeZone(identifier: "Europe/Rome"); formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: Date())
+    }
     func testStandardizedHealthAndCompactShiftPalette() {
         let app = launch(["--dark"])
         capture("dashboard-weekly-structure-dark")
@@ -319,7 +348,11 @@ final class NativeInterfaceTests: XCTestCase {
         let app = launch(["--dark"]), detail = app.buttons["home-health-detail"]
         let scroll = app.scrollViews["dashboard-scroll"]
         for _ in 0..<6 { if detail.exists && detail.frame.maxY < app.tabBars.firstMatch.frame.minY { break }; scroll.swipeUp() }
-        XCTAssertTrue(detail.exists); XCTAssertLessThanOrEqual(detail.frame.height, 300)
+        XCTAssertTrue(detail.exists); XCTAssertLessThanOrEqual(detail.frame.height, 120)
+        for text in ["TDEE · kcal/giorno", "Ultimo peso", "Tra 1 mese"] {
+            XCTAssertFalse(app.staticTexts[text].exists)
+        }
+        XCTAssertFalse(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Previsione in attesa")).firstMatch.exists)
         XCTAssertLessThan(detail.frame.maxY, app.tabBars.firstMatch.frame.minY)
         capture("compact-home-health-card")
         detail.tap(); XCTAssertTrue(app.navigationBars["Peso e calorie"].waitForExistence(timeout: 10))
@@ -508,7 +541,7 @@ final class NativeInterfaceTests: XCTestCase {
             XCTAssertGreaterThan(detail.frame.midY, routine.frame.midY)
             XCTAssertFalse(app.buttons["health-connect"].exists)
             XCTAssertTrue(detail.label.contains("peso e calorie dell’ultimo mese"))
-            XCTAssertTrue(detail.label.contains("previsione del peso del prossimo mese"))
+            XCTAssertTrue(detail.label.contains("Dettagli e previsioni nella scheda"))
             XCTAssertTrue(detail.label.contains("TDEE medio storico stimato"))
             XCTAssertTrue(app.buttons["home-health-add-weight"].exists)
             capture(dark ? "home-health-dark" : "home-health-light")
@@ -573,7 +606,7 @@ final class NativeInterfaceTests: XCTestCase {
         let app = launch(["--dark"])
         let detail = app.buttons["home-health-detail"]
         reveal(detail, in: app)
-        XCTAssertTrue(detail.label.contains("kcal a sinistra, kg a destra"))
+        XCTAssertTrue(detail.label.contains("Anteprima peso e calorie"))
         capture("home-health-continuous-forecast")
         app.tabBars.buttons["Finanza"].tap()
         let month = app.staticTexts["finance-month"]
