@@ -116,12 +116,13 @@ final class NativeInterfaceTests: XCTestCase {
             let top = max(surface.frame.minY, heading.exists && heading.frame.minY < surface.frame.minY + 60 ? heading.frame.maxY : surface.frame.minY)
             if cell.exists && cell.isHittable && cell.frame.minY >= top && cell.frame.maxY <= surface.frame.maxY { return }
             let offset: CGFloat
-            if cell.exists { offset = cell.frame.midY - (top + surface.frame.maxY) / 2 }
+            if cell.exists && cell.frame.height > 0 { offset = cell.frame.midY - (top + surface.frame.maxY) / 2 }
             else { offset = day < Self.today() ? -60 : 60 }
             let distance = min(60, max(-60, offset))
             let start = surface.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.6))
             start.press(forDuration: 0.05, thenDragTo: start.withOffset(CGVector(dx: 0, dy: -distance)))
         }
+        print("QA_CALENDAR_GEOMETRY day=\(day) cell=\(cell.frame) viewport=\(surface.frame)")
         capture("calendar-date-unreachable")
         XCTAssertTrue(cell.isHittable, "Selected calendar date must remain reachable in its own pane")
         XCTAssertGreaterThanOrEqual(cell.frame.minY, surface.frame.minY)

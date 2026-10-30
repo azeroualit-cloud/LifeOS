@@ -60,6 +60,15 @@ struct CalendarScreen: View {
                     .padding(.bottom, NativeDesign.Layout.scrollClearance)
             }
             .scrollPosition(id: $visibleMonth, anchor: .top)
+            .background {
+                GeometryReader { viewport in
+                    Color.clear.preference(key: NativeCalendarViewportSize.self, value: viewport.size)
+                }
+            }
+            .onPreferenceChange(NativeCalendarViewportSize.self) { size in
+                guard size.height > 0, !selected.isEmpty, monthDays[String(selected.prefix(7))] != nil else { return }
+                proxy.scrollTo(weekID(for: selected), anchor: .center)
+            }
             .accessibilityIdentifier("calendar-scroll")
             .onChange(of: jumpMonth) { _, month in
                 guard let month else { return }
@@ -100,9 +109,6 @@ struct CalendarScreen: View {
         }
         .onChange(of: router.calendarFocusRequest) { _, _ in
             selected = router.calendarDay; jumpMonth = String(selected.prefix(7))
-        }
-        .onChange(of: painting) { _, _ in
-            if !selected.isEmpty { jumpMonth = String(selected.prefix(7)) }
         }
         .onChange(of: visibleMonth) { _, month in if let month { ensureWindow(around: month) } }
         .onChange(of: NativeCalendarSource(life: store.life, demo: store.isDemo, origin: store.server?.absoluteString)) { _, _ in
@@ -378,4 +384,9 @@ extension ShiftKind {
 struct EventEditor: View {
     let record: Record
     var body: some View { NativeActivityEditor(record: record, source: "event") }
+}
+
+private struct NativeCalendarViewportSize: PreferenceKey {
+    static var defaultValue: CGSize = .zero
+    static func reduce(value: inout CGSize, nextValue: () -> CGSize) { value = nextValue() }
 }
