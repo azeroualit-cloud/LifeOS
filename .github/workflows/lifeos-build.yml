@@ -228,7 +228,7 @@ jobs:
                       r=find(v,name)
                       if r:return r
           data=json.loads(manifest.read_text())
-          for name in ['unified-activity-editor-dark','health-standardized-dark','compact-shift-palette-dark','dashboard-weekly-structure-dark','dashboard-grouped-events-dark']:
+          for name in ['unified-activity-editor-dark','health-standardized-dark','compact-shift-palette-dark','dashboard-weekly-structure-dark','dashboard-grouped-events-dark','health-preview-light','health-preview-large-text']:
               source=find(data,name)
               if not source:continue
               dest=pathlib.Path('build')/(name+'.png')

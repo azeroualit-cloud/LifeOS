@@ -79,7 +79,7 @@ private struct NativeHealthDashboardChart: View {
                     .foregroundStyle(NativeDesign.healthGray)
                     .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
             }
-        }.chartXScale(domain: data.start...data.today).chartYScale(domain: data.weightDomain)
+        }.chartXScale(domain: data.start...Calendar.current.date(byAdding: .day, value: 1, to: data.today)!).chartYScale(domain: data.weightDomain)
             .chartXAxis(.hidden).chartYAxis(.hidden).chartLegend(.hidden)
             .frame(height: NativeDesign.Layout.healthOverviewChart)
             .accessibilityHidden(true)

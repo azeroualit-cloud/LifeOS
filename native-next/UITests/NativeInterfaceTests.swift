@@ -345,17 +345,23 @@ final class NativeInterfaceTests: XCTestCase {
         capture("habits-weekday-schedule")
     }
     func testHomeHealthCardRemainsCompactAndOpensDetail() {
-        let app = launch(["--dark"]), detail = app.buttons["home-health-detail"]
-        let scroll = app.scrollViews["dashboard-scroll"]
-        for _ in 0..<6 { if detail.exists && detail.frame.maxY < app.tabBars.firstMatch.frame.minY { break }; scroll.swipeUp() }
-        XCTAssertTrue(detail.exists); XCTAssertLessThanOrEqual(detail.frame.height, 120)
-        for text in ["TDEE · kcal/giorno", "Ultimo peso", "Tra 1 mese"] {
-            XCTAssertFalse(app.staticTexts[text].exists)
+        for arguments in [["--dark"], [], ["--dark", "--large-text"]] {
+            let app = launch(arguments), detail = app.buttons["home-health-detail"]
+            reveal(detail, in: app)
+            XCTAssertTrue(detail.isHittable)
+            XCTAssertGreaterThanOrEqual(detail.frame.minX, 0)
+            XCTAssertLessThanOrEqual(detail.frame.maxX, app.frame.maxX)
+            if !arguments.contains("--large-text") {
+                XCTAssertLessThanOrEqual(detail.frame.height, 120)
+            }
+            for text in ["TDEE · kcal/giorno", "Ultimo peso", "Tra 1 mese"] {
+                XCTAssertFalse(app.staticTexts[text].exists)
+            }
+            XCTAssertFalse(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Previsione in attesa")).firstMatch.exists)
+            capture(arguments.contains("--large-text") ? "health-preview-large-text" : arguments.isEmpty ? "health-preview-light" : "compact-home-health-card")
+            detail.tap(); XCTAssertTrue(app.navigationBars["Peso e calorie"].waitForExistence(timeout: 10))
+            app.terminate()
         }
-        XCTAssertFalse(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Previsione in attesa")).firstMatch.exists)
-        XCTAssertLessThan(detail.frame.maxY, app.tabBars.firstMatch.frame.minY)
-        capture("compact-home-health-card")
-        detail.tap(); XCTAssertTrue(app.navigationBars["Peso e calorie"].waitForExistence(timeout: 10))
     }
     func testFourSectionsInBothThemes() {
         for dark in [false, true] {
