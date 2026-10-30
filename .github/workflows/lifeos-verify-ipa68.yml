@@ -1,0 +1,34 @@
+name: Life OS - Verifica IPA 68
+on:
+  push:
+    paths: ['.github/workflows/lifeos-verify-ipa68.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scarica il pacchetto verificato della build 68
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download 41052957803 --repo azeroualit-cloud/LifeOS --name LifeOS-IPA-per-Signulous --dir ipa68
+      - name: Verifica integrità, versione e binario iPhone
+        run: |
+          python3 - <<'PY'
+          import pathlib,zipfile,plistlib,hashlib,struct
+          root=pathlib.Path('ipa68'); files=list(root.rglob('*.ipa')); assert len(files)==1
+          path=files[0]; expected=next(root.rglob('SHA256.txt')).read_text().split()[0]
+          digest=hashlib.sha256(path.read_bytes()).hexdigest(); assert digest==expected
+          with zipfile.ZipFile(path) as z:
+              assert z.testzip() is None
+              app='Payload/LifeOSProbe.app/'
+              info=plistlib.loads(z.read(app+'Info.plist'))
+              assert info['CFBundleIdentifier']=='com.nas.lifeos.probe'
+              assert info['CFBundleVersion']=='68' and info['CFBundleShortVersionString']=='0.10.7'
+              assert info['CFBundleSupportedPlatforms']==['iPhoneOS']
+              binary=z.read(app+info['CFBundleExecutable'])
+              assert binary[:4]==b'\xcf\xfa\xed\xfe' and struct.unpack('<I',binary[4:8])[0]==0x0100000c
+          print('VERIFIED_IPA68_INTEGRITY_VERSION_ARM64_SHA256 '+digest)
+          PY
