@@ -1,3 +1,15 @@
+## Consegna verificata — 30 ottobre 2026, 0.10.9 build 70
+
+[IPA diretta per Signulous](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.9-build70/LifeOS-70.ipa) · [build e test Apple](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41134083093) · [distribuzione Cloudflare](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41138923274) · [modifiche, schema e verifiche](native/REVISIONE-70.md).
+
+Dashboard: passato all’80% e giorni futuri pieni anche nel mese successivo; barra del turno attivo a slot di due ore e consumo persistente della microanimazione. Calendario con mesi scorrevoli sopra e riquadro del giorno fisso sotto, ritorno a oggi, selezione esplicita dalla Dashboard e palette compatta. Widget unico 2×2 con sette giorni di turni, riepiloghi e +. Finanza con icone native e Liquid Glass, movimenti ordinati per inserimento. Conservati anteprima Salute minimale, TDEE su 30 giorni completi, agenda settimanale raggruppata, editor unico e salvataggio locale persistente.
+
+Superati **199 test unitari e 33 esecuzioni UI**, zero fallimenti (11 sul simulatore principale e 22 su SE 3, 24 metodi UI distinti). Archivio Release riuscito. IPA scaricata dal link pubblico: checksum, integrità, bundle/versioni, arm64 e piattaforma iOS reale di app ed estensione verificati. Sorgente app: `32687ab8bf1a13afca078df49c5b9d5bc9da9aaa`. SHA-256: `dca5df9c93f51c908089044e3099e22c28cf15a63fdd5af9144fa83e76d822d7`.
+
+Aggiornati e verificati `lifeos` e `lifeos-native-test`: timestamp UTC immutabile in metadati dedicati, ordine storico per identificatore quando l’ora non esiste, autenticazione/binding/moduli e trigger preesistenti conservati. Nessun movimento di prova creato; nessun valore finanziario, sorgente live o credenziale pubblicati nei log.
+
+**Firma da verificare sul telefono:** l’IPA va rifirmata con Signulous mantenendo l’estensione. I dati del widget richiedono l’App Group `group.com.nas.lifeos` autorizzato per app ed estensione; il provisioning Signulous e la prova fisica non sono stati verificati qui. Aggiornare senza disinstallare e aprire l’app per popolare il widget.
+
 ## Consegna verificata — 30 ottobre 2026, 0.10.8 build 69
 
 [IPA diretta per Signulous](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.8-build69/LifeOS-69.ipa) · [build e test Apple](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41079215196) · [modifiche e verifiche](native/REVISIONE-69.md).

@@ -1,6 +1,6 @@
 # Life OS iOS
 
-L’app mobile è scritta in **Swift**, con **SwiftUI** per interfaccia e navigazione, **Swift Charts** per i grafici, **SF Symbols** per le icone e **HealthKit** per peso e calorie. Colori, spaziature e componenti Life OS sono definiti sopra queste API native; non c’è un framework grafico di terze parti.
+L’app mobile è scritta in **Swift**, con **SwiftUI** per interfaccia e navigazione, **Swift Charts** per i grafici, **SF Symbols** per le icone, **HealthKit** per peso e calorie e **WidgetKit** per il widget 2×2. Colori, spaziature e componenti Life OS sono definiti sopra queste API native; non c’è un framework grafico di terze parti.
 
 ## Sorgenti e build
 
@@ -15,4 +15,6 @@ Su questo ramo la sorgente corrente è `native-next/`, un overlay sulla build 60
 
 [Schema, comportamenti e verifiche della revisione 68](docs/native/STANDARDIZATION-68.md). La distribuzione sui Worker live è separata dalla compilazione: avvio manuale oppure commit esplicito con marcatore dedicato sul workflow. Build 68 e aggiornamento backend verificati dopo l’autorizzazione dell’utente; risultati e link IPA nel documento collegato.
 
-[Dashboard 69: anteprima Salute e impegni raggruppati](docs/native/REVISIONE-69.md) · [IPA diretta 0.10.8 build 69](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.8-build69/LifeOS-69.ipa). Verifiche Apple e integrità del pacchetto completate; backend attività della revisione 68 conservato.
+[Revisione 70: modifiche, schema e verifiche](docs/native/REVISIONE-70.md) · [IPA diretta 0.10.9 build 70](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.9-build70/LifeOS-70.ipa). Superati 199 unitari e 33 esecuzioni UI; pacchetto scaricato e verificato. Entrambi i Worker Cloudflare aggiornati e verificati per l’ordinamento dei movimenti per inserimento.
+
+Il widget informativo usa solo il formato piccolo, sette giorni di turni e riepiloghi. La condivisione dati richiede una rifirma compatibile con l’App Group `group.com.nas.lifeos` per app ed estensione: il provisioning Signulous sul telefono resta da verificare. [Storico Dashboard 69](docs/native/REVISIONE-69.md).
