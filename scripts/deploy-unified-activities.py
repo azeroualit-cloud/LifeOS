@@ -76,7 +76,7 @@ def main():
     changed_workers=[]
     try:
         for item in prepared:
-            if item[3]!=item[4]:upload(item,item[4]);changed_workers.append(item)
+            if item[3]!=item[4]:changed_workers.append(item);upload(item,item[4])
         signature=lambda parts:sorted((n,hashlib.sha256(d).hexdigest()) for n,_,d in parts)
         for item in prepared:
             _,actual=helpers.modules(*api('/workers/scripts/'+item[0]+'/content/v2'))
