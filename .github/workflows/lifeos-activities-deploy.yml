@@ -57,8 +57,10 @@ jobs:
                   raise AssertionError('Il server ha accettato un titolo vuoto.')
               except urllib.error.HTTPError as response:
                   assert response.code==400
-                  rejected=json.loads(response.read())
-                  assert 'Attività non valida' in rejected.get('error','')
+                  raw=response.read().decode('utf-8')
+                  try: reason=json.loads(raw).get('error','')
+                  except json.JSONDecodeError: reason=raw
+                  assert 'Attività non valida' in reason
               print('UNIFIED_ACTIVITY_READ_AND_VALIDATION_CONTRACT_OK; no private data logged; no test activities created.')
           except Exception as error:
               raise SystemExit('Verifica API fallita: stage='+stage+' class='+type(error).__name__+' HTTP='+str(getattr(error,'code','n/a')))
