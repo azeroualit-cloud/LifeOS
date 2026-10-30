@@ -1,6 +1,6 @@
 import SwiftUI
 
-private extension Notification.Name { static let nativeTaskEditorSaved = Notification.Name("lifeos.native.task-editor-saved") }
+extension Notification.Name { static let nativeTaskEditorSaved = Notification.Name("lifeos.native.task-editor-saved") }
 
 struct TasksScreen: View {
     @EnvironmentObject var store: NativeStore
