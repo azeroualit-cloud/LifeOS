@@ -10,6 +10,10 @@ on:
         description: Recover only the two simulator-launch failures from run 41018165365, with identical source ZIP
         type: boolean
         default: false
+      verify_calendar_panel_53:
+        description: Recheck three Calendar pane cases only after verifying build 53 provenance
+        type: boolean
+        default: false
       package_verified_only:
         description: Package after all 127 tests are verified; only widget version metadata may differ
         type: boolean
@@ -27,6 +31,8 @@ jobs:
     if: github.event.repository.private == false
     runs-on: macos-15
     timeout-minutes: 75
+    env:
+      PANEL_RECOVERY: ${{ inputs.verify_calendar_panel_53 == true || contains(github.event.head_commit.message, '[verify-panel-53]') }}
     defaults:
       run:
         shell: bash
@@ -56,7 +62,7 @@ jobs:
           import hashlib, pathlib, zipfile
           source = pathlib.Path('lifeos-native.zip')
           if source.is_file():
-              assert hashlib.sha256(source.read_bytes()).hexdigest() == 'ee45a7e7b68714352aab40529467e790368a7b9c8997ec45e0718ec4b367ae56', 'ZIP sorgenti diverso da quello previsto'
+              assert hashlib.sha256(source.read_bytes()).hexdigest() == '3f4366d2c7790af7bbb1f60920705265147ecfdf20dad7d45a0b97dcca22e717', 'ZIP sorgenti diverso da quello previsto'
               with zipfile.ZipFile(source) as archive:
                   for name in archive.namelist():
                       p = pathlib.PurePosixPath(name)
@@ -137,6 +143,38 @@ jobs:
           except Exception as error:
               raise SystemExit('Verifica contratto fallita: stage=%s class=%s HTTP=%s. Nessun dato o credenziale pubblicato.' % (stage,type(error).__name__,getattr(error,'code','n/a')))
           PY
+      - name: Verifica provenienza correzione pannello Calendario 53
+        if: env.PANEL_RECOVERY == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh run view 41030004032 --repo azeroualit-cloud/LifeOS --log > app/build/verified-panel53.log
+          python3 - <<'PYPANEL'
+          import io, pathlib, re, subprocess, zipfile
+          parent = 'a6fbbf89de3b754c57d3572907da7cd45544c7ae'
+          subprocess.run(['git', 'fetch', '--no-tags', 'origin', parent], check=True)
+          old = zipfile.ZipFile(io.BytesIO(subprocess.check_output(['git', 'show', parent + ':lifeos-native.zip'])))
+          new = zipfile.ZipFile('lifeos-native.zip')
+          expected = {n: old.read(n) for n in old.namelist()}
+          path = 'Sources/CalendarScreen.swift'
+          expected[path] = expected[path].decode().replace('                    .accessibilityIdentifier("calendar-day-panel")', '').encode()
+          path = 'UITests/NativeInterfaceTests.swift'
+          text = expected[path].decode()
+          for element in ['detail', 'scroll', 'surface']:
+              text = text.replace('XCTAssertTrue(' + element + '.waitForExistence(timeout: 10))', 'XCTAssertTrue(' + element + '.waitForExistence(timeout: 10), app.debugDescription)')
+          expected[path] = text.encode()
+          assert expected == {n: new.read(n) for n in new.namelist()}, 'Source changes exceed the isolated pane identifier fix'
+          log = pathlib.Path('app/build/verified-panel53.log').read_text()
+          assert 'Executed 86 tests, with 0 failures' in log
+          outcomes = re.findall(r"Test Case '-\[LifeOSProbeUITests.NativeInterfaceTests (\w+)\]' (passed|failed)", log)
+          passed = {n for n, status in outcomes if status == 'passed'}
+          failed = {n for n, status in outcomes if status == 'failed'}
+          targets = {'testCalendarDetailAnchorAndTodayOnTabReturnAndForeground', 'testCalendarEventCanBeCreatedAfterBoundaryScroll', 'testRepeatedBoundaryScrollingKeepsNavigationStable'}
+          assert failed == targets and len(passed) == 29 and not passed.intersection(failed)
+          pathlib.Path('app/build/panel53-cases.txt').write_text('\n'.join(sorted(targets)) + '\n')
+          print('VERIFIED_PANEL53: 86 unit + 29 UI passed; only pane identifier and failure diagnostics changed; recheck all three failures')
+          PYPANEL
       - name: Compila app e test Apple
         if: inputs.package_verified_only != true
         timeout-minutes: 12
@@ -181,7 +219,7 @@ jobs:
           print('VERIFIED_RECOVERY: source files identical except explicit widget version metadata; 82 unit and 12 compact UI passed')
           PYRECOVERY
       - name: Verifica mirata Finanza su compatto
-        if: inputs.recover_compact_launch != true
+        if: inputs.recover_compact_launch != true && env.PANEL_RECOVERY != 'true'
         timeout-minutes: 15
         working-directory: app
         run: |
@@ -254,6 +292,10 @@ jobs:
           xcrun simctl boot "$DEVICE"
           xcrun simctl bootstatus "$DEVICE" -b
           TEST_SCOPE=(-only-testing:LifeOSProbeTests -only-testing:LifeOSProbeUITests)
+          if [ "$PANEL_RECOVERY" = "true" ]; then
+            TEST_SCOPE=()
+            while IFS= read -r name; do TEST_SCOPE+=("-only-testing:LifeOSProbeUITests/NativeInterfaceTests/$name"); done < build/panel53-cases.txt
+          fi
           if [ "$REUSE_VERIFIED_UI" = "true" ]; then TEST_SCOPE=(-only-testing:LifeOSProbeTests); fi
           xcodebuild test "${TEST_SCOPE[@]}" -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -parallel-testing-enabled NO -resultBundlePath build/Tests.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/tests.log
       - name: Esporta anteprima principale
@@ -320,7 +362,7 @@ jobs:
           RECOVER_COMPACT: ${{ inputs.recover_compact_launch == true }}
         run: |
           set -euo pipefail
-          if [ "$RECOVER_COMPACT" = "true" ]; then
+          if [ "$RECOVER_COMPACT" = "true" ] || [ "$PANEL_RECOVERY" = "true" ]; then
             RUNTIME=$(xcrun simctl list runtimes -j | python3 -c 'import json,sys; r=[x for x in json.load(sys.stdin)["runtimes"] if x.get("isAvailable") and x["name"].startswith("iOS")]; print(sorted(r,key=lambda x:tuple(map(int,x["version"].split("."))),reverse=True)[0]["identifier"])')
             COMPACT=$(xcrun simctl create 'LifeOS compact recovery' 'com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation' "$RUNTIME")
             echo "COMPACT=$COMPACT" >> "$GITHUB_ENV"
@@ -332,12 +374,12 @@ jobs:
           if [ "$RECOVER_COMPACT" = "true" ]; then
             COMPACT_SCOPE=()
             while IFS= read -r name; do COMPACT_SCOPE+=("-only-testing:LifeOSProbeUITests/NativeInterfaceTests/$name"); done < build/recovery-cases.txt
-            APP_PATH=$(python3 -c 'from pathlib import Path; p=list(Path.home().glob("Library/Developer/Xcode/DerivedData/LifeOSProbe-*/Build/Products/Debug-iphonesimulator/LifeOSProbe.app")); assert len(p)==1, "Expected exactly one compiled simulator app"; print(p[0])')
-            test -d "$APP_PATH"
-            xcrun simctl install "$COMPACT" "$APP_PATH"
-            xcrun simctl launch --terminate-running-process "$COMPACT" com.nas.lifeos.probe --visual-test
-            xcrun simctl io "$COMPACT" screenshot build/preflight.png
           fi
+          APP_PATH=$(python3 -c 'from pathlib import Path; p=list(Path.home().glob("Library/Developer/Xcode/DerivedData/LifeOSProbe-*/Build/Products/Debug-iphonesimulator/LifeOSProbe.app")); assert len(p)==1, "Expected exactly one compiled simulator app"; print(p[0])')
+          test -d "$APP_PATH"
+          xcrun simctl install "$COMPACT" "$APP_PATH"
+          xcrun simctl launch --terminate-running-process "$COMPACT" com.nas.lifeos.probe --visual-test
+          xcrun simctl io "$COMPACT" screenshot build/preflight.png
           xcodebuild test -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT" -parallel-testing-enabled NO "${COMPACT_SCOPE[@]}" -resultBundlePath build/Compact.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compact.log
       - name: Esporta schermate del simulatore
         if: always()
