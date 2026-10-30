@@ -58,7 +58,7 @@ struct DashboardScreen: View {
                             Text(["D", "L", "M", "M", "G", "V", "S"][weekday - 1]).font(.caption).foregroundStyle(NativeDesign.secondary)
                             CalendarDayCell(item: item, active: current).equatable()
                         }.frame(maxWidth: .infinity).contentShape(Rectangle())
-                    }.buttonStyle(.plain).accessibilityIdentifier("dashboard-day-" + day)
+                    }.buttonStyle(.plain).opacity(day < today ? NativeDesign.Layout.pastDayOpacity : 1).accessibilityIdentifier("dashboard-day-" + day)
                         .accessibilityLabel(CivilDate.label(day) + ", " + (shift?.title ?? "Turno non disponibile"))
                         .accessibilityAddTraits(current ? .isSelected : [])
                 }
@@ -127,13 +127,17 @@ struct DashboardScreen: View {
                 Text(NativeHomeSummary.hasCalendarData(life: store.life, demo: store.isDemo) ? "Nessun appuntamento nei prossimi 7 giorni" : "Calendario da aggiornare")
                     .font(NativeDesign.body).foregroundStyle(NativeDesign.secondary).accessibilityIdentifier("home-agenda-empty")
             } else {
-                ForEach(Array(summary.events.prefix(3).enumerated()), id: \.offset) { _, event in
+                ForEach(Array(summary.events.enumerated()), id: \.offset) { _, event in
                     Button { router.sheet = .event(event) } label: {
                         VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
+                            HStack(spacing: NativeDesign.Space.small) {
+                                Text(agendaDate(event, today: today)).font(NativeDesign.metadata).monospacedDigit().foregroundStyle(NativeDesign.secondary)
+                                Rectangle().fill(NativeDesign.secondary.opacity(0.25)).frame(height: NativeDesign.Space.hairline).accessibilityHidden(true)
+                            }
                             Text(event.text("title", fallback: "Appuntamento")).font(NativeDesign.body).foregroundStyle(Color.primary).fixedSize(horizontal: false, vertical: true)
-                            Text(agendaDate(event, today: today)).font(NativeDesign.metadata).monospacedDigit().foregroundStyle(NativeDesign.secondary)
+                                .padding(.leading, NativeDesign.Space.large)
                         }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
-                            .padding(.vertical, NativeDesign.Space.small).contentShape(Rectangle())
+                            .contentShape(Rectangle())
                     }.buttonStyle(NativePressStyle()).accessibilityIdentifier("home-agenda-" + String(event.integer("id")) + "-" + event.text("day"))
                 }
             }

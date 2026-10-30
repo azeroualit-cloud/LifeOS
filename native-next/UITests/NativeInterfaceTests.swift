@@ -51,6 +51,51 @@ final class NativeInterfaceTests: XCTestCase {
         let shot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
         shot.name = name; shot.lifetime = .keepAlways; add(shot)
     }
+    func testUnifiedActivityEditorPreservesDescriptionWhenAddingAndRemovingDate() {
+        let app = launch(["--dark"])
+        app.tabBars.buttons["Attività"].tap()
+        app.buttons["primary-add"].tap()
+        let title = app.textFields["activity-title"]
+        XCTAssertTrue(title.waitForExistence(timeout: 10))
+        title.tap(); title.typeText("Attività unificata test")
+        let notes = app.textViews["Descrizione"]
+        notes.tap(); notes.typeText("Descrizione persistente")
+        app.buttons["Salva"].tap()
+        let activity = app.buttons["Attività unificata test"]
+        revealChecklistButton(activity, in: app); activity.tap()
+        // Context actions preserve the existing inline interaction before opening the editor.
+        let edit = app.buttons["inline-task-details"]
+        if edit.waitForExistence(timeout: 2) { edit.tap() }
+        XCTAssertTrue(app.textFields["activity-title"].waitForExistence(timeout: 10))
+        XCTAssertEqual(app.textViews["Descrizione"].value as? String, "Descrizione persistente")
+        app.buttons["Inizio"].tap()
+        capture("unified-activity-editor-dark")
+        app.buttons["Salva"].tap()
+        app.tabBars.buttons["Dashboard"].tap()
+        let event = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-agenda-")).matching(NSPredicate(format: "label CONTAINS %@", "Attività unificata test")).firstMatch
+        reveal(event, in: app)
+        XCTAssertTrue(event.isHittable); event.tap()
+        XCTAssertTrue(app.textViews["Descrizione"].waitForExistence(timeout: 10))
+        XCTAssertEqual(app.textViews["Descrizione"].value as? String, "Descrizione persistente")
+        app.buttons["Inizio"].tap(); app.buttons["Salva"].tap()
+        app.tabBars.buttons["Attività"].tap()
+        let restored = app.buttons["Attività unificata test"]
+        revealChecklistButton(restored, in: app)
+        XCTAssertTrue(restored.exists)
+    }
+    func testStandardizedHealthAndCompactShiftPalette() {
+        let app = launch(["--dark"])
+        let health = app.buttons["home-health-detail"]
+        reveal(health, in: app)
+        XCTAssertTrue(health.exists)
+        capture("health-standardized-dark")
+        app.tabBars.buttons["Calendario"].tap()
+        app.buttons["toggle-shift-paint"].tap()
+        let first = app.buttons["shift-brush-morning"]
+        XCTAssertTrue(first.waitForExistence(timeout: 10))
+        XCTAssertLessThanOrEqual(first.frame.width, 60)
+        capture("compact-shift-palette-dark")
+    }
     func testActivityAgendaShowsOnlyRelevantItemsAndFoldsCompleted() {
         let app = launch(["--dark", "--activity-agenda"])
         app.tabBars.buttons["Attività"].tap()
@@ -82,12 +127,12 @@ final class NativeInterfaceTests: XCTestCase {
         app.staticTexts["Evento oggi"].tap()
         let details = app.buttons["inline-event-details"]
         XCTAssertTrue(details.waitForExistence(timeout: 10)); assertMinimumTouchTarget(details)
-        XCTAssertFalse(app.navigationBars["Modifica evento"].exists)
+        XCTAssertFalse(app.navigationBars["Modifica attività"].exists)
         let time = app.buttons["inline-event-time"]
         assertMinimumTouchTarget(time)
         capture("event-context-action-chips")
         time.tap()
-        XCTAssertTrue(app.navigationBars["Modifica evento"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.navigationBars["Modifica attività"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.switches["Ora iniziale"].waitForExistence(timeout: 10))
         XCTAssertEqual(app.switches["Ora iniziale"].value as? String, "1")
         app.buttons["Annulla"].tap()
@@ -276,7 +321,7 @@ final class NativeInterfaceTests: XCTestCase {
                 XCTAssertTrue(add.isHittable)
                 assertMinimumTouchTarget(add)
                 add.tap()
-                let editor = tab == "Attività" ? "Nuova attività" : tab == "Calendario" ? "Nuovo evento" : "Nuovo movimento"
+                let editor = tab == "Attività" ? "Nuova attività" : tab == "Calendario" ? "Nuova attività" : "Nuovo movimento"
                 XCTAssertTrue(app.navigationBars[editor].waitForExistence(timeout: 10))
                 app.buttons["Annulla"].tap()
                 XCTAssertTrue(app.navigationBars[tab].waitForExistence(timeout: 10))
@@ -358,7 +403,7 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertTrue(event.isHittable); assertMinimumTouchTarget(event)
         capture("dashboard-focus-timeline-dark")
         event.tap()
-        XCTAssertTrue(app.navigationBars["Modifica evento"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.navigationBars["Modifica attività"].waitForExistence(timeout: 10))
         capture("dashboard-timeline-event-editor")
     }
     func testCompactDashboardPriorityAndActivityActionsStayVisible() {
@@ -609,7 +654,7 @@ final class NativeInterfaceTests: XCTestCase {
     }
     func testBottomAddOpensTheCorrectEditor() {
         let app = launch(["--dark"])
-        for (tab, title) in [("Dashboard", "Nuovo movimento"), ("Attività", "Nuova attività"), ("Calendario", "Nuovo evento"), ("Finanza", "Nuovo movimento")] {
+        for (tab, title) in [("Dashboard", "Nuovo movimento"), ("Attività", "Nuova attività"), ("Calendario", "Nuova attività"), ("Finanza", "Nuovo movimento")] {
             app.buttons[tab].tap()
             addButton(app).tap()
             XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: 10))
@@ -716,7 +761,7 @@ final class NativeInterfaceTests: XCTestCase {
         if let nearest { assertMinimumTouchTarget(nearest); XCTAssertEqual(nearest.frame.midY, titleFrame.midY, accuracy: 2, "Senza orario o luogo il titolo deve essere centrato sul controllo") }
         capture("calendar-event-after-scroll")
         eventTitle.tap()
-        XCTAssertTrue(app.navigationBars["Modifica evento"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.navigationBars["Modifica attività"].waitForExistence(timeout: 10))
         XCTAssertEqual(app.textFields["Titolo"].value as? String, "Evento dopo scorrimento")
         app.buttons["Annulla"].tap()
         for _ in 0..<4 { scroll.swipeDown(velocity: .fast) }
@@ -1034,7 +1079,7 @@ final class NativeInterfaceTests: XCTestCase {
         for _ in 0..<3 {
             app.tabBars.buttons["Calendario"].tap()
             addButton(app).tap()
-            XCTAssertTrue(app.navigationBars["Nuovo evento"].waitForExistence(timeout: 10))
+            XCTAssertTrue(app.navigationBars["Nuova attività"].waitForExistence(timeout: 10))
             app.buttons["Annulla"].tap()
             XCTAssertTrue(app.navigationBars["Calendario"].waitForExistence(timeout: 10))
             XCTAssertTrue(app.tabBars.buttons["Calendario"].isSelected)

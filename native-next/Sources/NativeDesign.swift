@@ -11,6 +11,7 @@ enum NativeDesign {
         UIColor(white: traits.userInterfaceStyle == .dark ? 0.68 : 0.37, alpha: 1)
     })
     static let actionSurface = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor(white: 0.17, alpha: 1) : .tertiarySystemFill })
+    static let healthGray = Color(uiColor: .systemGray)
     static let inset = Color.primary.opacity(0.045)
     // Financial direction only: red = outflow/decline, green = available/inflow/growth.
     static let financialRed = Color(uiColor: UIColor { trait in
@@ -48,6 +49,12 @@ enum NativeDesign {
         static let healthChartHeight: CGFloat = 200
         static let categoryWidth: CGFloat = 88
         static let navigationInset = Space.large
+        static let pastDayOpacity = 0.62
+        static let activityDescriptionHeight: CGFloat = 90
+        static let shiftBrushWidth: CGFloat = 44
+        static let shiftBrushHeight: CGFloat = 60
+        static let healthMetricWidth: CGFloat = 106
+        static let healthBarRadius: CGFloat = 2
         static let calendarDayNumber: CGFloat = 26
         static let calendarDayHeight: CGFloat = 54
         static let calendarMarker: CGFloat = 3

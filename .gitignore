@@ -4,3 +4,7 @@ native/build/
 native/*.xcodeproj/
 __pycache__/
 web/previews/attivita.png
+
+/work/
+
+/manual/build-68/

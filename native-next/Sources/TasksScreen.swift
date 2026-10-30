@@ -274,69 +274,8 @@ private struct NativeEventControls: View {
 }
 
 struct TaskEditor: View {
-    @EnvironmentObject var store: NativeStore
-    @Environment(\.dismiss) private var dismiss
     let record: Record
-    @State private var title = ""
-    @State private var notes = ""
-    @State private var category = "action"
-    @State private var due = Date()
-    @State private var scheduled = Date()
-    @State private var hasDue = false
-    @State private var hasScheduled = false
-    @State private var hasTime = false
-    @State private var notificationTime = CivilDate.date(CivilDate.day()).addingTimeInterval(9 * 3600)
-    @State private var saving = false
-    @State private var error: String?
-    var body: some View {
-        ScrollViewReader { scroll in
-        Form {
-            Section { TextField("Titolo", text: $title); Picker("Categoria", selection: $category) { ForEach(store.categories.map { DisplayRecord($0, key: "key") }) { item in Text(item.value.text("label")).tag(item.value.text("key")) } } }
-            Section("Date") {
-                Toggle("Scadenza", isOn: $hasDue).id("dates")
-                if hasDue { DatePicker("Scade il", selection: $due, displayedComponents: .date) }
-                Toggle("Mostra nel calendario", isOn: $hasScheduled)
-                if hasScheduled { DatePicker("Giorno", selection: $scheduled, displayedComponents: .date) }
-                if hasDue || hasScheduled {
-                    Toggle("Orario promemoria", isOn: $hasTime).id("reminder")
-                    if hasTime { DatePicker("Ora", selection: $notificationTime, displayedComponents: .hourAndMinute) }
-                    Text("Il promemoria segue il giorno programmato, oppure la scadenza. Senza orario usa le 9:00, se le notifiche sono abilitate.").font(.caption).foregroundStyle(NativeDesign.secondary)
-                }
-            }
-            Section("Note") { TextEditor(text: $notes).frame(minHeight: 120) }
-            if let error { NativeInlineMessage(text: error) }
-        }.modifier(NativeListAppearance()).navigationTitle(record.integer("id") > 0 ? "Modifica attività" : "Nuova attività").navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .cancellationAction) { Button("Annulla") { dismiss() }.disabled(saving) }
-            ToolbarItem(placement: .confirmationAction) { Button("Salva") { Task { await save() } }.disabled(saving || store.busy || title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) }
-        }.onAppear {
-            title = record.text("title"); notes = record.text("notes"); category = record.text("list_kind", fallback: store.categories.first?.text("key") ?? "action")
-            hasDue = !record.text("due_date").isEmpty; hasScheduled = !record.text("scheduled_date").isEmpty
-            if hasDue { due = CivilDate.date(record.text("due_date")) }; if hasScheduled { scheduled = CivilDate.date(record.text("scheduled_date")) }
-            hasTime = !record.text("scheduled_time").isEmpty
-            if record.text("_editorSection") == "reminder" {
-                if !hasDue && !hasScheduled { hasScheduled = true }; hasTime = true
-            }
-            if hasTime {
-                let parts = record.text("scheduled_time").split(separator: ":").compactMap { Int($0) }
-                if parts.count == 2, let time = CivilDate.calendar.date(bySettingHour: parts[0], minute: parts[1], second: 0, of: Date()) { notificationTime = time }
-            }
-        }
-        .task {
-            if !record.text("_editorSection").isEmpty {
-                await Task.yield(); scroll.scrollTo(record.text("_editorSection"), anchor: .center)
-            }
-        }
-        }
-    }
-    private func save() async {
-        saving = true; defer { saving = false }
-        do {
-            try await store.perform("saveTask", ["id": .int(record.integer("id")), "title": .string(title), "notes": .string(notes), "list_kind": .string(category), "due_date": hasDue ? .string(CivilDate.day(due)) : .null, "scheduled_date": hasScheduled ? .string(CivilDate.day(scheduled)) : .null, "scheduled_time": hasTime && (hasScheduled || hasDue) ? .string(String(format: "%02d:%02d", CivilDate.calendar.component(.hour, from: notificationTime), CivilDate.calendar.component(.minute, from: notificationTime))) : .null])
-            NotificationCenter.default.post(name: .nativeTaskEditorSaved, object: record.integer("id"))
-            dismiss()
-        } catch { self.error = error.localizedDescription }
-    }
+    var body: some View { NativeActivityEditor(record: record, source: "task") }
 }
 struct CategoriesEditor: View {
     @EnvironmentObject var store: NativeStore

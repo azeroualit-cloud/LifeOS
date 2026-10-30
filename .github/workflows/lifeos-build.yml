@@ -2,11 +2,11 @@ name: Life OS - App nativa
 on:
   workflow_dispatch:
   push:
-    paths: ['lifeos-native.zip', '.github/workflows/lifeos-build.yml', '.github/workflows/ios.yml', 'Sources/**', 'Tests/**', 'Assets.xcassets/**', 'project.yml', 'native/**', 'native-next/**']
+    paths: ['lifeos-native.zip', '.github/workflows/lifeos-build.yml', '.github/workflows/ios.yml', 'Sources/**', 'Tests/**', 'Assets.xcassets/**', 'project.yml', 'native/**', 'native-next/**', 'backend/activities/**', 'manual/build-68/**', 'scripts/deploy-activities-68.py']
 permissions:
   contents: read
 concurrency:
-  group: lifeos-native-67-period-${{ github.ref }}
+  group: lifeos-native-68-standardization-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   build:
@@ -62,6 +62,17 @@ jobs:
         run: node web/tests/task-retention.mjs
       - name: Verifica instradamento spese e transazioni atomiche
         run: node backend/expense-routing/tests/routing.test.mjs
+      - name: Verifica attività unificate e replay atomici
+        run: |
+          python3 scripts/build-worker-68.py
+          node backend/activities/tests/activities.test.mjs
+          node backend/activities/tests/worker.test.mjs
+          node --input-type=module --check < manual/build-68/worker.js
+      - name: Verifica contesto backend live senza scritture
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          LIFEOS_BACKEND_AUDIT_ONLY: '1'
+        run: python3 scripts/deploy-activities-68.py
       - name: Verifica design system
         working-directory: app
         run: python3 scripts/check-design-system.py
@@ -152,7 +163,7 @@ jobs:
           DEVICE="$MAIN_DEVICE"
           xcrun simctl boot "$DEVICE" || true
           xcrun simctl bootstatus "$DEVICE" -b
-          xcodebuild test-without-building -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeTests -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCompactDashboardPriorityAndActivityActionsStayVisible -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testDashboardFocusTimelineOpensEventWithoutDuplicateSummary -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeSummaryAndVerticalRoutinesInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeEmptyStatesRemainActionable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeManyEventsAndTasksStayBoundedAndReachable -resultBundlePath build/Regression.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/regression-tests.log
+          xcodebuild test-without-building -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeTests -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testUnifiedActivityEditorPreservesDescriptionWhenAddingAndRemovingDate -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testStandardizedHealthAndCompactShiftPalette -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeHealthCardRemainsCompactAndOpensDetail -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCompactDashboardPriorityAndActivityActionsStayVisible -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testDashboardFocusTimelineOpensEventWithoutDuplicateSummary -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeSummaryAndVerticalRoutinesInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeEmptyStatesRemainActionable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeManyEventsAndTasksStayBoundedAndReachable -resultBundlePath build/Regression.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/regression-tests.log
       - name: Prepara simulatore compatto
         timeout-minutes: 15
         working-directory: app
@@ -193,7 +204,7 @@ jobs:
           xcrun simctl shutdown "$MAIN_DEVICE" || true
           xcrun simctl boot "$COMPACT"
           xcrun simctl bootstatus "$COMPACT" -b
-          xcodebuild test -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testDashboardFocusTimelineOpensEventWithoutDuplicateSummary -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCompactDashboardPriorityAndActivityActionsStayVisible -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testEditingKeepsTaskTitleGeometryAndDraftAcrossTabs -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testRepeatedTabSwitchesKeepNativeDestinationsUsable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarTodayRestoresMonthAndSelection -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testEventContextActionsUseFullSizeChipsAndOwnEditor -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testActivityAgendaShowsOnlyRelevantItemsAndFoldsCompleted -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testSharedRowsAndCategoryChoicesKeepAccessibleTargets -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testReducedMotionKeepsChecklistAndFinanceActionsFunctional -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarDayCanBeDeselectedWithASecondTap -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarSelectionUpdatesImmediatelyAndKeepsEventIndex -resultBundlePath build/Compact.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compact.log
+          xcodebuild test -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testDashboardFocusTimelineOpensEventWithoutDuplicateSummary -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testUnifiedActivityEditorPreservesDescriptionWhenAddingAndRemovingDate -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testStandardizedHealthAndCompactShiftPalette -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeHealthCardRemainsCompactAndOpensDetail -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCompactDashboardPriorityAndActivityActionsStayVisible -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testEditingKeepsTaskTitleGeometryAndDraftAcrossTabs -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testRepeatedTabSwitchesKeepNativeDestinationsUsable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarTodayRestoresMonthAndSelection -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testEventContextActionsUseFullSizeChipsAndOwnEditor -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testActivityAgendaShowsOnlyRelevantItemsAndFoldsCompleted -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testSharedRowsAndCategoryChoicesKeepAccessibleTargets -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testReducedMotionKeepsChecklistAndFinanceActionsFunctional -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarDayCanBeDeselectedWithASecondTap -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarSelectionUpdatesImmediatelyAndKeepsEventIndex -resultBundlePath build/Compact.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compact.log
       - name: Esporta schermate del simulatore
         if: always()
         continue-on-error: true

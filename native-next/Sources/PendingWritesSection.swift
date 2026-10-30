@@ -5,6 +5,7 @@ struct PendingWritesSection: View {
     @State private var discarding: PendingWrite?
     private func title(_ write: PendingWrite) -> String {
         switch write.method {
+        case "saveActivity": return write.payload.text("title", fallback: "Attività")
         case "setTaskStatus": return "Stato attività"
         case "setEventOccurrence": return "Evento del " + write.payload.text("day")
         case "setRoutineCheck": return "Abitudine del " + write.payload.text("day")

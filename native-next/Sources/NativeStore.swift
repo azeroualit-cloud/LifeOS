@@ -352,7 +352,7 @@ import SwiftUI
                 let legacy = next.life.records("health")
                 next.life = value
                 if !legacy.isEmpty { next.life["health"] = .array(legacy.map(JSONValue.object)) }
-                for write in next.pending where write.method != "saveHealthEntry" && LocalLifeMutation.supports(write.method) { try LocalLifeMutation.apply(write.method, write.payload, to: &next.life) }
+                for write in next.pending where write.method != "saveHealthEntry" && (write.method != "saveActivity" || !write.accepted) && LocalLifeMutation.supports(write.method) { try LocalLifeMutation.apply(write.method, write.payload, to: &next.life) }
                 next.calendarMonth = cm; next.lifeRefreshedAt = Date(); changed = true
             } catch { failure = error }
         }
@@ -476,14 +476,52 @@ import SwiftUI
     }
     func perform(_ method: String, _ payload: Record = [:], args: [JSONValue]? = nil) async throws {
         error = nil
+        if method == "saveTask", isDemo || life.record("capabilities").integer("unifiedActivities") >= 1 {
+            let old = tasks.first { $0.integer("id") == payload.integer("id") } ?? [:]
+            var p = old.merging(payload) { _, value in value }
+            p["uid"] = .string(old.text("activity_uid", fallback: payload.integer("id") == 0 ? UUID().uuidString : "task:" + String(payload.integer("id"))))
+            p["source"] = .string("task"); p["sourceId"] = .int(max(0, payload.integer("id")))
+            p["day"] = p["scheduled_date"]; p["start_time"] = p["scheduled_time"]
+            p["completed"] = .bool(old.text("status") == "done")
+            try await perform("saveActivity", p); return
+        }
+        if method == "saveActivity" { try NativeActivityDraft.validate(payload) }
+        if ["setTaskStatus", "setEventOccurrence"].contains(method), payload.integer("id") < 0 {
+            let row = (tasks + events).first { $0.integer("id") == payload.integer("id") }
+            guard var p = row else { throw Message(text: "Attività locale non trovata.") }
+            p["uid"] = p["activity_uid"]; p["source"] = .string(method == "setTaskStatus" ? "task" : "event"); p["sourceId"] = .int(0)
+            p["completed"] = .bool(payload.text("status") == "done")
+            try await perform("saveActivity", p); return
+        }
         if isDemo {
             var next = state
-            if method == "changeExpenseDestination" || method == "saveTransaction" && payload.integer("expenseRoutingVersion") == 1 {
+            if method == "saveActivity" {
+                var p = payload
+                p["localID"] = .int(-1 - ((next.life.records("tasks") + next.life.records("events")).map { abs($0.integer("id")) }.max() ?? 0))
+                try NativeLocalActivity.apply(p, life: &next.life)
+                let key = p.text("day").isEmpty ? "tasks" : "events"
+                let positive = (next.life.records(key).map { $0.integer("id") }.filter { $0 > 0 }.max() ?? 0) + 1
+                next.life[key] = .array(next.life.records(key).map { row in var row = row; if row.text("activity_uid") == p.text("uid") { row["id"] = .int(positive); row["pending"] = .bool(false) }; return .object(row) })
+            } else if method == "changeExpenseDestination" || method == "saveTransaction" && payload.integer("expenseRoutingVersion") == 1 {
                 try NativeExpenseDemo.apply(method, payload: payload, state: &next)
             } else { try DemoActions.apply(method, payload, args: args, state: &next) }
             next.refreshedAt = Date(); try save(next); return
         }
         try NativeServerFeaturePolicy.validate(method, payload: payload, life: life)
+        if method == "saveActivity" {
+            guard server != nil else { throw Message(text: "Collega il server per sincronizzare le attività.") }
+            guard life.record("capabilities").integer("unifiedActivities") >= 1 else { throw Message(text: "Il server deve essere aggiornato per conservare attività ed eventi unificati. I dati restano nell’editor.") }
+            var next = state, p = payload
+            let request = UUID().uuidString
+            p["requestId"] = .string(request)
+            let lowest = (next.life.records("tasks") + next.life.records("events")).map { $0.integer("id") }.min() ?? 0
+            p["localID"] = .int(min(-1, lowest - 1))
+            try NativeLocalActivity.apply(p, life: &next.life)
+            next.pending.append(PendingWrite(id: request, method: method, payload: p))
+            try save(next)
+            notice = "Salvato sul dispositivo · conferma del server in attesa"
+            scheduleSync(); return
+        }
         if LocalLifeMutation.supports(method) {
             guard server != nil else { throw Message(text: "Collega il server per sincronizzare le modifiche.") }
             var next = state

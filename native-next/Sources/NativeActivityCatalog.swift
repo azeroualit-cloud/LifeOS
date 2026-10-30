@@ -4,7 +4,7 @@ import Foundation
 struct NativeActivity: Identifiable {
     let record: Record
     let isEvent: Bool
-    var id: String { (isEvent ? "event:" : "task:") + String(record.integer("id")) + (isEvent ? ":" + record.text("day") : "") }
+    var id: String { record.text("activity_uid", fallback: (isEvent ? "event:" : "task:") + String(record.integer("id"))) + (isEvent ? ":" + record.text("day") : "") }
     var completed: Bool { record.text(isEvent ? "occurrence_status" : "status") == "done" }
 }
 enum NativeActivityCatalog {
@@ -17,11 +17,11 @@ enum NativeActivityCatalog {
     }
     static func rows(tasks: [Record], events: [Record], category: String, section: String, today: String = CivilDate.day()) -> [NativeActivity] {
         var rows = NativeTaskList.rows(tasks, category: category, section: section, today: today).map { NativeActivity(record: $0, isEvent: false) }
-        if category == "action" && (section == "todo" || section == "waiting") {
+        if section == "todo" || section == "waiting" {
             var seen = Set<String>()
             let last = CivilDate.adding(7, to: today)
             rows += events.filter {
-                $0.text("day") >= today && $0.text("day") <= last && $0.text("occurrence_status", fallback: "open") == "open"
+                $0.text("list_kind", fallback: "action") == category && $0.text("day") >= today && $0.text("day") <= last && $0.text("occurrence_status", fallback: "open") == "open"
                     && (($0.text("day") <= CivilDate.adding(1, to: today)) == (section == "todo"))
             }.map { NativeActivity(record: $0, isEvent: true) }.filter { seen.insert($0.id).inserted }
         }

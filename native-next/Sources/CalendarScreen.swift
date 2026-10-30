@@ -18,8 +18,8 @@ struct CalendarScreen: View {
     @State private var loading = false
     @State private var loadError: String?
     @State private var reload = 0
-    @ScaledMetric(relativeTo: .caption) private var brushWidth = 132.0
-    @ScaledMetric(relativeTo: .caption) private var brushHeight = 64.0
+    @ScaledMetric(relativeTo: .caption) private var brushWidth = NativeDesign.Layout.shiftBrushWidth
+    @ScaledMetric(relativeTo: .caption) private var brushHeight = NativeDesign.Layout.shiftBrushHeight
     private var focusMonth: String { visibleMonth ?? store.calendarMonth }
     var body: some View {
         ScrollViewReader { proxy in
@@ -202,15 +202,15 @@ struct CalendarScreen: View {
             if painting {
                 Text("Scegli un turno, poi tocca i giorni da assegnare. Usa Cancella per rimuoverlo.").font(.caption).foregroundStyle(NativeDesign.secondary)
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: NativeDesign.Space.small) { ForEach(ShiftKind.allCases) { kind in
+                    HStack(spacing: NativeDesign.Space.xs) { ForEach(ShiftKind.allCases) { kind in
                         Button { brush = kind.rawValue } label: {
                             VStack(spacing: NativeDesign.Space.xs) {
-                                Label { Text(kind.title).foregroundStyle(Color.primary) } icon: { Image(systemName: kind.symbol).foregroundStyle(kind.color) }.font(.caption.weight(.semibold))
-                                if !kind.time.isEmpty { Text(kind.time).font(.caption2).foregroundStyle(NativeDesign.secondary) }
+                                Label { Text(String(kind.title.prefix(1))).foregroundStyle(Color.primary) } icon: { Image(systemName: kind.symbol).foregroundStyle(kind.color) }.font(.caption.weight(.semibold))
+                                if !kind.time.isEmpty { Text(kind.time.replacingOccurrences(of: ":00", with: "")).font(.caption2).foregroundStyle(NativeDesign.secondary) }
                             }
-                                .padding(NativeDesign.Space.medium).frame(width: brushWidth, height: brushHeight)
+                                .frame(width: brushWidth, height: brushHeight)
                                 .modifier(NativeSelectionSurface(selected: brush == kind.rawValue, tint: kind.color, outlined: true))
-                        }.buttonStyle(NativePressStyle()).foregroundStyle(kind.color).accessibilityIdentifier("shift-brush-" + kind.rawValue).accessibilityAddTraits(brush == kind.rawValue ? .isSelected : [])
+                        }.buttonStyle(NativePressStyle()).foregroundStyle(kind.color).accessibilityLabel(kind.title + (kind.time.isEmpty ? "" : ", " + kind.time)).accessibilityIdentifier("shift-brush-" + kind.rawValue).accessibilityAddTraits(brush == kind.rawValue ? .isSelected : [])
                     } }
                 }
             }
@@ -340,98 +340,6 @@ extension ShiftKind {
     }
 }
 struct EventEditor: View {
-    @EnvironmentObject var store: NativeStore
-    @Environment(\.dismiss) private var dismiss
     let record: Record
-    @State private var title = ""
-    @State private var location = ""
-    @State private var notes = ""
-    @State private var date = Date()
-    @State private var start = Date()
-    @State private var end = Date()
-    @State private var hasTime = false
-    @State private var hasEnd = false
-    @State private var frequency = "none"
-    @State private var until = Date()
-    @State private var hasUntil = false
-    @State private var fromHere = false
-    @State private var saving = false
-    @State private var error: String?
-    @State private var confirmDelete = false
-    var body: some View {
-        ScrollViewReader { scroll in
-        Form {
-            Section { TextField("Titolo", text: $title); DatePicker("Giorno", selection: $date, displayedComponents: .date); TextField("Luogo", text: $location) }.id("dates")
-            Section("Orario") {
-                Toggle("Ora iniziale", isOn: $hasTime)
-                if hasTime {
-                    DatePicker("Inizio", selection: $start, displayedComponents: .hourAndMinute)
-                    Toggle("Ora finale", isOn: $hasEnd)
-                    if hasEnd { DatePicker("Fine", selection: $end, displayedComponents: .hourAndMinute) }
-                }
-            }
-            .id("time")
-            Section("Ripetizione") {
-                Picker("Frequenza", selection: $frequency) { Text("Mai").tag("none"); Text("Ogni settimana").tag("weekly"); Text("Ogni mese").tag("monthly"); Text("Ogni anno").tag("yearly") }
-                if frequency != "none" { Toggle("Data finale", isOn: $hasUntil); if hasUntil { DatePicker("Fino al", selection: $until, in: date..., displayedComponents: .date) } }
-                if record.integer("id") > 0 && record.text("frequency", fallback: "none") != "none" {
-                    Toggle("Modifica da questa occorrenza", isOn: $fromHere)
-                    Text("Le occorrenze precedenti restano nello storico.").font(.caption).foregroundStyle(NativeDesign.secondary)
-                }
-            }
-            .id("repeat")
-            Section("Note") { TextEditor(text: $notes).frame(minHeight: 90) }
-            if record.integer("id") > 0 {
-                Section {
-                    if record.text("day") < CivilDate.day() {
-                        Text("Evento passato. Per riattivarlo scegli una data futura e salva.").font(.caption).foregroundStyle(NativeDesign.secondary)
-                    } else {
-                    Button(record.text("occurrence_status") == "done" ? "Riapri questa occorrenza" : "Segna fatta questa occorrenza") {
-                        Task { await store.run("setEventOccurrence", ["id": .int(record.integer("id")), "day": .string(record.text("day")), "status": .string(record.text("occurrence_status") == "done" ? "open" : "done")]); if store.error == nil { dismiss() } }
-                    }
-                    }
-                    Button("Elimina solo questa occorrenza", role: .destructive) { Task { await store.run("setEventOccurrence", ["id": .int(record.integer("id")), "day": .string(record.text("day")), "status": .string("skipped")]); if store.error == nil { dismiss() } } }
-                    Button("Elimina intera serie", role: .destructive) { confirmDelete = true }
-                }.id("actions").disabled(saving || store.busy)
-            }
-            if let error { NativeInlineMessage(text: error) }
-        }.modifier(NativeListAppearance()).navigationTitle(record.integer("id") > 0 ? "Modifica evento" : "Nuovo evento").navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .cancellationAction) { Button("Annulla") { dismiss() }.disabled(saving) }
-            ToolbarItem(placement: .confirmationAction) { Button("Salva") { Task { await save() } }.disabled(saving || store.busy || title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) }
-        }
-        .confirmationDialog("Eliminare la serie e tutti gli stati delle occorrenze?", isPresented: $confirmDelete, titleVisibility: .visible) { Button("Elimina serie", role: .destructive) { Task { await store.run("deleteEvent", args: [.int(record.integer("id"))]); if store.error == nil { dismiss() } } } }
-        .onChange(of: fromHere) { _, value in date = CivilDate.date(value ? record.text("day") : record.text("series_day", fallback: record.text("day"))) }
-        .onAppear {
-            title = record.text("title"); location = record.text("location"); notes = record.text("notes")
-            date = CivilDate.date(record.text("series_day", fallback: record.text("day", fallback: CivilDate.day())))
-            frequency = record.text("frequency", fallback: "none"); hasTime = !record.text("start_time").isEmpty; hasEnd = !record.text("end_time").isEmpty
-            start = clockDate(record.text("start_time", fallback: "09:00")); end = clockDate(record.text("end_time", fallback: "10:00"))
-            if record.text("_editorSection") == "time" { hasTime = true }
-            hasUntil = !record.text("until_day").isEmpty; until = CivilDate.date(record.text("until_day", fallback: CivilDate.adding(365, to: CivilDate.day())))
-        }
-        .task {
-            if !record.text("_editorSection").isEmpty {
-                await Task.yield(); scroll.scrollTo(record.text("_editorSection"), anchor: .center)
-            }
-        }
-        }
-    }
-    private func clockDate(_ text: String) -> Date {
-        let parts = text.split(separator: ":").compactMap { Int($0) }
-        return CivilDate.calendar.date(bySettingHour: parts.first ?? 9, minute: parts.last ?? 0, second: 0, of: Date()) ?? Date()
-    }
-    private func clock(_ date: Date) -> String {
-        let parts = CivilDate.calendar.dateComponents([.hour, .minute], from: date)
-        return String(format: "%02d:%02d", parts.hour ?? 0, parts.minute ?? 0)
-    }
-    private func save() async {
-        saving = true; defer { saving = false }
-        var payload: Record = ["id": .int(record.integer("id")), "title": .string(title), "day": .string(CivilDate.day(date)), "location": .string(location), "notes": .string(notes),
-            "start_time": hasTime ? .string(clock(start)) : .null, "end_time": hasTime && hasEnd ? .string(clock(end)) : .null,
-            "frequency": .string(frequency), "until_day": hasUntil && frequency != "none" ? .string(CivilDate.day(until)) : .null]
-        if fromHere { payload["split_from"] = record["day"] }
-        do { try await store.perform(fromHere ? "splitEventSeries" : "saveEvent", payload); dismiss() }
-        catch { self.error = error.localizedDescription }
-    }
+    var body: some View { NativeActivityEditor(record: record, source: "event") }
 }

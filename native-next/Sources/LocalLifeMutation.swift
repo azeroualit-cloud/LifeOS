@@ -5,10 +5,11 @@ import Foundation
 enum LocalLifeMutation {
     private static func validDay(_ day: String) -> Bool { day.count == 10 && CivilDate.day(CivilDate.date(day)) == day }
     static func supports(_ method: String) -> Bool {
-        ["setTaskStatus", "setRoutineCheck", "paintShift", "saveHealthEntry", "setEventOccurrence"].contains(method)
+        ["saveActivity", "setTaskStatus", "setRoutineCheck", "paintShift", "saveHealthEntry", "setEventOccurrence"].contains(method)
     }
     static func key(_ write: PendingWrite) -> String {
         switch write.method {
+        case "saveActivity": return "activity:" + write.payload.text("uid")
         case "paintShift", "saveHealthEntry": return write.method + ":" + write.payload.text("day")
         case "setRoutineCheck", "setEventOccurrence": return write.method + ":" + String(write.payload.integer("id")) + ":" + write.payload.text("day")
         case "setTaskStatus": return write.method + ":" + String(write.payload.integer("id"))
@@ -17,6 +18,7 @@ enum LocalLifeMutation {
     }
     static func apply(_ method: String, _ p: Record, to life: inout Record) throws {
         switch method {
+        case "saveActivity": try NativeLocalActivity.apply(p, life: &life)
         case "setTaskStatus":
             guard p.integer("id") > 0, ["todo", "done", "waiting"].contains(p.text("status")) else { throw Message(text: "Stato attività non valido.") }
             var rows = life.records("tasks")
