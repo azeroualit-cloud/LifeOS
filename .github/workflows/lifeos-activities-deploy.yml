@@ -1,10 +1,13 @@
 name: Life OS - Distribuzione attività unificate
 on:
   workflow_dispatch:
+  push:
+    paths: ['.github/workflows/lifeos-activities-deploy.yml']
 permissions:
   contents: read
 jobs:
   deploy:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[deploy-activities-68]')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
