@@ -1,3 +1,4 @@
+# Final reviewed activity payload; this workflow only reads and compiles in memory.
 name: Life OS - Audit attività 68 senza scritture
 on:
   push:
