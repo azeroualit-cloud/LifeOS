@@ -28,8 +28,9 @@ export async function saveActivity(db,input) {
   if(exceptions.n&&(convert||old.day!==p.day||(repeat?.frequency??'none')!==p.frequency))throw Error('La serie ha uno storico: usa «Modifica da questa occorrenza» prima di cambiare la regola o rimuovere la data.');
  }
  const token=crypto.randomUUID(),gate='EXISTS(SELECT 1 FROM os_activity_requests WHERE id=? AND token=?)';
- const expected=identity?'EXISTS(SELECT 1 FROM os_activity_identity WHERE uid=? AND kind=? AND source_id=?)':'NOT EXISTS(SELECT 1 FROM os_activity_identity WHERE uid=?)';
+ let expected=identity?'EXISTS(SELECT 1 FROM os_activity_identity WHERE uid=? AND kind=? AND source_id=?)':'NOT EXISTS(SELECT 1 FROM os_activity_identity WHERE uid=?)';
  const expectedArgs=identity?[p.uid,identity.kind,identity.source_id]:[p.uid];
+ if(old){expected+=` AND EXISTS(SELECT 1 FROM ${source==='task'?'os_tasks':'os_events'} WHERE id=?)`;expectedArgs.push(id);}
  const args=[requestId,token],steps=[db.prepare(`INSERT OR IGNORE INTO os_activity_requests(id,fingerprint,token) SELECT ?,?,? WHERE ${expected}`).bind(requestId,signature,token,...expectedArgs)];
  const status=old?.status??(input.completed?'done':'todo');
  if(target==='task'){

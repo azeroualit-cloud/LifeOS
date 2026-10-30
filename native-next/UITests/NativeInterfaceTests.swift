@@ -79,9 +79,15 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertEqual(app.textViews["Descrizione"].value as? String, "Descrizione persistente")
         app.buttons["Inizio"].tap(); app.buttons["Salva"].tap()
         app.tabBars.buttons["Attività"].tap()
-        let restored = app.buttons["Attività unificata test"]
+        let restored = app.buttons["Cambia completamento Attività unificata test"]
         revealChecklistButton(restored, in: app)
-        XCTAssertTrue(restored.exists)
+        XCTAssertEqual(app.buttons.matching(identifier: "Cambia completamento Attività unificata test").count, 1)
+        let collapsed = app.buttons["Attività unificata test"]
+        if collapsed.exists { collapsed.tap() }
+        let details = app.buttons["inline-task-details"]
+        XCTAssertTrue(details.waitForExistence(timeout: 10)); details.tap()
+        XCTAssertTrue(app.textViews["Descrizione"].waitForExistence(timeout: 10))
+        XCTAssertEqual(app.textViews["Descrizione"].value as? String, "Descrizione persistente")
     }
     func testStandardizedHealthAndCompactShiftPalette() {
         let app = launch(["--dark"])

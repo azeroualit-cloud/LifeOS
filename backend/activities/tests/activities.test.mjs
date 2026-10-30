@@ -8,7 +8,7 @@ function fixture(){
  CREATE TABLE os_events(id INTEGER PRIMARY KEY AUTOINCREMENT,title TEXT,notes TEXT,day TEXT,start_time TEXT,end_time TEXT,location TEXT,updated_at TEXT);
  CREATE TABLE os_event_repeat(event_id INTEGER PRIMARY KEY,frequency TEXT,until_day TEXT);
  CREATE TABLE os_event_occurrences(event_id INTEGER,day TEXT,status TEXT,PRIMARY KEY(event_id,day));`);
- const db={prepare(sql){let args=[];return {bind(...p){args=p;return this},async first(){return sqlite.prepare(sql).get(...args)??null},async all(){return {results:sqlite.prepare(sql).all(...args)}},async run(){const r=sqlite.prepare(sql).run(...args);return {meta:{changes:r.changes}}}}},async batch(statements){sqlite.exec('BEGIN');try{const r=[];for(const s of statements)r.push(await s.run());sqlite.exec('COMMIT');return r}catch(e){sqlite.exec('ROLLBACK');throw e}}};
+ const db={prepare(sql){let args=[];return {sql,bind(...p){args=p;return this},async first(){return sqlite.prepare(sql).get(...args)??null},async all(){return {results:sqlite.prepare(sql).all(...args)}},async run(){const r=sqlite.prepare(sql).run(...args);return {meta:{changes:r.changes}}}}},async batch(statements){sqlite.exec('BEGIN');try{const r=[];for(const s of statements)r.push(await s.run());sqlite.exec('COMMIT');return r}catch(e){sqlite.exec('ROLLBACK');throw e}}};
  const p={uid:'activity-one',requestId:'request-one',source:'task',sourceId:0,title:'Unica attività',notes:'Descrizione conservata',list_kind:'action',day:null,due_date:'2026-11-15',location:'Casa',frequency:'weekly'};return {db,sqlite,p};
 }
 test('lost response retries create one item and changed replay is rejected',async()=>{const {db,sqlite,p}=fixture();await saveActivity(db,p);await saveActivity(db,p);assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM os_tasks').get().n,1);await assert.rejects(()=>saveActivity(db,{...p,title:'Different'}));});
@@ -37,4 +37,13 @@ test('a failed conversion rolls back the original row and receipt atomically',as
  assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM os_tasks').get().n,1);
  assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM os_activity_requests WHERE id=?').get('request-rollback').n,0);
  assert.equal(sqlite.prepare('SELECT kind FROM os_activity_identity').get().kind,'task');
+});
+
+test('deletion between lookup and commit cannot produce a false save receipt',async()=>{
+ const {db,sqlite,p}=fixture();sqlite.exec("INSERT INTO os_tasks(title,list_kind,status) VALUES('Original','action','todo');");
+ const batch=db.batch.bind(db);let deleted=false;
+ db.batch=async items=>{if(!deleted&&items.some(s=>s.sql.startsWith('INSERT OR IGNORE INTO os_activity_requests'))){deleted=true;sqlite.exec('DELETE FROM os_tasks WHERE id=1');}return batch(items);};
+ await assert.rejects(()=>saveActivity(db,{...p,uid:'task:1',sourceId:1}));
+ assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM os_activity_identity').get().n,0);
+ assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM os_activity_requests').get().n,0);
 });
