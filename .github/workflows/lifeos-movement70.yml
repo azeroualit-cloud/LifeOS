@@ -12,19 +12,6 @@ permissions:
   contents: read
   actions: read
 jobs:
-  stop-superseded:
-    if: contains(github.event.head_commit.message, '[stop-superseded-70]')
-    runs-on: ubuntu-latest
-    permissions:
-      actions: write
-    steps:
-      - name: Ferma soltanto la verifica sorgente superata
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          if [ "$(gh api repos/azeroualit-cloud/LifeOS/actions/runs/41109907852 --jq .status)" != completed ]; then
-            gh api --method POST repos/azeroualit-cloud/LifeOS/actions/runs/41109907852/force-cancel
-          fi
   audit:
     runs-on: ubuntu-latest
     steps:
@@ -51,7 +38,7 @@ jobs:
     if: contains(github.event.head_commit.message, '[deploy-movement-70]') || (github.event_name == 'workflow_dispatch' && inputs.deploy)
     runs-on: ubuntu-latest
     env:
-      VERIFIED_NATIVE_RUN: ''
+      VERIFIED_NATIVE_RUN: '41134083093'
     steps:
       - uses: actions/checkout@v5
         with:
