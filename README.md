@@ -13,4 +13,4 @@ Su questo ramo la sorgente corrente è `native-next/`, un overlay sulla build 60
 - Grafici/calibrazione: `NativeHealthViews.swift`, `NativeHealthModel.swift`.
 - Servizio backend attività: `backend/activities/activities.mjs`.
 
-[Schema, comportamenti e verifiche della revisione 68](docs/native/STANDARDIZATION-68.md). La distribuzione sui Worker live è separata dalla compilazione e richiede l’autorizzazione specifica; il workflow di distribuzione è solo manuale.
+[Schema, comportamenti e verifiche della revisione 68](docs/native/STANDARDIZATION-68.md). La distribuzione sui Worker live è separata dalla compilazione: avvio manuale oppure commit esplicito con marcatore dedicato sul workflow. Build 68 e aggiornamento backend verificati dopo l’autorizzazione dell’utente; risultati e link IPA nel documento collegato.
