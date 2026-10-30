@@ -23,8 +23,15 @@ jobs:
           def load(name,path):
               spec=importlib.util.spec_from_file_location(name,path)
               m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);return m
-          legacy=load('prerequisites','scripts/deploy-lifeos-61.py')
           current=load('activities','scripts/deploy-activities-68.py')
-          current.base.transform=lambda source,patches: current.transform(legacy.transform(source,patches),patches)
+          def inspect(source,patches):
+              import re,json
+              statements=[]
+              for literal in re.findall(r'"((?:[^"\\]|\\.)*)"',source):
+                  if literal.startswith(('CREATE TABLE','ALTER TABLE','SELECT','DELETE FROM','UPDATE')) and any(table in literal for table in ['os_tasks','os_events','os_event_repeat']):
+                      statements.append(literal)
+              print('ACTIVITY_SCHEMA_CONTEXT '+json.dumps({'fields':{key:key in source for key in ['scheduled_time','section_status','activityEvents']},'sql':statements},ensure_ascii=True))
+              return source
+          current.base.transform=inspect
           current.base.main()
           PY
