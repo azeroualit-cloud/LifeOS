@@ -48,11 +48,6 @@ struct CalendarScreen: View {
                     ForEach(months, id: \.self) { month in
                         Section {
                             monthGrid(month)
-                                .background {
-                                    GeometryReader { position in
-                                        Color.clear.preference(key: NativeCalendarMonthPositions.self, value: [month: position.frame(in: .named("calendar-months")).minY])
-                                    }
-                                }
                         } header: {
                             Text(NativeCalendarWindow.monthLabel(month)).font(.title2.bold()).foregroundStyle(Color.primary)
                                 .accessibilityLabel(CivilDate.monthTitle(month)).accessibilityIdentifier("calendar-month-heading-" + month).frame(maxWidth: .infinity, alignment: .leading)
@@ -64,12 +59,7 @@ struct CalendarScreen: View {
                     .padding(.horizontal, NativeDesign.Layout.screenInset)
                     .padding(.bottom, NativeDesign.Layout.scrollClearance)
             }
-            .coordinateSpace(name: "calendar-months")
-            .onPreferenceChange(NativeCalendarMonthPositions.self) { positions in
-                let passed = positions.filter { $0.value <= 0 }
-                let month = passed.max(by: { $0.value < $1.value })?.key ?? positions.min(by: { $0.value < $1.value })?.key
-                if let month, visibleMonth != month { visibleMonth = month }
-            }
+            .scrollPosition(id: $visibleMonth, anchor: .top)
             .accessibilityIdentifier("calendar-scroll")
             .onChange(of: jumpMonth) { _, month in
                 guard let month else { return }
@@ -389,9 +379,3 @@ struct EventEditor: View {
     var body: some View { NativeActivityEditor(record: record, source: "event") }
 }
 
-private struct NativeCalendarMonthPositions: PreferenceKey {
-    static var defaultValue: [String: CGFloat] = [:]
-    static func reduce(value: inout [String: CGFloat], nextValue: () -> [String: CGFloat]) {
-        value.merge(nextValue(), uniquingKeysWith: { _, new in new })
-    }
-}
