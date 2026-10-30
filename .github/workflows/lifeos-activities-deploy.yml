@@ -27,12 +27,12 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: python3 scripts/deploy-unified-activities.py
-      - name: Verifica lettura reale senza creare attività di prova
+      - name: Verifica contratto reale senza creare attività di prova
         env:
           LIFEOS_TEST_PASSWORD: ${{ secrets.LIFEOS_TEST_PASSWORD }}
         run: |
           python3 - <<'PY'
-          import os,json,datetime,http.cookiejar,urllib.request
+          import os,json,datetime,http.cookiejar,urllib.request,urllib.error,uuid
           from zoneinfo import ZoneInfo
           origin='https://lifeos-native-test.a-zeroual-it.workers.dev'
           client=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
@@ -46,7 +46,14 @@ jobs:
               snapshot=json.loads(post('/api/getLifeData',[month]))
               assert snapshot['capabilities']['unifiedActivities']==1
               assert all(isinstance(snapshot[k],list) for k in ['tasks','events','upcomingEvents'])
-              print('UNIFIED_ACTIVITY_READ_CONTRACT_OK; no private data logged; no test activities created.')
+              try:
+                  post('/api/saveActivity',[{'uid':'validation-probe','requestId':str(uuid.uuid4()),'source':'task','sourceId':0,'title':''}])
+                  raise AssertionError('Il server ha accettato un titolo vuoto.')
+              except urllib.error.HTTPError as response:
+                  assert response.code==400
+                  rejected=json.loads(response.read())
+                  assert 'Attività non valida' in rejected.get('error','')
+              print('UNIFIED_ACTIVITY_READ_AND_VALIDATION_CONTRACT_OK; no private data logged; no test activities created.')
           except Exception as error:
               raise SystemExit('Verifica API fallita: '+type(error).__name__)
           PY
