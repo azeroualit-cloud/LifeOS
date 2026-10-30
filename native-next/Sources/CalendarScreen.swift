@@ -44,15 +44,14 @@ struct CalendarScreen: View {
 
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: NativeDesign.Space.small, pinnedViews: [.sectionHeaders]) {
+                LazyVStack(alignment: .leading, spacing: NativeDesign.Space.small) {
                     ForEach(months, id: \.self) { month in
-                        Section {
-                            monthGrid(month)
-                        } header: {
+                        VStack(alignment: .leading, spacing: NativeDesign.Space.none) {
                             Text(NativeCalendarWindow.monthLabel(month)).font(.title2.bold()).foregroundStyle(Color.primary)
                                 .accessibilityLabel(CivilDate.monthTitle(month)).accessibilityIdentifier("calendar-month-heading-" + month).frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(.vertical, NativeDesign.Space.xs).background(NativeDesign.canvas)
                                 .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                            monthGrid(month)
                         }.id(month)
                     }
                 }.scrollTargetLayout()
