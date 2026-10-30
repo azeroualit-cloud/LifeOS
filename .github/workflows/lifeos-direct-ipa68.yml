@@ -24,4 +24,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create ios-0.10.7-build68 LifeOS-68.ipa --repo azeroualit-cloud/LifeOS --target 642507c893321bcc78e14613ee9d76dfa62816c0 --title "Life OS 0.10.7 build 68" --notes "IPA non firmata per Signulous. Build Apple verificata: 191 test unitari e 25 esecuzioni UI. Backend attività aggiornato."
+          gh release create ios-0.10.7-build68 LifeOS-68.ipa --repo azeroualit-cloud/LifeOS --target "$GITHUB_SHA" --title "Life OS 0.10.7 build 68" --notes "IPA non firmata per Signulous. Build Apple verificata: 191 test unitari e 25 esecuzioni UI. Backend attività aggiornato. IPA compilata dal sorgente 642507c893321bcc78e14613ee9d76dfa62816c0; tag associato alla procedura di pubblicazione."
