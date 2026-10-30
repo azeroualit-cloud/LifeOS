@@ -85,6 +85,7 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertEqual(details.frame.minY, y, accuracy: 1)
         app.tabBars.buttons["Finanza"].tap(); app.tabBars.buttons["Calendario"].tap()
         let current = app.buttons["calendar-day-" + today]
+        capture("calendar-on-tab-return")
         expectation(for: NSPredicate { element, _ in guard let element = element as? XCUIElement else { return false }; return element.isSelected && element.isHittable }, evaluatedWith: current)
         waitForExpectations(timeout: 10)
         app.buttons["Mese successivo"].tap()
@@ -111,13 +112,16 @@ final class NativeInterfaceTests: XCTestCase {
         let cell = app.buttons["calendar-day-" + day], surface = app.scrollViews["calendar-scroll"]
         for _ in 0..<20 {
             let heading = app.staticTexts["calendar-month-heading-" + String(day.prefix(7))]
-            let top = heading.exists && heading.frame.maxY <= surface.frame.maxY ? heading.frame.maxY : app.buttons["calendar-today"].frame.maxY + 24
+            let top = max(surface.frame.minY, heading.exists && heading.frame.minY < surface.frame.minY + 60 ? heading.frame.maxY : surface.frame.minY)
             if cell.exists && cell.isHittable && cell.frame.minY >= top && cell.frame.maxY <= surface.frame.maxY { return }
-            let earlier = cell.exists ? cell.frame.minY < top : day < Self.today()
-            let start = surface.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: earlier ? 0.78 : 0.96))
-            let end = surface.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: earlier ? 0.96 : 0.78))
-            start.press(forDuration: 0.05, thenDragTo: end)
+            let offset: CGFloat
+            if cell.exists { offset = cell.frame.midY - (top + surface.frame.maxY) / 2 }
+            else { offset = day < Self.today() ? -60 : 60 }
+            let distance = min(60, max(-60, offset))
+            let start = surface.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.6))
+            start.press(forDuration: 0.05, thenDragTo: start.withOffset(CGVector(dx: 0, dy: -distance)))
         }
+        capture("calendar-date-unreachable")
         XCTAssertTrue(cell.isHittable, "Selected calendar date must remain reachable in its own pane")
     }
     func testUnifiedActivityEditorPreservesDescriptionWhenAddingAndRemovingDate() {
@@ -976,6 +980,7 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertTrue(brush.waitForExistence(timeout: 10)); brush.tap()
         let formatter = DateFormatter(); formatter.locale = Locale(identifier: "en_US_POSIX"); formatter.timeZone = TimeZone(identifier: "Europe/Rome"); formatter.dateFormat = "yyyy-MM-dd"
         let day = app.buttons["calendar-day-" + formatter.string(from: Date())]
+        capture("calendar-palette-before-paint")
         revealCalendarDay(formatter.string(from: Date()), in: app)
         day.tap()
         expectation(for: NSPredicate(format: "label CONTAINS %@", "Pomeriggio"), evaluatedWith: day)

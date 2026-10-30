@@ -23,6 +23,22 @@ struct CalendarScreen: View {
     var body: some View {
         GeometryReader { geometry in
         VStack(spacing: NativeDesign.Space.none) {
+        VStack(spacing: NativeDesign.Space.none) {
+                VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
+                    brushPanel.dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                    ProgressView().progressViewStyle(.linear).frame(height: NativeDesign.Space.xxs)
+                        .opacity(loading ? 1 : 0).accessibilityLabel("Aggiornamento calendario")
+                        .accessibilityHidden(!loading).allowsHitTesting(false)
+                    if let loadError {
+                        HStack { NativeInlineMessage(text: loadError); Button("Riprova") { reload += 1 } }
+                    }
+                    HStack {
+                        ForEach(Array(["L", "M", "M", "G", "V", "S", "D"].enumerated()), id: \.offset) { _, name in
+                            Text(name).font(.caption).foregroundStyle(NativeDesign.secondary).frame(maxWidth: .infinity)
+                        }
+                    }.padding(.vertical, NativeDesign.Space.small).dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                }.padding(.horizontal, NativeDesign.Layout.screenInset).background(NativeDesign.canvas)
+
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: NativeDesign.Space.small, pinnedViews: [.sectionHeaders]) {
@@ -42,37 +58,22 @@ struct CalendarScreen: View {
             }
             .scrollPosition(id: $visibleMonth, anchor: .top)
             .accessibilityIdentifier("calendar-scroll")
-            .safeAreaInset(edge: .top, spacing: NativeDesign.Space.none) {
-                VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-                    brushPanel.dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-                    ProgressView().progressViewStyle(.linear).frame(height: NativeDesign.Space.xxs)
-                        .opacity(loading ? 1 : 0).accessibilityLabel("Aggiornamento calendario")
-                        .accessibilityHidden(!loading).allowsHitTesting(false)
-                    if let loadError {
-                        HStack { NativeInlineMessage(text: loadError); Button("Riprova") { reload += 1 } }
-                    }
-                    HStack {
-                        ForEach(Array(["L", "M", "M", "G", "V", "S", "D"].enumerated()), id: \.offset) { _, name in
-                            Text(name).font(.caption).foregroundStyle(NativeDesign.secondary).frame(maxWidth: .infinity)
-                        }
-                    }.padding(.vertical, NativeDesign.Space.small).dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-                }.padding(.horizontal, NativeDesign.Layout.screenInset).background(NativeDesign.canvas)
-            }
             .onChange(of: jumpMonth) { _, month in
                 guard let month else { return }
                 ensureWindow(around: month)
-                withAnimation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration)) { proxy.scrollTo(month, anchor: .top) }
+                proxy.scrollTo(month, anchor: .top)
                 visibleMonth = month
                 let day = selected
                 if day.hasPrefix(month) {
                     Task { @MainActor in
                         await Task.yield()
                         guard selected == day else { return }
-                        proxy.scrollTo(day, anchor: .bottom)
+                        proxy.scrollTo(weekID(for: day), anchor: .center)
                     }
                 }
                 jumpMonth = nil
             }
+        }
         }.frame(height: geometry.size.height * NativeDesign.Layout.calendarPaneFraction)
         Divider()
         ScrollView {
@@ -180,11 +181,16 @@ struct CalendarScreen: View {
         selected = CivilDate.day(); router.calendarDay = selected
         jumpMonth = String(selected.prefix(7))
     }
+    private func weekID(for day: String) -> String {
+        let month = String(day.prefix(7)), days = monthDays[month] ?? []
+        guard let index = days.firstIndex(where: { $0.day == day }) else { return month }
+        return "week-" + days[index / 7 * 7].day
+    }
     private func monthGrid(_ month: String) -> some View {
         let days = monthDays[month] ?? []
-        return Grid(horizontalSpacing: NativeDesign.Space.xs, verticalSpacing: NativeDesign.Space.none) {
+        return VStack(spacing: NativeDesign.Space.none) {
             ForEach(0..<(days.count / 7), id: \.self) { week in
-                GridRow {
+                HStack(spacing: NativeDesign.Space.xs) {
                     ForEach(0..<7, id: \.self) { index in
                         let item = days[week * 7 + index]
                         if item.isCurrentMonth {
@@ -209,7 +215,8 @@ struct CalendarScreen: View {
                         }
                     }
                 }
-                GridRow { Divider().gridCellColumns(7).gridCellUnsizedAxes(.horizontal) }
+                .id("week-" + days[week * 7].day)
+                Divider()
             }
         }.dynamicTypeSize(...DynamicTypeSize.xxxLarge)
     }
