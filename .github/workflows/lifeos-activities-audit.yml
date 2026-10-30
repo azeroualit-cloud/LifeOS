@@ -19,19 +19,49 @@ jobs:
           LIFEOS_BACKEND_AUDIT_ONLY: '1'
         run: |
           python3 - <<'PY'
-          import importlib.util,pathlib
-          def load(name,path):
-              spec=importlib.util.spec_from_file_location(name,path)
-              m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);return m
-          current=load('activities','scripts/deploy-activities-68.py')
-          def inspect(source,patches):
-              import re,json
-              statements=[]
-              for literal in re.findall(r'"((?:[^"\\]|\\.)*)"',source):
-                  if literal.startswith(('CREATE TABLE','ALTER TABLE','SELECT','DELETE FROM','UPDATE')) and any(table in literal for table in ['os_tasks','os_events','os_event_repeat']):
-                      statements.append(literal)
-              print('ACTIVITY_SCHEMA_CONTEXT '+json.dumps({'fields':{key:key in source for key in ['scheduled_time','section_status','activityEvents']},'sql':statements},ensure_ascii=True))
-              return source
-          current.base.transform=inspect
-          current.base.main()
+          import os,re,posixpath,urllib.request,importlib.util,tempfile,subprocess
+          from pathlib import Path
+          spec=importlib.util.spec_from_file_location('helpers','scripts/deploy-lifeos-61.py')
+          helpers=importlib.util.module_from_spec(spec);spec.loader.exec_module(helpers)
+          module=Path('backend/activities/activities.mjs').read_text().replace('export async function','async function')
+          def active_module(entry,parts):
+              sources={name:data.decode() for name,kind,data in parts if 'javascript' in kind or name.endswith(('.js','.mjs'))}
+              distances={entry:0};queue=[entry]
+              while queue:
+                  name=queue.pop(0)
+                  for target in re.findall(r'(?:from\s*|import\s*)[\'\"]([^\'\"]+)[\'\"]',sources.get(name,'')):
+                      resolved=posixpath.normpath(posixpath.join(posixpath.dirname(name),target)) if target.startswith('.') else target
+                      if resolved in sources and resolved not in distances:distances[resolved]=distances[name]+1;queue.append(resolved)
+              candidates=[name for name in distances if 'async function lifeAction(' in sources.get(name,'') and all(field in sources[name] for field in ['scheduled_time','section_status','activityEvents'])]
+              if not candidates:raise RuntimeError('Implementazione attività attiva non riconosciuta; nessuna scrittura.')
+              closest=min(distances[name] for name in candidates)
+              candidates=[name for name in candidates if distances[name]==closest]
+              if len(candidates)!=1:raise RuntimeError('Implementazione attività ambigua; nessuna scrittura.')
+              return candidates[0]
+          
+          def transform(source):
+              expected='// LIFEOS_UNIFIED_ACTIVITIES_68\n'+module+'\n'
+              if '// LIFEOS_UNIFIED_ACTIVITIES_68' in source:
+                  if not source.startswith(expected):raise RuntimeError('Versione attività diversa; nessuna scrittura.')
+                  return source
+              substitutions=[
+                (r'if \(method === "getLifeData"\) return lifeRead\(env, x\);','if (method === "getLifeData") return enrichActivities(env.DB, await lifeRead(env, x));'),
+                (r'(await ensureLife\(env\);\s*)(if \(method === "setRoutineCheck"\))',r'\1if (method === "saveActivity") return saveActivity(env.DB, x);\n  \2'),
+                (r'("saveTask",\s*"setEventOccurrence")','"saveActivity",\n      \\1'),
+              ]
+              for pattern,replacement in substitutions:
+                  source,count=re.subn(pattern,replacement,source)
+                  if count!=1:raise RuntimeError('Contesto attività inatteso; nessuna scrittura.')
+              return expected+source
+          
+          
+          for name in helpers.WORKERS:
+              request=urllib.request.Request('https://api.cloudflare.com/client/v4/accounts/'+helpers.ACCOUNT+'/workers/scripts/'+name+'/content/v2',headers={'Authorization':'Bearer '+os.environ['CLOUDFLARE_API_TOKEN']})
+              with urllib.request.urlopen(request,timeout=90) as response:entry,parts=helpers.modules(response.read(),response.headers)
+              target=active_module(entry,parts)
+              data=next(data for filename,kind,data in parts if filename==target)
+              with tempfile.TemporaryDirectory() as folder:
+                  path=Path(folder)/'worker.mjs';path.write_text(transform(data.decode()))
+                  subprocess.run(['node','--check',str(path)],check=True,capture_output=True)
+          print('LIVE_ACTIVITY_CONTEXT_VERIFIED; no internal structure, source or records logged; no writes.')
           PY
