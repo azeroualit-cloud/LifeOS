@@ -253,7 +253,7 @@ jobs:
           xcrun simctl shutdown all
           xcrun simctl boot "$DEVICE"
           xcrun simctl bootstatus "$DEVICE" -b
-          TEST_SCOPE=()
+          TEST_SCOPE=(-only-testing:LifeOSProbeTests -only-testing:LifeOSProbeUITests)
           if [ "$REUSE_VERIFIED_UI" = "true" ]; then TEST_SCOPE=(-only-testing:LifeOSProbeTests); fi
           xcodebuild test "${TEST_SCOPE[@]}" -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" -parallel-testing-enabled NO -resultBundlePath build/Tests.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/tests.log
       - name: Esporta anteprima principale
