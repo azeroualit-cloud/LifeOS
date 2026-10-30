@@ -11,7 +11,7 @@ function fixture(){
  const db={prepare(sql){let args=[];return {sql,bind(...p){args=p;return this},async first(){return sqlite.prepare(sql).get(...args)??null},async all(){return {results:sqlite.prepare(sql).all(...args)}},async run(){const r=sqlite.prepare(sql).run(...args);return {meta:{changes:r.changes}}}}},async batch(statements){sqlite.exec('BEGIN');try{const r=[];for(const s of statements)r.push(await s.run());sqlite.exec('COMMIT');return r}catch(e){sqlite.exec('ROLLBACK');throw e}}};
  const p={uid:'activity-one',requestId:'request-one',source:'task',sourceId:0,title:'Unica attività',notes:'Descrizione conservata',list_kind:'action',day:null,due_date:'2026-11-15',location:'Casa',frequency:'weekly'};return {db,sqlite,p};
 }
-test('lost response retries create one item and changed replay is rejected',async()=>{const {db,sqlite,p}=fixture();await saveActivity(db,p);await saveActivity(db,p);assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM os_tasks').get().n,1);await assert.rejects(()=>saveActivity(db,{...p,title:'Different'}));});
+test('lost response retries create one item and changed replay is rejected',async()=>{const {db,sqlite,p}=fixture();await saveActivity(db,p);await saveActivity(db,p);assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM os_tasks').get().n,1);await assert.rejects(()=>saveActivity(db,{...p,title:'Different'}));await assert.rejects(()=>saveActivity(db,{...p,completed:true}));});
 test('adding/removing dates preserves identity and fields, leaving one item',async()=>{
  const {db,sqlite,p}=fixture();await saveActivity(db,p);
  const task=sqlite.prepare('SELECT * FROM os_tasks').get();

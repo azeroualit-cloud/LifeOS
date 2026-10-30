@@ -38,7 +38,7 @@ jobs:
               candidates=[name for name in candidates if distances[name]==closest]
               if len(candidates)!=1:raise RuntimeError('Implementazione attività ambigua; nessuna scrittura.')
               return candidates[0]
-          
+
           def transform(source):
               expected='// LIFEOS_UNIFIED_ACTIVITIES_68\n'+module+'\n'
               if '// LIFEOS_UNIFIED_ACTIVITIES_68' in source:
@@ -53,8 +53,8 @@ jobs:
                   source,count=re.subn(pattern,replacement,source)
                   if count!=1:raise RuntimeError('Contesto attività inatteso; nessuna scrittura.')
               return expected+source
-          
-          
+
+
           for name in helpers.WORKERS:
               request=urllib.request.Request('https://api.cloudflare.com/client/v4/accounts/'+helpers.ACCOUNT+'/workers/scripts/'+name+'/content/v2',headers={'Authorization':'Bearer '+os.environ['CLOUDFLARE_API_TOKEN']})
               with urllib.request.urlopen(request,timeout=90) as response:entry,parts=helpers.modules(response.read(),response.headers)

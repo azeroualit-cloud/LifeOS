@@ -25,3 +25,26 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: python3 scripts/deploy-unified-activities.py
+      - name: Verifica lettura reale senza creare attività di prova
+        env:
+          LIFEOS_TEST_PASSWORD: ${{ secrets.LIFEOS_TEST_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import os,json,datetime,http.cookiejar,urllib.request
+          from zoneinfo import ZoneInfo
+          origin='https://lifeos-native-test.a-zeroual-it.workers.dev'
+          client=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+          def post(path,payload):
+              request=urllib.request.Request(origin+path,data=json.dumps(payload).encode(),method='POST',headers={'Origin':origin,'Content-Type':'application/json'})
+              with client.open(request,timeout=90) as response:return response.read()
+          try:
+              password=os.environ['LIFEOS_TEST_PASSWORD'];assert password
+              post('/auth/login',{'user':'nas','password':password})
+              month=datetime.datetime.now(ZoneInfo('Europe/Rome')).strftime('%Y-%m')
+              snapshot=json.loads(post('/api/getLifeData',[month]))
+              assert snapshot['capabilities']['unifiedActivities']==1
+              assert all(isinstance(snapshot[k],list) for k in ['tasks','events','upcomingEvents'])
+              print('UNIFIED_ACTIVITY_READ_CONTRACT_OK; no private data logged; no test activities created.')
+          except Exception as error:
+              raise SystemExit('Verifica API fallita: '+type(error).__name__)
+          PY
