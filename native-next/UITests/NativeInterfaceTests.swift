@@ -348,7 +348,13 @@ final class NativeInterfaceTests: XCTestCase {
         for arguments in [["--dark"], [], ["--dark", "--large-text"]] {
             let app = launch(arguments), detail = app.buttons["home-health-detail"]
             reveal(detail, in: app)
+            let surface = app.scrollViews["dashboard-scroll"]
+            for _ in 0..<6 {
+                if detail.exists && detail.frame.maxY < app.tabBars.firstMatch.frame.minY { break }
+                surface.swipeUp(velocity: .slow)
+            }
             XCTAssertTrue(detail.isHittable)
+            XCTAssertLessThan(detail.frame.maxY, app.tabBars.firstMatch.frame.minY)
             XCTAssertGreaterThanOrEqual(detail.frame.minX, 0)
             XCTAssertLessThanOrEqual(detail.frame.maxX, app.frame.maxX)
             if !arguments.contains("--large-text") {
@@ -662,8 +668,13 @@ final class NativeInterfaceTests: XCTestCase {
         reveal(events, in: app); XCTAssertTrue(events.isHittable)
         events.tap()
         XCTAssertTrue(app.navigationBars["Prossimi appuntamenti"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.staticTexts["Appuntamento 5"].exists)
+        let first = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-agenda-5-")).firstMatch
+        XCTAssertTrue(first.waitForExistence(timeout: 10))
+        XCTAssertEqual(first.label, "Appuntamento 5")
+        XCTAssertTrue(first.isHittable); assertMinimumTouchTarget(first)
         capture("home-many-events-agenda")
+        first.tap()
+        XCTAssertTrue(app.navigationBars["Modifica attività"].waitForExistence(timeout: 10))
     }
     func testKeyboardAndLocalMovementFlow() {
         let app = launch()
