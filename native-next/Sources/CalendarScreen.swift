@@ -31,7 +31,7 @@ struct CalendarScreen: View {
                             monthGrid(month)
                         } header: {
                             Text(NativeCalendarWindow.monthLabel(month)).font(.title2.bold()).foregroundStyle(Color.primary)
-                                .accessibilityLabel(CivilDate.monthTitle(month)).frame(maxWidth: .infinity, alignment: .leading)
+                                .accessibilityLabel(CivilDate.monthTitle(month)).accessibilityIdentifier("calendar-month-heading-" + month).frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(.vertical, NativeDesign.Space.xs).background(NativeDesign.canvas)
                                 .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                         }.id(month)
@@ -68,7 +68,7 @@ struct CalendarScreen: View {
                     Task { @MainActor in
                         await Task.yield()
                         guard selected == day else { return }
-                        proxy.scrollTo(day, anchor: .center)
+                        proxy.scrollTo(day, anchor: .bottom)
                     }
                 }
                 jumpMonth = nil

@@ -7,7 +7,7 @@ on:
         type: boolean
         default: false
   push:
-    paths: ['.github/workflows/lifeos-movement70.yml']
+    paths: ['.github/workflows/lifeos-movement70.yml', 'backend/movement-order/**', 'scripts/deploy-movement-creation-70.py', 'scripts/test_movement_creation_70.py']
 permissions:
   contents: read
   actions: read

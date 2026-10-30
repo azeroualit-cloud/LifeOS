@@ -110,7 +110,8 @@ final class NativeInterfaceTests: XCTestCase {
     private func revealCalendarDay(_ day: String, in app: XCUIApplication) {
         let cell = app.buttons["calendar-day-" + day], surface = app.scrollViews["calendar-scroll"]
         for _ in 0..<20 {
-            let top = app.buttons["calendar-today"].frame.maxY + 24
+            let heading = app.staticTexts["calendar-month-heading-" + String(day.prefix(7))]
+            let top = heading.exists && heading.frame.maxY <= surface.frame.maxY ? heading.frame.maxY : app.buttons["calendar-today"].frame.maxY + 24
             if cell.exists && cell.isHittable && cell.frame.minY >= top && cell.frame.maxY <= surface.frame.maxY { return }
             let earlier = cell.exists ? cell.frame.minY < top : day < Self.today()
             let start = surface.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: earlier ? 0.78 : 0.96))
@@ -975,10 +976,15 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertTrue(brush.waitForExistence(timeout: 10)); brush.tap()
         let formatter = DateFormatter(); formatter.locale = Locale(identifier: "en_US_POSIX"); formatter.timeZone = TimeZone(identifier: "Europe/Rome"); formatter.dateFormat = "yyyy-MM-dd"
         let day = app.buttons["calendar-day-" + formatter.string(from: Date())]
+        revealCalendarDay(formatter.string(from: Date()), in: app)
         day.tap()
+        expectation(for: NSPredicate(format: "label CONTAINS %@", "Pomeriggio"), evaluatedWith: day)
+        waitForExpectations(timeout: 10)
         XCTAssertTrue(day.label.contains("Pomeriggio"))
         capture("calendar-paint-palette")
         app.buttons["Annulla"].tap()
+        expectation(for: NSPredicate(format: "label CONTAINS %@", "Mattina"), evaluatedWith: day)
+        waitForExpectations(timeout: 10)
         XCTAssertTrue(day.label.contains("Mattina"))
         app.buttons["toggle-shift-paint"].tap()
     }

@@ -1,7 +1,7 @@
 """Add immutable insertion timestamps; preserve live modules, bindings and auth."""
 from pathlib import Path
 import importlib.util
-import os,json,urllib.request,urllib.error,http.cookiejar,datetime,re
+import os,json,urllib.request,urllib.error,http.cookiejar,datetime,hashlib,re
 from zoneinfo import ZoneInfo
 spec = importlib.util.spec_from_file_location('activities68', Path(__file__).with_name('deploy-unified-activities.py'))
 base = importlib.util.module_from_spec(spec); spec.loader.exec_module(base)
@@ -18,7 +18,9 @@ def transform(source):
       ('Math.max(1, sheet.getLastRow() - 1), 23).getValues()', 'Math.max(1, sheet.getLastRow() - 1), 24).getValues()'),
       ('        row: number_(row[19]),\n        date:', '        row: number_(row[19]),\n        created_at: row[23] || null,\n        date:'),
       ('  selectedTransactions.sort((a, b) => b.date.localeCompare(a.date));', '  sortMovementCreation(selectedTransactions);'),
-      ('    r.financial_category_id\n  ];', '    r.financial_category_id,\n    r.created_at || null\n  ];'),
+      ('    r.financial_category_id\n  ];', '    r.financial_category_id,\n    r.insertion_created_at || null\n  ];'),
+      ('"SELECT * FROM movements ORDER BY source_row"', '"SELECT m.*,mc.created_at insertion_created_at FROM movements m LEFT JOIN movement_creation_metadata mc ON mc.movement_source_row=m.source_row ORDER BY m.source_row"'),
+      ('"SELECT m.*,c.detail_category resolved_category,c.category_id financial_category_id FROM movements m LEFT JOIN movement_financial_categories c ON c.movement_source_row=m.source_row ORDER BY m.source_row"', '"SELECT m.*,mc.created_at insertion_created_at,c.detail_category resolved_category,c.category_id financial_category_id FROM movements m LEFT JOIN movement_creation_metadata mc ON mc.movement_source_row=m.source_row LEFT JOIN movement_financial_categories c ON c.movement_source_row=m.source_row ORDER BY m.source_row"'),
     ]
     for index,(old,new) in enumerate(patches):
         if source.count(old) != 1: raise RuntimeError('Contesto inserimento movimenti diverso, patch '+str(index)+'; nessuna scrittura.')
@@ -35,20 +37,30 @@ def metadata_query(sql):
         return result['result'][0]['results']
     except Exception as error: raise RuntimeError('Verifica metadati D1 fallita: '+type(error).__name__) from None
 
-def audit_triggers():
-    rows=metadata_query("SELECT name,sql FROM sqlite_master WHERE type='trigger' AND tbl_name='movements'")
-    for row in rows:
-        if row['name'] in ['lifeos_movement_created_v1','lifeos_movement_created_immutable_v1']: continue
-        sql=row.get('sql') or ''
-        # Timestamp stamping must never invoke an unreviewed generic update hook.
-        if re.search(r'\bUPDATE\b',sql,re.I):
-            raise RuntimeError('Trigger di aggiornamento movimenti da verificare; nessun codice distribuito.')
-    columns=metadata_query('PRAGMA table_info(movements)')
-    if any(row['name']=='created_at' and row['type'].upper()!='TEXT' for row in columns):
-        raise RuntimeError('Tipo timestamp inatteso; nessun codice distribuito.')
-    print('MOVEMENT_CREATION_METADATA_AUDIT_OK; no source or records logged.')
+def canonical_trigger(sql):
+    return ' '.join(re.sub(r'\bIF NOT EXISTS\s+', '', sql, flags=re.I).strip().rstrip(';').split())
 
-def verify_live_contract():
+def expected_triggers():
+    statements=[json.loads(value) for value in re.findall(r'db\.prepare\(("CREATE TRIGGER[^\n]+")\)',payload)]
+    return {re.search(r'TRIGGER IF NOT EXISTS (\w+)',sql)[1]:canonical_trigger(sql) for sql in statements}
+
+def audit_triggers():
+    rows=metadata_query("SELECT name,tbl_name,sql FROM sqlite_master WHERE type='trigger' AND name NOT IN ('lifeos_movement_created_v1','lifeos_movement_created_immutable_v1')")
+    # The sidecar does not update movements and must preserve every legacy trigger.
+    fingerprints={row['name']:hashlib.sha256((row.get('sql') or '').encode()).hexdigest() for row in rows}
+    if any(row['tbl_name']=='movement_creation_metadata' for row in rows):
+        raise RuntimeError('Trigger dei metadati preesistenti diversi; nessun codice distribuito.')
+    owned=metadata_query("SELECT name,sql FROM sqlite_master WHERE type='trigger' AND name IN ('lifeos_movement_created_v1','lifeos_movement_created_immutable_v1')")
+    expected=expected_triggers()
+    if any(canonical_trigger(row.get('sql') or '') != expected.get(row['name']) for row in owned):
+        raise RuntimeError('Trigger creazione preesistenti diversi; nessun codice distribuito.')
+    columns=metadata_query('PRAGMA table_info(movement_creation_metadata)')
+    if columns and ({row['name'] for row in columns}!={'movement_source_row','created_at'} or not any(row['name']=='created_at' and row['type'].upper()=='TEXT' for row in columns)):
+        raise RuntimeError('Metadati creazione preesistenti diversi; nessun codice distribuito.')
+    print('MOVEMENT_CREATION_METADATA_AUDIT_OK; legacy triggers preserved, no source or records logged.')
+    return fingerprints
+
+def verify_live_contract(original_triggers):
     origin='https://lifeos-native-test.a-zeroual-it.workers.dev'
     client=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
     def post(path,payload):
@@ -69,7 +81,8 @@ def verify_live_contract():
         order=lambda row:(row.get('created_at') or '',int(row['row']))
         assert rows==sorted(rows,key=order,reverse=True)
         stage='schema'
-        assert any(row['name']=='created_at' for row in metadata_query('PRAGMA table_info(movements)'))
+        assert any(row['name']=='created_at' for row in metadata_query('PRAGMA table_info(movement_creation_metadata)'))
+        assert audit_triggers()==original_triggers
         triggers=metadata_query("SELECT name FROM sqlite_master WHERE name IN ('lifeos_movement_created_v1','lifeos_movement_created_immutable_v1') AND type='trigger'")
         assert len(triggers)==2
         print('MOVEMENT_CREATION_LIVE_CONTRACT_OK; no records created, no financial values logged.')
@@ -78,5 +91,5 @@ def verify_live_contract():
 
 if __name__ == '__main__':
     base.transform=transform
-    audit_triggers()
-    base.main(post_verification=verify_live_contract,label='MOVEMENT_CREATION_70_DEPLOYED_AND_VERIFIED')
+    original_triggers=audit_triggers()
+    base.main(post_verification=lambda:verify_live_contract(original_triggers),label='MOVEMENT_CREATION_70_DEPLOYED_AND_VERIFIED')

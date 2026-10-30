@@ -2,42 +2,54 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {DatabaseSync} from 'node:sqlite';
 import {readFileSync} from 'node:fs';
-const source=readFileSync(new URL('../../../manual/build-70/worker.js',import.meta.url),'utf8');
+const source=readFileSync(process.env.LIFEOS_CREATION_WORKER || new URL('../../../manual/build-70/worker.js',import.meta.url),'utf8');
 const core=await import('data:text/javascript;base64,'+Buffer.from(source+'\nexport {ensureMovementCreation,sortMovementCreation,recordToMovement};').toString('base64'));
 function fixture() {
- const sql=new DatabaseSync(':memory:');sql.exec('CREATE TABLE movements(source_row INTEGER PRIMARY KEY,actual_date TEXT,description TEXT,amount REAL)');
+ const sql=new DatabaseSync(':memory:');sql.exec('PRAGMA foreign_keys=ON; CREATE TABLE movements(source_row INTEGER PRIMARY KEY,actual_date TEXT,description TEXT,amount REAL)');
  const db={prepare(text){let args=[];return {bind(...values){args=values;return this},async all(){return {results:sql.prepare(text).all(...args)}},async run(){return {meta:{changes:sql.prepare(text).run(...args).changes}}}}},async batch(items){sql.exec('BEGIN');try{const result=[];for(const item of items)result.push(await item.run());sql.exec('COMMIT');return result}catch(e){sql.exec('ROLLBACK');throw e}}};
- return {sql,db};
+ const rows=()=>sql.prepare('SELECT m.source_row row,c.created_at FROM movements m LEFT JOIN movement_creation_metadata c ON c.movement_source_row=m.source_row').all();
+ return {sql,db,rows};
 }
 test('historical movements keep unknown creation time, order by append id',async()=>{
- const {sql,db}=fixture();sql.exec("INSERT INTO movements VALUES(7,'2026-10-30','Old',-1),(8,'2026-09-01','Backdated',-2)");
+ const {sql,db,rows}=fixture();sql.exec("INSERT INTO movements VALUES(7,'2026-10-30','Old',-1),(8,'2026-09-01','Backdated',-2)");
  await core.ensureMovementCreation(db);
- const rows=sql.prepare('SELECT source_row row,created_at FROM movements').all();
- assert.ok(rows.every(r=>r.created_at===null));assert.deepEqual(core.sortMovementCreation(rows).map(r=>r.row),[8,7]);
+ assert.ok(rows().every(r=>r.created_at===null));assert.deepEqual(core.sortMovementCreation(rows()).map(r=>r.row),[8,7]);
 });
 test('new backdated entries have real immutable UTC timestamps and sort first',async()=>{
- const {sql,db}=fixture();sql.exec("INSERT INTO movements VALUES(7,'2026-10-30','Old',-1)");await core.ensureMovementCreation(db);
+ const {sql,db,rows}=fixture();sql.exec("INSERT INTO movements VALUES(7,'2026-10-30','Old',-1)");await core.ensureMovementCreation(db);
  sql.prepare('INSERT INTO movements(source_row,actual_date,description,amount) VALUES(?,?,?,?)').run(8,'2026-09-01','New',-2);
- const before=sql.prepare('SELECT * FROM movements WHERE source_row=8').get();assert.match(before.created_at,/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+ const before=rows().find(r=>r.row===8);assert.match(before.created_at,/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
  sql.prepare('UPDATE movements SET actual_date=?,amount=? WHERE source_row=8').run('2026-08-01',-10);
- assert.equal(sql.prepare('SELECT created_at FROM movements WHERE source_row=8').get().created_at,before.created_at);
- assert.throws(()=>sql.exec("UPDATE movements SET created_at='2000-01-01' WHERE source_row=8"),/immutable/);
- assert.deepEqual(core.sortMovementCreation(sql.prepare('SELECT source_row row,created_at FROM movements').all()).map(r=>r.row),[8,7]);
+ assert.equal(rows().find(r=>r.row===8).created_at,before.created_at);
+ assert.throws(()=>sql.exec("UPDATE movement_creation_metadata SET created_at='2000-01-01' WHERE movement_source_row=8"),/immutable/);
+ assert.deepEqual(core.sortMovementCreation(rows()).map(r=>r.row),[8,7]);
 });
 test('timestamp ties retain deterministic append order and deletion/reinsertion stamps anew',async()=>{
- const {sql,db}=fixture();await core.ensureMovementCreation(db);
- sql.exec("INSERT INTO movements(source_row,created_at) VALUES(1,'2026-10-01T10:00:00.000Z'),(2,'2026-10-01T10:00:00.000Z')");
- assert.deepEqual(core.sortMovementCreation(sql.prepare('SELECT source_row row,created_at FROM movements').all()).map(r=>r.row),[2,1]);
- sql.exec('DELETE FROM movements WHERE source_row=2');sql.exec('INSERT INTO movements(source_row) VALUES(2)');
- assert.notEqual(sql.prepare('SELECT created_at FROM movements WHERE source_row=2').get().created_at,'2026-10-01T10:00:00.000Z');
+ const {sql,db,rows}=fixture();await core.ensureMovementCreation(db);
+ sql.exec('INSERT INTO movements(source_row) VALUES(1),(2)');
+ assert.deepEqual(core.sortMovementCreation([{row:1,created_at:'2026-10-01T10:00:00.000Z'},{row:2,created_at:'2026-10-01T10:00:00.000Z'}]).map(r=>r.row),[2,1]);
+ sql.exec('DELETE FROM movements WHERE source_row=2');assert.equal(sql.prepare('SELECT COUNT(*) n FROM movement_creation_metadata WHERE movement_source_row=2').get().n,0);
+ sql.exec('INSERT INTO movements(source_row) VALUES(2)');assert.ok(rows().find(r=>r.row===2).created_at);
 });
-test('migration is idempotent and concurrent callers preserve amounts and dates',async()=>{
+test('migration is idempotent and does not add columns or change historical amounts/dates',async()=>{
  const {sql,db}=fixture();sql.exec("INSERT INTO movements VALUES(1,'2026-10-30','Preserve',-125.50)");
+ const before=sql.prepare('SELECT * FROM movements').get(), columns=sql.prepare('PRAGMA table_info(movements)').all();
  await Promise.all([core.ensureMovementCreation(db),core.ensureMovementCreation(db)]);await core.ensureMovementCreation(db);
- assert.deepEqual({...sql.prepare('SELECT * FROM movements').get()},{source_row:1,actual_date:'2026-10-30',description:'Preserve',amount:-125.5,created_at:null});
+ assert.deepEqual(sql.prepare('SELECT * FROM movements').get(),before);assert.deepEqual(sql.prepare('PRAGMA table_info(movements)').all(),columns);
  assert.equal(sql.prepare("SELECT COUNT(*) n FROM sqlite_master WHERE type='trigger'").get().n,2);
 });
+test('timestamp stamp does not activate legacy movement UPDATE hooks',async()=>{
+ const {sql,db}=fixture();sql.exec('CREATE TABLE probe(n INTEGER); INSERT INTO probe VALUES(0); CREATE TRIGGER legacy_update AFTER UPDATE ON movements BEGIN UPDATE probe SET n=n+1; END;');
+ await core.ensureMovementCreation(db);sql.exec("INSERT INTO movements(source_row,amount) VALUES(1,-10)");
+ assert.equal(sql.prepare('SELECT n FROM probe').get().n,0,'timestamp metadata must not update the financial row');
+ sql.exec('UPDATE movements SET amount=-20 WHERE source_row=1');assert.equal(sql.prepare('SELECT n FROM probe').get().n,1,'existing edit hook still runs normally');
+});
+test('a failed bank batch rolls back the sidecar with the inserted movement',async()=>{
+ const {sql,db}=fixture();await core.ensureMovementCreation(db);
+ await assert.rejects(db.batch([db.prepare('INSERT INTO movements(source_row) VALUES(1)'),db.prepare('INSERT INTO nonexistent VALUES(1)')]));
+ assert.equal(sql.prepare('SELECT COUNT(*) n FROM movements').get().n,0);assert.equal(sql.prepare('SELECT COUNT(*) n FROM movement_creation_metadata').get().n,0);
+});
 test('Worker projection preserves financial-category indexes and appends creation field',()=>{
- const row=core.recordToMovement({source_row:8,created_at:'2026-10-30T10:00:00.000Z',resolved_category:'Acqua',financial_category_id:3});
+ const row=core.recordToMovement({source_row:8,insertion_created_at:'2026-10-30T10:00:00.000Z',resolved_category:'Acqua',financial_category_id:3});
  assert.equal(row[19],8);assert.equal(row[21],'Acqua');assert.equal(row[22],3);assert.equal(row[23],'2026-10-30T10:00:00.000Z');
 });
