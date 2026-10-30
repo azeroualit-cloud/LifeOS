@@ -1,0 +1,27 @@
+name: Life OS - Link diretto IPA 68
+on:
+  push:
+    paths: ['.github/workflows/lifeos-direct-ipa68.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scarica e verifica IPA già compilata
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api repos/azeroualit-cloud/LifeOS/actions/artifacts/12976114405/zip > artifact.zip
+          unzip -q artifact.zip -d artifact
+          IPA="$(find artifact -name LifeOS-unsigned.ipa -type f)"
+          test -n "$IPA"
+          echo "bb2cb3085f3f358b744d9566d2aa79b0f062936b5c0fb03bc8064d9b1f000670  $IPA" | sha256sum -c -
+          cp "$IPA" LifeOS-68.ipa
+      - name: Pubblica singolo file IPA
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create ios-0.10.7-build68 LifeOS-68.ipa --repo azeroualit-cloud/LifeOS --target 642507c893321bcc78e14613ee9d76dfa62816c0 --title "Life OS 0.10.7 build 68" --notes "IPA non firmata per Signulous. Build Apple verificata: 191 test unitari e 25 esecuzioni UI. Backend attività aggiornato."
