@@ -1,3 +1,7 @@
+## Widget — build 52, implementazione non ancora verificata su Apple
+
+Aggiunti ai sorgenti un solo widget 2×2 con sette turni, progresso abitudini, conteggi attività/scadute e + per Evento/Attività; estensione incorporata, App Group, copia locale minima e aggiornamento dopo salvataggio. Controlli locali su sintassi, configurazione e pacchetto passati; otto test unitari/integrazione e un test UI predisposti ma non eseguiti. Mancano compilazione Xcode, QA del widget reale e conferma firma Signulous/App Group. **Nessuna IPA build 52 verificata: build 51 resta l’ultima consegna verificata.** Dettagli: native/WIDGET-0.9.0-build52.md.
+
 ## Webapp — revisione locale 17 ottobre 2026
 
 Sorgente completo recuperato dal file allegato e versionato in `web/worker.mjs`, HTML leggibile in `web/app.html`. Palette platino, Finanza aperta senza card, Budget/Extra/Spesa (Spesa a destra), Budget separato, grafici esistenti in Analisi; calendario uniforme senza fondi weekend e selezione sul numero; più contestuale nell’intestazione e microanimazioni con Riduci movimento. Rimossi dalla UI il Sankey storico e il riepilogo annuale. Backend identico alla baseline allegata.

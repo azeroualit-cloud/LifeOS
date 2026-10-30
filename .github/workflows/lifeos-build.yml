@@ -2,7 +2,7 @@ name: Life OS - App nativa
 on:
   workflow_dispatch:
   push:
-    paths: ['lifeos-native.zip', '.github/workflows/lifeos-build.yml', '.github/workflows/ios.yml', 'Sources/**', 'Tests/**', 'Assets.xcassets/**', 'project.yml']
+    paths: ['lifeos-native.zip', '.github/workflows/lifeos-build.yml', '.github/workflows/ios.yml', 'Sources/**', 'Shared/**', 'Widgets/**', 'Tests/**', 'UITests/**', '*.entitlements', 'Assets.xcassets/**', 'project.yml']
 permissions:
   contents: read
 concurrency:
@@ -42,7 +42,7 @@ jobs:
           import hashlib, pathlib, zipfile
           source = pathlib.Path('lifeos-native.zip')
           if source.is_file():
-              assert hashlib.sha256(source.read_bytes()).hexdigest() == 'dd90cdc78d87be0afea5ce909782a8ec85204f895b50dc4d2e3025a26490a8d8', 'ZIP sorgenti diverso da quello previsto'
+              assert hashlib.sha256(source.read_bytes()).hexdigest() == 'ab5d1dfe473feeeffea2a81164f4b78d41cdbad862460804d0db94f9fba4918c', 'ZIP sorgenti diverso da quello previsto'
               with zipfile.ZipFile(source) as archive:
                   for name in archive.namelist():
                       p = pathlib.PurePosixPath(name)
@@ -51,9 +51,11 @@ jobs:
           elif pathlib.Path('project.yml').is_file():
               import shutil
               pathlib.Path('app').mkdir()
-              for name in ['Sources', 'Tests', 'UITests', 'Assets.xcassets']:
+              for name in ['Sources', 'Shared', 'Widgets', 'Tests', 'UITests', 'Assets.xcassets']:
                   shutil.copytree(name, 'app/' + name)
               shutil.copy2('project.yml', 'app/project.yml')
+              for name in ['LifeOS.entitlements', 'Widget.entitlements']:
+                  shutil.copy2(name, 'app/' + name)
               pathlib.Path('app/scripts').mkdir(exist_ok=True)
               shutil.copy2('scripts/check-design-system.py', 'app/scripts/check-design-system.py')
           else:
@@ -182,6 +184,19 @@ jobs:
           set -euo pipefail
           xcodebuild archive -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -configuration Release -destination 'generic/platform=iOS' -archivePath build/LifeOS.xcarchive CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/archive.log
           test -d build/LifeOS.xcarchive/Products/Applications/LifeOSProbe.app
+          python3 - <<'PYWIDGET'
+          import pathlib, plistlib
+          app = pathlib.Path('build/LifeOS.xcarchive/Products/Applications/LifeOSProbe.app')
+          extension = app / 'PlugIns/LifeOSDayWidget.appex'
+          assert extension.is_dir(), 'Estensione widget assente dall’app archiviata'
+          main = plistlib.loads((app/'Info.plist').read_bytes())
+          widget = plistlib.loads((extension/'Info.plist').read_bytes())
+          assert widget['NSExtension']['NSExtensionPointIdentifier'] == 'com.apple.widgetkit-extension'
+          assert widget['CFBundleIdentifier'] == main['CFBundleIdentifier'] + '.widget'
+          assert widget['CFBundleVersion'] == main['CFBundleVersion']
+          assert any('lifeos' in entry.get('CFBundleURLSchemes', []) for entry in main['CFBundleURLTypes'])
+          print('WIDGET_EMBEDDED_AND_VERSIONED_OK')
+          PYWIDGET
           mkdir -p build/Payload download
           cp -R build/LifeOS.xcarchive/Products/Applications/LifeOSProbe.app build/Payload/
           cd build
