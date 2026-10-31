@@ -103,13 +103,13 @@ struct CalendarScreen: View {
                 }.accessibilityIdentifier("calendar-back-month")
                 Spacer()
                 Button("Oggi") { selected = CivilDate.day(); store.calendarMonth = CivilDate.month() }
-                    .frame(minHeight: NativeDesign.Layout.touchTarget)
+                    .frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget)
             }.buttonStyle(.plain).padding(.horizontal, NativeDesign.Layout.screenInset)
             weekdayLabels.padding(.horizontal, NativeDesign.Layout.screenInset)
             HStack(spacing: NativeDesign.Space.none) {
                 ForEach(weekDays, id: \.self) { day in
                     Button { selected = day; store.calendarMonth = String(day.prefix(7)) } label: {
-                        Text(String(Int(day.suffix(2)) ?? 0)).font(.title3.weight(.semibold))
+                        Text(String(Int(day.suffix(2)) ?? 0)).font(.title3.weight(.semibold)).lineLimit(1).minimumScaleFactor(0.7)
                             .foregroundStyle(day == selected ? NativeDesign.canvas : Color.primary)
                             .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget)
                             .background { if day == selected { Circle().fill(Color.primary).frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget) } }
@@ -120,10 +120,16 @@ struct CalendarScreen: View {
             }.buttonStyle(.plain).padding(.horizontal, NativeDesign.Layout.screenInset).padding(.bottom, NativeDesign.Space.small)
             Divider()
             Text(CivilDate.label(selected).capitalized).font(.headline).padding(.vertical, NativeDesign.Space.medium)
+            if allDayCount > 0 {
+                ScrollView { allDayAgenda.padding(.horizontal, NativeDesign.Layout.screenInset) }
+                    .scrollBounceBehavior(.basedOnSize)
+                    .frame(height: min(CGFloat(allDayCount) * NativeDesign.Layout.rowHeight + NativeDesign.Space.medium, NativeDesign.Layout.allDayAgendaHeight))
+                    .accessibilityIdentifier("calendar-all-day-pane")
+                Divider()
+            }
             ScrollViewReader { proxy in
                 ScrollView {
                     VStack(alignment: .leading, spacing: NativeDesign.Space.none) {
-                        allDayAgenda
                         dayTimeline
                         Button { router.sheet = .event(["day": .string(selected)]) } label: {
                             Label("Aggiungi evento", systemImage: "plus.circle").frame(minHeight: NativeDesign.Layout.touchTarget)
@@ -193,6 +199,11 @@ struct CalendarScreen: View {
         return (0..<7).map { CivilDate.adding($0, to: monday) }
     }
     private var selectedShift: ShiftKind? { monthDays[String(selected.prefix(7))]?.first { $0.day == selected }?.shift }
+    private var allDayCount: Int {
+        (eventsByDay[selected] ?? []).filter { $0.text("start_time").isEmpty }.count
+        + (tasksByDay[selected] ?? []).filter { $0.text("scheduled_time").isEmpty }.count
+        + (selectedShift?.time.isEmpty == true ? 1 : 0)
+    }
     private var allDayAgenda: some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
             ForEach((eventsByDay[selected] ?? []).filter { $0.text("start_time").isEmpty }.map { DisplayRecord($0) }) { item in eventRow(item.value) }
@@ -394,7 +405,7 @@ private struct NativeShiftBrushOption: View {
         Button { brush = kind.rawValue } label: {
             VStack(spacing: NativeDesign.Space.xs) {
                 Label { Text(String(kind.title.prefix(1))).foregroundStyle(Color.primary) } icon: { Image(systemName: kind.symbol).foregroundStyle(kind.color) }.font(.caption.weight(.semibold))
-                if !kind.time.isEmpty { Text(kind.time.replacingOccurrences(of: ":00", with: "")).font(.caption2).foregroundStyle(NativeDesign.secondary) }
+                Text(kind.time.isEmpty ? " " : kind.time.replacingOccurrences(of: ":00", with: "")).font(.caption2).foregroundStyle(NativeDesign.secondary).lineLimit(1)
             }.frame(width: width, height: height)
                 .modifier(NativeGlass())
                 .overlay(Capsule().stroke(brush == kind.rawValue ? kind.color : Color.clear, lineWidth: NativeDesign.Layout.selectionLine))
@@ -429,7 +440,7 @@ struct CalendarDayCell: View, Equatable {
         VStack(spacing: NativeDesign.Space.xxs) {
             Text(String(Int(item.day.suffix(2)) ?? 0)).font(appearance == .month ? .title3.weight(.semibold) : .subheadline.weight(active || item.isToday ? .semibold : .regular)).monospacedDigit()
                 .foregroundStyle(active ? (item.shift == nil ? NativeDesign.canvas : Color.black.opacity(0.85)) : appearance == .month && item.isWeekend ? NativeDesign.secondary : Color.primary)
-                .minimumScaleFactor(0.8).lineLimit(1).frame(width: numberSize, height: numberSize)
+                .minimumScaleFactor(0.8).lineLimit(1).frame(width: appearance == .month ? NativeDesign.Layout.touchTarget : numberSize, height: appearance == .month ? NativeDesign.Layout.touchTarget : numberSize)
                 .background(active ? color : .clear, in: Circle())
                 .overlay(Circle().stroke(item.isToday && !active ? color : .clear, lineWidth: 1))
             NativeShiftBadge(shift: item.shift)

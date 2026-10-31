@@ -26,7 +26,7 @@ final class NativeRevision71UITests: XCTestCase {
     }
     private func reveal(_ element: XCUIElement, in surface: XCUIElement, app: XCUIApplication) {
         for _ in 0..<24 {
-            let top = max(surface.frame.minY, app.navigationBars.firstMatch.frame.maxY)
+            let top = max(surface.frame.minY, app.navigationBars.firstMatch.exists ? app.navigationBars.firstMatch.frame.maxY : surface.frame.minY)
             let bottom = min(surface.frame.maxY, app.tabBars.firstMatch.exists ? app.tabBars.firstMatch.frame.minY : app.frame.maxY)
             if element.exists && element.isHittable && element.frame.minY >= top && element.frame.maxY <= bottom { return }
             let above = element.exists && element.frame.minY < top
@@ -65,6 +65,20 @@ final class NativeRevision71UITests: XCTestCase {
         app.buttons["Mese successivo"].tap()
         XCUIDevice.shared.press(.home); app.activate()
         reveal(today, in: app.scrollViews["calendar-scroll"], app: app); XCTAssertTrue(today.isSelected)
+    }
+    func testAllDayEventsStayVisibleWhileTheHourTimelineScrolls() {
+        let app = launch(["--activity-agenda"])
+        app.tabBars.buttons["Calendario"].tap()
+        let today = app.buttons["calendar-day-" + day()]
+        reveal(today, in: app.scrollViews["calendar-scroll"], app: app); today.tap()
+        let allDay = app.scrollViews["calendar-all-day-pane"]
+        XCTAssertTrue(exists(allDay, app: app))
+        let event = app.buttons["Evento oggi"]
+        XCTAssertTrue(event.isHittable)
+        let y = event.frame.minY
+        app.scrollViews["calendar-day-pane"].swipeUp()
+        XCTAssertTrue(event.isHittable); XCTAssertEqual(event.frame.minY, y, accuracy: 1)
+        event.tap(); XCTAssertTrue(app.navigationBars["Modifica attività"].waitForExistence(timeout: 10))
     }
     func testTaskAndEventOpenTheSameBottomEditorWithoutInlineChips() {
         let app = launch(["--activity-agenda"])

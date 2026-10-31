@@ -32,95 +32,99 @@ struct NativeActivityEditor: View {
     @State private var identity = UUID().uuidString
     var body: some View {
         Form {
+            Section {
+                TextField("Titolo", text: $title).accessibilityIdentifier("activity-title")
+                VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+                    Text("Descrizione").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
+                    TextEditor(text: $notes).frame(minHeight: NativeDesign.Layout.activityDescriptionHeight).accessibilityLabel("Descrizione")
+                }
+                HStack(alignment: .top, spacing: NativeDesign.Space.small) {
+                    VStack(alignment: .leading) {
+                        dateField("Inizio", enabled: $hasDate, date: $date, presented: $choosingStart)
+                        if hasDate { timeField("Ora iniziale", enabled: $hasTime, value: $start) }
+                    }
+                    VStack(alignment: .leading) {
+                        dateField("Scadenza", enabled: $hasDue, date: $due, presented: $choosingDue)
+                        if hasDue || (hasDate && hasEnd) {
+                            if hasDate { timeField("Ora finale", enabled: $hasEnd, value: $end) }
+                            else { timeField("Promemoria", enabled: $hasTime, value: $start) }
+                        }
+                    }
+                }.id("dates")
+            }
+            Section {
+                Picker("Categoria", selection: $category) {
+                    ForEach(store.categories.map { DisplayRecord($0, key: "key") }) { item in Text(item.value.text("label")).tag(item.value.text("key")) }
+                }
+                TextField("Luogo", text: $location)
+            }
+            if hasDate {
+                Section("Avviso evento") {
+                    if #available(iOS 26.0, *) {
+                        Toggle("Sveglia urgente", isOn: $urgent).disabled(store.isDemo || (!urgent && !alarmEligible))
+                            .accessibilityIdentifier("activity-urgent-alarm")
+                        Text(store.isDemo ? "Le sveglie non vengono programmate nella demo." : frequency != "none" ? "Disponibile per eventi senza ripetizione." : !hasTime ? "Aggiungi un orario per attivarla." : !alarmEligible ? "Scegli una data e un’ora future." : "Suona anche in silenzioso e Full immersion. Solo su questo iPhone.")
+                            .font(.caption).foregroundStyle(NativeDesign.secondary)
+                    } else { Text("La sveglia urgente è disponibile da iOS 26.").font(.caption).foregroundStyle(NativeDesign.secondary) }
+                }
+            }
+            if hasDate {
+                Section("Ripetizione") {
+                    Picker("Frequenza", selection: $frequency) {
+                        Text("Mai").tag("none"); Text("Ogni settimana").tag("weekly"); Text("Ogni mese").tag("monthly"); Text("Ogni anno").tag("yearly")
+                    }
+                    if frequency != "none" {
+                        Toggle("Data finale", isOn: $hasUntil)
+                        if hasUntil { DatePicker("Fino al", selection: $until, in: date..., displayedComponents: .date) }
+                    }
+                    if source == "event", record.integer("id") > 0, record.text("frequency", fallback: "none") != "none" {
+                        Toggle("Modifica da questa occorrenza", isOn: $fromHere)
+                        Text("Le occorrenze precedenti restano nello storico.").font(.caption).foregroundStyle(NativeDesign.secondary)
+                    }
+                }.id("repeat")
+            }
+            if record.integer("id") > 0, source == "task" {
+                Section("Gestisci attività") {
+                    Button(record.text("status") == "done" ? "Segna da fare" : "Segna completata") {
+                        Task { await store.run("setTaskStatus", ["id": .int(record.integer("id")), "status": .string(NativeTaskList.completionStatus(record))]); if store.error == nil { cancelAlarmAndDismiss() } }
+                    }
+                    Button(NativeTaskList.section(record) == "waiting" ? "Riattiva attività" : "Metti in attesa") {
+                        Task { await store.run("setTaskStatus", ["id": .int(record.integer("id")), "status": .string(NativeTaskList.section(record) == "waiting" ? "todo" : "waiting")]); if store.error == nil { cancelAlarmAndDismiss() } }
+                    }
+                    Button("Elimina attività", role: .destructive) { deleteTask = true }
+                }
+            }
+            if record.integer("id") > 0, source == "event" {
                 Section {
-                    TextField("Titolo", text: $title).accessibilityIdentifier("activity-title")
-                    VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-                        Text("Descrizione").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
-                        TextEditor(text: $notes).frame(minHeight: NativeDesign.Layout.activityDescriptionHeight).accessibilityLabel("Descrizione")
+                    Button(record.text("occurrence_status") == "done" ? "Riapri questa occorrenza" : "Segna fatta questa occorrenza") {
+                        Task { await store.run("setEventOccurrence", ["id": .int(record.integer("id")), "day": .string(record.text("day")), "status": .string(record.text("occurrence_status") == "done" ? "open" : "done")]); if store.error == nil { cancelAlarmAndDismiss() } }
                     }
-                    HStack(alignment: .top, spacing: NativeDesign.Space.small) {
-                        VStack(alignment: .leading) {
-                            dateField("Inizio", enabled: $hasDate, date: $date, presented: $choosingStart)
-                            if hasDate { timeField("Ora iniziale", enabled: $hasTime, value: $start) }
-                        }
-                        VStack(alignment: .leading) {
-                            dateField("Scadenza", enabled: $hasDue, date: $due, presented: $choosingDue)
-                            if hasDate || hasDue {
-                                if hasDate { timeField("Ora finale", enabled: $hasEnd, value: $end) }
-                                else { timeField("Promemoria", enabled: $hasTime, value: $start) }
-                            }
-                        }
-                    }.id("dates")
-                }
-                Section {
-                    Picker("Categoria", selection: $category) {
-                        ForEach(store.categories.map { DisplayRecord($0, key: "key") }) { item in Text(item.value.text("label")).tag(item.value.text("key")) }
+                    Button("Elimina solo questa occorrenza", role: .destructive) {
+                        Task { await store.run("setEventOccurrence", ["id": .int(record.integer("id")), "day": .string(record.text("day")), "status": .string("skipped")]); if store.error == nil { cancelAlarmAndDismiss() } }
                     }
-                    TextField("Luogo", text: $location)
-                }
-                if hasDate {
-                    Section("Avviso evento") {
-                        if #available(iOS 26.0, *) {
-                            Toggle("Sveglia urgente", isOn: $urgent).disabled(!hasTime || frequency != "none" || store.isDemo)
-                                .accessibilityIdentifier("activity-urgent-alarm")
-                            Text("Suona a quest’ora anche in silenzioso e Full immersion, con il tuo consenso. Solo su questo iPhone, per eventi singoli con orario. Le serie ricorrenti mantengono i promemoria normali.").font(.caption).foregroundStyle(NativeDesign.secondary)
-                        } else { Text("La sveglia urgente è disponibile da iOS 26.").font(.caption).foregroundStyle(NativeDesign.secondary) }
-                    }
-                }
-                if hasDate {
-                    Section("Ripetizione") {
-                        Picker("Frequenza", selection: $frequency) {
-                            Text("Mai").tag("none"); Text("Ogni settimana").tag("weekly"); Text("Ogni mese").tag("monthly"); Text("Ogni anno").tag("yearly")
-                        }
-                        if frequency != "none" {
-                            Toggle("Data finale", isOn: $hasUntil)
-                            if hasUntil { DatePicker("Fino al", selection: $until, in: date..., displayedComponents: .date) }
-                        }
-                        if source == "event", record.integer("id") > 0, record.text("frequency", fallback: "none") != "none" {
-                            Toggle("Modifica da questa occorrenza", isOn: $fromHere)
-                            Text("Le occorrenze precedenti restano nello storico.").font(.caption).foregroundStyle(NativeDesign.secondary)
-                        }
-                    }.id("repeat")
-                }
-                if record.integer("id") > 0, source == "task" {
-                    Section("Gestisci attività") {
-                        Button(record.text("status") == "done" ? "Segna da fare" : "Segna completata") {
-                            Task { await store.run("setTaskStatus", ["id": .int(record.integer("id")), "status": .string(NativeTaskList.completionStatus(record))]); if store.error == nil { cancelAlarmAndDismiss() } }
-                        }
-                        Button(NativeTaskList.section(record) == "waiting" ? "Riattiva attività" : "Metti in attesa") {
-                            Task { await store.run("setTaskStatus", ["id": .int(record.integer("id")), "status": .string(NativeTaskList.section(record) == "waiting" ? "todo" : "waiting")]); if store.error == nil { cancelAlarmAndDismiss() } }
-                        }
-                        Button("Elimina attività", role: .destructive) { deleteTask = true }
-                    }
-                }
-                if record.integer("id") > 0, source == "event" {
-                    Section {
-                        Button(record.text("occurrence_status") == "done" ? "Riapri questa occorrenza" : "Segna fatta questa occorrenza") {
-                            Task { await store.run("setEventOccurrence", ["id": .int(record.integer("id")), "day": .string(record.text("day")), "status": .string(record.text("occurrence_status") == "done" ? "open" : "done")]); if store.error == nil { cancelAlarmAndDismiss() } }
-                        }
-                        Button("Elimina solo questa occorrenza", role: .destructive) {
-                            Task { await store.run("setEventOccurrence", ["id": .int(record.integer("id")), "day": .string(record.text("day")), "status": .string("skipped")]); if store.error == nil { cancelAlarmAndDismiss() } }
-                        }
-                        Button("Elimina intera serie", role: .destructive) { deleteSeries = true }
-                    }.id("actions")
-                }
-                if let failure { NativeInlineMessage(text: failure) }
-            }.modifier(NativeListAppearance())
-                .navigationTitle(record.integer("id") != 0 ? "Modifica attività" : "Nuova attività").navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) { Button("Annulla") { dismiss() }.disabled(saving) }
-                    ToolbarItem(placement: .confirmationAction) { Button("Salva") { Task { await save() } }.disabled(saving || title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) }
-                }
-                .onAppear(perform: load)
-                .onChange(of: fromHere) { _, value in date = CivilDate.date(value ? record.text("day") : record.text("series_day", fallback: record.text("day"))) }
-                .presentationDetents([.large])
-                .presentationDragIndicator(.visible)
-                .confirmationDialog("Eliminare questa attività?", isPresented: $deleteTask, titleVisibility: .visible) {
-                    Button("Elimina attività", role: .destructive) { Task { await store.run("deleteTask", args: [.int(record.integer("id"))]); if store.error == nil { cancelAlarmAndDismiss() } } }
-                }
-                .confirmationDialog("Eliminare la serie e tutti gli stati delle occorrenze?", isPresented: $deleteSeries, titleVisibility: .visible) {
-                    Button("Elimina serie", role: .destructive) { Task { await store.run("deleteEvent", args: [.int(record.integer("id"))]); if store.error == nil { cancelAlarmAndDismiss() } } }
-                }
+                    Button("Elimina intera serie", role: .destructive) { deleteSeries = true }
+                }.id("actions")
+            }
+            if let failure { NativeInlineMessage(text: failure) }
+        }.modifier(NativeListAppearance())
+            .navigationTitle(record.integer("id") != 0 ? "Modifica attività" : "Nuova attività").navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Annulla") { dismiss() }.disabled(saving) }
+                ToolbarItem(placement: .confirmationAction) { Button("Salva") { Task { await save() } }.disabled(saving || title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) }
+            }
+            .onAppear(perform: load)
+            .onChange(of: fromHere) { _, value in date = CivilDate.date(value ? record.text("day") : record.text("series_day", fallback: record.text("day"))) }
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+            .confirmationDialog("Eliminare questa attività?", isPresented: $deleteTask, titleVisibility: .visible) {
+                Button("Elimina attività", role: .destructive) { Task { await store.run("deleteTask", args: [.int(record.integer("id"))]); if store.error == nil { cancelAlarmAndDismiss() } } }
+            }
+            .confirmationDialog("Eliminare la serie e tutti gli stati delle occorrenze?", isPresented: $deleteSeries, titleVisibility: .visible) {
+                Button("Elimina serie", role: .destructive) { Task { await store.run("deleteEvent", args: [.int(record.integer("id"))]); if store.error == nil { cancelAlarmAndDismiss() } } }
+            }
+    }
+    private var alarmEligible: Bool {
+        hasDate && hasTime && frequency == "none" && (NativeUrgentAlarm.date(day: CivilDate.day(date), time: clock(start)) ?? .distantPast) > Date()
     }
     private func cancelAlarmAndDismiss() {
         do { try NativeUrgentAlarm.cancel(identity: identity); dismiss() }
@@ -144,7 +148,7 @@ struct NativeActivityEditor: View {
         }.frame(maxWidth: .infinity, alignment: .leading)
         .popover(isPresented: presented) {
             VStack {
-                HStack { Text(title).font(.headline); Spacer(); Button("Fine") { presented.wrappedValue = false }.frame(minHeight: NativeDesign.Layout.touchTarget) }
+                HStack { Text(title).font(.headline); Spacer(); Button("Fine") { presented.wrappedValue = false }.frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget) }
                 DatePicker(title, selection: date, displayedComponents: .date).datePickerStyle(.graphical).labelsHidden()
             }.padding().presentationCompactAdaptation(.popover)
         }

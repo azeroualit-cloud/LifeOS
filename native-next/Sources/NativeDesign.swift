@@ -63,6 +63,7 @@ enum NativeDesign {
         static let healthBarRadius: CGFloat = 2
         static let calendarDayNumber: CGFloat = 26
         static let selectionLine: CGFloat = 2
+        static let allDayAgendaHeight: CGFloat = 168
         static let timelineHour: CGFloat = 76
         static let timelineLabel: CGFloat = 48
         static let calendarSwipeDistance: CGFloat = 44

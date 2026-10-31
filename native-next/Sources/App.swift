@@ -219,10 +219,7 @@ struct NativeRoot: View {
     private var dashboard: some View { NavigationStack { DashboardScreen().toolbar { tools }.navigationTitle("Dashboard").navigationBarTitleDisplayMode(.inline) } }
     private var tasks: some View { NavigationStack { TasksScreen().toolbar { tools }.navigationTitle("Attività").navigationBarTitleDisplayMode(.inline) } }
     private var calendar: some View { NavigationStack { CalendarScreen().toolbar { tools }.navigationTitle("Calendario").navigationBarTitleDisplayMode(.inline) } }
-    private var finance: some View { NavigationStack { FinanceScreen().toolbar { financeTools }.navigationTitle("Finanza").navigationBarTitleDisplayMode(.large) } }
-    @ToolbarContentBuilder private var financeTools: some ToolbarContent {
-        ToolbarItemGroup(placement: .topBarTrailing) { settingsControl; addControl }
-    }
+    private var finance: some View { NavigationStack { FinanceScreen().navigationTitle("Finanza").navigationBarTitleDisplayMode(.inline) } }
     @ToolbarContentBuilder private var tools: some ToolbarContent {
         if #available(iOS 26.0, *) {
             ToolbarItem(placement: .topBarTrailing) { addControl }

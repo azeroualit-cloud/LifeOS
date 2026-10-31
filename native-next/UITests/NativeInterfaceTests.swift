@@ -24,7 +24,7 @@ final class NativeInterfaceTests: XCTestCase {
             XCTAssertTrue(app.navigationBars["Budget"].waitForExistence(timeout: 10))
         } else {
             app.navigationBars.buttons.element(boundBy: 0).tap()
-            XCTAssertTrue(app.navigationBars["Finanza"].waitForExistence(timeout: 10))
+            XCTAssertTrue(app.staticTexts["finance-heading"].waitForExistence(timeout: 10))
         }
     }
     private func addButton(_ app: XCUIApplication) -> XCUIElement {
@@ -76,7 +76,7 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "dashboard-day-")).count, 7)
         capture("dashboard-week-80-and-shift-progress")
         app.tabBars.buttons["Finanza"].tap()
-        for name in ["finance-budget", "finance-new-plan", "finance-expense", "finance-analysis"] {
+        for name in ["finance-budget", "finance-analysis", "finance-more", "primary-add"] {
             let button = app.buttons[name]; XCTAssertTrue(button.waitForExistence(timeout: 10)); assertMinimumTouchTarget(button)
         }
         capture("finance-native-glass-actions")
@@ -372,7 +372,7 @@ final class NativeInterfaceTests: XCTestCase {
                     XCTAssertEqual(touch.screenPoint.x, frame.midX + offset.dx, accuracy: 0.1)
                     XCTAssertEqual(touch.screenPoint.y, frame.midY + offset.dy, accuracy: 0.1)
                     touch.tap()
-                    XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: 5),
+                    XCTAssertTrue((title == "Finanza" ? app.staticTexts["finance-heading"] : app.navigationBars[title]).waitForExistence(timeout: 5),
                                   "Toolbar non risponde a \(offset) dal centro: \(identifier), frame \(frame)")
                     app.buttons[dismiss].tap()
                     XCTAssertTrue(app.navigationBars["Dashboard"].waitForExistence(timeout: 5))
@@ -388,7 +388,7 @@ final class NativeInterfaceTests: XCTestCase {
         for (key, title) in [("finance", "Finanza"), ("tasks", "Attività"), ("calendar", "Calendario"), ("dashboard", "Dashboard"), ("calendar", "Calendario"), ("tasks", "Attività"), ("dashboard", "Dashboard")] {
             let tab = app.tabBars.buttons[title]
             XCTAssertTrue(tab.isHittable); assertMinimumTouchTarget(tab); tab.tap()
-            XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: 3))
+            XCTAssertTrue((title == "Finanza" ? app.staticTexts["finance-heading"] : app.navigationBars[title]).waitForExistence(timeout: 3))
             XCTAssertTrue(tab.isSelected)
             for other in ["dashboard", "tasks", "calendar", "finance"] where other != key {
                 XCTAssertFalse(app.tabBars.buttons[["dashboard": "Dashboard", "tasks": "Attività", "calendar": "Calendario", "finance": "Finanza"][other]!].isSelected)
@@ -657,7 +657,7 @@ final class NativeInterfaceTests: XCTestCase {
         for (tab, title) in [("Dashboard", "Nuovo movimento"), ("Attività", "Nuova attività"), ("Calendario", "Nuova attività"), ("Finanza", "Nuovo movimento")] {
             app.buttons[tab].tap()
             addButton(app).tap()
-            XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: 10))
+            XCTAssertTrue((title == "Finanza" ? app.staticTexts["finance-heading"] : app.navigationBars[title]).waitForExistence(timeout: 10))
             app.buttons["Annulla"].tap()
             XCTAssertTrue(addButton(app).waitForExistence(timeout: 10))
         }
@@ -724,47 +724,20 @@ final class NativeInterfaceTests: XCTestCase {
         let scroll = app.scrollViews["calendar-scroll"]
         XCTAssertTrue(scroll.waitForExistence(timeout: 10))
         for _ in 0..<4 { scroll.swipeUp(velocity: .fast) }
-        // With continuous months there is no bottom boundary; use the persistent toolbar action.
-        let add = app.buttons["primary-add"]
-        XCTAssertTrue(add.isHittable)
-        XCTAssertLessThan(add.frame.maxY, app.buttons["Dashboard"].frame.minY - 4)
-        add.tap()
-        let title = app.textFields["Titolo"]
-        XCTAssertTrue(title.waitForExistence(timeout: 10))
-        title.tap(); title.typeText("Evento dopo scorrimento")
-        app.buttons["Salva"].tap()
-        XCTAssertTrue(app.buttons["Calendario"].waitForExistence(timeout: 10))
-        // A single-line native Button exposes its title as the button label, not a child StaticText.
-        let eventTitle = app.buttons.matching(NSPredicate(format: "label == %@", "Evento dopo scorrimento")).firstMatch
-        app.buttons["calendar-today"].tap()
-        // SwiftUI can report a clipped button as hittable beneath a safe-area inset.
-        // Keep the complete row inside the visible content before tapping it.
-        let upperEdge = app.buttons["calendar-today"].frame.maxY + 60
-        let lowerEdge = app.tabBars.firstMatch.frame.minY
-        for _ in 0..<16 {
-            let frame = eventTitle.frame
-            if eventTitle.exists && frame.minY >= upperEdge && frame.maxY <= lowerEdge { break }
-            let start = scroll.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.6))
-            let delta: CGFloat = frame.minY < upperEdge ? 0.14 : -0.14
-            start.press(forDuration: 0.05, thenDragTo: scroll.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.6 + delta)))
-        }
-        XCTAssertGreaterThanOrEqual(eventTitle.frame.minY, upperEdge)
-        XCTAssertLessThanOrEqual(eventTitle.frame.maxY, lowerEdge)
-        XCTAssertTrue(eventTitle.waitForExistence(timeout: 10))
-        XCTAssertTrue(eventTitle.isHittable)
-        let titleFrame = eventTitle.frame
-        let checkboxes = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "event-check-"))
-        let nearest = checkboxes.allElementsBoundByIndex.min { abs($0.frame.midY - titleFrame.midY) < abs($1.frame.midY - titleFrame.midY) }
-        XCTAssertNotNil(nearest)
-        if let nearest { assertMinimumTouchTarget(nearest); XCTAssertEqual(nearest.frame.midY, titleFrame.midY, accuracy: 2, "Senza orario o luogo il titolo deve essere centrato sul controllo") }
-        capture("calendar-event-after-scroll")
-        eventTitle.tap()
-        XCTAssertTrue(app.navigationBars["Modifica attività"].waitForExistence(timeout: 10))
-        XCTAssertEqual(app.textFields["Titolo"].value as? String, "Evento dopo scorrimento")
-        app.buttons["Annulla"].tap()
-        for _ in 0..<4 { scroll.swipeDown(velocity: .fast) }
         addButton(app).tap()
-        XCTAssertTrue(app.textFields["Titolo"].waitForExistence(timeout: 10))
+        let title = app.textFields["activity-title"]
+        XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText("Evento dopo scorrimento")
+        app.buttons["Salva"].tap()
+        app.buttons["calendar-today"].tap()
+        revealCalendarDay(Self.today(), in: app)
+        app.buttons["calendar-day-" + Self.today()].tap()
+        XCTAssertTrue(app.scrollViews["calendar-all-day-pane"].waitForExistence(timeout: 10))
+        let event = app.buttons["Evento dopo scorrimento"]
+        XCTAssertTrue(event.isHittable); assertMinimumTouchTarget(event)
+        capture("calendar-event-after-scroll")
+        event.tap()
+        XCTAssertTrue(app.navigationBars["Modifica attività"].waitForExistence(timeout: 10))
+        XCTAssertEqual(title.value as? String, "Evento dopo scorrimento")
         app.buttons["Annulla"].tap()
     }
     func testCalendarSelectionUpdatesImmediatelyAndKeepsEventIndex() {
@@ -781,7 +754,9 @@ final class NativeInterfaceTests: XCTestCase {
             let cell = app.buttons["calendar-day-" + day]
             revealCalendarDay(day, in: app)
             cell.tap()
-            XCTAssertTrue(cell.isSelected, "Il giorno deve essere selezionato al termine del tocco: \(day)")
+            let focused = app.buttons["calendar-week-day-" + day]
+            XCTAssertTrue(focused.waitForExistence(timeout: 10)); XCTAssertTrue(focused.isSelected)
+            app.buttons["calendar-back-month"].tap()
         }
         capture("calendar-repeated-selection")
     }
@@ -789,16 +764,12 @@ final class NativeInterfaceTests: XCTestCase {
         let app = launch(["--stress-content"])
         app.buttons["Attività"].tap()
         let title = "Attività lunga di verifica 1: pianificare e organizzare gli impegni della settimana"
-        XCTAssertTrue(app.staticTexts[title].waitForExistence(timeout: 10))
-        app.buttons["task-open-1"].tap()
-        XCTAssertTrue(app.descendants(matching: .any)["inline-task-title"].waitForExistence(timeout: 10))
-        app.buttons["inline-task-details"].tap()
+        let open = app.buttons["task-open-1"]
+        revealChecklistButton(open, in: app); open.tap()
         XCTAssertTrue(app.navigationBars["Modifica attività"].waitForExistence(timeout: 10))
+        XCTAssertEqual(app.textFields["activity-title"].value as? String, title)
         capture("long-task-editor")
         app.buttons["Annulla"].tap()
-        let inlineTitle = app.descendants(matching: .any)["inline-task-title"]
-        XCTAssertTrue(inlineTitle.waitForExistence(timeout: 10))
-        XCTAssertEqual(inlineTitle.value as? String, title)
         XCTAssertEqual(app.buttons["Cambia completamento " + title].value as? String, "Da completare")
     }
 
@@ -1036,24 +1007,19 @@ final class NativeInterfaceTests: XCTestCase {
     func testFinanceHasOpenOverviewAndDirectMovements() {
         let app = launch(["--dark"])
         app.buttons["Finanza"].tap()
+        XCTAssertTrue(app.staticTexts["finance-heading"].exists)
         XCTAssertFalse(app.segmentedControls.firstMatch.exists)
         XCTAssertFalse(app.otherElements["wealth-forecast-chart"].exists)
-        let expense = app.buttons["primary-add"], extra = app.buttons["finance-new-plan"], budget = app.buttons["finance-budget"]
-        XCTAssertTrue(expense.waitForExistence(timeout: 10))
-        XCTAssertGreaterThan(expense.frame.minX, extra.frame.maxX)
-        XCTAssertGreaterThan(extra.frame.minX, budget.frame.maxX)
-        let analysis = app.buttons["finance-analysis"]
-        XCTAssertGreaterThan(analysis.frame.minX, expense.frame.maxX)
-        for action in [expense, extra, budget, analysis] { assertMinimumTouchTarget(action) }
-        extra.tap()
-        XCTAssertTrue(app.navigationBars["Nuovo piano"].waitForExistence(timeout: 10))
-        app.buttons["Annulla"].tap()
-        expense.tap()
-        XCTAssertTrue(app.navigationBars["Nuovo movimento"].waitForExistence(timeout: 10))
-        app.buttons["Annulla"].tap()
+        let budget = app.buttons["finance-budget"], analysis = app.buttons["finance-analysis"], more = app.buttons["finance-more"]
+        revealFinanceControl(budget, in: app)
+        for action in [budget, analysis, more] { assertMinimumTouchTarget(action) }
+        XCTAssertGreaterThan(analysis.frame.minX, budget.frame.maxX)
+        more.tap(); app.buttons["Nuovo piano"].tap()
+        XCTAssertTrue(app.navigationBars["Nuovo piano"].waitForExistence(timeout: 10)); app.buttons["Annulla"].tap()
+        app.buttons["primary-add"].tap()
+        XCTAssertTrue(app.navigationBars["Nuovo movimento"].waitForExistence(timeout: 10)); app.buttons["Annulla"].tap()
         let all = app.buttons["all-movements"]
-        for _ in 0..<6 { if all.isHittable { break }; app.scrollViews["finance-scroll"].swipeUp() }
-        XCTAssertTrue(all.isHittable); all.tap()
+        revealFinanceControl(all, in: app); all.tap()
         XCTAssertTrue(app.navigationBars["Movimenti"].waitForExistence(timeout: 10))
         capture("all-movements-direct")
     }
@@ -1086,7 +1052,7 @@ final class NativeInterfaceTests: XCTestCase {
         for _ in 0..<18 {
             if element.isHittable { return }
             let visible = scroll.frame.intersection(app.frame)
-            let top = max(visible.minY, app.navigationBars.firstMatch.frame.maxY)
+            let top = max(visible.minY, app.navigationBars.firstMatch.exists ? app.navigationBars.firstMatch.frame.maxY : visible.minY)
             let bottom = min(visible.maxY, app.tabBars.firstMatch.frame.minY)
             guard bottom > top else { return }
             // Short drags avoid flicking past a control on a short screen.

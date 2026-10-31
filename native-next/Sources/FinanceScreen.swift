@@ -9,9 +9,17 @@ struct FinanceScreen: View {
     @State private var account = "Tutti"
     @AppStorage("native-hide-money") private var hidden = false
     var body: some View {
+        VStack(spacing: NativeDesign.Space.none) {
+            HStack {
+                Text("Finanza").font(.largeTitle.bold()).accessibilityAddTraits(.isHeader).accessibilityIdentifier("finance-heading")
+                Spacer()
+                NativeToolbarButton(symbol: "gearshape", label: "Impostazioni") { router.sheet = .settings }
+                    .contextMenu { Button("Sincronizza", systemImage: "arrow.triangle.2.circlepath") { Task { await store.sync() } }.disabled(store.busy || store.syncing) }
+                NativeToolbarButton(symbol: "plus", label: "Aggiungi spesa") { router.sheet = .movement([:]) }.accessibilityIdentifier("primary-add")
+            }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.top, NativeDesign.Space.small).padding(.bottom, NativeDesign.Space.large)
         ScrollView {
-            VStack(alignment: .leading, spacing: NativeDesign.Space.bottom) {
-                VStack(spacing: NativeDesign.Space.none) { Divider(); MonthControl(finance: true).padding(.vertical, NativeDesign.Space.small); Divider() }
+            VStack(alignment: .leading, spacing: NativeDesign.Space.section) {
+                VStack(spacing: NativeDesign.Space.none) { Divider(); MonthControl(finance: true); Divider() }
                 balance
                 actions
                 recentMovements
@@ -25,10 +33,12 @@ struct FinanceScreen: View {
             }.padding(.horizontal, NativeDesign.Layout.screenInset)
                 .padding(.top, NativeDesign.Space.small).padding(.bottom, NativeDesign.Layout.scrollClearance)
         }.background(NativeDesign.canvas).scrollBounceBehavior(.basedOnSize).accessibilityIdentifier("finance-scroll")
+        }.background(NativeDesign.canvas)
+        .toolbar(.hidden, for: .navigationBar)
         .onAppear { router.financeSection = "Panoramica" }
     }
     private var balance: some View {
-        VStack(alignment: .leading, spacing: NativeDesign.Space.section) {
+        VStack(alignment: .leading, spacing: NativeDesign.Space.large) {
             VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
                 HStack {
                     Text("Budget rimanente").font(.title3).foregroundStyle(NativeDesign.secondary)
@@ -60,7 +70,7 @@ struct FinanceScreen: View {
                 }
             }
             Divider()
-        }.frame(maxWidth: .infinity, alignment: .leading).padding(.vertical, NativeDesign.Space.large)
+        }.frame(maxWidth: .infinity, alignment: .leading)
     }
     private var accountName: some View { Text(store.summary.text("account", fallback: "Trade Republic")).font(.title3.weight(.semibold)) }
     private var accountBalance: some View {
@@ -70,8 +80,8 @@ struct FinanceScreen: View {
     private var presentation: NativeFinanceOverview { NativeFinanceOverview(summary: store.summary, month: store.financeMonth) }
     private var actions: some View {
         HStack(spacing: NativeDesign.Space.medium) {
-            NavigationLink { NativePlansScreen() } label: { financePill("Budget", symbol: "wallet.bifold") }.accessibilityIdentifier("finance-budget")
-            NavigationLink { FinanceAnalysisScreen() } label: { financePill("Analisi", symbol: "chart.xyaxis.line") }.accessibilityIdentifier("finance-analysis")
+            NavigationLink { NativePlansScreen().toolbar(.visible, for: .navigationBar) } label: { financePill("Budget", symbol: "wallet.bifold") }.accessibilityIdentifier("finance-budget")
+            NavigationLink { FinanceAnalysisScreen().toolbar(.visible, for: .navigationBar) } label: { financePill("Analisi", symbol: "chart.xyaxis.line") }.accessibilityIdentifier("finance-analysis")
             Spacer(minLength: 0)
             Menu {
                 Button("Nuovo piano", systemImage: "folder.badge.plus") { router.sheet = .financePlan }
@@ -93,7 +103,7 @@ struct FinanceScreen: View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.large) {
             NativeSectionHeader("Ultimi movimenti") {
                 NavigationLink {
-                    List { movements }.modifier(NativeListAppearance()).navigationTitle("Movimenti").navigationBarTitleDisplayMode(.inline)
+                    List { movements }.modifier(NativeListAppearance()).navigationTitle("Movimenti").navigationBarTitleDisplayMode(.inline).toolbar(.visible, for: .navigationBar)
                 } label: { Text("Vedi tutti ›").foregroundStyle(Color.blue).font(.subheadline).frame(minHeight: NativeDesign.Layout.touchTarget) }
                     .accessibilityLabel("Mostra tutti i movimenti").accessibilityIdentifier("all-movements")
             }
