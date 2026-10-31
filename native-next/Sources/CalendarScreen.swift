@@ -232,7 +232,7 @@ struct CalendarScreen: View {
                         .accessibilityIdentifier("calendar-timeline-" + slot.id).accessibilityValue(completed ? "Completata" : "Da completare")
                 }
             }
-        }.frame(height: hourHeight * 24)
+        }.frame(height: NativeDesign.Layout.timelineContentHeight)
     }
     private var weekDays: [String] {
         let weekday = CivilDate.calendar.component(.weekday, from: CivilDate.date(selected))

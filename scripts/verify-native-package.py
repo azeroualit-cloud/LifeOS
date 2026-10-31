@@ -33,11 +33,13 @@ def verify(path: Path, version: str, build: str):
                     platforms.append(struct.unpack_from('<I', binary, position + 8)[0])
                 position += size
             assert platforms == [2], 'Expected iOS device, never a Simulator binary'
-            assert b'LifeOSOverview' in binary, 'Missing new informative widget identity'
             if prefix == app:
                 assert info.get('NSAlarmKitUsageDescription'), 'Missing alarm authorization purpose'
                 assert any('lifeos' in item.get('CFBundleURLSchemes', []) for item in info.get('CFBundleURLTypes', []))
             else:
+                # Swift may inline a short String into instructions. The runtime
+                # type name is longer and remains in widget reflection metadata.
+                assert b'LifeOSOverviewWidget' in binary, 'Missing informative widget implementation'
                 assert info['NSExtension']['NSExtensionPointIdentifier'] == 'com.apple.widgetkit-extension'
         print('VERIFIED_IPHONE_APP_AND_INFORMATIVE_WIDGET', version, build, hashlib.sha256(path.read_bytes()).hexdigest())
 

@@ -6,6 +6,8 @@ struct NativeActivityEditor: View {
     @Environment(\.dismiss) private var dismiss
     let record: Record
     let source: String
+    private enum Field: Hashable { case title, notes, location }
+    @FocusState private var focusedField: Field?
     @State private var title = ""
     @State private var notes = ""
     @State private var location = ""
@@ -33,10 +35,10 @@ struct NativeActivityEditor: View {
     var body: some View {
         Form {
             Section {
-                TextField("Titolo", text: $title).accessibilityIdentifier("activity-title")
+                TextField("Titolo", text: $title).focused($focusedField, equals: .title).accessibilityIdentifier("activity-title")
                 VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
                     Text("Descrizione").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
-                    TextEditor(text: $notes).frame(minHeight: NativeDesign.Layout.activityDescriptionHeight).accessibilityLabel("Descrizione")
+                    TextEditor(text: $notes).focused($focusedField, equals: .notes).frame(minHeight: NativeDesign.Layout.activityDescriptionHeight).accessibilityLabel("Descrizione")
                 }
                 HStack(alignment: .top, spacing: NativeDesign.Space.small) {
                     VStack(alignment: .leading) {
@@ -56,7 +58,7 @@ struct NativeActivityEditor: View {
                 Picker("Categoria", selection: $category) {
                     ForEach(store.categories.map { DisplayRecord($0, key: "key") }) { item in Text(item.value.text("label")).tag(item.value.text("key")) }
                 }
-                TextField("Luogo", text: $location)
+                TextField("Luogo", text: $location).focused($focusedField, equals: .location)
             }
             if hasDate {
                 Section("Avviso evento") {
@@ -106,7 +108,7 @@ struct NativeActivityEditor: View {
                 }.id("actions")
             }
             if let failure { NativeInlineMessage(text: failure) }
-        }.modifier(NativeListAppearance())
+        }.modifier(NativeListAppearance()).scrollDismissesKeyboard(.interactively)
             .navigationTitle(record.integer("id") != 0 ? "Modifica attività" : "Nuova attività").navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Annulla") { dismiss() }.disabled(saving) }
@@ -142,6 +144,7 @@ struct NativeActivityEditor: View {
             Text(title).font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
             HStack(spacing: NativeDesign.Space.none) {
                 Button {
+                    focusedField = nil
                     enabled.wrappedValue = true
                     presented.wrappedValue = true
                 } label: {
@@ -169,8 +172,9 @@ struct NativeActivityEditor: View {
                     NativeIconButton(symbol: "xmark.circle.fill", label: "Rimuovi " + title.lowercased()) { enabled.wrappedValue = false }
                 }
             } else {
-                Button { enabled.wrappedValue = true } label: {
-                    Label(title, systemImage: "clock").font(.caption).frame(minHeight: NativeDesign.Layout.touchTarget)
+                Button { focusedField = nil; enabled.wrappedValue = true } label: {
+                    Label(title, systemImage: "clock").font(.caption)
+                        .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading).contentShape(Rectangle())
                 }.buttonStyle(.plain)
             }
         }

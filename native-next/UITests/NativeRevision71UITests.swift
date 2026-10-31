@@ -51,6 +51,10 @@ final class NativeRevision71UITests: XCTestCase {
         capture("71-calendar-day-timeline")
         app.buttons["calendar-back-month"].tap()
         XCTAssertTrue(months.waitForExistence(timeout: 10))
+        let paint = app.buttons["toggle-shift-paint"]
+        expectation(for: NSPredicate { element, _ in (element as? XCUIElement)?.isHittable == true }, evaluatedWith: paint)
+        waitForExpectations(timeout: 10)
+        XCTAssertGreaterThanOrEqual(paint.frame.minY, app.navigationBars.firstMatch.frame.maxY - 1)
         capture("71-calendar-full-month")
     }
     func testDashboardExplicitDayAndCalendarEntryResumeDefaults() {
@@ -201,7 +205,11 @@ final class NativeRevision71UITests: XCTestCase {
         let title = app.textFields["activity-title"]
         XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText("Slot completato test")
         app.buttons["activity-date-Inizio"].tap(); app.buttons["Fine"].tap()
-        app.buttons["Ora iniziale"].tap(); app.buttons["Salva"].tap()
+        let clock = app.buttons["Ora iniziale"]
+        expectation(for: NSPredicate { element, _ in (element as? XCUIElement)?.isHittable == true }, evaluatedWith: clock)
+        waitForExpectations(timeout: 10)
+        XCTAssertGreaterThanOrEqual(clock.frame.height.rounded(), 44)
+        clock.tap(); app.buttons["Salva"].tap()
         let complete = app.buttons["Cambia completamento evento Slot completato test"]
         reveal(complete, in: app.collectionViews.firstMatch, app: app); complete.tap()
         app.tabBars.buttons["Calendario"].tap()

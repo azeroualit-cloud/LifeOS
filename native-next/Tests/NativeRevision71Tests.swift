@@ -75,6 +75,10 @@ import UIKit
         try NativeUrgentAlarm.cancel(identity: "event:1", demo: true)
         XCTAssertEqual(NativeUrgentAlarm.entries, [entry])
     }
+    func testWidgetUsesTheNewGalleryIdentityAndKeepsTheSharedDataGroup() {
+        XCTAssertEqual(LifeOSWidgetStorage.kind, "LifeOSOverview")
+        XCTAssertEqual(LifeOSWidgetStorage.group, "group.com.nas.lifeos")
+    }
     func testHealthAccentIsChromaticInBothThemes() {
         for style in [UIUserInterfaceStyle.light, .dark] {
             let color = UIColor(NativeDesign.healthAccent).resolvedColor(with: UITraitCollection(userInterfaceStyle: style))

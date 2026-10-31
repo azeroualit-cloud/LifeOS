@@ -65,6 +65,8 @@ enum NativeDesign {
         static let selectionLine: CGFloat = 2
         static let allDayAgendaHeight: CGFloat = 168
         static let timelineHour: CGFloat = 76
+        // The last minute still needs a full touch target before the Add button.
+        static let timelineContentHeight: CGFloat = timelineHour * 24 + touchTarget
         static let timelineLabel: CGFloat = 48
         static let calendarSwipeDistance: CGFloat = 44
         static let calendarMonthDayHeight: CGFloat = 88
