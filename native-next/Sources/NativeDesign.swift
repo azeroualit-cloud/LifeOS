@@ -15,6 +15,8 @@ enum NativeDesign {
         UIColor(white: traits.userInterfaceStyle == .dark ? 0.72 : 0.27, alpha: 1)
     })
     static let actionSurface = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor(white: 0.17, alpha: 1) : .tertiarySystemFill })
+    static let calendarAccent = Color(uiColor: .systemBlue)
+    static func calendarNumber(size: CGFloat) -> Font { .system(size: size, weight: .regular, design: .default) }
     static let healthAccent = Color(uiColor: .systemOrange)
     static let healthGray = Color(uiColor: .systemGray)
     static let inset = Color.primary.opacity(0.045)
@@ -38,8 +40,8 @@ enum NativeDesign {
         static let bottom: CGFloat = 32
     }
     enum Layout {
-        // Finance primary amount: stronger hierarchy than the 34 pt iOS large title.
-        static let budgetAmount: CGFloat = 56
+        // Finance amount remains prominent without dominating the screen.
+        static let budgetAmount: CGFloat = 40
         static let screenInset = Space.xLarge
         static let listInset = Space.large
         static let cardInset = Space.xLarge
@@ -63,11 +65,11 @@ enum NativeDesign {
         static let healthBarRadius: CGFloat = 2
         static let calendarDayNumber: CGFloat = 26
         static let selectionLine: CGFloat = 2
-        static let allDayAgendaHeight: CGFloat = 168
-        static let timelineHour: CGFloat = 76
-        // The last minute still needs a full touch target before the Add button.
-        static let timelineContentHeight: CGFloat = timelineHour * 24 + touchTarget
-        static let timelineLabel: CGFloat = 48
+        static let datePickerSheetHeight: CGFloat = 480
+        static let allDayChipWidth: CGFloat = 200
+        static let agendaIndent: CGFloat = 12
+        static let calendarDateNumber: CGFloat = 20
+        static let calendarDateLine: CGFloat = 32
         static let calendarSwipeDistance: CGFloat = 44
         static let calendarMonthDayHeight: CGFloat = 88
         static let calendarDayHeight: CGFloat = 54
@@ -103,7 +105,7 @@ enum NativeDesign {
     static let progressRadius: CGFloat = 3
     static let heading = Font.system(.headline, weight: .semibold)
     static let value = Font.system(.title, weight: .semibold)
-    static func budgetValue(size: CGFloat) -> Font { Font.system(size: size, weight: .bold) }
+    static func budgetValue(size: CGFloat) -> Font { Font.system(size: size, weight: .semibold) }
     static let body = Font.system(.body, weight: .regular)
     static let metadata = Font.system(.footnote, weight: .regular)
     static let symbol = Font.system(.body, weight: .medium)

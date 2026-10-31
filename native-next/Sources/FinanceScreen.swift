@@ -19,7 +19,7 @@ struct FinanceScreen: View {
             }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.top, NativeDesign.Space.small).padding(.bottom, NativeDesign.Space.large)
         ScrollView {
             VStack(alignment: .leading, spacing: NativeDesign.Space.section) {
-                VStack(spacing: NativeDesign.Space.none) { Divider(); MonthControl(finance: true); Divider() }
+                MonthControl(finance: true)
                 balance
                 actions
                 recentMovements
@@ -55,10 +55,9 @@ struct FinanceScreen: View {
                     if presentation.days > 0 {
                         Text(presentation.daily.euro + " al giorno").font(.title3.weight(.semibold)).monospacedDigit()
                     }
-                    Text(presentation.periodLabel).font(.subheadline).foregroundStyle(NativeDesign.secondary)
+                    Text(presentation.days == 1 ? "1 giorno · incluso oggi" : presentation.periodLabel).font(.subheadline).foregroundStyle(NativeDesign.secondary)
                 }
             }.accessibilityElement(children: .contain).accessibilityIdentifier("budget-hero")
-            Divider()
             VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
                 Text("CONTO PRINCIPALE").font(.caption.weight(.medium)).foregroundStyle(NativeDesign.secondary)
                 ViewThatFits(in: .horizontal) {
@@ -69,7 +68,6 @@ struct FinanceScreen: View {
                     Text("Saldo dell’ultima sincronizzazione, distinto dal mese selezionato.").font(.caption).foregroundStyle(NativeDesign.secondary)
                 }
             }
-            Divider()
         }.frame(maxWidth: .infinity, alignment: .leading)
     }
     private var accountName: some View { Text(store.summary.text("account", fallback: "Trade Republic")).font(.title3.weight(.semibold)) }
@@ -107,7 +105,6 @@ struct FinanceScreen: View {
                 } label: { Text("Vedi tutti ›").foregroundStyle(Color.blue).font(.subheadline).frame(minHeight: NativeDesign.Layout.touchTarget) }
                     .accessibilityLabel("Mostra tutti i movimenti").accessibilityIdentifier("all-movements")
             }
-            Divider()
             ForEach(store.transactions.prefix(3).map { DisplayRecord($0, key: "row") }) { item in
                 Button { router.sheet = .movement(item.value) } label: {
                     ViewThatFits(in: .horizontal) {

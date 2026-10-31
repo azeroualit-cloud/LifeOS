@@ -35,6 +35,7 @@ struct CalendarScreen: View {
                 monthOverview.transition(.move(edge: .leading).combined(with: .opacity))
             }
         }.background(NativeDesign.canvas)
+        .toolbar(.hidden, for: .navigationBar).tint(NativeDesign.calendarAccent)
         .animation(reduceMotion ? nil : .smooth(duration: NativeDesign.Motion.navigationResponse), value: showingDay)
         .onAppear {
             if months.isEmpty {
@@ -71,11 +72,15 @@ struct CalendarScreen: View {
     }
     private var monthOverview: some View {
         VStack(spacing: NativeDesign.Space.none) {
+            HStack {
+                Text(CivilDate.monthTitle(focusMonth)).font(.title.bold()).lineLimit(1).minimumScaleFactor(0.7)
+                    .accessibilityAddTraits(.isHeader).accessibilityIdentifier("calendar-month-heading-" + focusMonth)
+                Spacer(minLength: NativeDesign.Space.small)
+                NativeToolbarButton(symbol: "plus", label: "Aggiungi evento") { router.sheet = .event(["day": .string(selected)]) }
+                    .accessibilityIdentifier("primary-add")
+            }.padding(.horizontal, NativeDesign.Layout.screenInset)
             brushPanel.padding(.horizontal, NativeDesign.Layout.screenInset)
             if let loadError { HStack { NativeInlineMessage(text: loadError); Button("Riprova") { reload += 1 } }.padding(.horizontal) }
-            Text(CivilDate.monthTitle(focusMonth)).font(.largeTitle.bold()).lineLimit(1).minimumScaleFactor(0.7)
-                .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, NativeDesign.Layout.screenInset)
-                .accessibilityAddTraits(.isHeader).accessibilityIdentifier("calendar-month-heading-" + focusMonth)
             weekdayLabels.padding(.horizontal, NativeDesign.Layout.screenInset)
             Divider()
             ScrollViewReader { proxy in
@@ -136,126 +141,113 @@ struct CalendarScreen: View {
     }
     private var dayAgenda: some View {
         VStack(spacing: NativeDesign.Space.none) {
-            HStack {
+            HStack(spacing: NativeDesign.Space.small) {
                 Button { showingDay = false; jumpMonth = String(selected.prefix(7)) } label: {
                     Label(NativeCalendarWindow.monthLabel(String(selected.prefix(7))), systemImage: "chevron.left")
-                        .frame(minHeight: NativeDesign.Layout.touchTarget).padding(.horizontal, NativeDesign.Space.medium).modifier(NativeGlass())
+                        .font(.subheadline).frame(minHeight: NativeDesign.Layout.touchTarget)
                 }.accessibilityIdentifier("calendar-back-month")
-                Spacer()
-                Button("Oggi") { selected = CivilDate.day(); store.calendarMonth = CivilDate.month() }
-                    .frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget)
+                Spacer(minLength: NativeDesign.Space.xs)
+                Button(action: goToToday) {
+                    Text(CivilDate.label(selected).capitalized).font(.headline).lineLimit(1).minimumScaleFactor(0.75)
+                        .frame(minHeight: NativeDesign.Layout.touchTarget)
+                }.foregroundStyle(Color.primary).accessibilityLabel("Vai a oggi, " + CivilDate.label(selected))
+                    .accessibilityIdentifier("calendar-day-heading")
+                Spacer(minLength: NativeDesign.Space.xs)
+                NativeToolbarButton(symbol: "plus", label: "Aggiungi evento") { router.sheet = .event(["day": .string(selected)]) }
+                    .accessibilityIdentifier("primary-add")
             }.buttonStyle(.plain).padding(.horizontal, NativeDesign.Layout.screenInset)
+                .accessibilityIdentifier("calendar-day-header")
             weekdayLabels.padding(.horizontal, NativeDesign.Layout.screenInset)
-            HStack(spacing: NativeDesign.Space.none) {
+            HStack(spacing: NativeDesign.Space.xxs) {
                 ForEach(weekDays, id: \.self) { day in
                     Button { selected = day; store.calendarMonth = String(day.prefix(7)) } label: {
-                        Text(String(Int(day.suffix(2)) ?? 0)).font(.title3.weight(.semibold)).lineLimit(1).minimumScaleFactor(0.7)
-                            .foregroundStyle(day == selected ? NativeDesign.canvas : Color.primary)
-                            .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget)
-                            .background { if day == selected { Circle().fill(Color.primary).frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget) } }
-                            .contentShape(Rectangle())
-                    }.accessibilityIdentifier("calendar-week-day-" + day).accessibilityLabel(CivilDate.label(day))
+                        CalendarDayCell(item: presentation(for: day), active: day == selected, appearance: .calendarWeek).equatable()
+                    }.accessibilityIdentifier("calendar-week-day-" + day)
+                        .accessibilityLabel(CivilDate.label(day) + ", " + (shift(on: day)?.title ?? "nessun turno"))
                         .accessibilityAddTraits(day == selected ? .isSelected : [])
                 }
             }.buttonStyle(.plain).padding(.horizontal, NativeDesign.Layout.screenInset).padding(.bottom, NativeDesign.Space.small)
-            Divider()
-            Text(CivilDate.label(selected).capitalized).font(.headline).padding(.vertical, NativeDesign.Space.medium)
-            if allDayCount > 0 {
-                ScrollView { allDayAgenda.padding(.horizontal, NativeDesign.Layout.screenInset) }
-                    .scrollBounceBehavior(.basedOnSize)
-                    .frame(height: min(CGFloat(allDayCount) * NativeDesign.Layout.rowHeight + NativeDesign.Space.medium, NativeDesign.Layout.allDayAgendaHeight))
-                    .accessibilityIdentifier("calendar-all-day-pane")
-                Divider()
-            }
-            ScrollViewReader { proxy in
-                ScrollView {
-                    VStack(alignment: .leading, spacing: NativeDesign.Space.none) {
-                        dayTimeline
-                        Button { router.sheet = .event(["day": .string(selected)]) } label: {
-                            Label("Aggiungi evento", systemImage: "plus.circle").frame(minHeight: NativeDesign.Layout.touchTarget)
-                        }.accessibilityIdentifier("calendar-add-event")
-                    }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.bottom, NativeDesign.Layout.scrollClearance)
-                }.accessibilityIdentifier("calendar-day-pane")
-                .onAppear { proxy.scrollTo(6, anchor: .top) }
-                .onChange(of: selected) { _, _ in proxy.scrollTo(6, anchor: .top) }
-            }
+                .simultaneousGesture(daySwipe)
+            ScrollView {
+                VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
+                    if !allDayEntries.isEmpty || selectedShift?.time.isEmpty == true { allDayStrip }
+                    ForEach(agenda) { node in
+                        NativeCalendarAgendaBlock(node: node, onOpen: openAgendaEntry)
+                    }
+                    if agenda.isEmpty && allDayEntries.isEmpty && selectedShift == nil {
+                        Text("Nessun impegno").font(.subheadline).foregroundStyle(NativeDesign.secondary)
+                            .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.rowHeight, alignment: .leading)
+                    }
+                    Button { router.sheet = .event(["day": .string(selected)]) } label: {
+                        Label("Aggiungi evento", systemImage: "plus.circle").frame(minHeight: NativeDesign.Layout.touchTarget)
+                    }.accessibilityIdentifier("calendar-add-event")
+                }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.top, NativeDesign.Space.small)
+                    .padding(.bottom, NativeDesign.Layout.scrollClearance)
+            }.scrollBounceBehavior(.basedOnSize).accessibilityIdentifier("calendar-day-pane")
         }
-        .simultaneousGesture(DragGesture(minimumDistance: NativeDesign.Layout.calendarSwipeDistance).onEnded { gesture in
+        .task(id: weekDays.joined()) {
+            for month in Set(weekDays.map { String($0.prefix(7)) }).sorted() where monthData[month] == nil { await loadMonth(month) }
+        }
+    }
+    private var daySwipe: some Gesture {
+        DragGesture(minimumDistance: NativeDesign.Layout.calendarSwipeDistance).onEnded { gesture in
             guard abs(gesture.translation.width) > abs(gesture.translation.height) * 2 else { return }
             withAnimation(reduceMotion ? nil : .smooth(duration: NativeDesign.Motion.selectionDuration)) {
                 selected = CivilDate.adding(gesture.translation.width < 0 ? 1 : -1, to: selected)
                 store.calendarMonth = String(selected.prefix(7))
             }
-        })
+        }
     }
-    private var dayTimeline: some View {
-        let hourHeight = NativeDesign.Layout.timelineHour
-        let minimumMinutes = Int(ceil(NativeDesign.Layout.touchTarget / hourHeight * 60))
-        let slots = NativeCalendarTimeline.slots(events: eventsByDay[selected] ?? [], tasks: tasksByDay[selected] ?? [], minimumMinutes: minimumMinutes)
-        return ZStack(alignment: .topLeading) {
-            VStack(spacing: NativeDesign.Space.none) {
-                ForEach(0..<24, id: \.self) { hour in
-                    HStack(alignment: .top, spacing: NativeDesign.Space.small) {
-                        Text(String(format: "%02d:00", hour)).font(.caption).monospacedDigit().foregroundStyle(NativeDesign.secondary)
-                            .frame(width: NativeDesign.Layout.timelineLabel, alignment: .trailing)
-                        Rectangle().fill(NativeDesign.secondary.opacity(0.25)).frame(height: NativeDesign.Space.hairline).frame(maxWidth: .infinity).padding(.top, NativeDesign.Space.small).accessibilityHidden(true)
-                    }.frame(height: hourHeight, alignment: .top).id(hour)
-                }
-            }
-            GeometryReader { geometry in
-                let left = NativeDesign.Layout.timelineLabel + NativeDesign.Space.small
-                let width = max(NativeDesign.Layout.touchTarget, geometry.size.width - left)
-                if let shift = selectedShift, let start = NativeCalendarTimeline.minute(String(shift.time.prefix(5))) {
-                    let end = NativeCalendarTimeline.minute(String(shift.time.suffix(5))) ?? start
-                    let duration = end > start ? end - start : 1440 - start
-                    VStack(alignment: .leading) {
-                        Label(shift.title + " · " + shift.time, systemImage: shift.symbol).font(.caption.weight(.medium)).padding(NativeDesign.Space.xs)
-                        Spacer(minLength: 0)
-                    }.frame(width: width, height: CGFloat(duration) / 60 * hourHeight, alignment: .topLeading)
-                        .foregroundStyle(shift.color).background(shift.color.opacity(0.08), in: RoundedRectangle(cornerRadius: NativeDesign.badgeRadius))
-                        .offset(x: left, y: CGFloat(start) / 60 * hourHeight).allowsHitTesting(false)
-                }
-                ForEach(slots) { slot in
-                    let laneWidth = width / CGFloat(slot.lanes)
-                    let completed = slot.source == "event" ? slot.record.text("occurrence_status") == "done" : slot.record.text("status") == "done"
-                    Button { router.sheet = slot.source == "event" ? .event(slot.record) : .task(slot.record) } label: {
-                        VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
-                            Text(slot.record.text("title")).font(.subheadline.weight(.medium)).lineLimit(2).strikethrough(completed).foregroundStyle(completed ? NativeDesign.secondary : Color.primary)
-                            Text(slot.record.text(slot.source == "event" ? "start_time" : "scheduled_time")).font(.caption).monospacedDigit().foregroundStyle(NativeDesign.secondary)
-                        }.padding(NativeDesign.Space.xs)
-                            .frame(width: max(0, laneWidth - NativeDesign.Space.xxs), height: max(NativeDesign.Layout.touchTarget, CGFloat(slot.end - slot.start) / 60 * hourHeight), alignment: .topLeading)
-                            .background(NativeDesign.actionSurface, in: RoundedRectangle(cornerRadius: NativeDesign.badgeRadius))
-                            .overlay(alignment: .leading) { RoundedRectangle(cornerRadius: NativeDesign.progressRadius).fill(NativeDesign.accent).frame(width: NativeDesign.Layout.calendarMarker) }
-                            .clipped().contentShape(Rectangle())
-                    }.buttonStyle(.plain).foregroundStyle(Color.primary)
-                        .offset(x: left + CGFloat(slot.lane) * laneWidth, y: CGFloat(slot.start) / 60 * hourHeight)
-                        .accessibilityIdentifier("calendar-timeline-" + slot.id).accessibilityValue(completed ? "Completata" : "Da completare")
-                }
-            }
-        }.frame(height: NativeDesign.Layout.timelineContentHeight)
+    private var agenda: [NativeCalendarAgendaNode] {
+        let previous = CivilDate.adding(-1, to: selected)
+        return NativeCalendarTimeline.agenda(events: eventsByDay[selected] ?? [], tasks: tasksByDay[selected] ?? [], shift: selectedShift, previousShift: shift(on: previous), previousEvents: eventsByDay[previous] ?? [])
+    }
+    private func openAgendaEntry(_ item: NativeCalendarAgendaEntry) {
+        router.sheet = item.source == "event" ? .event(item.record) : .task(item.record)
     }
     private var weekDays: [String] {
         let weekday = CivilDate.calendar.component(.weekday, from: CivilDate.date(selected))
         let monday = CivilDate.adding(-((weekday + 5) % 7), to: selected)
         return (0..<7).map { CivilDate.adding($0, to: monday) }
     }
-    private var selectedShift: ShiftKind? { monthDays[String(selected.prefix(7))]?.first { $0.day == selected }?.shift }
-    private var allDayCount: Int {
-        (eventsByDay[selected] ?? []).filter { $0.text("start_time").isEmpty }.count
-        + (tasksByDay[selected] ?? []).filter { $0.text("scheduled_time").isEmpty }.count
-        + (selectedShift?.time.isEmpty == true ? 1 : 0)
+    private func shift(on day: String) -> ShiftKind? {
+        monthDays[String(day.prefix(7))]?.first { $0.day == day }?.shift
     }
-    private var allDayAgenda: some View {
-        VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-            ForEach((eventsByDay[selected] ?? []).filter { $0.text("start_time").isEmpty }.map { DisplayRecord($0) }) { item in eventRow(item.value) }
-            ForEach((tasksByDay[selected] ?? []).filter { $0.text("scheduled_time").isEmpty }.map { DisplayRecord($0) }) { item in calendarTaskRow(item.value) }
-            if let shift = selectedShift, shift.time.isEmpty { Label(shift.title, systemImage: shift.symbol).foregroundStyle(shift.color).frame(minHeight: NativeDesign.Layout.touchTarget) }
-        }.padding(.bottom, NativeDesign.Space.medium)
+    private func presentation(for day: String) -> CalendarDayPresentation {
+        let weekday = CivilDate.calendar.component(.weekday, from: CivilDate.date(day))
+        return CalendarDayPresentation(day: day, label: CivilDate.label(day), shift: shift(on: day), hasEvents: !(eventsByDay[day] ?? []).isEmpty || !(tasksByDay[day] ?? []).isEmpty, isToday: day == CivilDate.day(), isWeekend: weekday == 1 || weekday == 7, isCurrentMonth: true)
     }
-    private func calendarTaskRow(_ record: Record) -> some View {
-        NativeChecklistRow(title: record.text("title"), checked: record.text("status") == "done", completionLabel: "Cambia completamento " + record.text("title"), onComplete: {
-            Task { await store.run("setTaskStatus", ["id": .int(record.integer("id")), "status": .string(NativeTaskList.completionStatus(record))]) }
-        }, onOpen: { router.sheet = .task(record) }).disabled(store.busy)
+    private var selectedShift: ShiftKind? { shift(on: selected) }
+    private var allDayEntries: [NativeCalendarAgendaEntry] {
+        (eventsByDay[selected] ?? []).filter { $0.text("start_time").isEmpty }.map {
+            NativeCalendarAgendaEntry(id: "event:" + String($0.integer("id")), record: $0, source: "event", start: 0, end: nil)
+        } + (tasksByDay[selected] ?? []).filter { $0.text("scheduled_time").isEmpty }.map {
+            NativeCalendarAgendaEntry(id: "task:" + String($0.integer("id")), record: $0, source: "task", start: 0, end: nil)
+        }
+    }
+    private var allDayStrip: some View {
+        VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
+            Text("Tutto il giorno").font(.caption).foregroundStyle(NativeDesign.secondary)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: NativeDesign.Space.small) {
+                    if let shift = selectedShift, shift.time.isEmpty {
+                        Label(shift.title, systemImage: shift.symbol).font(.subheadline).foregroundStyle(shift.color)
+                            .padding(.horizontal, NativeDesign.Space.medium).frame(minHeight: NativeDesign.Layout.touchTarget)
+                            .background(shift.color.opacity(0.12), in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
+                    }
+                    ForEach(allDayEntries) { item in
+                        Button { openAgendaEntry(item) } label: {
+                            HStack(spacing: NativeDesign.Space.small) {
+                                Image(systemName: item.completed ? "checkmark.circle.fill" : "circle").foregroundStyle(NativeDesign.calendarAccent)
+                                Text(item.record.text("title")).font(.subheadline).lineLimit(1).strikethrough(item.completed)
+                                    .frame(maxWidth: NativeDesign.Layout.allDayChipWidth, alignment: .leading)
+                            }.padding(.horizontal, NativeDesign.Space.medium).frame(minHeight: NativeDesign.Layout.touchTarget)
+                                .background(NativeDesign.actionSurface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
+                        }.buttonStyle(.plain).accessibilityLabel(item.record.text("title"))
+                    }
+                }
+            }.accessibilityIdentifier("calendar-all-day-strip")
+        }
     }
     private func patchShifts(_ changes: [String: String]) {
         for (day, raw) in changes {
@@ -412,30 +404,6 @@ struct CalendarScreen: View {
             }
         }.buttonStyle(NativePressStyle())
     }
-    private func eventRow(_ r: Record) -> some View {
-        let time = r.text("start_time"), location = r.text("location")
-        return HStack(spacing: NativeDesign.Space.small) {
-            RoundedRectangle(cornerRadius: NativeDesign.progressRadius).fill(NativeDesign.accent.opacity(0.65))
-                .frame(width: NativeDesign.Layout.calendarMarker, height: NativeDesign.Layout.touchTarget).accessibilityHidden(true)
-            NativeCompletionButton(checked: r.text("occurrence_status") == "done", label: "Cambia completamento evento " + r.text("title")) {
-                if r.text("day") < CivilDate.day() { router.sheet = .event(r); return }
-                Task { await store.run("setEventOccurrence", ["id": .int(r.integer("id")), "day": .string(r.text("day")), "status": .string(r.text("occurrence_status") == "done" ? "open" : "done")]) }
-            }.accessibilityIdentifier("event-check-" + String(r.integer("id")))
-            Button { router.sheet = .event(r) } label: {
-                ViewThatFits(in: .horizontal) {
-                    HStack(alignment: .center, spacing: NativeDesign.Space.small) {
-                        NativeRowText(title: r.text("title"), subtitle: location, completed: r.text("occurrence_status") == "done", titleIdentifier: "event-title-" + String(r.integer("id")))
-                        Text(time.isEmpty ? "Tutto il giorno" : time).font(.subheadline).monospacedDigit().foregroundStyle(NativeDesign.secondary).fixedSize()
-                    }
-                    VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-                        NativeRowText(title: r.text("title"), subtitle: location, completed: r.text("occurrence_status") == "done", titleIdentifier: "event-title-" + String(r.integer("id")))
-                        Text(time.isEmpty ? "Tutto il giorno" : time).font(.subheadline).monospacedDigit().foregroundStyle(NativeDesign.secondary)
-                    }
-                }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading).contentShape(Rectangle())
-            }.buttonStyle(.borderless).accessibilityLabel(r.text("title"))
-                .accessibilityValue([time.isEmpty ? "Tutto il giorno" : time, location].filter { !$0.isEmpty }.joined(separator: ", "))
-        }.disabled(store.busy)
-    }
 
 }
 private struct NativeShiftBrushOption: View {
@@ -468,7 +436,7 @@ struct CalendarDayPresentation: Equatable {
     let isWeekend: Bool
     let isCurrentMonth: Bool
 }
-enum NativeCalendarDayAppearance { case month, week }
+enum NativeCalendarDayAppearance { case month, week, calendarWeek }
 
 struct CalendarDayCell: View, Equatable {
     @Environment(\.nativeReduceMotion) private var reduceMotion
@@ -477,18 +445,26 @@ struct CalendarDayCell: View, Equatable {
     var appearance: NativeCalendarDayAppearance = .month
     @ScaledMetric(relativeTo: .subheadline) private var numberSize = NativeDesign.Layout.calendarDayNumber
     static func == (lhs: Self, rhs: Self) -> Bool { lhs.item == rhs.item && lhs.active == rhs.active && lhs.appearance == rhs.appearance }
+    @ScaledMetric(relativeTo: .title3) private var calendarNumberSize = NativeDesign.Layout.calendarDateNumber
     var body: some View {
         let color = item.shift?.color ?? NativeDesign.accent
         VStack(spacing: NativeDesign.Space.xxs) {
-            Text(String(Int(item.day.suffix(2)) ?? 0)).font(appearance == .month ? .title3.weight(.semibold) : .subheadline.weight(active || item.isToday ? .semibold : .regular)).monospacedDigit()
-                .foregroundStyle(active ? (item.shift == nil ? NativeDesign.canvas : Color.black.opacity(0.85)) : appearance == .month && item.isWeekend ? NativeDesign.secondary : Color.primary)
-                .minimumScaleFactor(0.8).lineLimit(1).frame(width: appearance == .month ? NativeDesign.Layout.touchTarget : numberSize, height: appearance == .month ? NativeDesign.Layout.touchTarget : numberSize)
-                .background(active ? color : .clear, in: Circle())
-                .overlay(Circle().stroke(item.isToday && !active ? color : .clear, lineWidth: 1))
+            if appearance == .week {
+                Text(String(Int(item.day.suffix(2)) ?? 0)).font(.subheadline.weight(active || item.isToday ? .semibold : .regular)).monospacedDigit()
+                    .foregroundStyle(active ? (item.shift == nil ? NativeDesign.canvas : Color.black.opacity(0.85)) : Color.primary)
+                    .minimumScaleFactor(0.8).lineLimit(1).frame(width: numberSize, height: numberSize)
+                    .background(active ? color : .clear, in: Circle())
+                    .overlay(Circle().stroke(item.isToday && !active ? color : .clear, lineWidth: NativeDesign.Space.hairline))
+            } else {
+                Text(String(Int(item.day.suffix(2)) ?? 0)).font(NativeDesign.calendarNumber(size: calendarNumberSize))
+                    .foregroundStyle(active || item.isToday ? NativeDesign.calendarAccent : item.isWeekend ? NativeDesign.secondary : Color.primary)
+                    .minimumScaleFactor(0.8).lineLimit(1).frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.calendarDateLine)
+            }
             NativeShiftBadge(shift: item.shift)
-            Circle().fill(item.hasEvents ? color : Color.clear).frame(width: NativeDesign.Space.xs, height: NativeDesign.Space.xs)
+            Circle().fill(item.hasEvents ? (appearance == .week ? color : NativeDesign.calendarAccent) : Color.clear)
+                .frame(width: NativeDesign.Space.xs, height: NativeDesign.Space.xs)
         }.frame(maxWidth: .infinity).frame(minHeight: NativeDesign.Layout.calendarDayHeight)
-            .contentShape(Rectangle()).opacity(appearance == .week || item.isCurrentMonth ? 1 : 0.38)
+            .contentShape(Rectangle()).opacity(appearance != .month || item.isCurrentMonth ? 1 : 0.38)
             .animation(reduceMotion ? nil : .easeOut(duration: NativeDesign.Motion.selectionDuration), value: active)
             .animation(reduceMotion ? nil : .easeOut(duration: NativeDesign.Motion.selectionDuration), value: item.shift)
             .accessibilityAddTraits(active ? .isSelected : [])

@@ -140,6 +140,22 @@ import SwiftUI
         demo.life["occurrences"] = .object(["206:" + CivilDate.adding(2, to: today): .string("done")])
         do { try save(demo) } catch { self.error = error.localizedDescription }
     }
+    func seedVisualCompactCalendar() {
+        guard isDemo else { return }
+        seedVisualActivityAgenda()
+        var demo = state
+        let today = CivilDate.day()
+        var events = demo.life.records("events")
+        for (id, title, start, end) in [(301, "Evento lungo", "06:00", "14:00"), (302, "Visita interna", "08:00", "09:00"), (303, "Dopo il turno", "15:00", ""), (304, "Ultimo impegno", "23:59", "")] {
+            events.append(["id": .int(id), "title": .string(title), "day": .string(today), "start_time": .string(start), "end_time": .string(end), "frequency": .string("none")])
+        }
+        demo.life["events"] = .array(events.map(JSONValue.object))
+        let weekday = CivilDate.calendar.component(.weekday, from: CivilDate.date(today))
+        let monday = CivilDate.adding(-((weekday + 5) % 7), to: today)
+        let kinds: [ShiftKind] = [.morning, .afternoon, .night, .rest, .holiday, .morning, .rest]
+        demo.life["shifts"] = .array((0..<7).map { index in .object(["day": .string(CivilDate.adding(index, to: monday)), "kind": .string(kinds[index].rawValue)]) })
+        do { try save(demo) } catch { self.error = error.localizedDescription }
+    }
     func seedVisualOffDayHabit() {
         guard isDemo else { return }
         var demo = state

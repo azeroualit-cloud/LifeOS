@@ -38,22 +38,6 @@ import UIKit
         XCTAssertFalse(router.calendarOpensDay)
         XCTAssertEqual(router.calendarDay, "2026-10-31")
     }
-    func testMinuteTimelineSeparatesOverlapsAndReusesLanesWithoutShiftingHours() {
-        let events: [Record] = [
-            ["id": .int(1), "start_time": .string("08:30"), "end_time": .string("10:00")],
-            ["id": .int(2), "start_time": .string("09:00"), "end_time": .string("09:45")],
-            ["id": .int(3), "start_time": .string("10:00"), "end_time": .string("11:00")],
-            ["id": .int(4), "start_time": .string("")]
-        ]
-        let tasks: [Record] = [["id": .int(5), "scheduled_time": .string("09:15")]]
-        let slots = NativeCalendarTimeline.slots(events: events, tasks: tasks, minimumMinutes: 35)
-        XCTAssertEqual(slots.count, 4)
-        XCTAssertEqual(slots.map(\.start), [510, 540, 555, 600])
-        XCTAssertEqual(slots.prefix(3).map(\.lanes), [3, 3, 3])
-        XCTAssertEqual(Set(slots.prefix(3).map(\.lane)).count, 3)
-        XCTAssertEqual(slots.last?.lane, 0)
-        XCTAssertEqual(slots.last?.lanes, 3, "Connected overlaps keep consistent column widths")
-    }
     func testContinuousMonthWeeksHaveNoDuplicatesOrGapsAtBoundaries() {
         let months = ["2026-10", "2026-11", "2026-12"]
         let days = months.enumerated().flatMap { index, month -> [String] in

@@ -6,7 +6,7 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: lifeos-native-71-redesign-${{ github.ref }}
+  group: lifeos-native-72-agenda-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   build:
@@ -168,7 +168,7 @@ jobs:
           set -euo pipefail
           xcrun simctl boot "$MAIN_DEVICE" || true
           xcrun simctl bootstatus "$MAIN_DEVICE" -b
-          xcodebuild test-without-building -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 300 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeRevision71UITests -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testInformativeWidgetFitsBothSmallWidths -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarRepeatedScrollingKeepsMonthAnchorsAndReturnsToToday -resultBundlePath build/Focused.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/focused-tests.log
+          xcodebuild test-without-building -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 300 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeRevision72UITests -only-testing:LifeOSProbeUITests/NativeRevision71UITests -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testInformativeWidgetFitsBothSmallWidths -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarRepeatedScrollingKeepsMonthAnchorsAndReturnsToToday -resultBundlePath build/Focused.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/focused-tests.log
       - name: Verifica logica e flussi agenda su iPhone principale
         timeout-minutes: 35
         working-directory: app
@@ -233,7 +233,7 @@ jobs:
           xcrun simctl shutdown "$MAIN_DEVICE" || true
           xcrun simctl boot "$COMPACT"
           xcrun simctl bootstatus "$COMPACT" -b
-          xcodebuild test -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeRevision71UITests -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testInformativeWidgetFitsBothSmallWidths -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testDashboardAgendaGroupsDaysAndCompletesWithoutOpeningEditor -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testActivityAgendaShowsOnlyRelevantItemsAndFoldsCompleted -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeHealthCardRemainsCompactAndOpensDetail -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFinanceOverviewSupportsLargeTextAndEmptySnapshot -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testUnifiedActivityEditorPreservesDescriptionWhenAddingAndRemovingDate -resultBundlePath build/Compact.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compact.log
+          xcodebuild test -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeRevision72UITests -only-testing:LifeOSProbeUITests/NativeRevision71UITests -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testInformativeWidgetFitsBothSmallWidths -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testDashboardAgendaGroupsDaysAndCompletesWithoutOpeningEditor -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testActivityAgendaShowsOnlyRelevantItemsAndFoldsCompleted -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeHealthCardRemainsCompactAndOpensDetail -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFinanceOverviewSupportsLargeTextAndEmptySnapshot -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testUnifiedActivityEditorPreservesDescriptionWhenAddingAndRemovingDate -resultBundlePath build/Compact.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compact.log
       - name: Esporta schermate del simulatore
         if: always()
         continue-on-error: true
@@ -257,7 +257,7 @@ jobs:
           cd build
           zip -qr ../download/LifeOS-unsigned.ipa Payload
           cd ../download
-          python3 ../../scripts/verify-native-package.py LifeOS-unsigned.ipa --version 0.10.10 --build 71
+          python3 ../../scripts/verify-native-package.py LifeOS-unsigned.ipa --version 0.10.11 --build 72
           shasum -a 256 LifeOS-unsigned.ipa > SHA256.txt
       - name: Errori XCTest in annotazioni
         if: always()
@@ -314,7 +314,7 @@ jobs:
             app/build/Compact.xcresult
           retention-days: 1
           if-no-files-found: ignore
-      - name: Pubblica link diretto IPA 71 verificata
+      - name: Pubblica link diretto IPA 72 verificata
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -322,5 +322,6 @@ jobs:
           cd app/download
           shasum -a 256 -c SHA256.txt
           unzip -tq LifeOS-unsigned.ipa
-          cp LifeOS-unsigned.ipa LifeOS-71.ipa
-          gh release create ios-0.10.10-build71 LifeOS-71.ipa SHA256.txt --repo azeroualit-cloud/LifeOS --target "$GITHUB_SHA" --title "Life OS 0.10.10 build 71" --notes "Calendario mese/giorno, editor attività dal basso, date e orari affiancati, Finanza aperta, accento Salute e widget Life OS Oggi. IPA non firmata per Signulous, pubblicata dopo verifiche Apple. Sorgente: $GITHUB_SHA."
+          cp LifeOS-unsigned.ipa LifeOS-72.ipa
+          shasum -a 256 LifeOS-72.ipa > SHA256.txt
+          gh release create ios-0.10.11-build72 LifeOS-72.ipa SHA256.txt --repo azeroualit-cloud/LifeOS --target "$GITHUB_SHA" --title "Life OS 0.10.11 build 72" --notes "Selettore data a larghezza intera, agenda compatta con eventi annidati, settimana con turni e intestazione unica, Finanza alleggerita. IPA non firmata per Signulous, pubblicata dopo verifiche Apple. Sorgente: $GITHUB_SHA."

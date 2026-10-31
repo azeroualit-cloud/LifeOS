@@ -54,7 +54,7 @@ final class NativeRevision71UITests: XCTestCase {
         let paint = app.buttons["toggle-shift-paint"]
         expectation(for: NSPredicate { element, _ in (element as? XCUIElement)?.isHittable == true }, evaluatedWith: paint)
         waitForExpectations(timeout: 10)
-        XCTAssertGreaterThanOrEqual(paint.frame.minY, app.navigationBars.firstMatch.frame.maxY - 1)
+        XCTAssertFalse(app.navigationBars["Calendario"].exists)
         capture("71-calendar-full-month")
     }
     func testDashboardExplicitDayAndCalendarEntryResumeDefaults() {
@@ -70,18 +70,17 @@ final class NativeRevision71UITests: XCTestCase {
         XCUIDevice.shared.press(.home); app.activate()
         reveal(today, in: app.scrollViews["calendar-scroll"], app: app); XCTAssertTrue(today.isSelected)
     }
-    func testAllDayEventsStayVisibleWhileTheHourTimelineScrolls() {
+    func testAllDayEventsUseCompactChipsWithinTheDayScroll() {
         let app = launch(["--activity-agenda"])
         app.tabBars.buttons["Calendario"].tap()
         let today = app.buttons["calendar-day-" + day()]
         reveal(today, in: app.scrollViews["calendar-scroll"], app: app); today.tap()
-        let allDay = app.scrollViews["calendar-all-day-pane"]
+        let allDay = app.scrollViews["calendar-all-day-strip"]
         XCTAssertTrue(exists(allDay, app: app))
+        XCTAssertLessThanOrEqual(allDay.frame.height, 60)
+        XCTAssertFalse(app.scrollViews["calendar-all-day-pane"].exists)
         let event = app.buttons["Evento oggi"]
         XCTAssertTrue(event.isHittable)
-        let y = event.frame.minY
-        app.scrollViews["calendar-day-pane"].swipeUp()
-        XCTAssertTrue(event.isHittable); XCTAssertEqual(event.frame.minY, y, accuracy: 1)
         event.tap(); XCTAssertTrue(app.navigationBars["Modifica attività"].waitForExistence(timeout: 10))
     }
     func testTaskAndEventOpenTheSameBottomEditorWithoutInlineChips() {

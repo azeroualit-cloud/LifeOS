@@ -20,6 +20,7 @@ import UIKit
         #if DEBUG
         if args.contains("--expense-routing") { value.seedVisualExpenseRouting() }
         if args.contains("--activity-agenda") { value.seedVisualActivityAgenda() }
+        if args.contains("--compact-calendar") { value.seedVisualCompactCalendar() }
         if args.contains("--off-day-habit") { value.seedVisualOffDayHabit() }
         if args.contains("--stress-content") { value.seedVisualTasks() }
         if args.contains("--stress-money") { value.seedVisualMoney() }
@@ -218,7 +219,7 @@ struct NativeRoot: View {
     }
     private var dashboard: some View { NavigationStack { DashboardScreen().toolbar { tools }.navigationTitle("Dashboard").navigationBarTitleDisplayMode(.inline) } }
     private var tasks: some View { NavigationStack { TasksScreen().toolbar { tools }.navigationTitle("Attività").navigationBarTitleDisplayMode(.inline) } }
-    private var calendar: some View { NavigationStack { CalendarScreen().toolbar { tools }.navigationTitle("Calendario").navigationBarTitleDisplayMode(.inline) } }
+    private var calendar: some View { NavigationStack { CalendarScreen() } }
     private var finance: some View { NavigationStack { FinanceScreen().navigationTitle("Finanza").navigationBarTitleDisplayMode(.inline) } }
     @ToolbarContentBuilder private var tools: some ToolbarContent {
         if #available(iOS 26.0, *) {

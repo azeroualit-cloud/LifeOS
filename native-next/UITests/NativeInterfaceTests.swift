@@ -731,7 +731,7 @@ final class NativeInterfaceTests: XCTestCase {
         app.buttons["calendar-today"].tap()
         revealCalendarDay(Self.today(), in: app)
         app.buttons["calendar-day-" + Self.today()].tap()
-        XCTAssertTrue(app.scrollViews["calendar-all-day-pane"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.scrollViews["calendar-all-day-strip"].waitForExistence(timeout: 10))
         let event = app.buttons["Evento dopo scorrimento"]
         XCTAssertTrue(event.isHittable); assertMinimumTouchTarget(event)
         capture("calendar-event-after-scroll")
@@ -1043,7 +1043,7 @@ final class NativeInterfaceTests: XCTestCase {
             addButton(app).tap()
             XCTAssertTrue(app.navigationBars["Nuova attività"].waitForExistence(timeout: 10))
             app.buttons["Annulla"].tap()
-            XCTAssertTrue(app.navigationBars["Calendario"].waitForExistence(timeout: 10))
+            XCTAssertTrue(app.scrollViews["calendar-scroll"].waitForExistence(timeout: 10))
             XCTAssertTrue(app.tabBars.buttons["Calendario"].isSelected)
         }
     }

@@ -156,13 +156,21 @@ struct NativeActivityEditor: View {
                 }
             }
         }.frame(maxWidth: .infinity, alignment: .leading)
-        .popover(isPresented: presented) {
-            VStack {
-                HStack { Text(title).font(.headline); Spacer(); Button("Fine") { presented.wrappedValue = false }.frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget) }
-                DatePicker(title, selection: date, displayedComponents: .date).datePickerStyle(.graphical).labelsHidden()
-            }.padding().presentationCompactAdaptation(.popover)
+        .sheet(isPresented: presented) {
+            NavigationStack {
+                ScrollView {
+                    DatePicker(title, selection: date, displayedComponents: .date)
+                        .datePickerStyle(.graphical).labelsHidden()
+                        .frame(maxWidth: .infinity).padding(NativeDesign.Space.large)
+                        .accessibilityIdentifier("activity-full-width-date-picker")
+                }.navigationTitle(title).navigationBarTitleDisplayMode(.inline)
+                    .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Fine") { presented.wrappedValue = false } } }
+            }.tint(NativeDesign.calendarAccent)
+                .presentationDetents([.height(NativeDesign.Layout.datePickerSheetHeight), .large])
+                .presentationDragIndicator(.visible)
         }
     }
+
     private func timeField(_ title: String, enabled: Binding<Bool>, value: Binding<Date>) -> some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
             if enabled.wrappedValue {
