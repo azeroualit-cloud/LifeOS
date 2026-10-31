@@ -191,6 +191,22 @@ final class NativeRevision71UITests: XCTestCase {
         capture("71-dashboard-health-accent")
         health.tap(); XCTAssertTrue(app.navigationBars["Peso e calorie"].waitForExistence(timeout: 10))
     }
+    func testCompletedTimedActivityKeepsItsStateInTheDayTimeline() {
+        let app = launch()
+        app.tabBars.buttons["Attività"].tap(); app.buttons["primary-add"].tap()
+        let title = app.textFields["activity-title"]
+        XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText("Slot completato test")
+        app.buttons["activity-date-Inizio"].tap(); app.buttons["Fine"].tap()
+        app.buttons["Ora iniziale"].tap(); app.buttons["Salva"].tap()
+        let complete = app.buttons["Cambia completamento evento Slot completato test"]
+        reveal(complete, in: app.collectionViews.firstMatch, app: app); complete.tap()
+        app.tabBars.buttons["Calendario"].tap()
+        let today = app.buttons["calendar-day-" + day()]
+        reveal(today, in: app.scrollViews["calendar-scroll"], app: app); today.tap()
+        let slot = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "calendar-timeline-event:", "Slot completato test")).firstMatch
+        XCTAssertTrue(exists(slot, app: app)); XCTAssertEqual(slot.value as? String, "Completata")
+        capture("71-completed-timed-activity")
+    }
     func testReducedMotionAndLargeTextKeepMonthDayAndEditorUsable() {
         let app = launch(["--reduce-motion", "--large-text"])
         app.tabBars.buttons["Calendario"].tap()

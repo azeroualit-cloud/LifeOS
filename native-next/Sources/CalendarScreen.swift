@@ -17,6 +17,8 @@ struct CalendarScreen: View {
     @State private var windowAnchor: String?
     @State private var restoringWindow = false
     @State private var monthPositionReady = false
+    @State private var positioningMonth: String?
+    @State private var positioningDay: String?
     @State private var monthDays: [String: [CalendarDayPresentation]] = [:]
     @State private var monthData: [String: Record] = [:]
     @State private var eventsByDay: [String: [Record]] = [:]
@@ -92,32 +94,44 @@ struct CalendarScreen: View {
                 }.accessibilityIdentifier("calendar-scroll")
                 .coordinateSpace(name: "calendar-viewport")
                 .onPreferenceChange(NativeCalendarMonthFrames.self) { frames in
-                    guard monthPositionReady, !restoringWindow, !showingDay else { return }
-                    // Observe scrolling without feeding an offset back into ScrollView.
-                    // A bidirectional scrollPosition binding can fight layout changes
-                    // when the paint palette changes the viewport's height.
+                    guard !showingDay else { return }
+                    if let target = positioningMonth {
+                        // A date inside an offscreen lazy month is not yet a scroll
+                        // target. First realize its parent, then position the date.
+                        guard let frame = frames[target], frame.maxY > 0,
+                              abs(frame.minY) <= NativeDesign.Space.section else { return }
+                        let day = positioningDay
+                        positioningMonth = nil; positioningDay = nil
+                        restoringWindow = false; monthPositionReady = true; visibleMonth = target
+                        if let day { proxy.scrollTo(day, anchor: .center) }
+                        return
+                    }
+                    guard monthPositionReady, !restoringWindow else { return }
                     let first = frames.filter { $0.value.maxY > 0 }.min { $0.value.minY < $1.value.minY }?.key
                     if let first, months.contains(first), first != visibleMonth { visibleMonth = first }
                 }
-                .task {
-                    monthPositionReady = false
-                    await Task.yield()
-                    proxy.scrollTo(selected, anchor: .center)
-                    await Task.yield()
-                    monthPositionReady = true
-                }
+                .task { position(month: String(selected.prefix(7)), day: selected, proxy: proxy) }
                 .onChange(of: windowAnchor) { _, month in
                     guard let month else { return }
-                    proxy.scrollTo(month, anchor: .top)
                     windowAnchor = nil
-                    Task { @MainActor in await Task.yield(); restoringWindow = false }
+                    position(month: month, day: nil, proxy: proxy)
                 }
                 .onChange(of: jumpMonth) { _, month in
                     guard let month else { return }
                     ensureWindow(around: month, preservePosition: false)
-                    proxy.scrollTo(selected.hasPrefix(month) ? selected : month, anchor: selected.hasPrefix(month) ? .center : .top); visibleMonth = month; jumpMonth = nil
+                    position(month: month, day: selected.hasPrefix(month) ? selected : nil, proxy: proxy)
+                    jumpMonth = nil
                 }
             }
+        }
+    }
+    private func position(month: String, day: String?, proxy: ScrollViewProxy) {
+        monthPositionReady = false; restoringWindow = true
+        positioningMonth = month; positioningDay = day
+        Task { @MainActor in
+            await Task.yield()
+            guard positioningMonth == month, !showingDay else { return }
+            proxy.scrollTo(month, anchor: .top)
         }
     }
     private var dayAgenda: some View {
@@ -203,10 +217,11 @@ struct CalendarScreen: View {
                 }
                 ForEach(slots) { slot in
                     let laneWidth = width / CGFloat(slot.lanes)
+                    let completed = slot.source == "event" ? slot.record.text("occurrence_status") == "done" : slot.record.text("status") == "done"
                     Button { router.sheet = slot.source == "event" ? .event(slot.record) : .task(slot.record) } label: {
                         VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
-                            Text(slot.record.text("title")).font(.subheadline.weight(.medium)).lineLimit(2)
-                            Text(slot.record.text(slot.source == "event" ? "start_time" : "scheduled_time")).font(.caption).monospacedDigit()
+                            Text(slot.record.text("title")).font(.subheadline.weight(.medium)).lineLimit(2).strikethrough(completed).foregroundStyle(completed ? NativeDesign.secondary : Color.primary)
+                            Text(slot.record.text(slot.source == "event" ? "start_time" : "scheduled_time")).font(.caption).monospacedDigit().foregroundStyle(NativeDesign.secondary)
                         }.padding(NativeDesign.Space.xs)
                             .frame(width: max(0, laneWidth - NativeDesign.Space.xxs), height: max(NativeDesign.Layout.touchTarget, CGFloat(slot.end - slot.start) / 60 * hourHeight), alignment: .topLeading)
                             .background(NativeDesign.actionSurface, in: RoundedRectangle(cornerRadius: NativeDesign.badgeRadius))
@@ -214,7 +229,7 @@ struct CalendarScreen: View {
                             .clipped().contentShape(Rectangle())
                     }.buttonStyle(.plain).foregroundStyle(Color.primary)
                         .offset(x: left + CGFloat(slot.lane) * laneWidth, y: CGFloat(slot.start) / 60 * hourHeight)
-                        .accessibilityIdentifier("calendar-timeline-" + slot.id)
+                        .accessibilityIdentifier("calendar-timeline-" + slot.id).accessibilityValue(completed ? "Completata" : "Da completare")
                 }
             }
         }.frame(height: hourHeight * 24)
