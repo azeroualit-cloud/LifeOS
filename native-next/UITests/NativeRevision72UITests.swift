@@ -52,6 +52,8 @@ final class NativeRevision72UITests: XCTestCase {
         XCTAssertFalse(app.navigationBars["Calendario"].exists)
         XCTAssertFalse(app.buttons["Impostazioni"].exists)
         let back = app.buttons["calendar-back-month"], title = app.buttons["calendar-day-heading"], add = app.buttons["primary-add"]
+        XCTAssertGreaterThanOrEqual(back.frame.height.rounded(), 44)
+        XCTAssertGreaterThanOrEqual(title.frame.height.rounded(), 44)
         XCTAssertEqual(back.frame.midY, title.frame.midY, accuracy: 4)
         XCTAssertEqual(back.frame.midY, add.frame.midY, accuracy: 4)
         let days = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "calendar-week-day-"))

@@ -144,19 +144,18 @@ struct CalendarScreen: View {
             HStack(spacing: NativeDesign.Space.small) {
                 Button { showingDay = false; jumpMonth = String(selected.prefix(7)) } label: {
                     Label(NativeCalendarWindow.monthLabel(String(selected.prefix(7))), systemImage: "chevron.left")
-                        .font(.subheadline).frame(minHeight: NativeDesign.Layout.touchTarget)
-                }.accessibilityIdentifier("calendar-back-month")
+                        .font(.subheadline).frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle())
+                }.foregroundStyle(NativeDesign.calendarAccent).accessibilityIdentifier("calendar-back-month")
                 Spacer(minLength: NativeDesign.Space.xs)
                 Button(action: goToToday) {
                     Text(CivilDate.label(selected).capitalized).font(.headline).lineLimit(1).minimumScaleFactor(0.75)
-                        .frame(minHeight: NativeDesign.Layout.touchTarget)
+                        .frame(minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle())
                 }.foregroundStyle(Color.primary).accessibilityLabel("Vai a oggi, " + CivilDate.label(selected))
                     .accessibilityIdentifier("calendar-day-heading")
                 Spacer(minLength: NativeDesign.Space.xs)
                 NativeToolbarButton(symbol: "plus", label: "Aggiungi evento") { router.sheet = .event(["day": .string(selected)]) }
                     .accessibilityIdentifier("primary-add")
             }.buttonStyle(.plain).padding(.horizontal, NativeDesign.Layout.screenInset)
-                .accessibilityIdentifier("calendar-day-header")
             weekdayLabels.padding(.horizontal, NativeDesign.Layout.screenInset)
             HStack(spacing: NativeDesign.Space.xxs) {
                 ForEach(weekDays, id: \.self) { day in

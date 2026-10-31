@@ -41,6 +41,7 @@ struct NativeCalendarAgendaBlock: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(shift == nil ? NativeDesign.actionSurface : color.opacity(0.10), in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
             .overlay(alignment: .leading) { RoundedRectangle(cornerRadius: NativeDesign.progressRadius).fill(color.opacity(entry.completed ? 0.45 : 1)).frame(width: NativeDesign.Layout.calendarMarker) }
+            .accessibilityElement(children: .contain)
             .accessibilityIdentifier("calendar-agenda-block-" + entry.id)
     }
 }
