@@ -131,15 +131,15 @@ struct NativeRoot: View {
             if let url = NativeIntentDraft.pendingURL { route(url) }
             if NativeIntentDraft.taskTitle != nil { route(URL(string: "lifeos://task")!) }
             await health.start(demo: NativeHealthLaunchPolicy.simulated)
-            await store.sync(automatic: true); await store.loadWeather()
+            await store.sync(automatic: true)
         }
         .onOpenURL { route($0) }
         .onReceive(NotificationCenter.default.publisher(for: .lifeOSRoute)) { note in
             if let url = note.object as? URL { route(url) }
         }
         .onChange(of: store.life, initial: true) { _, _ in updateReminders() }
-        .task(id: store.life) {
-            guard !store.isDemo else { return }
+        .task(id: NativeUrgentAlarmSource(life: store.life, editing: router.sheet != nil)) {
+            guard router.sheet == nil, !store.isDemo else { return }
             do { try await NativeUrgentAlarm.reconcile(life: store.life) }
             catch { if !Task.isCancelled { store.error = "Controlla le sveglie urgenti: " + error.localizedDescription } }
         }
@@ -158,14 +158,14 @@ struct NativeRoot: View {
                     returnedFromBackground = false; router.activationDate = Date()
                     if router.tab == .calendar { router.calendarOpensDay = false; router.calendarDay = CivilDate.day(); router.calendarFocusRequest = UUID(); store.calendarMonth = CivilDate.month() }
                 }
-                currentDay = CivilDate.day(); store.rollover(); Task { await store.sync(automatic: true); await store.loadWeather() } }
+                currentDay = CivilDate.day(); store.rollover(); Task { await store.sync(automatic: true) } }
         }
         .onReceive(Timer.publish(every: 30, on: .main, in: .common).autoconnect()) { _ in
             let day = CivilDate.day()
             if day != currentDay {
                 currentDay = day; store.rollover()
-                Task { await store.sync(automatic: true); await store.loadWeather() }
-            } else if scenePhase == .active { Task { await store.sync(automatic: true); await store.loadWeather() } }
+                Task { await store.sync(automatic: true) }
+            } else if scenePhase == .active { Task { await store.sync(automatic: true) } }
         }
     }
     private func updateReminders() { NativeNotifications.shared.update(life: store.life, enabled: remindersEnabled && !store.isDemo) }

@@ -39,7 +39,7 @@ enum NativeDesign {
     }
     enum Layout {
         // Finance primary amount: stronger hierarchy than the 34 pt iOS large title.
-        static let budgetAmount: CGFloat = 48
+        static let budgetAmount: CGFloat = 56
         static let screenInset = Space.xLarge
         static let listInset = Space.large
         static let cardInset = Space.xLarge
@@ -60,12 +60,12 @@ enum NativeDesign {
         static let shiftBrushHeight: CGFloat = 60
         static let shiftProgressWidth: CGFloat = 144
         static let shiftProgressHeight: CGFloat = 8
-        static let calendarPaneFraction: CGFloat = 0.58
         static let healthBarRadius: CGFloat = 2
         static let calendarDayNumber: CGFloat = 26
         static let selectionLine: CGFloat = 2
         static let timelineHour: CGFloat = 76
         static let timelineLabel: CGFloat = 48
+        static let calendarSwipeDistance: CGFloat = 44
         static let calendarMonthDayHeight: CGFloat = 88
         static let calendarDayHeight: CGFloat = 54
         static let calendarMarker: CGFloat = 3

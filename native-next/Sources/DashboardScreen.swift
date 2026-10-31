@@ -28,10 +28,7 @@ struct DashboardScreen: View {
             }
             .background(NativeDesign.canvas).scrollBounceBehavior(.basedOnSize).accessibilityIdentifier("dashboard-scroll")
             .refreshable { await health.refresh() }
-            .task(id: today) {
-                // Home dates follow today without changing the month being browsed in Calendar.
-                await store.loadWeather()
-            }
+
         }.sensoryFeedback(.success, trigger: routineFeedback)
         .task { await health.start(demo: NativeHealthLaunchPolicy.simulated) }
         .onChange(of: store.life.records("health"), initial: true) { _, rows in

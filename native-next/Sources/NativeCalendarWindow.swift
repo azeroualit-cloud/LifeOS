@@ -2,6 +2,12 @@ import Foundation
 
 /// Stable civil month identifiers keep scroll anchors intact when extending the range.
 enum NativeCalendarWindow {
+    /// A boundary week belongs to its Monday's month. The first visible month
+    /// also owns its leading week, so every date appears once without empty rows.
+    static func weekIndexes(_ month: String, includeLeading: Bool) -> [Int] {
+        let days = CivilDate.gridDates(month)
+        return (0..<(days.count / 7)).filter { includeLeading || CivilDate.day(days[$0 * 7]).hasPrefix(month) }
+    }
     static func monthLabel(_ month: String) -> String { CivilDate.monthAbbreviation(month) }
     /// Keep neighbouring identities stable while bounding grids and server snapshots.
     static let capacity = 13

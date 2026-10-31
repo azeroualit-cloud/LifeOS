@@ -31,8 +31,7 @@ struct NativeActivityEditor: View {
     @State private var deleteSeries = false
     @State private var identity = UUID().uuidString
     var body: some View {
-        ScrollViewReader { scroll in
-            Form {
+        Form {
                 Section {
                     TextField("Titolo", text: $title).accessibilityIdentifier("activity-title")
                     VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
@@ -114,9 +113,6 @@ struct NativeActivityEditor: View {
                 }
                 .onAppear(perform: load)
                 .onChange(of: fromHere) { _, value in date = CivilDate.date(value ? record.text("day") : record.text("series_day", fallback: record.text("day"))) }
-                .task {
-                    if !record.text("_editorSection").isEmpty { await Task.yield(); scroll.scrollTo(record.text("_editorSection") == "reminder" ? "time" : record.text("_editorSection"), anchor: .center) }
-                }
                 .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
                 .confirmationDialog("Eliminare questa attività?", isPresented: $deleteTask, titleVisibility: .visible) {
@@ -125,7 +121,6 @@ struct NativeActivityEditor: View {
                 .confirmationDialog("Eliminare la serie e tutti gli stati delle occorrenze?", isPresented: $deleteSeries, titleVisibility: .visible) {
                     Button("Elimina serie", role: .destructive) { Task { await store.run("deleteEvent", args: [.int(record.integer("id"))]); if store.error == nil { cancelAlarmAndDismiss() } } }
                 }
-        }
     }
     private func cancelAlarmAndDismiss() {
         do { try NativeUrgentAlarm.cancel(identity: identity); dismiss() }
@@ -183,7 +178,6 @@ struct NativeActivityEditor: View {
         hasUntil = !record.text("until_day").isEmpty; until = CivilDate.date(record.text("until_day", fallback: CivilDate.adding(365, to: CivilDate.day())))
         if record.integer("id") != 0 { identity = record.text("activity_uid", fallback: source + ":" + String(record.integer("id"))) }
         urgent = NativeUrgentAlarm.enabled(identity: identity)
-        if ["time", "reminder"].contains(record.text("_editorSection")) { hasTime = true; if !hasDate && !hasDue { hasDue = true } }
     }
     private func clockDate(_ value: String) -> Date {
         let parts = value.split(separator: ":").compactMap { Int($0) }
@@ -205,7 +199,6 @@ struct NativeActivityEditor: View {
                     try await NativeUrgentAlarm.set(identity: identity, enabled: urgent && hasDate && hasTime && frequency == "none", day: CivilDate.day(date), time: clock(start), title: title)
                 }
             } catch { store.error = "Attività salvata. Sveglia non aggiornata: " + error.localizedDescription }
-            NotificationCenter.default.post(name: .nativeTaskEditorSaved, object: record.integer("id"))
             dismiss()
         } catch { failure = error.localizedDescription }
     }

@@ -15,7 +15,10 @@ import AlarmKit
         get { (try? JSONDecoder().decode([Entry].self, from: UserDefaults.standard.data(forKey: storageKey) ?? Data())) ?? [] }
         set { if let data = try? JSONEncoder().encode(newValue) { UserDefaults.standard.set(data, forKey: storageKey) } }
     }
-    static func enabled(identity: String) -> Bool { entries.contains { $0.identity == identity && $0.date > Date() } }
+    static func enabled(identity: String) -> Bool {
+        guard #available(iOS 26.0, *), let entry = entries.first(where: { $0.identity == identity && $0.date > Date() }) else { return false }
+        return (try? AlarmManager.shared.alarms.contains { $0.id == entry.id }) == true
+    }
     static func date(day: String, time: String) -> Date? {
         guard NativeRoutineSchedule.validDay(day), time.count == 5 else { return nil }
         let parts = time.split(separator: ":").compactMap { Int($0) }
@@ -35,7 +38,10 @@ import AlarmKit
         let alert = AlarmPresentation.Alert(title: LocalizedStringResource(stringLiteral: title), stopButton: AlarmButton(text: "Ferma", textColor: .white, systemImageName: "stop.circle"))
         let attributes = AlarmAttributes(presentation: AlarmPresentation(alert: alert), metadata: NativeEventAlarmMetadata(), tintColor: NativeDesign.healthAccent)
         let configuration = AlarmManager.AlarmConfiguration(schedule: .fixed(date), attributes: attributes)
-        // Reusing the stable UUID updates the same alarm; no duplicate sound after an edit.
+        // The public API schedules a new alarm; don't assume replacement semantics.
+        // Cancel the old UUID first, then schedule it again so edits cannot duplicate it.
+        let existing = try AlarmManager.shared.alarms
+        if existing.contains(where: { $0.id == id }) { try AlarmManager.shared.cancel(id: id) }
         _ = try await AlarmManager.shared.schedule(id: id, configuration: configuration)
         entries = entries.filter { $0.identity != identity } + [Entry(id: id, identity: identity, day: day, title: title, date: date)]
     }
@@ -68,3 +74,14 @@ import AlarmKit
     }
 }
 @available(iOS 26.0, *) private struct NativeEventAlarmMetadata: AlarmMetadata { }
+
+/// An editor owns scheduling while open. Reconcile after dismissal so a local
+/// save and its system alarm are not scheduled concurrently by the root view.
+struct NativeUrgentAlarmSource: Equatable {
+    let content: Record
+    let editing: Bool
+    init(life: Record, editing: Bool) {
+        self.editing = editing
+        content = life.filter { ["events", "activityEvents", "upcomingEvents", "tasks", "occurrences"].contains($0.key) }
+    }
+}

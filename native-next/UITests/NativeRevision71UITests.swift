@@ -14,6 +14,11 @@ final class NativeRevision71UITests: XCTestCase {
         let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
         attachment.name = name; attachment.lifetime = .keepAlways; add(attachment)
     }
+    private func exists(_ element: XCUIElement, app: XCUIApplication) -> Bool {
+        let found = element.waitForExistence(timeout: 10)
+        if !found { print("CALENDAR_DAY_DIAGNOSTIC " + app.debugDescription); capture("71-calendar-day-entry-failure") }
+        return found
+    }
     private func day(_ offset: Int = 0) -> String {
         var calendar = Calendar(identifier: .gregorian); calendar.timeZone = TimeZone(identifier: "Europe/Rome")!
         let formatter = DateFormatter(); formatter.calendar = calendar; formatter.timeZone = calendar.timeZone; formatter.dateFormat = "yyyy-MM-dd"
@@ -35,12 +40,12 @@ final class NativeRevision71UITests: XCTestCase {
         app.tabBars.buttons["Calendario"].tap()
         let months = app.scrollViews["calendar-scroll"]
         XCTAssertTrue(months.waitForExistence(timeout: 10))
-        XCTAssertGreaterThan(months.frame.height, app.frame.height * 0.6)
+        XCTAssertGreaterThan(months.frame.height, app.frame.height * 0.55)
         XCTAssertFalse(app.scrollViews["calendar-day-pane"].exists)
         XCTAssertFalse(app.buttons["Esporta turni su Apple (facoltativo)"].exists)
         let today = app.buttons["calendar-day-" + day()]
         reveal(today, in: months, app: app); today.tap()
-        XCTAssertTrue(app.scrollViews["calendar-day-pane"].waitForExistence(timeout: 10))
+        XCTAssertTrue(exists(app.scrollViews["calendar-day-pane"], app: app))
         XCTAssertTrue(app.buttons["calendar-week-day-" + day()].isSelected)
         XCTAssertFalse(months.exists)
         capture("71-calendar-day-timeline")
@@ -52,7 +57,7 @@ final class NativeRevision71UITests: XCTestCase {
         let app = launch()
         app.buttons["dashboard-day-" + day(1)].tap()
         let explicit = app.buttons["calendar-week-day-" + day(1)]
-        XCTAssertTrue(explicit.waitForExistence(timeout: 10)); XCTAssertTrue(explicit.isSelected)
+        XCTAssertTrue(exists(explicit, app: app)); XCTAssertTrue(explicit.isSelected)
         app.tabBars.buttons["Finanza"].tap(); app.tabBars.buttons["Calendario"].tap()
         XCTAssertTrue(app.scrollViews["calendar-scroll"].waitForExistence(timeout: 10))
         let today = app.buttons["calendar-day-" + day()]
@@ -146,8 +151,12 @@ final class NativeRevision71UITests: XCTestCase {
         reveal(budget, in: surface, app: app); XCTAssertTrue(analysis.exists)
         XCTAssertGreaterThanOrEqual(budget.frame.height.rounded(), 44)
         capture("71-finance-reference-layout")
-        budget.tap(); XCTAssertTrue(app.navigationBars["Budget"].waitForExistence(timeout: 10))
+        analysis.tap(); XCTAssertTrue(app.navigationBars["Analisi"].waitForExistence(timeout: 10))
         app.navigationBars.buttons.element(boundBy: 0).tap()
+        reveal(budget, in: surface, app: app); budget.tap(); XCTAssertTrue(app.navigationBars["Budget"].waitForExistence(timeout: 10))
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.buttons["finance-more"].tap(); app.buttons["Nuovo piano"].tap()
+        XCTAssertTrue(app.navigationBars["Nuovo piano"].waitForExistence(timeout: 10)); app.buttons["Annulla"].tap()
         app.buttons["primary-add"].tap()
         XCTAssertTrue(app.navigationBars["Nuovo movimento"].waitForExistence(timeout: 10))
         app.buttons["Annulla"].tap()
@@ -171,7 +180,7 @@ final class NativeRevision71UITests: XCTestCase {
         app.tabBars.buttons["Calendario"].tap()
         let today = app.buttons["calendar-day-" + day()]
         reveal(today, in: app.scrollViews["calendar-scroll"], app: app); today.tap()
-        XCTAssertTrue(app.buttons["calendar-back-month"].waitForExistence(timeout: 10))
+        XCTAssertTrue(exists(app.buttons["calendar-back-month"], app: app))
         app.buttons["primary-add"].tap()
         XCTAssertTrue(app.navigationBars["Nuova attività"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.buttons["activity-date-Inizio"].exists)

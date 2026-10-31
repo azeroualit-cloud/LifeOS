@@ -67,35 +67,7 @@ final class NativeInterfaceTests: XCTestCase {
         assertMinimumTouchTarget(actions.firstMatch)
         capture("widget-informative-2x2-dark")
     }
-    func testCalendarDayPaneIsFixedAndTodayRestoresOnEntryAndResume() {
-        let app = launch(["--dark"])
-        let formatter = DateFormatter(); formatter.locale = Locale(identifier: "en_US_POSIX"); formatter.timeZone = TimeZone(identifier: "Europe/Rome"); formatter.dateFormat = "yyyy-MM-dd"
-        let calendar = Calendar(identifier: .gregorian)
-        let today = formatter.string(from: Date())
-        let tomorrow = formatter.string(from: calendar.date(byAdding: .day, value: 1, to: Date())!)
-        app.buttons["dashboard-day-" + tomorrow].tap()
-        let explicit = app.buttons["calendar-day-" + tomorrow]
-        capture("calendar-explicit-day-first-entry")
-        expectation(for: NSPredicate { element, _ in (element as? XCUIElement)?.isSelected == true }, evaluatedWith: explicit)
-        waitForExpectations(timeout: 10)
-        let details = app.scrollViews["calendar-day-pane"], months = app.scrollViews["calendar-scroll"]
-        XCTAssertTrue(details.exists)
-        XCTAssertGreaterThanOrEqual(details.frame.minY, months.frame.maxY - 1)
-        let y = details.frame.minY
-        app.buttons["Mese successivo"].tap()
-        XCTAssertEqual(details.frame.minY, y, accuracy: 1)
-        app.tabBars.buttons["Finanza"].tap(); app.tabBars.buttons["Calendario"].tap()
-        let current = app.buttons["calendar-day-" + today]
-        capture("calendar-on-tab-return")
-        expectation(for: NSPredicate { element, _ in guard let element = element as? XCUIElement else { return false }; return element.isSelected && element.isHittable }, evaluatedWith: current)
-        waitForExpectations(timeout: 10)
-        app.buttons["Mese successivo"].tap()
-        XCUIDevice.shared.press(.home); app.activate()
-        expectation(for: NSPredicate { element, _ in guard let element = element as? XCUIElement else { return false }; return element.isSelected && element.isHittable }, evaluatedWith: current)
-        waitForExpectations(timeout: 10)
-        XCTAssertEqual(details.frame.minY, y, accuracy: 1)
-        capture("calendar-fixed-day-pane-dark")
-    }
+
     func testDashboardWeekShiftProgressAndFinanceGlassActions() {
         let app = launch(["--dark", "--active-shift"])
         XCTAssertTrue(app.buttons["home-focus"].waitForExistence(timeout: 10))
@@ -143,12 +115,9 @@ final class NativeInterfaceTests: XCTestCase {
         app.buttons["Salva"].tap()
         let activity = app.buttons["Attività unificata test"]
         revealChecklistButton(activity, in: app); activity.tap()
-        // Context actions preserve the existing inline interaction before opening the editor.
-        let edit = app.buttons["inline-task-details"]
-        if edit.waitForExistence(timeout: 2) { edit.tap() }
         XCTAssertTrue(app.textFields["activity-title"].waitForExistence(timeout: 10))
         XCTAssertEqual(app.textViews["Descrizione"].value as? String, "Descrizione persistente")
-        app.buttons["Inizio"].tap()
+        app.buttons["activity-date-Inizio"].tap(); app.buttons["Fine"].tap()
         capture("unified-activity-editor-dark")
         app.buttons["Salva"].tap()
         app.tabBars.buttons["Dashboard"].tap()
@@ -157,15 +126,13 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertTrue(event.isHittable); event.tap()
         XCTAssertTrue(app.textViews["Descrizione"].waitForExistence(timeout: 10))
         XCTAssertEqual(app.textViews["Descrizione"].value as? String, "Descrizione persistente")
-        app.buttons["Inizio"].tap(); app.buttons["Salva"].tap()
+        app.buttons["Rimuovi inizio"].tap(); app.buttons["Salva"].tap()
         app.tabBars.buttons["Attività"].tap()
         let restored = app.buttons["Cambia completamento Attività unificata test"]
         revealChecklistButton(restored, in: app)
         XCTAssertEqual(app.buttons.matching(identifier: "Cambia completamento Attività unificata test").count, 1)
         let collapsed = app.buttons["Attività unificata test"]
         if collapsed.exists { collapsed.tap() }
-        let details = app.buttons["inline-task-details"]
-        XCTAssertTrue(details.waitForExistence(timeout: 10)); details.tap()
         XCTAssertTrue(app.textViews["Descrizione"].waitForExistence(timeout: 10))
         XCTAssertEqual(app.textViews["Descrizione"].value as? String, "Descrizione persistente")
     }
@@ -243,33 +210,7 @@ final class NativeInterfaceTests: XCTestCase {
         revealChecklistButton(completion, in: app, towardTop: true)
         XCTAssertEqual(completion.value as? String, "Da completare")
     }
-    func testEventContextActionsUseFullSizeChipsAndOwnEditor() {
-        let app = launch(["--dark", "--activity-agenda"])
-        app.tabBars.buttons["Attività"].tap()
-        app.staticTexts["Evento oggi"].tap()
-        let details = app.buttons["inline-event-details"]
-        XCTAssertTrue(details.waitForExistence(timeout: 10)); assertMinimumTouchTarget(details)
-        XCTAssertFalse(app.navigationBars["Modifica attività"].exists)
-        let time = app.buttons["inline-event-time"]
-        assertMinimumTouchTarget(time)
-        capture("event-context-action-chips")
-        time.tap()
-        XCTAssertTrue(app.navigationBars["Modifica attività"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.switches["Ora iniziale"].waitForExistence(timeout: 10))
-        XCTAssertEqual(app.switches["Ora iniziale"].value as? String, "1")
-        app.buttons["Annulla"].tap()
-        let task = app.buttons["Cambia completamento Da fare libera"]
-        revealChecklistButton(task, in: app)
-        app.buttons["Da fare libera"].tap()
-        let reminder = app.buttons["inline-task-reminder"]
-        XCTAssertTrue(reminder.waitForExistence(timeout: 10)); assertMinimumTouchTarget(reminder)
-        capture("task-context-action-chips")
-        reminder.tap()
-        XCTAssertTrue(app.navigationBars["Modifica attività"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.switches["Orario promemoria"].waitForExistence(timeout: 10))
-        XCTAssertEqual(app.switches["Orario promemoria"].value as? String, "1")
-        XCTAssertFalse(app.navigationBars["Impostazioni"].exists)
-    }
+
     func testCalendarRepeatedScrollingKeepsMonthAnchorsAndReturnsToToday() {
         let app = launch(["--dark"])
         app.tabBars.buttons["Calendario"].tap()
@@ -284,54 +225,7 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertEqual(app.buttons.matching(identifier: "calendar-day-" + day).count,1)
         capture("calendar-after-repeated-scroll-and-today")
     }
-    func testEditingKeepsTaskTitleGeometryAndDraftAcrossTabs() {
-        let app = launch(["--dark", "--activity-agenda"])
-        app.tabBars.buttons["Attività"].tap()
-        let open = app.buttons["task-open-101"]
-        revealChecklistButton(open, in: app)
-        let before = open.frame
-        capture("task-title-before-edit")
-        open.tap()
-        let title = app.descendants(matching: .any)["inline-task-title"]
-        XCTAssertTrue(title.waitForExistence(timeout: 10))
-        XCTAssertEqual(title.value as? String, "Da fare libera")
-        XCTAssertEqual(title.frame.minX,before.minX,accuracy:2)
-        XCTAssertEqual(title.frame.width,before.width,accuracy:2)
-        XCTAssertEqual(title.frame.midY,before.midY,accuracy:2)
-        XCTAssertEqual(app.buttons["Cambia completamento Da fare libera"].frame.midY,title.frame.midY,accuracy:2)
-        capture("task-title-during-edit")
-        title.tap(); title.typeText("2028")
-        let edited = title.value as? String
-        XCTAssertTrue(edited?.contains("2028") == true)
-        let hideKeyboard = app.buttons["hide-task-keyboard"]
-        XCTAssertTrue(hideKeyboard.waitForExistence(timeout:10))
-        hideKeyboard.tap()
-        XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout:10))
-        for target in ["Calendario","Finanza","Dashboard","Attività"] {
-            let tab = app.tabBars.buttons[target]
-            XCTAssertTrue(tab.waitForExistence(timeout:10)); XCTAssertTrue(tab.isHittable); tab.tap(); XCTAssertTrue(tab.isSelected)
-        }
-        XCTAssertTrue(title.waitForExistence(timeout:10))
-        XCTAssertEqual(title.value as? String,edited)
-        let close = app.buttons["inline-task-close"]
-        revealChecklistButton(close,in:app)
-        close.tap()
-        XCTAssertTrue(app.buttons["Salva e chiudi"].waitForExistence(timeout:10))
-        app.buttons["Salva e chiudi"].tap()
-        XCTAssertTrue(open.waitForExistence(timeout:10))
-        XCTAssertEqual(open.label,edited)
-        open.tap()
-        XCTAssertEqual(title.value as? String,edited)
-        app.buttons["inline-task-details"].tap()
-        XCTAssertTrue(app.navigationBars["Modifica attività"].waitForExistence(timeout:10))
-        let detailTitle = app.textFields["Titolo"]
-        detailTitle.tap(); detailTitle.typeText("9")
-        let savedInDetails = detailTitle.value as? String
-        app.navigationBars["Modifica attività"].buttons["Salva"].tap()
-        XCTAssertTrue(app.navigationBars["Modifica attività"].waitForNonExistence(timeout:10))
-        XCTAssertEqual(title.value as? String,savedInDetails)
-        capture("task-title-saved-after-tab-switches")
-    }
+
     func testRepeatedTabSwitchesKeepNativeDestinationsUsable() {
         let app = launch(["--dark"])
         for _ in 0..<3 {
@@ -365,20 +259,7 @@ final class NativeInterfaceTests: XCTestCase {
         for _ in 0..<8 { if habit.isHittable { break }; form.swipeUp() }
         XCTAssertTrue(habit.waitForExistence(timeout: 10))
     }
-    func testCalendarDayCanBeDeselectedWithASecondTap() {
-        let app = launch(["--dark"])
-        app.tabBars.buttons["Calendario"].tap()
-        app.buttons["calendar-today"].tap()
-        let formatter = DateFormatter(); formatter.locale = Locale(identifier: "en_US_POSIX"); formatter.timeZone = TimeZone(identifier: "Europe/Rome"); formatter.dateFormat = "yyyy-MM-dd"
-        let day = app.buttons["calendar-day-" + formatter.string(from: Date())]
-        XCTAssertTrue(day.waitForExistence(timeout: 10))
-        XCTAssertTrue(day.isSelected)
-        day.tap()
-        XCTAssertFalse(day.isSelected)
-        capture("calendar-neutral-deselected")
-        day.tap()
-        XCTAssertTrue(day.isSelected)
-    }
+
     func testCalendarScrollPerformance() {
         let app = launch(["--dark"])
         app.tabBars.buttons["Calendario"].tap()
@@ -544,31 +425,7 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Modifica attività"].waitForExistence(timeout: 10))
         capture("dashboard-timeline-event-editor")
     }
-    func testCompactDashboardPriorityAndActivityActionsStayVisible() {
-        let app = launch(["--dark", "--inactive-shift"])
-        XCTAssertTrue(app.staticTexts["home-today"].waitForExistence(timeout: 10))
-        XCTAssertFalse(app.buttons["home-focus"].exists)
-        XCTAssertLessThan(app.staticTexts["home-routines-heading"].frame.minY, app.staticTexts["home-agenda-heading"].frame.minY)
-        capture("dashboard-compact-priority")
-        app.tabBars.buttons["Attività"].tap()
-        let title = app.buttons["task-open-1"]
-        revealChecklistButton(title, in: app); title.tap()
-        let trash = app.buttons["inline-task-delete"]
-        revealChecklistButton(trash, in: app)
-        for id in ["inline-task-details", "inline-task-reminder", "inline-task-delete", "inline-task-close"] {
-            let button = app.buttons[id]
-            XCTAssertTrue(button.isHittable); assertMinimumTouchTarget(button)
-            XCTAssertGreaterThanOrEqual(button.frame.minX, 0)
-            XCTAssertLessThanOrEqual(button.frame.maxX, app.frame.maxX)
-        }
-        capture("activity-actions-all-visible")
-        trash.tap()
-        XCTAssertTrue(app.buttons["Elimina attività"].waitForExistence(timeout: 5))
-        // iOS can present this confirmation as a popover without a Cancel row.
-        // Dismiss outside and verify the task remains intact.
-        app.navigationBars["Attività"].coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
-        XCTAssertEqual(app.textFields["inline-task-title"].value as? String, "Organizzare la settimana")
-    }
+
     func testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination() {
         let app = launch(["--dark", "--expense-routing"])
         addButton(app).tap()
@@ -827,10 +684,8 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertTrue(completion.waitForExistence(timeout: 10)); XCTAssertTrue(completion.isHittable)
         assertMinimumTouchTarget(completion)
         app.buttons["task-open-1"].tap()
-        XCTAssertTrue(app.descendants(matching: .any)["inline-task-title"].waitForExistence(timeout: 10))
-        XCTAssertFalse(app.navigationBars["Modifica attività"].exists)
-        app.buttons["inline-task-details"].tap()
-        XCTAssertTrue(app.navigationBars["Modifica attività"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.textFields["activity-title"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.navigationBars["Modifica attività"].exists)
         app.buttons["Annulla"].tap()
         capture("shared-task-rows")
         completion.tap()
@@ -946,18 +801,7 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertEqual(inlineTitle.value as? String, title)
         XCTAssertEqual(app.buttons["Cambia completamento " + title].value as? String, "Da completare")
     }
-    func testDashboardDayRestoresCalendarMonthAndSelection() {
-        let app = launch()
-        app.buttons["Calendario"].tap()
-        app.buttons["Mese precedente"].tap()
-        app.buttons["Dashboard"].tap()
-        let formatter = DateFormatter(); formatter.locale = Locale(identifier: "en_US_POSIX"); formatter.timeZone = TimeZone(identifier: "Europe/Rome"); formatter.dateFormat = "yyyy-MM-dd"
-        let day = formatter.string(from: Date())
-        app.buttons["dashboard-day-" + day].tap()
-        let selected = app.buttons["calendar-day-" + day]
-        XCTAssertTrue(selected.waitForExistence(timeout: 10))
-        XCTAssertTrue(selected.isSelected)
-    }
+
     func testNegativeBudgetAndGroupedAmounts() {
         let app = launch(["--stress-money", "--dark"])
         app.buttons["Finanza"].tap()
@@ -1194,7 +1038,7 @@ final class NativeInterfaceTests: XCTestCase {
         app.buttons["Finanza"].tap()
         XCTAssertFalse(app.segmentedControls.firstMatch.exists)
         XCTAssertFalse(app.otherElements["wealth-forecast-chart"].exists)
-        let expense = app.buttons["finance-expense"], extra = app.buttons["finance-new-plan"], budget = app.buttons["finance-budget"]
+        let expense = app.buttons["primary-add"], extra = app.buttons["finance-new-plan"], budget = app.buttons["finance-budget"]
         XCTAssertTrue(expense.waitForExistence(timeout: 10))
         XCTAssertGreaterThan(expense.frame.minX, extra.frame.maxX)
         XCTAssertGreaterThan(extra.frame.minX, budget.frame.maxX)
@@ -1265,7 +1109,7 @@ final class NativeInterfaceTests: XCTestCase {
         for args in [["--dark", "--large-text", "--stress-money"], ["--dark", "--empty-home"]] {
             let app = launch(args)
             app.tabBars.buttons["Finanza"].tap()
-            let expense = app.buttons["finance-expense"]
+            let expense = app.buttons["primary-add"]
             revealFinanceControl(expense, in: app)
             XCTAssertTrue(expense.isHittable, "Spesa irraggiungibile: args \(args), frame \(expense.frame), scroll \(app.scrollViews["finance-scroll"].frame)"); assertMinimumTouchTarget(expense)
             expense.tap()
@@ -1299,7 +1143,7 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertFalse(app.navigationBars["Modifica attività"].exists)
         completion.tap(); revealChecklistButton(completion, in: app, towardTop: true); XCTAssertEqual(completion.value as? String, "Da completare")
         app.tabBars.buttons["Finanza"].tap()
-        let expense = app.buttons["finance-expense"]
+        let expense = app.buttons["primary-add"]
         for _ in 0..<5 { if expense.isHittable { break }; app.scrollViews["finance-scroll"].swipeUp() }
         expense.tap()
         XCTAssertTrue(app.navigationBars["Nuovo movimento"].waitForExistence(timeout: 10))

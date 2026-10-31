@@ -78,7 +78,7 @@ struct FinanceScreen: View {
                 Button("Nuova spesa", systemImage: "minus.circle") { router.sheet = .movement([:]) }
             } label: {
                 Image(systemName: "ellipsis").frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget).modifier(NativeGlass())
-            }.accessibilityLabel("Altre azioni finanziarie")
+            }.accessibilityLabel("Altre azioni finanziarie").accessibilityIdentifier("finance-more")
         }.buttonStyle(.plain).foregroundStyle(Color.primary)
     }
     private func financePill(_ title: String, symbol: String) -> some View {

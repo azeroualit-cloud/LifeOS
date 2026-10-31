@@ -16,7 +16,7 @@ struct NativeHealthCard: View {
                 NavigationLink { NativeHealthDetail(health: health, demo: demo) } label: {
                     HStack(spacing: NativeDesign.Space.small) {
                         Label("Peso e calorie", systemImage: "figure.arms.open")
-                            .font(NativeDesign.heading).foregroundStyle(NativeDesign.secondary)
+                            .font(NativeDesign.heading).foregroundStyle(NativeDesign.healthAccent)
                         Spacer(minLength: NativeDesign.Space.small)
                         if health.loading { ProgressView().controlSize(.small) }
                         NativeDisclosureIndicator()
