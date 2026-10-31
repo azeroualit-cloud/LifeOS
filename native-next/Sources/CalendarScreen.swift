@@ -14,6 +14,9 @@ struct CalendarScreen: View {
     @State private var months: [String] = []
     @State private var visibleMonth: String?
     @State private var jumpMonth: String?
+    @State private var windowAnchor: String?
+    @State private var restoringWindow = false
+    @State private var monthPositionReady = false
     @State private var monthDays: [String: [CalendarDayPresentation]] = [:]
     @State private var monthData: [String: Record] = [:]
     @State private var eventsByDay: [String: [Record]] = [:]
@@ -47,8 +50,9 @@ struct CalendarScreen: View {
             jumpMonth = String(selected.prefix(7))
         }
         .onChange(of: router.calendarDay) { _, day in
-            if showingDay { let month = String(day.prefix(7)); ensureWindow(around: month); visibleMonth = month }
+            if showingDay { let month = String(day.prefix(7)); ensureWindow(around: month, preservePosition: false); visibleMonth = month }
         }
+        .onChange(of: showingDay) { _, value in if value { monthPositionReady = false } }
         .onChange(of: visibleMonth) { _, month in if let month { ensureWindow(around: month) } }
         .onChange(of: NativeCalendarSource(life: store.life, demo: store.isDemo, origin: store.server?.absoluteString)) { old, new in
             if let changes = new.shiftChanges(from: old) { patchShifts(changes) }
@@ -67,7 +71,7 @@ struct CalendarScreen: View {
         VStack(spacing: NativeDesign.Space.none) {
             brushPanel.padding(.horizontal, NativeDesign.Layout.screenInset)
             if let loadError { HStack { NativeInlineMessage(text: loadError); Button("Riprova") { reload += 1 } }.padding(.horizontal) }
-            Text(CivilDate.monthTitle(focusMonth)).font(.largeTitle.bold())
+            Text(CivilDate.monthTitle(focusMonth)).font(.largeTitle.bold()).lineLimit(1).minimumScaleFactor(0.7)
                 .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, NativeDesign.Layout.screenInset)
                 .accessibilityAddTraits(.isHeader).accessibilityIdentifier("calendar-month-heading-" + focusMonth)
             weekdayLabels.padding(.horizontal, NativeDesign.Layout.screenInset)
@@ -77,18 +81,40 @@ struct CalendarScreen: View {
                     LazyVStack(alignment: .leading, spacing: NativeDesign.Space.none) {
                         ForEach(months, id: \.self) { month in
                             monthGrid(month).id(month)
+                                .background {
+                                    GeometryReader { geometry in
+                                        Color.clear.preference(key: NativeCalendarMonthFrames.self, value: [month: geometry.frame(in: .named("calendar-viewport"))])
+                                    }
+                                }
                         }
                     }.scrollTargetLayout().padding(.horizontal, NativeDesign.Layout.screenInset)
                         .padding(.vertical, NativeDesign.Space.large).padding(.bottom, NativeDesign.Layout.scrollClearance)
                 }.accessibilityIdentifier("calendar-scroll")
-                .scrollPosition(id: $visibleMonth, anchor: .top)
+                .coordinateSpace(name: "calendar-viewport")
+                .onPreferenceChange(NativeCalendarMonthFrames.self) { frames in
+                    guard monthPositionReady, !restoringWindow, !showingDay else { return }
+                    // Observe scrolling without feeding an offset back into ScrollView.
+                    // A bidirectional scrollPosition binding can fight layout changes
+                    // when the paint palette changes the viewport's height.
+                    let first = frames.filter { $0.value.maxY > 0 }.min { $0.value.minY < $1.value.minY }?.key
+                    if let first, months.contains(first), first != visibleMonth { visibleMonth = first }
+                }
                 .task {
+                    monthPositionReady = false
                     await Task.yield()
                     proxy.scrollTo(selected, anchor: .center)
+                    await Task.yield()
+                    monthPositionReady = true
+                }
+                .onChange(of: windowAnchor) { _, month in
+                    guard let month else { return }
+                    proxy.scrollTo(month, anchor: .top)
+                    windowAnchor = nil
+                    Task { @MainActor in await Task.yield(); restoringWindow = false }
                 }
                 .onChange(of: jumpMonth) { _, month in
                     guard let month else { return }
-                    ensureWindow(around: month)
+                    ensureWindow(around: month, preservePosition: false)
                     proxy.scrollTo(selected.hasPrefix(month) ? selected : month, anchor: selected.hasPrefix(month) ? .center : .top); visibleMonth = month; jumpMonth = nil
                 }
             }
@@ -237,11 +263,12 @@ struct CalendarScreen: View {
         if router.calendarDay.hasPrefix(month) { return router.calendarDay }
         return CivilDate.day().hasPrefix(month) ? CivilDate.day() : month + "-01"
     }
-    private func ensureWindow(around month: String) {
+    private func ensureWindow(around month: String, preservePosition: Bool = true) {
         if let index = months.firstIndex(of: month), index >= 2 && index < months.count - 2 { return }
         let next = NativeCalendarWindow.extended(months, around: month)
         guard next != months else { return }
         let added = Set(next).subtracting(months)
+        if preservePosition && !showingDay { restoringWindow = true; windowAnchor = month }
         months = next
         let retained = Set(next)
         monthData = monthData.filter { retained.contains($0.key) }
@@ -461,4 +488,13 @@ extension ShiftKind {
 struct EventEditor: View {
     let record: Record
     var body: some View { NativeActivityEditor(record: record, source: "event") }
+}
+
+/// Read-only geometry is kept outside the calendar's data projection. It never
+/// writes a native scroll offset during a user gesture.
+private struct NativeCalendarMonthFrames: PreferenceKey {
+    static var defaultValue: [String: CGRect] = [:]
+    static func reduce(value: inout [String: CGRect], nextValue: () -> [String: CGRect]) {
+        value.merge(nextValue(), uniquingKeysWith: { _, new in new })
+    }
 }

@@ -143,7 +143,9 @@ final class NativeRevision71UITests: XCTestCase {
             XCTAssertGreaterThanOrEqual(brush.frame.height.rounded(), 44)
         }
         let today = app.buttons["calendar-day-" + day()]
-        reveal(today, in: app.scrollViews["calendar-scroll"], app: app)
+        let surface = app.scrollViews["calendar-scroll"]
+        surface.swipeUp(velocity: .slow); surface.swipeDown(velocity: .slow)
+        reveal(today, in: surface, app: app)
         for (kind, label) in [("morning", "Mattina"), ("afternoon", "Pomeriggio"), ("rest", "Riposo")] {
             app.buttons["shift-brush-" + kind].tap(); today.tap()
             expectation(for: NSPredicate(format: "label CONTAINS %@", label), evaluatedWith: today); waitForExpectations(timeout: 5)

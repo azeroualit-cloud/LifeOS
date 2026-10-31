@@ -168,7 +168,7 @@ jobs:
           set -euo pipefail
           xcrun simctl boot "$MAIN_DEVICE" || true
           xcrun simctl bootstatus "$MAIN_DEVICE" -b
-          xcodebuild test-without-building -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeRevision71UITests -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testInformativeWidgetFitsBothSmallWidths -resultBundlePath build/Focused.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/focused-tests.log
+          xcodebuild test-without-building -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 300 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeRevision71UITests -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testInformativeWidgetFitsBothSmallWidths -resultBundlePath build/Focused.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/focused-tests.log
       - name: Verifica logica e flussi agenda su iPhone principale
         timeout-minutes: 35
         working-directory: app
