@@ -46,7 +46,7 @@ struct NativeActivityEditor: View {
                     VStack(alignment: .leading) {
                         dateField("Scadenza", enabled: $hasDue, date: $due, presented: $choosingDue)
                         if hasDue || (hasDate && hasEnd) {
-                            if hasDate { timeField("Ora finale", enabled: $hasEnd, value: $end) }
+                            if hasDate { timeField("Ora finale", enabled: endEnabled, value: $end) }
                             else { timeField("Promemoria", enabled: $hasTime, value: $start) }
                         }
                     }
@@ -113,7 +113,8 @@ struct NativeActivityEditor: View {
                 ToolbarItem(placement: .confirmationAction) { Button("Salva") { Task { await save() } }.disabled(saving || title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) }
             }
             .onAppear(perform: load)
-            .onChange(of: fromHere) { _, value in date = CivilDate.date(value ? record.text("day") : record.text("series_day", fallback: record.text("day"))) }
+            .onChange(of: hasTime) { _, enabled in if !enabled { hasEnd = false } }
+        .onChange(of: fromHere) { _, value in date = CivilDate.date(value ? record.text("day") : record.text("series_day", fallback: record.text("day"))) }
             .presentationDetents([.large])
             .presentationDragIndicator(.visible)
             .confirmationDialog("Eliminare questa attività?", isPresented: $deleteTask, titleVisibility: .visible) {
@@ -122,6 +123,12 @@ struct NativeActivityEditor: View {
             .confirmationDialog("Eliminare la serie e tutti gli stati delle occorrenze?", isPresented: $deleteSeries, titleVisibility: .visible) {
                 Button("Elimina serie", role: .destructive) { Task { await store.run("deleteEvent", args: [.int(record.integer("id"))]); if store.error == nil { cancelAlarmAndDismiss() } } }
             }
+    }
+    private var endEnabled: Binding<Bool> {
+        Binding(get: { hasEnd }, set: { enabled in
+            hasEnd = enabled
+            if enabled { hasTime = true }
+        })
     }
     private var alarmEligible: Bool {
         hasDate && hasTime && frequency == "none" && (NativeUrgentAlarm.date(day: CivilDate.day(date), time: clock(start)) ?? .distantPast) > Date()
