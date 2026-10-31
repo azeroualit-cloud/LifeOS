@@ -1,0 +1,130 @@
+name: Life OS - Pacchetto 71 con verifiche riutilizzate
+on:
+  push:
+    paths: ['.github/workflows/lifeos-package71.yml', 'native-next/project.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: lifeos-package71-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  package:
+    if: github.event.repository.private == false && (github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[package-only-71]'))
+    runs-on: macos-15
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Verifica prove Apple e modifica limitata ai metadati
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, re, subprocess, urllib.request
+          reference='1512469de2f9e440ad25775f0371eea689c756d2'
+          changed=set(subprocess.check_output(['git','diff','--name-only',reference,'HEAD'],text=True).splitlines())
+          allowed={'.github/workflows/lifeos-build.yml','.github/workflows/lifeos-package71.yml','native-next/project.yml'}
+          assert changed <= allowed, 'La distribuzione rapida ammette soltanto metadati e workflow.'
+          before=subprocess.check_output(['git','show',reference+':native-next/project.yml'],text=True)
+          pairs=re.findall(r'^        INFOPLIST_KEY_(NS(?:AlarmKit|HealthUpdate|HealthShare)UsageDescription): (.+)$',before,re.M)
+          assert len(pairs)==3
+          expected=before
+          for key,value in pairs: expected=expected.replace('        INFOPLIST_KEY_'+key+': '+value+'\n','')
+          expected=expected.replace('      properties:\n','      properties:\n'+''.join('        '+key+': '+value+'\n' for key,value in pairs),1)
+          assert pathlib.Path('native-next/project.yml').read_text()==expected, 'Modifica al progetto diversa dalle tre descrizioni.'
+          def api(suffix):
+              request=urllib.request.Request('https://api.github.com/repos/azeroualit-cloud/LifeOS/'+suffix,headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})
+              with urllib.request.urlopen(request,timeout=30) as response:return json.load(response)
+          run=api('actions/runs/41196021079')
+          assert run['head_sha']==reference and run['status']=='completed'
+          jobs=api('actions/runs/41196021079/jobs')['jobs']
+          steps={step['name']:step['conclusion'] for job in jobs for step in job['steps']}
+          for name in ['Compila app e test Apple','Verifica design system','Verifica mese/giorno, editor, Finanza e widget','Verifica logica e flussi agenda su iPhone principale','Verifica agenda e archivio su iPhone compatto']:
+              assert steps.get(name)=='success', name
+          assert steps.get('Crea una sola IPA per iPhone')=='failure'
+          print('VERIFIED_UNCHANGED_RUNTIME_AND_TEST_SOURCES: 207 unitari e 36 prove UI dal run 41196021079. Differenza: descrizioni Info.plist.')
+          PY
+      - name: Seleziona SDK Apple recente
+        run: |
+          python3 - <<'PY'
+          import os,pathlib,re
+          found=[]
+          for path in pathlib.Path('/Applications').glob('Xcode_*.app'):
+              match=re.fullmatch(r'Xcode_([0-9.]+)\.app',path.name)
+              if match:
+                  version=tuple(map(int,match[1].split('.')))
+                  if version[0]>=26:found.append((version,path))
+          assert found
+          path=max(found,key=lambda item:item[0])[1]
+          with open(os.environ['GITHUB_ENV'],'a') as output:output.write('DEVELOPER_DIR='+str(path/'Contents/Developer')+'\n')
+          print('Xcode:',path.name)
+          PY
+      - name: Assembla gli stessi sorgenti verificati
+        run: |
+          curl --fail --location --silent --show-error https://raw.githubusercontent.com/azeroualit-cloud/LifeOS/02c2c089841833a67fc9a223b367710edf7e37b9/lifeos-native.zip -o /tmp/lifeos-build60.zip
+          python3 - <<'PY'
+          import hashlib,pathlib,shutil,zipfile
+          source=pathlib.Path('/tmp/lifeos-build60.zip')
+          assert hashlib.sha256(source.read_bytes()).hexdigest()=='b09762b88e4dc017d2c89fa7582ac38daf1fddf5aa0dd12fed94d73f6099ef03'
+          with zipfile.ZipFile(source) as archive:
+              for name in archive.namelist():
+                  path=pathlib.PurePosixPath(name)
+                  assert not path.is_absolute() and '..' not in path.parts
+              archive.extractall('app')
+          overlay=pathlib.Path('native-next')
+          for path in overlay.rglob('*'):
+              if path.is_file() and path.parts[1] in ['Sources','Tests','UITests','Widget','Shared','project.yml','LifeOS.entitlements','Widget.entitlements']:
+                  target=pathlib.Path('app')/path.relative_to(overlay)
+                  target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(path,target)
+          PY
+      - name: Genera e archivia per iPhone
+        working-directory: app
+        run: |
+          set -euo pipefail
+          brew install xcodegen
+          xcodegen generate
+          mkdir -p build download
+          xcodebuild archive -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -configuration Release -destination 'generic/platform=iOS' -archivePath build/LifeOS.xcarchive CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/archive.log
+      - name: Verifica pacchetto e finalizza IPA
+        working-directory: app
+        run: |
+          set -euo pipefail
+          mkdir -p build/Payload
+          cp -R build/LifeOS.xcarchive/Products/Applications/LifeOSProbe.app build/Payload/
+          cd build
+          zip -qr ../download/LifeOS-71.ipa Payload
+          cd ../download
+          python3 ../../scripts/verify-native-package.py LifeOS-71.ipa --version 0.10.10 --build 71
+          python3 - <<'PY'
+          import plistlib,zipfile
+          with zipfile.ZipFile('LifeOS-71.ipa') as archive:
+              info=plistlib.loads(archive.read('Payload/LifeOSProbe.app/Info.plist'))
+              for key in ['NSAlarmKitUsageDescription','NSHealthShareUsageDescription','NSHealthUpdateUsageDescription']:assert info.get(key),key
+          print('ALL_REQUIRED_AUTHORIZATION_PURPOSES_PRESENT')
+          PY
+          shasum -a 256 LifeOS-71.ipa > SHA256.txt
+      - uses: actions/upload-artifact@v5
+        with:
+          name: LifeOS-IPA71-verificata
+          path: app/download/
+          if-no-files-found: error
+      - name: Pubblica IPA diretta
+        env:
+          GH_TOKEN: ${{ github.token }}
+        working-directory: app/download
+        run: |
+          shasum -a 256 -c SHA256.txt
+          gh release create ios-0.10.10-build71 LifeOS-71.ipa SHA256.txt --repo azeroualit-cloud/LifeOS --target "$GITHUB_SHA" --title "Life OS 0.10.10 build 71" --notes "Calendario mese/giorno, editor dal basso, Finanza, Salute, palette Liquid Glass e widget Life OS Oggi. IPA non firmata per Signulous. Codice e test invariati rispetto al run 41196021079: 207 unitari e 36 esecuzioni UI riuscite. Descrizioni di autorizzazione rese esplicite nel plist; archivio iPhone verificato."
+      - name: Log archivio
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: LifeOS-package71-diagnostica
+          path: app/build/archive.log
+          if-no-files-found: ignore
