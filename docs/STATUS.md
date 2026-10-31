@@ -1,3 +1,15 @@
+## Consegna verificata — 31 ottobre 2026, 0.10.10 build 71
+
+[IPA diretta per Signulous](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.10-build71/LifeOS-71.ipa) · [test Apple](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41196021079) · [pacchetto finale](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41198865956) · [struttura, modifiche e verifiche](native/REVISIONE-71.md).
+
+Calendario continuo mese/giorno, editor attività dal basso con date affiancate e orari subito sotto, Dipingi ispirato a Supershift con palette Liquid Glass e aggiornamenti locali, Finanza secondo il riferimento, accento Salute arancione, intestazione Dashboard con sola data. Sveglie urgenti AlarmKit per eventi singoli su iOS 26+. Icona originale conservata.
+
+**207 test unitari e 36 esecuzioni UI superati**, zero fallimenti. Il primo archivio ha superato compilazione e test; il verificatore ha rilevato una descrizione di autorizzazione mancante. Corretto soltanto il plist e ricostruito il pacchetto, verificando automaticamente identità di sorgenti/test rispetto al commit testato. Download pubblico verificato per checksum, integrità, versione, piattaforma iPhoneOS arm64, estensione widget e autorizzazioni.
+
+Sorgente testato: `1512469de2f9e440ad25775f0371eea689c756d2`; pacchetto: `d1b97d1cd7848ae9fa522195ae4a4a9f85192d8c`. SHA-256 IPA: `1fbd6df65664dc0ff1825eafbeb9b26c1cf54a95b6ae38c9b95916dccfb24849`.
+
+Aggiornare senza disinstallare. Rimuovere il vecchio widget e aggiungere **Life OS · Oggi**. IPA da rifirmare preservando estensione e App Group `group.com.nas.lifeos`; provisioning Signulous e suono AlarmKit su dispositivo fisico non verificati. Nessun aggiornamento Cloudflare necessario per questo incremento.
+
 ## Consegna verificata — 30 ottobre 2026, 0.10.9 build 70
 
 [IPA diretta per Signulous](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.9-build70/LifeOS-70.ipa) · [build e test Apple](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41134083093) · [distribuzione Cloudflare](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41138923274) · [modifiche, schema e verifiche](native/REVISIONE-70.md).

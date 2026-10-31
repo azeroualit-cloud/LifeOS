@@ -1,4 +1,4 @@
-# Revisione 71 — in verifica
+# Revisione 71 — consegna verificata
 
 Base: build 70, sorgente `native-next`, Swift e SwiftUI; Charts per Salute, WidgetKit per il widget, AlarmKit per le sveglie urgenti. Nessun nuovo framework esterno. Icona attuale conservata su scelta dell’utente.
 
@@ -41,4 +41,8 @@ La vecchia identità `LifeOSQuickActions` viene sostituita da `LifeOSOverview`, 
 
 ## Verifiche
 
-Stato provvisorio: sintassi Swift e design system controllati localmente; compilazione Apple, test e QA visivo da completare prima di pubblicare l’IPA 71. Nessuna modifica backend necessaria per questo incremento; i Worker della build 70 restano la base attuale.
+Superati **207 test unitari e 36 esecuzioni UI**, zero fallimenti, su iPhone 15 Pro e iPhone SE 3. Sintassi, design system, regressioni backend e integrità del pacchetto verificati. [Test Apple](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41196021079): tutti i test e l’archivio riusciti; il controllo finale ha rilevato una descrizione di autorizzazione assente dal plist. La correzione riguarda solo i metadati: le tre descrizioni AlarmKit/HealthKit sono ora proprietà esplicite del plist. [Confezionamento finale riuscito](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41198865956), con controllo automatico che sorgenti e test siano identici alla revisione testata.
+
+[Scarica direttamente LifeOS-71.ipa](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.10-build71/LifeOS-71.ipa), versione **0.10.10 (71)**. Download pubblico verificato: checksum, CRC, bundle/versioni di app ed estensione, binari arm64 per iPhoneOS, schema URL e tre descrizioni di autorizzazione. Dimensione: 1.496.519 byte. SHA-256: `1fbd6df65664dc0ff1825eafbeb9b26c1cf54a95b6ae38c9b95916dccfb24849`.
+
+Sorgente e test: `1512469de2f9e440ad25775f0371eea689c756d2`. Pacchetto finale: `d1b97d1cd7848ae9fa522195ae4a4a9f85192d8c`. IPA non firmata, da rifirmare con Signulous aggiornando senza disinstallare. Provisioning App Group e suono AlarmKit su iPhone fisico restano da verificare. Nessuna modifica backend necessaria per questo incremento; i Worker aggiornati e verificati della build 70 restano la base attuale.
