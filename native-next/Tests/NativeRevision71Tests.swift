@@ -67,6 +67,14 @@ import UIKit
         XCTAssertTrue(days.contains("2027-01-01"))
         for (a, b) in zip(days, days.dropFirst()) { XCTAssertEqual(CivilDate.adding(1, to: a), b) }
     }
+    func testDemoCannotCancelARealUrgentAlarmWithTheSameLegacyIdentity() throws {
+        let previous = NativeUrgentAlarm.entries
+        defer { NativeUrgentAlarm.entries = previous }
+        let entry = NativeUrgentAlarm.Entry(id: UUID(), identity: "event:1", day: "2099-01-01", title: "Real event fixture", date: .distantFuture)
+        NativeUrgentAlarm.entries = [entry]
+        try NativeUrgentAlarm.cancel(identity: "event:1", demo: true)
+        XCTAssertEqual(NativeUrgentAlarm.entries, [entry])
+    }
     func testHealthAccentIsChromaticInBothThemes() {
         for style in [UIUserInterfaceStyle.light, .dark] {
             let color = UIColor(NativeDesign.healthAccent).resolvedColor(with: UITraitCollection(userInterfaceStyle: style))

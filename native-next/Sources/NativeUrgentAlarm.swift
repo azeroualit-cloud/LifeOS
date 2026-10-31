@@ -45,7 +45,8 @@ import AlarmKit
         _ = try await AlarmManager.shared.schedule(id: id, configuration: configuration)
         entries = entries.filter { $0.identity != identity } + [Entry(id: id, identity: identity, day: day, title: title, date: date)]
     }
-    static func cancel(identity: String) throws {
+    static func cancel(identity: String, demo: Bool = false) throws {
+        guard !demo else { return }
         guard #available(iOS 26.0, *) else { return }
         let matches = entries.filter { $0.identity == identity }
         guard !matches.isEmpty else { return }

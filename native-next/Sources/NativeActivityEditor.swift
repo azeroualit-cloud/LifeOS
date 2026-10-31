@@ -127,7 +127,7 @@ struct NativeActivityEditor: View {
         hasDate && hasTime && frequency == "none" && (NativeUrgentAlarm.date(day: CivilDate.day(date), time: clock(start)) ?? .distantPast) > Date()
     }
     private func cancelAlarmAndDismiss() {
-        do { try NativeUrgentAlarm.cancel(identity: identity); dismiss() }
+        do { try NativeUrgentAlarm.cancel(identity: identity, demo: store.isDemo); dismiss() }
         catch { failure = "Attività aggiornata, ma la sveglia non è stata rimossa: " + error.localizedDescription }
     }
     private func dateField(_ title: String, enabled: Binding<Bool>, date: Binding<Date>, presented: Binding<Bool>) -> some View {
@@ -181,7 +181,7 @@ struct NativeActivityEditor: View {
         frequency = record.text("frequency", fallback: "none")
         hasUntil = !record.text("until_day").isEmpty; until = CivilDate.date(record.text("until_day", fallback: CivilDate.adding(365, to: CivilDate.day())))
         if record.integer("id") != 0 { identity = record.text("activity_uid", fallback: source + ":" + String(record.integer("id"))) }
-        urgent = NativeUrgentAlarm.enabled(identity: identity)
+        urgent = !store.isDemo && NativeUrgentAlarm.enabled(identity: identity)
     }
     private func clockDate(_ value: String) -> Date {
         let parts = value.split(separator: ":").compactMap { Int($0) }
