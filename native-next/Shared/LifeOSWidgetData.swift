@@ -51,7 +51,7 @@ enum LifeOSWidgetCalendar {
 }
 enum LifeOSWidgetStorage {
     static let group = "group.com.nas.lifeos"
-    static let kind = "LifeOSQuickActions"
+    static let kind = "LifeOSOverview"
     static let filename = "lifeos-widget-v1.json"
     static func container() -> URL? {
         FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: group)

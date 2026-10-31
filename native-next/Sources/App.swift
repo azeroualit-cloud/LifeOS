@@ -69,6 +69,7 @@ enum NativeSheet: Identifiable {
     @Published var financeSection = "Panoramica"
     @Published var calendarDay = CivilDate.day()
     @Published var activationDate = Date()
+    @Published var calendarOpensDay = false
     @Published var calendarFocusRequest = UUID()
     var requestedCalendarDay: String?
     init() {
@@ -78,10 +79,12 @@ enum NativeSheet: Identifiable {
     }
     func enterCalendar(today: String = CivilDate.day()) -> String {
         let day = requestedCalendarDay ?? today
+        calendarOpensDay = requestedCalendarDay != nil
         requestedCalendarDay = nil; calendarDay = day; calendarFocusRequest = UUID()
         return day
     }
     func showCalendar(day: String = CivilDate.day()) {
+        calendarOpensDay = true
         let alreadyOpen = tab == .calendar
         requestedCalendarDay = alreadyOpen ? nil : day; calendarDay = day; tab = .calendar
         if alreadyOpen { calendarFocusRequest = UUID() }
@@ -135,6 +138,11 @@ struct NativeRoot: View {
             if let url = note.object as? URL { route(url) }
         }
         .onChange(of: store.life, initial: true) { _, _ in updateReminders() }
+        .task(id: store.life) {
+            guard !store.isDemo else { return }
+            do { try await NativeUrgentAlarm.reconcile(life: store.life) }
+            catch { if !Task.isCancelled { store.error = "Controlla le sveglie urgenti: " + error.localizedDescription } }
+        }
         .onChange(of: remindersEnabled) { _, _ in updateReminders() }
         .onChange(of: store.isDemo) { _, _ in updateReminders() }
         .onChange(of: router.tab) { _, tab in
@@ -148,7 +156,7 @@ struct NativeRoot: View {
             if phase == .active {
                 if returnedFromBackground {
                     returnedFromBackground = false; router.activationDate = Date()
-                    if router.tab == .calendar { router.calendarDay = CivilDate.day(); router.calendarFocusRequest = UUID(); store.calendarMonth = CivilDate.month() }
+                    if router.tab == .calendar { router.calendarOpensDay = false; router.calendarDay = CivilDate.day(); router.calendarFocusRequest = UUID(); store.calendarMonth = CivilDate.month() }
                 }
                 currentDay = CivilDate.day(); store.rollover(); Task { await store.sync(automatic: true); await store.loadWeather() } }
         }
@@ -211,7 +219,10 @@ struct NativeRoot: View {
     private var dashboard: some View { NavigationStack { DashboardScreen().toolbar { tools }.navigationTitle("Dashboard").navigationBarTitleDisplayMode(.inline) } }
     private var tasks: some View { NavigationStack { TasksScreen().toolbar { tools }.navigationTitle("Attività").navigationBarTitleDisplayMode(.inline) } }
     private var calendar: some View { NavigationStack { CalendarScreen().toolbar { tools }.navigationTitle("Calendario").navigationBarTitleDisplayMode(.inline) } }
-    private var finance: some View { NavigationStack { FinanceScreen().toolbar { tools }.navigationTitle("Finanza").navigationBarTitleDisplayMode(.inline) } }
+    private var finance: some View { NavigationStack { FinanceScreen().toolbar { financeTools }.navigationTitle("Finanza").navigationBarTitleDisplayMode(.large) } }
+    @ToolbarContentBuilder private var financeTools: some ToolbarContent {
+        ToolbarItemGroup(placement: .topBarTrailing) { settingsControl; addControl }
+    }
     @ToolbarContentBuilder private var tools: some ToolbarContent {
         if #available(iOS 26.0, *) {
             ToolbarItem(placement: .topBarTrailing) { addControl }

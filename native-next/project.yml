@@ -32,10 +32,11 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.nas.lifeos.probe
         GENERATE_INFOPLIST_FILE: YES
         CODE_SIGN_ENTITLEMENTS: LifeOS.entitlements
+        INFOPLIST_KEY_NSAlarmKitUsageDescription: Life OS programma le sveglie urgenti degli eventi che scegli, anche in silenzioso e Full immersion.
         INFOPLIST_KEY_NSHealthUpdateUsageDescription: Life OS salva in Apple Health le pesate che inserisci, solo su tua richiesta.
         INFOPLIST_KEY_NSHealthShareUsageDescription: Life OS legge peso e calorie alimentari per mostrare andamento e scenari di peso, solo sul dispositivo.
-        MARKETING_VERSION: '0.10.9'
-        CURRENT_PROJECT_VERSION: '70'
+        MARKETING_VERSION: '0.10.10'
+        CURRENT_PROJECT_VERSION: '71'
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         INFOPLIST_KEY_CFBundleDisplayName: Life OS
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
@@ -61,8 +62,8 @@ targets:
       base:
         CODE_SIGN_ENTITLEMENTS: Widget.entitlements
         PRODUCT_BUNDLE_IDENTIFIER: com.nas.lifeos.probe.quickactions
-        MARKETING_VERSION: '0.10.9'
-        CURRENT_PROJECT_VERSION: '70'
+        MARKETING_VERSION: '0.10.10'
+        CURRENT_PROJECT_VERSION: '71'
         SKIP_INSTALL: YES
         APPLICATION_EXTENSION_API_ONLY: YES
   LifeOSProbeTests:

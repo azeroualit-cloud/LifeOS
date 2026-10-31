@@ -11,7 +11,7 @@ struct FinanceScreen: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: NativeDesign.Space.bottom) {
-                MonthControl(finance: true)
+                VStack(spacing: NativeDesign.Space.none) { Divider(); MonthControl(finance: true).padding(.vertical, NativeDesign.Space.small); Divider() }
                 balance
                 actions
                 recentMovements
@@ -28,10 +28,11 @@ struct FinanceScreen: View {
         .onAppear { router.financeSection = "Panoramica" }
     }
     private var balance: some View {
-        VStack(spacing: NativeDesign.Space.section) {
-            VStack(spacing: NativeDesign.Space.small) {
-                HStack(spacing: NativeDesign.Space.xs) {
-                    Text("Budget rimanente").font(.subheadline).foregroundStyle(NativeDesign.secondary)
+        VStack(alignment: .leading, spacing: NativeDesign.Space.section) {
+            VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+                HStack {
+                    Text("Budget rimanente").font(.title3).foregroundStyle(NativeDesign.secondary)
+                    Spacer()
                     NativeIconButton(symbol: hidden ? "eye.slash" : "eye", label: hidden ? "Mostra importi" : "Nascondi importi") { hidden.toggle() }
                 }
                 Group {
@@ -42,50 +43,61 @@ struct FinanceScreen: View {
                     .minimumScaleFactor(0.7).lineLimit(1).accessibilityIdentifier("finance-budget-value")
                 if !hidden, presentation.remaining != nil {
                     if presentation.days > 0 {
-                        Text(presentation.daily.euro + " al giorno").font(.subheadline.weight(.medium)).monospacedDigit()
-                        Text(presentation.periodLabel).font(.caption).foregroundStyle(NativeDesign.secondary)
-                    } else {
-                        Text(presentation.periodLabel).font(.caption).foregroundStyle(NativeDesign.secondary)
+                        Text(presentation.daily.euro + " al giorno").font(.title3.weight(.semibold)).monospacedDigit()
                     }
+                    Text(presentation.periodLabel).font(.subheadline).foregroundStyle(NativeDesign.secondary)
                 }
             }.accessibilityElement(children: .contain).accessibilityIdentifier("budget-hero")
-            VStack(spacing: NativeDesign.Space.xs) {
-                Text("Conto principale · " + store.summary.text("account", fallback: "Trade Republic")).font(.subheadline).foregroundStyle(NativeDesign.secondary)
-                Text("Saldo attuale · " + (hidden ? "•••• €" : presentation.balance.map(\.euro) ?? "Da aggiornare"))
-                    .font(.subheadline.weight(.medium)).monospacedDigit().fixedSize(horizontal: false, vertical: true)
-                    .accessibilityIdentifier("finance-current-balance")
+            Divider()
+            VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+                Text("CONTO PRINCIPALE").font(.caption.weight(.medium)).foregroundStyle(NativeDesign.secondary)
+                ViewThatFits(in: .horizontal) {
+                    HStack(alignment: .firstTextBaseline) { accountName; Spacer(minLength: NativeDesign.Space.small); accountBalance }
+                    VStack(alignment: .leading, spacing: NativeDesign.Space.small) { accountName; accountBalance }
+                }
                 if store.financeMonth != CivilDate.month() {
                     Text("Saldo dell’ultima sincronizzazione, distinto dal mese selezionato.").font(.caption).foregroundStyle(NativeDesign.secondary)
                 }
             }
-        }.frame(maxWidth: .infinity).multilineTextAlignment(.center).padding(.vertical, NativeDesign.Space.large)
+            Divider()
+        }.frame(maxWidth: .infinity, alignment: .leading).padding(.vertical, NativeDesign.Space.large)
+    }
+    private var accountName: some View { Text(store.summary.text("account", fallback: "Trade Republic")).font(.title3.weight(.semibold)) }
+    private var accountBalance: some View {
+        Text(hidden ? "•••• €" : presentation.balance.map(\.euro) ?? "Da aggiornare")
+            .font(.title3.weight(.semibold)).monospacedDigit().accessibilityIdentifier("finance-current-balance")
     }
     private var presentation: NativeFinanceOverview { NativeFinanceOverview(summary: store.summary, month: store.financeMonth) }
     private var actions: some View {
-        HStack(alignment: .top, spacing: NativeDesign.Space.small) {
-            NavigationLink { NativePlansScreen() } label: { actionLabel("Budget", symbol: "slider.horizontal.3") }.accessibilityIdentifier("finance-budget")
-            Button { router.sheet = .financePlan } label: { actionLabel("Nuovo piano", symbol: "folder.badge.plus") }.accessibilityIdentifier("finance-new-plan")
-            Button { router.sheet = .movement([:]) } label: { actionLabel("Nuova spesa", symbol: "minus.circle") }.accessibilityIdentifier("finance-expense")
-            NavigationLink { FinanceAnalysisScreen() } label: { actionLabel("Analisi", symbol: "chart.xyaxis.line") }.accessibilityIdentifier("finance-analysis")
-        }.buttonStyle(NativePressStyle()).foregroundStyle(NativeDesign.accent)
+        HStack(spacing: NativeDesign.Space.medium) {
+            NavigationLink { NativePlansScreen() } label: { financePill("Budget", symbol: "wallet.bifold") }.accessibilityIdentifier("finance-budget")
+            NavigationLink { FinanceAnalysisScreen() } label: { financePill("Analisi", symbol: "chart.xyaxis.line") }.accessibilityIdentifier("finance-analysis")
+            Spacer(minLength: 0)
+            Menu {
+                Button("Nuovo piano", systemImage: "folder.badge.plus") { router.sheet = .financePlan }
+                Button("Nuova spesa", systemImage: "minus.circle") { router.sheet = .movement([:]) }
+            } label: {
+                Image(systemName: "ellipsis").frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget).modifier(NativeGlass())
+            }.accessibilityLabel("Altre azioni finanziarie")
+        }.buttonStyle(.plain).foregroundStyle(Color.primary)
     }
-    private func actionLabel(_ title: String, symbol: String) -> some View {
-        VStack(spacing: NativeDesign.Space.small) {
-            Image(systemName: symbol).font(.title2.weight(.regular))
-                .frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget)
-                .modifier(NativeGlass())
-                .accessibilityHidden(true)
-            Text(title).font(.subheadline).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
-        }.frame(maxWidth: .infinity).contentShape(Rectangle())
+    private func financePill(_ title: String, symbol: String) -> some View {
+        HStack(spacing: NativeDesign.Space.small) {
+            Image(systemName: symbol).font(.subheadline.weight(.regular))
+            Text(title).font(.subheadline.weight(.medium))
+            Image(systemName: "chevron.right").font(.caption.weight(.semibold))
+        }.padding(.horizontal, NativeDesign.Space.large).frame(minHeight: NativeDesign.Layout.touchTarget)
+            .modifier(NativeGlass()).contentShape(Capsule())
     }
     private var recentMovements: some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.large) {
             NativeSectionHeader("Ultimi movimenti") {
                 NavigationLink {
                     List { movements }.modifier(NativeListAppearance()).navigationTitle("Movimenti").navigationBarTitleDisplayMode(.inline)
-                } label: { Text("Vedi tutti").font(.subheadline).frame(minHeight: NativeDesign.Layout.touchTarget) }
+                } label: { Text("Vedi tutti ›").foregroundStyle(Color.blue).font(.subheadline).frame(minHeight: NativeDesign.Layout.touchTarget) }
                     .accessibilityLabel("Mostra tutti i movimenti").accessibilityIdentifier("all-movements")
             }
+            Divider()
             ForEach(store.transactions.prefix(3).map { DisplayRecord($0, key: "row") }) { item in
                 Button { router.sheet = .movement(item.value) } label: {
                     ViewThatFits(in: .horizontal) {
@@ -101,13 +113,17 @@ struct FinanceScreen: View {
                     }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
                         .padding(.vertical, NativeDesign.Space.small).contentShape(Rectangle()).multilineTextAlignment(.leading)
                 }.buttonStyle(NativePressStyle())
+                Divider().padding(.leading, NativeDesign.Layout.touchTarget + NativeDesign.Space.medium)
             }
             if store.transactions.isEmpty { Text("Nessun movimento nel mese").font(.subheadline).foregroundStyle(NativeDesign.secondary) }
         }
     }
     private func movementDescription(_ record: Record) -> some View {
         HStack(spacing: NativeDesign.Space.medium) {
-            NativeIcon(name: NativeCategoryCatalog.symbol(for: record.text("displayCategory", fallback: record.text("category"))))
+            Image(systemName: NativeCategoryCatalog.symbol(for: record.text("displayCategory", fallback: record.text("category"))))
+                .font(.title3.weight(.regular)).foregroundStyle(Color.primary)
+                .frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget)
+                .background(NativeDesign.actionSurface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
             NativeRowText(title: record.text("name"), subtitle: CivilDate.label(record.text("date")), titleLineLimit: 2)
         }
     }

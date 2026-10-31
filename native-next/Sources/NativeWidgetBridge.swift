@@ -39,18 +39,19 @@ import WidgetKit
         return LifeOSWidgetSnapshot(generatedAt: now, demo: demo, days: days, ready: demo || life["upcomingEvents"] != nil, updatedAt: demo ? now : updatedAt)
     }
     static func publish(life: Record, demo: Bool, updatedAt: Date? = nil, now: Date = Date()) {
+        defer { WidgetCenter.shared.reloadTimelines(ofKind: LifeOSWidgetStorage.kind) }
         guard let directory = LifeOSWidgetStorage.container() else {
             lastError = "La firma attuale non consente la condivisione dei dati con il widget. Verifica App Groups nel servizio di firma."
             return
         }
         do {
             try LifeOSWidgetStorage.write(snapshot(life: life, demo: demo, updatedAt: updatedAt, now: now), directory: directory)
-            lastError = nil; WidgetCenter.shared.reloadTimelines(ofKind: LifeOSWidgetStorage.kind)
+            lastError = nil
         } catch { lastError = "Aggiornamento del widget non riuscito. Riapri l’app per riprovare." }
     }
     static var status: String {
         lastError ?? (LifeOSWidgetStorage.container() == nil
             ? "La condivisione del widget richiede App Groups nella firma di app ed estensione."
-            : "Aggiungi Life OS alla Home: un solo widget 2×2 con turni della settimana, abitudini, impegni e aggiunta attività.")
+            : "Nella galleria widget aggiungi “Life OS · Oggi” (2×2). Se vedi i vecchi pulsanti, rimuovi il vecchio widget e aggiungi questo. Mostra turni, abitudini, impegni e +.")
     }
 }

@@ -1,6 +1,7 @@
 import SwiftUI
 import AppIntents
 import UserNotifications
+import WidgetKit
 
 struct NativeIntegrationSettings: View {
     @EnvironmentObject var store: NativeStore
@@ -28,6 +29,11 @@ struct NativeIntegrationSettings: View {
             }.accessibilityIdentifier("shift-export-settings")
             ShortcutsLink()
             Text("Con Siri: “Registra il peso in Life OS” oppure “Prepara un’attività in Life OS”. Il peso viene scritto in Apple Health dopo il consenso. Per le attività conferma il salvataggio nell’app.").font(.caption).foregroundStyle(NativeDesign.secondary)
+            Button("Aggiorna widget 2×2") {
+                NativeWidgetBridge.publish(life: store.life, demo: store.isDemo, updatedAt: store.state.lifeRefreshedAt)
+                Task { await refreshStatus() }
+            }
+            Text("Se nella galleria non compare ‘Life OS · Oggi’, la versione dell’estensione installata è ancora quella precedente: reinstalla l’IPA mantenendo l’estensione widget nel servizio di firma.").font(.caption).foregroundStyle(NativeDesign.secondary)
             Text(widgetStatus).font(.caption).foregroundStyle(NativeDesign.secondary)
         }.task { await refreshStatus() }
         .onChange(of: phase) { _, value in if value == .active { Task { await refreshStatus() } } }

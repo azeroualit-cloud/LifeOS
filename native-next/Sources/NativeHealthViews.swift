@@ -49,7 +49,7 @@ struct NativeHealthCard: View {
     private func metric(_ value: String, unit: String) -> some View {
         let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: NativeDesign.Space.xs)) : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xs))
         return layout {
-            Text(value).font(.title2.weight(.semibold)).monospacedDigit().foregroundStyle(NativeDesign.healthGray)
+            Text(value).font(.title2.weight(.semibold)).monospacedDigit().foregroundStyle(NativeDesign.healthAccent)
             Text(unit).font(.caption).foregroundStyle(NativeDesign.secondary)
         }
     }
@@ -71,7 +71,7 @@ private struct NativeHealthDashboardChart: View {
                 BarMark(x: .value("Data", day.date, unit: .day),
                         yStart: .value("Base", data.weightDomain.lowerBound),
                         yEnd: .value("Calorie", data.plottedCalories(day.calories!)))
-                    .foregroundStyle(CivilDate.day(day.date) == CivilDate.day(data.today) ? NativeDesign.accent : NativeDesign.healthGray)
+                    .foregroundStyle(CivilDate.day(day.date) == CivilDate.day(data.today) ? NativeDesign.healthAccent : NativeDesign.healthGray)
                     .clipShape(UnevenRoundedRectangle(topLeadingRadius: NativeDesign.Layout.healthBarRadius, bottomLeadingRadius: 0, bottomTrailingRadius: 0, topTrailingRadius: NativeDesign.Layout.healthBarRadius))
             }
             ForEach(data.days.filter { ($0.weight ?? 0) > 0 && ($0.weight?.isFinite ?? false) }) { day in

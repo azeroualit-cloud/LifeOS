@@ -84,11 +84,7 @@ struct DashboardScreen: View {
     }
     private func headingText(_ summary: NativeHomeSummary, today: String) -> some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-            Text(summary.greeting).font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary).accessibilityIdentifier("home-greeting")
-            Text(CivilDate.label(today).capitalized).font(NativeDesign.value).accessibilityAddTraits(.isHeader)
-            if let weather = summary.phrases.first(where: { $0.lead == "A Empoli, " }) {
-                Text(weather.detail).font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
-            }
+            Text(CivilDate.label(today).capitalized).accessibilityIdentifier("home-today").font(NativeDesign.value).accessibilityAddTraits(.isHeader)
         }
     }
     private func focusDate(_ now: Date) -> Date {

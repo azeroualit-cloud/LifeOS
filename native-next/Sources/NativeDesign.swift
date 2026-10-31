@@ -15,6 +15,7 @@ enum NativeDesign {
         UIColor(white: traits.userInterfaceStyle == .dark ? 0.72 : 0.27, alpha: 1)
     })
     static let actionSurface = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor(white: 0.17, alpha: 1) : .tertiarySystemFill })
+    static let healthAccent = Color(uiColor: .systemOrange)
     static let healthGray = Color(uiColor: .systemGray)
     static let inset = Color.primary.opacity(0.045)
     // Financial direction only: red = outflow/decline, green = available/inflow/growth.
@@ -62,6 +63,10 @@ enum NativeDesign {
         static let calendarPaneFraction: CGFloat = 0.58
         static let healthBarRadius: CGFloat = 2
         static let calendarDayNumber: CGFloat = 26
+        static let selectionLine: CGFloat = 2
+        static let timelineHour: CGFloat = 76
+        static let timelineLabel: CGFloat = 48
+        static let calendarMonthDayHeight: CGFloat = 88
         static let calendarDayHeight: CGFloat = 54
         static let calendarMarker: CGFloat = 3
         static let statusDot: CGFloat = 6

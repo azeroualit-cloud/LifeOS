@@ -546,7 +546,7 @@ final class NativeInterfaceTests: XCTestCase {
     }
     func testCompactDashboardPriorityAndActivityActionsStayVisible() {
         let app = launch(["--dark", "--inactive-shift"])
-        XCTAssertTrue(app.staticTexts["home-greeting"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["home-today"].waitForExistence(timeout: 10))
         XCTAssertFalse(app.buttons["home-focus"].exists)
         XCTAssertLessThan(app.staticTexts["home-routines-heading"].frame.minY, app.staticTexts["home-agenda-heading"].frame.minY)
         capture("dashboard-compact-priority")
@@ -605,7 +605,7 @@ final class NativeInterfaceTests: XCTestCase {
     func testHomeSummaryAndVerticalRoutinesInBothThemes() {
         for dark in [false, true] {
             let app = launch(dark ? ["--dark"] : [])
-            let summary = app.staticTexts["home-greeting"]
+            let summary = app.staticTexts["home-today"]
             XCTAssertTrue(summary.waitForExistence(timeout: 10))
             XCTAssertTrue(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-agenda-")).firstMatch.exists)
             XCTAssertFalse(summary.label.contains("dalle"))
@@ -647,7 +647,7 @@ final class NativeInterfaceTests: XCTestCase {
     }
     func testHomeEmptyStatesRemainActionable() {
         let app = launch(["--empty-home", "--dark"])
-        let summary = app.staticTexts["home-greeting"]
+        let summary = app.staticTexts["home-today"]
         XCTAssertTrue(summary.waitForExistence(timeout: 10))
         XCTAssertTrue(app.staticTexts["home-agenda-empty"].exists)
         XCTAssertFalse(app.buttons["home-focus"].exists)
@@ -738,7 +738,7 @@ final class NativeInterfaceTests: XCTestCase {
     }
     func testHomeManyEventsAndTasksStayBoundedAndReachable() {
         let app = launch(["--busy-home", "--stress-content", "--dark"])
-        let summary = app.staticTexts["home-greeting"]
+        let summary = app.staticTexts["home-today"]
         XCTAssertTrue(summary.waitForExistence(timeout: 10))
         XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-agenda-")).count, 12, "The weekly agenda must retain every appointment in the fixture")
         XCTAssertFalse(app.staticTexts["home-summary"].exists)

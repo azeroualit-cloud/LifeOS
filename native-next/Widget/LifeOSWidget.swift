@@ -12,10 +12,10 @@ struct LifeOSProvider: TimelineProvider {
         completion(Timeline(entries: dates.map { LifeOSEntry(date: $0, snapshot: snapshot) }, policy: .after(now.addingTimeInterval(3600))))
     }
 }
-@main struct LifeOSQuickActionsWidget: Widget {
+@main struct LifeOSOverviewWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: LifeOSWidgetStorage.kind, provider: LifeOSProvider()) { entry in LifeOSWidgetView(entry: entry).containerBackground(.fill.tertiary, for: .widget) }
-            .configurationDisplayName("Life OS")
+            .configurationDisplayName("Life OS · Oggi")
             .description("Turni della settimana, abitudini, attività ed eventi. Aggiungi con +.")
             .supportedFamilies([.systemSmall])
     }
