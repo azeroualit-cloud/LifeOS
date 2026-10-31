@@ -1,3 +1,13 @@
+## Consegna verificata — 31 ottobre 2026, 0.10.11 build 72
+
+[IPA diretta per Signulous](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.11-build72/LifeOS-72.ipa) · [build e test Apple](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41203199987) · [modifiche e verifiche](native/REVISIONE-72.md).
+
+Corretto il calendario tagliato nell’editor con un selettore a larghezza intera. Mese e settimana con numeri SF Pro 20 pt Regular e soli badge rettangolari dei turni; selezione blu, tutti i sette turni visibili, intestazione del giorno su una riga. Agenda a scorrimento unico con eventi lunghi compatti, contenimenti annidati, gestione delle notti e pillole di tutto il giorno. Finanza: importo 40 pt Semibold, meno divisori, percorsi e dati conservati.
+
+**213 test unitari e 44 esecuzioni UI superati**, zero fallimenti (17 mirate e 5 regressioni principali, 22 sul compatto). Schermate dei simulatori iPhone 15 Pro e SE 3 controllate. Archivio Release riuscito e IPA pubblica scaricata/verificata: integrità, checksum, versioni/bundle, app ed estensione arm64 per iPhoneOS, schema URL e descrizioni di autorizzazione.
+
+Sorgente verificato: `5c05d2c2771795c203e9b2423e7b3ef2c48df66b`. SHA-256: `ceae8507028401ad4206dfba0c48a749fbbb3eb11191e37d9c9effdef0f4c55c`. IPA non firmata da aggiornare con Signulous senza disinstallare. Prova fisica, provisioning App Group e suono AlarmKit restano da verificare sul dispositivo. Nessuna modifica Cloudflare necessaria.
+
 ## Consegna verificata — 31 ottobre 2026, 0.10.10 build 71
 
 [IPA diretta per Signulous](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.10-build71/LifeOS-71.ipa) · [test Apple](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41196021079) · [pacchetto finale](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41198865956) · [struttura, modifiche e verifiche](native/REVISIONE-71.md).
