@@ -84,7 +84,7 @@ struct CalendarScreen: View {
     private var monthOverview: some View {
         VStack(spacing: NativeDesign.Space.none) {
             HStack {
-                Text(CivilDate.monthTitle(focusMonth)).font(.title.bold()).lineLimit(1).minimumScaleFactor(0.7)
+                Text(CivilDate.monthTitle(showingPreview ? String(selected.prefix(7)) : focusMonth)).font(.title.bold()).lineLimit(1).minimumScaleFactor(0.7)
                     .accessibilityAddTraits(.isHeader).accessibilityIdentifier("calendar-month-heading-" + focusMonth)
                 Spacer(minLength: NativeDesign.Space.small)
                 NativeToolbarButton(symbol: "plus", label: "Aggiungi evento") { router.sheet = .event(["day": .string(selected)]) }
@@ -127,6 +127,14 @@ struct CalendarScreen: View {
                     if let first, months.contains(first), first != visibleMonth { visibleMonth = first }
                 }
                 .task { position(month: String(selected.prefix(7)), day: selected, proxy: proxy) }
+                .task(id: showingPreview) {
+                    guard showingPreview else { return }
+                    // Re-anchor after the viewport reaches its final height.
+                    do { try await Task.sleep(for: .seconds(reduceMotion ? 0 : NativeDesign.Motion.navigationResponse)) }
+                    catch { return }
+                    guard showingPreview, !showingDay else { return }
+                    position(month: String(selected.prefix(7)), day: selected, proxy: proxy)
+                }
                 .onChange(of: windowAnchor) { _, month in
                     guard let month else { return }
                     windowAnchor = nil
@@ -142,12 +150,21 @@ struct CalendarScreen: View {
         }
     }
     private func position(month: String, day: String?, proxy: ScrollViewProxy) {
+        // Boundary weeks belong to the month of their Monday, not to
+        // the month printed in a Sunday date such as 1 November.
+        let targetMonth: String
+        if let day {
+            let weekday = CivilDate.calendar.component(.weekday, from: CivilDate.date(day))
+            let monday = CivilDate.adding(-((weekday + 5) % 7), to: day)
+            let owner = String(monday.prefix(7))
+            targetMonth = months.contains(owner) ? owner : month
+        } else { targetMonth = month }
         monthPositionReady = false; restoringWindow = true
-        positioningMonth = month; positioningDay = day
+        positioningMonth = targetMonth; positioningDay = day
         Task { @MainActor in
             await Task.yield()
-            guard positioningMonth == month, !showingDay else { return }
-            proxy.scrollTo(month, anchor: .top)
+            guard positioningMonth == targetMonth, !showingDay else { return }
+            proxy.scrollTo(targetMonth, anchor: .top)
         }
     }
     private var dayAgenda: some View {
