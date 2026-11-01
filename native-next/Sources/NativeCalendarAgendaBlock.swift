@@ -7,7 +7,7 @@ struct NativeCalendarAgendaBlock: View {
     var depth = 0
     private var entry: NativeCalendarAgendaEntry { node.entry }
     private var shift: ShiftKind? { entry.source == "shift" ? ShiftKind(rawValue: entry.record.text("kind")) : nil }
-    private var color: Color { shift?.color ?? NativeDesign.calendarAccent }
+    private var color: Color { shift?.color ?? NativeCalendarEventStyle.color(for: entry) }
     var body: some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
             Text(NativeCalendarTimeline.clock(entry.start)).font(.caption).monospacedDigit().foregroundStyle(color)
@@ -23,7 +23,7 @@ struct NativeCalendarAgendaBlock: View {
                             .foregroundStyle(entry.completed ? NativeDesign.secondary : Color.primary).strikethrough(entry.completed)
                             .multilineTextAlignment(.leading)
                     }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading).contentShape(Rectangle())
-                }.buttonStyle(.plain).accessibilityIdentifier("calendar-timeline-" + entry.id)
+                }.buttonStyle(NativePressStyle()).accessibilityIdentifier("calendar-timeline-" + entry.id)
                     .accessibilityValue(entry.completed ? "Completata" : "Da completare")
             }
             if !node.children.isEmpty {
@@ -39,7 +39,7 @@ struct NativeCalendarAgendaBlock: View {
             }
         }.padding(NativeDesign.Space.medium)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(shift == nil ? NativeDesign.actionSurface : color.opacity(0.10), in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
+            .background(color.opacity(0.10), in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
             .overlay(alignment: .leading) { RoundedRectangle(cornerRadius: NativeDesign.progressRadius).fill(color.opacity(entry.completed ? 0.45 : 1)).frame(width: NativeDesign.Layout.calendarMarker) }
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("calendar-agenda-block-" + entry.id)

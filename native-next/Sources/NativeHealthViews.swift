@@ -71,7 +71,7 @@ private struct NativeHealthDashboardChart: View {
                 BarMark(x: .value("Data", day.date, unit: .day),
                         yStart: .value("Base", data.weightDomain.lowerBound),
                         yEnd: .value("Calorie", data.plottedCalories(day.calories!)))
-                    .foregroundStyle(CivilDate.day(day.date) == CivilDate.day(data.today) ? NativeDesign.healthAccent : NativeDesign.healthGray)
+                    .foregroundStyle(CivilDate.day(day.date) == CivilDate.day(data.today) ? NativeDesign.healthAccent : NativeDesign.healthHistoricalBar)
                     .clipShape(UnevenRoundedRectangle(topLeadingRadius: NativeDesign.Layout.healthBarRadius, bottomLeadingRadius: 0, bottomTrailingRadius: 0, topTrailingRadius: NativeDesign.Layout.healthBarRadius))
             }
             ForEach(data.days.filter { ($0.weight ?? 0) > 0 && ($0.weight?.isFinite ?? false) }) { day in
@@ -80,7 +80,7 @@ private struct NativeHealthDashboardChart: View {
             }
             ForEach(data.trend) { point in
                 LineMark(x: .value("Data", point.date), y: .value("Peso", point.value))
-                    .foregroundStyle(NativeDesign.healthGray)
+                    .foregroundStyle(NativeDesign.healthTrend)
                     .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
             }
         }.chartXScale(domain: data.start...Calendar.current.date(byAdding: .day, value: 1, to: data.today)!).chartYScale(domain: data.weightDomain)

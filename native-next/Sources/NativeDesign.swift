@@ -19,6 +19,9 @@ enum NativeDesign {
     static func calendarNumber(size: CGFloat) -> Font { .system(size: size, weight: .regular, design: .default) }
     static let healthAccent = Color(uiColor: .systemOrange)
     static let healthGray = Color(uiColor: .systemGray)
+    static let healthHistoricalBar = healthGray.opacity(0.28)
+    static let healthTrend = Color(uiColor: .label)
+    static let calendarPreviewFraction: CGFloat = 0.46
     static let inset = Color.primary.opacity(0.045)
     // Financial direction only: red = outflow/decline, green = available/inflow/growth.
     static let financialRed = Color(uiColor: UIColor { trait in

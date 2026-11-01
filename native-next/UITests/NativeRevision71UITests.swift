@@ -45,6 +45,7 @@ final class NativeRevision71UITests: XCTestCase {
         XCTAssertFalse(app.buttons["Esporta turni su Apple (facoltativo)"].exists)
         let today = app.buttons["calendar-day-" + day()]
         reveal(today, in: months, app: app); today.tap()
+        app.buttons["calendar-expand-day"].tap()
         XCTAssertTrue(exists(app.scrollViews["calendar-day-pane"], app: app))
         XCTAssertTrue(app.buttons["calendar-week-day-" + day()].isSelected)
         XCTAssertFalse(months.exists)
@@ -75,6 +76,7 @@ final class NativeRevision71UITests: XCTestCase {
         app.tabBars.buttons["Calendario"].tap()
         let today = app.buttons["calendar-day-" + day()]
         reveal(today, in: app.scrollViews["calendar-scroll"], app: app); today.tap()
+        app.buttons["calendar-expand-day"].tap()
         let allDay = app.scrollViews["calendar-all-day-strip"]
         XCTAssertTrue(exists(allDay, app: app))
         XCTAssertLessThanOrEqual(allDay.frame.height, 60)
@@ -214,6 +216,7 @@ final class NativeRevision71UITests: XCTestCase {
         app.tabBars.buttons["Calendario"].tap()
         let today = app.buttons["calendar-day-" + day()]
         reveal(today, in: app.scrollViews["calendar-scroll"], app: app); today.tap()
+        app.buttons["calendar-expand-day"].tap()
         let slot = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "calendar-timeline-event:", "Slot completato test")).firstMatch
         XCTAssertTrue(exists(slot, app: app)); XCTAssertEqual(slot.value as? String, "Completata")
         capture("71-completed-timed-activity")
@@ -223,6 +226,7 @@ final class NativeRevision71UITests: XCTestCase {
         app.tabBars.buttons["Calendario"].tap()
         let today = app.buttons["calendar-day-" + day()]
         reveal(today, in: app.scrollViews["calendar-scroll"], app: app); today.tap()
+        app.buttons["calendar-expand-day"].tap()
         XCTAssertTrue(exists(app.buttons["calendar-back-month"], app: app))
         app.buttons["primary-add"].tap()
         XCTAssertTrue(app.navigationBars["Nuova attività"].waitForExistence(timeout: 10))

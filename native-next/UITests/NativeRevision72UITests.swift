@@ -26,6 +26,7 @@ final class NativeRevision72UITests: XCTestCase {
             scroll.swipeUp(velocity: .slow)
         }
         XCTAssertTrue(today.isHittable); today.tap()
+        app.buttons["calendar-expand-day"].tap()
         XCTAssertTrue(app.scrollViews["calendar-day-pane"].waitForExistence(timeout: 10))
     }
     func testDatePickerHasSevenFullWidthColumnsAfterTypingAndBothDatesRemainClearable() {

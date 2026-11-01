@@ -68,7 +68,7 @@ struct DashboardScreen: View {
     }
     private func heading(_ summary: NativeHomeSummary, today: String, now: Date) -> some View {
         ViewThatFits(in: .horizontal) {
-            HStack(alignment: .top, spacing: NativeDesign.Space.medium) {
+            HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.medium) {
                 headingText(summary, today: today)
                 Spacer(minLength: NativeDesign.Space.small)
                 activeShift(now: now, today: today)
@@ -102,7 +102,7 @@ struct DashboardScreen: View {
                     NativeShiftProgressBar(model: model, now: focusNow, activation: router.activationDate)
                         .frame(width: NativeDesign.Layout.shiftProgressWidth)
                 }.frame(minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle())
-            }.buttonStyle(.plain).accessibilityIdentifier("home-focus")
+            }.buttonStyle(NativePressStyle()).accessibilityIdentifier("home-focus")
                 .accessibilityLabel(model.title + ", " + model.remainingText + " alla fine")
                 .accessibilityHint("Apre il giorno nel calendario")
                 .transition(reduceMotion ? .identity : .opacity.combined(with: .scale(scale: NativeDesign.Motion.pressedScale)))
