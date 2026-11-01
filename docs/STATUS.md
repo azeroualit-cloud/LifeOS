@@ -1,3 +1,9 @@
+## Consegna verificata — 1 novembre 2026, 0.10.12 build 73
+
+[Revisione 73: flusso calendario e Dashboard](native/REVISIONE-73.md) · [IPA diretta 0.10.12 build 73](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.12-build73/LifeOS-73.ipa). Agenda sotto il mese, espansione esplicita alla settimana, colori stabili degli eventi, baseline Dashboard e contrasto del trend peso. Superati **215 unitari e 32 esecuzioni UI**, download pubblico verificato. Aggiornare senza disinstallare.
+
+[Build Apple](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41327446300). Sorgente `ea74b524369795a9e9b52de5cbb1ca5363ac1766`. SHA-256 IPA: `3fe4250cfc9faf1bdb056c68f303fd1afd6da5bee68eaa0d39f513e5abaa5236`. Nessuna modifica backend. Firma e prova fisica restano esterne ai test.
+
 ## Consegna verificata — 31 ottobre 2026, 0.10.11 build 72
 
 [IPA diretta per Signulous](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.11-build72/LifeOS-72.ipa) · [build e test Apple](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41203199987) · [modifiche e verifiche](native/REVISIONE-72.md).
