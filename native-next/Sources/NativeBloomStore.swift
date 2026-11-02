@@ -20,21 +20,23 @@ struct NativeBloomConflict: Identifiable {
     let incoming: Record
     /// Keep previews small and compare original attachment bytes without exposing Base64.
     static func preview(_ record: Record) -> Record {
-        record.mapValues { value in
+        var result: Record = [:]
+        for (key, value) in record {
+            if key == "data", case .string(let raw) = value, let bytes = Data(base64Encoded: raw) {
+                result["attachmentBytes"] = .int(bytes.count)
+                result["attachmentSHA256"] = .string(SHA256.hash(data: bytes).map { String(format: "%02x", $0) }.joined())
+                continue
+            }
             switch value {
-            case .object(let object): return .object(preview(object))
-            case .array(let values): return .array(values.map { element in
+            case .object(let object): result[key] = .object(preview(object))
+            case .array(let values): result[key] = .array(values.map { (element: JSONValue) -> JSONValue in
                 if case .object(let object) = element { return .object(preview(object)) }
                 return element
             })
-            default: return value
+            default: result[key] = value
             }
-        }.reduce(into: Record()) { result, entry in
-            if entry.key == "data", case .string(let raw) = entry.value, let bytes = Data(base64Encoded: raw) {
-                result["attachmentBytes"] = .int(bytes.count)
-                result["attachmentSHA256"] = .string(SHA256.hash(data: bytes).map { String(format: "%02x", $0) }.joined())
-            } else { result[entry.key] = entry.value }
         }
+        return result
     }
 }
 

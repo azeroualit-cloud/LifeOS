@@ -122,7 +122,27 @@ struct NativeBloomScreen: View {
                     }
                 }
             }
-            .sheet(isPresented: $showingCaptures) {
+            .sheet(isPresented: $showingCaptures) { capturesSheet }
+            .sheet(isPresented: $showingReport) { reportSheet }
+            .sheet(isPresented: $composing) { NavigationStack { NativeBloomComposer(store: store, initial: captureRecord) } }
+            .fileImporter(isPresented: $importing, allowedContentTypes: [.json]) { result in
+                do {
+                    let url = try result.get(), access = url.startAccessingSecurityScopedResource()
+                    defer { if access { url.stopAccessingSecurityScopedResource() } }
+                    guard (try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0) <= 100 * 1024 * 1024 else { throw Message(text: "Backup superiore a 100 MiB.") }
+                    let data = try Data(contentsOf: url), preview = try store.preview(data)
+                    let files = preview.items.flatMap { item -> [Record] in (item["data"] != nil && item["data"] != .null ? [item] : []) + item.records("noteFiles") }
+                    let bytes = files.reduce(0) { $0 + (Data(base64Encoded: $1.text("data"))?.count ?? 0) }
+                    let trashed = preview.items.filter { $0.flag("archived") }.count
+                    pendingSummary = "\(preview.items.count) note, \(preview.collections.count) categorie, \(files.count) allegati (\(bytes) byte), \(trashed) note nel Cestino. Il Cestino viene conservato."
+                    importConflicts = try store.conflicts(data); resolutions = [:]
+                    pendingData = data
+                } catch { store.error = error.localizedDescription }
+            }
+            .sheet(isPresented: Binding(get: { pendingData != nil }, set: { if !$0 { pendingData = nil } })) { importSheet }
+            .fileExporter(isPresented: $exporting, document: NativeBloomDocument(data: exportData), contentType: .json, defaultFilename: "LifeOS-Bloom-backup") { result in if case .failure(let error) = result { store.error = error.localizedDescription } }
+    }
+    private var capturesSheet: some View {
                 NavigationStack {
                     List {
                         if let error = captureInbox.error { Text(error).foregroundStyle(.red) }
@@ -135,8 +155,9 @@ struct NativeBloomScreen: View {
                         if let error = store.error { Text(error).foregroundStyle(.red) }
                     }.navigationTitle("Catture in sospeso").toolbar { Button("Fine") { showingCaptures = false } }
                 }
-            }
-            .sheet(isPresented: $showingReport) {
+    }
+
+    private var reportSheet: some View {
                 NavigationStack {
                     Form {
                         if let report = store.archive.lifeosImportReports?.last {
@@ -153,30 +174,16 @@ struct NativeBloomScreen: View {
                         }
                     }.navigationTitle("Rapporto importazione").toolbar { Button("Fine") { showingReport = false } }
                 }
-            }
-            .sheet(isPresented: $composing) { NavigationStack { NativeBloomComposer(store: store, initial: captureRecord) } }
-            .fileImporter(isPresented: $importing, allowedContentTypes: [.json]) { result in
-                do {
-                    let url = try result.get(), access = url.startAccessingSecurityScopedResource()
-                    defer { if access { url.stopAccessingSecurityScopedResource() } }
-                    guard (try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0) <= 100 * 1024 * 1024 else { throw Message(text: "Backup superiore a 100 MiB.") }
-                    let data = try Data(contentsOf: url), preview = try store.preview(data)
-                    let files = preview.items.flatMap { item -> [Record] in (item["data"] != nil && item["data"] != .null ? [item] : []) + item.records("noteFiles") }
-                    let bytes = files.reduce(0) { $0 + (Data(base64Encoded: $1.text("data"))?.count ?? 0) }
-                    let trashed = preview.items.filter { $0.flag("archived") }.count
-                    pendingSummary = "\(preview.items.count) note, \(preview.collections.count) categorie, \(files.count) allegati (\(bytes) byte), \(trashed) note nel Cestino. Il Cestino viene conservato."
-                    importConflicts = try store.conflicts(data); resolutions = [:]
-                    pendingData = data
-                } catch { store.error = error.localizedDescription }
-            }
-            .sheet(isPresented: Binding(get: { pendingData != nil }, set: { if !$0 { pendingData = nil } })) {
+    }
+
+    private var importSheet: some View {
                 NavigationStack {
                     Form {
                         Section { Text(pendingSummary) }
                         ForEach(importConflicts) { conflict in
                             Section(conflict.title) {
-                                NavigationLink("Confronta versioni", systemImage: "doc.on.doc") {
-                                    NativeBloomConflictComparison(conflict: conflict)
+                                NavigationLink { NativeBloomConflictComparison(conflict: conflict) } label: {
+                                    Label("Confronta versioni", systemImage: "doc.on.doc")
                                 }
                                 Picker("Conflitto", selection: Binding(get: { resolutions[conflict.id]?.rawValue ?? "" }, set: { resolutions[conflict.id] = NativeBloomConflictChoice(rawValue: $0) })) {
                                     Text("Scegli una soluzione").tag("")
@@ -195,8 +202,6 @@ struct NativeBloomScreen: View {
                     }.navigationTitle("Importa backup")
                         .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Annulla") { pendingData = nil } } }
                 }
-            }
-            .fileExporter(isPresented: $exporting, document: NativeBloomDocument(data: exportData), contentType: .json, defaultFilename: "LifeOS-Bloom-backup") { result in if case .failure(let error) = result { store.error = error.localizedDescription } }
     }
     private struct MapGroup: Identifiable {
         let id: String
