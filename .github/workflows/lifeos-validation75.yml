@@ -23,6 +23,7 @@ jobs:
           python3 scripts/build-worker-68.py
           python3 scripts/build-worker-70.py
           python3 scripts/build-worker-75.py
+          python3 backend/utilities/tests/test_transform.py
           node backend/utilities/tests/competence.test.mjs
           LIFEOS_UTILITY_WORKER=manual/build-75/worker.js node backend/utilities/tests/budget.test.mjs
           node backend/utilities/tests/routing.test.mjs

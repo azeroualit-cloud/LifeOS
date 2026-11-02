@@ -15,33 +15,35 @@ struct NativeExpenseRouteSection: View {
     @State private var loading = false
     @State private var issue: String?
     @State private var retry = 0
-    private var query: String { category + day + String(movementID) + bill.start + bill.end + String(retry) }
+    private var query: String { category + day + String(movementID) + String(bill.enabled) + String(retry) }
     private var chosen: Record? { plans.first { $0.text("id") == selected } }
     var body: some View {
-        Section("Da dove viene pagata") {
-            if loading { ProgressView("Verifico fondi e piani…") }
-            if let issue {
-                NativeInlineMessage(text: issue)
-                Button("Riprova") { retry += 1 }
-            } else {
-                Picker("Destinazione", selection: $selected) {
-                    if selected.isEmpty { Text("Scegli un piano o il budget").tag("") }
-                    Text("Budget mensile").tag(NativeExpenseRouting.ordinary)
-                    ForEach(plans.indices, id: \.self) { index in Text("Piano · " + plans[index].text("name")).tag(plans[index].text("id")) }
-                }.accessibilityIdentifier("expense-destination")
-                if let chosen {
-                    let split = NativeExpenseRouting.split(amount: amount, plan: chosen)
-                    LabeledContent("Dal fondo " + chosen.text("name"), value: (Double(split.fund) / 100).euro)
-                    LabeledContent("Dagli altri risparmi", value: (Double(split.savings) / 100).euro).accessibilityIdentifier("expense-savings-preview")
-                    Text("Il pagamento non viene sottratto di nuovo dal budget. Disponibilità verificata nuovamente al salvataggio.").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
-                } else if selected == NativeExpenseRouting.ordinary {
-                    LabeledContent("Dal budget mensile", value: (Double(amount) / 100).euro).accessibilityIdentifier("expense-budget-preview")
-                    Text(plans.isEmpty ? "Nessun piano compatibile con questa categoria e data." : "Hai scelto di non usare il fondo del piano.").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
-                } else { Text("Ci sono più piani compatibili: scegli quale utilizzare.").font(NativeDesign.metadata) }
+        Group {
+            Section("Da dove viene pagata") {
+                if loading { ProgressView("Verifico fondi e piani…") }
+                if let issue {
+                    NativeInlineMessage(text: issue)
+                    Button("Riprova") { retry += 1 }
+                } else {
+                    Picker("Destinazione", selection: $selected) {
+                        if selected.isEmpty { Text("Scegli un piano o il budget").tag("") }
+                        Text("Budget mensile").tag(NativeExpenseRouting.ordinary)
+                        ForEach(plans.indices, id: \.self) { index in Text("Piano · " + plans[index].text("name")).tag(plans[index].text("id")) }
+                    }.accessibilityIdentifier("expense-destination")
+                    if let chosen {
+                        let split = NativeExpenseRouting.split(amount: amount, plan: chosen)
+                        LabeledContent("Dal fondo " + chosen.text("name"), value: (Double(split.fund) / 100).euro)
+                        LabeledContent("Dagli altri risparmi", value: (Double(split.savings) / 100).euro).accessibilityIdentifier("expense-savings-preview")
+                        Text("Il pagamento non viene sottratto di nuovo dal budget. Disponibilità verificata nuovamente al salvataggio.").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
+                    } else if selected == NativeExpenseRouting.ordinary {
+                        LabeledContent(bill.enabled ? "Pagamento bancario" : "Dal budget mensile", value: (Double(amount) / 100).euro).accessibilityIdentifier("expense-budget-preview")
+                        Text(plans.isEmpty ? "Nessun piano compatibile con questa categoria e data." : "Hai scelto di non usare il fondo del piano.").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
+                    } else { Text("Ci sono più piani compatibili: scegli quale utilizzare.").font(NativeDesign.metadata) }
+                }
             }
-            if bill.enabled {
+            if bill.enabled { Section("Periodo di competenza") {
                 NativeUtilityPeriodFields(period: $bill, amountCents: amount)
-            }
+            } }
         }.task(id: query) { await load() }
             .onChange(of: selected) { _, _ in updateReady() }
             .onChange(of: bill) { _, value in
@@ -49,9 +51,10 @@ struct NativeExpenseRouteSection: View {
                 updateReady()
             }
             .onChange(of: category + day) { _, _ in selected = ""; ready = false }
+            .onChange(of: category) { _, _ in plans = []; selected = ""; ready = false }
     }
     private func updateReady() {
-        bill.prepare(day: day, required: NativeUtilityPeriodDraft.categories.contains(category) || chosen?.text("kind") == "estimated" || movementID > 0 && bill.enabled)
+        bill.prepare(day: day, required: NativeUtilityPeriodDraft.categories.contains(category) || chosen?.text("kind") == "estimated" || bill.enabled)
         quotedAvailable = chosen.map(NativeExpenseRouting.available) ?? 0
         ready = !loading && issue == nil && (!bill.enabled || bill.months != nil) && (selected == NativeExpenseRouting.ordinary || chosen != nil)
     }
@@ -65,8 +68,9 @@ struct NativeExpenseRouteSection: View {
             } else {
                 var payload: Record = ["category": .string(category), "date": .string(day), "amountCents": .int(max(1, amount))]
                 if movementID > 0 { payload["movementId"] = .int(movementID) }
-                if bill.enabled, !bill.start.isEmpty, !bill.end.isEmpty {
-                    payload["competenceStartMonth"] = .string(bill.start); payload["competenceEndMonth"] = .string(bill.end)
+                if bill.enabled {
+                    payload["competenceStartMonth"] = .string(bill.months == nil ? String(day.prefix(7)) : bill.start)
+                    payload["competenceEndMonth"] = .string(bill.months == nil ? String(day.prefix(7)) : bill.end)
                 }
                 let result = try await store.read("getExpenseRouting", args: [.object(payload)]).object
                 guard result.integer("version") == 1 else { throw Message(text: "Aggiorna il Worker Cloudflare alla build 67 per collegare le spese ai piani.") }
@@ -110,11 +114,11 @@ struct NativeExpenseDestinationEditor: View {
         Form {
             Section {
                 LabeledContent(record.text("description", fallback: record.text("name")), value: (Double(amount) / 100).euro)
-                Text("Cambia il fondo utilizzato mantenendo lo stesso movimento bancario.").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
+                Text("Modifica il periodo o la provenienza del pagamento. Il movimento bancario rimane unico.").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
             }
             NativeExpenseRouteSection(category: record.text("category"), day: String(record.text("actual_date", fallback: record.text("date")).prefix(10)), amount: amount, movementID: record.integer("source_row") == 0 ? record.integer("row") : record.integer("source_row"), selected: $selected, competenceMonths: $months, ready: $ready, quotedAvailable: $quotedAvailable, bill: $bill).id(quoteGeneration).disabled(submitted)
             if let issue { NativeInlineMessage(text: issue) }
-        }.modifier(NativeListAppearance()).navigationTitle("Destinazione").navigationBarTitleDisplayMode(.inline)
+        }.modifier(NativeListAppearance()).navigationTitle(bill.enabled ? "Bolletta" : "Destinazione").navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Chiudi") { dismiss() }.disabled(saving) }
                 ToolbarItem(placement: .confirmationAction) { Button(submitted ? "Riprova" : "Conferma") { Task { await save() } }.disabled(!ready || selected.isEmpty || saving).accessibilityIdentifier("expense-destination-confirm") }

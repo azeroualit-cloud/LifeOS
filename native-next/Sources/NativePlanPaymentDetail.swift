@@ -5,7 +5,7 @@ struct NativePlanPaymentDetail: View {
     @Environment(\.dismiss) private var dismiss
     let planID: String
     let paymentID: String
-    var onDeleted: (() -> Void)? = nil
+    var onFinished: (() -> Void)? = nil
     @State private var confirmDelete = false
     @State private var deleting = false
     @State private var error: String?
@@ -46,7 +46,7 @@ struct NativePlanPaymentDetail: View {
             .task { await store.loadFinancePlans() }
             .sheet(isPresented: $editingBill) {
                 NavigationStack { NativeExpenseDestinationEditor(record: billRecord) {
-                    Task { await store.loadFinancePlans(); dismiss() }
+                    Task { await store.loadFinancePlans(); if let onFinished { onFinished() } else { dismiss() } }
                 } }
             }
             .confirmationDialog("Eliminare questo pagamento e il movimento collegato? Il saldo verrà aggiornato. Il piano interrotto resterà interrotto; un obiettivo chiuso tornerà aperto.", isPresented: $confirmDelete, titleVisibility: .visible) {
@@ -74,7 +74,7 @@ struct NativePlanPaymentDetail: View {
                 try await store.perform("deleteFinancePlanPayment", ["requestId": .string(requestID), "planId": .string(planID), "paymentId": .string(paymentID)])
             }
             await store.loadFinancePlans()
-            if let onDeleted { onDeleted() } else { dismiss() }
+            if let onFinished { onFinished() } else { dismiss() }
         } catch { self.error = error.localizedDescription }
     }
 }

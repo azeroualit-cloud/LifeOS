@@ -43,9 +43,13 @@ jobs:
               for value in strings(match):
                   if (root/value).is_file() and value not in paths:paths.append(value)
           print('SYNTHETIC_ATTACHMENTS',paths)
-          for index,name in enumerate(paths[:12]):
+          def is_image(name):
+              data=(root/name).read_bytes()[:16]
+              return data.startswith(b'\x89PNG') or data.startswith(b'\xff\xd8') or b'ftypheic' in data
+          selected=[p for p in paths if is_image(p)][:4]+[p for p in paths if pathlib.Path(p).suffix=='.txt'][:1]
+          for index,name in enumerate(selected):
               p=root/name
-              if p.suffix.lower() in ['.png','.jpeg','.jpg','.heic']:
+              if is_image(name):
                   subprocess.run(['sips','-s','format','png','-Z','1100',str(p),'--out','preview.png'],check=True)
                   data=base64.b64encode(pathlib.Path('preview.png').read_bytes()).decode()
                   print('QA_IMAGE_START utility-'+str(index))

@@ -1,7 +1,16 @@
 import XCTest
 
 final class NativeRevision75UITests: XCTestCase {
+    private func reveal(_ element: XCUIElement, app: XCUIApplication) {
+        let list = app.collectionViews.firstMatch
+        for _ in 0..<12 {
+            if element.exists && element.isHittable { return }
+            let above = element.exists && element.frame.minY < app.navigationBars.firstMatch.frame.maxY
+            if above { list.swipeDown(velocity: .slow) } else { list.swipeUp(velocity: .slow) }
+        }
+    }
     private func selectMenu(_ button: XCUIElement, title: String, app: XCUIApplication) {
+        reveal(button, app: app)
         XCTAssertTrue(button.waitForExistence(timeout: 10)); button.tap()
         let choice = app.buttons[title]
         for _ in 0..<6 {
@@ -10,6 +19,23 @@ final class NativeRevision75UITests: XCTestCase {
                 .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.75)))
         }
         XCTAssertTrue(choice.isHittable); choice.tap()
+    }
+    func testBillMonthControlsFitWithLargeText() {
+        continueAfterFailure = false; executionTimeAllowance = 180
+        let app = XCUIApplication()
+        app.launchArguments = ["--visual-test", "--dark", "--expense-routing", "--large-text", "--reduce-motion", "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"]
+        app.launch(); XCTAssertTrue(app.tabBars.buttons["Dashboard"].waitForExistence(timeout: 30))
+        app.buttons["primary-add"].tap()
+        selectMenu(app.buttons["movement-category"], title: "Acqua", app: app)
+        for title in ["Mese iniziale", "Mese finale"] {
+            for prefix in ["utility-month-", "utility-year-"] {
+                let control = app.buttons[prefix + title]; reveal(control, app: app)
+                XCTAssertTrue(control.isHittable)
+                XCTAssertGreaterThanOrEqual(control.frame.minX, app.frame.minX)
+                XCTAssertLessThanOrEqual(control.frame.maxX, app.frame.maxX)
+            }
+        }
+        let shot = XCTAttachment(screenshot: XCUIScreen.main.screenshot()); shot.name = "75-utility-large-text"; shot.lifetime = .keepAlways; add(shot)
     }
     func testBillPeriodShowsThreeExactSharesAndExistingPaymentCanBeEdited() {
         continueAfterFailure = false; executionTimeAllowance = 300
@@ -28,7 +54,9 @@ final class NativeRevision75UITests: XCTestCase {
         let year = Calendar.current.component(.year, from: Date())
         for month in ["08", "09", "10"] {
             let row = app.descendants(matching: .any).matching(identifier: "utility-share-\(year)-" + month).firstMatch
+            for _ in 0..<8 { if row.exists && row.isHittable { break }; app.collectionViews.firstMatch.swipeUp(velocity: .slow) }
             XCTAssertTrue(row.waitForExistence(timeout: 10))
+            XCTAssertTrue(row.debugDescription.contains("73,93"), "La quota mostrata deve essere 73,93 €")
         }
         let shot = XCTAttachment(screenshot: XCUIScreen.main.screenshot()); shot.name = "75-utility-three-shares"; shot.lifetime = .keepAlways; add(shot)
         app.buttons["Salva"].tap()

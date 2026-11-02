@@ -117,7 +117,7 @@ struct NativePlanEditor: View {
                 if draft.kind != .advance {
                     Picker("Categoria della spesa", selection: $draft.category) { ForEach(Input.categories, id: \.self) { Text($0) } }
                 }
-                TextField([.fund, .estimated].contains(draft.kind) ? "Quota mensile €" : draft.kind == .fixed ? "Importo per scadenza €" : "Importo totale €", text: $draft.amount).keyboardType(.decimalPad).focused($editing).accessibilityIdentifier("plan-amount").disabled(draft.kind == .recovery && usesExisting)
+                TextField(draft.kind == .estimated ? "Accantonamento mensile €" : draft.kind == .fund ? "Quota mensile €" : draft.kind == .fixed ? "Importo per scadenza €" : "Importo totale €", text: $draft.amount).keyboardType(.decimalPad).focused($editing).accessibilityIdentifier("plan-amount").disabled(draft.kind == .recovery && usesExisting)
             }.disabled(submitted)
             Section("Mesi del piano") {
                 if draft.kind == .advance { NativeMonthPicker(title: "Mese beneficiario", selection: $draft.beneficiaryMonth) }
@@ -204,9 +204,9 @@ struct NativePlanDetail: View {
                 if !plan.text("endMonth").isEmpty { LabeledContent("Ultimo mese", value: CivilDate.monthTitle(plan.text("endMonth"))) }
                 else { Text("Senza scadenza").font(.caption).foregroundStyle(NativeDesign.secondary) }
                 if plan.text("kind") == "advance" { LabeledContent("Mese beneficiario", value: CivilDate.monthTitle(plan.text("beneficiaryMonth"))) }
-                LabeledContent("Budget di " + CivilDate.monthTitle(store.financeMonth), value: (-Double(plan.integer("contributionCents")) / 100).euro)
+                LabeledContent((plan.text("kind") == "estimated" ? "Accantonato in " : "Budget di ") + CivilDate.monthTitle(store.financeMonth), value: (Double(plan.integer("contributionCents")) * (plan.text("kind") == "estimated" ? 1 : -1) / 100).euro)
                 if !["advance", "recovery"].contains(plan.text("kind")) {
-                    LabeledContent("Destinato al fondo nel mese consultato", value: (Double(plan.integer("fundCents")) / 100).euro)
+                    LabeledContent("Disponibile nel fondo", value: (Double(plan.integer("fundCents")) / 100).euro)
                     if plan.integer("fromGeneralSavingsCents") > 0 { LabeledContent("Pagato dagli altri risparmi", value: (Double(plan.integer("fromGeneralSavingsCents")) / 100).euro) }
                 }
                 if plan.text("status") == "active", plan.text("startMonth") <= CivilDate.month(), NativePlanKind(rawValue: plan.text("kind"))?.payable == true {
@@ -360,7 +360,7 @@ struct NativePlansInfo: View {
                 Text("Scegli una quota mensile. Il fondo accumula nel tempo. Un pagamento riduce il fondo e il saldo una sola volta; il piano continua. Interrompi ferma le quote future senza generare una spesa e libera l’eventuale residuo nei risparmi generali.")
             }
             Section("Affitto e utenze") {
-                Text("Affitto: importo e periodicità fissi. Il pagamento chiude una scadenza, non il piano. Utenze: quota stimata dai pagamenti e dai mesi coperti. Una bolletta di 160 € per due mesi vale 80 €/mese. La media aggiorna soltanto le quote dal prossimo mese.")
+                Text("Affitto: importo e periodicità fissi. Il pagamento chiude una scadenza, non il piano. Per le bollette scegli mese iniziale e finale: 221,79 € da agosto a ottobre pesano 73,93 € su ciascun mese, anche passato. Il costo effettivo sostituisce la stima; il pagamento resta unico e gli accantonamenti del fondo rimangono separati.")
             }
             Section("Rateizza una spesa") {
                 Text("Il pagamento è una sola uscita dai risparmi. Nei mesi scelti riduci il budget per ricostituirli. Questo piano non ha un secondo pulsante Paga. Se la registrazione è rimasta in sospeso, usa Completa questa registrazione, senza creare un altro pagamento.")
@@ -438,7 +438,7 @@ private struct NativePlanQuotaEditor: View {
         Form {
             Section("Quote future") {
                 Text(plan.text("name")).font(.headline)
-                TextField(plan.text("kind") == "goal" ? "Nuovo totale previsto €" : plan.text("kind") == "fixed" ? "Importo per scadenza €" : "Quota mensile €", text: $amount).keyboardType(.decimalPad).focused($editing).accessibilityIdentifier("plan-edit-amount")
+                TextField(plan.text("kind") == "goal" ? "Nuovo totale previsto €" : plan.text("kind") == "fixed" ? "Importo per scadenza €" : plan.text("kind") == "estimated" ? "Accantonamento mensile €" : "Quota mensile €", text: $amount).keyboardType(.decimalPad).focused($editing).accessibilityIdentifier("plan-edit-amount")
                 NativeMonthPicker(title: "Decorrenza", selection: $first)
                 if plan.text("kind") == "goal" { NativeMonthPicker(title: "Ultimo mese", selection: $last) }
                 Text("I mesi precedenti alla decorrenza e i pagamenti restano invariati. Per un obiettivo, il nuovo totale viene distribuito sui mesi futuri dopo le quote già maturate.").font(.caption).foregroundStyle(NativeDesign.secondary)

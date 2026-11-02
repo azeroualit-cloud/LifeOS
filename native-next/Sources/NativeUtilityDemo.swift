@@ -13,7 +13,8 @@ enum NativeUtilityDemo {
         let transactions = state.finance.records("transactions")
         let plans = state.finance.record("plansV2").records("plans").filter { $0.text("kind") == "estimated" }
         let payments = state.finance.record("plansV2").records("payments")
-        let ordinary = state.finance.records("utilityBills")
+        let ordinary = state.finance.records("utilityBills").filter { bill in transactions.contains { $0.integer("row") == bill.integer("movementId") } }
+        state.finance["utilityBills"] = .array(ordinary.map(JSONValue.object))
         let bills = ordinary + payments.filter { !$0.record("utilityPeriod").isEmpty }
         let categories = Set(plans.map { $0.text("category") } + bills.compactMap { bill in transactions.first { $0.integer("row") == bill.integer("movementId") }?.text("category") })
         var summary = state.finance.record("summary"), baseline = state.finance.record("demoUtilityBaseline")

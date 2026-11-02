@@ -243,13 +243,14 @@ struct MovementEditor: View {
                 Section {
                     Text("Questo movimento appartiene a un piano.")
                     NavigationLink("Gestisci pagamento collegato") {
-                        NativePlanPaymentDetail(planID: detail.text("financePlanId"), paymentID: detail.text("financePlanPaymentId"), onDeleted: { dismiss() })
+                        NativePlanPaymentDetail(planID: detail.text("financePlanId"), paymentID: detail.text("financePlanPaymentId"), onFinished: { dismiss() })
                     }.accessibilityIdentifier("movement-manage-plan-payment")
                 }
             }
             Section {
                 Picker("Tipo", selection: Binding(get: { type }, set: { value in
                     type = value
+                    bill = NativeUtilityPeriodDraft()
                     let choices = value == "Entrata" ? NativeCategoryCatalog.incomeChoices : Input.categories
                     if !choices.contains(category) { category = "Altro" }
                 })) {
@@ -261,7 +262,7 @@ struct MovementEditor: View {
                 if editing { Picker("Conto", selection: $account) { ForEach(["Trade Republic", "Revolut", "IsyBank"], id: \.self) { Text($0) } } }
                 else { LabeledContent("Conto", value: type == "Trasferimento" ? "Revolut" : "Trade Republic") }
                 if type == "Trasferimento" { Picker("Destinazione", selection: $counterpart) { ForEach(editing ? ["Trade Republic", "Revolut", "IsyBank"] : ["Trade Republic"], id: \.self) { Text($0) } } }
-                else { Picker("Categoria", selection: $category) { ForEach(options, id: \.self) { Text($0) } }.accessibilityIdentifier("movement-category") }
+                else { Picker("Categoria", selection: Binding(get: { category }, set: { category = $0; bill = NativeUtilityPeriodDraft() })) { ForEach(options, id: \.self) { Text($0) } }.accessibilityIdentifier("movement-category") }
             }.disabled(linkedPayment)
             if !editing && type == "Spesa" {
                 NativeExpenseRouteSection(category: category, day: CivilDate.day(date), amount: Input.cents(amount) ?? 0, selected: $destination, competenceMonths: $months, ready: $routeReady, quotedAvailable: $quotedAvailable, bill: $bill)
@@ -269,6 +270,8 @@ struct MovementEditor: View {
             if editing && type == "Spesa" && account == "Trade Republic" {
                 Section("Destinazione") {
                     Text(detail.text("financePlanId").isEmpty ? "Budget mensile" : "Pagamento collegato a un piano").font(NativeDesign.body)
+                    let period = NativeUtilityPeriodDraft(record: detail)
+                    if period.enabled, period.months != nil { LabeledContent("Competenza", value: CivilDate.monthTitle(period.start) + " – " + CivilDate.monthTitle(period.end)) }
                     Button(NativeUtilityPeriodDraft.categories.contains(category) || !detail.text("utilityCompetenceStartMonth").isEmpty ? "Modifica periodo o destinazione" : "Cambia destinazione della spesa") { changingDestination = true }.accessibilityIdentifier("movement-change-destination")
                         .disabled(!destinationUnchanged)
                     if !destinationUnchanged { Text("Salva le modifiche al movimento prima di cambiare destinazione.").font(NativeDesign.metadata) }
@@ -319,7 +322,7 @@ struct MovementEditor: View {
             r["financePlanId"] = payment["planId"]; r["financePlanPaymentId"] = payment["id"]; r["financePlanCompetenceMonths"] = payment["competenceMonths"]
         }
         included = !editing && r.flag("includedInSnapshot")
-        detail = r; name = r.text("description", fallback: r.text("name")); amount = r.isEmpty ? "" : String(format: "%.2f", abs(r.amount("amount"))).replacingOccurrences(of: ".", with: ",")
+        detail = r; bill = NativeUtilityPeriodDraft(record: r); name = r.text("description", fallback: r.text("name")); amount = r.isEmpty ? "" : String(format: "%.2f", abs(r.amount("amount"))).replacingOccurrences(of: ".", with: ",")
         type = r.text("movement_type", fallback: r.text("type", fallback: "Spesa"))
         if r.text("notes").hasPrefix("Rimborso / restituzione:") { type = "Rimborso" }
         account = r.text("account", fallback: "Trade Republic"); category = r.text("category", fallback: "Altro")

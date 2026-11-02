@@ -12,7 +12,7 @@ await writeFile(join(folder, 'worker.mjs'), source + '\nexport {monthlyBudgetAmo
 const core = await import(pathToFileURL(join(folder, 'worker.mjs')));
 test.after(() => rm(folder, { recursive: true, force: true }));
 const period = utilityPeriod({ competenceStartMonth: '2026-08', competenceEndMonth: '2026-10' });
-const row = { source_row: 2, amount: -221.79, actual_date: '2026-11-02', category: 'Acqua', account: 'Trade Republic', movement_type: 'Spesa', status: 'Eseguito' };
+const row = { source_row: 2, description: 'Bolletta sintetica', amount: -221.79, actual_date: '2026-11-02', category: 'Acqua', account: 'Trade Republic', movement_type: 'Spesa', status: 'Eseguito' };
 const movement = [new Date('2026-11-02T12:00:00Z'), new Date('2026-11-02T12:00:00Z'), 'Bolletta sintetica', -221.79, 'Trade Republic', 'Acqua', 'Spesa', 'Eseguito', 3];
 movement[19] = 2;
 const state = { plans: {}, payments: {}, commands: {}, expenseRoutingCommands: { bill: { kind: 'ordinary', pending: false, movementId: 2, utilityPeriod: period } } };
@@ -76,5 +76,30 @@ test('unpaid November retains the last complete paid salary window; a real histo
     grid[1][14] = 1400;
     const incomplete = core.computeFinance(core.sheetBook(config(), salaries.filter((_, i) => i !== 5), []), 2026, 11, null, [], [], false, {});
     assert.equal(incomplete.summary.monthlySalary, 1400); assert.equal(incomplete.summary.salaryWindow, null);
+    grid[1][14] = 0;
+    const realDeficit = core.computeFinance(core.sheetBook(config(), [], []), 2026, 11, null, [], [], true, {});
+    assert.equal(realDeficit.summary.monthlyRemaining, -500, 'A real deficit is never hidden with a clamp');
+  } finally { globalThis.Date = RealDate; }
+});
+
+test('full finance response updates every past month while transaction and cashflow stay in November', () => {
+  const RealDate = globalThis.Date;
+  globalThis.Date = class extends RealDate { constructor(...args) { super(...(args.length ? args : ['2026-11-02T12:00:00Z'])); } };
+  try {
+    const grid = Array.from({ length: 24 }, () => Array(15).fill(''));
+    grid[1][14] = 1800; grid[2][14] = 500;
+    grid[4][0] = 'Acqua'; grid[4][1] = 50; grid[4][2] = 'Vincolata';
+    const config = grid.map((values, index) => ({ sheet: 'Budget', row_number: index + 1, values_json: JSON.stringify(values) }));
+    config.push({ sheet: 'Categorie finanziarie', row_number: 1, values_json: JSON.stringify([[{ id: 10, name: 'Altro', members: [] }]]) });
+    const plan = { allocations: [], links: [], budgetPolicies: [{ movement_source_row: 2, treatment: 'ordinary' }], utilityCompetence: utilityCompetenceContext(state, [row]) };
+    const result = core.computeFinance(core.sheetBook(config, [row], []), 2026, 11, plan, [], [], false, {});
+    for (const month of ['2026-08', '2026-09', '2026-10']) {
+      const value = result.yearly.find(item => item.month === month);
+      assert.equal(value.monthlyRemaining, 1226.07); assert.equal(value.spent, 0);
+    }
+    assert.equal(result.summary.monthlyRemaining, 1250);
+    assert.equal(result.yearly.find(item => item.month === '2026-11').spent, 221.79);
+    assert.equal(result.transactions.length, 1); assert.equal(result.transactions[0].date, '2026-11-02');
+    assert.equal(result.transactions[0].amount, -221.79);
   } finally { globalThis.Date = RealDate; }
 });

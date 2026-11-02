@@ -5,15 +5,14 @@ struct NativeUtilityPeriodFields: View {
     let amountCents: Int
     var body: some View {
         NativeUtilityMonthPicker(title: "Mese iniziale", selection: $period.start)
-            .accessibilityIdentifier("utility-period-start")
         NativeUtilityMonthPicker(title: "Mese finale", selection: $period.end)
-            .accessibilityIdentifier("utility-period-end")
         if period.months == nil {
             Text("Scegli un periodo da 1 a 12 mesi, con la fine successiva o uguale all’inizio.")
                 .font(NativeDesign.metadata).foregroundStyle(NativeDesign.warning)
         } else {
             ForEach(period.shares(amountCents)) { share in
                 LabeledContent(CivilDate.monthTitle(share.month), value: (Double(share.cents) / 100).euro)
+                    .accessibilityElement(children: .combine)
                     .accessibilityIdentifier("utility-share-" + share.month)
             }
             Text("Le quote sostituiscono le stime nei mesi indicati, anche passati. Il pagamento resta un’unica uscita alla data effettiva; gli accantonamenti del fondo rimangono separati.")
@@ -23,6 +22,7 @@ struct NativeUtilityPeriodFields: View {
 }
 
 private struct NativeUtilityMonthPicker: View {
+    @Environment(\.dynamicTypeSize) private var textSize
     let title: String
     @Binding var selection: String
     private var month: Binding<Int> {
@@ -32,9 +32,16 @@ private struct NativeUtilityMonthPicker: View {
         Binding(get: { Int(selection.prefix(4)) ?? 2026 }, set: { selection = String($0) + "-" + String(selection.suffix(2)) })
     }
     var body: some View {
-        HStack {
-            Text(title)
-            Spacer(minLength: NativeDesign.Space.small)
+        Group {
+            if textSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: NativeDesign.Space.small) { Text(title); selectors }
+            } else {
+                HStack { Text(title); Spacer(minLength: NativeDesign.Space.small); selectors }
+            }
+        }
+    }
+    private var selectors: some View {
+        HStack(spacing: NativeDesign.Space.small) {
             Picker("Mese · " + title, selection: month) {
                 ForEach(1...12, id: \.self) { value in
                     Text(CivilDate.monthTitle(String(format: "2026-%02d", value)).components(separatedBy: " ")[0]).tag(value)
