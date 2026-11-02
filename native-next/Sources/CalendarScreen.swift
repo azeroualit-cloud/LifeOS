@@ -17,7 +17,6 @@ struct CalendarScreen: View {
     @State private var months: [String] = []
     @State private var visibleMonth: String?
     @State private var jumpMonth: String?
-    @State private var windowAnchor: String?
     @State private var restoringWindow = false
     @State private var monthPositionReady = false
     @State private var positionRequest = UUID()
@@ -25,6 +24,7 @@ struct CalendarScreen: View {
     @State private var scrollWeek: String?
     @State private var viewportHeight: CGFloat = 0
     @State private var monthDays: [String: [CalendarDayPresentation]] = [:]
+    @State private var calendarWeeks: [CalendarWeek] = []
     @State private var monthData: [String: Record] = [:]
     @State private var eventsByDay: [String: [Record]] = [:]
     @State private var tasksByDay: [String: [Record]] = [:]
@@ -72,7 +72,7 @@ struct CalendarScreen: View {
             jumpMonth = String(selected.prefix(7))
         }
         .onChange(of: router.calendarDay) { _, day in
-            if showingDay { let month = String(day.prefix(7)); ensureWindow(around: month, preservePosition: false); visibleMonth = month }
+            if showingDay { let month = String(day.prefix(7)); ensureWindow(around: month); visibleMonth = month }
         }
         .onChange(of: showingDay) { _, value in if value { monthPositionReady = false; showingPreview = false } }
         .onChange(of: visibleMonth) { _, month in if let month { ensureWindow(around: month) } }
@@ -147,14 +147,9 @@ struct CalendarScreen: View {
                 .onChange(of: showingPreview) { _, preview in
                     if preview { revealSelectedWeek() }
                 }
-                .onChange(of: windowAnchor) { _, month in
-                    guard let month else { return }
-                    windowAnchor = nil
-                    position(month: month, day: nil)
-                }
                 .onChange(of: jumpMonth) { _, month in
                     guard let month else { return }
-                    ensureWindow(around: month, preservePosition: false)
+                    ensureWindow(around: month)
                     position(month: month, day: selected.hasPrefix(month) ? selected : nil)
                     jumpMonth = nil
                 }
@@ -183,7 +178,10 @@ struct CalendarScreen: View {
             guard positionRequest == request, !showingDay else { return }
             var transaction = Transaction(animation: nil)
             transaction.disablesAnimations = true
-            withTransaction(transaction) { scrollWeek = target }
+            withTransaction(transaction) {
+                scrollWeek = target
+                requestedWeek = nil; restoringWindow = false; monthPositionReady = true
+            }
         }
     }
     private var dayAgenda: some View {
@@ -336,12 +334,11 @@ struct CalendarScreen: View {
         if router.calendarDay.hasPrefix(month) { return router.calendarDay }
         return CivilDate.day().hasPrefix(month) ? CivilDate.day() : month + "-01"
     }
-    private func ensureWindow(around month: String, preservePosition: Bool = true) {
+    private func ensureWindow(around month: String) {
         if let index = months.firstIndex(of: month), index >= 2 && index < months.count - 2 { return }
         let next = NativeCalendarWindow.extended(months, around: month)
         guard next != months else { return }
         let added = Set(next).subtracting(months)
-        if preservePosition && !showingDay { restoringWindow = true; windowAnchor = month }
         months = next
         let retained = Set(next)
         monthData = monthData.filter { retained.contains($0.key) }
@@ -401,6 +398,7 @@ struct CalendarScreen: View {
             }
         }
         monthDays = grids
+        calendarWeeks = weeks(in: grids)
     }
     private func goToToday() {
         selected = CivilDate.day()
@@ -411,11 +409,11 @@ struct CalendarScreen: View {
         let month: String
         let index: Int
     }
-    private var calendarWeeks: [CalendarWeek] {
+    private func weeks(in grids: [String: [CalendarDayPresentation]]) -> [CalendarWeek] {
         months.flatMap { month in
-            let days = monthDays[month] ?? []
+            let days = grids[month] ?? []
             return (days.isEmpty ? [] : NativeCalendarWindow.weekIndexes(month, includeLeading: month == months.first)).map { index in
-                CalendarWeek(id: weekID(for: days[index * 7].day), month: month, index: index)
+                CalendarWeek(id: "week-" + days[index * 7].day, month: month, index: index)
             }
         }
     }
@@ -589,5 +587,5 @@ private struct NativeCalendarMonthFrames: PreferenceKey {
 
 private struct NativeCalendarViewportHeight: PreferenceKey {
     static var defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
 }

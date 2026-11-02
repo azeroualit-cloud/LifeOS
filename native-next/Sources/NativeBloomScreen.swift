@@ -14,6 +14,7 @@ private struct NativeBloomDocument: FileDocument {
 
 struct NativeBloomScreen: View {
     @EnvironmentObject private var router: NativeRouter
+    @Environment(\.dynamicTypeSize) private var typeSize
     @StateObject private var store = NativeBloomStore.shared
     @StateObject private var classifier = NativeBloomPlaceClassifier()
     @StateObject private var captureInbox = NativeBloomCaptureInbox.shared
@@ -37,6 +38,7 @@ struct NativeBloomScreen: View {
     @AppStorage("lifeos.bloom.filter.category") private var savedCategory = ""
     @State private var selectedPlaceNote: String?
     @State private var hasOpenedMap = false
+    @State private var hasOpenedRediscovery = false
     @State private var mapFitRequest = 0
     private var notes: [Record] {
         store.archive.items.filter { item in
@@ -52,11 +54,12 @@ struct NativeBloomScreen: View {
     }
     var body: some View {
         VStack {
-            Picker("Sezione Bloom", selection: $section) {
-                Label("Libreria", systemImage: "books.vertical").tag("Libreria")
-                Label("Mappa", systemImage: "map").tag("Mappa")
-                Label("Riscopri", systemImage: "sparkles").tag("Riscopri")
-            }.pickerStyle(.segmented).padding(.horizontal)
+            let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: NativeDesign.Space.small)) : AnyLayout(HStackLayout(spacing: NativeDesign.Space.small))
+            layout {
+                NativeBloomSectionButton(title: "Libreria", symbol: "books.vertical", id: "library", selection: $section)
+                NativeBloomSectionButton(title: "Mappa", symbol: "map", id: "map", selection: $section)
+                NativeBloomSectionButton(title: "Riscopri", symbol: "sparkles", id: "rediscovery", selection: $section)
+            }.padding(.horizontal, NativeDesign.Layout.screenInset)
             if let notice { Text(notice).font(.caption).foregroundStyle(.secondary) }
             if section == "Mappa" {
                 HStack {
@@ -71,12 +74,15 @@ struct NativeBloomScreen: View {
                     NativeBloomClusteredPlacesMap(places: mapAnnotations, isVisible: section == "Mappa", selectedID: selectedPlaceNote, fitRequest: mapFitRequest) { selectedPlaceNote = $0 }
                         .opacity(section == "Mappa" ? 1 : 0).allowsHitTesting(section == "Mappa").accessibilityHidden(section != "Mappa")
                 }
-                if section != "Mappa" {
-                    NativeBloomLibraryContent(store: store, notes: ordered, category: $category, showTrash: showTrash, rediscovery: section == "Riscopri", newRound: { rediscoveryRound += 1 }, goToLibrary: { section = "Libreria" })
-                        .searchable(text: $search, prompt: "Cerca nella Libreria")
+                NativeBloomLibraryContent(store: store, notes: notes, category: $category, showTrash: showTrash, rediscovery: false, newRound: { rediscoveryRound += 1 }, goToLibrary: { section = "Libreria" })
+                    .opacity(section == "Libreria" ? 1 : 0).allowsHitTesting(section == "Libreria").accessibilityHidden(section != "Libreria")
+                if hasOpenedRediscovery {
+                    NativeBloomLibraryContent(store: store, notes: ordered, category: $category, showTrash: false, rediscovery: true, newRound: { rediscoveryRound += 1 }, goToLibrary: { section = "Libreria" })
+                        .opacity(section == "Riscopri" ? 1 : 0).allowsHitTesting(section == "Riscopri").accessibilityHidden(section != "Riscopri")
                 }
             }
         }.navigationTitle("Bloom")
+            .searchable(text: $search, prompt: "Cerca nella Libreria")
             .navigationDestination(isPresented: Binding(get: { selectedPlaceNote != nil }, set: { if !$0 { selectedPlaceNote = nil } })) {
                 if let id = selectedPlaceNote, let group = mapGroups.first(where: { $0.id == id }) {
                     List {
@@ -101,7 +107,7 @@ struct NativeBloomScreen: View {
             }
             .onChange(of: category) { _, value in savedCategory = value }
             .onChange(of: section) { _, value in
-                if value == "Riscopri" { showTrash = false }
+                if value == "Riscopri" { showTrash = false; hasOpenedRediscovery = true }
                 if value == "Mappa" { hasOpenedMap = true }
             }
             .toolbar {
@@ -209,7 +215,6 @@ struct NativeBloomScreen: View {
         mapGroups.map { NativeBloomPlaceMapAnnotation(id: $0.id, place: $0.place, count: $0.notes.count) }
     }
     private var ordered: [Record] {
-        guard section == "Riscopri" else { return notes }
         let candidates = notes.compactMap { item -> NativeBloomRediscoveryCandidate? in
             guard let id = UUID(uuidString: item.text("id")) else { return nil }
             return .init(id: id, kind: item.text("kind"), collectionID: UUID(uuidString: item.text("collectionID")), host: URL(string: item.text("urlString"))?.host, isArchived: item.flag("archived"))
@@ -220,6 +225,31 @@ struct NativeBloomScreen: View {
         return ids.compactMap { byID[$0.uuidString.lowercased()] }
     }
 
+}
+
+private struct NativeBloomSectionButton: View {
+    let title: String
+    let symbol: String
+    let id: String
+    @Binding var selection: String
+    private var selected: Bool { selection == title }
+    private var control: some View {
+        Button { selection = title } label: {
+            Label(title, systemImage: symbol).labelStyle(.titleAndIcon).font(.subheadline)
+                .lineLimit(1).minimumScaleFactor(0.8)
+                .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget)
+        }.accessibilityIdentifier("bloom-section-" + id)
+            .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+    @ViewBuilder var body: some View {
+        if #available(iOS 26.0, *) {
+            if selected { control.buttonStyle(.glassProminent).buttonBorderShape(.capsule) }
+            else { control.buttonStyle(.glass).buttonBorderShape(.capsule) }
+        } else {
+            if selected { control.buttonStyle(.borderedProminent).buttonBorderShape(.capsule) }
+            else { control.buttonStyle(.bordered).buttonBorderShape(.capsule) }
+        }
+    }
 }
 
 struct NativeBloomDetail: View {

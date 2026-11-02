@@ -48,6 +48,13 @@ final class NativeRevision74UITests: XCTestCase {
         if !saved { print("BLOOM_SAVE_DIAGNOSTIC " + app.debugDescription) }
         XCTAssertFalse(title.exists, "Successful save must close the editor")
         XCTAssertTrue(saved, "Saved note must be present in the library")
+        for name in ["map", "rediscovery", "library"] {
+            let section = app.buttons["bloom-section-" + name]
+            XCTAssertTrue(section.waitForExistence(timeout: 10)); section.tap()
+            XCTAssertTrue(section.isSelected)
+        }
+        XCTAssertTrue(note.waitForExistence(timeout: 10))
+        capture("74-bloom-library")
         app.tabBars.buttons["Dashboard"].tap(); app.tabBars.buttons["Altro"].tap()
         XCTAssertTrue(note.waitForExistence(timeout: 10))
         app.openOtherDestination("Calendario")
