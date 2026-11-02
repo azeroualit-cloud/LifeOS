@@ -100,11 +100,11 @@ struct CalendarScreen: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: NativeDesign.Space.none) {
-                        ForEach(months, id: \.self) { month in
-                            monthGrid(month).id(month)
+                        ForEach(calendarWeeks) { week in
+                            weekGrid(week.month, week: week.index).id(week.id)
                                 .background {
                                     GeometryReader { geometry in
-                                        Color.clear.preference(key: NativeCalendarMonthFrames.self, value: [month: geometry.frame(in: .named("calendar-viewport"))])
+                                        Color.clear.preference(key: NativeCalendarMonthFrames.self, value: [week.month: geometry.frame(in: .named("calendar-viewport"))])
                                     }
                                 }
                         }
@@ -122,7 +122,7 @@ struct CalendarScreen: View {
                         let day = positioningDay
                         positioningMonth = nil; positioningDay = nil
                         restoringWindow = false; monthPositionReady = true; visibleMonth = target
-                        if let day { proxy.scrollTo(day, anchor: .center) }
+                        if let day { proxy.scrollTo(weekID(for: day), anchor: .center) }
                         return
                     }
                     guard monthPositionReady, !restoringWindow else { return }
@@ -141,7 +141,7 @@ struct CalendarScreen: View {
                     // that parent's frame does not emit another preference.
                     positioningMonth = nil; positioningDay = nil
                     restoringWindow = false; monthPositionReady = true
-                    proxy.scrollTo(selected, anchor: .center)
+                    proxy.scrollTo(weekID(for: selected), anchor: .center)
                 }
                 .onChange(of: windowAnchor) { _, month in
                     guard let month else { return }
@@ -172,7 +172,9 @@ struct CalendarScreen: View {
         Task { @MainActor in
             await Task.yield()
             guard positioningMonth == targetMonth, !showingDay else { return }
-            proxy.scrollTo(targetMonth, anchor: .top)
+            if let week = calendarWeeks.first(where: { $0.month == targetMonth }) {
+                proxy.scrollTo(week.id, anchor: .top)
+            }
         }
     }
     private var dayAgenda: some View {
@@ -395,10 +397,26 @@ struct CalendarScreen: View {
         selected = CivilDate.day()
         jumpMonth = String(selected.prefix(7))
     }
-    private func monthGrid(_ month: String) -> some View {
+    private struct CalendarWeek: Identifiable {
+        let id: String
+        let month: String
+        let index: Int
+    }
+    private var calendarWeeks: [CalendarWeek] {
+        months.flatMap { month in
+            let days = monthDays[month] ?? []
+            return (days.isEmpty ? [] : NativeCalendarWindow.weekIndexes(month, includeLeading: month == months.first)).map { index in
+                CalendarWeek(id: weekID(for: days[index * 7].day), month: month, index: index)
+            }
+        }
+    }
+    private func weekID(for day: String) -> String {
+        let weekday = CivilDate.calendar.component(.weekday, from: CivilDate.date(day))
+        return "week-" + CivilDate.adding(-((weekday + 5) % 7), to: day)
+    }
+    private func weekGrid(_ month: String, week: Int) -> some View {
         let days = monthDays[month] ?? []
         return VStack(spacing: NativeDesign.Space.none) {
-            ForEach(days.isEmpty ? [] : NativeCalendarWindow.weekIndexes(month, includeLeading: month == months.first), id: \.self) { week in
                 if (0..<7).contains(where: { days[week * 7 + $0].day.hasSuffix("-01") }) {
                     HStack(spacing: NativeDesign.Space.xs) {
                         ForEach(0..<7, id: \.self) { index in
@@ -434,9 +452,7 @@ struct CalendarScreen: View {
 
                     }
                 }
-                .id("week-" + month + "-" + String(week))
                 Divider()
-            }
         }.dynamicTypeSize(...DynamicTypeSize.xxxLarge)
     }
     @State private var painting = false
@@ -558,6 +574,6 @@ struct EventEditor: View {
 private struct NativeCalendarMonthFrames: PreferenceKey {
     static var defaultValue: [String: CGRect] = [:]
     static func reduce(value: inout [String: CGRect], nextValue: () -> [String: CGRect]) {
-        value.merge(nextValue(), uniquingKeysWith: { _, new in new })
+        value.merge(nextValue(), uniquingKeysWith: { old, new in old.union(new) })
     }
 }

@@ -1,23 +1,9 @@
-# Implementazione 74 — stato locale, non distribuito
+# Implementazione 74 — stato della verifica
 
-Baseline: build 73, commit a4fb3e40514a15208a04282ac82cc55ed38bbdcd.
+Questo documento sostituisce il primo elenco provvisorio. Implementazione, architettura, prove intermedie e limiti sono descritti in [Revisione 74](REVISIONE-74.md); l'inventario effettivo delle animazioni è in [Movimento 74](MOVIMENTO-74.md).
 
-Implementati in questa lavorazione:
-- Quattro schede Dashboard/Attività/Salute/Altro; destinazioni Finanza/Calendario/Bloom nello stack Altro e accesso esplicito dalla Dashboard.
-- Puntino calendario legato al turno, mese corrente accentato e separatore prima della settimana di inizio mese.
-- Rimozione particelle turno e avanzamento animato del riempimento.
-- Modello nutrizione Decimal, campi macro, calcolo 4/4/9, timestamp, cronologia/edit e richieste HealthKit.
-- Registro locale pending/confirmed con sync identifiers/version per i quattro campioni; retry della revisione pendente. Richiede verifica della semantica HealthKit e test delle interruzioni prima della distribuzione.
-- Primo archivio Bloom separato, allegati content-addressed SHA256, indice atomico, backup sorgente conservato, import preview/idempotenza con rifiuto dei conflitti, ricerca/testo/modifica/Cestino, mappa e mescolamento.
+Implementati: navigazione Dashboard/Attività/Salute/Altro, calendario e controlli nativi, modulo nutrizione con writer HealthKit separato e registro recuperabile, archivio Bloom separato, importazione con conflitti espliciti, Libreria/Mappa/Riscopri, allegati originali, backup e cattura LifeOS.
 
-Verifiche effettive: parsing sintattico Swift, git diff --check, checker design system passati. Nessun compilatore Swift/Xcode locale; nessun test XCTest eseguito in questa lavorazione. Nessuna IPA prodotta o pubblicata.
+La prima verifica Apple ha superato 230 test unitari e due UI. I successivi controlli della distribuzione hanno rilevato un problema di raggiungibilità della data selezionata dopo il ridimensionamento dell'agenda; la correzione deve superare nuovamente i controlli principali e compatti prima della pubblicazione.
 
-Da completare prima di considerare concluso il piano:
-1. Documentazione SDK/runtime iOS reale, compilazione Apple e correzione type-check; test navigazione aggiornati alle quattro schede.
-2. Servizio HealthKit iniettabile, test permessi/errori/riavvio/modifiche e verifica fisica. Scelta fonte nutrizionale esplicita.
-3. Validazione Bloom completa (date, riferimenti, coordinate, framing, metadati, limiti), conflitti con tre scelte per record e report persistente; mapping categorie.
-4. Categorie/fissati/multiselezione, creazione link/foto/file, media originali e secondari, ritaglio, Markdown completo, cluster e gestione luoghi, planner Riscopri e preferenze, App Intent/cattura.
-5. Transizione geometrica calendario, controlli nativi, selezione grafici, test Riduci movimento e tocchi rapidi.
-6. QA visuale e regressioni, archivio e download IPA verificato. Backup reale Bloom e confronto fisico restano verifiche distinte.
-
-Il modulo Bloom attuale è un primo incremento funzionante nel codice, non l’intera integrazione descritta nello ZIP. Non rimuovere Bloom originale sulla base di questo stato.
+La build 73 resta la consegna verificata finché Revisione 74 non riporta una distribuzione riuscita e un download controllato. Nessuna prova fisica HealthKit o comparazione con iOS 27.2 è stata eseguita. Il database Bloom reale del telefono non è nello ZIP: la sua migrazione richiede un backup esportato e il controllo successivo di conteggi, allegati e riapertura offline.
