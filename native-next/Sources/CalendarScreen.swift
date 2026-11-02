@@ -5,6 +5,7 @@ struct CalendarScreen: View {
     @EnvironmentObject var router: NativeRouter
     @Environment(\.dismiss) private var dismiss
     @Environment(\.nativeReduceMotion) private var reduceMotion
+    @Namespace private var calendarMotion
     @State private var showingDay = false
     @State private var showingPreview = false
     private var selected: String {
@@ -172,7 +173,7 @@ struct CalendarScreen: View {
     private var dayAgenda: some View {
         VStack(spacing: NativeDesign.Space.none) {
             HStack(spacing: NativeDesign.Space.small) {
-                Button { showingDay = false; jumpMonth = String(selected.prefix(7)) } label: {
+                Button { withAnimation(reduceMotion ? nil : .smooth(duration: NativeDesign.Motion.navigationResponse)) { showingDay = false; jumpMonth = String(selected.prefix(7)) } } label: {
                     Label(NativeCalendarWindow.monthLabel(String(selected.prefix(7))), systemImage: "chevron.left")
                         .font(.subheadline).frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle())
                 }.foregroundStyle(NativeDesign.calendarAccent).accessibilityIdentifier("calendar-back-month")
@@ -191,6 +192,7 @@ struct CalendarScreen: View {
                 ForEach(weekDays, id: \.self) { day in
                     Button { selected = day; store.calendarMonth = String(day.prefix(7)) } label: {
                         CalendarDayCell(item: presentation(for: day), active: day == selected, appearance: .calendarWeek).equatable()
+                            .matchedGeometryEffect(id: day, in: calendarMotion)
                     }.accessibilityIdentifier("calendar-week-day-" + day)
                         .accessibilityLabel(CivilDate.label(day) + ", " + (shift(on: day)?.title ?? "nessun turno"))
                         .accessibilityAddTraits(day == selected ? .isSelected : [])
@@ -207,7 +209,7 @@ struct CalendarScreen: View {
         HStack(spacing: NativeDesign.Space.small) {
             Text(CivilDate.label(selected).capitalized).font(.headline).accessibilityAddTraits(.isHeader)
             Spacer(minLength: NativeDesign.Space.xs)
-            Button { showingDay = true } label: {
+            Button { withAnimation(reduceMotion ? nil : .smooth(duration: NativeDesign.Motion.navigationResponse)) { showingDay = true } } label: {
                 Image(systemName: "arrow.up.left.and.arrow.down.right")
                     .frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget).contentShape(Rectangle())
             }.accessibilityLabel("Espandi giornata").accessibilityIdentifier("calendar-expand-day")
@@ -421,7 +423,7 @@ struct CalendarScreen: View {
                                         } catch { store.error = error.localizedDescription }
                                     }
                                 }
-                            } label: { CalendarDayCell(item: displayed, active: showingPreview ? item.day == selected : item.isToday).equatable().frame(minHeight: NativeDesign.Layout.calendarMonthDayHeight) }
+                            } label: { CalendarDayCell(item: displayed, active: showingPreview ? item.day == selected : item.isToday).equatable().matchedGeometryEffect(id: item.day, in: calendarMotion).frame(minHeight: NativeDesign.Layout.calendarMonthDayHeight) }
                                 .buttonStyle(NativePressStyle()).disabled(painting && (store.busy || (!store.isDemo && monthData[month] == nil)))
                                 .id(item.day).accessibilityIdentifier("calendar-day-" + item.day)
                                 .accessibilityLabel(item.label + ", " + (item.shift?.title ?? "nessun turno"))

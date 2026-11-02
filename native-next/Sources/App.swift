@@ -88,7 +88,8 @@ enum NativeSheet: Identifiable {
     }
     func showCalendar(day: String = CivilDate.day()) {
         calendarOpensDay = true
-        requestedCalendarDay = nil; calendarDay = day; tab = .other
+        let alreadyOpen = tab == .other && otherPath.last == .calendar
+        requestedCalendarDay = alreadyOpen ? nil : day; calendarDay = day; tab = .other
         otherPath = [.calendar]; calendarFocusRequest = UUID()
     }
 }
@@ -152,7 +153,6 @@ struct NativeRoot: View {
             if phase == .active {
                 if returnedFromBackground {
                     returnedFromBackground = false; router.activationDate = Date()
-                    if router.tab == .other && router.otherPath.last == .calendar { router.calendarOpensDay = false; router.calendarDay = CivilDate.day(); router.calendarFocusRequest = UUID(); store.calendarMonth = CivilDate.month() }
                 }
                 currentDay = CivilDate.day(); store.rollover(); Task { await store.sync(automatic: true) } }
         }
@@ -218,7 +218,7 @@ struct NativeRoot: View {
         NavigationStack(path: $router.otherPath) {
             List {
                 NavigationLink(value: NativeOtherDestination.finance) { Label("Finanza", systemImage: "chart.bar") }
-                Button { router.calendarOpensDay = false; router.calendarDay = CivilDate.day(); store.calendarMonth = CivilDate.month(); router.calendarFocusRequest = UUID(); router.otherPath = [.calendar] } label: { Label("Calendario", systemImage: "calendar") }
+                Button { router.requestedCalendarDay = nil; router.calendarOpensDay = false; router.calendarDay = CivilDate.day(); store.calendarMonth = CivilDate.month(); router.calendarFocusRequest = UUID(); router.otherPath = [.calendar] } label: { Label("Calendario", systemImage: "calendar") }
                 NavigationLink(value: NativeOtherDestination.bloom) { Label("Bloom", systemImage: "books.vertical") }
             }.navigationTitle("Altro")
                 .navigationDestination(for: NativeOtherDestination.self) { destination in

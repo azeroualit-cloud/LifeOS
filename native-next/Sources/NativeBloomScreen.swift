@@ -1,6 +1,8 @@
 import SwiftUI
 import MapKit
 import UniformTypeIdentifiers
+import QuickLook
+import PhotosUI
 
 private struct NativeBloomDocument: FileDocument {
     static var readableContentTypes: [UTType] { [.json] }
@@ -23,12 +25,13 @@ struct NativeBloomScreen: View {
     @State private var resolutions: [String: NativeBloomConflictChoice] = [:]
     @State private var notice: String?
     @State private var showTrash = false
+    @State private var category = ""
     @State private var composing = false
     @State private var shuffled: [String] = []
     @State private var position: MapCameraPosition = .automatic
     private var notes: [Record] {
         store.archive.items.filter { item in
-            item.flag("archived") == showTrash && (search.isEmpty || [item.text("title"), item.text("text"), item.text("notes"), item.text("urlString")].joined(separator: " ").localizedCaseInsensitiveContains(search))
+            item.flag("archived") == showTrash && (category.isEmpty || (item["tagIDs"]?.array.map(\.string) ?? [item.text("collectionID")]).contains(category)) && (search.isEmpty || [item.text("title"), item.text("text"), item.text("notes"), item.text("urlString")].joined(separator: " ").localizedCaseInsensitiveContains(search))
         }.sorted { $0.amount("capturedAt") > $1.amount("capturedAt") }
     }
     var body: some View {
@@ -53,6 +56,12 @@ struct NativeBloomScreen: View {
                 }
             } else {
                 List {
+                    if section == "Libreria" {
+                        Picker("Categoria", selection: $category) {
+                            Text("Tutte le note").tag("")
+                            ForEach(store.archive.collections.map { DisplayRecord($0, key: "id") }) { row in Text(row.value.text("name")).tag(row.value.text("id")) }
+                        }
+                    }
                     if section == "Riscopri" { Button("Nuovo giro") { shuffled = notes.map { $0.text("id") }.shuffled() } }
                     ForEach(ordered.map { DisplayRecord($0, key: "id") }) { item in
                         NavigationLink { NativeBloomDetail(store: store, id: item.value.text("id")) } label: {
@@ -147,6 +156,12 @@ private struct NativeBloomDetail: View {
                         } catch { store.error = error.localizedDescription }
                     }
                 }
+                ForEach(Array(item.records("noteFiles").enumerated()), id: \.offset) { index, attachment in
+                    Button("Apri " + attachment.text("name", fallback: "allegato")) { openAttachment(index) }
+                }
+                ForEach(Array((item["noteLinks"]?.array ?? []).enumerated()), id: \.offset) { _, value in
+                    if let url = URL(string: value.string), ["http", "https"].contains(url.scheme ?? "") { Link(value.string, destination: url) }
+                }
                 let place = item.record("place")
                 if !place.isEmpty {
                     Text(place.text("name"))
@@ -159,7 +174,17 @@ private struct NativeBloomDetail: View {
         }.navigationTitle("Nota").navigationBarTitleDisplayMode(.inline)
             .toolbar { Button("Modifica") { editing = true } }
             .sheet(isPresented: $editing) { NavigationStack { NativeBloomComposer(store: store, initial: item) } }
-            .sheet(isPresented: Binding(get: { file != nil }, set: { if !$0 { file = nil } })) { if let file { ShareLink("Condividi allegato", item: file).padding() } }
+            .quickLookPreview($file)
+    }
+    private func openAttachment(_ index: Int) {
+        do {
+            let attachments = try store.hydrated(item).records("noteFiles")
+            guard attachments.indices.contains(index), let bytes = Data(base64Encoded: attachments[index].text("data")) else { throw Message(text: "Allegato non disponibile.") }
+            let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            let name = URL(fileURLWithPath: attachments[index].text("name", fallback: "allegato")).lastPathComponent
+            let path = directory.appendingPathComponent(name); try bytes.write(to: path); file = path
+        } catch { store.error = error.localizedDescription }
     }
 }
 
@@ -169,17 +194,90 @@ private struct NativeBloomComposer: View {
     @Environment(\.dismiss) private var dismiss
     @State private var title = ""
     @State private var text = ""
+    @State private var link = ""
+    @State private var otherLinks: [JSONValue] = []
+    @State private var readFailed = false
+    @State private var tags = Set<String>()
+    @State private var pinned = Set<String>()
+    @State private var categoryName = ""
+    @State private var attachments: [Record] = []
+    @State private var importing = false
+    @State private var photo: PhotosPickerItem?
+    @State private var error: String?
     var body: some View {
-        Form { TextField("Titolo", text: $title); TextEditor(text: $text).frame(minHeight: NativeDesign.Layout.activityDescriptionHeight) }
+        Form {
+            TextField("Titolo", text: $title).accessibilityIdentifier("bloom-note-title")
+            TextEditor(text: $text).accessibilityIdentifier("bloom-note-text").frame(minHeight: NativeDesign.Layout.activityDescriptionHeight)
+            TextField("Link web", text: $link).keyboardType(.URL).textInputAutocapitalization(.never).autocorrectionDisabled()
+            Section("Categorie") {
+                ForEach(store.archive.collections.map { DisplayRecord($0, key: "id") }) { row in
+                    let id = row.value.text("id")
+                    Toggle(row.value.text("name"), isOn: Binding(get: { tags.contains(id) }, set: { value in if value { tags.insert(id) } else { tags.remove(id); pinned.remove(id) } }))
+                    if tags.contains(id) {
+                        Toggle("Fissa in " + row.value.text("name"), isOn: Binding(get: { pinned.contains(id) }, set: { value in if value { pinned.insert(id) } else { pinned.remove(id) } }))
+                    }
+                }
+                TextField("Nuova categoria", text: $categoryName)
+                Button("Crea categoria") { do { tags.insert(try store.addCategory(categoryName)); categoryName = "" } catch { self.error = error.localizedDescription } }.disabled(categoryName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            }
+            Section("Allegati") {
+                ForEach(Array(attachments.enumerated()), id: \.offset) { index, attachment in
+                    HStack { Text(attachment.text("name")); Spacer(); Button("Rimuovi", role: .destructive) { attachments.remove(at: index) } }
+                }
+                Button("Aggiungi file") { importing = true }.disabled(attachments.count >= 10)
+                PhotosPicker("Aggiungi foto", selection: $photo, matching: .images).disabled(attachments.count >= 10)
+            }
+            if let error { Text(error).foregroundStyle(.red) }
+        }
+            .fileImporter(isPresented: $importing, allowedContentTypes: [.data], allowsMultipleSelection: true) { result in
+                do {
+                    let urls = try result.get()
+                    guard attachments.count + urls.count <= 10 else { throw Message(text: "Massimo 10 allegati per nota.") }
+                    var next = attachments
+                    for url in urls {
+                        let access = url.startAccessingSecurityScopedResource(); defer { if access { url.stopAccessingSecurityScopedResource() } }
+                        guard (try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0) <= 25 * 1024 * 1024 else { throw Message(text: "File superiore a 25 MiB.") }
+                        let bytes = try Data(contentsOf: url)
+                        next.append(["id": .string(UUID().uuidString), "name": .string(url.lastPathComponent), "type": .string(UTType(filenameExtension: url.pathExtension)?.identifier ?? UTType.data.identifier), "data": .string(bytes.base64EncodedString())])
+                    }
+                    attachments = next
+                } catch { self.error = error.localizedDescription }
+            }
+            .onChange(of: photo) { _, selected in
+                Task {
+                    do {
+                        guard let selected, let bytes = try await selected.loadTransferable(type: Data.self) else { return }
+                        guard bytes.count <= 25 * 1024 * 1024, attachments.count < 10 else { throw Message(text: "Limite allegati superato.") }
+                        let type = selected.supportedContentTypes.first ?? .image
+                        attachments.append(["id": .string(UUID().uuidString), "name": .string("Foto." + (type.preferredFilenameExtension ?? "jpg")), "type": .string(type.identifier), "data": .string(bytes.base64EncodedString())])
+                    } catch { self.error = error.localizedDescription }
+                }
+            }
             .navigationTitle(initial.isEmpty ? "Nuova nota" : "Modifica nota")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Annulla") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) { Button("Salva") {
                     var item = initial
                     if item.isEmpty { item = ["id": .string(UUID().uuidString), "kind": .string("text"), "urlString": .string(""), "capturedAt": .number(Date().timeIntervalSinceReferenceDate), "archived": .bool(false), "noteVersion": .int(1)] }
+                    if !link.isEmpty {
+                        guard let url = URL(string: link), ["https", "http"].contains(url.scheme?.lowercased() ?? ""), url.host != nil else { error = "Inserisci un link HTTP o HTTPS valido."; return }
+                        if item.text("kind") == "link" { item["urlString"] = .string(link) }
+                        else { item["noteLinks"] = .array([.string(link)] + otherLinks) }
+                    } else if item.text("kind") != "link" { item["noteLinks"] = .array(otherLinks) }
+                    item["tagIDs"] = .array(tags.sorted().map(JSONValue.string))
+                    item["pinnedCategoryIDs"] = .array(pinned.intersection(tags).sorted().map(JSONValue.string))
+                    item["collectionID"] = tags.sorted().first.map(JSONValue.string) ?? .null
+                    item["noteFiles"] = .array(attachments.map(JSONValue.object))
                     item["title"] = .string(title); item[item.text("kind") == "text" ? "text" : "notes"] = .string(text); item["modifiedAt"] = .number(Date().timeIntervalSinceReferenceDate)
                     do { try store.save(item); dismiss() } catch { store.error = error.localizedDescription }
-                }.disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) }
-            }.onAppear { title = initial.text("title"); text = initial.text("text", fallback: initial.text("notes")) }
+                }.disabled(readFailed || title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && link.isEmpty && attachments.isEmpty) }
+            }.onAppear {
+                title = initial.text("title"); text = initial.text("text", fallback: initial.text("notes"))
+                link = initial.text("urlString", fallback: initial["noteLinks"]?.array.first?.string ?? "")
+                tags = Set(initial["tagIDs"]?.array.map(\.string) ?? (initial.text("collectionID").isEmpty ? [] : [initial.text("collectionID")]))
+                pinned = Set(initial["pinnedCategoryIDs"]?.array.map(\.string) ?? [])
+                otherLinks = Array((initial["noteLinks"]?.array ?? []).dropFirst())
+                do { attachments = try store.hydrated(initial).records("noteFiles") } catch { readFailed = true; self.error = error.localizedDescription }
+            }
     }
 }

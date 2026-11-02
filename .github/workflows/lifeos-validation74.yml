@@ -61,7 +61,7 @@ jobs:
         working-directory: app
         run: |
           set -o pipefail
-          xcodebuild test -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$VALIDATION_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeTests -resultBundlePath Validation.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee validation.log
+          xcodebuild test -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$VALIDATION_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeTests -only-testing:LifeOSProbeUITests/NativeRevision74UITests -resultBundlePath Validation.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee validation.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:

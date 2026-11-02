@@ -78,9 +78,21 @@ struct NativeBloomArchive: Codable {
     }
     func save(_ record: Record) throws {
         var next = archive
+        var validation = archive
+        validation.items = try archive.items.filter { $0.text("id") != record.text("id") }.map(hydrated) + [hydrated(record)]
+        _ = try preview(JSONEncoder().encode(validation))
         let stored = try externalize(record)
         next.items.removeAll { $0.text("id") == record.text("id") }; next.items.append(stored)
         try commit(next)
+    }
+    func addCategory(_ name: String) throws -> String {
+        let clean = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !clean.isEmpty, clean.utf8.count <= 1024 else { throw Message(text: "Inserisci un nome categoria valido.") }
+        if let existing = archive.collections.first(where: { $0.text("name").localizedCaseInsensitiveCompare(clean) == .orderedSame }) { return existing.text("id") }
+        var next = archive; let id = UUID().uuidString
+        guard next.collections.count < 2000 else { throw Message(text: "Limite categorie raggiunto.") }
+        next.collections.append(["id": .string(id), "name": .string(clean), "createdAt": .number(Date().timeIntervalSinceReferenceDate)])
+        try commit(next); return id
     }
     func trash(_ record: Record, restore: Bool = false) throws {
         var changed = record; changed["archived"] = .bool(!restore)

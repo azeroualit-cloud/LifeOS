@@ -55,7 +55,7 @@ struct NativeNutritionScreen: View {
         }.navigationTitle("Salute")
     }
     private func field(_ title: String, text: Binding<String>) -> some View {
-        HStack { Text(title); TextField("0", text: text).keyboardType(.decimalPad).multilineTextAlignment(.trailing).accessibilityLabel(title + " in grammi"); Text("g").foregroundStyle(.secondary) }
+        HStack { Text(title); TextField("0", text: text).keyboardType(.decimalPad).multilineTextAlignment(.trailing).accessibilityLabel(title + " in grammi").accessibilityIdentifier("nutrition-" + title); Text("g").foregroundStyle(.secondary) }
     }
     private func clear() { editing = nil; protein = ""; carbohydrate = ""; fat = ""; date = Date() }
 }
