@@ -37,7 +37,7 @@ struct NativeBloomLibraryContent: View {
                 VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
                     Picker("Categoria", selection: $category) {
                         Text("Tutte le note").tag("")
-                        ForEach(store.archive.collections.map { DisplayRecord($0, key: "id") }) { row in Text(row.value.text("name")).tag(row.value.text("id")) }
+                        ForEach(store.archive.collections.map { NativeBloomRow($0) }) { row in Text(row.value.text("name")).tag(row.value.text("id")) }
                     }.pickerStyle(.menu).labelsHidden().lineLimit(1).minimumScaleFactor(0.75)
                         .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
                     HStack {
@@ -56,7 +56,7 @@ struct NativeBloomLibraryContent: View {
                 HStack {
                     Text("\(selected.count) selezionate").font(.caption)
                     Menu("Categoria") {
-                        ForEach(store.archive.collections.map { DisplayRecord($0, key: "id") }) { row in
+                        ForEach(store.archive.collections.map { NativeBloomRow($0) }) { row in
                             Button(row.value.text("name")) { perform { try store.updateNotes(selected, category: row.value.text("id")) } }
                         }
                     }.disabled(selected.isEmpty)
@@ -67,12 +67,12 @@ struct NativeBloomLibraryContent: View {
             else if grid || rediscovery {
                 ScrollView {
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: NativeDesign.Layout.bloomGridMinimum), spacing: NativeDesign.Space.medium)], alignment: .leading, spacing: NativeDesign.Space.medium) {
-                        ForEach(notes.map { DisplayRecord($0, key: "id") }) { item in destination(item.value) }
+                        ForEach(notes.map { NativeBloomRow($0) }) { item in destination(item.value) }
                     }.padding(.horizontal).padding(.bottom, NativeDesign.Layout.scrollClearance)
                 }
             } else {
                 List {
-                    ForEach(notes.map { DisplayRecord($0, key: "id") }) { item in
+                    ForEach(notes.map { NativeBloomRow($0) }) { item in
                         destination(item.value).swipeActions {
                             Button(showTrash ? "Ripristina" : "Cestino", role: showTrash ? nil : .destructive) { perform { try store.trash(item.value, restore: showTrash) } }
                         }
@@ -119,7 +119,7 @@ private struct NativeBloomCategories: View {
                 }.disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
             Section("Categorie") {
-                ForEach(store.archive.collections.map { DisplayRecord($0, key: "id") }) { row in
+                ForEach(store.archive.collections.map { NativeBloomRow($0) }) { row in
                     let members = store.archive.items.filter { !$0.flag("archived") && ($0["tagIDs"]?.array.map(\.string) ?? [$0.text("collectionID")]).contains(row.value.text("id")) }
                     HStack {
                         ForEach(Array(members.prefix(3).enumerated()), id: \.offset) { _, member in

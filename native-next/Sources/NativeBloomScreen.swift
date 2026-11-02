@@ -87,7 +87,7 @@ struct NativeBloomScreen: View {
                 if let id = selectedPlaceNote, let group = mapGroups.first(where: { $0.id == id }) {
                     List {
                         Section(group.place.name) {
-                            ForEach(group.notes.map { DisplayRecord($0, key: "id") }) { row in
+                            ForEach(group.notes.map { NativeBloomRow($0) }) { row in
                                 NavigationLink { NativeBloomDetail(store: store, id: row.value.text("id")) } label: { Text(row.value.text("title", fallback: row.value.text("fileName", fallback: "Nota"))) }
                             }
                         }
@@ -433,7 +433,7 @@ private struct NativeBloomComposer: View {
     }
     private var categorySection: some View {
             Section("Categorie") {
-                ForEach(store.archive.collections.map { DisplayRecord($0, key: "id") }) { row in
+                ForEach(store.archive.collections.map { NativeBloomRow($0) }) { row in
                     let id = row.value.text("id")
                     Toggle(row.value.text("name"), isOn: Binding(get: { tags.contains(id) }, set: { value in if value { tags.insert(id) } else { tags.remove(id); pinned.remove(id) } }))
                     if tags.contains(id) {

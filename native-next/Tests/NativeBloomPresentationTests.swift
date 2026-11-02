@@ -2,6 +2,14 @@ import XCTest
 @testable import LifeOSProbe
 
 final class NativeBloomPresentationTests: XCTestCase {
+    func testNoteAndCategoryRowsRetainDistinctUUIDsAcrossContentUpdates() {
+        let ids = [UUID().uuidString, UUID().uuidString]
+        let rows = ids.map { NativeBloomRow(["id": .string($0), "title": .string("Titolo")]) }
+        XCTAssertEqual(rows.map(\.id), ids)
+        XCTAssertEqual(Set(rows.map(\.id)).count, 2)
+        var edited = rows[0].value; edited["title"] = .string("Modificato")
+        XCTAssertEqual(NativeBloomRow(edited).id, ids[0])
+    }
     func testMarkdownPreservesTablesCodeAndCompactTitleOnlyContent() {
         let blocks = NativeBloomMarkdownBlock.parse("# Titolo\n\n| A | B |\n| --- | --- |\n| Uno | Due |\n\n```swift\nlet n = 1\n```")
         XCTAssertEqual(blocks.count, 3)

@@ -2,6 +2,13 @@ import Foundation
 import CryptoKit
 import Combine
 
+/// Bloom identities are UUID strings; LifeOS task/finance rows use numeric IDs.
+struct NativeBloomRow: Identifiable {
+    let value: Record
+    var id: String { value.text("id") }
+    init(_ value: Record) { self.value = value }
+}
+
 enum NativeBloomConflictChoice: String, CaseIterable { case keep, replace, copy }
 struct NativeBloomConflict: Identifiable { let id: String; let title: String }
 

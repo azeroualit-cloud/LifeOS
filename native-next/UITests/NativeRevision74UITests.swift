@@ -48,12 +48,18 @@ final class NativeRevision74UITests: XCTestCase {
         if !saved { print("BLOOM_SAVE_DIAGNOSTIC " + app.debugDescription) }
         XCTAssertFalse(title.exists, "Successful save must close the editor")
         XCTAssertTrue(saved, "Saved note must be present in the library")
+        app.buttons["Nuova nota"].tap()
+        let secondName = "Seconda nota " + UUID().uuidString.prefix(8)
+        XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText(String(secondName))
+        app.buttons["Salva"].tap()
+        let second = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label == %@", "bloom-note-", String(secondName))).firstMatch
+        XCTAssertTrue(second.waitForExistence(timeout: 10)); XCTAssertTrue(note.exists)
         for name in ["map", "rediscovery", "library"] {
             let section = app.buttons["bloom-section-" + name]
             XCTAssertTrue(section.waitForExistence(timeout: 10)); section.tap()
             XCTAssertTrue(section.isSelected)
         }
-        XCTAssertTrue(note.waitForExistence(timeout: 10))
+        XCTAssertTrue(note.waitForExistence(timeout: 10)); XCTAssertTrue(second.exists)
         capture("74-bloom-library")
         app.tabBars.buttons["Dashboard"].tap(); app.tabBars.buttons["Altro"].tap()
         XCTAssertTrue(note.waitForExistence(timeout: 10))
