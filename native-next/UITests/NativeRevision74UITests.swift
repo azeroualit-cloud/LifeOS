@@ -36,13 +36,23 @@ final class NativeRevision74UITests: XCTestCase {
         XCTAssertTrue(detail.isHittable); detail.tap()
         XCTAssertTrue(app.navigationBars["Peso e calorie"].waitForExistence(timeout: 10))
         let chart = app.descendants(matching: .any).matching(identifier: "health-weight-chart").firstMatch
-        XCTAssertTrue(chart.waitForExistence(timeout: 10))
-        let caption = app.staticTexts["health-weight-selection"], intake = app.textFields["health-intake"]
-        let before = intake.frame.minY
+        let surface = app.scrollViews["health-detail-scroll"]
+        for _ in 0..<10 {
+            let top = app.navigationBars.firstMatch.frame.maxY + 8
+            let bottom = app.tabBars.firstMatch.frame.minY - 8
+            if chart.exists && chart.frame.minY >= top && chart.frame.maxY <= bottom { break }
+            let above = chart.exists && chart.frame.minY < top
+            surface.coordinate(withNormalizedOffset: CGVector(dx: 0.02, dy: above ? 0.3 : 0.75))
+                .press(forDuration: 0.05, thenDragTo: surface.coordinate(withNormalizedOffset: CGVector(dx: 0.02, dy: above ? 0.65 : 0.4)))
+        }
+        XCTAssertTrue(chart.waitForExistence(timeout: 10)); XCTAssertTrue(chart.isHittable)
+        XCTAssertLessThanOrEqual(chart.frame.maxY, app.tabBars.firstMatch.frame.minY)
+        let caption = app.staticTexts["health-weight-selection"]
+        let before = caption.frame.height
         chart.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
         expectation(for: NSPredicate(format: "label != %@", "Tocca o tieni premuto e scorri"), evaluatedWith: caption)
         waitForExpectations(timeout: 5)
-        XCTAssertEqual(intake.frame.minY, before, accuracy: 1)
+        XCTAssertEqual(caption.frame.height, before, accuracy: 1)
         let selected = caption.label
         chart.coordinate(withNormalizedOffset: CGVector(dx: 0.25, dy: 0.5)).press(forDuration: 0.35, thenDragTo: chart.coordinate(withNormalizedOffset: CGVector(dx: 0.75, dy: 0.5)))
         XCTAssertNotEqual(caption.label, selected)
