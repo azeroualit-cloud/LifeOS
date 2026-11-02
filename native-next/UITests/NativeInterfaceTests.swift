@@ -338,6 +338,9 @@ final class NativeInterfaceTests: XCTestCase {
         }
     }
     func testFourSectionsInBothThemes() {
+        // Two launches, twelve screens and eight editors exceed 180 seconds
+        // with SDK 27 automation; keep every interaction and assertion.
+        executionTimeAllowance = 300
         for dark in [false, true] {
             let app = launch(dark ? ["--dark"] : [])
             for name in ["Dashboard", "Attività", "Salute", "Altro"] {
@@ -743,6 +746,8 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertEqual(completion.value as? String, "Da completare")
     }
     func testRepeatedBoundaryScrollingKeepsNavigationStable() {
+        // All 56 flings remain required. The budget includes XCTest overhead.
+        executionTimeAllowance = 300
         let app = launch(["--stress-content", "--dark"])
         for page in ["Dashboard", "Attività", "Calendario", "Finanza"] {
             if page == "Calendario" || page == "Finanza" { app.openOtherDestination(page) }
