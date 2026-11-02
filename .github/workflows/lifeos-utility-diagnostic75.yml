@@ -16,13 +16,13 @@ jobs:
           run-id: 41544986385
           github-token: ${{ github.token }}
           path: diagnostic
-      - name: Inspect failed synthetic bill UI attachments
+      - name: Inspect failed synthetic chart UI attachments
         run: |
           RESULT=$(find diagnostic -name Validation.xcresult -type d | head -1)
           test -n "$RESULT"
           xcrun xcresulttool export attachments --path "$RESULT" --output-path screenshots
           python3 - <<'PY'
-          import json,pathlib,base64,subprocess
+          import json,pathlib,base64,subprocess,plistlib
           root=pathlib.Path('screenshots')
           def strings(node):
               if isinstance(node,dict):
@@ -47,6 +47,35 @@ jobs:
           def is_image(name):
               data=(root/name).read_bytes()[:16]
               return data.startswith(b'\x89PNG') or data.startswith(b'\xff\xd8') or b'ftypheic' in data
+          for name in paths:
+              p=root/name
+              if p.read_bytes().startswith(b'bplist'):
+                  doc=plistlib.loads(p.read_bytes()); objects=doc.get('$objects',[])
+                  def resolve(v,seen=frozenset()):
+                      if isinstance(v,plistlib.UID):
+                          if v.data in seen:return '<cycle>'
+                          return resolve(objects[v.data],seen|{v.data})
+                      if isinstance(v,dict):
+                          if 'NS.keys' in v and 'NS.objects' in v:
+                              return {str(resolve(k,seen)):resolve(x,seen) for k,x in zip(v['NS.keys'],v['NS.objects'])}
+                          return {k:resolve(x,seen) for k,x in v.items() if k!='$class'}
+                      if isinstance(v,list):return [resolve(x,seen) for x in v]
+                      if isinstance(v,bytes):return {'bytes':len(v)}
+                      return v
+                  tree=resolve(doc.get('$top',doc))
+                  def find(v):
+                      if isinstance(v,dict):
+                          if any('health-weight-chart' in str(x) or 'health-weight-selection' in str(x) for x in v.values() if isinstance(x,str)):print('CHART_AX_NODE',json.dumps(v,default=str)[:10000])
+                          for x in v.values():find(x)
+                      elif isinstance(v,list):
+                          for x in v:find(x)
+                  find(tree)
+                  print('CHART_ARCHIVE_KEYS',list(doc),str(tree)[:2000])
+          videos=[root/n for n in paths if pathlib.Path(n).suffix=='.mp4']
+          if videos:
+              pathlib.Path('/tmp/chart-frame.swift').write_text('import AVFoundation\nimport AppKit\nlet asset=AVURLAsset(url:URL(fileURLWithPath:CommandLine.arguments[1]))\nlet generator=AVAssetImageGenerator(asset:asset)\ngenerator.appliesPreferredTrackTransform=true\nlet t=CMTime(seconds:max(0,asset.duration.seconds-5),preferredTimescale:600)\nlet img=try generator.copyCGImage(at:t,actualTime:nil)\nlet data=NSBitmapImageRep(cgImage:img).representation(using:.png,properties:[:])!\ntry data.write(to:URL(fileURLWithPath:"chart-failure.png"))\n')
+              subprocess.run(['swift','/tmp/chart-frame.swift',str(videos[0])],check=True)
+              (root/'chart-failure.png').write_bytes(pathlib.Path('chart-failure.png').read_bytes());paths.insert(0,'chart-failure.png')
           selected=[p for p in paths if is_image(p)][:4]+[p for p in paths if pathlib.Path(p).suffix=='.txt'][:1]
           for index,name in enumerate(selected):
               p=root/name
