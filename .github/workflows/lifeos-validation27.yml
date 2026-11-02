@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   validate:
-    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[validation-74]')
+    if: github.event_name == 'workflow_dispatch' || (contains(github.event.head_commit.message, '[validation-74]') && !contains(github.event.head_commit.message, '[calendar-ui-only]'))
     runs-on: xcode-27
     timeout-minutes: 70
     steps:
