@@ -4,7 +4,7 @@ on:
     inputs:
       run_id:
         description: Existing run with LifeOS-diagnostica
-        default: '41506255193'
+        default: '41513411080'
         required: true
   push:
     paths: ['.github/workflows/lifeos-calendar-diagnostic.yml']
@@ -18,8 +18,8 @@ jobs:
     steps:
       - uses: actions/download-artifact@v5
         with:
-          name: calendar-probe27
-          run-id: ${{ inputs.run_id || '41506255193' }}
+          name: compact-probe74
+          run-id: ${{ inputs.run_id || '41513411080' }}
           github-token: ${{ github.token }}
           path: diagnostic
       - name: Export selected calendar preview
@@ -38,7 +38,7 @@ jobs:
               elif isinstance(node,str):yield node
           def matches(node):
               if isinstance(node,dict):
-                  if any('testLargeTextAndSixWeekCalendar' in value for value in node.values() if isinstance(value,str)):
+                  if any(any(t in value for t in ['testActivityAgendaShowsOnlyRelevantItemsAndFoldsCompleted','testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination']) for value in node.values() if isinstance(value,str)):
                       yield node
                   else:
                       for value in node.values():yield from matches(value)
@@ -50,7 +50,7 @@ jobs:
               for value in strings(match):
                   if value.endswith('.png') and (root/value).is_file() and value not in paths:paths.append(value)
           print('DIAGNOSTIC_ATTACHMENTS',paths)
-          for index,name in enumerate(paths[:6]):
+          for index,name in enumerate(paths[-12:]):
               subprocess.run(['sips','-Z','1100',str(root/name),'--out','preview.png'],check=True)
               data=base64.b64encode(pathlib.Path('preview.png').read_bytes()).decode()
               print('QA_IMAGE_START preview-'+str(index))
