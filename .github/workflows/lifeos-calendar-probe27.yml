@@ -2,7 +2,7 @@ name: LifeOS calendar probe SDK 27.2
 on:
   workflow_dispatch:
   push:
-    paths: ['.github/workflows/lifeos-calendar-probe27.yml']
+    paths: ['native-next/**', '.github/workflows/lifeos-calendar-probe27.yml']
 permissions:
   contents: read
 concurrency:
@@ -10,6 +10,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   validate:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[validation-74]')
     runs-on: xcode-27
     timeout-minutes: 25
     steps:

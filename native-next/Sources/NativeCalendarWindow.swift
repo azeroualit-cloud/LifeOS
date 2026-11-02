@@ -8,6 +8,11 @@ enum NativeCalendarWindow {
         let days = CivilDate.gridDates(month)
         return (0..<(days.count / 7)).filter { includeLeading || CivilDate.day(days[$0 * 7]).hasPrefix(month) }
     }
+    /// A boundary row introduces its new month above day 1. The native scroll
+    /// anchor owns the viewport; geometry observations never change its offset.
+    static func focusMonth(weekStarting monday: String) -> String {
+        String(CivilDate.adding(6, to: monday).prefix(7))
+    }
     static func monthLabel(_ month: String) -> String { CivilDate.monthAbbreviation(month) }
     /// Keep neighbouring identities stable while bounding grids and server snapshots.
     static let capacity = 13

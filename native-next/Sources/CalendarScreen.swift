@@ -22,6 +22,8 @@ struct CalendarScreen: View {
     @State private var positionRequest = UUID()
     @State private var requestedWeek: String?
     @State private var scrollWeek: String?
+    @State private var anchoredWeek: String?
+    @State private var anchoredMonth: String?
     @State private var viewportHeight: CGFloat = 0
     @State private var monthDays: [String: [CalendarDayPresentation]] = [:]
     @State private var calendarWeeks: [CalendarWeek] = []
@@ -116,6 +118,10 @@ struct CalendarScreen: View {
                         }
                     }.scrollTargetLayout().padding(.horizontal, NativeDesign.Layout.screenInset)
                         .padding(.vertical, NativeDesign.Space.large).padding(.bottom, NativeDesign.Layout.scrollClearance)
+                }.scrollPosition(id: $scrollWeek, anchor: .top)
+                .onChange(of: scrollWeek) { _, week in
+                    guard monthPositionReady, !restoringWindow, !showingDay, let week else { return }
+                    updateVisibleMonth(for: week)
                 }
                 .accessibilityIdentifier("calendar-scroll")
                 .modifier(NativeUITestValue(value: scrollDiagnostics))
@@ -126,10 +132,8 @@ struct CalendarScreen: View {
                         guard let frame = frames[target], frame.maxY > 0,
                               frame.minY < viewportHeight else { return }
                         requestedWeek = nil; restoringWindow = false; monthPositionReady = true
+                        if let anchoredMonth { visibleMonth = anchoredMonth }
                     }
-                    guard monthPositionReady, !restoringWindow else { return }
-                    let first = frames.filter { $0.value.maxY > 0 }.min { $0.value.minY < $1.value.minY }?.key
-                    if let first, let month = calendarWeeks.first(where: { $0.id == first })?.month, month != visibleMonth { visibleMonth = month }
                 }
                 .task { position(month: String(selected.prefix(7)), day: selected) }
                 .task(id: positionRequest) {
@@ -176,11 +180,17 @@ struct CalendarScreen: View {
         position(month: String(selected.prefix(7)), day: selected)
     }
     private func position(month: String, day: String?) {
-        let target = day.map(weekID(for:)) ?? calendarWeeks.first(where: { $0.month == month })?.id
-        guard let target else { return }
+        let target = weekID(for: day ?? month + "-01")
+        guard calendarWeeks.contains(where: { $0.id == target }) else { return }
         requestedWeek = target; monthPositionReady = false; restoringWindow = true
-        scrollWeek = target
+        anchoredWeek = target; anchoredMonth = month; visibleMonth = month
         positionRequest = UUID()
+    }
+    private func updateVisibleMonth(for week: String) {
+        guard calendarWeeks.contains(where: { $0.id == week }) else { return }
+        if week == anchoredWeek, let anchoredMonth { visibleMonth = anchoredMonth; return }
+        anchoredWeek = nil; anchoredMonth = nil
+        visibleMonth = NativeCalendarWindow.focusMonth(weekStarting: String(week.dropFirst("week-".count)))
     }
     private var dayAgenda: some View {
         VStack(spacing: NativeDesign.Space.none) {

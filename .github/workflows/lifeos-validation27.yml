@@ -62,11 +62,25 @@ jobs:
           print('Validation runtime:',runtime['version'],'device:',device)
           PYDEVICE
           xcrun simctl boot "$VALIDATION_DEVICE" || true
-      - name: Compile and test domain logic
+      - name: Compile application and test runner
+        timeout-minutes: 15
         working-directory: app
         run: |
           set -o pipefail
-          xcodebuild test -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 300 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$VALIDATION_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeTests -only-testing:LifeOSProbeUITests/NativeRevision74UITests -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testLargeTextAndSixWeekCalendar -resultBundlePath Validation.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee validation.log
+          xcodebuild build-for-testing -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$VALIDATION_DEVICE" CODE_SIGNING_ALLOWED=NO 2>&1 | tee compile.log
+      - name: Verify domain logic
+        timeout-minutes: 15
+        working-directory: app
+        run: |
+          set -o pipefail
+          xcrun simctl bootstatus "$VALIDATION_DEVICE" -b
+          xcodebuild test-without-building -test-timeouts-enabled YES -default-test-execution-time-allowance 120 -maximum-test-execution-time-allowance 180 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$VALIDATION_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeTests -resultBundlePath Domain.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee domain.log
+      - name: Verify calendar and new application flows
+        timeout-minutes: 20
+        working-directory: app
+        run: |
+          set -o pipefail
+          xcodebuild test-without-building -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 300 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$VALIDATION_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeRevision74UITests -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testLargeTextAndSixWeekCalendar -resultBundlePath Validation.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee validation.log
       - name: Export UI screenshots
         if: always()
         working-directory: app
@@ -80,6 +94,9 @@ jobs:
         with:
           name: validation74-ios27
           path: |
+            app/compile.log
+            app/domain.log
+            app/Domain.xcresult
             app/validation.log
             app/Validation.xcresult
             app/build/focused-screenshots

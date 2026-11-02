@@ -2,6 +2,17 @@ import XCTest
 @testable import LifeOSProbe
 
 final class NativeCalendarPerformanceTests: XCTestCase {
+    func testBoundaryWeekFocusMatchesTheMonthLabelForEveryWeekdayAndLeapYear() {
+        for year in [2024, 2026] {
+            for month in 1...12 {
+                let value = String(format: "%04d-%02d", year, month), first = value + "-01"
+                let weekday = CivilDate.calendar.component(.weekday, from: CivilDate.date(first))
+                let monday = CivilDate.adding(-((weekday + 5) % 7), to: first)
+                XCTAssertEqual(NativeCalendarWindow.focusMonth(weekStarting: monday), value)
+                XCTAssertEqual(NativeCalendarWindow.focusMonth(weekStarting: CivilDate.adding(-7, to: monday)), NativeCalendarWindow.offset(value, by: -1))
+            }
+        }
+    }
     func testWindowStaysBoundedAndContiguousAcrossYearsAndReverseScrolling() {
         var window = NativeCalendarWindow.months(around: "2026-10")
         for offset in Array(0...120) + Array((0...120).reversed()) {

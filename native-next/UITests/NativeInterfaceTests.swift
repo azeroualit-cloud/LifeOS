@@ -668,7 +668,9 @@ final class NativeInterfaceTests: XCTestCase {
             let shifted = calendar.date(byAdding: .month, value: (delta < 0 ? -1 : 1) * (index + 1), to: Date())!
             let formatter = DateFormatter(); formatter.calendar = calendar; formatter.timeZone = calendar.timeZone; formatter.dateFormat = "yyyy-MM"
             let expected = "calendar-month-heading-" + formatter.string(from: shifted)
-            let reached = app.staticTexts[expected].waitForExistence(timeout: 5)
+            let headingReached = app.staticTexts[expected].waitForExistence(timeout: 5)
+            let firstDay = app.buttons["calendar-day-" + formatter.string(from: shifted) + "-01"]
+            let reached = headingReached && firstDay.waitForExistence(timeout: 5) && firstDay.isHittable
             print("CALENDAR_MONTH_STEP index=\(index) expected=\(expected) actual=\(heading.label) state=\(app.scrollViews["calendar-scroll"].value ?? "none")")
             if !reached {
                 capture("calendar-large-month-navigation-diagnostic")
