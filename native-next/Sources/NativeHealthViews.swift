@@ -169,18 +169,25 @@ private enum NativeHealthPeriod: String, CaseIterable, Identifiable {
 /// containing scroll view. Scrubbing starts only after a deliberate hold.
 private func nativeHealthChartGesture(_ proxy: ChartProxy) -> some Gesture {
     SpatialTapGesture().onEnded { proxy.selectXValue(at: $0.location.x) }
-        .simultaneously(with: LongPressGesture(minimumDuration: NativeDesign.Motion.chartSelectionHoldDuration)
-            .sequenced(before: DragGesture(minimumDistance: 0))
-            .onChanged { value in
-                if case .second(true, let drag?) = value { proxy.selectXValue(at: drag.location.x) }
-            })
+}
+private func nativeHealthChartScrubbingGesture(_ scrubbing: GestureState<Bool>, select: @escaping (CGFloat) -> Void) -> some Gesture {
+    LongPressGesture(minimumDuration: NativeDesign.Motion.chartSelectionHoldDuration)
+        .sequenced(before: DragGesture(minimumDistance: 0))
+        .updating(scrubbing) { value, active, _ in
+            if case .second(true, _) = value { active = true }
+        }
+        .onChanged { value in
+            if case .second(true, let drag?) = value { select(drag.location.x) }
+        }
 }
 
 private struct NativeHealthWeightChart: View {
     let days: [HealthDay]
     var forecast: [HealthPoint] = []
+    var onScrubbing: (Bool) -> Void = { _ in }
     @Environment(\.nativeReduceMotion) private var reduceMotion
     @State private var selectedDate: Date?
+    @GestureState private var scrubbing = false
     @ScaledMetric(relativeTo: .caption) private var selectionCaptionHeight = NativeDesign.Layout.healthSelectionCaptionHeight
     @State private var referenceDate = Date()
     @State private var period: NativeHealthPeriod = .month
@@ -232,6 +239,18 @@ private struct NativeHealthWeightChart: View {
                     }
                 }.chartXSelection(value: $selectedDate)
                     .chartGesture { nativeHealthChartGesture($0) }
+                    .chartOverlay { proxy in
+                        GeometryReader { geometry in
+                            if let anchor = proxy.plotFrame {
+                                let plot = geometry[anchor]
+                                Color.clear.contentShape(Rectangle()).frame(width: plot.width, height: plot.height)
+                                    .simultaneousGesture(nativeHealthChartScrubbingGesture($scrubbing) { x in
+                                        selectedDate = proxy.value(atX: min(max(x, 0), plot.width), as: Date.self)
+                                    })
+                                    .position(x: plot.midX, y: plot.midY)
+                            }
+                        }
+                    }
                     .animation(reduceMotion ? nil : .default, value: period)
                     .chartXScale(domain: start...end).chartYScale(domain: domain)
                     .chartXAxis { AxisMarks(values: .stride(by: .day, count: forecast.isEmpty ? period.axisDays : 28)) { _ in AxisValueLabel(format: .dateTime.day().month(.abbreviated)) } }
@@ -246,13 +265,17 @@ private struct NativeHealthWeightChart: View {
             }
         }.onChange(of: days) { _, _ in referenceDate = Date() }
             .onChange(of: period) { _, _ in referenceDate = Date(); selectedDate = nil }
+            .onChange(of: scrubbing) { _, active in onScrubbing(active) }
+            .onDisappear { onScrubbing(false) }
     }
 }
 
 private struct NativeHealthCaloriesChart: View {
     let days: [HealthDay]
+    var onScrubbing: (Bool) -> Void = { _ in }
     @Environment(\.nativeReduceMotion) private var reduceMotion
     @State private var selectedDate: Date?
+    @GestureState private var scrubbing = false
     @ScaledMetric(relativeTo: .caption) private var selectionCaptionHeight = NativeDesign.Layout.healthSelectionCaptionHeight
     @State private var referenceDate = Date()
     @State private var period: NativeHealthPeriod = .month
@@ -282,6 +305,18 @@ private struct NativeHealthCaloriesChart: View {
                     }
                 }.chartXSelection(value: $selectedDate)
                     .chartGesture { nativeHealthChartGesture($0) }
+                    .chartOverlay { proxy in
+                        GeometryReader { geometry in
+                            if let anchor = proxy.plotFrame {
+                                let plot = geometry[anchor]
+                                Color.clear.contentShape(Rectangle()).frame(width: plot.width, height: plot.height)
+                                    .simultaneousGesture(nativeHealthChartScrubbingGesture($scrubbing) { x in
+                                        selectedDate = proxy.value(atX: min(max(x, 0), plot.width), as: Date.self)
+                                    })
+                                    .position(x: plot.midX, y: plot.midY)
+                            }
+                        }
+                    }
                     .animation(reduceMotion ? nil : .default, value: period)
                     .chartXScale(domain: start...Calendar.current.date(byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: referenceDate))!)
                     .chartYScale(domain: 0...max(3000, (visibleDays.compactMap(\.calories).max() ?? 0) * 1.1))
@@ -295,6 +330,8 @@ private struct NativeHealthCaloriesChart: View {
             }
         }.onChange(of: days) { _, _ in referenceDate = Date() }
             .onChange(of: period) { _, _ in referenceDate = Date(); selectedDate = nil }
+            .onChange(of: scrubbing) { _, active in onScrubbing(active) }
+            .onDisappear { onScrubbing(false) }
     }
 }
 
@@ -302,6 +339,10 @@ struct NativeHealthDetail: View {
     @ObservedObject var health: NativeHealthStore
     let demo: Bool
     @State private var intakeText = ""
+    @State private var scrubbingCharts = Set<String>()
+    private func setChartScrubbing(_ id: String, _ active: Bool) {
+        if active { scrubbingCharts.insert(id) } else { scrubbingCharts.remove(id) }
+    }
     @FocusState private var editing: Bool
     private var intake: Double? {
         guard let value = Double(intakeText.replacingOccurrences(of: ",", with: ".")), value.isFinite, (800...6000).contains(value) else { return nil }
@@ -318,11 +359,11 @@ struct NativeHealthDetail: View {
                 tdeeSection
                 NativeCard {
                     Text("Peso").font(NativeDesign.heading)
-                    NativeHealthWeightChart(days: health.days)
+                    NativeHealthWeightChart(days: health.days, onScrubbing: { setChartScrubbing("weight", $0) })
                 }
                 NativeCard {
                     Text("Calorie assunte").font(NativeDesign.heading)
-                    NativeHealthCaloriesChart(days: health.days)
+                    NativeHealthCaloriesChart(days: health.days, onScrubbing: { setChartScrubbing("calories", $0) })
                 }
                 scenarioSection
                 connectionSections
@@ -330,6 +371,8 @@ struct NativeHealthDetail: View {
             }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.vertical, NativeDesign.Space.large)
         }.background(NativeDesign.canvas).navigationTitle("Peso e calorie").navigationBarTitleDisplayMode(.inline)
             .accessibilityIdentifier("health-detail-scroll")
+            .scrollDisabled(!scrubbingCharts.isEmpty)
+            .modifier(NativeUITestValue(value: "scrubbing=" + scrubbingCharts.sorted().joined(separator: ",")))
             .toolbar { ToolbarItemGroup(placement: .keyboard) { Spacer(); Button("Fine") { editing = false } } }
             .task { if intakeText.isEmpty, let value = health.estimate?.averageIntake { intakeText = String(Int(value.rounded())) } }
     }
@@ -372,7 +415,7 @@ struct NativeHealthDetail: View {
                 }.frame(minHeight: NativeDesign.Layout.touchTarget)
                 if forecast.isEmpty { Text("Inserisci un valore fra 800 e 6.000 kcal/giorno. Questo intervallo è tecnico, non una raccomandazione alimentare.").font(.caption).foregroundStyle(NativeDesign.secondary) }
                 else {
-                    NativeHealthWeightChart(days: health.days, forecast: forecast)
+                    NativeHealthWeightChart(days: health.days, forecast: forecast, onScrubbing: { setChartScrubbing("forecast", $0) })
                     ForEach([4, 8], id: \.self) { week in
                         if let point = forecast.dropFirst(week * 7).first {
                             LabeledContent("Tra \(week) settimane dalla stima", value: point.value.formatted(.number.precision(.fractionLength(1))) + " kg")

@@ -59,8 +59,9 @@ final class NativeRevision74UITests: XCTestCase {
         XCTAssertNotEqual(caption.label, selected)
         let y = chart.frame.minY
         chart.coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.75)).press(forDuration: 0.05, thenDragTo: chart.coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.15)))
-        XCTAssertLessThan(chart.frame.minY, y - 20)
         capture("74-health-chart-selection")
+        print("HEALTH_CHART_SCROLL before=\(y) after=\(chart.frame.minY) caption=\(caption.label) state=\(surface.value ?? "none")")
+        XCTAssertLessThan(chart.frame.minY, y - 20)
     }
     func testMoreDestinationsAndBloomNotePersistsAcrossNavigation() {
         let app = launch(); app.tabBars.buttons["Altro"].tap()

@@ -89,12 +89,12 @@ struct NativeBloomLibraryContent: View {
             }.buttonStyle(.plain)
         } else { NavigationLink { NativeBloomDetail(store: store, id: row.text("id")) } label: { card(row) }.buttonStyle(.plain)
             .accessibilityIdentifier("bloom-note-" + row.text("id"))
-            .accessibilityLabel(row.text("title", fallback: row.text("fileName", fallback: "Nota"))) }
+            .accessibilityLabel(NativeBloomRow(row).displayTitle) }
     }
     private func card(_ row: Record) -> some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
             if let url = store.primaryFileURL(row) { NativeBloomThumbnail(url: url).frame(height: NativeDesign.Layout.bloomThumbnailHeight).clipped() }
-            Text(row.text("title", fallback: row.text("fileName", fallback: String(row.text("text", fallback: row.text("urlString", fallback: "Nota")).prefix(80))))).font(.headline).lineLimit(3).multilineTextAlignment(.leading)
+            Text(NativeBloomRow(row).displayTitle).font(.headline).lineLimit(3).multilineTextAlignment(.leading)
             if !row.text("text").isEmpty { Text(row.text("text")).font(.subheadline).foregroundStyle(.secondary).lineLimit(4).multilineTextAlignment(.leading) }
         }.frame(maxWidth: .infinity, alignment: .leading).padding(NativeDesign.Space.medium)
             .background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))

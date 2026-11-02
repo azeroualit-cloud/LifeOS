@@ -88,7 +88,7 @@ struct NativeBloomScreen: View {
                     List {
                         Section(group.place.name) {
                             ForEach(group.notes.map { NativeBloomRow($0) }) { row in
-                                NavigationLink { NativeBloomDetail(store: store, id: row.value.text("id")) } label: { Text(row.value.text("title", fallback: row.value.text("fileName", fallback: "Nota"))) }
+                                NavigationLink { NativeBloomDetail(store: store, id: row.value.text("id")) } label: { Text(row.displayTitle) }
                             }
                         }
                         Section { Button("Apri in Mappe") {

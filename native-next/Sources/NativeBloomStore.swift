@@ -6,6 +6,9 @@ import Combine
 struct NativeBloomRow: Identifiable {
     let value: Record
     var id: String { value.text("id") }
+    var displayTitle: String {
+        value.text("title", fallback: value.text("fileName", fallback: String(value.text("text", fallback: value.text("urlString", fallback: "Nota")).prefix(80))))
+    }
     init(_ value: Record) { self.value = value }
 }
 

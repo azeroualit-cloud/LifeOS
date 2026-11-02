@@ -118,7 +118,7 @@ struct CalendarScreen: View {
                         .padding(.vertical, NativeDesign.Space.large).padding(.bottom, NativeDesign.Layout.scrollClearance)
                 }.scrollPosition(id: $scrollWeek, anchor: showingPreview ? .center : .top)
                 .accessibilityIdentifier("calendar-scroll")
-                .accessibilityValue(scrollDiagnostics)
+                .modifier(NativeUITestValue(value: scrollDiagnostics))
                 .coordinateSpace(name: "calendar-viewport")
                 .onPreferenceChange(NativeCalendarMonthFrames.self) { frames in
                     guard !showingDay else { return }

@@ -332,6 +332,19 @@ struct NativeChecklistListRow: ViewModifier {
     }
 }
 
+/// Keep diagnostics out of production accessibility values.
+struct NativeUITestValue: ViewModifier {
+    let value: String
+    @ViewBuilder func body(content: Content) -> some View {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--visual-test") { content.accessibilityValue(value) }
+        else { content }
+        #else
+        content
+        #endif
+    }
+}
+
 /// Animate only a number's glyphs, never the surrounding row, list or navigation.
 struct NativeNumericFeedback: ViewModifier {
     @Environment(\.nativeReduceMotion) private var reduceMotion
