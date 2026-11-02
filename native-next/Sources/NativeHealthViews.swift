@@ -247,7 +247,7 @@ private struct NativeHealthWeightChart: View {
                                     .simultaneousGesture(nativeHealthChartScrubbingGesture($scrubbing) { x in
                                         selectedDate = proxy.value(atX: min(max(x, 0), plot.width), as: Date.self)
                                     })
-                                    .position(x: plot.midX, y: plot.midY)
+                                    .position(x: plot.midX, y: plot.midY).accessibilityHidden(true)
                             }
                         }
                     }
@@ -313,7 +313,7 @@ private struct NativeHealthCaloriesChart: View {
                                     .simultaneousGesture(nativeHealthChartScrubbingGesture($scrubbing) { x in
                                         selectedDate = proxy.value(atX: min(max(x, 0), plot.width), as: Date.self)
                                     })
-                                    .position(x: plot.midX, y: plot.midY)
+                                    .position(x: plot.midX, y: plot.midY).accessibilityHidden(true)
                             }
                         }
                     }
