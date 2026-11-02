@@ -59,6 +59,7 @@ final class NativeRevision74UITests: XCTestCase {
         XCTAssertTrue(cell.isHittable); cell.tap()
         XCTAssertTrue(app.scrollViews["calendar-day-pane"].waitForExistence(timeout: 10))
         capture("74-calendar-preview-diagnostic")
+        print("CALENDAR_PREVIEW_FRAMES cell=\(cell.frame) viewport=\(surface.frame)")
         expectation(for: NSPredicate { _, _ in cell.isHittable }, evaluatedWith: cell)
         waitForExpectations(timeout: 3)
         app.buttons["calendar-expand-day"].tap()

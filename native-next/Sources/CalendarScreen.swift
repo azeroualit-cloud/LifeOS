@@ -130,18 +130,17 @@ struct CalendarScreen: View {
                     if let first, months.contains(first), first != visibleMonth { visibleMonth = first }
                 }
                 .task { position(month: String(selected.prefix(7)), day: selected, proxy: proxy) }
-                .task(id: showingPreview) {
-                    guard showingPreview else { return }
-                    // Re-anchor after the viewport reaches its final height.
-                    do { try await Task.sleep(for: .seconds(reduceMotion ? 0 : NativeDesign.Motion.navigationResponse)) }
-                    catch { return }
-                    guard showingPreview, !showingDay else { return }
-                    // The selected row is already realized: scrolling its parent
-                    // first can leave the row outside the smaller viewport when
-                    // that parent's frame does not emit another preference.
-                    positioningMonth = nil; positioningDay = nil
-                    restoringWindow = false; monthPositionReady = true
-                    proxy.scrollTo(weekID(for: selected), anchor: .center)
+                .background {
+                    GeometryReader { geometry in
+                        Color.clear.preference(key: NativeCalendarViewportHeight.self, value: geometry.size.height)
+                    }
+                }
+                .onPreferenceChange(NativeCalendarViewportHeight.self) { height in
+                    guard showingPreview, height > 0 else { return }
+                    revealSelectedWeek(proxy: proxy)
+                }
+                .onChange(of: selected) { _, _ in
+                    if showingPreview { revealSelectedWeek(proxy: proxy) }
                 }
                 .onChange(of: windowAnchor) { _, month in
                     guard let month else { return }
@@ -155,6 +154,18 @@ struct CalendarScreen: View {
                     jumpMonth = nil
                 }
             }
+        }
+    }
+    private func revealSelectedWeek(proxy: ScrollViewProxy) {
+        positioningMonth = nil; positioningDay = nil
+        restoringWindow = false; monthPositionReady = true
+        let target = weekID(for: selected)
+        Task { @MainActor in
+            await Task.yield()
+            guard showingPreview, !showingDay, target == weekID(for: selected) else { return }
+            var transaction = Transaction(animation: nil)
+            transaction.disablesAnimations = true
+            withTransaction(transaction) { proxy.scrollTo(target, anchor: .center) }
         }
     }
     private func position(month: String, day: String?, proxy: ScrollViewProxy) {
@@ -576,4 +587,9 @@ private struct NativeCalendarMonthFrames: PreferenceKey {
     static func reduce(value: inout [String: CGRect], nextValue: () -> [String: CGRect]) {
         value.merge(nextValue(), uniquingKeysWith: { old, new in old.union(new) })
     }
+}
+
+private struct NativeCalendarViewportHeight: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
 }
