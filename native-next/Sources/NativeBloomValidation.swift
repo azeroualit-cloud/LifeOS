@@ -7,6 +7,10 @@ enum NativeBloomValidation {
             guard let value = row[key], value != .null else { if required { throw invalid() }; return }
             guard case .number(let n) = value, n.isFinite else { throw invalid() }
         }
+        func string(_ row: Record, _ key: String, required: Bool = false) throws {
+            guard let value = row[key], value != .null else { if required { throw invalid() }; return }
+            guard case .string = value else { throw invalid() }
+        }
         func uuid(_ row: Record, _ key: String, required: Bool = false) throws {
             guard let value = row[key], value != .null else { if required { throw invalid() }; return }
             guard case .string(let raw) = value, UUID(uuidString: raw) != nil else { throw invalid() }
@@ -33,10 +37,13 @@ enum NativeBloomValidation {
         guard archive.createdAt.isFinite else { throw invalid() }
         let categories = Set(archive.collections.map { $0.text("id") })
         for category in archive.collections {
+            try string(category,"name",required:true)
             try uuid(category,"id",required:true); try number(category,"createdAt",required:true); try number(category,"modifiedAt")
             guard category.text("name").utf8.count <= 1024 else { throw invalid() }
         }
         for item in archive.items {
+            for key in ["title", "notes", "text", "fileName", "contentType"] { try string(item,key) }
+            try string(item,"urlString",required:true)
             try uuid(item,"id",required:true); try uuid(item,"collectionID")
             try number(item,"capturedAt",required:true); try number(item,"modifiedAt"); try number(item,"trashedAt")
             guard case .bool? = item["archived"] else { throw invalid() }
@@ -48,6 +55,7 @@ enum NativeBloomValidation {
             try framing(item["imageFraming"])
             if let value = item["place"], value != .null {
                 guard case .object(let place) = value, !place.text("name").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, place.text("name").utf8.count <= 4096 else { throw invalid() }
+                try string(place,"kind")
                 try number(place,"latitude",required:true); try number(place,"longitude",required:true)
                 guard (-90...90).contains(place.amount("latitude")), (-180...180).contains(place.amount("longitude")) else { throw invalid() }
             }
@@ -69,11 +77,11 @@ enum NativeBloomValidation {
                 }
             } else if linkCount > 10 { throw invalid() }
             switch item.text("kind") {
-            case "link": try url(item.text("urlString")); guard item["data"] == nil || item["data"] == .null else { throw invalid() }
+            case "link": try url(item.text("urlString")); guard (item["text"] == nil || item["text"] == .null) && (item["data"] == nil || item["data"] == .null) else { throw invalid() }
             case "text":
                 guard case .string? = item["text"], item.text("urlString").isEmpty, item["data"] == nil || item["data"] == .null else { throw invalid() }
                 guard !item.text("text").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !item.text("title").isEmpty || linkCount > 0 || !fileIDs.isEmpty else { throw invalid() }
-            case "file", "image": guard !item.text("fileName").isEmpty, item.text("urlString").isEmpty, case .string(let raw)? = item["data"], Data(base64Encoded: raw) != nil else { throw invalid() }
+            case "file", "image": guard item["text"] == nil || item["text"] == .null, !item.text("fileName").isEmpty, item.text("urlString").isEmpty, case .string(let raw)? = item["data"], Data(base64Encoded: raw) != nil else { throw invalid() }
             default: throw invalid()
             }
         }

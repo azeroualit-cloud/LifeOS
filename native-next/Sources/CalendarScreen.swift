@@ -136,7 +136,12 @@ struct CalendarScreen: View {
                     do { try await Task.sleep(for: .seconds(reduceMotion ? 0 : NativeDesign.Motion.navigationResponse)) }
                     catch { return }
                     guard showingPreview, !showingDay else { return }
-                    position(month: String(selected.prefix(7)), day: selected, proxy: proxy)
+                    // The selected row is already realized: scrolling its parent
+                    // first can leave the row outside the smaller viewport when
+                    // that parent's frame does not emit another preference.
+                    positioningMonth = nil; positioningDay = nil
+                    restoringWindow = false; monthPositionReady = true
+                    proxy.scrollTo(selected, anchor: .center)
                 }
                 .onChange(of: windowAnchor) { _, month in
                     guard let month else { return }
@@ -412,7 +417,7 @@ struct CalendarScreen: View {
                         let displayed = CalendarDayPresentation(day: item.day, label: item.label, shift: item.shift, hasEvents: item.hasEvents, isToday: item.isToday, isWeekend: item.isWeekend, isCurrentMonth: true)
                             Button {
                                 if !store.busy { store.calendarMonth = String(item.day.prefix(7)) }
-                                withAnimation(reduceMotion ? nil : .easeOut(duration: NativeDesign.Motion.selectionDuration)) { selected = item.day; if !painting { showingPreview = true; jumpMonth = String(item.day.prefix(7)) } }
+                                withAnimation(reduceMotion ? nil : .easeOut(duration: NativeDesign.Motion.selectionDuration)) { selected = item.day; if !painting { showingPreview = true } }
                                 if painting {
                                     let old = item.shift?.rawValue ?? "erase", kind = brush
                                     Task {

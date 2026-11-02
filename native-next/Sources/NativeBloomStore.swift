@@ -216,8 +216,7 @@ struct NativeBloomArchive: Codable {
             let files = item.records("noteFiles")
             total += files.reduce(0) { $0 + $1.text("name").utf8.count + $1.text("type").utf8.count }
             for file in [item] + files {
-                let raw = file.text("data")
-                if !raw.isEmpty { guard let data = Data(base64Encoded: raw) else { throw Message(text: "Base64 non valido.") }; bytes += data.count }
+                if case .string(let raw)? = file["data"] { guard let data = Data(base64Encoded: raw) else { throw Message(text: "Base64 non valido.") }; bytes += data.count }
                 else if ["image", "file"].contains(item.text("kind")), file.text("id") == item.text("id") { throw Message(text: "File principale mancante.") }
             }
             guard bytes <= 25 * 1024 * 1024 else { throw Message(text: "Nota superiore a 25 MiB.") }

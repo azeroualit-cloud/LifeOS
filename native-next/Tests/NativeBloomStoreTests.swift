@@ -113,6 +113,18 @@ import XCTest
         XCTAssertThrowsError(try store.save(note()))
         XCTAssertEqual(try Data(contentsOf: index), corrupt)
     }
+    func testEmptyFilesArePreservedAndWrongMetadataTypesAreRejected() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let store = NativeBloomStore(directory: root)
+        var empty = note(); empty["kind"] = .string("file"); empty["text"] = .null; empty["fileName"] = .string("vuoto.txt"); empty["data"] = .string("")
+        let data = try JSONEncoder().encode(NativeBloomArchive(items: [empty]))
+        _ = try store.importBackup(data)
+        let record = try XCTUnwrap(store.archive.items.first)
+        XCTAssertEqual(try store.hydrated(record)["data"], .string(""))
+        var invalid = note(); invalid["title"] = .bool(true)
+        XCTAssertThrowsError(try store.preview(JSONEncoder().encode(NativeBloomArchive(items: [invalid]))))
+    }
     func testImportedTrashIsNotAutomaticallyDeleted() throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }

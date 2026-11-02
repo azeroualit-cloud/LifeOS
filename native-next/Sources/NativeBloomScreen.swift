@@ -292,6 +292,7 @@ private struct NativeBloomComposer: View {
     @State private var attachments: [Record] = []
     @State private var importing = false
     @State private var photo: PhotosPickerItem?
+    @State private var loadingPhoto = false
     @State private var primaryImage: Data?
     @State private var primaryFraming = NativeBloomImageFraming().record
     @State private var error: String?
@@ -321,7 +322,10 @@ private struct NativeBloomComposer: View {
                 } catch { self.error = error.localizedDescription }
             }
             .onChange(of: photo) { _, selected in
+                guard selected != nil else { return }
+                loadingPhoto = true
                 Task {
+                    defer { loadingPhoto = false }
                     do {
                         guard let selected, let bytes = try await selected.loadTransferable(type: Data.self) else { return }
                         guard bytes.count <= 25 * 1024 * 1024, attachments.count < 10 else { throw Message(text: "Limite allegati superato.") }
@@ -349,7 +353,7 @@ private struct NativeBloomComposer: View {
                     item["noteFiles"] = .array(attachments.map(JSONValue.object))
                     item["title"] = .string(title); item[item.text("kind") == "text" ? "text" : "notes"] = .string(text); item["modifiedAt"] = .number(Date().timeIntervalSinceReferenceDate)
                     do { try store.save(item); dismiss() } catch { store.error = error.localizedDescription }
-                }.disabled(readFailed || title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && link.isEmpty && attachments.isEmpty && initial.text("lifeosFileSHA256").isEmpty) }
+                }.disabled(readFailed || loadingPhoto || title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && link.isEmpty && attachments.isEmpty && initial.text("lifeosFileSHA256").isEmpty) }
             }.onAppear {
                 guard !didLoad else { return }; didLoad = true
                 title = initial.text("title"); text = initial.text("text", fallback: initial.text("notes"))
@@ -420,8 +424,9 @@ private struct NativeBloomComposer: View {
                         }
                     }
                 }
-                Button("Aggiungi file") { importing = true }.disabled(attachments.count >= 10)
-                PhotosPicker("Aggiungi foto", selection: $photo, matching: .images).disabled(attachments.count >= 10)
+                if loadingPhoto { ProgressView("Caricamento foto") }
+                Button("Aggiungi file") { importing = true }.disabled(attachments.count >= 10 || loadingPhoto)
+                PhotosPicker("Aggiungi foto", selection: $photo, matching: .images).disabled(attachments.count >= 10 || loadingPhoto)
             }
     }
 
