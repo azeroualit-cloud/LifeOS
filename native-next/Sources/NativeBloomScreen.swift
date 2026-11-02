@@ -236,6 +236,7 @@ private struct NativeBloomSectionButton: View {
     private var control: some View {
         Button { selection = title } label: {
             Label(title, systemImage: symbol).labelStyle(.titleAndIcon).font(.subheadline)
+                .foregroundStyle(selected ? NativeDesign.onAccent : Color.primary)
                 .lineLimit(1).minimumScaleFactor(0.8)
                 .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget)
         }.accessibilityIdentifier("bloom-section-" + id)

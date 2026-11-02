@@ -5,6 +5,7 @@ enum NativeDesign {
     static let accent = Color(uiColor: UIColor { trait in
         trait.userInterfaceStyle == .dark ? UIColor(white: 0.87, alpha: 1) : UIColor(white: 0.23, alpha: 1)
     })
+    static let onAccent = Color(uiColor: .systemBackground)
     static let canvas = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor(white: 0.045, alpha: 1) : .systemGroupedBackground })
     static let surface = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor(white: 0.075, alpha: 1) : .secondarySystemGroupedBackground })
     static let secondary = Color(uiColor: UIColor { traits in
