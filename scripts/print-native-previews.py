@@ -1,6 +1,7 @@
 import base64,json,pathlib,subprocess,sys
 compact = len(sys.argv) > 1 and sys.argv[1] == 'compact'
-root = pathlib.Path('build/compact-screenshots') if compact else pathlib.Path('build/focused-screenshots') if pathlib.Path('build/focused-screenshots/manifest.json').exists() else pathlib.Path('build/screenshots')
+native74 = len(sys.argv) > 1 and sys.argv[1] == 'native74'
+root = pathlib.Path('build/native74-screenshots') if native74 else pathlib.Path('build/compact-screenshots') if compact else pathlib.Path('build/focused-screenshots') if pathlib.Path('build/focused-screenshots/manifest.json').exists() else pathlib.Path('build/screenshots')
 prefix = 'compact-' if compact else ''
 manifest = root/'manifest.json'
 if not manifest.exists(): raise SystemExit(0)
