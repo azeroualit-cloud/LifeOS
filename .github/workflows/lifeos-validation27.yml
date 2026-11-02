@@ -1,4 +1,4 @@
-name: LifeOS 74 validation iOS 27.2
+name: LifeOS 74 validation SDK 27.2
 on:
   workflow_dispatch:
   push:
@@ -39,17 +39,6 @@ jobs:
           with open(os.environ['GITHUB_ENV'],'a') as f: f.write('DEVELOPER_DIR='+str(max(found)[1]/'Contents/Developer')+'\n')
           PY
       - run: xcodebuild -version && xcodebuild -showsdks && xcrun simctl list runtimes
-      - name: Verify or install the exact iOS 27.2 simulator runtime
-        timeout-minutes: 20
-        run: |
-          set -euo pipefail
-          xcrun simctl list runtimes available -j > /tmp/runtimes.json
-          if ! python3 -c 'import json; assert any(r.get("isAvailable") and r.get("version")=="27.2" and ".iOS-" in r["identifier"] for r in json.load(open("/tmp/runtimes.json"))["runtimes"])'; then
-            xcodebuild -help > /tmp/xcodebuild-help.txt 2>&1 || true
-            python3 -c 's=open("/tmp/xcodebuild-help.txt").read(); assert "-downloadPlatform" in s and "-buildVersion" in s'
-            xcodebuild -downloadPlatform iOS -buildVersion 27.2
-          fi
-          xcrun simctl list runtimes available -j
       - name: Generate and check design system
         working-directory: app
         run: |
@@ -61,8 +50,11 @@ jobs:
           python3 - <<'PYDEVICE'
           import json, subprocess, os
           runtimes=json.loads(subprocess.check_output(['xcrun','simctl','list','runtimes','-j']))['runtimes']
-          choices=[r for r in runtimes if r.get('isAvailable') and r.get('version')=='27.2' and r['identifier'].startswith('com.apple.CoreSimulator.SimRuntime.iOS-')]
-          assert choices, 'Exact iOS 27.2 simulator runtime unavailable'
+          device_type='com.apple.CoreSimulator.SimDeviceType.iPhone-15-Pro'
+          choices=[r for r in runtimes if r.get('isAvailable') and r['identifier'].startswith('com.apple.CoreSimulator.SimRuntime.iOS-') and any(d['identifier']==device_type for d in r.get('supportedDeviceTypes',[]))]
+          assert choices, 'No runtime supporting iPhone 15 Pro'
+          for r in runtimes:
+              if '.iOS-' in r['identifier']:print('Runtime:',r['version'],'supports iPhone 15 Pro:',any(d['identifier']==device_type for d in r.get('supportedDeviceTypes',[])))
           runtime=max(choices,key=lambda r:tuple(map(int,r['version'].split('.'))))
           device=subprocess.check_output(['xcrun','simctl','create','LifeOS Validation 15 Pro','com.apple.CoreSimulator.SimDeviceType.iPhone-15-Pro',runtime['identifier']],text=True).strip()
           with open(os.environ['GITHUB_ENV'],'a') as f: f.write('VALIDATION_DEVICE='+device+'\n')
