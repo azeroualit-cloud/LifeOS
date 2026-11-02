@@ -37,7 +37,7 @@ import XCTest
         router.calendarDay = "2026-09-15"
         XCTAssertEqual(router.enterCalendar(today:"2026-10-30"),"2026-10-30")
         router.showCalendar(day:"2026-11-02")
-        XCTAssertEqual(router.calendarDay,"2026-11-02")
+        XCTAssertEqual(router.enterCalendar(today:"2026-10-30"),"2026-11-02")
         XCTAssertEqual(router.otherPath,[.calendar])
         router.tab = .dashboard;router.tab = .other
         XCTAssertEqual(router.enterCalendar(today:"2026-10-30"),"2026-10-30")
