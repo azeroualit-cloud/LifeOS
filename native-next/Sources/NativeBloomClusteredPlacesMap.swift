@@ -5,6 +5,7 @@ import MapKit
 @MainActor
 struct NativeBloomClusteredPlacesMap: UIViewRepresentable {
     let places: [NativeBloomPlaceMapAnnotation]
+    var isVisible = true
     let selectedID: String?
     let fitRequest: Int
     let select: (String) -> Void
@@ -24,6 +25,8 @@ struct NativeBloomClusteredPlacesMap: UIViewRepresentable {
     func updateUIView(_ map: MKMapView, context: Context) {
         let coordinator = context.coordinator
         coordinator.parent = self
+        map.isHidden = !isVisible
+        guard isVisible else { return }
         if coordinator.updateAnnotations(map, places: places) {
             coordinator.fit(map, annotations: places, animated: false)
         }

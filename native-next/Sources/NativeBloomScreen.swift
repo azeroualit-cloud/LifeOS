@@ -68,7 +68,7 @@ struct NativeBloomScreen: View {
             if let error = store.error { Text(error).foregroundStyle(.red) }
             ZStack {
                 if hasOpenedMap {
-                    NativeBloomClusteredPlacesMap(places: mapAnnotations, selectedID: selectedPlaceNote, fitRequest: mapFitRequest) { selectedPlaceNote = $0 }
+                    NativeBloomClusteredPlacesMap(places: mapAnnotations, isVisible: section == "Mappa", selectedID: selectedPlaceNote, fitRequest: mapFitRequest) { selectedPlaceNote = $0 }
                         .opacity(section == "Mappa" ? 1 : 0).allowsHitTesting(section == "Mappa").accessibilityHidden(section != "Mappa")
                 }
                 if section != "Mappa" {
