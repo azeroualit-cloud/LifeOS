@@ -103,7 +103,7 @@ struct CalendarScreen: View {
             if let loadError { HStack { NativeInlineMessage(text: loadError); Button("Riprova") { reload += 1 } }.padding(.horizontal) }
             weekdayLabels.padding(.horizontal, NativeDesign.Layout.screenInset)
             Divider()
-            Group {
+            ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: NativeDesign.Space.none) {
                         ForEach(calendarWeeks) { week in
@@ -116,7 +116,7 @@ struct CalendarScreen: View {
                         }
                     }.scrollTargetLayout().padding(.horizontal, NativeDesign.Layout.screenInset)
                         .padding(.vertical, NativeDesign.Space.large).padding(.bottom, NativeDesign.Layout.scrollClearance)
-                }.scrollPosition(id: $scrollWeek, anchor: showingPreview ? .center : .top)
+                }
                 .accessibilityIdentifier("calendar-scroll")
                 .modifier(NativeUITestValue(value: scrollDiagnostics))
                 .coordinateSpace(name: "calendar-viewport")
@@ -132,6 +132,14 @@ struct CalendarScreen: View {
                     if let first, let month = calendarWeeks.first(where: { $0.id == first })?.month, month != visibleMonth { visibleMonth = month }
                 }
                 .task { position(month: String(selected.prefix(7)), day: selected) }
+                .task(id: positionRequest) {
+                    guard let target = requestedWeek, !showingDay else { return }
+                    var transaction = Transaction(animation: nil)
+                    transaction.disablesAnimations = true
+                    withTransaction(transaction) {
+                        proxy.scrollTo(target, anchor: showingPreview ? .center : .top)
+                    }
+                }
                 .background {
                     GeometryReader { geometry in
                         Color.clear.preference(key: NativeCalendarViewportHeight.self, value: geometry.size.height)
@@ -170,19 +178,9 @@ struct CalendarScreen: View {
     private func position(month: String, day: String?) {
         let target = day.map(weekID(for:)) ?? calendarWeeks.first(where: { $0.month == month })?.id
         guard let target else { return }
-        let request = UUID(); positionRequest = request
         requestedWeek = target; monthPositionReady = false; restoringWindow = true
-        scrollWeek = nil
-        Task { @MainActor in
-            await Task.yield()
-            guard positionRequest == request, !showingDay else { return }
-            var transaction = Transaction(animation: nil)
-            transaction.disablesAnimations = true
-            withTransaction(transaction) {
-                scrollWeek = target
-                requestedWeek = nil; restoringWindow = false; monthPositionReady = true
-            }
-        }
+        scrollWeek = target
+        positionRequest = UUID()
     }
     private var dayAgenda: some View {
         VStack(spacing: NativeDesign.Space.none) {
@@ -456,6 +454,7 @@ struct CalendarScreen: View {
                                 .buttonStyle(NativePressStyle()).disabled(painting && (store.busy || (!store.isDemo && monthData[month] == nil)))
                                 .id(item.day).accessibilityIdentifier("calendar-day-" + item.day)
                                 .accessibilityLabel(item.label + ", " + (item.shift?.title ?? "nessun turno"))
+                                .accessibilityAddTraits((showingPreview ? item.day == selected : item.isToday) ? .isSelected : [])
 
                     }
                 }
