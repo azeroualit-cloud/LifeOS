@@ -14,10 +14,12 @@ Inventario ricavato dai sorgenti effettivamente assemblati: base 60 e overlay `n
 | Calendario | Cambio layout → posizione condivisa di numero e badge; area pulsante stabile | Selezione, anteprima, espansione e ritorno |
 | Calendario: selezione e pittura | Aggiornamento stato → breve easeOut; pannello pennelli easeInOut | Tocchi rapidi, sette turni, annulla |
 | Attività | Aggiornamento record → animazione layout; espansione completate | Persistenza prima dello stato visivo; accessibilità |
-| Grafici | Cambio periodo → animazione Swift Charts; selezione data/valore con assi stabili | Peso/calorie, dati vuoti, fonti, selezione |
+| Grafici | Cambio periodo → animazione Swift Charts; selezione data/valore con assi stabili | Peso/calorie, dati vuoti, fonti, tocco, pressione con trascinamento e scroll verticale |
 | Sintesi testuale | Aggiornamento testo → contentTransition opacity nativo | Appartiene alla base assemblata, non è un effetto di digitazione |
 | Bloom | Stack/fogli/menu/pager nativi; camera mappa conservata | Creazione nota, cambio sezione, allegati, ritorno |
 
 Le transizioni personalizzate leggono `nativeReduceMotion`; non governano salvataggi o successo delle operazioni. Le presentazioni native restano affidate al sistema. La pausa del breve impulso della barra controlla soltanto l'effetto visivo e non blocca l'input.
 
-Riferimenti funzionali scelti: Calendario per date/navigazione, Promemoria per completamento/editor, Salute per grafici. Non si dichiara una corrispondenza misurata con le app Apple: il confronto delle registrazioni sullo stesso iPhone, con identica versione iOS e dimensione del testo, rimane distinto dai test automatici. Il runner disponibile usa iOS 26.2, non 27.2.
+Riferimenti funzionali scelti: Calendario per date/navigazione, Promemoria per completamento/editor, Salute per grafici. Non si dichiara una corrispondenza misurata con le app Apple: il confronto delle registrazioni sullo stesso iPhone, con identica versione iOS e dimensione del testo, rimane distinto dai test automatici. Le verifiche iniziali hanno usato SDK 26.3 e runtime 26.2. Il runner aggiornato dispone di Xcode 27.2 RC e SDK 27.2: per iPhone 15 Pro e iPhone SE 3 il runtime compatibile disponibile è iOS 27.0. Il runtime 27.2 scaricabile è limitato a un altro modello di iPhone; non dimostra quindi il comportamento su iPhone 15 Pro con iOS 27.2.
+
+Nei grafici, UITapGestureRecognizer e UILongPressGestureRecognizer pubblici gestiscono la selezione sul plot di Swift Charts. Il tocco attende il fallimento della pressione; una pressione riconosciuta aggiorna la selezione mentre il contenitore sospende lo scorrimento. Fine, annullamento e smontaggio rilasciano il contenitore. Non si usano durate di animazione per governare il salvataggio o l’input. Bloom conserva le viste Libreria e Riscopri e la camera Mappa durante i cambi sezione; i tre controlli sono pulsanti nativi con testo, simbolo e stato selezionato accessibile.

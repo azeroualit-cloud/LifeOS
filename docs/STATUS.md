@@ -1,3 +1,9 @@
+## Consegna verificata — 2 novembre 2026, 0.10.13 build 74
+
+[Revisione 74: Apple, Salute e Bloom](native/REVISIONE-74.md) · [IPA diretta per Signulous](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.13-build74/LifeOS-74.ipa) · [registrazione dei flussi](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.13-build74/LifeOS-74-flussi.mp4). Quattro schede native, macro e HealthKit, Bloom locale con importazione e allegati, calendario e grafici. **240 unitari e 42 esecuzioni UI superati**. SDK 27.2; runtime effettivo 27.0 su iPhone 15 Pro e SE 3 simulati. Download e app/widget verificati. Aggiornare senza disinstallare; prove fisiche e confronto Apple separati.
+
+[Build Apple](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41517266623). Sorgente `8621d28800be38fd044ea35a3d7fd54d249a503b`. SHA-256 IPA: `c3effa92af323e544eeaaf55e8eda964098b0aa7b5581211c65c53d5d063f715`. Nessuna modifica backend per questa revisione.
+
 ## Consegna verificata — 1 novembre 2026, 0.10.12 build 73
 
 [Revisione 73: flusso calendario e Dashboard](native/REVISIONE-73.md) · [IPA diretta 0.10.12 build 73](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.12-build73/LifeOS-73.ipa). Agenda sotto il mese, espansione esplicita alla settimana, colori stabili degli eventi, baseline Dashboard e contrasto del trend peso. Superati **215 unitari e 32 esecuzioni UI**, download pubblico verificato. Aggiornare senza disinstallare.
