@@ -57,6 +57,7 @@ struct TasksScreen: View {
                         }.foregroundStyle(NativeDesign.secondary).textCase(nil)
                             .padding(.horizontal, NativeDesign.Layout.screenInset)
                             .frame(minHeight: NativeDesign.Layout.touchTarget)
+                            .contentShape(Rectangle())
                             .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                     }.buttonStyle(.plain).listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)).accessibilityIdentifier("toggle-completed-tasks")
                         .accessibilityValue(completedExpanded ? "Aperta" : "Chiusa")

@@ -201,6 +201,7 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertEqual(archived.value as? String, "Chiusa")
         capture("agenda-rolling-week-completed-collapsed")
         archived.tap()
+        XCTAssertTrue(NSPredicate(format: "value == %@", "Aperta").evaluate(with: archived), "Il centro dell’intestazione deve aprire le completate")
         let completion = app.buttons["Cambia completamento Attività archiviata"]
         revealChecklistButton(completion, in: app)
         XCTAssertEqual(completion.value as? String, "Completata")
@@ -459,7 +460,18 @@ final class NativeInterfaceTests: XCTestCase {
         app.buttons["movement-hide-keyboard"].tap()
         let category = app.buttons["movement-category"]
         for _ in 0..<5 { if category.isHittable { break }; app.collectionViews.firstMatch.swipeUp() }
-        category.tap(); app.buttons["Acqua"].tap()
+        category.tap()
+        // A native menu opens around its selected item (Altro). On compact
+        // screens its earlier categories are reached by scrolling the menu.
+        let water = app.buttons["Acqua"]
+        for _ in 0..<6 {
+            if water.exists && water.isHittable { break }
+            let start = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.35))
+            let end = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.75))
+            start.press(forDuration: 0.05, thenDragTo: end)
+        }
+        capture("expense-category-menu-compact")
+        XCTAssertTrue(water.isHittable); water.tap()
         for _ in 0..<6 { if app.staticTexts["Dagli altri risparmi"].isHittable { break }; app.collectionViews.firstMatch.swipeUp() }
         XCTAssertTrue(app.staticTexts["Dagli altri risparmi"].exists)
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "10,00")).firstMatch.exists)
