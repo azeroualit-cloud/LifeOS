@@ -20,15 +20,7 @@ struct NativeShiftProgressBar: View {
                             Capsule().fill(model.shift?.color ?? NativeDesign.accent).frame(width: width * slot.fraction)
                         }.frame(width: width)
                             .scaleEffect(burst == slot.index ? 1 + pulse * 0.08 : 1)
-                            .overlay {
-                                if burst == slot.index && !reduceMotion {
-                                    ForEach(0..<5) { dot in
-                                        Circle().fill((model.shift?.color ?? NativeDesign.accent).opacity(pulse * 0.6))
-                                            .frame(width: NativeDesign.Space.xxs, height: NativeDesign.Space.xxs)
-                                            .offset(x: cos(Double(dot) * .pi * 2 / 5) * (4 + pulse * 10), y: sin(Double(dot) * .pi * 2 / 5) * (4 + pulse * 10))
-                                    }
-                                }
-                            }
+                            .animation(reduceMotion ? nil : .smooth(duration: NativeDesign.Motion.layoutDuration), value: slot.fraction)
                     }
                 }
             }

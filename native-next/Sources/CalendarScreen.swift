@@ -3,6 +3,7 @@ import SwiftUI
 struct CalendarScreen: View {
     @EnvironmentObject var store: NativeStore
     @EnvironmentObject var router: NativeRouter
+    @Environment(\.dismiss) private var dismiss
     @Environment(\.nativeReduceMotion) private var reduceMotion
     @State private var showingDay = false
     @State private var showingPreview = false
@@ -84,6 +85,7 @@ struct CalendarScreen: View {
     private var monthOverview: some View {
         VStack(spacing: NativeDesign.Space.none) {
             HStack {
+                Button { dismiss() } label: { Image(systemName: "chevron.left").frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget) }.accessibilityLabel("Torna ad Altro")
                 Text(CivilDate.monthTitle(showingPreview ? String(selected.prefix(7)) : focusMonth)).font(.title.bold()).lineLimit(1).minimumScaleFactor(0.7)
                     .accessibilityAddTraits(.isHeader).accessibilityIdentifier("calendar-month-heading-" + focusMonth)
                 Spacer(minLength: NativeDesign.Space.small)
@@ -396,9 +398,12 @@ struct CalendarScreen: View {
                         ForEach(0..<7, id: \.self) { index in
                             let day = days[week * 7 + index].day
                             Text(day.hasSuffix("-01") ? NativeCalendarWindow.monthLabel(String(day.prefix(7))) : "")
-                                .font(.title3.weight(.semibold)).frame(maxWidth: .infinity)
+                                .font(.title3.weight(.semibold))
+                                .foregroundStyle(day.hasPrefix(CivilDate.month()) ? NativeDesign.calendarAccent : NativeDesign.secondary)
+                                .frame(maxWidth: .infinity)
                         }
                     }.padding(.top, NativeDesign.Space.medium).padding(.bottom, NativeDesign.Space.small)
+                    Divider()
                 }
                 HStack(spacing: NativeDesign.Space.xs) {
                     ForEach(0..<7, id: \.self) { index in
@@ -508,7 +513,7 @@ struct CalendarDayCell: View, Equatable {
                     .minimumScaleFactor(0.8).lineLimit(1).frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.calendarDateLine)
             }
             NativeShiftBadge(shift: item.shift)
-            Circle().fill(item.hasEvents ? (appearance == .week ? color : NativeDesign.calendarAccent) : Color.clear)
+            Circle().fill(item.hasEvents ? (item.shift?.color ?? NativeDesign.secondary) : Color.clear)
                 .frame(width: NativeDesign.Space.xs, height: NativeDesign.Space.xs)
         }.frame(maxWidth: .infinity).frame(minHeight: NativeDesign.Layout.calendarDayHeight)
             .contentShape(Rectangle()).opacity(appearance != .month || item.isCurrentMonth ? 1 : 0.38)

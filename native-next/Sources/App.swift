@@ -50,7 +50,8 @@ import UIKit
         #endif
     }
 }
-enum NativeTab: Hashable { case dashboard, tasks, calendar, finance }
+enum NativeTab: Hashable { case dashboard, tasks, health, other }
+enum NativeOtherDestination: Hashable { case finance, calendar, bloom }
 enum NativeSheet: Identifiable {
     case weight(NativeWeightTransfer?)
     case financePlan, settings, task(Record), event(Record), movement(Record), extra(Record), routines, categories, budget, recurring(Record), planning
@@ -65,6 +66,7 @@ enum NativeSheet: Identifiable {
 }
 @MainActor final class NativeRouter: ObservableObject {
     @Published var tab: NativeTab = .dashboard
+    @Published var otherPath: [NativeOtherDestination] = []
     @Published var sheet: NativeSheet?
     @Published var taskCategory = "action"
     @Published var financeSection = "Panoramica"
@@ -86,9 +88,8 @@ enum NativeSheet: Identifiable {
     }
     func showCalendar(day: String = CivilDate.day()) {
         calendarOpensDay = true
-        let alreadyOpen = tab == .calendar
-        requestedCalendarDay = alreadyOpen ? nil : day; calendarDay = day; tab = .calendar
-        if alreadyOpen { calendarFocusRequest = UUID() }
+        requestedCalendarDay = nil; calendarDay = day; tab = .other
+        otherPath = [.calendar]; calendarFocusRequest = UUID()
     }
 }
 struct NativeRoot: View {
@@ -146,18 +147,12 @@ struct NativeRoot: View {
         }
         .onChange(of: remindersEnabled) { _, _ in updateReminders() }
         .onChange(of: store.isDemo) { _, _ in updateReminders() }
-        .onChange(of: router.tab) { _, tab in
-            if tab == .calendar {
-                let day = router.enterCalendar()
-                store.calendarMonth = String(day.prefix(7))
-            }
-        }
         .onChange(of: scenePhase) { _, phase in
             if phase == .background { returnedFromBackground = true }
             if phase == .active {
                 if returnedFromBackground {
                     returnedFromBackground = false; router.activationDate = Date()
-                    if router.tab == .calendar { router.calendarOpensDay = false; router.calendarDay = CivilDate.day(); router.calendarFocusRequest = UUID(); store.calendarMonth = CivilDate.month() }
+                    if router.tab == .other && router.otherPath.last == .calendar { router.calendarOpensDay = false; router.calendarDay = CivilDate.day(); router.calendarFocusRequest = UUID(); store.calendarMonth = CivilDate.month() }
                 }
                 currentDay = CivilDate.day(); store.rollover(); Task { await store.sync(automatic: true) } }
         }
@@ -213,14 +208,28 @@ struct NativeRoot: View {
         TabView(selection: $router.tab) {
             dashboard.tabItem { Label("Dashboard", systemImage: "square.grid.2x2") }.tag(NativeTab.dashboard)
             tasks.tabItem { Label("Attività", systemImage: "checklist") }.tag(NativeTab.tasks)
-            calendar.tabItem { Label("Calendario", systemImage: "calendar") }.tag(NativeTab.calendar)
-            finance.tabItem { Label("Finanza", systemImage: "chart.bar") }.tag(NativeTab.finance)
+            NavigationStack { NativeNutritionScreen() }.tabItem { Label("Salute", systemImage: "heart") }.tag(NativeTab.health)
+            other.tabItem { Label("Altro", systemImage: "ellipsis") }.tag(NativeTab.other)
         }
     }
     private var dashboard: some View { NavigationStack { DashboardScreen().toolbar { tools }.navigationTitle("Dashboard").navigationBarTitleDisplayMode(.inline) } }
     private var tasks: some View { NavigationStack { TasksScreen().toolbar { tools }.navigationTitle("Attività").navigationBarTitleDisplayMode(.inline) } }
-    private var calendar: some View { NavigationStack { CalendarScreen() } }
-    private var finance: some View { NavigationStack { FinanceScreen().navigationTitle("Finanza").navigationBarTitleDisplayMode(.inline) } }
+    private var other: some View {
+        NavigationStack(path: $router.otherPath) {
+            List {
+                NavigationLink(value: NativeOtherDestination.finance) { Label("Finanza", systemImage: "chart.bar") }
+                Button { router.calendarOpensDay = false; router.calendarDay = CivilDate.day(); store.calendarMonth = CivilDate.month(); router.calendarFocusRequest = UUID(); router.otherPath = [.calendar] } label: { Label("Calendario", systemImage: "calendar") }
+                NavigationLink(value: NativeOtherDestination.bloom) { Label("Bloom", systemImage: "books.vertical") }
+            }.navigationTitle("Altro")
+                .navigationDestination(for: NativeOtherDestination.self) { destination in
+                    switch destination {
+                    case .finance: FinanceScreen()
+                    case .calendar: CalendarScreen()
+                    case .bloom: NativeBloomScreen()
+                    }
+                }
+        }
+    }
     @ToolbarContentBuilder private var tools: some ToolbarContent {
         if #available(iOS 26.0, *) {
             ToolbarItem(placement: .topBarTrailing) { addControl }
@@ -243,17 +252,17 @@ struct NativeRoot: View {
     private func addItem() {
         switch router.tab {
         case .dashboard: router.sheet = .movement([:])
-        case .finance: router.sheet = router.financeSection == "Budget" ? .financePlan : .movement([:])
+        case .health: break
+        case .other: router.sheet = router.otherPath.last == .calendar ? .event(["day": .string(router.calendarDay)]) : .movement([:])
         case .tasks: router.sheet = .task(["list_kind": .string(router.taskCategory)])
-        case .calendar: router.sheet = .event(["day": .string(router.calendarDay)])
         }
     }
     private var addLabel: String {
         switch router.tab {
         case .dashboard: return "Aggiungi spesa"
-        case .finance: return router.financeSection == "Budget" ? "Nuovo piano" : "Aggiungi spesa"
+        case .health: return "Aggiungi nutrienti"
+        case .other: return router.otherPath.last == .calendar ? "Aggiungi evento" : "Aggiungi spesa"
         case .tasks: return "Aggiungi attività"
-        case .calendar: return "Aggiungi evento"
         }
     }
 }

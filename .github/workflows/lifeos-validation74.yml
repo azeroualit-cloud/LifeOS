@@ -1,0 +1,59 @@
+name: LifeOS 74 validation
+on:
+  workflow_dispatch:
+  push:
+    paths: ['native-next/**', '.github/workflows/lifeos-validation74.yml']
+permissions:
+  contents: read
+concurrency:
+  group: lifeos-validation74-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - name: Assemble pinned base and overlay
+        run: |
+          set -euo pipefail
+          curl -fLsS https://raw.githubusercontent.com/azeroualit-cloud/LifeOS/02c2c089841833a67fc9a223b367710edf7e37b9/lifeos-native.zip -o /tmp/base.zip
+          python3 - <<'PY'
+          import pathlib, zipfile, hashlib, shutil
+          p=pathlib.Path('/tmp/base.zip')
+          assert hashlib.sha256(p.read_bytes()).hexdigest() == 'b09762b88e4dc017d2c89fa7582ac38daf1fddf5aa0dd12fed94d73f6099ef03'
+          with zipfile.ZipFile(p) as z:
+              assert all(not pathlib.PurePosixPath(n).is_absolute() and '..' not in pathlib.PurePosixPath(n).parts for n in z.namelist())
+              z.extractall('app')
+          shutil.copytree('native-next','app',dirs_exist_ok=True)
+          PY
+      - name: Select SDK and report actual runtimes
+        run: |
+          python3 - <<'PY'
+          import pathlib, re, os
+          found=[]
+          for p in pathlib.Path('/Applications').glob('Xcode_*.app'):
+              m=re.fullmatch(r'Xcode_([0-9.]+).app',p.name)
+              if m and int(m[1].split('.')[0])>=26: found.append((tuple(map(int,m[1].split('.'))),p))
+          assert found
+          with open(os.environ['GITHUB_ENV'],'a') as f: f.write('DEVELOPER_DIR='+str(max(found)[1]/'Contents/Developer')+'\n')
+          PY
+      - run: xcodebuild -version && xcodebuild -showsdks && xcrun simctl list runtimes
+      - name: Generate and check design system
+        working-directory: app
+        run: |
+          brew install xcodegen
+          python3 scripts/check-design-system.py
+          xcodegen generate
+      - name: Compile and test domain logic
+        working-directory: app
+        run: |
+          set -o pipefail
+          xcodebuild test -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination 'platform=iOS Simulator,name=iPhone 15 Pro' -parallel-testing-enabled NO -only-testing:LifeOSProbeTests -resultBundlePath Validation.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee validation.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: validation74
+          path: |
+            app/validation.log
+            app/Validation.xcresult
