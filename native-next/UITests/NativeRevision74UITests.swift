@@ -29,6 +29,28 @@ final class NativeRevision74UITests: XCTestCase {
         XCTAssertEqual(total.label, "165 kcal")
         capture("74-nutrition-calculation")
     }
+    func testHealthChartsAllowVerticalScrollAndNativeSelection() {
+        let app = launch(), dashboard = app.scrollViews["dashboard-scroll"]
+        let detail = app.buttons["home-health-detail"]
+        for _ in 0..<12 { if detail.isHittable { break }; dashboard.swipeUp(velocity: .slow) }
+        XCTAssertTrue(detail.isHittable); detail.tap()
+        XCTAssertTrue(app.navigationBars["Peso e calorie"].waitForExistence(timeout: 10))
+        let chart = app.descendants(matching: .any).matching(identifier: "health-weight-chart").firstMatch
+        XCTAssertTrue(chart.waitForExistence(timeout: 10))
+        let caption = app.staticTexts["health-weight-selection"], intake = app.textFields["health-intake"]
+        let before = intake.frame.minY
+        chart.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        expectation(for: NSPredicate(format: "label != %@", "Tocca o tieni premuto e scorri"), evaluatedWith: caption)
+        waitForExpectations(timeout: 5)
+        XCTAssertEqual(intake.frame.minY, before, accuracy: 1)
+        let selected = caption.label
+        chart.coordinate(withNormalizedOffset: CGVector(dx: 0.25, dy: 0.5)).press(forDuration: 0.35, thenDragTo: chart.coordinate(withNormalizedOffset: CGVector(dx: 0.75, dy: 0.5)))
+        XCTAssertNotEqual(caption.label, selected)
+        let y = chart.frame.minY
+        chart.coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.75)).press(forDuration: 0.05, thenDragTo: chart.coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.15)))
+        XCTAssertLessThan(chart.frame.minY, y - 20)
+        capture("74-health-chart-selection")
+    }
     func testMoreDestinationsAndBloomNotePersistsAcrossNavigation() {
         let app = launch(); app.tabBars.buttons["Altro"].tap()
         for name in ["Finanza", "Calendario", "Bloom"] { XCTAssertTrue(app.buttons[name].waitForExistence(timeout: 10)) }

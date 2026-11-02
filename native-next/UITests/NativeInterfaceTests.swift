@@ -231,15 +231,20 @@ final class NativeInterfaceTests: XCTestCase {
     func testRepeatedTabSwitchesKeepNativeDestinationsUsable() {
         let app = launch(["--dark"])
         for _ in 0..<3 {
-            for name in ["Attività","Calendario","Finanza","Dashboard"] {
+            for name in ["Dashboard", "Attività", "Salute", "Altro"] {
                 let tab = app.tabBars.buttons[name]
                 tab.tap(); XCTAssertTrue(tab.isSelected)
-                XCTAssertTrue(app.navigationBars[name].exists)
-                XCTAssertTrue(addButton(app).isHittable)
+                if name == "Salute" { XCTAssertTrue(app.textFields["nutrition-Proteine"].waitForExistence(timeout: 10)) }
+                if name == "Dashboard" || name == "Attività" { XCTAssertTrue(app.buttons["primary-add"].isHittable) }
             }
+            app.openOtherDestination("Calendario")
+            XCTAssertTrue(app.scrollViews["calendar-scroll"].waitForExistence(timeout: 10))
+            app.openOtherDestination("Finanza")
+            XCTAssertTrue(app.scrollViews["finance-scroll"].waitForExistence(timeout: 10))
         }
         capture("native-tabs-after-repeated-switches")
     }
+
     func testShiftExportRemainsReachableFromSettings() {
         let app = launch(["--dark"])
         app.buttons["Impostazioni"].tap()
@@ -335,25 +340,39 @@ final class NativeInterfaceTests: XCTestCase {
     func testFourSectionsInBothThemes() {
         for dark in [false, true] {
             let app = launch(dark ? ["--dark"] : [])
-            for tab in ["Dashboard", "Attività", "Calendario", "Finanza"] {
-                app.buttons[tab].tap()
-                XCTAssertTrue(app.navigationBars[tab].waitForExistence(timeout: 10))
-                let add = addButton(app)
-                XCTAssertTrue(add.isHittable)
-                assertMinimumTouchTarget(add)
-                add.tap()
-                let editor = tab == "Attività" ? "Nuova attività" : tab == "Calendario" ? "Nuova attività" : "Nuovo movimento"
+            for name in ["Dashboard", "Attività", "Salute", "Altro"] {
+                let tab = app.tabBars.buttons[name]; tab.tap(); XCTAssertTrue(tab.isSelected)
+                if name == "Salute" {
+                    XCTAssertTrue(app.textFields["nutrition-Proteine"].waitForExistence(timeout: 10))
+                    capture((dark ? "dark-" : "light-") + "Salute")
+                }
+                if name == "Altro" {
+                    for destination in ["Finanza", "Calendario", "Bloom"] { XCTAssertTrue(app.buttons[destination].exists) }
+                    app.buttons["Bloom"].tap()
+                    XCTAssertTrue(app.buttons["bloom-section-library"].waitForExistence(timeout: 10))
+                    capture((dark ? "dark-" : "light-") + "Bloom")
+                }
+            }
+            for page in ["Dashboard", "Attività", "Calendario", "Finanza"] {
+                if page == "Calendario" || page == "Finanza" { app.openOtherDestination(page) }
+                else { app.tabBars.buttons[page].tap() }
+                let add = app.buttons["primary-add"]
+                XCTAssertTrue(add.waitForExistence(timeout: 10)); XCTAssertTrue(add.isHittable)
+                assertMinimumTouchTarget(add); add.tap()
+                let editor = page == "Attività" || page == "Calendario" ? "Nuova attività" : "Nuovo movimento"
                 XCTAssertTrue(app.navigationBars[editor].waitForExistence(timeout: 10))
                 app.buttons["Annulla"].tap()
-                XCTAssertTrue(app.navigationBars[tab].waitForExistence(timeout: 10))
-                XCTAssertTrue(app.navigationBars.buttons["primary-add"].exists)
+                let host = page == "Calendario" || page == "Finanza" ? "Altro" : page
+                XCTAssertTrue(app.tabBars.buttons[host].isSelected)
+                XCTAssertTrue(app.buttons["primary-add"].isHittable)
                 XCTAssertTrue(app.tabBars.firstMatch.exists)
-                if tab == "Finanza" { XCTAssertTrue(app.staticTexts["finance-budget-value"].exists) }
-                capture((dark ? "dark-" : "light-") + tab)
+                if page == "Finanza" { XCTAssertTrue(app.staticTexts["finance-budget-value"].exists) }
+                capture((dark ? "dark-" : "light-") + page)
             }
             app.terminate()
         }
     }
+
     func testNativeToolbarRespondsAcross44PointTouchRegion() {
         for dark in [false, true] {
             let app = launch(dark ? ["--dark"] : [])
@@ -627,8 +646,8 @@ final class NativeInterfaceTests: XCTestCase {
         let amount = app.textFields["Importo €"]
         amount.tap(); amount.typeText("2")
         app.buttons["Salva"].tap()
-        XCTAssertTrue(app.buttons["Finanza"].waitForExistence(timeout: 10))
-        app.buttons["Finanza"].tap()
+        XCTAssertTrue(app.tabBars.buttons["Dashboard"].isSelected)
+        app.openOtherDestination("Finanza")
         let all = app.buttons["all-movements"]
         for _ in 0..<8 { if all.isHittable { break }; app.scrollViews["finance-scroll"].swipeUp() }
         XCTAssertTrue(all.isHittable); all.tap()
@@ -638,7 +657,11 @@ final class NativeInterfaceTests: XCTestCase {
     func testLargeTextAndSixWeekCalendar() {
         let app = launch(["--large-text", "--six-weeks"])
         capture("accessibility-dashboard")
-        app.buttons["Calendario"].tap()
+        app.openOtherDestination("Calendario")
+        var calendar = Calendar(identifier: .gregorian); calendar.timeZone = TimeZone(identifier: "Europe/Rome")!
+        let parts = calendar.dateComponents([.year, .month], from: Date())
+        let delta = 2026 * 12 + 3 - ((parts.year ?? 2026) * 12 + (parts.month ?? 3))
+        for _ in 0..<abs(delta) { app.buttons[delta < 0 ? "Mese precedente" : "Mese successivo"].tap() }
         XCTAssertTrue(app.staticTexts["Marzo 2026"].waitForExistence(timeout: 10))
         capture("accessibility-six-weeks")
         app.terminate()
@@ -705,24 +728,23 @@ final class NativeInterfaceTests: XCTestCase {
     }
     func testRepeatedBoundaryScrollingKeepsNavigationStable() {
         let app = launch(["--stress-content", "--dark"])
-        for tab in ["Dashboard", "Attività", "Calendario", "Finanza"] {
-            app.buttons[tab].tap()
-            let tabs = app.buttons["Dashboard"]
-            let before = tabs.frame
-            let surface = tab == "Attività" ? app.collectionViews.firstMatch : app.scrollViews[tab == "Dashboard" ? "dashboard-scroll" : tab == "Finanza" ? "finance-scroll" : "calendar-scroll"]
+        for page in ["Dashboard", "Attività", "Calendario", "Finanza"] {
+            if page == "Calendario" || page == "Finanza" { app.openOtherDestination(page) }
+            else { app.tabBars.buttons[page].tap() }
+            let tabs = app.tabBars.buttons["Dashboard"], before = app.tabBars.buttons["Dashboard"].frame
+            let surface = page == "Attività" ? app.collectionViews.firstMatch : app.scrollViews[page == "Dashboard" ? "dashboard-scroll" : page == "Finanza" ? "finance-scroll" : "calendar-scroll"]
             XCTAssertTrue(surface.waitForExistence(timeout: 10))
-            for _ in 0..<4 { surface.swipeUp(velocity: .fast) }
-            for _ in 0..<3 { surface.swipeUp(velocity: .fast) }
+            for _ in 0..<7 { surface.swipeUp(velocity: .fast) }
             for _ in 0..<7 { surface.swipeDown(velocity: .fast) }
-            XCTAssertTrue(app.buttons["Dashboard"].isHittable)
-            XCTAssertTrue(app.buttons["Calendario"].isHittable)
+            XCTAssertTrue(tabs.isHittable); XCTAssertTrue(app.tabBars.buttons["Altro"].isHittable)
             XCTAssertEqual(before.height, tabs.frame.height, accuracy: 2)
-            capture("boundary-" + tab)
+            capture("boundary-" + page)
         }
     }
+
     func testCalendarEventCanBeCreatedAfterBoundaryScroll() {
         let app = launch(["--dark"])
-        app.buttons["Calendario"].tap()
+        app.openOtherDestination("Calendario")
         let scroll = app.scrollViews["calendar-scroll"]
         XCTAssertTrue(scroll.waitForExistence(timeout: 10))
         for _ in 0..<4 { scroll.swipeUp(velocity: .fast) }
@@ -744,7 +766,7 @@ final class NativeInterfaceTests: XCTestCase {
     }
     func testCalendarSelectionUpdatesImmediatelyAndKeepsEventIndex() {
         let app = launch(["--dark"])
-        app.buttons["Calendario"].tap()
+        app.openOtherDestination("Calendario")
         let cells = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "calendar-day-"))
         XCTAssertGreaterThanOrEqual(cells.count, 28)
         // Resolve each date by identity: lazy months can enter/leave the accessibility tree.
@@ -777,14 +799,14 @@ final class NativeInterfaceTests: XCTestCase {
 
     func testNegativeBudgetAndGroupedAmounts() {
         let app = launch(["--stress-money", "--dark"])
-        app.buttons["Finanza"].tap()
+        app.openOtherDestination("Finanza")
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "1.234,56")).firstMatch.waitForExistence(timeout: 10))
         XCTAssertTrue(app.staticTexts["finance-current-balance"].label.contains("12.345,67"))
         capture("negative-budget-and-grouped-amounts")
     }
     func testFinanceMonthButtonsMoveIndependentlyInBothDirections() {
         let app = launch(["--dark"])
-        app.buttons["Finanza"].tap()
+        app.openOtherDestination("Finanza")
         selectFinanceSection("Extra", in: app)
         let formatter = DateFormatter(); formatter.locale = Locale(identifier: "it_IT"); formatter.timeZone = TimeZone(identifier: "Europe/Rome"); formatter.dateFormat = "MMMM yyyy"
         var calendar = Calendar(identifier: .gregorian); calendar.timeZone = formatter.timeZone
@@ -798,7 +820,7 @@ final class NativeInterfaceTests: XCTestCase {
     }
     func testVisibleShiftBrushPaintsAndUndoRestoresDay() {
         let app = launch(["--dark"])
-        app.buttons["Calendario"].tap()
+        app.openOtherDestination("Calendario")
         app.buttons["toggle-shift-paint"].tap()
         let brush = app.buttons["shift-brush-afternoon"]
         XCTAssertTrue(brush.waitForExistence(timeout: 10)); brush.tap()
@@ -821,7 +843,7 @@ final class NativeInterfaceTests: XCTestCase {
     }
     func testSavingsBreakdownAndDirectTaskReorder() {
         let app = launch(["--dark"])
-        app.buttons["Finanza"].tap()
+        app.openOtherDestination("Finanza")
         openBudget(app)
         let assets = app.descendants(matching: .any)["finance-total-assets"]
         for _ in 0..<5 { if assets.isHittable { break }; app.collectionViews.firstMatch.swipeUp() }
@@ -835,7 +857,7 @@ final class NativeInterfaceTests: XCTestCase {
     }
     func testExtraActualPaymentUsesSavingsAndKeepsMonthlyBudget() {
         let app = launch(["--stress-money", "--dark"])
-        app.buttons["Finanza"].tap()
+        app.openOtherDestination("Finanza")
         selectFinanceSection("Extra", in: app)
         let legacyPlan = app.staticTexts["Manutenzione auto"]
         for _ in 0..<12 { if legacyPlan.isHittable { break }; app.collectionViews.firstMatch.swipeUp() }
@@ -988,7 +1010,7 @@ final class NativeInterfaceTests: XCTestCase {
     }
     func testGoalsAreIndependentlyEditableAndReloadAfterSave() {
         let app = launch(["--dark"])
-        app.buttons["Finanza"].tap()
+        app.openOtherDestination("Finanza")
         openBudget(app)
         let edit = app.buttons["Obiettivo e fondo emergenza"]
         for _ in 0..<4 { if edit.isHittable { break }; app.collectionViews.firstMatch.swipeUp() }
@@ -1008,7 +1030,7 @@ final class NativeInterfaceTests: XCTestCase {
     }
     func testFinanceHasOpenOverviewAndDirectMovements() {
         let app = launch(["--dark"])
-        app.buttons["Finanza"].tap()
+        app.openOtherDestination("Finanza")
         XCTAssertTrue(app.staticTexts["finance-heading"].exists)
         XCTAssertFalse(app.segmentedControls.firstMatch.exists)
         XCTAssertFalse(app.otherElements["wealth-forecast-chart"].exists)

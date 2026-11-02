@@ -165,13 +165,33 @@ private enum NativeHealthPeriod: String, CaseIterable, Identifiable {
     var axisDays: Int { self == .week ? 2 : (self == .month ? 7 : 28) }
 }
 
+/// Keep the chart's native selection binding and let vertical swipes reach the
+/// containing scroll view. Scrubbing starts only after a deliberate hold.
+private func nativeHealthChartGesture(_ proxy: ChartProxy) -> some Gesture {
+    SpatialTapGesture().onEnded { proxy.selectXValue(at: $0.location.x) }
+        .simultaneously(with: LongPressGesture(minimumDuration: NativeDesign.Motion.chartSelectionHoldDuration)
+            .sequenced(before: DragGesture(minimumDistance: 0))
+            .onChanged { value in
+                if case .second(true, let drag?) = value { proxy.selectXValue(at: drag.location.x) }
+            })
+}
+
 private struct NativeHealthWeightChart: View {
     let days: [HealthDay]
     var forecast: [HealthPoint] = []
     @Environment(\.nativeReduceMotion) private var reduceMotion
     @State private var selectedDate: Date?
+    @ScaledMetric(relativeTo: .caption) private var selectionCaptionHeight = NativeDesign.Layout.healthSelectionCaptionHeight
     @State private var referenceDate = Date()
     @State private var period: NativeHealthPeriod = .month
+    private var selectionDescription: String {
+        guard let selectedDate else { return "Tocca o tieni premuto e scorri" }
+        let date = selectedDate.formatted(date: .abbreviated, time: .omitted)
+        if let day = visibleDays.first(where: { Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }), let weight = day.weight {
+            return date + " · " + weight.formatted(.number.precision(.fractionLength(1))) + " kg"
+        }
+        return date + " · nessuna pesata"
+    }
     private var start: Date { period.start(relativeTo: referenceDate) }
     private var end: Date { max(forecast.last?.date ?? referenceDate, referenceDate) }
     private var visibleDays: [HealthDay] { days.filter { $0.date >= start && $0.weight != nil } }
@@ -208,16 +228,16 @@ private struct NativeHealthWeightChart: View {
                         RuleMark(x: .value("Oggi", Date())).foregroundStyle(Color.secondary.opacity(0.5))
                     }
                 }.chartXSelection(value: $selectedDate)
+                    .chartGesture { nativeHealthChartGesture($0) }
                     .animation(reduceMotion ? nil : .default, value: period)
                     .chartXScale(domain: start...end).chartYScale(domain: domain)
                     .chartXAxis { AxisMarks(values: .stride(by: .day, count: forecast.isEmpty ? period.axisDays : 28)) { _ in AxisValueLabel(format: .dateTime.day().month(.abbreviated)) } }
                     .frame(height: 190)
+                    .accessibilityIdentifier(forecast.isEmpty ? "health-weight-chart" : "health-forecast-chart")
                     .accessibilityLabel("Peso in chilogrammi: pesate e tendenza" + (forecast.isEmpty ? "" : ", previsione tratteggiata"))
-                if let selectedDate {
-                    if let day = visibleDays.first(where: { Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }), let weight = day.weight {
-                        Text(day.date.formatted(date: .abbreviated, time: .omitted) + " · " + weight.formatted(.number.precision(.fractionLength(1))) + " kg").font(.caption)
-                    } else { Text("Nessuna pesata in questa data").font(.caption).foregroundStyle(NativeDesign.secondary) }
-                }
+                Text(selectionDescription).font(.caption).foregroundStyle(NativeDesign.secondary)
+                    .lineLimit(2).frame(maxWidth: .infinity, minHeight: selectionCaptionHeight, alignment: .leading)
+                    .accessibilityIdentifier(forecast.isEmpty ? "health-weight-selection" : "health-forecast-selection")
                 Text(forecast.isEmpty ? "kg · Punti: pesate · Linea: tendenza" : "kg · Linea: tendenza · Tratteggio: previsione")
                     .font(.caption).foregroundStyle(NativeDesign.secondary)
             }
@@ -230,8 +250,17 @@ private struct NativeHealthCaloriesChart: View {
     let days: [HealthDay]
     @Environment(\.nativeReduceMotion) private var reduceMotion
     @State private var selectedDate: Date?
+    @ScaledMetric(relativeTo: .caption) private var selectionCaptionHeight = NativeDesign.Layout.healthSelectionCaptionHeight
     @State private var referenceDate = Date()
     @State private var period: NativeHealthPeriod = .month
+    private var selectionDescription: String {
+        guard let selectedDate else { return "Tocca o tieni premuto e scorri" }
+        let date = selectedDate.formatted(date: .abbreviated, time: .omitted)
+        if let day = visibleDays.first(where: { Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }), let calories = day.calories {
+            return date + " · " + calories.formatted(.number.precision(.fractionLength(0))) + " kcal"
+        }
+        return date + " · nessun dato"
+    }
     private var start: Date { period.start(relativeTo: referenceDate) }
     private var visibleDays: [HealthDay] { days.filter { $0.date >= start && $0.calories != nil } }
     var body: some View {
@@ -249,21 +278,17 @@ private struct NativeHealthCaloriesChart: View {
                         .foregroundStyle(Color.orange.opacity(0.7))
                     }
                 }.chartXSelection(value: $selectedDate)
+                    .chartGesture { nativeHealthChartGesture($0) }
                     .animation(reduceMotion ? nil : .default, value: period)
                     .chartXScale(domain: start...Calendar.current.date(byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: referenceDate))!)
                     .chartYScale(domain: 0...max(3000, (visibleDays.compactMap(\.calories).max() ?? 0) * 1.1))
                     .chartXAxis { AxisMarks(values: .stride(by: .day, count: period.axisDays)) { _ in AxisValueLabel(format: .dateTime.day().month(.abbreviated)) } }
                     .frame(height: 190)
+                    .accessibilityIdentifier("health-calories-chart")
                     .accessibilityLabel("Calorie assunte per giorno nel periodo selezionato")
-                if let selectedDate {
-                    if let day = visibleDays.first(where: { Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }), let calories = day.calories {
-                        Text(day.date.formatted(date: .abbreviated, time: .omitted) + " · " + calories.formatted(.number.precision(.fractionLength(0))) + " kcal").font(.caption)
-                    } else { Text("Nessuna caloria registrata in questa data").font(.caption).foregroundStyle(NativeDesign.secondary) }
-                }
-                let average = visibleDays.compactMap(\.calories).reduce(0, +) / Double(visibleDays.count)
-                Text("Media registrata: " + average.formatted(.number.precision(.fractionLength(0))) + " kcal/giorno · \(visibleDays.count) giorni registrati")
-                    .font(.caption).foregroundStyle(NativeDesign.secondary)
-                Text("I giorni mancanti non sono zero. Oggi può essere incompleto.").font(.caption).foregroundStyle(NativeDesign.secondary)
+                Text(selectionDescription).font(.caption).foregroundStyle(NativeDesign.secondary)
+                    .lineLimit(2).frame(maxWidth: .infinity, minHeight: selectionCaptionHeight, alignment: .leading)
+                    .accessibilityIdentifier("health-calories-selection")
             }
         }.onChange(of: days) { _, _ in referenceDate = Date() }
             .onChange(of: period) { _, _ in referenceDate = Date(); selectedDate = nil }

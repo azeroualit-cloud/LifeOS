@@ -60,6 +60,7 @@ enum NativeDesign {
         static let groupedInset = Space.large
         static let touchTarget: CGFloat = 44
         static let healthOverviewChart: CGFloat = 88
+        static let healthSelectionCaptionHeight: CGFloat = 28
         static let rowHeight: CGFloat = 52
         static let iconTile: CGFloat = 38
         static let tabHeight: CGFloat = 52
@@ -93,6 +94,7 @@ enum NativeDesign {
         static let introTickNanoseconds: UInt64 = 20_000_000
         static let pressDuration = 0.18
         static let selectionDuration = 0.16
+        static let chartSelectionHoldDuration = 0.25
         static let layoutDuration = 0.26
         static let calendarDebounce: UInt64 = 180_000_000
         static let navigationResponse = 0.30
