@@ -191,8 +191,7 @@ struct CalendarScreen: View {
             HStack(spacing: NativeDesign.Space.xxs) {
                 ForEach(weekDays, id: \.self) { day in
                     Button { selected = day; store.calendarMonth = String(day.prefix(7)) } label: {
-                        CalendarDayCell(item: presentation(for: day), active: day == selected, appearance: .calendarWeek).equatable()
-                            .matchedGeometryEffect(id: day, in: calendarMotion)
+                        CalendarDayCell(item: presentation(for: day), active: day == selected, appearance: .calendarWeek, motionNamespace: calendarMotion).equatable()
                     }.accessibilityIdentifier("calendar-week-day-" + day)
                         .accessibilityLabel(CivilDate.label(day) + ", " + (shift(on: day)?.title ?? "nessun turno"))
                         .accessibilityAddTraits(day == selected ? .isSelected : [])
@@ -423,7 +422,7 @@ struct CalendarScreen: View {
                                         } catch { store.error = error.localizedDescription }
                                     }
                                 }
-                            } label: { CalendarDayCell(item: displayed, active: showingPreview ? item.day == selected : item.isToday).equatable().matchedGeometryEffect(id: item.day, in: calendarMotion).frame(minHeight: NativeDesign.Layout.calendarMonthDayHeight) }
+                            } label: { CalendarDayCell(item: displayed, active: showingPreview ? item.day == selected : item.isToday, motionNamespace: calendarMotion).equatable().frame(minHeight: NativeDesign.Layout.calendarMonthDayHeight) }
                                 .buttonStyle(NativePressStyle()).disabled(painting && (store.busy || (!store.isDemo && monthData[month] == nil)))
                                 .id(item.day).accessibilityIdentifier("calendar-day-" + item.day)
                                 .accessibilityLabel(item.label + ", " + (item.shift?.title ?? "nessun turno"))
@@ -497,8 +496,9 @@ struct CalendarDayCell: View, Equatable {
     let item: CalendarDayPresentation
     let active: Bool
     var appearance: NativeCalendarDayAppearance = .month
+    var motionNamespace: Namespace.ID? = nil
     @ScaledMetric(relativeTo: .subheadline) private var numberSize = NativeDesign.Layout.calendarDayNumber
-    static func == (lhs: Self, rhs: Self) -> Bool { lhs.item == rhs.item && lhs.active == rhs.active && lhs.appearance == rhs.appearance }
+    static func == (lhs: Self, rhs: Self) -> Bool { lhs.item == rhs.item && lhs.active == rhs.active && lhs.appearance == rhs.appearance && lhs.motionNamespace == rhs.motionNamespace }
     @ScaledMetric(relativeTo: .title3) private var calendarNumberSize = NativeDesign.Layout.calendarDateNumber
     var body: some View {
         let color = item.shift?.color ?? NativeDesign.accent
@@ -513,8 +513,10 @@ struct CalendarDayCell: View, Equatable {
                 Text(String(Int(item.day.suffix(2)) ?? 0)).font(NativeDesign.calendarNumber(size: calendarNumberSize))
                     .foregroundStyle(active || item.isToday ? NativeDesign.calendarAccent : item.isWeekend ? NativeDesign.secondary : Color.primary)
                     .minimumScaleFactor(0.8).lineLimit(1).frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.calendarDateLine)
+                    .modifier(NativeCalendarVisualMotion(namespace: motionNamespace, id: item.day + "-number"))
             }
             NativeShiftBadge(shift: item.shift)
+                .modifier(NativeCalendarVisualMotion(namespace: motionNamespace, id: item.day + "-shift"))
             Circle().fill(item.hasEvents ? (item.shift?.color ?? NativeDesign.secondary) : Color.clear)
                 .frame(width: NativeDesign.Space.xs, height: NativeDesign.Space.xs)
         }.frame(maxWidth: .infinity).frame(minHeight: NativeDesign.Layout.calendarDayHeight)
@@ -524,6 +526,17 @@ struct CalendarDayCell: View, Equatable {
             .accessibilityAddTraits(active ? .isSelected : [])
     }
 }
+/// Animate the visual content, while the enclosing Button keeps its layout and
+/// hit region. Scroll repositioning must never transform the interactive cell.
+private struct NativeCalendarVisualMotion: ViewModifier {
+    let namespace: Namespace.ID?
+    let id: String
+    @ViewBuilder func body(content: Content) -> some View {
+        if let namespace { content.matchedGeometryEffect(id: id, in: namespace, properties: .position) }
+        else { content }
+    }
+}
+
 extension ShiftKind {
     var color: Color { LifeOSShiftPalette.color(rawValue) }
     var symbol: String {

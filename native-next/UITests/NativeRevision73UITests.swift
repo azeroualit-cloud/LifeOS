@@ -28,6 +28,8 @@ final class NativeRevision73UITests: XCTestCase {
         XCTAssertTrue(agenda.waitForExistence(timeout: 10))
         XCTAssertTrue(month.exists); XCTAssertTrue(month.isHittable)
         XCTAssertTrue(today.isSelected)
+        expectation(for: NSPredicate { _, _ in today.isHittable }, evaluatedWith: today)
+        waitForExpectations(timeout: 3)
         XCTAssertTrue(today.isHittable)
         XCTAssertGreaterThanOrEqual(today.frame.minY, month.frame.minY)
         XCTAssertLessThanOrEqual(today.frame.maxY, month.frame.maxY)
