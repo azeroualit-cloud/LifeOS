@@ -190,6 +190,9 @@ private struct NativeHealthWeightChart: View {
         if let day = visibleDays.first(where: { Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }), let weight = day.weight {
             return date + " · " + weight.formatted(.number.precision(.fractionLength(1))) + " kg"
         }
+        if let point = forecast.first(where: { Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }) {
+            return date + " · " + point.value.formatted(.number.precision(.fractionLength(1))) + " kg · previsione"
+        }
         return date + " · nessuna pesata"
     }
     private var start: Date { period.start(relativeTo: referenceDate) }
