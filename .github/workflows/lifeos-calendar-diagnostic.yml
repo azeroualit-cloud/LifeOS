@@ -4,7 +4,7 @@ on:
     inputs:
       run_id:
         description: Existing run with LifeOS-diagnostica
-        default: '41447134082'
+        default: '41492682854'
         required: true
   push:
     paths: ['.github/workflows/lifeos-calendar-diagnostic.yml']
@@ -19,35 +19,42 @@ jobs:
       - uses: actions/download-artifact@v5
         with:
           name: LifeOS-diagnostica
-          run-id: ${{ inputs.run_id || '41447134082' }}
+          run-id: ${{ inputs.run_id || '41492682854' }}
           github-token: ${{ github.token }}
           path: diagnostic
       - name: Export selected calendar preview
         run: |
-          RESULT=$(find diagnostic -name Native74.xcresult -type d | head -1)
+          RESULT=$(find diagnostic -name Focused.xcresult -type d | head -1)
           test -n "$RESULT"
           xcrun xcresulttool export attachments --path "$RESULT" --output-path screenshots
           python3 - <<'PY'
           import json,pathlib,base64,subprocess
           root=pathlib.Path('screenshots')
-          def find(node):
+          def strings(node):
               if isinstance(node,dict):
-                  values=[v for v in node.values() if isinstance(v,str)]
-                  if any('74-calendar-preview-diagnostic' in v for v in values):
-                      for v in values:
-                          if v.endswith('.png') and (root/v).is_file(): return root/v
-                  for v in node.values():
-                      r=find(v)
-                      if r:return r
+                  for value in node.values():yield from strings(value)
               elif isinstance(node,list):
-                  for v in node:
-                      r=find(v)
-                      if r:return r
-          source=find(json.loads((root/'manifest.json').read_text()))
-          if not source:raise SystemExit('Missing diagnostic screenshot')
-          subprocess.run(['sips','-Z','1100',str(source),'--out','preview.png'],check=True)
-          data=base64.b64encode(pathlib.Path('preview.png').read_bytes()).decode()
-          print('QA_IMAGE_START preview')
-          for i in range(0,len(data),16000): print('QA_IMAGE_DATA '+data[i:i+16000])
-          print('QA_IMAGE_END preview')
+                  for value in node:yield from strings(value)
+              elif isinstance(node,str):yield node
+          def matches(node):
+              if isinstance(node,dict):
+                  if any('testLargeTextAndSixWeekCalendar' in value for value in node.values() if isinstance(value,str)):
+                      yield node
+                  else:
+                      for value in node.values():yield from matches(value)
+              elif isinstance(node,list):
+                  for value in node:yield from matches(value)
+          manifest=json.loads((root/'manifest.json').read_text())
+          paths=[]
+          for match in matches(manifest):
+              for value in strings(match):
+                  if value.endswith('.png') and (root/value).is_file() and value not in paths:paths.append(value)
+          print('DIAGNOSTIC_ATTACHMENTS',paths)
+          for index,name in enumerate(paths[:6]):
+              subprocess.run(['sips','-Z','1100',str(root/name),'--out','preview.png'],check=True)
+              data=base64.b64encode(pathlib.Path('preview.png').read_bytes()).decode()
+              print('QA_IMAGE_START preview-'+str(index))
+              for i in range(0,len(data),16000): print('QA_IMAGE_DATA '+data[i:i+16000])
+              print('QA_IMAGE_END preview-'+str(index))
+          if not paths: print(json.dumps(manifest)[:20000])
           PY
