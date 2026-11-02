@@ -22,6 +22,7 @@ struct CalendarScreen: View {
     @State private var monthPositionReady = false
     @State private var positioningMonth: String?
     @State private var positioningDay: String?
+    @State private var previewScrollTarget: String?
     @State private var monthDays: [String: [CalendarDayPresentation]] = [:]
     @State private var monthData: [String: Record] = [:]
     @State private var eventsByDay: [String: [Record]] = [:]
@@ -110,7 +111,8 @@ struct CalendarScreen: View {
                         }
                     }.scrollTargetLayout().padding(.horizontal, NativeDesign.Layout.screenInset)
                         .padding(.vertical, NativeDesign.Space.large).padding(.bottom, NativeDesign.Layout.scrollClearance)
-                }.accessibilityIdentifier("calendar-scroll")
+                }.scrollPosition(id: $previewScrollTarget, anchor: .center)
+                .accessibilityIdentifier("calendar-scroll")
                 .coordinateSpace(name: "calendar-viewport")
                 .onPreferenceChange(NativeCalendarMonthFrames.self) { frames in
                     guard !showingDay else { return }
@@ -137,10 +139,14 @@ struct CalendarScreen: View {
                 }
                 .onPreferenceChange(NativeCalendarViewportHeight.self) { height in
                     guard showingPreview, height > 0 else { return }
-                    revealSelectedWeek(proxy: proxy)
+                    revealSelectedWeek()
                 }
                 .onChange(of: selected) { _, _ in
-                    if showingPreview { revealSelectedWeek(proxy: proxy) }
+                    if showingPreview { revealSelectedWeek() }
+                }
+                .onChange(of: showingPreview) { _, preview in
+                    if preview { revealSelectedWeek() }
+                    else { previewScrollTarget = nil }
                 }
                 .onChange(of: windowAnchor) { _, month in
                     guard let month else { return }
@@ -156,16 +162,17 @@ struct CalendarScreen: View {
             }
         }
     }
-    private func revealSelectedWeek(proxy: ScrollViewProxy) {
+    private func revealSelectedWeek() {
         positioningMonth = nil; positioningDay = nil
         restoringWindow = false; monthPositionReady = true
         let target = weekID(for: selected)
+        previewScrollTarget = nil
         Task { @MainActor in
             await Task.yield()
             guard showingPreview, !showingDay, target == weekID(for: selected) else { return }
             var transaction = Transaction(animation: nil)
             transaction.disablesAnimations = true
-            withTransaction(transaction) { proxy.scrollTo(target, anchor: .center) }
+            withTransaction(transaction) { previewScrollTarget = target }
         }
     }
     private func position(month: String, day: String?, proxy: ScrollViewProxy) {
