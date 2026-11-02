@@ -184,6 +184,7 @@ struct NativeRoot: View {
         }
         if url.scheme == "lifeos", url.host == "bloom" {
             if let raw = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first(where: { $0.name == "url" })?.value {
+                guard router.sheet == nil else { store.notice = "Chiudi la schermata aperta e riapri il link per preparare la nota Bloom."; return }
                 guard let target = URL(string: raw), ["https", "http"].contains(target.scheme?.lowercased() ?? ""), target.host != nil else { store.error = "Link Bloom non valido."; return }
                 router.bloomCaptureURL = raw
             }

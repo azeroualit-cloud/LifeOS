@@ -154,6 +154,20 @@ struct NativeBloomArchive: Codable {
         }
         try commit(next)
     }
+    func deleteArchivedNote(_ id: String) throws {
+        guard let note = archive.items.first(where: { $0.text("id") == id }), note.flag("archived") else { throw Message(text: "Puoi eliminare definitivamente solo una nota nel Cestino.") }
+        func hashes(_ row: Record) -> Set<String> {
+            Set(([row] + row.records("noteFiles")).map { $0.text("lifeosFileSHA256") }.filter { $0.count == 64 && $0.allSatisfy({ $0.isHexDigit }) })
+        }
+        var next = archive; next.items.removeAll { $0.text("id") == id }
+        let retained = next.items.reduce(into: Set<String>()) { $0.formUnion(hashes($1)) }
+        let removable = hashes(note).subtracting(retained)
+        try commit(next)
+        for hash in removable {
+            do { try FileManager.default.removeItem(at: root.appendingPathComponent("files").appendingPathComponent(hash)) }
+            catch { self.error = "Nota eliminata dalla Libreria; alcuni file locali non sono stati rimossi. I backup restano conservati." }
+        }
+    }
     func trash(_ record: Record, restore: Bool = false) throws {
         var changed = record; changed["archived"] = .bool(!restore)
         changed["trashedAt"] = restore ? .null : .number(Date().timeIntervalSinceReferenceDate)

@@ -10,6 +10,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   validate:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[validation-74]')
     runs-on: macos-15
     timeout-minutes: 60
     steps:

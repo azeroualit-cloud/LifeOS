@@ -82,7 +82,9 @@ struct NativeBloomLibraryContent: View {
             Button { let id = row.text("id"); if selected.contains(id) { selected.remove(id) } else { selected.insert(id) } } label: {
                 card(row).overlay(alignment: .topTrailing) { Image(systemName: selected.contains(row.text("id")) ? "checkmark.circle.fill" : "circle").padding(NativeDesign.Space.small) }
             }.buttonStyle(.plain)
-        } else { NavigationLink { NativeBloomDetail(store: store, id: row.text("id")) } label: { card(row) }.buttonStyle(.plain) }
+        } else { NavigationLink { NativeBloomDetail(store: store, id: row.text("id")) } label: { card(row) }.buttonStyle(.plain)
+            .accessibilityIdentifier("bloom-note-" + row.text("id"))
+            .accessibilityLabel(row.text("title", fallback: row.text("fileName", fallback: "Nota"))) }
     }
     private func card(_ row: Record) -> some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.small) {

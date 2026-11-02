@@ -16,6 +16,8 @@ struct NativeBloomScreen: View {
     @EnvironmentObject private var router: NativeRouter
     @StateObject private var store = NativeBloomStore.shared
     @StateObject private var classifier = NativeBloomPlaceClassifier()
+    @StateObject private var captureInbox = NativeBloomCaptureInbox.shared
+    @State private var showingCaptures = false
     @State private var captureRecord: Record = [:]
     @State private var section = "Libreria"
     @State private var search = ""
@@ -102,9 +104,24 @@ struct NativeBloomScreen: View {
                     Menu("Archivio", systemImage: "ellipsis") {
                         Button(showTrash ? "Mostra Libreria" : "Cestino") { showTrash.toggle() }
                         Button("Importa backup Bloom") { importing = true }
+                        Button("Catture da completare (\(captureInbox.requests.count))") { showingCaptures = true }
                         Button("Ultimo rapporto importazione") { showingReport = true }.disabled(store.archive.lifeosImportReports?.isEmpty != false)
                         Button("Esporta backup") { do { exportData = try store.export(); exporting = true } catch { store.error = error.localizedDescription } }
                     }
+                }
+            }
+            .sheet(isPresented: $showingCaptures) {
+                NavigationStack {
+                    List {
+                        if let error = captureInbox.error { Text(error).foregroundStyle(.red) }
+                        ForEach(captureInbox.requests) { request in
+                            VStack(alignment: .leading) {
+                                Text(request.row.text("urlString"))
+                                Button("Riprova") { do { try captureInbox.retry(request, in: store) } catch { store.error = error.localizedDescription } }
+                            }
+                        }
+                        if let error = store.error { Text(error).foregroundStyle(.red) }
+                    }.navigationTitle("Catture in sospeso").toolbar { Button("Fine") { showingCaptures = false } }
                 }
             }
             .sheet(isPresented: $showingReport) {
@@ -204,35 +221,14 @@ struct NativeBloomDetail: View {
     @ObservedObject var store: NativeBloomStore
     let id: String
     @State private var editing = false
+    @State private var confirmingDeletion = false
     @State private var file: URL?
     private var item: Record { store.archive.items.first { $0.text("id") == id } ?? [:] }
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: NativeDesign.Space.large) {
                 Text(item.text("title")).font(.title)
-                if item.text("kind") == "image", let hydrated = try? store.hydrated(item), let bytes = Data(base64Encoded: hydrated.text("data")) {
-                    NativeBloomFramedImage(data: bytes, framing: item.record("imageFraming"))
-                }
-                NativeBloomMarkdownDocumentView(text: item.text("text", fallback: item.text("notes")))
-                if let url = URL(string: item.text("urlString")), ["https", "http"].contains(url.scheme ?? "") { Link(item.text("urlString"), destination: url) }
-                if !item.text("lifeosFileSHA256").isEmpty {
-                    Button("Apri " + item.text("fileName", fallback: "allegato")) {
-                        do {
-                            let hydrated = try store.hydrated(item)
-                            guard let bytes = Data(base64Encoded: hydrated.text("data")) else { return }
-                            let name = URL(fileURLWithPath: item.text("fileName", fallback: "allegato")).lastPathComponent
-                            let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-                            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-                            let path = directory.appendingPathComponent(name); try bytes.write(to: path); file = path
-                        } catch { store.error = error.localizedDescription }
-                    }
-                }
-                ForEach(Array(item.records("noteFiles").enumerated()), id: \.offset) { index, attachment in
-                    Button("Apri " + attachment.text("name", fallback: "allegato")) { openAttachment(index) }
-                }
-                ForEach(Array((item["noteLinks"]?.array ?? []).enumerated()), id: \.offset) { _, value in
-                    if let url = URL(string: value.string), ["http", "https"].contains(url.scheme ?? "") { Link(value.string, destination: url) }
-                }
+                NativeBloomMediaPager(store: store, item: item, openFile: openRecord)
                 let place = item.record("place")
                 if !place.isEmpty {
                     Text(place.text("name"))
@@ -245,23 +241,28 @@ struct NativeBloomDetail: View {
         }.navigationTitle("Nota").navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 Button("Modifica") { editing = true }
+                if item.flag("archived") { Button("Elimina definitivamente", systemImage: "trash.slash", role: .destructive) { confirmingDeletion = true } }
                 Button(item.flag("archived") ? "Ripristina" : "Sposta nel Cestino", systemImage: item.flag("archived") ? "arrow.uturn.backward" : "trash") {
                     do { try store.trash(item, restore: item.flag("archived")); dismiss() } catch { store.error = error.localizedDescription }
                 }
             }
             .sheet(isPresented: $editing) { NavigationStack { NativeBloomComposer(store: store, initial: item) } }
             .quickLookPreview($file)
+            .confirmationDialog("Eliminare definitivamente la nota dalla Libreria? Restano eventuali copie nei backup.", isPresented: $confirmingDeletion) {
+                Button("Elimina definitivamente", role: .destructive) { do { try store.deleteArchivedNote(id); dismiss() } catch { store.error = error.localizedDescription } }
+            }
     }
-    private func openAttachment(_ index: Int) {
+    private func openRecord(_ source: Record) {
         do {
-            let attachments = try store.hydrated(item).records("noteFiles")
-            guard attachments.indices.contains(index), let bytes = Data(base64Encoded: attachments[index].text("data")) else { throw Message(text: "Allegato non disponibile.") }
+            let hydrated = try store.hydrated(source)
+            guard let bytes = Data(base64Encoded: hydrated.text("data")) else { throw Message(text: "Allegato non disponibile.") }
             let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-            let name = URL(fileURLWithPath: attachments[index].text("name", fallback: "allegato")).lastPathComponent
+            let name = URL(fileURLWithPath: source.text("fileName", fallback: source.text("name", fallback: "allegato"))).lastPathComponent
             let path = directory.appendingPathComponent(name); try bytes.write(to: path); file = path
         } catch { store.error = error.localizedDescription }
     }
+
 }
 
 private struct NativeBloomComposer: View {

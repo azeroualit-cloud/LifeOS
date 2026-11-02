@@ -31,7 +31,7 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
     func authorize() async throws {
         guard HKHealthStore.isHealthDataAvailable() else { throw Message(text: "Apple Salute non è disponibile su questo dispositivo.") }
         let types = identifiers.map { HKObjectType.quantityType(forIdentifier: $0)! }
-        try await health.requestAuthorization(toShare: Set(types), read: Set(types))
+        try await health.requestAuthorization(toShare: Set(types), read: [])
         guard types.allSatisfy({ health.authorizationStatus(for: $0) == .sharingAuthorized }) else { throw Message(text: "Autorizza la scrittura di tutti i macronutrienti e delle calorie in Apple Salute.") }
     }
     func write(_ entry: NativeNutritionEntry) async throws {

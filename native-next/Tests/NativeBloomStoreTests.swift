@@ -84,6 +84,24 @@ import XCTest
         try store.updateNotes(ids, archived: false)
         XCTAssertTrue(store.archive.items.allSatisfy { !$0.flag("archived") })
     }
+    func testPermanentDeletionRetainsFilesSharedByAnotherNote() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let store = NativeBloomStore(directory: root), bytes = Data([1, 2, 3])
+        var first = note(), second = note()
+        for index in 0..<2 {
+            var row = index == 0 ? first : second
+            row["kind"] = .string("file"); row["text"] = .null; row["data"] = .string(bytes.base64EncodedString()); row["fileName"] = .string("original.bin"); row["archived"] = .bool(true)
+            if index == 0 { first = row } else { second = row }
+            try store.save(row)
+        }
+        try store.deleteArchivedNote(first.text("id"))
+        let retained = try XCTUnwrap(store.archive.items.first)
+        XCTAssertEqual(try store.hydrated(retained)["data"], .string(bytes.base64EncodedString()))
+        try store.deleteArchivedNote(second.text("id"))
+        XCTAssertTrue(store.archive.items.isEmpty)
+        XCTAssertThrowsError(try store.hydrated(retained))
+    }
     func testImportedTrashIsNotAutomaticallyDeleted() throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }

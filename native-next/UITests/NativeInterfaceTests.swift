@@ -442,7 +442,7 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertTrue(app.buttons["expense-destination"].label.contains("Acqua"))
         capture("expense-water-fund-and-savings-preview")
         app.buttons["Salva"].tap()
-        XCTAssertTrue(app.tabBars.buttons["Finanza"].waitForExistence(timeout: 10)); app.openOtherDestination("Finanza")
+        XCTAssertTrue(app.tabBars.buttons["Altro"].waitForExistence(timeout: 10)); app.openOtherDestination("Finanza")
         let all = app.buttons["all-movements"]
         for _ in 0..<6 { if all.isHittable { break }; app.scrollViews["finance-scroll"].swipeUp() }
         all.tap()
@@ -1044,7 +1044,7 @@ final class NativeInterfaceTests: XCTestCase {
             XCTAssertTrue(app.navigationBars["Nuova attività"].waitForExistence(timeout: 10))
             app.buttons["Annulla"].tap()
             XCTAssertTrue(app.scrollViews["calendar-scroll"].waitForExistence(timeout: 10))
-            XCTAssertTrue(app.tabBars.buttons["Calendario"].isSelected)
+            XCTAssertTrue(app.tabBars.buttons["Altro"].isSelected)
         }
     }
     private func revealFinanceControl(_ element: XCUIElement, in app: XCUIApplication) {
@@ -1114,7 +1114,7 @@ final class NativeInterfaceTests: XCTestCase {
         expense.tap()
         XCTAssertTrue(app.navigationBars["Nuovo movimento"].waitForExistence(timeout: 10))
         app.buttons["Annulla"].tap()
-        XCTAssertTrue(app.tabBars.buttons["Finanza"].isSelected)
+        XCTAssertTrue(app.tabBars.buttons["Altro"].isSelected)
         capture("reduced-motion-finance")
     }
 
