@@ -1,0 +1,53 @@
+name: LifeOS calendar diagnostic
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Existing run with LifeOS-diagnostica
+        default: '41447134082'
+        required: true
+  push:
+    paths: ['.github/workflows/lifeos-calendar-diagnostic.yml']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inspect:
+    runs-on: macos-15
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          name: LifeOS-diagnostica
+          run-id: ${{ inputs.run_id || '41447134082' }}
+          github-token: ${{ github.token }}
+          path: diagnostic
+      - name: Export selected calendar preview
+        run: |
+          RESULT=$(find diagnostic -name Native74.xcresult -type d | head -1)
+          test -n "$RESULT"
+          xcrun xcresulttool export attachments --path "$RESULT" --output-path screenshots
+          python3 - <<'PY'
+          import json,pathlib,base64,subprocess
+          root=pathlib.Path('screenshots')
+          def find(node):
+              if isinstance(node,dict):
+                  values=[v for v in node.values() if isinstance(v,str)]
+                  if any('74-calendar-preview-diagnostic' in v for v in values):
+                      for v in values:
+                          if v.endswith('.png') and (root/v).is_file(): return root/v
+                  for v in node.values():
+                      r=find(v)
+                      if r:return r
+              elif isinstance(node,list):
+                  for v in node:
+                      r=find(v)
+                      if r:return r
+          source=find(json.loads((root/'manifest.json').read_text()))
+          if not source:raise SystemExit('Missing diagnostic screenshot')
+          subprocess.run(['sips','-Z','1100',str(source),'--out','preview.png'],check=True)
+          data=base64.b64encode(pathlib.Path('preview.png').read_bytes()).decode()
+          print('QA_IMAGE_START preview')
+          for i in range(0,len(data),16000): print('QA_IMAGE_DATA '+data[i:i+16000])
+          print('QA_IMAGE_END preview')
+          PY
