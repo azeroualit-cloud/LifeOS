@@ -176,8 +176,14 @@ jobs:
           stop_video
           trap - EXIT
           test -s build/LifeOS-74-flussi.mp4
-          xcrun xcresulttool export attachments --path build/Native74.xcresult --output-path build/native74-screenshots
-          python3 ../scripts/print-native-previews.py native74
+      - name: Esporta schermate dei nuovi flussi anche in caso di errore
+        if: always()
+        working-directory: app
+        run: |
+          if [ -f build/Native74.xcresult/Info.plist ]; then
+            xcrun xcresulttool export attachments --path build/Native74.xcresult --output-path build/native74-screenshots
+            python3 ../scripts/print-native-previews.py native74
+          fi
       - name: Verifica mese/giorno, editor, Finanza e widget
         timeout-minutes: 25
         working-directory: app

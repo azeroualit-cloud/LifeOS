@@ -102,6 +102,17 @@ import XCTest
         XCTAssertTrue(store.archive.items.isEmpty)
         XCTAssertThrowsError(try store.hydrated(retained))
     }
+    func testCorruptIndexCannotProduceASuccessfulEmptyBackup() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        let index = root.appendingPathComponent("index.json"), corrupt = Data("corrupt archive".utf8)
+        try corrupt.write(to: index)
+        let store = NativeBloomStore(directory: root)
+        XCTAssertThrowsError(try store.export())
+        XCTAssertThrowsError(try store.save(note()))
+        XCTAssertEqual(try Data(contentsOf: index), corrupt)
+    }
     func testImportedTrashIsNotAutomaticallyDeleted() throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }

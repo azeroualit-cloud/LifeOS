@@ -36,6 +36,7 @@ struct NativeBloomScreen: View {
     @AppStorage("lifeos.bloom.rediscovery.round") private var rediscoveryRound = 0
     @AppStorage("lifeos.bloom.filter.category") private var savedCategory = ""
     @State private var selectedPlaceNote: String?
+    @State private var hasOpenedMap = false
     @State private var mapFitRequest = 0
     private var notes: [Record] {
         store.archive.items.filter { item in
@@ -66,8 +67,10 @@ struct NativeBloomScreen: View {
             }
             if let error = store.error { Text(error).foregroundStyle(.red) }
             ZStack {
-                NativeBloomClusteredPlacesMap(places: mapAnnotations, selectedID: selectedPlaceNote, fitRequest: mapFitRequest) { selectedPlaceNote = $0 }
-                    .opacity(section == "Mappa" ? 1 : 0).allowsHitTesting(section == "Mappa").accessibilityHidden(section != "Mappa")
+                if hasOpenedMap {
+                    NativeBloomClusteredPlacesMap(places: mapAnnotations, selectedID: selectedPlaceNote, fitRequest: mapFitRequest) { selectedPlaceNote = $0 }
+                        .opacity(section == "Mappa" ? 1 : 0).allowsHitTesting(section == "Mappa").accessibilityHidden(section != "Mappa")
+                }
                 if section != "Mappa" {
                     NativeBloomLibraryContent(store: store, notes: ordered, category: $category, showTrash: showTrash, rediscovery: section == "Riscopri", newRound: { rediscoveryRound += 1 }, goToLibrary: { section = "Libreria" })
                         .searchable(text: $search, prompt: "Cerca nella Libreria")
@@ -97,7 +100,10 @@ struct NativeBloomScreen: View {
                 router.bloomCaptureURL = nil; composing = true
             }
             .onChange(of: category) { _, value in savedCategory = value }
-            .onChange(of: section) { _, value in if value == "Riscopri" { showTrash = false } }
+            .onChange(of: section) { _, value in
+                if value == "Riscopri" { showTrash = false }
+                if value == "Mappa" { hasOpenedMap = true }
+            }
             .toolbar {
                 ToolbarItem(placement: .primaryAction) { Button("Nuova nota", systemImage: "plus") { captureRecord = [:]; composing = true } }
                 ToolbarItem(placement: .secondaryAction) {

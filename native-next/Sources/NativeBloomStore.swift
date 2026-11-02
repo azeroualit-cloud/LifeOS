@@ -174,6 +174,7 @@ struct NativeBloomArchive: Codable {
         try save(changed)
     }
     func export() throws -> Data {
+        guard available else { throw Message(text: "Archivio Bloom non leggibile: esportazione interrotta per non creare un backup vuoto.") }
         var result = archive; result.items = try archive.items.map(hydrated); result.createdAt = Date().timeIntervalSinceReferenceDate
         return try JSONEncoder().encode(result)
     }

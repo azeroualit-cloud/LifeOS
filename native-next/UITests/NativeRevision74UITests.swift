@@ -33,7 +33,11 @@ final class NativeRevision74UITests: XCTestCase {
         let app = launch(); app.tabBars.buttons["Altro"].tap()
         for name in ["Finanza", "Calendario", "Bloom"] { XCTAssertTrue(app.buttons[name].waitForExistence(timeout: 10)) }
         app.buttons["Bloom"].tap()
-        XCTAssertTrue(app.buttons["Nuova nota"].waitForExistence(timeout: 10)); app.buttons["Nuova nota"].tap()
+        capture("74-bloom-entry")
+        let add = app.buttons["Nuova nota"]
+        let ready = add.waitForExistence(timeout: 10)
+        if !ready { print("BLOOM_ENTRY_DIAGNOSTIC " + app.debugDescription) }
+        XCTAssertTrue(ready); add.tap()
         let name = "Nota test " + UUID().uuidString.prefix(8)
         let title = app.textFields["bloom-note-title"]
         XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText(String(name))
