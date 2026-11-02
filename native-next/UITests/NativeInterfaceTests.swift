@@ -661,7 +661,21 @@ final class NativeInterfaceTests: XCTestCase {
         var calendar = Calendar(identifier: .gregorian); calendar.timeZone = TimeZone(identifier: "Europe/Rome")!
         let parts = calendar.dateComponents([.year, .month], from: Date())
         let delta = 2026 * 12 + 3 - ((parts.year ?? 2026) * 12 + (parts.month ?? 3))
-        for _ in 0..<abs(delta) { app.buttons[delta < 0 ? "Mese precedente" : "Mese successivo"].tap() }
+        let heading = app.staticTexts.matching(NSPredicate(format: "identifier BEGINSWITH %@", "calendar-month-heading-")).firstMatch
+        print("CALENDAR_MONTH_STEP initial=\(heading.label)")
+        for index in 0..<abs(delta) {
+            app.buttons[delta < 0 ? "Mese precedente" : "Mese successivo"].tap()
+            let shifted = calendar.date(byAdding: .month, value: (delta < 0 ? -1 : 1) * (index + 1), to: Date())!
+            let formatter = DateFormatter(); formatter.calendar = calendar; formatter.timeZone = calendar.timeZone; formatter.dateFormat = "yyyy-MM"
+            let expected = "calendar-month-heading-" + formatter.string(from: shifted)
+            let reached = app.staticTexts[expected].waitForExistence(timeout: 5)
+            print("CALENDAR_MONTH_STEP index=\(index) expected=\(expected) actual=\(heading.label) state=\(app.scrollViews["calendar-scroll"].value ?? "none")")
+            if !reached {
+                capture("calendar-large-month-navigation-diagnostic")
+                print("CALENDAR_LARGE_DIAGNOSTIC " + app.debugDescription)
+            }
+            XCTAssertTrue(reached)
+        }
         XCTAssertTrue(app.staticTexts["Marzo 2026"].waitForExistence(timeout: 10))
         capture("accessibility-six-weeks")
         app.terminate()

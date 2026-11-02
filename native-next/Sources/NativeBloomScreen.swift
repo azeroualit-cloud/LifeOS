@@ -175,6 +175,9 @@ struct NativeBloomScreen: View {
                         Section { Text(pendingSummary) }
                         ForEach(importConflicts) { conflict in
                             Section(conflict.title) {
+                                NavigationLink("Confronta versioni", systemImage: "doc.on.doc") {
+                                    NativeBloomConflictComparison(conflict: conflict)
+                                }
                                 Picker("Conflitto", selection: Binding(get: { resolutions[conflict.id]?.rawValue ?? "" }, set: { resolutions[conflict.id] = NativeBloomConflictChoice(rawValue: $0) })) {
                                     Text("Scegli una soluzione").tag("")
                                     Text("Mantieni LifeOS").tag("keep")

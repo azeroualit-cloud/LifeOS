@@ -23,6 +23,17 @@ import XCTest
         XCTAssertEqual(restored.items.first { $0.text("id") == id.uuidString }?["data"], .string(bytes.base64EncodedString()))
         XCTAssertEqual(restored.items.first { $0.text("id") == id.uuidString }?.text("fileName"), "../../originale.pdf")
     }
+    func testConflictPreviewComparesOriginalAttachmentBytesWithoutRetainingBase64() {
+        let bytes = Data([0, 1, 2, 255])
+        let file: Record = ["name": .string("originale.bin"), "data": .string(bytes.base64EncodedString())]
+        let preview = NativeBloomConflict.preview(["text": .string("Testo 🌱"), "noteFiles": .array([.object(file)])])
+        XCTAssertEqual(preview.text("text"), "Testo 🌱")
+        let attachment = preview.records("noteFiles")[0]
+        XCTAssertNil(attachment["data"])
+        XCTAssertEqual(attachment.integer("attachmentBytes"), bytes.count)
+        XCTAssertEqual(attachment.text("attachmentSHA256"), "3d1f57c984978ef98a18378c8166c1cb8ede02c03eeb6aee7e2f121dfeee3e56")
+        XCTAssertEqual(file["data"], .string(bytes.base64EncodedString()))
+    }
     func testBothBackupVersionsRoundTripAllKindsNestedFilesPlacesAndOrderedLinks() throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }
@@ -67,6 +78,9 @@ import XCTest
         try store.save(original)
         var conflict = original; conflict["text"] = .string("Divergente")
         let incoming = NativeBloomArchive(items: [note(), conflict])
+        let differences = try store.conflicts(JSONEncoder().encode(incoming))
+        XCTAssertEqual(differences.first?.current["text"], original["text"])
+        XCTAssertEqual(differences.first?.incoming["text"], .string("Divergente"))
         XCTAssertThrowsError(try store.importBackup(JSONEncoder().encode(incoming)))
         XCTAssertEqual(store.archive.items, [original])
         XCTAssertEqual(NativeBloomStore(directory: root).archive.items, [original])

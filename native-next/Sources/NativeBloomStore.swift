@@ -13,7 +13,30 @@ struct NativeBloomRow: Identifiable {
 }
 
 enum NativeBloomConflictChoice: String, CaseIterable { case keep, replace, copy }
-struct NativeBloomConflict: Identifiable { let id: String; let title: String }
+struct NativeBloomConflict: Identifiable {
+    let id: String
+    let title: String
+    let current: Record
+    let incoming: Record
+    /// Keep previews small and compare original attachment bytes without exposing Base64.
+    static func preview(_ record: Record) -> Record {
+        record.mapValues { value in
+            switch value {
+            case .object(let object): return .object(preview(object))
+            case .array(let values): return .array(values.map { element in
+                if case .object(let object) = element { return .object(preview(object)) }
+                return element
+            })
+            default: return value
+            }
+        }.reduce(into: Record()) { result, entry in
+            if entry.key == "data", case .string(let raw) = entry.value, let bytes = Data(base64Encoded: raw) {
+                result["attachmentBytes"] = .int(bytes.count)
+                result["attachmentSHA256"] = .string(SHA256.hash(data: bytes).map { String(format: "%02x", $0) }.joined())
+            } else { result[entry.key] = entry.value }
+        }
+    }
+}
 
 struct NativeBloomImportReport: Codable, Identifiable {
     var id = UUID()
@@ -249,7 +272,7 @@ struct NativeBloomArchive: Codable {
             var category = source
             if let mapped = mappings[sourceHash + ":category:" + source.text("id")] { category["id"] = .string(mapped) }
             if let old = archive.collections.first(where: { $0.text("id") == category.text("id") }), try encoder.encode(old) != encoder.encode(category) {
-                result.append(.init(id: "category:" + source.text("id"), title: category.text("name")))
+                result.append(.init(id: "category:" + source.text("id"), title: category.text("name"), current: NativeBloomConflict.preview(old), incoming: NativeBloomConflict.preview(category)))
             }
         }
         for source in incoming.items {
@@ -260,14 +283,16 @@ struct NativeBloomArchive: Codable {
                 if case .array(let values)? = item[key] { item[key] = .array(values.map { value in .string(mappings[sourceHash + ":category:" + value.string] ?? value.string) }) }
             }
             if let old = archive.items.first(where: { $0.text("id") == item.text("id") }), try encoder.encode(hydrated(old)) != encoder.encode(item) {
-                result.append(.init(id: "note:" + source.text("id"), title: item.text("title", fallback: String(item.text("text").prefix(80)))))
+                result.append(.init(id: "note:" + source.text("id"), title: NativeBloomRow(item).displayTitle, current: NativeBloomConflict.preview(try hydrated(old)), incoming: NativeBloomConflict.preview(item)))
             }
         }
         let categoryConflicts = Set(result.filter { $0.id.hasPrefix("category:") }.map { String($0.id.dropFirst("category:".count)) })
         for item in incoming.items where archive.items.contains(where: { $0.text("id") == item.text("id") }) {
             let tags = Set(item["tagIDs"]?.array.map(\.string) ?? [item.text("collectionID")])
             if !tags.isDisjoint(with: categoryConflicts), !result.contains(where: { $0.id == "note:" + item.text("id") }) {
-                result.append(.init(id: "note:" + item.text("id"), title: item.text("title", fallback: "Relazioni categoria della nota")))
+                if let old = archive.items.first(where: { $0.text("id") == item.text("id") }) {
+                    result.append(.init(id: "note:" + item.text("id"), title: NativeBloomRow(item).displayTitle, current: NativeBloomConflict.preview(try hydrated(old)), incoming: NativeBloomConflict.preview(item)))
+                }
             }
         }
         return result
