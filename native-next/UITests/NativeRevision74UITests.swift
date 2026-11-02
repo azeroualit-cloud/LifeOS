@@ -46,5 +46,20 @@ final class NativeRevision74UITests: XCTestCase {
         XCTAssertTrue(saved, "Saved note must be present in the library")
         app.tabBars.buttons["Dashboard"].tap(); app.tabBars.buttons["Altro"].tap()
         XCTAssertTrue(note.waitForExistence(timeout: 10))
+        app.openOtherDestination("Calendario")
+        let formatter = DateFormatter(); formatter.timeZone = TimeZone(identifier: "Europe/Rome"); formatter.dateFormat = "yyyy-MM-dd"
+        let today = formatter.string(from: Date()), surface = app.scrollViews["calendar-scroll"]
+        let cell = app.buttons["calendar-day-" + today]
+        XCTAssertTrue(surface.waitForExistence(timeout: 10))
+        for _ in 0..<12 { if cell.isHittable { break }; surface.swipeUp(velocity: .slow) }
+        XCTAssertTrue(cell.isHittable); cell.tap()
+        XCTAssertTrue(app.scrollViews["calendar-day-pane"].waitForExistence(timeout: 10))
+        expectation(for: NSPredicate { _, _ in cell.isHittable }, evaluatedWith: cell)
+        waitForExpectations(timeout: 3)
+        app.buttons["calendar-expand-day"].tap()
+        XCTAssertTrue(app.buttons["calendar-week-day-" + today].waitForExistence(timeout: 10))
+        capture("74-calendar-month-week")
+        app.buttons["calendar-back-month"].tap()
+        XCTAssertTrue(surface.waitForExistence(timeout: 10))
     }
 }
