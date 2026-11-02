@@ -11,7 +11,7 @@ concurrency:
 jobs:
   build:
     if: github.event.repository.private == false && !contains(github.event.head_commit.message, '[validation-74]') && !contains(github.event.head_commit.message, '[package-only-71]')
-    runs-on: macos-15
+    runs-on: xcode-27
     timeout-minutes: 145
     defaults:
       run:
@@ -146,12 +146,21 @@ jobs:
       - name: Prepara iPhone 15 Pro
         run: |
           python3 - <<'PYDEVICE'
-          import json, os, subprocess
+          import json, os, re, subprocess
           data=json.loads(subprocess.check_output(['xcrun','simctl','list','devices','available','-j']))
-          runtime=sorted(k for k in data['devices'] if 'iOS' in k)[-1]
-          matches=[d['udid'] for d in data['devices'][runtime] if d['name']=='iPhone 15 Pro']
-          device=matches[0] if matches else subprocess.check_output(['xcrun','simctl','create','LifeOS iPhone 15 Pro','com.apple.CoreSimulator.SimDeviceType.iPhone-15-Pro',runtime],text=True).strip()
-          with open(os.environ['GITHUB_ENV'],'a') as f: f.write('MAIN_DEVICE='+device+'\n')
+          runtimes=json.loads(subprocess.check_output(['xcrun','simctl','list','runtimes','-j']))['runtimes']
+          kind='com.apple.CoreSimulator.SimDeviceType.iPhone-15-Pro'
+          choices=[r for r in runtimes if r.get('isAvailable') and '.iOS-' in r['identifier'] and any(d['identifier']==kind for d in r.get('supportedDeviceTypes',[]))]
+          assert choices, 'Nessun runtime compatibile con iPhone 15 Pro'
+          runtime=max(choices,key=lambda r:tuple(map(int,r['version'].split('.'))))
+          matches=[d['udid'] for d in data['devices'].get(runtime['identifier'],[]) if d['name']=='iPhone 15 Pro']
+          device=matches[0] if matches else subprocess.check_output(['xcrun','simctl','create','LifeOS iPhone 15 Pro',kind,runtime['identifier']],text=True).strip()
+          sdk=subprocess.check_output(['xcrun','--sdk','iphoneos','--show-sdk-version'],text=True).strip()
+          assert re.fullmatch(r'[0-9.]+',sdk) and re.fullmatch(r'[0-9.]+',runtime['version'])
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('MAIN_DEVICE='+device+'\nNATIVE_SDK_VERSION='+sdk+'\nNATIVE_RUNTIME_VERSION='+runtime['version']+'\n')
+          print(subprocess.check_output(['xcodebuild','-version'],text=True))
+          print('Test iPhone 15 Pro: SDK',sdk,'runtime iOS',runtime['version'])
           PYDEVICE
       - name: Compila app e test Apple
         timeout-minutes: 35
@@ -207,9 +216,19 @@ jobs:
         run: |
           set -euo pipefail
           xcrun simctl shutdown "$MAIN_DEVICE"
-          RUNTIME=$(xcrun simctl list runtimes -j | python3 -c 'import json,sys; r=[x for x in json.load(sys.stdin)["runtimes"] if x.get("isAvailable") and x["name"].startswith("iOS")]; print(sorted(r,key=lambda x:tuple(map(int,x["version"].split("."))),reverse=True)[0]["identifier"])')
-          COMPACT=$(xcrun simctl create 'LifeOS compact' 'com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation' "$RUNTIME")
-          echo "COMPACT=$COMPACT" >> "$GITHUB_ENV"
+          python3 - <<'PYCOMPACT'
+          import json,os,subprocess
+          kind='com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation'
+          runtimes=json.loads(subprocess.check_output(['xcrun','simctl','list','runtimes','-j']))['runtimes']
+          choices=[r for r in runtimes if r.get('isAvailable') and '.iOS-' in r['identifier'] and any(d['identifier']==kind for d in r.get('supportedDeviceTypes',[]))]
+          assert choices, 'Nessun runtime compatibile con iPhone SE 3'
+          runtime=max(choices,key=lambda r:tuple(map(int,r['version'].split('.'))))
+          device=subprocess.check_output(['xcrun','simctl','create','LifeOS compact',kind,runtime['identifier']],text=True).strip()
+          with open(os.environ['GITHUB_ENV'],'a') as f:f.write('COMPACT='+device+'\n')
+          with open('/tmp/lifeos-compact-device','w') as f:f.write(device)
+          print('Test iPhone SE 3: runtime iOS',runtime['version'])
+          PYCOMPACT
+          COMPACT=$(cat /tmp/lifeos-compact-device)
           xcrun simctl boot "$COMPACT"
           xcrun simctl bootstatus "$COMPACT" -b
           xcrun simctl shutdown "$COMPACT"
@@ -350,4 +369,4 @@ jobs:
           cp LifeOS-unsigned.ipa LifeOS-74.ipa
           cp ../build/LifeOS-74-flussi.mp4 LifeOS-74-flussi.mp4
           shasum -a 256 LifeOS-74.ipa LifeOS-74-flussi.mp4 > SHA256.txt
-          gh release create ios-0.10.13-build74 LifeOS-74.ipa LifeOS-74-flussi.mp4 SHA256.txt --repo azeroualit-cloud/LifeOS --target "$GITHUB_SHA" --title "Life OS 0.10.13 build 74" --notes "Quattro schede native, Salute con macro e registrazioni modificabili in HealthKit, Bloom locale con importazione e allegati, calendario e controlli nativi. Validazione sul runtime disponibile iOS 26.2; prova fisica iOS 27.2 separata. IPA non firmata per Signulous, pubblicata dopo verifiche Apple. Sorgente: $GITHUB_SHA."
+          gh release create ios-0.10.13-build74 LifeOS-74.ipa LifeOS-74-flussi.mp4 SHA256.txt --repo azeroualit-cloud/LifeOS --target "$GITHUB_SHA" --title "Life OS 0.10.13 build 74" --notes "Quattro schede native, Salute con macro e registrazioni modificabili in HealthKit, Bloom locale con importazione e allegati, calendario e controlli nativi. Compilata con SDK iOS $NATIVE_SDK_VERSION; verificata su simulatore iPhone 15 Pro iOS $NATIVE_RUNTIME_VERSION e iPhone compatto. Prova fisica e confronto con Apple su iOS 27.2 separati. IPA non firmata per Signulous, pubblicata dopo verifiche Apple. Sorgente: $GITHUB_SHA."
