@@ -79,7 +79,7 @@ struct CalendarScreen: View {
         .task(id: focusMonth + "-" + String(reload)) { await loadMonth(focusMonth) }
     }
     private var weekdayLabels: some View {
-        HStack(spacing: NativeDesign.Space.none) {
+        HStack(spacing: NativeDesign.Space.xs) {
             ForEach(Array(["L", "M", "M", "G", "V", "S", "D"].enumerated()), id: \.offset) { _, name in
                 Text(name).font(.caption.weight(.medium)).foregroundStyle(NativeDesign.secondary).frame(maxWidth: .infinity)
             }
