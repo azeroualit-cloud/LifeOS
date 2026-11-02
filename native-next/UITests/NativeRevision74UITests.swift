@@ -40,7 +40,7 @@ final class NativeRevision74UITests: XCTestCase {
         for _ in 0..<10 {
             let top = app.navigationBars.firstMatch.frame.maxY + 8
             let bottom = app.tabBars.firstMatch.frame.minY - 8
-            if chart.exists && chart.frame.minY >= top && chart.frame.maxY <= bottom { break }
+            if chart.exists && chart.frame.minY >= top && chart.frame.maxY + 64 <= bottom { break }
             let above = chart.exists && chart.frame.minY < top
             surface.coordinate(withNormalizedOffset: CGVector(dx: 0.02, dy: above ? 0.3 : 0.75))
                 .press(forDuration: 0.05, thenDragTo: surface.coordinate(withNormalizedOffset: CGVector(dx: 0.02, dy: above ? 0.65 : 0.4)))
@@ -48,6 +48,7 @@ final class NativeRevision74UITests: XCTestCase {
         XCTAssertTrue(chart.waitForExistence(timeout: 10)); XCTAssertTrue(chart.isHittable)
         XCTAssertLessThanOrEqual(chart.frame.maxY, app.tabBars.firstMatch.frame.minY)
         let caption = app.staticTexts["health-weight-selection"]
+        XCTAssertTrue(caption.waitForExistence(timeout: 10))
         let before = caption.frame.height
         chart.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
         expectation(for: NSPredicate(format: "label != %@", "Tocca o tieni premuto e scorri"), evaluatedWith: caption)
