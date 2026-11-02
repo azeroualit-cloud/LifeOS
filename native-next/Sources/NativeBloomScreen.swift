@@ -343,7 +343,7 @@ private struct NativeBloomComposer: View {
                     item["noteFiles"] = .array(attachments.map(JSONValue.object))
                     item["title"] = .string(title); item[item.text("kind") == "text" ? "text" : "notes"] = .string(text); item["modifiedAt"] = .number(Date().timeIntervalSinceReferenceDate)
                     do { try store.save(item); dismiss() } catch { store.error = error.localizedDescription }
-                }.disabled(readFailed || title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && link.isEmpty && attachments.isEmpty) }
+                }.disabled(readFailed || title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && link.isEmpty && attachments.isEmpty && initial.text("lifeosFileSHA256").isEmpty) }
             }.onAppear {
                 guard !didLoad else { return }; didLoad = true
                 title = initial.text("title"); text = initial.text("text", fallback: initial.text("notes"))

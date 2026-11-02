@@ -199,7 +199,7 @@ struct NativeBloomArchive: Codable {
         try NativeBloomValidation.validate(incoming)
         let categories = Set(incoming.collections.map { $0.text("id") })
         guard categories.count == incoming.collections.count, Set(incoming.items.map { $0.text("id") }).count == incoming.items.count else { throw Message(text: "Identificativi duplicati nel backup.") }
-        var total = 0
+        var total = incoming.collections.reduce(0) { $0 + $1.text("name").utf8.count }
         for category in incoming.collections {
             guard UUID(uuidString: category.text("id")) != nil, !category.text("name").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { throw Message(text: "Categoria non valida.") }
         }
@@ -208,8 +208,12 @@ struct NativeBloomArchive: Codable {
             let tags = item["tagIDs"].flatMap { value -> [String]? in if case .array(let values) = value { return values.compactMap { if case .string(let s) = $0 { return s }; return nil } }; return nil } ?? (item.text("collectionID").isEmpty ? [] : [item.text("collectionID")])
             guard tags.allSatisfy(categories.contains) else { throw Message(text: "Categoria mancante nel backup.") }
             if item.text("kind") == "link" { guard let url = URL(string: item.text("urlString")), ["https", "http"].contains(url.scheme?.lowercased() ?? ""), url.host != nil else { throw Message(text: "Link non valido.") } }
+            total += ["urlString", "title", "fileName", "contentType"].reduce(0) { $0 + item.text($1).utf8.count }
+            total += item.record("place").text("name").utf8.count
+            total += (item["noteLinks"]?.array ?? []).reduce(0) { $0 + $1.string.utf8.count }
             var bytes = item.text("text").utf8.count + item.text("notes").utf8.count
             let files = item.records("noteFiles")
+            total += files.reduce(0) { $0 + $1.text("name").utf8.count + $1.text("type").utf8.count }
             for file in [item] + files {
                 let raw = file.text("data")
                 if !raw.isEmpty { guard let data = Data(base64Encoded: raw) else { throw Message(text: "Base64 non valido.") }; bytes += data.count }
