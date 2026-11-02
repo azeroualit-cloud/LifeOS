@@ -4,7 +4,7 @@ on:
     inputs:
       run_id:
         description: Existing run with LifeOS-diagnostica
-        default: '41492682854'
+        default: '41506255193'
         required: true
   push:
     paths: ['.github/workflows/lifeos-calendar-diagnostic.yml']
@@ -13,18 +13,18 @@ permissions:
   actions: read
 jobs:
   inspect:
-    runs-on: macos-15
+    runs-on: xcode-27
     timeout-minutes: 10
     steps:
       - uses: actions/download-artifact@v5
         with:
-          name: LifeOS-diagnostica
-          run-id: ${{ inputs.run_id || '41492682854' }}
+          name: calendar-probe27
+          run-id: ${{ inputs.run_id || '41506255193' }}
           github-token: ${{ github.token }}
           path: diagnostic
       - name: Export selected calendar preview
         run: |
-          RESULT=$(find diagnostic -name Focused.xcresult -type d | head -1)
+          RESULT=$(find diagnostic -name Validation.xcresult -type d | head -1)
           test -n "$RESULT"
           xcrun xcresulttool export attachments --path "$RESULT" --output-path screenshots
           python3 - <<'PY'
