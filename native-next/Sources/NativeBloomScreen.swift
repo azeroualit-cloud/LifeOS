@@ -19,6 +19,8 @@ struct NativeBloomScreen: View {
     @State private var exportData = Data()
     @State private var pendingData: Data?
     @State private var pendingSummary = ""
+    @State private var importConflicts: [NativeBloomConflict] = []
+    @State private var resolutions: [String: NativeBloomConflictChoice] = [:]
     @State private var notice: String?
     @State private var showTrash = false
     @State private var composing = false
@@ -83,12 +85,34 @@ struct NativeBloomScreen: View {
                     guard (try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0) <= 100 * 1024 * 1024 else { throw Message(text: "Backup superiore a 100 MiB.") }
                     let data = try Data(contentsOf: url), preview = try store.preview(data)
                     pendingSummary = "\(preview.items.count) note e \(preview.collections.count) categorie. Le note nel Cestino saranno conservate."
+                    importConflicts = try store.conflicts(data); resolutions = [:]
                     pendingData = data
                 } catch { store.error = error.localizedDescription }
             }
-            .confirmationDialog("Importa backup", isPresented: Binding(get: { pendingData != nil }, set: { if !$0 { pendingData = nil } })) {
-                Button("Importa") { guard let data = pendingData else { return }; do { notice = try store.importBackup(data) } catch { store.error = error.localizedDescription }; pendingData = nil }
-            } message: { Text(pendingSummary) }
+            .sheet(isPresented: Binding(get: { pendingData != nil }, set: { if !$0 { pendingData = nil } })) {
+                NavigationStack {
+                    Form {
+                        Section { Text(pendingSummary) }
+                        ForEach(importConflicts) { conflict in
+                            Section(conflict.title) {
+                                Picker("Conflitto", selection: Binding(get: { resolutions[conflict.id]?.rawValue ?? "" }, set: { resolutions[conflict.id] = NativeBloomConflictChoice(rawValue: $0) })) {
+                                    Text("Scegli una soluzione").tag("")
+                                    Text("Mantieni LifeOS").tag("keep")
+                                    Text("Sostituisci dal backup").tag("replace")
+                                    Text("Conserva una copia").tag("copy")
+                                }
+                            }
+                        }
+                        Button("Importa") {
+                            guard let data = pendingData else { return }
+                            do { notice = try store.importBackup(data, resolutions: resolutions); pendingData = nil }
+                            catch { store.error = error.localizedDescription }
+                        }.disabled(importConflicts.contains { resolutions[$0.id] == nil })
+                        if let error = store.error { Text(error).foregroundStyle(.red) }
+                    }.navigationTitle("Importa backup")
+                        .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Annulla") { pendingData = nil } } }
+                }
+            }
             .fileExporter(isPresented: $exporting, document: NativeBloomDocument(data: exportData), contentType: .json, defaultFilename: "LifeOS-Bloom-backup") { result in if case .failure(let error) = result { store.error = error.localizedDescription } }
     }
     private var ordered: [Record] {

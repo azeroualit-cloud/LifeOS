@@ -45,11 +45,23 @@ jobs:
           brew install xcodegen
           python3 scripts/check-design-system.py
           xcodegen generate
+      - name: Create iPhone 15 Pro on available runtime
+        run: |
+          python3 - <<'PYDEVICE'
+          import json, subprocess, os
+          runtimes=json.loads(subprocess.check_output(['xcrun','simctl','list','runtimes','-j']))['runtimes']
+          choices=[r for r in runtimes if r.get('isAvailable') and r['identifier'].startswith('com.apple.CoreSimulator.SimRuntime.iOS-')]
+          runtime=max(choices,key=lambda r:tuple(map(int,r['version'].split('.'))))
+          device=subprocess.check_output(['xcrun','simctl','create','LifeOS Validation 15 Pro','com.apple.CoreSimulator.SimDeviceType.iPhone-15-Pro',runtime['identifier']],text=True).strip()
+          with open(os.environ['GITHUB_ENV'],'a') as f: f.write('VALIDATION_DEVICE='+device+'\n')
+          print('Validation runtime:',runtime['version'],'device:',device)
+          PYDEVICE
+          xcrun simctl boot "$VALIDATION_DEVICE" || true
       - name: Compile and test domain logic
         working-directory: app
         run: |
           set -o pipefail
-          xcodebuild test -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination 'platform=iOS Simulator,name=iPhone 15 Pro' -parallel-testing-enabled NO -only-testing:LifeOSProbeTests -resultBundlePath Validation.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee validation.log
+          xcodebuild test -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$VALIDATION_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeTests -resultBundlePath Validation.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee validation.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
