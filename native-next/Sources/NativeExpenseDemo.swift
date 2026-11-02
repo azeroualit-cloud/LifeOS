@@ -2,12 +2,13 @@ import Foundation
 
 /// Explicit demo only. Production destinations are validated and committed by the Worker.
 enum NativeExpenseDemo {
-    static func preview(state: NativeArchive, category: String, day: String, movementID: Int) -> [Record] {
+    static func preview(state: NativeArchive, category: String, day: String, movementID: Int, bill: Bool = false) -> [Record] {
         var copy = state
         if movementID > 0 { try? removeLink(movementID, state: &copy) }
-        return NativeExpenseRouting.plans(copy.finance.record("plansV2").records("plans"), payments: copy.finance.record("plansV2").records("payments"), category: category, day: day)
+        return NativeExpenseRouting.plans(copy.finance.record("plansV2").records("plans"), payments: copy.finance.record("plansV2").records("payments"), category: category, day: day, bill: bill)
     }
-    static func apply(_ method: String, payload: Record, state: inout NativeArchive) throws {
+    static func apply(_ operation: String, payload: Record, state: inout NativeArchive) throws {
+        let method = operation == "changeUtilityBill" ? "changeExpenseDestination" : operation == "saveUtilityBill" ? "saveTransaction" : operation
         var next = state
         let id = payload.text("requestId")
         guard !id.isEmpty else { throw Message(text: "Identificatore mancante.") }
@@ -27,16 +28,26 @@ enum NativeExpenseDemo {
         movement["budgetTreatment"] = .string(planned ? "savings" : "ordinary")
         if method == "changeExpenseDestination" { try DemoActions.apply("editMovement", movement, args: nil, state: &next) }
         if planned {
-            let candidates = preview(state: next, category: movement.text("category"), day: movement.text("date"), movementID: 0)
+            let candidates = preview(state: next, category: movement.text("category"), day: movement.text("date"), movementID: 0, bill: NativeUtilityPeriodDraft(record: payload).enabled)
             guard let plan = candidates.first(where: { $0.text("id") == payload.text("planId") }) else { throw Message(text: "Piano non compatibile.") }
             guard payload["expectedAvailableCents"] != nil, payload.integer("expectedAvailableCents") == NativeExpenseRouting.available(plan) else { throw Message(text: "La disponibilità del fondo è cambiata. Aggiorna l’anteprima.") }
             var payment: Record = ["requestId": .string(id), "planId": payload["planId"]!, "amountCents": .int(Int((movement.amount("amount") * 100).rounded())), "date": movement["date"]!, "cycleMonth": .string(String(movement.text("date").prefix(7))), "competenceMonths": .int(max(1, payload.integer("competenceMonths")))]
+            payment.merge(NativeUtilityPeriodDraft(record: payload).payload) { _, value in value }
             if method == "changeExpenseDestination" { payment["movementId"] = payload["movementId"] }
             try NativePlanDemo.apply("recordFinancePlanPayment", payload: payment, state: &next)
             if method != "changeExpenseDestination", let index = next.finance.records("transactions").firstIndex(where: { $0.text("requestId") == id }) {
                 var rows = next.finance.records("transactions"); rows[index]["name"] = payload["name"]; rows[index]["note"] = payload["note"]; next.finance["transactions"] = .array(rows.map(JSONValue.object))
             }
         } else if method != "changeExpenseDestination" { try DemoActions.apply("saveTransaction", movement, args: nil, state: &next) }
+        let period = NativeUtilityPeriodDraft(record: payload)
+        if period.enabled {
+            guard period.months != nil else { throw Message(text: "Periodo della bolletta non valido.") }
+            let row = method == "changeExpenseDestination" ? payload.integer("movementId") : next.finance.records("transactions").first(where: { $0.text("requestId") == id })?.integer("row") ?? 0
+            guard row > 0 else { throw Message(text: "Movimento della bolletta non trovato.") }
+            var bills = next.finance.records("utilityBills").filter { $0.integer("movementId") != row }
+            if !planned { bills.append(["movementId": .int(row), "utilityPeriod": .object(["start": .string(period.start), "end": .string(period.end)])]) }
+            next.finance["utilityBills"] = .array(bills.map(JSONValue.object)); next.finance["utilityCompetenceEnabled"] = .bool(true)
+        }
         NativePlanDemo.project(month: next.financeMonth, state: &next)
         commands[id] = .string(signature); next.finance["expenseRoutingCommands"] = .object(commands); state = next
     }

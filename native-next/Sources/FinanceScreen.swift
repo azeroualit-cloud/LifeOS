@@ -208,6 +208,7 @@ struct MovementEditor: View {
     @State private var detail: Record = [:]
     @State private var destination = ""
     @State private var routeReady = false
+    @State private var bill = NativeUtilityPeriodDraft()
     @State private var quotedAvailable = 0
     @State private var changingDestination = false
     private enum InputField { case amount, name, note }
@@ -263,12 +264,12 @@ struct MovementEditor: View {
                 else { Picker("Categoria", selection: $category) { ForEach(options, id: \.self) { Text($0) } }.accessibilityIdentifier("movement-category") }
             }.disabled(linkedPayment)
             if !editing && type == "Spesa" {
-                NativeExpenseRouteSection(category: category, day: CivilDate.day(date), amount: Input.cents(amount) ?? 0, selected: $destination, competenceMonths: $months, ready: $routeReady, quotedAvailable: $quotedAvailable)
+                NativeExpenseRouteSection(category: category, day: CivilDate.day(date), amount: Input.cents(amount) ?? 0, selected: $destination, competenceMonths: $months, ready: $routeReady, quotedAvailable: $quotedAvailable, bill: $bill)
             }
             if editing && type == "Spesa" && account == "Trade Republic" {
                 Section("Destinazione") {
                     Text(detail.text("financePlanId").isEmpty ? "Budget mensile" : "Pagamento collegato a un piano").font(NativeDesign.body)
-                    Button("Cambia destinazione della spesa") { changingDestination = true }.accessibilityIdentifier("movement-change-destination")
+                    Button(NativeUtilityPeriodDraft.categories.contains(category) || !detail.text("utilityCompetenceStartMonth").isEmpty ? "Modifica periodo o destinazione" : "Cambia destinazione della spesa") { changingDestination = true }.accessibilityIdentifier("movement-change-destination")
                         .disabled(!destinationUnchanged)
                     if !destinationUnchanged { Text("Salva le modifiche al movimento prima di cambiare destinazione.").font(NativeDesign.metadata) }
                 }
@@ -313,6 +314,7 @@ struct MovementEditor: View {
     }
     private func populate(_ value: Record) {
         var r = value
+        if store.isDemo { r = NativeUtilityDemo.enriched(r, state: store.state) }
         if store.isDemo, let payment = store.finance.record("plansV2").records("payments").first(where: { $0.integer("movementId") == r.integer("row") }) {
             r["financePlanId"] = payment["planId"]; r["financePlanPaymentId"] = payment["id"]; r["financePlanCompetenceMonths"] = payment["competenceMonths"]
         }
@@ -336,12 +338,13 @@ struct MovementEditor: View {
             payload.merge(NativeExpenseRouting.destination(destination)) { _, new in new }
             payload["competenceMonths"] = .int(months)
             payload["expectedAvailableCents"] = .int(quotedAvailable)
+            payload.merge(bill.payload) { _, value in value }
         }
         if treatment == "recovery" && type == "Spesa" {
             payload["recoveryMonths"] = .string(recovery)
             if !recoveryAmount.isEmpty { guard let recoverCents = Input.cents(recoveryAmount) else { error = "Importo di recupero non valido."; return }; payload["recoveryAmount"] = .number(Double(recoverCents) / 100) }
         }
-        do { try await store.perform(editing ? "editMovement" : "saveTransaction", payload); dismiss() }
+        do { try await store.perform(editing ? "editMovement" : type == "Spesa" && bill.enabled ? "saveUtilityBill" : "saveTransaction", payload); dismiss() }
         catch { self.error = error.localizedDescription }
     }
 }

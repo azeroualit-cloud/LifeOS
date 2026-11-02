@@ -10,11 +10,12 @@ struct NativeExpenseRouteSection: View {
     @Binding var competenceMonths: Int
     @Binding var ready: Bool
     @Binding var quotedAvailable: Int
+    @Binding var bill: NativeUtilityPeriodDraft
     @State private var plans: [Record] = []
     @State private var loading = false
     @State private var issue: String?
     @State private var retry = 0
-    private var query: String { category + day + String(movementID) + String(retry) }
+    private var query: String { category + day + String(movementID) + bill.start + bill.end + String(retry) }
     private var chosen: Record? { plans.first { $0.text("id") == selected } }
     var body: some View {
         Section("Da dove viene pagata") {
@@ -33,29 +34,45 @@ struct NativeExpenseRouteSection: View {
                     LabeledContent("Dal fondo " + chosen.text("name"), value: (Double(split.fund) / 100).euro)
                     LabeledContent("Dagli altri risparmi", value: (Double(split.savings) / 100).euro).accessibilityIdentifier("expense-savings-preview")
                     Text("Il pagamento non viene sottratto di nuovo dal budget. Disponibilità verificata nuovamente al salvataggio.").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
-                    if chosen.text("kind") == "estimated" { Stepper("Mesi coperti: \(competenceMonths)", value: $competenceMonths, in: 1...12).accessibilityIdentifier("expense-competence-months") }
                 } else if selected == NativeExpenseRouting.ordinary {
                     LabeledContent("Dal budget mensile", value: (Double(amount) / 100).euro).accessibilityIdentifier("expense-budget-preview")
                     Text(plans.isEmpty ? "Nessun piano compatibile con questa categoria e data." : "Hai scelto di non usare il fondo del piano.").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
                 } else { Text("Ci sono più piani compatibili: scegli quale utilizzare.").font(NativeDesign.metadata) }
             }
+            if bill.enabled {
+                NativeUtilityPeriodFields(period: $bill, amountCents: amount)
+            }
         }.task(id: query) { await load() }
             .onChange(of: selected) { _, _ in updateReady() }
+            .onChange(of: bill) { _, value in
+                if let months = value.months { competenceMonths = months.count }
+                updateReady()
+            }
             .onChange(of: category + day) { _, _ in selected = ""; ready = false }
     }
-    private func updateReady() { quotedAvailable = chosen.map(NativeExpenseRouting.available) ?? 0; ready = !loading && issue == nil && (selected == NativeExpenseRouting.ordinary || chosen != nil) }
+    private func updateReady() {
+        bill.prepare(day: day, required: NativeUtilityPeriodDraft.categories.contains(category) || chosen?.text("kind") == "estimated" || movementID > 0 && bill.enabled)
+        quotedAvailable = chosen.map(NativeExpenseRouting.available) ?? 0
+        ready = !loading && issue == nil && (!bill.enabled || bill.months != nil) && (selected == NativeExpenseRouting.ordinary || chosen != nil)
+    }
     private func load() async {
         loading = true; ready = false; issue = nil
         do {
             try await Task.sleep(nanoseconds: NativeDesign.Motion.calendarDebounce)
             let rows: [Record]
             if store.isDemo {
-                rows = NativeExpenseDemo.preview(state: store.state, category: category, day: day, movementID: movementID)
+                rows = NativeExpenseDemo.preview(state: store.state, category: category, day: day, movementID: movementID, bill: bill.enabled)
             } else {
                 var payload: Record = ["category": .string(category), "date": .string(day), "amountCents": .int(max(1, amount))]
                 if movementID > 0 { payload["movementId"] = .int(movementID) }
+                if bill.enabled, !bill.start.isEmpty, !bill.end.isEmpty {
+                    payload["competenceStartMonth"] = .string(bill.start); payload["competenceEndMonth"] = .string(bill.end)
+                }
                 let result = try await store.read("getExpenseRouting", args: [.object(payload)]).object
                 guard result.integer("version") == 1 else { throw Message(text: "Aggiorna il Worker Cloudflare alla build 67 per collegare le spese ai piani.") }
+                if NativeUtilityPeriodDraft.categories.contains(category) || bill.enabled {
+                    guard result.integer("utilityCompetenceVersion") == 1 else { throw Message(text: "Aggiorna il server per conservare il periodo della bolletta. I dati inseriti restano nell’editor.") }
+                }
                 if movementID > 0 && (result.integer("amountCents") != amount || result.text("date") != day || result.text("category") != category) { throw Message(text: "Il movimento è cambiato. Chiudi e riaprilo.") }
                 rows = result.records("plans")
             }
@@ -80,6 +97,7 @@ struct NativeExpenseDestinationEditor: View {
     var onSaved: () -> Void
     @State private var selected = ""
     @State private var months = 1
+    @State private var bill = NativeUtilityPeriodDraft()
     @State private var ready = false
     @State private var quotedAvailable = 0
     @State private var quoteGeneration = 0
@@ -94,14 +112,14 @@ struct NativeExpenseDestinationEditor: View {
                 LabeledContent(record.text("description", fallback: record.text("name")), value: (Double(amount) / 100).euro)
                 Text("Cambia il fondo utilizzato mantenendo lo stesso movimento bancario.").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
             }
-            NativeExpenseRouteSection(category: record.text("category"), day: String(record.text("actual_date", fallback: record.text("date")).prefix(10)), amount: amount, movementID: record.integer("source_row") == 0 ? record.integer("row") : record.integer("source_row"), selected: $selected, competenceMonths: $months, ready: $ready, quotedAvailable: $quotedAvailable).id(quoteGeneration).disabled(submitted)
+            NativeExpenseRouteSection(category: record.text("category"), day: String(record.text("actual_date", fallback: record.text("date")).prefix(10)), amount: amount, movementID: record.integer("source_row") == 0 ? record.integer("row") : record.integer("source_row"), selected: $selected, competenceMonths: $months, ready: $ready, quotedAvailable: $quotedAvailable, bill: $bill).id(quoteGeneration).disabled(submitted)
             if let issue { NativeInlineMessage(text: issue) }
         }.modifier(NativeListAppearance()).navigationTitle("Destinazione").navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Chiudi") { dismiss() }.disabled(saving) }
                 ToolbarItem(placement: .confirmationAction) { Button(submitted ? "Riprova" : "Conferma") { Task { await save() } }.disabled(!ready || selected.isEmpty || saving).accessibilityIdentifier("expense-destination-confirm") }
             }
-            .onAppear { months = NativeExpenseRouting.coveredMonths(record); selected = record.text("financePlanId").isEmpty ? NativeExpenseRouting.ordinary : record.text("financePlanId") }
+            .onAppear { months = NativeExpenseRouting.coveredMonths(record); bill = NativeUtilityPeriodDraft(record: record); selected = record.text("financePlanId").isEmpty ? NativeExpenseRouting.ordinary : record.text("financePlanId") }
     }
     private func save() async {
         saving = true; submitted = true; defer { saving = false }
@@ -109,7 +127,8 @@ struct NativeExpenseDestinationEditor: View {
         payload["expectedAvailableCents"] = .int(quotedAvailable)
         payload["expectedAmountCents"] = .int(amount); payload["expectedCategory"] = record["category"]; payload["expectedDate"] = .string(String(record.text("actual_date", fallback: record.text("date")).prefix(10)))
         payload["requestId"] = .string(requestID); payload["expectedPaymentId"] = .string(record.text("financePlanPaymentId")); payload["movementId"] = .int(record.integer("source_row") == 0 ? record.integer("row") : record.integer("source_row")); payload["competenceMonths"] = .int(months)
-        do { try await store.perform("changeExpenseDestination", payload); onSaved(); dismiss() }
+        payload.merge(bill.payload) { _, value in value }
+        do { try await store.perform(bill.enabled ? "changeUtilityBill" : "changeExpenseDestination", payload); onSaved(); dismiss() }
         catch {
             issue = error.localizedDescription
             if error is NativeRequestRejected, let status = try? await store.read("getExpenseRequestStatus", args: [.object(["requestId": .string(requestID)])]), !status.object.flag("started") {

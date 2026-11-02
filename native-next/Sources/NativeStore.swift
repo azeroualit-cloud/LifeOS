@@ -37,7 +37,7 @@ import SwiftUI
     var finance: Record { isDemo || financeMonth == state.financeMonth ? state.finance : [:] }
     var summary: Record { finance.record("summary") }
     private var transferablePending: [PendingWrite] { state.pending.filter { $0.method != "saveHealthEntry" } }
-    var financialPending: [PendingWrite] { state.pending.filter { ["saveTransaction", "saveExtra"].contains($0.method) } }
+    var financialPending: [PendingWrite] { state.pending.filter { ["saveTransaction", "saveUtilityBill", "saveExtra"].contains($0.method) } }
     var tasks: [Record] { life.records("tasks") }
     var categories: [Record] { life.records("categories").sorted { $0.amount("position") < $1.amount("position") } }
     var routines: [Record] { life.records("routines").map { record in
@@ -525,9 +525,12 @@ import SwiftUI
                 let sameKind = p.text("source") == (key == "tasks" ? "task" : "event")
                 let positive = sameKind && p.integer("sourceId") > 0 ? p.integer("sourceId") : (next.life.records(key).map { $0.integer("id") }.filter { $0 > 0 }.max() ?? 0) + 1
                 next.life[key] = .array(next.life.records(key).map { row in var row = row; if row.text("activity_uid") == p.text("uid") { row["id"] = .int(positive); row["pending"] = .bool(false) }; return .object(row) })
-            } else if method == "changeExpenseDestination" || method == "saveTransaction" && payload.integer("expenseRoutingVersion") == 1 {
+            } else if method == "recordUtilityPlanPayment" {
+                try NativePlanDemo.apply("recordFinancePlanPayment", payload: payload, state: &next)
+            } else if ["changeExpenseDestination", "changeUtilityBill", "saveUtilityBill"].contains(method) || method == "saveTransaction" && payload.integer("expenseRoutingVersion") == 1 {
                 try NativeExpenseDemo.apply(method, payload: payload, state: &next)
             } else { try DemoActions.apply(method, payload, args: args, state: &next) }
+            if ["editMovement", "deleteMovement"].contains(method) { NativeUtilityDemo.project(month: next.financeMonth, state: &next) }
             next.refreshedAt = Date(); try save(next); return
         }
         try NativeServerFeaturePolicy.validate(method, payload: payload, life: life)
@@ -556,7 +559,7 @@ import SwiftUI
             return
         }
         guard !busy else { throw Message(text: "Attendi la fine del salvataggio.") }
-        if method == "saveTransaction" || method == "saveExtra" {
+        if ["saveTransaction", "saveUtilityBill", "saveExtra"].contains(method) {
             guard server != nil else { throw Message(text: "Per nuovi movimenti collega Life OS oppure apri la demo.") }
             var p = payload
             let id = p.text("requestId", fallback: UUID().uuidString); p["requestId"] = .string(id)
