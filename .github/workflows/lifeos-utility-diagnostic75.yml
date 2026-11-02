@@ -1,0 +1,56 @@
+name: LifeOS 75 synthetic UI diagnostic
+on:
+  push:
+    paths: ['.github/workflows/lifeos-utility-diagnostic75.yml']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inspect:
+    runs-on: xcode-27
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          name: validation75-ios27
+          run-id: 41542353289
+          github-token: ${{ github.token }}
+          path: diagnostic
+      - name: Inspect failed synthetic bill UI attachments
+        run: |
+          RESULT=$(find diagnostic -name Validation.xcresult -type d | head -1)
+          test -n "$RESULT"
+          xcrun xcresulttool export attachments --path "$RESULT" --output-path screenshots
+          python3 - <<'PY'
+          import json,pathlib,base64,subprocess
+          root=pathlib.Path('screenshots')
+          def strings(node):
+              if isinstance(node,dict):
+                  for value in node.values():yield from strings(value)
+              elif isinstance(node,list):
+                  for value in node:yield from strings(value)
+              elif isinstance(node,str):yield node
+          def matches(node):
+              if isinstance(node,dict):
+                  if any('testBillPeriodShowsThreeExactShares' in v for v in node.values() if isinstance(v,str)):yield node
+                  else:
+                      for value in node.values():yield from matches(value)
+              elif isinstance(node,list):
+                  for value in node:yield from matches(value)
+          manifest=json.loads((root/'manifest.json').read_text())
+          paths=[]
+          for match in matches(manifest):
+              for value in strings(match):
+                  if (root/value).is_file() and value not in paths:paths.append(value)
+          print('SYNTHETIC_ATTACHMENTS',paths)
+          for index,name in enumerate(paths[:12]):
+              p=root/name
+              if p.suffix.lower() in ['.png','.jpeg','.jpg','.heic']:
+                  subprocess.run(['sips','-s','format','png','-Z','1100',str(p),'--out','preview.png'],check=True)
+                  data=base64.b64encode(pathlib.Path('preview.png').read_bytes()).decode()
+                  print('QA_IMAGE_START utility-'+str(index))
+                  for i in range(0,len(data),16000):print('QA_IMAGE_DATA '+data[i:i+16000])
+                  print('QA_IMAGE_END utility-'+str(index))
+              elif p.suffix.lower() in ['.txt','.json']:print(p.read_text(errors='replace')[:40000])
+          if not paths:print(json.dumps(manifest)[:20000])
+          PY
