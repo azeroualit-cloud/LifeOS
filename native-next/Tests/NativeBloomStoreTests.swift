@@ -23,6 +23,43 @@ import XCTest
         XCTAssertEqual(restored.items.first { $0.text("id") == id.uuidString }?["data"], .string(bytes.base64EncodedString()))
         XCTAssertEqual(restored.items.first { $0.text("id") == id.uuidString }?.text("fileName"), "../../originale.pdf")
     }
+    func testBothBackupVersionsRoundTripAllKindsNestedFilesPlacesAndOrderedLinks() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let categories: [Record] = ["Idee 🌱", "Viaggi"].map { ["id": .string(UUID().uuidString), "name": .string($0), "createdAt": .number(100)] }
+        let png = try XCTUnwrap(Data(base64Encoded: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl6LPQAAAAASUVORK5CYII="))
+        let crop: Record = ["top": .number(0.1), "bottom": .number(0.2), "left": .number(0), "right": .number(0)]
+        var text = note()
+        text["text"] = .string("# Appunti Unicode 🌱\n\n| A | B |\n| --- | --- |\n| Caffè | 東京 |")
+        text["collectionID"] = categories[0]["id"]
+        text["tagIDs"] = .array([categories[1]["id"]!, categories[0]["id"]!])
+        text["pinnedCategoryIDs"] = .array([categories[1]["id"]!])
+        text["noteLinks"] = .array([.string("https://example.test/secondo"), .string("https://example.test/primo")])
+        text["place"] = .object(["name": .string("Posto salvato"), "latitude": .number(43.7), "longitude": .number(11.2), "kind": .string("park")])
+        text["futureMetadata"] = .object(["preserve": .bool(true), "unicode": .string("東京 🌱")])
+        text["noteFiles"] = .array([
+            .object(["id": .string(UUID().uuidString), "name": .string("foto.png"), "type": .string("public.png"), "data": .string(png.base64EncodedString()), "framing": .object(crop)]),
+            .object(["id": .string(UUID().uuidString), "name": .string("dati-📎.bin"), "type": .string("public.data"), "data": .string(Data([0, 1, 2, 255]).base64EncodedString())])
+        ])
+        var link = note(); link["kind"] = .string("link"); link["text"] = .null; link["urlString"] = .string("https://example.test/nota")
+        var image = note(); image["kind"] = .string("image"); image["text"] = .null; image["fileName"] = .string("originale.png"); image["contentType"] = .string("public.png"); image["data"] = .string(png.base64EncodedString()); image["imageFraming"] = .object(crop)
+        var file = note(); file["kind"] = .string("file"); file["text"] = .null; file["fileName"] = .string("archiviato.bin"); file["data"] = .string(Data([9, 8, 7]).base64EncodedString()); file["archived"] = .bool(true); file["trashedAt"] = .number(1)
+        let originals = [text, link, image, file]
+        for version in [1, 2] {
+            let directory = root.appendingPathComponent(String(version))
+            var incoming = NativeBloomArchive(collections: categories, items: originals); incoming.version = version
+            let store = NativeBloomStore(directory: directory)
+            _ = try store.importBackup(JSONEncoder().encode(incoming))
+            let restarted = NativeBloomStore(directory: directory)
+            let exported = try JSONDecoder().decode(NativeBloomArchive.self, from: restarted.export())
+            XCTAssertEqual(exported.version, 2); XCTAssertEqual(exported.collections, categories)
+            XCTAssertEqual(exported.items.count, originals.count)
+            for original in originals { XCTAssertEqual(exported.items.first { $0.text("id") == original.text("id") }, original) }
+            XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: directory.appendingPathComponent("files").path).count, 3)
+            XCTAssertEqual(restarted.archive.lifeosImportReports?.last?.fileCount, 4)
+            XCTAssertEqual(restarted.archive.lifeosImportReports?.last?.byteCount, png.count * 2 + 7)
+        }
+    }
     func testConflictDoesNotOverwriteOrPublishPartialImport() throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }

@@ -165,29 +165,12 @@ private enum NativeHealthPeriod: String, CaseIterable, Identifiable {
     var axisDays: Int { self == .week ? 2 : (self == .month ? 7 : 28) }
 }
 
-/// Keep the chart's native selection binding and let vertical swipes reach the
-/// containing scroll view. Scrubbing starts only after a deliberate hold.
-private func nativeHealthChartGesture(_ proxy: ChartProxy) -> some Gesture {
-    SpatialTapGesture().onEnded { proxy.selectXValue(at: $0.location.x) }
-}
-private func nativeHealthChartScrubbingGesture(_ scrubbing: GestureState<Bool>, select: @escaping (CGFloat) -> Void) -> some Gesture {
-    LongPressGesture(minimumDuration: NativeDesign.Motion.chartSelectionHoldDuration)
-        .sequenced(before: DragGesture(minimumDistance: 0))
-        .updating(scrubbing) { value, active, _ in
-            if case .second(true, _) = value { active = true }
-        }
-        .onChanged { value in
-            if case .second(true, let drag?) = value { select(drag.location.x) }
-        }
-}
-
 private struct NativeHealthWeightChart: View {
     let days: [HealthDay]
     var forecast: [HealthPoint] = []
     var onScrubbing: (Bool) -> Void = { _ in }
     @Environment(\.nativeReduceMotion) private var reduceMotion
     @State private var selectedDate: Date?
-    @GestureState private var scrubbing = false
     @ScaledMetric(relativeTo: .caption) private var selectionCaptionHeight = NativeDesign.Layout.healthSelectionCaptionHeight
     @State private var referenceDate = Date()
     @State private var period: NativeHealthPeriod = .month
@@ -238,15 +221,15 @@ private struct NativeHealthWeightChart: View {
                         RuleMark(x: .value("Oggi", Date())).foregroundStyle(Color.secondary.opacity(0.5))
                     }
                 }.chartXSelection(value: $selectedDate)
-                    .chartGesture { nativeHealthChartGesture($0) }
+                    .chartGesture { _ in TapGesture().onEnded { _ in } }
                     .chartOverlay { proxy in
                         GeometryReader { geometry in
                             if let anchor = proxy.plotFrame {
                                 let plot = geometry[anchor]
-                                Color.clear.contentShape(Rectangle()).frame(width: plot.width, height: plot.height)
-                                    .simultaneousGesture(nativeHealthChartScrubbingGesture($scrubbing) { x in
-                                        selectedDate = proxy.value(atX: min(max(x, 0), plot.width), as: Date.self)
-                                    })
+                                NativeHealthChartInteraction(onSelect: { x in
+                                    selectedDate = proxy.value(atX: min(max(x, 0), plot.width), as: Date.self)
+                                }, onScrubbing: onScrubbing)
+                                    .frame(width: plot.width, height: plot.height)
                                     .position(x: plot.midX, y: plot.midY).accessibilityHidden(true)
                             }
                         }
@@ -265,7 +248,6 @@ private struct NativeHealthWeightChart: View {
             }
         }.onChange(of: days) { _, _ in referenceDate = Date() }
             .onChange(of: period) { _, _ in referenceDate = Date(); selectedDate = nil }
-            .onChange(of: scrubbing) { _, active in onScrubbing(active) }
             .onDisappear { onScrubbing(false) }
     }
 }
@@ -275,7 +257,6 @@ private struct NativeHealthCaloriesChart: View {
     var onScrubbing: (Bool) -> Void = { _ in }
     @Environment(\.nativeReduceMotion) private var reduceMotion
     @State private var selectedDate: Date?
-    @GestureState private var scrubbing = false
     @ScaledMetric(relativeTo: .caption) private var selectionCaptionHeight = NativeDesign.Layout.healthSelectionCaptionHeight
     @State private var referenceDate = Date()
     @State private var period: NativeHealthPeriod = .month
@@ -304,15 +285,15 @@ private struct NativeHealthCaloriesChart: View {
                         .foregroundStyle(Color.orange.opacity(0.7))
                     }
                 }.chartXSelection(value: $selectedDate)
-                    .chartGesture { nativeHealthChartGesture($0) }
+                    .chartGesture { _ in TapGesture().onEnded { _ in } }
                     .chartOverlay { proxy in
                         GeometryReader { geometry in
                             if let anchor = proxy.plotFrame {
                                 let plot = geometry[anchor]
-                                Color.clear.contentShape(Rectangle()).frame(width: plot.width, height: plot.height)
-                                    .simultaneousGesture(nativeHealthChartScrubbingGesture($scrubbing) { x in
-                                        selectedDate = proxy.value(atX: min(max(x, 0), plot.width), as: Date.self)
-                                    })
+                                NativeHealthChartInteraction(onSelect: { x in
+                                    selectedDate = proxy.value(atX: min(max(x, 0), plot.width), as: Date.self)
+                                }, onScrubbing: onScrubbing)
+                                    .frame(width: plot.width, height: plot.height)
                                     .position(x: plot.midX, y: plot.midY).accessibilityHidden(true)
                             }
                         }
@@ -330,7 +311,6 @@ private struct NativeHealthCaloriesChart: View {
             }
         }.onChange(of: days) { _, _ in referenceDate = Date() }
             .onChange(of: period) { _, _ in referenceDate = Date(); selectedDate = nil }
-            .onChange(of: scrubbing) { _, active in onScrubbing(active) }
             .onDisappear { onScrubbing(false) }
     }
 }
