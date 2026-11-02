@@ -118,7 +118,7 @@ struct CalendarScreen: View {
                         }
                     }.scrollTargetLayout().padding(.horizontal, NativeDesign.Layout.screenInset)
                         .padding(.vertical, NativeDesign.Space.large).padding(.bottom, NativeDesign.Layout.scrollClearance)
-                }.scrollPosition(id: $scrollWeek, anchor: .top)
+                }.scrollPosition(id: $scrollWeek, anchor: showingPreview ? .center : .top)
                 .onChange(of: scrollWeek) { _, week in
                     guard monthPositionReady, !restoringWindow, !showingDay, let week else { return }
                     updateVisibleMonth(for: week)
@@ -184,6 +184,9 @@ struct CalendarScreen: View {
         guard calendarWeeks.contains(where: { $0.id == target }) else { return }
         requestedWeek = target; monthPositionReady = false; restoringWindow = true
         anchoredWeek = target; anchoredMonth = month; visibleMonth = month
+        // Keep the native retention anchor and the explicit reader request in
+        // agreement. Never clear this binding before assigning the target.
+        scrollWeek = target
         positionRequest = UUID()
     }
     private func updateVisibleMonth(for week: String) {
