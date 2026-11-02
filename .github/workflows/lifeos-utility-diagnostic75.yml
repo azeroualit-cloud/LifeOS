@@ -13,7 +13,7 @@ jobs:
       - uses: actions/download-artifact@v5
         with:
           name: validation75-ios27
-          run-id: 41542353289
+          run-id: 41544986385
           github-token: ${{ github.token }}
           path: diagnostic
       - name: Inspect failed synthetic bill UI attachments
@@ -32,7 +32,7 @@ jobs:
               elif isinstance(node,str):yield node
           def matches(node):
               if isinstance(node,dict):
-                  if any('testBillPeriodShowsThreeExactShares' in v for v in node.values() if isinstance(v,str)):yield node
+                  if any('testHealthChartsAllowVerticalScrollAndNativeSelection' in v for v in node.values() if isinstance(v,str)):yield node
                   else:
                       for value in node.values():yield from matches(value)
               elif isinstance(node,list):
@@ -43,6 +43,7 @@ jobs:
               for value in strings(match):
                   if (root/value).is_file() and value not in paths:paths.append(value)
           print('SYNTHETIC_ATTACHMENTS',paths)
+          print('SYNTHETIC_ATTACHMENT_TYPES',[(n,subprocess.check_output(['file','-b',str(root/n)],text=True).strip()) for n in paths[:16]])
           def is_image(name):
               data=(root/name).read_bytes()[:16]
               return data.startswith(b'\x89PNG') or data.startswith(b'\xff\xd8') or b'ftypheic' in data
