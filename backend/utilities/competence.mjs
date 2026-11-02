@@ -1,4 +1,8 @@
 // A bill owns a competence period. Cash and fund contributions keep their dates.
+export function isUtilityCostFund(plan) {
+  return plan?.kind === 'estimated' || ['fund', 'fixed', 'goal'].includes(plan?.kind)
+    && ['Elettricità', 'Gas', 'Acqua', 'Utenze', 'Condominio'].includes(plan?.category);
+}
 export function utilityPeriod(input) {
   const start = input.competenceStartMonth, end = input.competenceEndMonth;
   if (start == null && end == null) return null;
@@ -48,7 +52,7 @@ export function utilityCompetenceContext(state, movements) {
     if (command.kind === 'ordinary' && !command.cancelled && command.active !== false)
       add(command.pending ? confirmedPendingRow(command, id) : command.movementId, command.utilityPeriod);
   }
-  return { version: 1, bills: [...bills.values()], profiles: Object.values(state?.plans || {}).filter(p => p.kind === 'estimated') };
+  return { version: 1, bills: [...bills.values()], profiles: Object.values(state?.plans || {}).filter(isUtilityCostFund) };
 }
 
 export function utilityMonthlyCost(context, category, month, fallbackCents, contribution) {
@@ -77,8 +81,25 @@ export function utilityMovementMetadata(row, state) {
   return item ? { ...row, utilityCompetenceStartMonth: item.utilityPeriod.start, utilityCompetenceEndMonth: item.utilityPeriod.end } : row;
 }
 
-// Find a complete paid window, without including an unpaid current month.
-// A gap in the latest paid window still falls back to the configured salary.
+// At rollover use the preceding paid month, never an arbitrarily stale salary.
+// Missing older income or a gap in the 12-month window retains the configured fallback.
 export function salaryReferenceMonth(credited, cutoff) {
-  return [...credited.keys()].filter(m => m <= cutoff).sort().at(-1) || cutoff;
+  if (credited.has(cutoff)) return cutoff;
+  const n = Number(cutoff.slice(0, 4)) * 12 + Number(cutoff.slice(-2)) - 2;
+  const previous = `${Math.floor(n / 12)}-${String(n % 12 + 1).padStart(2, '0')}`;
+  return credited.has(previous) ? previous : cutoff;
+}
+
+export function refreshUtilityEstimate(state, planId, today) {
+  const plan = state.plans[planId];
+  if (plan?.kind !== 'estimated' || plan.status !== 'active') return;
+  const history = Object.values(state.payments).filter(p => p.planId === planId && p.status === 'posted')
+    .sort((a, b) => a.date.localeCompare(b.date)).slice(-12);
+  if (!history.length) return;
+  const count = history.reduce((n, p) => n + p.competenceMonths, 0);
+  const amountCents = Math.max(1, Math.round(history.reduce((n, p) => n + p.amountCents, 0) / count));
+  const fromMonth = new Date(Date.UTC(Number(today.slice(0, 4)), Number(today.slice(5, 7)), 1)).toISOString().slice(0, 7);
+  plan.rateChanges = (plan.rateChanges || []).filter(c => c.fromMonth !== fromMonth);
+  plan.rateChanges.push({ fromMonth, amountCents });
+  plan.rateChanges.sort((a, b) => a.fromMonth.localeCompare(b.fromMonth));
 }

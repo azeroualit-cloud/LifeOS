@@ -11,6 +11,9 @@ struct NativeUtilityPeriodDraft: Equatable {
     var start = ""
     var end = ""
     static let categories: Set<String> = ["Elettricità", "Gas", "Acqua", "Utenze", "Condominio"]
+    static func isCostFund(_ plan: Record) -> Bool {
+        plan.text("kind") == "estimated" || (["fund", "fixed", "goal"].contains(plan.text("kind")) && categories.contains(plan.text("category")))
+    }
     var months: [String]? {
         guard NativePlanRules.validMonth(start), NativePlanRules.validMonth(end), start <= end else { return nil }
         var cursor = start, result: [String] = []

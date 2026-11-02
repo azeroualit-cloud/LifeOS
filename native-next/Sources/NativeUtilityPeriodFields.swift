@@ -22,7 +22,6 @@ struct NativeUtilityPeriodFields: View {
 }
 
 private struct NativeUtilityMonthPicker: View {
-    @Environment(\.dynamicTypeSize) private var textSize
     let title: String
     @Binding var selection: String
     private var month: Binding<Int> {
@@ -32,24 +31,35 @@ private struct NativeUtilityMonthPicker: View {
         Binding(get: { Int(selection.prefix(4)) ?? 2026 }, set: { selection = String($0) + "-" + String(selection.suffix(2)) })
     }
     var body: some View {
-        Group {
-            if textSize.isAccessibilitySize {
-                VStack(alignment: .leading, spacing: NativeDesign.Space.small) { Text(title); selectors }
-            } else {
-                HStack { Text(title); Spacer(minLength: NativeDesign.Space.small); selectors }
+        ViewThatFits(in: .horizontal) {
+            HStack {
+                Text(title).fixedSize(horizontal: true, vertical: false)
+                Spacer(minLength: NativeDesign.Space.small)
+                selectors.fixedSize(horizontal: true, vertical: false)
             }
+            VStack(alignment: .leading, spacing: NativeDesign.Space.small) { Text(title); selectors }
         }
     }
     private var selectors: some View {
-        HStack(spacing: NativeDesign.Space.small) {
-            Picker("Mese · " + title, selection: month) {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: NativeDesign.Space.small) { monthPicker; yearPicker }
+            VStack(alignment: .leading, spacing: NativeDesign.Space.small) { monthPicker; yearPicker }
+        }
+    }
+    private var monthPicker: some View {
+        Picker("Mese · " + title, selection: month) {
                 ForEach(1...12, id: \.self) { value in
                     Text(CivilDate.monthTitle(String(format: "2026-%02d", value)).components(separatedBy: " ")[0]).tag(value)
                 }
-            }.labelsHidden().pickerStyle(.menu).accessibilityIdentifier("utility-month-" + title)
-            Picker("Anno · " + title, selection: year) {
+        }.labelsHidden().pickerStyle(.menu).lineLimit(1).fixedSize(horizontal: true, vertical: false)
+            .frame(minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle())
+            .accessibilityIdentifier("utility-month-" + title)
+    }
+    private var yearPicker: some View {
+        Picker("Anno · " + title, selection: year) {
                 ForEach(2000...2099, id: \.self) { Text(String($0)).tag($0) }
-            }.labelsHidden().pickerStyle(.menu).accessibilityIdentifier("utility-year-" + title)
-        }
+        }.labelsHidden().pickerStyle(.menu).lineLimit(1).fixedSize(horizontal: true, vertical: false)
+            .frame(minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle())
+            .accessibilityIdentifier("utility-year-" + title)
     }
 }

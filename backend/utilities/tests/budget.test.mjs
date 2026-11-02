@@ -42,6 +42,10 @@ test('plan fund and bill cost are independent in the native overview, including 
   current.payments.bill = { id: 'bill', planId: 'water', status: 'posted', movementId: 2, date: '2026-11-02', amountCents: 22179, utilityPeriod: period };
   for (const month of ['2026-08', '2026-09', '2026-10', '2026-11']) {
     const baseBudget = budget(month, current), view = core.project(current, month);
+    if (month === '2026-10') {
+      const costRow = baseBudget.monthlyBudgetBreakdown.find(r => r.name === 'Acqua');
+      assert.equal(costRow.planId, 'water'); assert.equal(costRow.budgetRole, 'utilityCost');
+    }
     const base = { summary: { ...baseBudget, recurringCommitments: [], budget: 1000, committedCurrent: 0 }, transactions: [] };
     const updated = core.augmentFinance(base, view, view);
     assert.equal(updated.summary.monthlyRemaining, month === '2026-11' ? 1250 : 1226.07);
@@ -50,6 +54,17 @@ test('plan fund and bill cost are independent in the native overview, including 
   }
   assert.equal(core.balance(current, current.plans.water, '2026-10').fundCents, 5000);
   assert.equal(core.balance(current, current.plans.water, '2026-11').paidCents, 22179);
+});
+
+test('a utility bill funded by a continuous or fixed fund is charged once, regardless of fund kind', () => {
+  for (const kind of ['fund', 'fixed', 'goal']) {
+    const current = structuredClone(state); delete current.expenseRoutingCommands;
+    current.plans.water = { id: 'water', name: 'Fondo acqua', category: 'Acqua', kind, status: 'active', startMonth: '2026-08', endMonth: kind === 'goal' ? '2026-12' : null, intervalMonths: 1, amountCents: 5000 };
+    current.payments.bill = { id: 'bill', planId: 'water', status: 'posted', movementId: 2, date: '2026-11-02', amountCents: 22179, utilityPeriod: period };
+    const b = budget('2026-10', current), view = core.project(current, '2026-10');
+    const updated = core.augmentFinance({ summary: { ...b, recurringCommitments: [], budget: 1000, committedCurrent: 0 }, transactions: [] }, view, view);
+    assert.equal(updated.summary.monthlyRemaining, 1226.07, kind + ' must not charge cost and fund contribution together');
+  }
 });
 
 test('unpaid November retains the last complete paid salary window; a real history gap uses configured fallback', () => {
@@ -79,10 +94,13 @@ test('unpaid November retains the last complete paid salary window; a real histo
     grid[1][14] = 0;
     const realDeficit = core.computeFinance(core.sheetBook(config(), [], []), 2026, 11, null, [], [], true, {});
     assert.equal(realDeficit.summary.monthlyRemaining, -500, 'A real deficit is never hidden with a clamp');
+    const stale = salaries.map(r => ({ ...r, actual_date: new RealDate(Date.UTC(Number(r.actual_date.slice(0, 4)), Number(r.actual_date.slice(5, 7)) - 3, 28)).toISOString().slice(0, 10) }));
+    const staleHistory = core.computeFinance(core.sheetBook(config(), stale, []), 2026, 11, null, [], [], true, {});
+    assert.equal(staleHistory.summary.monthlyRemaining, -500, 'Stale salaries must not create current spending money');
   } finally { globalThis.Date = RealDate; }
 });
 
-test('full finance response updates every past month while transaction and cashflow stay in November', () => {
+test('full finance response updates every past month while cashflow stays on the actual payment date', () => {
   const RealDate = globalThis.Date;
   globalThis.Date = class extends RealDate { constructor(...args) { super(...(args.length ? args : ['2026-11-02T12:00:00Z'])); } };
   try {
@@ -91,15 +109,21 @@ test('full finance response updates every past month while transaction and cashf
     grid[4][0] = 'Acqua'; grid[4][1] = 50; grid[4][2] = 'Vincolata';
     const config = grid.map((values, index) => ({ sheet: 'Budget', row_number: index + 1, values_json: JSON.stringify(values) }));
     config.push({ sheet: 'Categorie finanziarie', row_number: 1, values_json: JSON.stringify([[{ id: 10, name: 'Altro', members: [] }]]) });
-    const plan = { allocations: [], links: [], budgetPolicies: [{ movement_source_row: 2, treatment: 'ordinary' }], utilityCompetence: utilityCompetenceContext(state, [row]) };
-    const result = core.computeFinance(core.sheetBook(config, [row], []), 2026, 11, plan, [], [], false, {});
-    for (const month of ['2026-08', '2026-09', '2026-10']) {
-      const value = result.yearly.find(item => item.month === month);
-      assert.equal(value.monthlyRemaining, 1226.07); assert.equal(value.spent, 0);
+    for (const paidDay of ['2026-10-31', '2026-11-02']) {
+      const bankRow = { ...row, actual_date: paidDay, competence_months: 3 };
+      const plan = { allocations: [], links: [], budgetPolicies: [{ movement_source_row: 2, treatment: 'ordinary' }], utilityCompetence: utilityCompetenceContext(state, [bankRow]) };
+      const result = core.computeFinance(core.sheetBook(config, [bankRow], []), 2026, 11, plan, [], [], false, {});
+      for (const month of ['2026-08', '2026-09', '2026-10']) {
+        const value = result.yearly.find(item => item.month === month);
+        assert.equal(value.monthlyRemaining, 1226.07);
+        assert.equal(value.spent, month === paidDay.slice(0, 7) ? 221.79 : 0);
+      }
+      assert.equal(result.summary.monthlyRemaining, paidDay.startsWith('2026-11') ? 1250 : 1226.07);
+      assert.equal(result.summary.monthlyBudgetBreakdown.find(r => r.name === 'Acqua').competenceSource, 'estimate');
+      assert.equal(result.yearly.find(item => item.month === '2026-11').spent, paidDay.startsWith('2026-11') ? 221.79 : 0);
+      assert.equal(result.transactions.length, paidDay.startsWith('2026-11') ? 1 : 0);
+      if (result.transactions.length) { assert.equal(result.transactions[0].date, paidDay); assert.equal(result.transactions[0].amount, -221.79); }
+      assert.equal(result.lifetime.expenses.find(r => r.name === 'Acqua').amount, 221.79);
     }
-    assert.equal(result.summary.monthlyRemaining, 1250);
-    assert.equal(result.yearly.find(item => item.month === '2026-11').spent, 221.79);
-    assert.equal(result.transactions.length, 1); assert.equal(result.transactions[0].date, '2026-11-02');
-    assert.equal(result.transactions[0].amount, -221.79);
   } finally { globalThis.Date = RealDate; }
 });

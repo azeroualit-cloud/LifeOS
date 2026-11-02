@@ -18,11 +18,11 @@ struct NativeBudgetFlow {
         func cents(_ key: String) -> Int { Int((summary.amount(key) * 100).rounded()) }
         salaryCents = cents("monthlySalary"); spentCents = cents("monthlySpent"); remainingCents = cents("monthlyRemaining")
         let separatesUtilityCosts = summary.integer("utilityCompetenceVersion") == 1
-        let current = plans.filter { (!separatesUtilityCosts || $0.text("kind") != "estimated") && ($0.integer("contributionCents") != 0 || ($0.text("status") == "active" && $0.text("startMonth") <= month && ($0.text("endMonth").isEmpty || $0.text("endMonth") >= month))) }
+        let current = plans.filter { (!separatesUtilityCosts || !NativeUtilityPeriodDraft.isCostFund($0)) && ($0.integer("contributionCents") != 0 || ($0.text("status") == "active" && $0.text("startMonth") <= month && ($0.text("endMonth").isEmpty || $0.text("endMonth") >= month))) }
         var entries: [(String, String?, Int)] = current.map { ($0.text("name"), $0.text("id"), $0.integer("contributionCents")) }
-        entries += summary.records("monthlyBudgetBreakdown").filter { $0.text("planId").isEmpty && $0.amount("amount") != 0 }.map { row in
-            let plan = separatesUtilityCosts ? plans.first { $0.text("kind") == "estimated" && $0.text("category") == row.text("name") } : nil
-            return (row.text("name"), plan?.text("id"), Int((row.amount("amount") * 100).rounded()))
+        entries += summary.records("monthlyBudgetBreakdown").filter { ($0.text("planId").isEmpty || separatesUtilityCosts && $0.text("budgetRole") == "utilityCost") && $0.amount("amount") != 0 }.map { row in
+            let plan = separatesUtilityCosts ? plans.first { NativeUtilityPeriodDraft.isCostFund($0) && $0.text("category") == row.text("name") } : nil
+            return (row.text("name"), row.text("planId").isEmpty ? plan?.text("id") : row.text("planId"), Int((row.amount("amount") * 100).rounded()))
         }
         let difference = salaryCents - spentCents - remainingCents - entries.reduce(0) { $0 + $1.2 }
         if difference != 0 { entries.append(("Altri impegni del mese", nil, difference)) }

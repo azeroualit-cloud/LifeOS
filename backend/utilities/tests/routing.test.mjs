@@ -104,3 +104,20 @@ test('dedicated bill endpoints preserve POST, origin and authentication checks',
     assert.equal((await worker.fetch(new Request(url, { method: 'POST', headers: { Origin: 'https://example.test' }, body: '[]' }), {}, {})).status, 401);
   }
 });
+
+test('editing competence on a stopped fund preserves payment identity, fund status and bank row', async () => {
+  const { ctx, payload, rows } = await fixture();
+  const input = { ...payload, expenseDestination: 'plan', planId: 'water', expectedAvailableCents: 10000 };
+  await core.expenseRouting.save({ ...ctx, input });
+  await ctx.service.change(state => { const next = structuredClone(state); next.plans.water.status = 'stopped'; next.plans.water.stopAfter = '2026-11'; return { state: next, result: {} }; });
+  const before = { ...rows()[0] };
+  const edit = { requestId: 'utility-stopped-edit', movementId: 2, expenseDestination: 'plan', planId: 'water', expectedPaymentId: input.requestId,
+    expectedAmountCents: 22179, expectedDate: '2026-11-02', expectedCategory: 'Acqua', competenceStartMonth: '2026-09', competenceEndMonth: '2026-10',
+    expectedCompetenceStartMonth: '2026-08', expectedCompetenceEndMonth: '2026-10' };
+  await core.expenseRouting.change({ ...ctx, input: edit });
+  const { state } = await ctx.repository.read();
+  assert.equal(state.payments[input.requestId].utilityPeriod.start, '2026-09');
+  assert.equal(state.plans.water.status, 'stopped'); assert.equal(Object.values(state.payments).filter(p => p.status === 'posted').length, 1);
+  assert.deepEqual({ ...rows()[0] }, before);
+  await assert.rejects(core.expenseRouting.change({ ...ctx, input: { ...edit, requestId: 'utility-stale-edit', competenceStartMonth: '2026-07' } }), /periodo.*cambiato/i);
+});

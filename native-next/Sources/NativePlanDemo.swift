@@ -66,10 +66,10 @@ enum NativePlanDemo {
                 guard amount > 0, amount <= 100_000_000, day <= today, CivilDate.day(CivilDate.date(day)) == day else { throw Message(text: "Importo o data non validi.") }
                 let bill = NativeUtilityPeriodDraft(record: payload)
                 if bill.enabled && bill.months == nil { throw Message(text: "Periodo della bolletta non valido.") }
-                let settlement = kind == .goal ? "once" : kind == .estimated && bill.enabled ? id : [.fixed, .estimated].contains(kind) ? NativePlanRules.cycleKey(plan, month: cycle) : id
+                let settlement = kind == .goal ? "once" : NativeUtilityPeriodDraft.isCostFund(plan) && bill.enabled ? id : [.fixed, .estimated].contains(kind) ? NativePlanRules.cycleKey(plan, month: cycle) : id
                 guard !payments.contains(where: { $0.text("planId") == plan.text("id") && $0.text("settlementKey") == settlement }) else { throw Message(text: "Pagamento già registrato.") }
                 if [.fixed, .estimated].contains(kind) {
-                    guard NativePlanRules.validMonth(cycle), cycle <= String(today.prefix(7)), cycle >= plan.text("startMonth") || kind == .estimated && bill.enabled else { throw Message(text: "Scadenza non valida.") }
+                    guard NativePlanRules.validMonth(cycle), cycle <= String(today.prefix(7)), cycle >= plan.text("startMonth") || NativeUtilityPeriodDraft.isCostFund(plan) && bill.enabled else { throw Message(text: "Scadenza non valida.") }
                 }
                 let covered = bill.months?.count ?? (payload.integer("competenceMonths") == 0 ? 1 : payload.integer("competenceMonths"))
                 guard (1...12).contains(covered) else { throw Message(text: "Mesi coperti non validi.") }
@@ -89,12 +89,7 @@ enum NativePlanDemo {
                 }
                 if kind == .goal { plan["status"] = .string("closed"); plan["closedMonth"] = .string(String(today.prefix(7))) }
                 if kind == .estimated {
-                    let history = payments.filter { $0.text("planId") == plan.text("id") }.sorted { $0.text("date") < $1.text("date") }.suffix(12)
-                    let total = history.reduce(0) { $0 + $1.integer("amountCents") }, months = history.reduce(0) { $0 + max(1, $1.integer("competenceMonths")) }
-                    let from = NativePlanRules.adding(1, to: String(today.prefix(7)))
-                    var changes = plan.records("rateChanges").filter { $0.text("fromMonth") != from }
-                    changes.append(["fromMonth": .string(from), "amountCents": .int(max(1, Int((Double(total) / Double(months)).rounded())))])
-                    plan["rateChanges"] = .array(changes.map(JSONValue.object))
+                    plan = NativeUtilityDemo.reestimated(plan, payments: payments, today: today)
                 }
             } else { throw Message(text: "Operazione non disponibile nella demo.") }
             plans[index] = plan
@@ -124,7 +119,7 @@ enum NativePlanDemo {
             let earmarked = plan.text("status") == "active" && !["advance", "recovery"].contains(plan.text("kind")) ? max(0, saved - spent) : 0
             return (earmarked, saved, spent)
         }
-        let adjustment = -plans.filter { !state.finance.flag("utilityCompetenceEnabled") || $0.text("kind") != "estimated" }.reduce(0) { $0 + NativePlanRules.contribution($1, month: month) }
+        let adjustment = -plans.filter { !state.finance.flag("utilityCompetenceEnabled") || !NativeUtilityPeriodDraft.isCostFund($0) }.reduce(0) { $0 + NativePlanRules.contribution($1, month: month) }
         let currentEarmarked = plans.reduce(0) { $0 + fund($1, through: current).0 }
         var summary = state.finance.record("summary")
         let previous = data.integer("demoAppliedAdjustmentCents"), previousReserved = data.integer("demoAppliedReservedCents")

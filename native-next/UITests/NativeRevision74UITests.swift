@@ -50,6 +50,9 @@ final class NativeRevision74UITests: XCTestCase {
         let caption = app.staticTexts["health-weight-selection"]
         XCTAssertTrue(caption.waitForExistence(timeout: 10))
         let before = caption.frame.height
+        print("CHART_BEFORE_TAP frame=\(chart.frame) caption=\(caption.frame) surface=\(surface.frame)")
+        capture("75-health-chart-before-tap")
+        print("CHART_ACCESSIBILITY_SYNTHETIC " + app.debugDescription)
         chart.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
         expectation(for: NSPredicate(format: "label != %@", "Tocca o tieni premuto e scorri"), evaluatedWith: caption)
         waitForExpectations(timeout: 5)

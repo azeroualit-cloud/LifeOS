@@ -7,7 +7,7 @@ deployment = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(deployment)
 
 def transform(source):
-    payload = Path('backend/utilities/competence.mjs').read_text().replace('export function ', 'function ')
+    payload = Path('backend/utilities/competence.mjs').read_text().replace('export async function ', 'async function ').replace('export function ', 'function ')
     marker = '// LIFEOS_UTILITY_COMPETENCE_75\n' + payload
     if '// LIFEOS_UTILITY_COMPETENCE_75' in source:
         if not source.endswith(marker): raise RuntimeError('Versione competenze differente; nessuna scrittura.')
@@ -25,14 +25,15 @@ def transform(source):
     routing = Path('backend/expense-routing/routing.mjs').read_text().replace('export function createExpenseRouting', 'function createExpenseRouting', 1)
     source = source[:a] + routing + source[b:]
     patch('const expenseRouting = createExpenseRouting({ PlanError, balance, command, completePayment, completePaymentDeletion, fingerprint, requestKey, month, cycleKey });',
-          'const expenseRouting = createExpenseRouting({ PlanError, balance, command, completePayment, completePaymentDeletion, fingerprint, requestKey, month, cycleKey, utilityPeriod });')
+          'const expenseRouting = createExpenseRouting({ PlanError, balance, command, completePayment, completePaymentDeletion, fingerprint, requestKey, month, cycleKey, utilityPeriod, refreshUtilityEstimate, isUtilityCostFund });')
     patch('  const amount = cents(input.amountCents), date2 = day(input.date, today), covered = Number(input.competenceMonths ?? 1);', '''  let billPeriod;
   try { billPeriod = utilityPeriod(input); } catch (error) { throw new PlanError(error.message); }
   const amount = cents(input.amountCents), date2 = day(input.date, today), covered = billPeriod?.count ?? Number(input.competenceMonths ?? 1);''')
     patch('if (["fixed", "estimated"].includes(plan.kind) && cycle < plan.startMonth)',
-          'if (["fixed", "estimated"].includes(plan.kind) && cycle < plan.startMonth && !(billPeriod && plan.kind === "estimated"))')
+          'if (["fixed", "estimated"].includes(plan.kind) && cycle < plan.startMonth && !(billPeriod && isUtilityCostFund(plan)))')
     patch('const settlement = ["goal", "recovery"].includes(plan.kind) ? "once" : ["fixed", "estimated"].includes(plan.kind) ? cycleKey(plan, cycle) : id;',
-          'const settlement = ["goal", "recovery"].includes(plan.kind) ? "once" : plan.kind === "estimated" && billPeriod ? id : ["fixed", "estimated"].includes(plan.kind) ? cycleKey(plan, cycle) : id;')
+          'const settlement = ["goal", "recovery"].includes(plan.kind) ? "once" : isUtilityCostFund(plan) && billPeriod ? id : ["fixed", "estimated"].includes(plan.kind) ? cycleKey(plan, cycle) : id;')
+    patch('plans: Object.values(state.plans).map((p) => ({ ...p, outstandingCents:', 'plans: Object.values(state.plans).map((p) => ({ ...p, utilityCostFund: isUtilityCostFund(p), outstandingCents:')
     patch('    competenceMonths: covered,\n    recovery,', '    competenceMonths: covered,\n    utilityPeriod: billPeriod,\n    recovery,')
     patch('var METHODS = { saveFinancePlan: "create", recordFinancePlanPayment: "pay",',
           'var METHODS = { saveFinancePlan: "create", recordFinancePlanPayment: "pay", recordUtilityPlanPayment: "pay",')
@@ -69,14 +70,21 @@ def transform(source):
     patch('    if (reconciliation.covered.has(r)) continue;',
           '    if (reconciliation.covered.has(r) || hasUtilityBill(competence, r[19])) continue;')
     patch('    adjustmentCents: adjustment(state.plans, selectedMonth),',
-          '    utilityCompetenceVersion: 1,\n    adjustmentCents: adjustment(Object.fromEntries(Object.entries(state.plans).filter(([, p]) => p.kind !== "estimated")), selectedMonth),')
+          '    utilityCompetenceVersion: 1,\n    adjustmentCents: adjustment(Object.fromEntries(Object.entries(state.plans).filter(([, p]) => !isUtilityCostFund(p))), selectedMonth),')
     patch('    monthlySalary: round(salary),', '    utilityCompetenceVersion: competence?.version ?? 0,\n    monthlySalary: round(salary),')
+    patch('...[...fixed].filter(([, amount]) => amount !== 0).map(([name, amount]) => ({ name, amount: round(amount) })),', '''...[...fixed].filter(([, amount]) => amount !== 0).map(([name, amount]) => {
+        const profile = competence?.profiles.find(p => p.category === name && contribution(p, month2) > 0);
+        const isUtilityCost = profile || competence?.bills.some(b => b.category === name);
+        return { name, amount: round(amount), ...(isUtilityCost ? { budgetRole: 'utilityCost',
+          competenceSource: utilityMonthlyCost(competence, name, month2, Math.round(amount * 100), contribution).source,
+          ...(profile ? { planId: profile.id } : {}) } : {}) };
+      }),''')
     patch('const adopted = view.plans.filter((p) => p.legacy && view.month >= p.legacy.fromMonth)',
-          'const adopted = view.plans.filter((p) => p.legacy && (current || p.kind !== "estimated") && view.month >= p.legacy.fromMonth)')
+          'const adopted = view.plans.filter((p) => p.legacy && (current || !isUtilityCostFund(p)) && view.month >= p.legacy.fromMonth)')
     patch('...view.plans.filter((p) => p.contributionCents !== 0).map',
-          '...view.plans.filter((p) => p.kind !== "estimated" && p.contributionCents !== 0).map')
+          '...view.plans.filter((p) => !isUtilityCostFund(p) && p.contributionCents !== 0).map')
     patch('const names = new Set(view.plans.filter((p) => p.legacy?.type === "recurring" && view.month >= p.legacy.fromMonth)',
-          'const names = new Set(view.plans.filter((p) => p.kind !== "estimated" && p.legacy?.type === "recurring" && view.month >= p.legacy.fromMonth)')
+          'const names = new Set(view.plans.filter((p) => !isUtilityCostFund(p) && p.legacy?.type === "recurring" && view.month >= p.legacy.fromMonth)')
     return source + '\n' + marker
 
 if __name__ == '__main__':

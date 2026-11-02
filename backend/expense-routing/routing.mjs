@@ -1,5 +1,5 @@
 // Integrates the existing plan service. No second cash ledger or category-only debit rules.
-export function createExpenseRouting({ PlanError, balance, command, completePayment, completePaymentDeletion, fingerprint, requestKey, month, cycleKey, utilityPeriod: parseUtilityPeriod = null }) {
+export function createExpenseRouting({ PlanError, balance, command, completePayment, completePaymentDeletion, fingerprint, requestKey, month, cycleKey, utilityPeriod: parseUtilityPeriod = null, refreshUtilityEstimate = null, isUtilityCostFund = p => p.kind === 'estimated' }) {
   const payable = new Set(['fixed', 'estimated', 'goal', 'fund']);
   const fail = (message, status = 400) => { throw new PlanError(message, status); };
   const signature = value => fingerprint(value);
@@ -26,10 +26,10 @@ export function createExpenseRouting({ PlanError, balance, command, completePaym
   }
   function candidates(state, checked) {
     return Object.values(state.plans).filter(p => {
-      if (!payable.has(p.kind) || p.status !== 'active' || p.category !== checked.category || p.startMonth > checked.date.slice(0,7) && !(checked.utilityPeriod && p.kind === 'estimated')) return false;
+      if (!payable.has(p.kind) || p.status !== 'active' || p.category !== checked.category || p.startMonth > checked.date.slice(0,7) && !(checked.utilityPeriod && isUtilityCostFund(p))) return false;
       if (['fixed','estimated'].includes(p.kind)) {
         const key = cycleKey(p, checked.date.slice(0,7));
-        if (!(checked.utilityPeriod && p.kind === 'estimated') && Object.values(state.payments).some(x => x.planId === p.id && x.status !== 'deleted' && x.settlementKey === key)) return false;
+        if (!(checked.utilityPeriod && isUtilityCostFund(p)) && Object.values(state.payments).some(x => x.planId === p.id && x.status !== 'deleted' && x.settlementKey === key)) return false;
       }
       return true;
     }).sort((a,b) => a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
@@ -50,17 +50,23 @@ export function createExpenseRouting({ PlanError, balance, command, completePaym
   }
   async function preview({ input, repository, db, today }) {
     let checked = validate(input, today), { state } = await repository.read();
+    let retained = null;
     if (input.movementId) {
       const row = await movement(db, Number(input.movementId));
       checked = validate({ amount: -Number(row.amount), date: String(row.actual_date).slice(0,10), category: row.category,
         competenceStartMonth: input.competenceStartMonth, competenceEndMonth: input.competenceEndMonth }, today);
       const payments = linked(state, row.source_row);
       if (payments.length > 1) fail('Il movimento ha più collegamenti: gestiscilo dal piano.',409);
-      if (payments[0]) state = detach(state, payments[0], 'preview-detach-' + row.source_row, today);
+      if (payments[0]) {
+        retained = state.plans[payments[0].planId];
+        state = detach(state, payments[0], 'preview-detach-' + row.source_row, today);
+      }
     }
-    return { version: 1, utilityCompetenceVersion: parseUtilityPeriod ? 1 : 0, category: checked.category, amountCents:checked.amount, date:checked.date, plans: candidates(state, checked).map(p => {
+    const plans = candidates(state, checked);
+    if (parseUtilityPeriod && retained && !plans.some(p => p.id === retained.id)) plans.push({ ...retained, retained: true });
+    return { version: 1, utilityCompetenceVersion: parseUtilityPeriod ? 1 : 0, category: checked.category, amountCents:checked.amount, date:checked.date, plans: plans.map(p => {
       const funds = available(state, p, checked.date.slice(0,7));
-      return { id:p.id, name:p.name, kind:p.kind, availableCents:funds, fromFundCents:Math.min(funds,checked.amount), fromSavingsCents:Math.max(0,checked.amount-funds) };
+      return { id:p.id, name:p.name, kind:p.kind, status:p.status, retained:!!p.retained, availableCents:funds, fromFundCents:Math.min(funds,checked.amount), fromSavingsCents:Math.max(0,checked.amount-funds) };
     }) };
   }
   async function status({ input, repository, db }) {
@@ -134,21 +140,34 @@ export function createExpenseRouting({ PlanError, balance, command, completePaym
       if (payments.length>1) fail('Movimento con più collegamenti.',409);
       const payment=payments[0];
       if ((input.expectedPaymentId ?? '') !== (payment?.id ?? '')) fail('La destinazione è cambiata su un altro dispositivo. Riapri il movimento.',409);
-      let next=payment ? detach(state,payment,id+'-detach',today) : structuredClone(state);
       const previousOrdinary = Object.values(state.expenseRoutingCommands || {}).find(c => c.kind === 'ordinary' && c.active !== false && c.movementId === rowID && c.utilityPeriod);
       const inherited = payment?.utilityPeriod ?? previousOrdinary?.utilityPeriod;
+      if (input.expectedCompetenceStartMonth != null || input.expectedCompetenceEndMonth != null) {
+        if (input.expectedCompetenceStartMonth !== (inherited?.start ?? '') || input.expectedCompetenceEndMonth !== (inherited?.end ?? ''))
+          fail('Il periodo della bolletta è cambiato su un altro dispositivo. Riaprila prima di modificarlo.', 409);
+      }
       const periodInput = input.competenceStartMonth != null || input.competenceEndMonth != null
         ? { competenceStartMonth: input.competenceStartMonth, competenceEndMonth: input.competenceEndMonth }
         : inherited ? { competenceStartMonth: inherited.start, competenceEndMonth: inherited.end } : {};
       const checked=validate({amount:-Number(row.amount),date:String(row.actual_date).slice(0,10),category:row.category,competenceMonths:input.competenceMonths,...periodInput},today);
-      if(input.expenseDestination==='plan') {
+      const periodOnly = payment && input.expenseDestination === 'plan' && input.planId === payment.planId && checked.utilityPeriod;
+      let next;
+      if (periodOnly) {
+        if (payment.status !== 'posted') fail('Completa prima il pagamento in sospeso.', 409);
+        if (state.plans[payment.planId]?.kind === 'recovery') fail('Gestisci questo pagamento dal piano di recupero.');
+        next = structuredClone(state);
+        next.payments[payment.id].utilityPeriod = checked.utilityPeriod;
+        next.payments[payment.id].competenceMonths = checked.competenceMonths;
+        if (refreshUtilityEstimate) refreshUtilityEstimate(next, payment.planId, today);
+      } else next=payment ? detach(state,payment,id+'-detach',today) : structuredClone(state);
+      if(input.expenseDestination==='plan' && !periodOnly) {
         if (checked.date.slice(0,7)<today.slice(0,7) && row.treatment!=='savings' && !payment && !checked.utilityPeriod) fail('Per cambiare una spesa ordinaria di un mese passato occorre prima una verifica del budget storico.');
         if (!candidates(next,checked).some(p=>p.id===input.planId)) fail('Piano non disponibile per questa spesa.',409);
         checkQuote(next,next.plans[input.planId],checked,input);
         const added=command(next,'pay',{requestId:id+'-attach',planId:input.planId,amountCents:checked.amount,date:checked.date,cycleMonth:checked.date.slice(0,7),competenceMonths:checked.competenceMonths,movementId:rowID,
           ...(checked.utilityPeriod ? { competenceStartMonth: checked.utilityPeriod.start, competenceEndMonth: checked.utilityPeriod.end } : {})},today);
         next=completePayment(added.state,added.result.paymentId,rowID,today);
-      } else if (input.planId) fail('Destinazione e piano non coerenti.');
+      } else if (input.expenseDestination === 'ordinary' && input.planId) fail('Destinazione e piano non coerenti.');
       next.expenseRoutingCommands ??= {};
       for (const c of Object.values(next.expenseRoutingCommands)) if (c.kind === 'ordinary' && c.movementId === rowID) c.active=false;
       next.expenseRoutingCommands[id]={signature:sig,kind:input.expenseDestination, movementId: rowID, utilityPeriod: checked.utilityPeriod};

@@ -31,10 +31,14 @@ struct NativeExpenseRouteSection: View {
                         ForEach(plans.indices, id: \.self) { index in Text("Piano · " + plans[index].text("name")).tag(plans[index].text("id")) }
                     }.accessibilityIdentifier("expense-destination")
                     if let chosen {
+                    if chosen.flag("retained") {
+                        Text("Mantieni il collegamento esistente. Cambiare il periodo non sposta denaro.").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
+                    } else {
                         let split = NativeExpenseRouting.split(amount: amount, plan: chosen)
                         LabeledContent("Dal fondo " + chosen.text("name"), value: (Double(split.fund) / 100).euro)
                         LabeledContent("Dagli altri risparmi", value: (Double(split.savings) / 100).euro).accessibilityIdentifier("expense-savings-preview")
                         Text("Il pagamento non viene sottratto di nuovo dal budget. Disponibilità verificata nuovamente al salvataggio.").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
+                    }
                     } else if selected == NativeExpenseRouting.ordinary {
                         LabeledContent(bill.enabled ? "Pagamento bancario" : "Dal budget mensile", value: (Double(amount) / 100).euro).accessibilityIdentifier("expense-budget-preview")
                         Text(plans.isEmpty ? "Nessun piano compatibile con questa categoria e data." : "Hai scelto di non usare il fondo del piano.").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
@@ -73,7 +77,7 @@ struct NativeExpenseRouteSection: View {
                     payload["competenceEndMonth"] = .string(bill.months == nil ? String(day.prefix(7)) : bill.end)
                 }
                 let result = try await store.read("getExpenseRouting", args: [.object(payload)]).object
-                guard result.integer("version") == 1 else { throw Message(text: "Aggiorna il Worker Cloudflare alla build 67 per collegare le spese ai piani.") }
+                guard result.integer("version") == 1 else { throw Message(text: "Il server collegato deve essere aggiornato per gestire fondi e pagamenti.") }
                 if NativeUtilityPeriodDraft.categories.contains(category) || bill.enabled {
                     guard result.integer("utilityCompetenceVersion") == 1 else { throw Message(text: "Aggiorna il server per conservare il periodo della bolletta. I dati inseriti restano nell’editor.") }
                 }
@@ -89,7 +93,7 @@ struct NativeExpenseRouteSection: View {
         catch {
             guard !Task.isCancelled else { return }
             loading = false; ready = false
-            issue = "Non posso verificare la destinazione. Controlla la connessione e il Worker build 67. " + error.localizedDescription
+            issue = "Non posso verificare la destinazione. Controlla la connessione e riprova. " + error.localizedDescription
         }
     }
 }
@@ -132,6 +136,10 @@ struct NativeExpenseDestinationEditor: View {
         payload["expectedAmountCents"] = .int(amount); payload["expectedCategory"] = record["category"]; payload["expectedDate"] = .string(String(record.text("actual_date", fallback: record.text("date")).prefix(10)))
         payload["requestId"] = .string(requestID); payload["expectedPaymentId"] = .string(record.text("financePlanPaymentId")); payload["movementId"] = .int(record.integer("source_row") == 0 ? record.integer("row") : record.integer("source_row")); payload["competenceMonths"] = .int(months)
         payload.merge(bill.payload) { _, value in value }
+        if bill.enabled {
+            let previous = NativeUtilityPeriodDraft(record: record)
+            payload["expectedCompetenceStartMonth"] = .string(previous.start); payload["expectedCompetenceEndMonth"] = .string(previous.end)
+        }
         do { try await store.perform(bill.enabled ? "changeUtilityBill" : "changeExpenseDestination", payload); onSaved(); dismiss() }
         catch {
             issue = error.localizedDescription

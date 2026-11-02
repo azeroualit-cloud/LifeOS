@@ -37,6 +37,11 @@ struct NativeHealthChartInteraction: UIViewRepresentable {
         }
         @objc func tapped(_ gesture: UITapGestureRecognizer) {
             guard gesture.state == .ended else { return }
+            #if DEBUG
+            if ProcessInfo.processInfo.arguments.contains("--visual-test") {
+                print("CHART_TAP_SYNTHETIC bounds=\(gesture.view?.bounds ?? .zero) window=\(gesture.view?.convert(gesture.view?.bounds ?? .zero, to: nil) ?? .zero)")
+            }
+            #endif
             onSelect(gesture.location(in: gesture.view).x)
         }
         @objc func held(_ gesture: UILongPressGestureRecognizer) {

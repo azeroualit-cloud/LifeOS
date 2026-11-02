@@ -126,7 +126,8 @@ struct NativeRoot: View {
                 case .recurring: NativePlansScreen()
                 case .planning: PlanningEditor()
                 }
-            }.presentationDragIndicator(.visible)
+            }.modifier(NativeVisualTestSize()).modifier(NativeVisualTestMotion())
+                .presentationDragIndicator(.visible)
         }
         .alert("Operazione non riuscita", isPresented: Binding(get: { store.error != nil }, set: { if !$0 { store.error = nil } })) {
             Button("OK") { store.error = nil }

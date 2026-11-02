@@ -6,7 +6,7 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: lifeos-native-74-apple-bloom-${{ github.ref }}
+  group: lifeos-native-75-utilities-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   build:
@@ -73,6 +73,14 @@ jobs:
           node backend/movement-order/tests/creation.test.mjs
           LIFEOS_ROUTING_WORKER=manual/build-70/worker.js node backend/expense-routing/tests/routing.test.mjs
           LIFEOS_ACTIVITY_WORKER=manual/build-70/worker.js node backend/activities/tests/worker.test.mjs
+          python3 scripts/build-worker-75.py
+          python3 backend/utilities/tests/test_transform.py
+          node backend/utilities/tests/competence.test.mjs
+          LIFEOS_UTILITY_WORKER=manual/build-75/worker.js node backend/utilities/tests/budget.test.mjs
+          node backend/utilities/tests/routing.test.mjs
+          LIFEOS_ROUTING_WORKER=manual/build-75/worker.js node backend/expense-routing/tests/routing.test.mjs
+          LIFEOS_ACTIVITY_WORKER=manual/build-75/worker.js node backend/activities/tests/worker.test.mjs
+          node --input-type=module --check < manual/build-75/worker.js
       - name: Verifica contesto backend live senza scritture
         continue-on-error: true
         env:
@@ -171,21 +179,21 @@ jobs:
           DEVICE="$MAIN_DEVICE"
           echo "MAIN_DEVICE=$DEVICE" >> "$GITHUB_ENV"
           xcodebuild build-for-testing -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compile.log
-      - name: Verifica e registra Salute e Bloom
+      - name: Verifica e registra Salute, Bloom e bollette
         timeout-minutes: 20
         working-directory: app
         run: |
           set -euo pipefail
           xcrun simctl boot "$MAIN_DEVICE" || true
           xcrun simctl bootstatus "$MAIN_DEVICE" -b
-          xcrun simctl io "$MAIN_DEVICE" recordVideo --codec=h264 build/LifeOS-74-flussi.mp4 > build/video.log 2>&1 &
+          xcrun simctl io "$MAIN_DEVICE" recordVideo --codec=h264 build/LifeOS-75-flussi.mp4 > build/video.log 2>&1 &
           VIDEO_PID=$!
           stop_video() { kill -INT "$VIDEO_PID" 2>/dev/null || true; wait "$VIDEO_PID" 2>/dev/null || true; }
           trap stop_video EXIT
-          xcodebuild test-without-building -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 300 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeRevision74UITests -resultBundlePath build/Native74.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/native74-tests.log
+          xcodebuild test-without-building -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 300 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeRevision75UITests -only-testing:LifeOSProbeUITests/NativeRevision74UITests -resultBundlePath build/Native74.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/native74-tests.log
           stop_video
           trap - EXIT
-          test -s build/LifeOS-74-flussi.mp4
+          test -s build/LifeOS-75-flussi.mp4
       - name: Esporta schermate dei nuovi flussi anche in caso di errore
         if: always()
         working-directory: app
@@ -202,7 +210,7 @@ jobs:
           set -euo pipefail
           xcrun simctl boot "$MAIN_DEVICE" || true
           xcrun simctl bootstatus "$MAIN_DEVICE" -b
-          xcodebuild test-without-building -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 300 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testRepeatedTabSwitchesKeepNativeDestinationsUsable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFourSectionsInBothThemes -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testRepeatedBoundaryScrollingKeepsNavigationStable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testLargeTextAndSixWeekCalendar -only-testing:LifeOSProbeUITests/NativeRevision73UITests -only-testing:LifeOSProbeUITests/NativeRevision72UITests -only-testing:LifeOSProbeUITests/NativeRevision71UITests/testMonthUsesScreenAndTapOpensDayThenReturns -only-testing:LifeOSProbeUITests/NativeRevision71UITests/testDashboardExplicitDayAndCalendarEntryResumeDefaults -only-testing:LifeOSProbeUITests/NativeRevision71UITests/testReducedMotionAndLargeTextKeepMonthDayAndEditorUsable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testInformativeWidgetFitsBothSmallWidths -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarRepeatedScrollingKeepsMonthAnchorsAndReturnsToToday -resultBundlePath build/Focused.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/focused-tests.log
+          xcodebuild test-without-building -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 300 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testRepeatedTabSwitchesKeepNativeDestinationsUsable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFourSectionsInLightTheme -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFourSectionsInDarkTheme -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testRepeatedBoundaryScrollingKeepsNavigationStable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testLargeTextAndSixWeekCalendar -only-testing:LifeOSProbeUITests/NativeRevision73UITests -only-testing:LifeOSProbeUITests/NativeRevision72UITests -only-testing:LifeOSProbeUITests/NativeRevision71UITests/testMonthUsesScreenAndTapOpensDayThenReturns -only-testing:LifeOSProbeUITests/NativeRevision71UITests/testDashboardExplicitDayAndCalendarEntryResumeDefaults -only-testing:LifeOSProbeUITests/NativeRevision71UITests/testReducedMotionAndLargeTextKeepMonthDayAndEditorUsable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testInformativeWidgetFitsBothSmallWidths -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarRepeatedScrollingKeepsMonthAnchorsAndReturnsToToday -resultBundlePath build/Focused.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/focused-tests.log
       - name: Verifica logica e flussi agenda su iPhone principale
         if: ${{ !cancelled() && steps.compile_native.outcome == 'success' }}
         timeout-minutes: 35
@@ -281,7 +289,7 @@ jobs:
           xcrun simctl shutdown "$MAIN_DEVICE" || true
           xcrun simctl boot "$COMPACT"
           xcrun simctl bootstatus "$COMPACT" -b
-          xcodebuild test -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeRevision74UITests -only-testing:LifeOSProbeUITests/NativeRevision73UITests -only-testing:LifeOSProbeUITests/NativeRevision72UITests -only-testing:LifeOSProbeUITests/NativeRevision71UITests/testMonthUsesScreenAndTapOpensDayThenReturns -only-testing:LifeOSProbeUITests/NativeRevision71UITests/testDashboardExplicitDayAndCalendarEntryResumeDefaults -only-testing:LifeOSProbeUITests/NativeRevision71UITests/testReducedMotionAndLargeTextKeepMonthDayAndEditorUsable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testInformativeWidgetFitsBothSmallWidths -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testDashboardAgendaGroupsDaysAndCompletesWithoutOpeningEditor -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testActivityAgendaShowsOnlyRelevantItemsAndFoldsCompleted -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeHealthCardRemainsCompactAndOpensDetail -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFinanceOverviewSupportsLargeTextAndEmptySnapshot -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testUnifiedActivityEditorPreservesDescriptionWhenAddingAndRemovingDate -resultBundlePath build/Compact.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compact.log
+          xcodebuild test -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeRevision75UITests -only-testing:LifeOSProbeUITests/NativeRevision74UITests -only-testing:LifeOSProbeUITests/NativeRevision73UITests -only-testing:LifeOSProbeUITests/NativeRevision72UITests -only-testing:LifeOSProbeUITests/NativeRevision71UITests/testMonthUsesScreenAndTapOpensDayThenReturns -only-testing:LifeOSProbeUITests/NativeRevision71UITests/testDashboardExplicitDayAndCalendarEntryResumeDefaults -only-testing:LifeOSProbeUITests/NativeRevision71UITests/testReducedMotionAndLargeTextKeepMonthDayAndEditorUsable -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testInformativeWidgetFitsBothSmallWidths -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testDashboardAgendaGroupsDaysAndCompletesWithoutOpeningEditor -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testActivityAgendaShowsOnlyRelevantItemsAndFoldsCompleted -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testHomeHealthCardRemainsCompactAndOpensDetail -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testFinanceOverviewSupportsLargeTextAndEmptySnapshot -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testUnifiedActivityEditorPreservesDescriptionWhenAddingAndRemovingDate -resultBundlePath build/Compact.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compact.log
       - name: Esporta schermate del simulatore
         if: always()
         continue-on-error: true
@@ -294,6 +302,10 @@ jobs:
         if: always()
         working-directory: app
         run: python3 ../scripts/print-native-previews.py compact
+      - name: Distribuisci competenze utenze dopo tutte le verifiche Apple
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: python3 scripts/deploy-utilities-75.py
       - name: Crea una sola IPA per iPhone
         working-directory: app
         run: |
@@ -305,7 +317,7 @@ jobs:
           cd build
           zip -qr ../download/LifeOS-unsigned.ipa Payload
           cd ../download
-          python3 ../../scripts/verify-native-package.py LifeOS-unsigned.ipa --version 0.10.13 --build 74
+          python3 ../../scripts/verify-native-package.py LifeOS-unsigned.ipa --version 0.10.14 --build 75
           shasum -a 256 LifeOS-unsigned.ipa > SHA256.txt
       - name: Errori XCTest in annotazioni
         if: always()
@@ -360,11 +372,11 @@ jobs:
             app/build/Regression.xcresult
             app/build/Focused.xcresult
             app/build/Native74.xcresult
-            app/build/LifeOS-74-flussi.mp4
+            app/build/LifeOS-75-flussi.mp4
             app/build/Compact.xcresult
           retention-days: 1
           if-no-files-found: ignore
-      - name: Pubblica link diretto IPA 74 verificata
+      - name: Pubblica link diretto IPA 75 verificata
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -372,7 +384,7 @@ jobs:
           cd app/download
           shasum -a 256 -c SHA256.txt
           unzip -tq LifeOS-unsigned.ipa
-          cp LifeOS-unsigned.ipa LifeOS-74.ipa
-          cp ../build/LifeOS-74-flussi.mp4 LifeOS-74-flussi.mp4
-          shasum -a 256 LifeOS-74.ipa LifeOS-74-flussi.mp4 > SHA256.txt
-          gh release create ios-0.10.13-build74 LifeOS-74.ipa LifeOS-74-flussi.mp4 SHA256.txt --repo azeroualit-cloud/LifeOS --target "$GITHUB_SHA" --title "Life OS 0.10.13 build 74" --notes "Quattro schede native, Salute con macro e registrazioni modificabili in HealthKit, Bloom locale con importazione e allegati, calendario e controlli nativi. Compilata con SDK iOS $NATIVE_SDK_VERSION; verificata su simulatore iPhone 15 Pro iOS $NATIVE_RUNTIME_VERSION e iPhone compatto. Prova fisica e confronto con Apple su iOS 27.2 separati. IPA non firmata per Signulous, pubblicata dopo verifiche Apple. Sorgente: $GITHUB_SHA."
+          cp LifeOS-unsigned.ipa LifeOS-75.ipa
+          cp ../build/LifeOS-75-flussi.mp4 LifeOS-75-flussi.mp4
+          shasum -a 256 LifeOS-75.ipa LifeOS-75-flussi.mp4 > SHA256.txt
+          gh release create ios-0.10.14-build75 LifeOS-75.ipa LifeOS-75-flussi.mp4 SHA256.txt --repo azeroualit-cloud/LifeOS --target "$GITHUB_SHA" --title "Life OS 0.10.14 build 75" --notes "Bollette ripartite sui mesi espliciti di competenza, pagamento bancario unico e fondo separato. Corretto il riferimento salariale quando il nuovo mese non è ancora pagato. Conservati Salute, Bloom, calendario e controlli nativi della build 74. Compilata con SDK iOS $NATIVE_SDK_VERSION; verificata su simulatore iPhone 15 Pro iOS $NATIVE_RUNTIME_VERSION e iPhone compatto. Prova fisica e confronto con Apple su iOS 27.2 separati. IPA non firmata per Signulous, pubblicata dopo verifiche Apple. Sorgente: $GITHUB_SHA."

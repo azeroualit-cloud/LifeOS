@@ -228,6 +228,9 @@ private struct NativeHealthWeightChart: View {
                                 let plot = geometry[anchor]
                                 NativeHealthChartInteraction(onSelect: { x in
                                     selectedDate = proxy.value(atX: min(max(x, 0), plot.width), as: Date.self)
+                                    #if DEBUG
+                                    if ProcessInfo.processInfo.arguments.contains("--visual-test") { print("CHART_SELECTION_SYNTHETIC x=\(x) plot=\(plot) resolved=\(selectedDate != nil)") }
+                                    #endif
                                 }, onScrubbing: onScrubbing)
                                     .frame(width: plot.width, height: plot.height)
                                     .position(x: plot.midX, y: plot.midY).accessibilityHidden(true)
@@ -292,6 +295,9 @@ private struct NativeHealthCaloriesChart: View {
                                 let plot = geometry[anchor]
                                 NativeHealthChartInteraction(onSelect: { x in
                                     selectedDate = proxy.value(atX: min(max(x, 0), plot.width), as: Date.self)
+                                    #if DEBUG
+                                    if ProcessInfo.processInfo.arguments.contains("--visual-test") { print("CHART_SELECTION_SYNTHETIC x=\(x) plot=\(plot) resolved=\(selectedDate != nil)") }
+                                    #endif
                                 }, onScrubbing: onScrubbing)
                                     .frame(width: plot.width, height: plot.height)
                                     .position(x: plot.midX, y: plot.midY).accessibilityHidden(true)

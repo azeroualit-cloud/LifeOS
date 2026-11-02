@@ -9,8 +9,8 @@ enum NativeExpenseRouting {
     }
     static func plans(_ source: [Record], payments: [Record], category: String, day: String, bill: Bool = false) -> [Record] {
         source.filter { p in
-            ["fixed", "estimated", "goal", "fund"].contains(p.text("kind")) && p.text("status") == "active" && p.text("category") == category && (p.text("startMonth") <= String(day.prefix(7)) || bill && p.text("kind") == "estimated") &&
-            (bill && p.text("kind") == "estimated" || !["fixed", "estimated"].contains(p.text("kind")) || !NativePlanRules.isPaid(p, payments: payments, month: String(day.prefix(7))))
+            ["fixed", "estimated", "goal", "fund"].contains(p.text("kind")) && p.text("status") == "active" && p.text("category") == category && (p.text("startMonth") <= String(day.prefix(7)) || bill && NativeUtilityPeriodDraft.isCostFund(p)) &&
+            (bill && NativeUtilityPeriodDraft.isCostFund(p) || !["fixed", "estimated"].contains(p.text("kind")) || !NativePlanRules.isPaid(p, payments: payments, month: String(day.prefix(7))))
         }.sorted { $0.text("name") < $1.text("name") }
     }
     static func suggestion(_ plans: [Record]) -> String {

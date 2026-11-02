@@ -4,8 +4,13 @@ import Foundation
 enum NativeExpenseDemo {
     static func preview(state: NativeArchive, category: String, day: String, movementID: Int, bill: Bool = false) -> [Record] {
         var copy = state
+        let original = state.finance.record("plansV2").records("payments").first { $0.integer("movementId") == movementID }
         if movementID > 0 { try? removeLink(movementID, state: &copy) }
-        return NativeExpenseRouting.plans(copy.finance.record("plansV2").records("plans"), payments: copy.finance.record("plansV2").records("payments"), category: category, day: day, bill: bill)
+        var rows = NativeExpenseRouting.plans(copy.finance.record("plansV2").records("plans"), payments: copy.finance.record("plansV2").records("payments"), category: category, day: day, bill: bill)
+        if let original, var retained = copy.finance.record("plansV2").records("plans").first(where: { $0.text("id") == original.text("planId") }), retained.text("kind") != "recovery", !rows.contains(where: { $0.text("id") == retained.text("id") }) {
+            retained["retained"] = .bool(true); rows.append(retained)
+        }
+        return rows
     }
     static func apply(_ operation: String, payload: Record, state: inout NativeArchive) throws {
         let method = operation == "changeUtilityBill" ? "changeExpenseDestination" : operation == "saveUtilityBill" ? "saveTransaction" : operation
@@ -21,6 +26,15 @@ enum NativeExpenseDemo {
             guard let old = next.finance.records("transactions").first(where: { $0.integer("row") == payload.integer("movementId") }), old.text("type") == "Spesa" else { throw Message(text: "Movimento non trovato.") }
             let linked = next.finance.record("plansV2").records("payments").first { $0.integer("movementId") == payload.integer("movementId") }
             guard (linked?.text("id") ?? "") == payload.text("expectedPaymentId") else { throw Message(text: "La destinazione è cambiata. Riapri il movimento.") }
+            let previous = NativeUtilityPeriodDraft(record: NativeUtilityDemo.enriched(old, state: next))
+            if payload["expectedCompetenceStartMonth"] != nil || payload["expectedCompetenceEndMonth"] != nil {
+                guard payload.text("expectedCompetenceStartMonth") == previous.start, payload.text("expectedCompetenceEndMonth") == previous.end else { throw Message(text: "Il periodo della bolletta è cambiato. Riaprila prima di modificarlo.") }
+            }
+            if let linked, payload.text("expenseDestination") == "plan", payload.text("planId") == linked.text("planId"), NativeUtilityPeriodDraft(record: payload).enabled {
+                try NativeUtilityDemo.editLinkedPeriod(payload, paymentID: linked.text("id"), state: &next)
+                commands[id] = .string(signature); next.finance["expenseRoutingCommands"] = .object(commands)
+                NativePlanDemo.project(month: next.financeMonth, state: &next); state = next; return
+            }
             try removeLink(payload.integer("movementId"), state: &next)
             movement = old; movement["amount"] = .number(abs(old.amount("amount")))
         }

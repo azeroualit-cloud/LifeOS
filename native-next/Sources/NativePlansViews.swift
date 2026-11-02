@@ -204,7 +204,7 @@ struct NativePlanDetail: View {
                 if !plan.text("endMonth").isEmpty { LabeledContent("Ultimo mese", value: CivilDate.monthTitle(plan.text("endMonth"))) }
                 else { Text("Senza scadenza").font(.caption).foregroundStyle(NativeDesign.secondary) }
                 if plan.text("kind") == "advance" { LabeledContent("Mese beneficiario", value: CivilDate.monthTitle(plan.text("beneficiaryMonth"))) }
-                LabeledContent((plan.text("kind") == "estimated" ? "Accantonato in " : "Budget di ") + CivilDate.monthTitle(store.financeMonth), value: (Double(plan.integer("contributionCents")) * (plan.text("kind") == "estimated" ? 1 : -1) / 100).euro)
+                LabeledContent((NativeUtilityPeriodDraft.isCostFund(plan) ? "Accantonato in " : "Budget di ") + CivilDate.monthTitle(store.financeMonth), value: (Double(plan.integer("contributionCents")) * (NativeUtilityPeriodDraft.isCostFund(plan) ? 1 : -1) / 100).euro)
                 if !["advance", "recovery"].contains(plan.text("kind")) {
                     LabeledContent("Disponibile nel fondo", value: (Double(plan.integer("fundCents")) / 100).euro)
                     if plan.integer("fromGeneralSavingsCents") > 0 { LabeledContent("Pagato dagli altri risparmi", value: (Double(plan.integer("fromGeneralSavingsCents")) / 100).euro) }
@@ -286,8 +286,8 @@ private struct NativePlanPaymentEditor: View {
                 Picker("Movimento bancario", selection: $usesExisting) { Text("Da registrare").tag(false); Text("Già registrato").tag(true) }.pickerStyle(.segmented)
                 if usesExisting { NativePlanMovementPicker(selection: $movement) }
                 else { DatePicker("Giorno del pagamento", selection: $date, in: ...Date(), displayedComponents: .date) }
-                if plan.text("kind") == "fixed" { NativeMonthPicker(title: "Scadenza pagata", selection: $cycleMonth) }
-                if plan.text("kind") == "estimated" { NativeUtilityPeriodFields(period: $bill, amountCents: amountCents ?? 0) }
+                if plan.text("kind") == "fixed" && !NativeUtilityPeriodDraft.isCostFund(plan) { NativeMonthPicker(title: "Scadenza pagata", selection: $cycleMonth) }
+                if NativeUtilityPeriodDraft.isCostFund(plan) { NativeUtilityPeriodFields(period: $bill, amountCents: amountCents ?? 0) }
                 Text(usesExisting ? "Collega una spesa esistente senza un secondo addebito. Le quote del piano restano distinte dal saldo." : "Un unico movimento dai risparmi. L’intero pagamento non verrà sottratto una seconda volta dal budget.").font(.caption).foregroundStyle(NativeDesign.secondary)
             }.disabled(submitted)
             if plan.text("kind") == "goal", extra > 0 {
@@ -305,10 +305,10 @@ private struct NativePlanPaymentEditor: View {
         }.modifier(NativeListAppearance()).navigationTitle("Registra pagamento").navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Annulla") { dismiss() }.disabled(saving) }
-                ToolbarItem(placement: .confirmationAction) { Button(submitted ? "Riprova" : "Conferma") { Task { await save() } }.disabled(saving || amountCents == nil || (usesExisting && movement == nil) || (plan.text("kind") == "estimated" && bill.months == nil)).accessibilityIdentifier("plan-payment-confirm") }
+                ToolbarItem(placement: .confirmationAction) { Button(submitted ? "Riprova" : "Conferma") { Task { await save() } }.disabled(saving || amountCents == nil || (usesExisting && movement == nil) || (NativeUtilityPeriodDraft.isCostFund(plan) && bill.months == nil)).accessibilityIdentifier("plan-payment-confirm") }
                 ToolbarItemGroup(placement: .keyboard) { Spacer(); Button("Fine") { editing = false } }
             }
-            .task { amount = String(format: "%.2f", Double(expectedCents) / 100); competenceMonths = max(1, plan.integer("intervalMonths")); bill.prepare(day: CivilDate.day(date), required: plan.text("kind") == "estimated") }
+            .task { amount = String(format: "%.2f", Double(expectedCents) / 100); competenceMonths = max(1, plan.integer("intervalMonths")); bill.prepare(day: CivilDate.day(date), required: NativeUtilityPeriodDraft.isCostFund(plan)) }
             .onChange(of: movement) { _, value in
                 if let value { amount = String(format: "%.2f", Double(value.integer("amountCents")) / 100); date = CivilDate.date(value.text("date")) }
             }

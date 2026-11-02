@@ -34,6 +34,9 @@ final class NativeRevision75UITests: XCTestCase {
                 XCTAssertGreaterThanOrEqual(control.frame.minX, app.frame.minX)
                 XCTAssertLessThanOrEqual(control.frame.maxX, app.frame.maxX)
             }
+            let label = app.staticTexts[title].firstMatch
+            reveal(label, app: app)
+            XCTAssertGreaterThan(label.frame.height, 24, "La prova deve usare davvero testo ingrandito anche nel foglio")
         }
         let shot = XCTAttachment(screenshot: XCUIScreen.main.screenshot()); shot.name = "75-utility-large-text"; shot.lifetime = .keepAlways; add(shot)
     }

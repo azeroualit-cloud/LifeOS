@@ -72,4 +72,5 @@ test('salary reference ignores unpaid November without looking into future or sk
   assert.equal(salaryReferenceMonth(credited, '2026-11'), '2026-10');
   assert.equal(salaryReferenceMonth(credited, '2026-09'), '2026-09');
   assert.equal(salaryReferenceMonth(new Map(), '2026-11'), '2026-11');
+  assert.equal(salaryReferenceMonth(new Map([['2026-09', 1800]]), '2026-11'), '2026-11', 'An older unpaid gap must keep the configured fallback');
 });

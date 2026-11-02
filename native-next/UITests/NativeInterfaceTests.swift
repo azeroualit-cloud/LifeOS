@@ -338,43 +338,42 @@ final class NativeInterfaceTests: XCTestCase {
             app.terminate()
         }
     }
-    func testFourSectionsInBothThemes() {
-        // Two launches, twelve screens and eight editors exceed 180 seconds
-        // with SDK 27 automation; keep every interaction and assertion.
+    func testFourSectionsInLightTheme() { verifyFourSections(dark: false) }
+    func testFourSectionsInDarkTheme() { verifyFourSections(dark: true) }
+    private func verifyFourSections(dark: Bool) {
+        // Independent appearance budgets retain every destination and editor.
         executionTimeAllowance = 300
-        for dark in [false, true] {
-            let app = launch(dark ? ["--dark"] : [])
-            for name in ["Dashboard", "Attività", "Salute", "Altro"] {
-                let tab = app.tabBars.buttons[name]; tab.tap(); XCTAssertTrue(tab.isSelected)
-                if name == "Salute" {
-                    XCTAssertTrue(app.textFields["nutrition-Proteine"].waitForExistence(timeout: 10))
-                    capture((dark ? "dark-" : "light-") + "Salute")
-                }
-                if name == "Altro" {
-                    for destination in ["Finanza", "Calendario", "Bloom"] { XCTAssertTrue(app.buttons[destination].exists) }
-                    app.buttons["Bloom"].tap()
-                    XCTAssertTrue(app.buttons["bloom-section-library"].waitForExistence(timeout: 10))
-                    capture((dark ? "dark-" : "light-") + "Bloom")
-                }
+        let app = launch(dark ? ["--dark"] : [])
+        for name in ["Dashboard", "Attività", "Salute", "Altro"] {
+            let tab = app.tabBars.buttons[name]; tab.tap(); XCTAssertTrue(tab.isSelected)
+            if name == "Salute" {
+                XCTAssertTrue(app.textFields["nutrition-Proteine"].waitForExistence(timeout: 10))
+                capture((dark ? "dark-" : "light-") + "Salute")
             }
-            for page in ["Dashboard", "Attività", "Calendario", "Finanza"] {
-                if page == "Calendario" || page == "Finanza" { app.openOtherDestination(page) }
-                else { app.tabBars.buttons[page].tap() }
-                let add = app.buttons["primary-add"]
-                XCTAssertTrue(add.waitForExistence(timeout: 10)); XCTAssertTrue(add.isHittable)
-                assertMinimumTouchTarget(add); add.tap()
-                let editor = page == "Attività" || page == "Calendario" ? "Nuova attività" : "Nuovo movimento"
-                XCTAssertTrue(app.navigationBars[editor].waitForExistence(timeout: 10))
-                app.buttons["Annulla"].tap()
-                let host = page == "Calendario" || page == "Finanza" ? "Altro" : page
-                XCTAssertTrue(app.tabBars.buttons[host].isSelected)
-                XCTAssertTrue(app.buttons["primary-add"].isHittable)
-                XCTAssertTrue(app.tabBars.firstMatch.exists)
-                if page == "Finanza" { XCTAssertTrue(app.staticTexts["finance-budget-value"].exists) }
-                capture((dark ? "dark-" : "light-") + page)
+            if name == "Altro" {
+                for destination in ["Finanza", "Calendario", "Bloom"] { XCTAssertTrue(app.buttons[destination].exists) }
+                app.buttons["Bloom"].tap()
+                XCTAssertTrue(app.buttons["bloom-section-library"].waitForExistence(timeout: 10))
+                capture((dark ? "dark-" : "light-") + "Bloom")
             }
-            app.terminate()
         }
+        for page in ["Dashboard", "Attività", "Calendario", "Finanza"] {
+            if page == "Calendario" || page == "Finanza" { app.openOtherDestination(page) }
+            else { app.tabBars.buttons[page].tap() }
+            let add = app.buttons["primary-add"]
+            XCTAssertTrue(add.waitForExistence(timeout: 10)); XCTAssertTrue(add.isHittable)
+            assertMinimumTouchTarget(add); add.tap()
+            let editor = page == "Attività" || page == "Calendario" ? "Nuova attività" : "Nuovo movimento"
+            XCTAssertTrue(app.navigationBars[editor].waitForExistence(timeout: 10))
+            app.buttons["Annulla"].tap()
+            let host = page == "Calendario" || page == "Finanza" ? "Altro" : page
+            XCTAssertTrue(app.tabBars.buttons[host].isSelected)
+            XCTAssertTrue(app.buttons["primary-add"].isHittable)
+            XCTAssertTrue(app.tabBars.firstMatch.exists)
+            if page == "Finanza" { XCTAssertTrue(app.staticTexts["finance-budget-value"].exists) }
+            capture((dark ? "dark-" : "light-") + page)
+        }
+        app.terminate()
     }
 
     func testNativeToolbarRespondsAcross44PointTouchRegion() {
