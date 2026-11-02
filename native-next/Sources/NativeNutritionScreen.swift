@@ -52,7 +52,10 @@ struct NativeNutritionScreen: View {
                     } else {
                         VStack(alignment: .leading) {
                             Text("Registrazione da completare")
-                            Button("Riprova") { Task { if await nutrition.save(entry, retry: true) { await health.refresh() } } }.disabled(nutrition.busy)
+                            Button("Riprova") { Task { if await nutrition.save(entry, retry: true) { if editing == entry.id { clear() }; await health.refresh() } } }.disabled(nutrition.busy)
+                            Button("Modifica e riprova") {
+                                editing = entry.id; protein = NSDecimalNumber(decimal: entry.protein).stringValue; carbohydrate = NSDecimalNumber(decimal: entry.carbohydrate).stringValue; fat = NSDecimalNumber(decimal: entry.fat).stringValue; date = entry.date; notice = nil
+                            }.disabled(nutrition.busy)
                         }
                     }
                 }

@@ -78,7 +78,6 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
             var pending = value
             if retry, let old, !old.confirmed { pending = old }
             else {
-                guard old?.confirmed != false else { throw Message(text: "Usa Riprova per completare la registrazione in sospeso.") }
                 pending.revision = (old?.revision ?? 0) + 1; pending.confirmed = false
                 try persist(entries.filter { $0.id != pending.id } + [pending])
             }

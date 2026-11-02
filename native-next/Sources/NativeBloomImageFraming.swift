@@ -1,4 +1,5 @@
 import SwiftUI
+import ImageIO
 
 struct NativeBloomImageFraming {
     var top = 0.0
@@ -11,17 +12,31 @@ struct NativeBloomImageFraming {
 struct NativeBloomFramedImage: View {
     let data: Data
     let framing: Record
+    @State private var orientedPreview: CGImage?
+    @State private var previewFinished = false
     private var image: UIImage? {
-        guard let original = UIImage(data: data), let cg = original.cgImage else { return nil }
+        guard let cg = orientedPreview else { return nil }
         let f = NativeBloomImageFraming(framing)
         let width = Double(cg.width), height = Double(cg.height)
         let rect = CGRect(x: width * f.left, y: height * f.top, width: width * (1 - f.left - f.right), height: height * (1 - f.top - f.bottom))
-        guard let crop = cg.cropping(to: rect.integral) else { return original }
-        return UIImage(cgImage: crop, scale: original.scale, orientation: original.imageOrientation)
+        guard let crop = cg.cropping(to: rect.integral) else { return UIImage(cgImage: cg) }
+        return UIImage(cgImage: crop)
     }
     var body: some View {
-        if let image { Image(uiImage: image).resizable().scaledToFit().accessibilityLabel("Anteprima immagine") }
-        else { Label("Anteprima non disponibile", systemImage: "photo") }
+        Group {
+            if let image { Image(uiImage: image).resizable().scaledToFit().accessibilityLabel("Anteprima immagine") }
+            else if previewFinished { Label("Anteprima non disponibile", systemImage: "photo") }
+            else { ProgressView("Anteprima immagine") }
+        }.task(id: data) {
+            previewFinished = false; orientedPreview = nil
+            let bytes = data
+            let preview = await Task.detached(priority: .utility) {
+                guard let source = CGImageSourceCreateWithData(bytes as CFData, nil) else { return Optional<CGImage>.none }
+                let options: [CFString: Any] = [kCGImageSourceCreateThumbnailFromImageAlways: true, kCGImageSourceCreateThumbnailWithTransform: true, kCGImageSourceThumbnailMaxPixelSize: 2048]
+                return CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary)
+            }.value
+            guard !Task.isCancelled else { return }; orientedPreview = preview; previewFinished = true
+        }
     }
 }
 struct NativeBloomFramingEditor: View {

@@ -170,9 +170,10 @@ private struct NativeHealthWeightChart: View {
     var forecast: [HealthPoint] = []
     @Environment(\.nativeReduceMotion) private var reduceMotion
     @State private var selectedDate: Date?
+    @State private var referenceDate = Date()
     @State private var period: NativeHealthPeriod = .month
-    private var start: Date { period.start(relativeTo: Date()) }
-    private var end: Date { max(forecast.last?.date ?? Date(), Date()) }
+    private var start: Date { period.start(relativeTo: referenceDate) }
+    private var end: Date { max(forecast.last?.date ?? referenceDate, referenceDate) }
     private var visibleDays: [HealthDay] { days.filter { $0.date >= start && $0.weight != nil } }
     private var trend: [HealthPoint] { NativeHealthMath.trend(days).filter { $0.date >= start } }
     private var domain: ClosedRange<Double> {
@@ -220,7 +221,8 @@ private struct NativeHealthWeightChart: View {
                 Text(forecast.isEmpty ? "kg · Punti: pesate · Linea: tendenza" : "kg · Linea: tendenza · Tratteggio: previsione")
                     .font(.caption).foregroundStyle(NativeDesign.secondary)
             }
-        }
+        }.onChange(of: days) { _, _ in referenceDate = Date() }
+            .onChange(of: period) { _, _ in referenceDate = Date(); selectedDate = nil }
     }
 }
 
@@ -228,8 +230,9 @@ private struct NativeHealthCaloriesChart: View {
     let days: [HealthDay]
     @Environment(\.nativeReduceMotion) private var reduceMotion
     @State private var selectedDate: Date?
+    @State private var referenceDate = Date()
     @State private var period: NativeHealthPeriod = .month
-    private var start: Date { period.start(relativeTo: Date()) }
+    private var start: Date { period.start(relativeTo: referenceDate) }
     private var visibleDays: [HealthDay] { days.filter { $0.date >= start && $0.calories != nil } }
     var body: some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
@@ -247,7 +250,7 @@ private struct NativeHealthCaloriesChart: View {
                     }
                 }.chartXSelection(value: $selectedDate)
                     .animation(reduceMotion ? nil : .default, value: period)
-                    .chartXScale(domain: start...Calendar.current.date(byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: Date()))!)
+                    .chartXScale(domain: start...Calendar.current.date(byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: referenceDate))!)
                     .chartYScale(domain: 0...max(3000, (visibleDays.compactMap(\.calories).max() ?? 0) * 1.1))
                     .chartXAxis { AxisMarks(values: .stride(by: .day, count: period.axisDays)) { _ in AxisValueLabel(format: .dateTime.day().month(.abbreviated)) } }
                     .frame(height: 190)
@@ -262,7 +265,8 @@ private struct NativeHealthCaloriesChart: View {
                     .font(.caption).foregroundStyle(NativeDesign.secondary)
                 Text("I giorni mancanti non sono zero. Oggi può essere incompleto.").font(.caption).foregroundStyle(NativeDesign.secondary)
             }
-        }
+        }.onChange(of: days) { _, _ in referenceDate = Date() }
+            .onChange(of: period) { _, _ in referenceDate = Date(); selectedDate = nil }
     }
 }
 

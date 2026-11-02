@@ -32,6 +32,20 @@ import XCTest
         XCTAssertEqual(writer.writes.last?.revision, 2)
         XCTAssertEqual(restarted.entries[0].calories, 245)
     }
+    func testPendingPayloadCanBeCorrectedWithAHigherRevision() async {
+        let root = directory(); defer { try? FileManager.default.removeItem(at: root) }
+        let writer = NutritionWriterProbe(); writer.fail = true
+        let store = NativeNutritionStore(directory: root, writer: writer)
+        let original = entry()
+        let failed = await store.save(original); XCTAssertFalse(failed)
+        var corrected = original; corrected.protein = 20
+        writer.fail = false
+        let saved = await store.save(corrected); XCTAssertTrue(saved)
+        XCTAssertEqual(writer.writes.map(\.revision), [1, 2])
+        XCTAssertEqual(store.entries.count, 1)
+        XCTAssertTrue(store.entries[0].confirmed)
+        XCTAssertEqual(store.entries[0].calories, 205)
+    }
     func testDeniedAuthorizationDoesNotCreateAConfirmedOrPendingRecord() async {
         let root = directory(); defer { try? FileManager.default.removeItem(at: root) }
         let writer = NutritionWriterProbe(); writer.denied = true

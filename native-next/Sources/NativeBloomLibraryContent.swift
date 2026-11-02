@@ -5,7 +5,7 @@ struct NativeBloomThumbnail: View {
     let url: URL?
     @State private var image: UIImage?
     var body: some View {
-        Group { if let image { Image(uiImage: image).resizable().scaledToFill().clipped().accessibilityHidden(true) } }
+        Group { if let image { Image(uiImage: image).resizable().scaledToFill().clipped().accessibilityHidden(true) } else { Image(systemName: "photo").foregroundStyle(.secondary).accessibilityLabel("Anteprima immagine non disponibile") } }
             .task(id: url) {
                 guard let url else { image = nil; return }
                 let result = await Task.detached(priority: .utility) {
@@ -34,15 +34,20 @@ struct NativeBloomLibraryContent: View {
     var body: some View {
         VStack(spacing: NativeDesign.Space.small) {
             if !rediscovery {
-                HStack {
+                VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
                     Picker("Categoria", selection: $category) {
                         Text("Tutte le note").tag("")
                         ForEach(store.archive.collections.map { DisplayRecord($0, key: "id") }) { row in Text(row.value.text("name")).tag(row.value.text("id")) }
+                    }.pickerStyle(.menu).labelsHidden().lineLimit(1).minimumScaleFactor(0.75)
+                        .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
+                    HStack {
+                        Button(grid ? "Elenco" : "Griglia", systemImage: grid ? "list.bullet" : "square.grid.2x2") { grid.toggle() }.labelStyle(.iconOnly)
+                            .frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget)
+                        Button(selecting ? "Fine" : "Seleziona") { selecting.toggle(); selected = [] }.frame(minHeight: NativeDesign.Layout.touchTarget)
+                        Spacer()
+                        Button("Categorie", systemImage: "folder") { showingCategories = true }.labelStyle(.iconOnly)
+                            .frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget)
                     }
-                    Spacer()
-                    Button(grid ? "Elenco" : "Griglia", systemImage: grid ? "list.bullet" : "square.grid.2x2") { grid.toggle() }.labelStyle(.iconOnly)
-                    Button(selecting ? "Fine" : "Seleziona") { selecting.toggle(); selected = [] }
-                    Button("Categorie", systemImage: "folder") { showingCategories = true }.labelStyle(.iconOnly)
                 }.padding(.horizontal)
             } else {
                 HStack { Button("Nuovo giro", action: newRound); Spacer(); Button("Vai alla libreria", action: goToLibrary) }.padding(.horizontal)
