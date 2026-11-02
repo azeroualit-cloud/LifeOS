@@ -40,6 +40,10 @@ struct CalendarScreen: View {
                 } else {
                     monthOverview
                         .frame(maxHeight: showingPreview ? geometry.size.height * NativeDesign.calendarPreviewFraction : .infinity)
+                        // Let the native scroll view resolve its final viewport in
+                        // one layout pass. Date glyphs and the agenda keep their
+                        // own transitions; an animated clip must not hide touches.
+                        .transaction { $0.animation = nil }
                     if showingPreview {
                         previewHeader
                         agendaContent
@@ -114,6 +118,7 @@ struct CalendarScreen: View {
                         .padding(.vertical, NativeDesign.Space.large).padding(.bottom, NativeDesign.Layout.scrollClearance)
                 }.scrollPosition(id: $scrollWeek, anchor: showingPreview ? .center : .top)
                 .accessibilityIdentifier("calendar-scroll")
+                .accessibilityValue(scrollDiagnostics)
                 .coordinateSpace(name: "calendar-viewport")
                 .onPreferenceChange(NativeCalendarMonthFrames.self) { frames in
                     guard !showingDay else { return }
@@ -155,6 +160,14 @@ struct CalendarScreen: View {
                 }
             }
         }
+    }
+    private var scrollDiagnostics: String {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--visual-test") {
+            return "target=\(scrollWeek ?? "nil") requested=\(requestedWeek ?? "nil") height=\(viewportHeight) ready=\(monthPositionReady)"
+        }
+        #endif
+        return ""
     }
     private func revealSelectedWeek() {
         position(month: String(selected.prefix(7)), day: selected)

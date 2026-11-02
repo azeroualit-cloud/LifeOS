@@ -32,8 +32,12 @@ struct NativeBloomArchive: Codable {
     @Published private(set) var archive = NativeBloomArchive()
     @Published var error: String?
     private let root: URL
+    private let writeFile: (Data, URL) throws -> Void
     private var available = false
-    init(directory: URL? = nil) {
+    init(directory: URL? = nil, writeFile: ((Data, URL) throws -> Void)? = nil) {
+        self.writeFile = writeFile ?? { data, destination in
+            try data.write(to: destination, options: [.atomic, .completeFileProtection])
+        }
         root = directory ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("LifeOSBloom", isDirectory: true)
         do {
             try FileManager.default.createDirectory(at: root.appendingPathComponent("files"), withIntermediateDirectories: true)
@@ -48,7 +52,7 @@ struct NativeBloomArchive: Codable {
         if let value = record["data"], case .string(let raw) = value {
             guard let bytes = Data(base64Encoded: raw) else { throw Message(text: "Allegato Base64 non valido.") }
             let hash = digest(bytes), path = root.appendingPathComponent("files").appendingPathComponent(hash)
-            if !FileManager.default.fileExists(atPath: path.path) { try bytes.write(to: path, options: [.atomic, .completeFileProtection]) }
+            if !FileManager.default.fileExists(atPath: path.path) { try writeFile(bytes, path) }
             guard digest(try Data(contentsOf: path)) == hash else { throw Message(text: "Verifica allegato non riuscita.") }
             record.removeValue(forKey: "data"); record["lifeosFileSHA256"] = .string(hash); record["lifeosFileBytes"] = .int(bytes.count)
         }
@@ -79,7 +83,7 @@ struct NativeBloomArchive: Codable {
     }
     private func commit(_ next: NativeBloomArchive) throws {
         guard available else { throw Message(text: "Archivio non disponibile: nessuna modifica salvata.") }
-        try JSONEncoder().encode(next).write(to: root.appendingPathComponent("index.json"), options: [.atomic, .completeFileProtection])
+        try writeFile(JSONEncoder().encode(next), root.appendingPathComponent("index.json"))
         archive = next
     }
     func save(_ record: Record) throws {
@@ -307,7 +311,7 @@ struct NativeBloomArchive: Codable {
         }
         // Keep the source before publishing the index. File orphans are harmless
         // and never referenced until the atomic index commit succeeds.
-        try data.write(to: root.appendingPathComponent("backup-" + digest(data) + ".json"), options: [.atomic, .completeFileProtection])
+        try writeFile(data, root.appendingPathComponent("backup-" + digest(data) + ".json"))
         var reports = next.lifeosImportReports ?? []
         let files = incoming.items.flatMap { item -> [Record] in (item["data"] != nil && item["data"] != .null ? [item] : []) + item.records("noteFiles") }
         let bytes = files.reduce(0) { $0 + (Data(base64Encoded: $1.text("data"))?.count ?? 0) }

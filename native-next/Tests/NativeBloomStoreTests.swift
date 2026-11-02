@@ -125,6 +125,72 @@ import XCTest
         var invalid = note(); invalid["title"] = .bool(true)
         XCTAssertThrowsError(try store.preview(JSONEncoder().encode(NativeBloomArchive(items: [invalid]))))
     }
+    func testOutOfSpaceAtIndexCommitRetainsArchiveAndRetryRecoversPreparedFiles() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        var full = false
+        let store = NativeBloomStore(directory: root, writeFile: { bytes, destination in
+            if full && destination.lastPathComponent == "index.json" { throw CocoaError(.fileWriteOutOfSpace) }
+            try bytes.write(to: destination, options: [.atomic, .completeFileProtection])
+        })
+        let original = note(); try store.save(original)
+        let index = root.appendingPathComponent("index.json"), before = try Data(contentsOf: index)
+        var file = note(); file["kind"] = .string("file"); file["text"] = .null
+        file["fileName"] = .string("original.bin"); file["data"] = .string(Data([4, 5, 6]).base64EncodedString())
+        let backup = try JSONEncoder().encode(NativeBloomArchive(items: [file]))
+        full = true
+        XCTAssertThrowsError(try store.importBackup(backup)) { error in
+            XCTAssertEqual((error as NSError).code, NSFileWriteOutOfSpaceError)
+        }
+        XCTAssertEqual(store.archive.items, [original])
+        XCTAssertEqual(try Data(contentsOf: index), before)
+        XCTAssertEqual(NativeBloomStore(directory: root).archive.items, [original])
+        full = false
+        _ = try store.importBackup(backup)
+        XCTAssertEqual(store.archive.items.count, 2)
+        let restarted = NativeBloomStore(directory: root)
+        XCTAssertEqual(try restarted.hydrated(try XCTUnwrap(restarted.archive.items.first { $0.text("id") == file.text("id") }))["data"], file["data"])
+        _ = try restarted.importBackup(backup)
+        XCTAssertEqual(restarted.archive.items.count, 2)
+    }
+    func testCorruptMediaAndUnknownBackupVersionsFailWithoutReplacingIndex() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let store = NativeBloomStore(directory: root)
+        var file = note(); file["kind"] = .string("file"); file["text"] = .null
+        file["fileName"] = .string("original.bin"); file["data"] = .string(Data([1, 2]).base64EncodedString())
+        try store.save(file)
+        let index = root.appendingPathComponent("index.json"), before = try Data(contentsOf: index)
+        let saved = try XCTUnwrap(store.archive.items.first)
+        try Data([9, 9]).write(to: root.appendingPathComponent("files").appendingPathComponent(saved.text("lifeosFileSHA256")))
+        XCTAssertThrowsError(try store.hydrated(saved)); XCTAssertThrowsError(try store.export())
+        var future = NativeBloomArchive(); future.version = 99
+        XCTAssertThrowsError(try store.importBackup(JSONEncoder().encode(future)))
+        XCTAssertThrowsError(try store.importBackup(Data("broken JSON".utf8)))
+        XCTAssertEqual(try Data(contentsOf: index), before)
+    }
+    func testCopiedCategoryAndNoteMappingsRemainIdempotentAcrossRestart() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let id = UUID().uuidString
+        let category: Record = ["id": .string(id), "name": .string("Originale"), "createdAt": .number(100)]
+        var original = note(); original["collectionID"] = .string(id); original["tagIDs"] = .array([.string(id)])
+        let store = NativeBloomStore(directory: root)
+        _ = try store.importBackup(JSONEncoder().encode(NativeBloomArchive(collections: [category], items: [original])))
+        var changed = category; changed["name"] = .string("Diversa")
+        let backup = try JSONEncoder().encode(NativeBloomArchive(collections: [changed], items: [original]))
+        let conflicts = try store.conflicts(backup)
+        XCTAssertEqual(conflicts.count, 2)
+        _ = try store.importBackup(backup, resolutions: Dictionary(uniqueKeysWithValues: conflicts.map { ($0.id, NativeBloomConflictChoice.copy) }))
+        let restarted = NativeBloomStore(directory: root)
+        XCTAssertTrue(try restarted.conflicts(backup).isEmpty)
+        _ = try restarted.importBackup(backup)
+        XCTAssertEqual(restarted.archive.items.count, 2); XCTAssertEqual(restarted.archive.collections.count, 2)
+        let copied = try XCTUnwrap(restarted.archive.items.first { $0.text("id") != original.text("id") })
+        XCTAssertNotEqual(copied.text("collectionID"), id)
+        XCTAssertEqual(copied["tagIDs"], .array([.string(copied.text("collectionID"))]))
+        XCTAssertTrue(restarted.archive.collections.contains { $0.text("id") == copied.text("collectionID") && $0.text("name") == "Diversa" })
+    }
     func testImportedTrashIsNotAutomaticallyDeleted() throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }
