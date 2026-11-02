@@ -1,0 +1,92 @@
+name: LifeOS 74 validation iOS 27.2
+on:
+  workflow_dispatch:
+  push:
+    paths: ['.github/workflows/lifeos-validation27.yml']
+permissions:
+  contents: read
+concurrency:
+  group: lifeos-validation27-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: xcode-27
+    timeout-minutes: 70
+    steps:
+      - uses: actions/checkout@v5
+      - name: Assemble pinned base and overlay
+        run: |
+          set -euo pipefail
+          curl -fLsS https://raw.githubusercontent.com/azeroualit-cloud/LifeOS/02c2c089841833a67fc9a223b367710edf7e37b9/lifeos-native.zip -o /tmp/base.zip
+          python3 - <<'PY'
+          import pathlib, zipfile, hashlib, shutil
+          p=pathlib.Path('/tmp/base.zip')
+          assert hashlib.sha256(p.read_bytes()).hexdigest() == 'b09762b88e4dc017d2c89fa7582ac38daf1fddf5aa0dd12fed94d73f6099ef03'
+          with zipfile.ZipFile(p) as z:
+              assert all(not pathlib.PurePosixPath(n).is_absolute() and '..' not in pathlib.PurePosixPath(n).parts for n in z.namelist())
+              z.extractall('app')
+          shutil.copytree('native-next','app',dirs_exist_ok=True)
+          PY
+      - name: Select SDK and report actual runtimes
+        run: |
+          python3 - <<'PY'
+          import pathlib, re, os
+          found=[]
+          for p in pathlib.Path('/Applications').glob('Xcode_*.app'):
+              m=re.fullmatch(r'Xcode_([0-9.]+).app',p.name)
+              if m and tuple(map(int,m[1].split('.')))[:2] == (27, 2): found.append((tuple(map(int,m[1].split('.'))),p))
+          assert found
+          with open(os.environ['GITHUB_ENV'],'a') as f: f.write('DEVELOPER_DIR='+str(max(found)[1]/'Contents/Developer')+'\n')
+          PY
+      - run: xcodebuild -version && xcodebuild -showsdks && xcrun simctl list runtimes
+      - name: Verify or install the exact iOS 27.2 simulator runtime
+        timeout-minutes: 20
+        run: |
+          set -euo pipefail
+          xcrun simctl list runtimes available -j > /tmp/runtimes.json
+          if ! python3 -c 'import json; assert any(r.get("isAvailable") and r.get("version")=="27.2" and ".iOS-" in r["identifier"] for r in json.load(open("/tmp/runtimes.json"))["runtimes"])'; then
+            xcodebuild -help > /tmp/xcodebuild-help.txt 2>&1 || true
+            python3 -c 's=open("/tmp/xcodebuild-help.txt").read(); assert "-downloadPlatform" in s and "-buildVersion" in s'
+            xcodebuild -downloadPlatform iOS -buildVersion 27.2
+          fi
+          xcrun simctl list runtimes available -j
+      - name: Generate and check design system
+        working-directory: app
+        run: |
+          brew install xcodegen
+          python3 scripts/check-design-system.py
+          xcodegen generate
+      - name: Create iPhone 15 Pro on available runtime
+        run: |
+          python3 - <<'PYDEVICE'
+          import json, subprocess, os
+          runtimes=json.loads(subprocess.check_output(['xcrun','simctl','list','runtimes','-j']))['runtimes']
+          choices=[r for r in runtimes if r.get('isAvailable') and r.get('version')=='27.2' and r['identifier'].startswith('com.apple.CoreSimulator.SimRuntime.iOS-')]
+          assert choices, 'Exact iOS 27.2 simulator runtime unavailable'
+          runtime=max(choices,key=lambda r:tuple(map(int,r['version'].split('.'))))
+          device=subprocess.check_output(['xcrun','simctl','create','LifeOS Validation 15 Pro','com.apple.CoreSimulator.SimDeviceType.iPhone-15-Pro',runtime['identifier']],text=True).strip()
+          with open(os.environ['GITHUB_ENV'],'a') as f: f.write('VALIDATION_DEVICE='+device+'\n')
+          print('Validation runtime:',runtime['version'],'device:',device)
+          PYDEVICE
+          xcrun simctl boot "$VALIDATION_DEVICE" || true
+      - name: Compile and test domain logic
+        working-directory: app
+        run: |
+          set -o pipefail
+          xcodebuild test -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 300 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$VALIDATION_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeTests -only-testing:LifeOSProbeUITests/NativeRevision74UITests -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testLargeTextAndSixWeekCalendar -resultBundlePath Validation.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee validation.log
+      - name: Export UI screenshots
+        if: always()
+        working-directory: app
+        run: |
+          if [ -f Validation.xcresult/Info.plist ]; then
+            xcrun xcresulttool export attachments --path Validation.xcresult --output-path build/focused-screenshots
+            python3 ../scripts/print-native-previews.py main
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: validation74-ios27
+          path: |
+            app/validation.log
+            app/Validation.xcresult
+            app/build/focused-screenshots
