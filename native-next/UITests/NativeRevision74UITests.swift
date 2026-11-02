@@ -21,7 +21,12 @@ final class NativeRevision74UITests: XCTestCase {
             let field = app.textFields["nutrition-" + label]
             XCTAssertTrue(field.waitForExistence(timeout: 10)); field.tap(); field.typeText(value)
         }
-        XCTAssertTrue(app.staticTexts["165 kcal"].exists)
+        app.buttons["Fine"].tap()
+        let total = app.staticTexts["nutrition-calories-value"]
+        capture("74-nutrition-calculation")
+        if !total.exists { print("NUTRITION_ACCESSIBILITY " + app.debugDescription) }
+        XCTAssertTrue(total.waitForExistence(timeout: 10))
+        XCTAssertEqual(total.label, "165 kcal")
         capture("74-nutrition-calculation")
     }
     func testMoreDestinationsAndBloomNotePersistsAcrossNavigation() {

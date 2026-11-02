@@ -43,6 +43,8 @@ enum NativeDesign {
         static let bottom: CGFloat = 32
     }
     enum Layout {
+        static let bloomGridMinimum: CGFloat = 150
+        static let bloomThumbnailHeight: CGFloat = 128
         static let bloomMarkdownFirstColumn: CGFloat = 140
         static let bloomMarkdownColumn: CGFloat = 220
         static let bloomMapFitTop: CGFloat = 72

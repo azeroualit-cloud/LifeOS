@@ -37,7 +37,7 @@ final class NativeRevision71UITests: XCTestCase {
     }
     func testMonthUsesScreenAndTapOpensDayThenReturns() {
         let app = launch()
-        app.tabBars.buttons["Calendario"].tap()
+        app.openOtherDestination("Calendario")
         let months = app.scrollViews["calendar-scroll"]
         XCTAssertTrue(months.waitForExistence(timeout: 10))
         XCTAssertGreaterThan(months.frame.height, app.frame.height * 0.55)
@@ -63,17 +63,19 @@ final class NativeRevision71UITests: XCTestCase {
         app.buttons["dashboard-day-" + day(1)].tap()
         let explicit = app.buttons["calendar-week-day-" + day(1)]
         XCTAssertTrue(exists(explicit, app: app)); XCTAssertTrue(explicit.isSelected)
-        app.tabBars.buttons["Finanza"].tap(); app.tabBars.buttons["Calendario"].tap()
+        app.openOtherDestination("Finanza"); app.openOtherDestination("Calendario")
         XCTAssertTrue(app.scrollViews["calendar-scroll"].waitForExistence(timeout: 10))
         let today = app.buttons["calendar-day-" + day()]
         reveal(today, in: app.scrollViews["calendar-scroll"], app: app); XCTAssertTrue(today.isSelected)
         app.buttons["Mese successivo"].tap()
+        let heading = app.staticTexts.matching(NSPredicate(format: "identifier BEGINSWITH %@", "calendar-month-heading-")).firstMatch
+        let browsedMonth = heading.label
         XCUIDevice.shared.press(.home); app.activate()
-        reveal(today, in: app.scrollViews["calendar-scroll"], app: app); XCTAssertTrue(today.isSelected)
+        XCTAssertEqual(heading.label, browsedMonth, "Background resume must preserve the calendar being consulted")
     }
     func testAllDayEventsUseCompactChipsWithinTheDayScroll() {
         let app = launch(["--activity-agenda"])
-        app.tabBars.buttons["Calendario"].tap()
+        app.openOtherDestination("Calendario")
         let today = app.buttons["calendar-day-" + day()]
         reveal(today, in: app.scrollViews["calendar-scroll"], app: app); today.tap()
         app.buttons["calendar-expand-day"].tap()
@@ -145,7 +147,7 @@ final class NativeRevision71UITests: XCTestCase {
     }
     func testPaintingHasGlassPaletteAndRapidEditsPreserveLastIntentAndUndo() {
         let app = launch()
-        app.tabBars.buttons["Calendario"].tap(); app.buttons["toggle-shift-paint"].tap()
+        app.openOtherDestination("Calendario"); app.buttons["toggle-shift-paint"].tap()
         for kind in ["morning", "afternoon", "night", "rest", "holiday", "erase"] {
             let brush = app.buttons["shift-brush-" + kind]
             XCTAssertTrue(brush.exists); XCTAssertGreaterThanOrEqual(brush.frame.width.rounded(), 44)
@@ -166,7 +168,7 @@ final class NativeRevision71UITests: XCTestCase {
     }
     func testFinanceMatchesOpenLayoutAndKeepsBudgetAnalysisAndExpense() {
         let app = launch()
-        app.tabBars.buttons["Finanza"].tap()
+        app.openOtherDestination("Finanza")
         let surface = app.scrollViews["finance-scroll"]
         let hero = app.staticTexts["finance-budget-value"]
         XCTAssertTrue(hero.waitForExistence(timeout: 10))
@@ -213,7 +215,7 @@ final class NativeRevision71UITests: XCTestCase {
         clock.tap(); app.buttons["Salva"].tap()
         let complete = app.buttons["Cambia completamento evento Slot completato test"]
         reveal(complete, in: app.collectionViews.firstMatch, app: app); complete.tap()
-        app.tabBars.buttons["Calendario"].tap()
+        app.openOtherDestination("Calendario")
         let today = app.buttons["calendar-day-" + day()]
         reveal(today, in: app.scrollViews["calendar-scroll"], app: app); today.tap()
         app.buttons["calendar-expand-day"].tap()
@@ -223,7 +225,7 @@ final class NativeRevision71UITests: XCTestCase {
     }
     func testReducedMotionAndLargeTextKeepMonthDayAndEditorUsable() {
         let app = launch(["--reduce-motion", "--large-text"])
-        app.tabBars.buttons["Calendario"].tap()
+        app.openOtherDestination("Calendario")
         let today = app.buttons["calendar-day-" + day()]
         reveal(today, in: app.scrollViews["calendar-scroll"], app: app); today.tap()
         app.buttons["calendar-expand-day"].tap()

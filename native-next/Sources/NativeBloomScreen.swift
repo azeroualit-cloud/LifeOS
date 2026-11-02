@@ -15,6 +15,7 @@ private struct NativeBloomDocument: FileDocument {
 struct NativeBloomScreen: View {
     @EnvironmentObject private var router: NativeRouter
     @StateObject private var store = NativeBloomStore.shared
+    @StateObject private var classifier = NativeBloomPlaceClassifier()
     @State private var captureRecord: Record = [:]
     @State private var section = "Libreria"
     @State private var search = ""
@@ -37,7 +38,14 @@ struct NativeBloomScreen: View {
     private var notes: [Record] {
         store.archive.items.filter { item in
             item.flag("archived") == showTrash && (category.isEmpty || (item["tagIDs"]?.array.map(\.string) ?? [item.text("collectionID")]).contains(category)) && (search.isEmpty || [item.text("title"), item.text("text"), item.text("notes"), item.text("urlString")].joined(separator: " ").localizedCaseInsensitiveContains(search))
-        }.sorted { $0.amount("capturedAt") > $1.amount("capturedAt") }
+        }.sorted {
+            if !category.isEmpty {
+                let left = $0["pinnedCategoryIDs"]?.array.map(\.string).contains(category) ?? false
+                let right = $1["pinnedCategoryIDs"]?.array.map(\.string).contains(category) ?? false
+                if left != right { return left }
+            }
+            return $0.amount("capturedAt") > $1.amount("capturedAt")
+        }
     }
     var body: some View {
         VStack {
@@ -47,38 +55,40 @@ struct NativeBloomScreen: View {
                 Label("Riscopri", systemImage: "sparkles").tag("Riscopri")
             }.pickerStyle(.segmented).padding(.horizontal)
             if let notice { Text(notice).font(.caption).foregroundStyle(.secondary) }
+            if section == "Mappa" {
+                HStack {
+                    Button("Inquadra luoghi") { mapFitRequest += 1 }
+                    Button(classifier.running ? "Ricerca in corso" : "Classifica luoghi") { Task { await classifier.classify(in: store) } }.disabled(classifier.running)
+                }.font(.subheadline)
+                if let message = classifier.message { Text(message).font(.caption).foregroundStyle(.secondary) }
+            }
             if let error = store.error { Text(error).foregroundStyle(.red) }
             ZStack {
                 NativeBloomClusteredPlacesMap(places: mapAnnotations, selectedID: selectedPlaceNote, fitRequest: mapFitRequest) { selectedPlaceNote = $0 }
                     .opacity(section == "Mappa" ? 1 : 0).allowsHitTesting(section == "Mappa").accessibilityHidden(section != "Mappa")
                 if section != "Mappa" {
-                List {
-                    if section == "Libreria" {
-                        Picker("Categoria", selection: $category) {
-                            Text("Tutte le note").tag("")
-                            ForEach(store.archive.collections.map { DisplayRecord($0, key: "id") }) { row in Text(row.value.text("name")).tag(row.value.text("id")) }
-                        }
-                    }
-                    if section == "Riscopri" { Button("Nuovo giro") { rediscoveryRound += 1 }
-                        Button("Vai alla libreria") { section = "Libreria" } }
-                    ForEach(ordered.map { DisplayRecord($0, key: "id") }) { item in
-                        NavigationLink { NativeBloomDetail(store: store, id: item.value.text("id")) } label: {
-                            VStack(alignment: .leading) {
-                                Text(title(item.value)).font(.headline)
-                                if !item.value.text("text").isEmpty { Text(item.value.text("text")).lineLimit(3).foregroundStyle(.secondary) }
-                            }
-                        }.swipeActions {
-                            Button(showTrash ? "Ripristina" : "Cestino", role: showTrash ? nil : .destructive) { do { try store.trash(item.value, restore: showTrash) } catch { store.error = error.localizedDescription } }
-                        }
-                    }
-                }.searchable(text: $search, prompt: "Cerca nella Libreria")
+                    NativeBloomLibraryContent(store: store, notes: ordered, category: $category, showTrash: showTrash, rediscovery: section == "Riscopri", newRound: { rediscoveryRound += 1 }, goToLibrary: { section = "Libreria" })
+                        .searchable(text: $search, prompt: "Cerca nella Libreria")
                 }
             }
         }.navigationTitle("Bloom")
             .navigationDestination(isPresented: Binding(get: { selectedPlaceNote != nil }, set: { if !$0 { selectedPlaceNote = nil } })) {
-                if let id = selectedPlaceNote { NativeBloomDetail(store: store, id: id) }
+                if let id = selectedPlaceNote, let group = mapGroups.first(where: { $0.id == id }) {
+                    List {
+                        Section(group.place.name) {
+                            ForEach(group.notes.map { DisplayRecord($0, key: "id") }) { row in
+                                NavigationLink { NativeBloomDetail(store: store, id: row.value.text("id")) } label: { Text(row.value.text("title", fallback: row.value.text("fileName", fallback: "Nota"))) }
+                            }
+                        }
+                        Section { Button("Apri in Mappe") {
+                            let item = MKMapItem(placemark: MKPlacemark(coordinate: CLLocationCoordinate2D(latitude: group.place.latitude, longitude: group.place.longitude)))
+                            item.name = group.place.name; item.openInMaps()
+                        } }
+                    }.navigationTitle(group.place.name)
+                }
             }
-            .onAppear { category = savedCategory }
+            .onAppear { category = store.archive.collections.contains(where: { $0.text("id") == savedCategory }) ? savedCategory : "" }
+            .onChange(of: store.archive.collections.map { $0.text("id") }) { _, ids in if !category.isEmpty && !ids.contains(category) { category = "" } }
             .onChange(of: router.bloomCaptureURL, initial: true) { _, raw in
                 guard let raw else { return }
                 captureRecord = ["id": .string(UUID().uuidString), "kind": .string("link"), "urlString": .string(raw), "title": .string(URL(string: raw)?.host ?? raw), "archived": .bool(false), "capturedAt": .number(Date().timeIntervalSinceReferenceDate), "noteVersion": .int(1)]
@@ -156,11 +166,24 @@ struct NativeBloomScreen: View {
             }
             .fileExporter(isPresented: $exporting, document: NativeBloomDocument(data: exportData), contentType: .json, defaultFilename: "LifeOS-Bloom-backup") { result in if case .failure(let error) = result { store.error = error.localizedDescription } }
     }
-    private var mapAnnotations: [NativeBloomPlaceMapAnnotation] {
-        notes.compactMap { row in
-            guard let bytes = try? JSONEncoder().encode(row.record("place")), let place = try? JSONDecoder().decode(NativeBloomPlace.self, from: bytes), place.isValid else { return nil }
-            return NativeBloomPlaceMapAnnotation(id: row.text("id"), place: place, count: 1)
+    private struct MapGroup: Identifiable {
+        let id: String
+        let place: NativeBloomPlace
+        var notes: [Record]
+    }
+    private var mapGroups: [MapGroup] {
+        var groups: [String: MapGroup] = [:]
+        for row in notes {
+            guard let bytes = try? JSONEncoder().encode(row.record("place")), let place = try? JSONDecoder().decode(NativeBloomPlace.self, from: bytes), place.isValid else { continue }
+            let name = place.name.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "it_IT")).trimmingCharacters(in: .whitespacesAndNewlines)
+            let key = "\(place.latitude):\(place.longitude):" + name
+            if var group = groups[key] { group.notes.append(row); groups[key] = group }
+            else { groups[key] = MapGroup(id: key, place: place, notes: [row]) }
         }
+        return groups.values.sorted { $0.id < $1.id }
+    }
+    private var mapAnnotations: [NativeBloomPlaceMapAnnotation] {
+        mapGroups.map { NativeBloomPlaceMapAnnotation(id: $0.id, place: $0.place, count: $0.notes.count) }
     }
     private var ordered: [Record] {
         guard section == "Riscopri" else { return notes }
@@ -173,10 +196,11 @@ struct NativeBloomScreen: View {
         let byID = Dictionary(uniqueKeysWithValues: notes.map { ($0.text("id").lowercased(), $0) })
         return ids.compactMap { byID[$0.uuidString.lowercased()] }
     }
-    private func title(_ item: Record) -> String { item.text("title", fallback: item.text("fileName", fallback: String(item.text("text", fallback: item.text("urlString", fallback: "Nota")).prefix(80)))) }
+
 }
 
-private struct NativeBloomDetail: View {
+struct NativeBloomDetail: View {
+    @Environment(\.dismiss) private var dismiss
     @ObservedObject var store: NativeBloomStore
     let id: String
     @State private var editing = false
@@ -219,7 +243,12 @@ private struct NativeBloomDetail: View {
                 }
             }.padding()
         }.navigationTitle("Nota").navigationBarTitleDisplayMode(.inline)
-            .toolbar { Button("Modifica") { editing = true } }
+            .toolbar {
+                Button("Modifica") { editing = true }
+                Button(item.flag("archived") ? "Ripristina" : "Sposta nel Cestino", systemImage: item.flag("archived") ? "arrow.uturn.backward" : "trash") {
+                    do { try store.trash(item, restore: item.flag("archived")); dismiss() } catch { store.error = error.localizedDescription }
+                }
+            }
             .sheet(isPresented: $editing) { NavigationStack { NativeBloomComposer(store: store, initial: item) } }
             .quickLookPreview($file)
     }

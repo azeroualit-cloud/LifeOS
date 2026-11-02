@@ -75,7 +75,7 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertFalse(app.staticTexts.matching(NSPredicate(format: "label ENDSWITH %@", "alla fine")).firstMatch.exists)
         XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "dashboard-day-")).count, 7)
         capture("dashboard-week-80-and-shift-progress")
-        app.tabBars.buttons["Finanza"].tap()
+        app.openOtherDestination("Finanza")
         for name in ["finance-budget", "finance-analysis", "finance-more", "primary-add"] {
             let button = app.buttons[name]; XCTAssertTrue(button.waitForExistence(timeout: 10)); assertMinimumTouchTarget(button)
         }
@@ -178,7 +178,7 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertTrue(health.exists)
         XCTAssertLessThan(health.frame.maxY, lower, "The entire Health chart must remain above the tab bar")
         capture("health-standardized-dark")
-        app.tabBars.buttons["Calendario"].tap()
+        app.openOtherDestination("Calendario")
         app.buttons["toggle-shift-paint"].tap()
         let first = app.buttons["shift-brush-morning"]
         XCTAssertTrue(first.waitForExistence(timeout: 10))
@@ -213,7 +213,7 @@ final class NativeInterfaceTests: XCTestCase {
 
     func testCalendarRepeatedScrollingKeepsMonthAnchorsAndReturnsToToday() {
         let app = launch(["--dark"])
-        app.tabBars.buttons["Calendario"].tap()
+        app.openOtherDestination("Calendario")
         let scroll = app.scrollViews["calendar-scroll"]
         XCTAssertTrue(scroll.waitForExistence(timeout: 10))
         for _ in 0..<8 { scroll.swipeUp(velocity: .fast) }
@@ -262,7 +262,7 @@ final class NativeInterfaceTests: XCTestCase {
 
     func testCalendarScrollPerformance() {
         let app = launch(["--dark"])
-        app.tabBars.buttons["Calendario"].tap()
+        app.openOtherDestination("Calendario")
         let scroll = app.scrollViews["calendar-scroll"]
         XCTAssertTrue(scroll.waitForExistence(timeout: 10))
         let options = XCTMeasureOptions(); options.iterationCount = 3
@@ -442,7 +442,7 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertTrue(app.buttons["expense-destination"].label.contains("Acqua"))
         capture("expense-water-fund-and-savings-preview")
         app.buttons["Salva"].tap()
-        XCTAssertTrue(app.tabBars.buttons["Finanza"].waitForExistence(timeout: 10)); app.tabBars.buttons["Finanza"].tap()
+        XCTAssertTrue(app.tabBars.buttons["Finanza"].waitForExistence(timeout: 10)); app.openOtherDestination("Finanza")
         let all = app.buttons["all-movements"]
         for _ in 0..<6 { if all.isHittable { break }; app.scrollViews["finance-scroll"].swipeUp() }
         all.tap()
@@ -557,7 +557,7 @@ final class NativeInterfaceTests: XCTestCase {
         reveal(detail, in: app)
         XCTAssertTrue(detail.label.contains("Anteprima peso e calorie"))
         capture("home-health-continuous-forecast")
-        app.tabBars.buttons["Finanza"].tap()
+        app.openOtherDestination("Finanza")
         let month = app.staticTexts["finance-month"]
         XCTAssertTrue(month.waitForExistence(timeout: 10))
         let current = month.label
@@ -863,7 +863,7 @@ final class NativeInterfaceTests: XCTestCase {
     }
     func testPlansInfoAndMonthOnlyAdvanceFlow() {
         let app = launch(["--dark"])
-        app.tabBars.buttons["Finanza"].tap()
+        app.openOtherDestination("Finanza")
         app.buttons["finance-budget"].tap()
         XCTAssertTrue(app.navigationBars["Budget"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.staticTexts["Stipendio di riferimento"].exists)
@@ -892,7 +892,7 @@ final class NativeInterfaceTests: XCTestCase {
     }
     func testPlansGoalPaymentWithOptionalOverageRecovery() {
         let app = launch(["--dark"])
-        app.tabBars.buttons["Finanza"].tap(); app.buttons["finance-budget"].tap()
+        app.openOtherDestination("Finanza"); app.buttons["finance-budget"].tap()
         app.buttons["plans-add"].tap()
         let name = app.textFields["plan-name"]; XCTAssertTrue(name.waitForExistence(timeout: 10)); name.tap(); name.typeText("Obiettivo prova")
         let amount = app.textFields["plan-amount"]; amount.tap(); amount.typeText("600")
@@ -916,7 +916,7 @@ final class NativeInterfaceTests: XCTestCase {
     }
     func testPlansFundCanEditFutureQuotaAndLinkAnExistingMovement() {
         let app = launch(["--dark"])
-        app.tabBars.buttons["Finanza"].tap(); app.buttons["finance-budget"].tap(); app.buttons["plans-add"].tap()
+        app.openOtherDestination("Finanza"); app.buttons["finance-budget"].tap(); app.buttons["plans-add"].tap()
         app.buttons["plan-kind"].tap(); app.buttons["Fondo senza scadenza"].tap()
         let name = app.textFields["plan-name"]; name.tap(); name.typeText("Fondo prova")
         let amount = app.textFields["plan-amount"]; amount.tap(); amount.typeText("50")
@@ -965,7 +965,7 @@ final class NativeInterfaceTests: XCTestCase {
     }
     func testAnalysisShowsFourChartsAndCategoryPeriods() {
         let app = launch(["--stress-money", "--dark"])
-        app.tabBars.buttons["Finanza"].tap()
+        app.openOtherDestination("Finanza")
         app.buttons["finance-analysis"].tap()
         XCTAssertTrue(app.navigationBars["Analisi"].waitForExistence(timeout: 10))
         let picker = app.segmentedControls["category-period"]
@@ -1039,7 +1039,7 @@ final class NativeInterfaceTests: XCTestCase {
     func testNativeAddKeepsDestinationSelectedAfterRepeatedPresentation() {
         let app = launch(["--dark"])
         for _ in 0..<3 {
-            app.tabBars.buttons["Calendario"].tap()
+            app.openOtherDestination("Calendario")
             addButton(app).tap()
             XCTAssertTrue(app.navigationBars["Nuova attività"].waitForExistence(timeout: 10))
             app.buttons["Annulla"].tap()
@@ -1074,7 +1074,7 @@ final class NativeInterfaceTests: XCTestCase {
     func testFinanceOverviewSupportsLargeTextAndEmptySnapshot() {
         for args in [["--dark", "--large-text", "--stress-money"], ["--dark", "--empty-home"]] {
             let app = launch(args)
-            app.tabBars.buttons["Finanza"].tap()
+            app.openOtherDestination("Finanza")
             let expense = app.buttons["primary-add"]
             revealFinanceControl(expense, in: app)
             XCTAssertTrue(expense.isHittable, "Spesa irraggiungibile: args \(args), frame \(expense.frame), scroll \(app.scrollViews["finance-scroll"].frame)"); assertMinimumTouchTarget(expense)
@@ -1108,7 +1108,7 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertEqual(completion.value as? String, "Completata")
         XCTAssertFalse(app.navigationBars["Modifica attività"].exists)
         completion.tap(); revealChecklistButton(completion, in: app, towardTop: true); XCTAssertEqual(completion.value as? String, "Da completare")
-        app.tabBars.buttons["Finanza"].tap()
+        app.openOtherDestination("Finanza")
         let expense = app.buttons["primary-add"]
         for _ in 0..<5 { if expense.isHittable { break }; app.scrollViews["finance-scroll"].swipeUp() }
         expense.tap()
@@ -1120,7 +1120,7 @@ final class NativeInterfaceTests: XCTestCase {
 
     func testCalendarTodayRestoresMonthAndSelection() {
         let app = launch(["--dark"])
-        app.tabBars.buttons["Calendario"].tap()
+        app.openOtherDestination("Calendario")
         app.buttons["Mese precedente"].tap()
         let today = app.buttons["calendar-today"]
         XCTAssertTrue(today.waitForExistence(timeout: 10)); assertMinimumTouchTarget(today); today.tap()

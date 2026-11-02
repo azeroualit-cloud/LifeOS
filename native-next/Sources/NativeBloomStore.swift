@@ -100,6 +100,60 @@ struct NativeBloomArchive: Codable {
         next.collections.append(["id": .string(id), "name": .string(clean), "createdAt": .number(Date().timeIntervalSinceReferenceDate)])
         try commit(next); return id
     }
+    func setClassifiedPlaceKind(_ id: String, expected: Record, kind: String) throws -> Bool {
+        guard let index = archive.items.firstIndex(where: { $0.text("id") == id }), archive.items[index].record("place") == expected, expected["kind"] == nil || expected["kind"] == .null else { return false }
+        var next = archive, place = expected
+        place["kind"] = .string(kind); next.items[index]["place"] = .object(place)
+        next.items[index]["modifiedAt"] = .number(Date().timeIntervalSinceReferenceDate)
+        try commit(next); return true
+    }
+    func primaryFileURL(_ row: Record) -> URL? {
+        let source: Record
+        if row.text("kind") == "image" { source = row }
+        else if let file = row.records("noteFiles").first(where: { $0.text("type").hasPrefix("public.image") || ["public.jpeg", "public.png", "public.heic"].contains($0.text("type")) }) { source = file }
+        else { return nil }
+        let hash = source.text("lifeosFileSHA256")
+        guard hash.count == 64, hash.allSatisfy({ $0.isHexDigit }) else { return nil }
+        return root.appendingPathComponent("files").appendingPathComponent(hash)
+    }
+    func updateNotes(_ ids: Set<String>, category: String? = nil, archived: Bool? = nil) throws {
+        guard !ids.isEmpty else { return }
+        guard ids.isSubset(of: Set(archive.items.map { $0.text("id") })) else { throw Message(text: "Una nota selezionata non è più disponibile.") }
+        if let category { guard archive.collections.contains(where: { $0.text("id") == category }) else { throw Message(text: "Categoria non disponibile.") } }
+        var next = archive
+        let now = Date().timeIntervalSinceReferenceDate
+        for index in next.items.indices where ids.contains(next.items[index].text("id")) {
+            var row = next.items[index]
+            if let category {
+                var tags = Set(row["tagIDs"]?.array.map(\.string) ?? (row.text("collectionID").isEmpty ? [] : [row.text("collectionID")]))
+                tags.insert(category); row["tagIDs"] = .array(tags.sorted().map(JSONValue.string))
+                if row.text("collectionID").isEmpty { row["collectionID"] = .string(category) }
+            }
+            if let archived { row["archived"] = .bool(archived); row["trashedAt"] = archived ? .number(now) : .null }
+            row["modifiedAt"] = .number(now); next.items[index] = row
+        }
+        try commit(next)
+    }
+    func renameCategory(_ id: String, name: String) throws {
+        let clean = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !clean.isEmpty, clean.utf8.count <= 1024, let index = archive.collections.firstIndex(where: { $0.text("id") == id }) else { throw Message(text: "Categoria o nome non valido.") }
+        guard !archive.collections.contains(where: { $0.text("id") != id && $0.text("name").localizedCaseInsensitiveCompare(clean) == .orderedSame }) else { throw Message(text: "Esiste già una categoria con questo nome.") }
+        var next = archive; next.collections[index]["name"] = .string(clean); next.collections[index]["modifiedAt"] = .number(Date().timeIntervalSinceReferenceDate)
+        try commit(next)
+    }
+    func removeCategory(_ id: String) throws {
+        var next = archive
+        next.collections.removeAll { $0.text("id") == id }
+        for index in next.items.indices {
+            var row = next.items[index]
+            let tags = Set(row["tagIDs"]?.array.map(\.string) ?? (row.text("collectionID").isEmpty ? [] : [row.text("collectionID")])).subtracting([id])
+            row["tagIDs"] = .array(tags.sorted().map(JSONValue.string))
+            row["pinnedCategoryIDs"] = .array((row["pinnedCategoryIDs"]?.array ?? []).filter { tags.contains($0.string) })
+            if row.text("collectionID") == id { row["collectionID"] = tags.sorted().first.map(JSONValue.string) ?? .null }
+            next.items[index] = row
+        }
+        try commit(next)
+    }
     func trash(_ record: Record, restore: Bool = false) throws {
         var changed = record; changed["archived"] = .bool(!restore)
         changed["trashedAt"] = restore ? .null : .number(Date().timeIntervalSinceReferenceDate)

@@ -4,6 +4,7 @@ import Charts
 struct FinanceScreen: View {
     @EnvironmentObject var store: NativeStore
     @EnvironmentObject var router: NativeRouter
+    @Environment(\.dismiss) private var dismiss
     @ScaledMetric(relativeTo: .largeTitle) private var budgetAmountSize = NativeDesign.Layout.budgetAmount
     @State private var search = ""
     @State private var account = "Tutti"
@@ -11,7 +12,8 @@ struct FinanceScreen: View {
     var body: some View {
         VStack(spacing: NativeDesign.Space.none) {
             HStack {
-                Text("Finanza").font(.largeTitle.bold()).accessibilityAddTraits(.isHeader).accessibilityIdentifier("finance-heading")
+                Button { dismiss() } label: { Image(systemName: "chevron.left").frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget) }.accessibilityLabel("Torna ad Altro").accessibilityIdentifier("other-back")
+                Text("Finanza").font(.largeTitle.bold()).lineLimit(1).minimumScaleFactor(0.75).accessibilityAddTraits(.isHeader).accessibilityIdentifier("finance-heading")
                 Spacer()
                 NativeToolbarButton(symbol: "gearshape", label: "Impostazioni") { router.sheet = .settings }
                     .contextMenu { Button("Sincronizza", systemImage: "arrow.triangle.2.circlepath") { Task { await store.sync() } }.disabled(store.busy || store.syncing) }

@@ -17,7 +17,7 @@ final class NativeRevision72UITests: XCTestCase {
         let item = XCTAttachment(screenshot: XCUIScreen.main.screenshot()); item.name = name; item.lifetime = .keepAlways; add(item)
     }
     private func openDay(_ app: XCUIApplication) {
-        app.tabBars.buttons["Calendario"].tap()
+        app.openOtherDestination("Calendario")
         let today = app.buttons["calendar-day-" + day()]
         let scroll = app.scrollViews["calendar-scroll"]
         XCTAssertTrue(scroll.waitForExistence(timeout: 10))
@@ -86,7 +86,7 @@ final class NativeRevision72UITests: XCTestCase {
         XCTAssertEqual(app.textFields["activity-title"].value as? String, "Ultimo impegno")
     }
     func testFinanceBudgetIsSmallerAndReferenceRoutesStillWork() {
-        let app = launch(); app.tabBars.buttons["Finanza"].tap()
+        let app = launch(); app.openOtherDestination("Finanza")
         let amount = app.staticTexts["finance-budget-value"]
         XCTAssertTrue(amount.waitForExistence(timeout: 10))
         XCTAssertLessThan(amount.frame.height, 65)

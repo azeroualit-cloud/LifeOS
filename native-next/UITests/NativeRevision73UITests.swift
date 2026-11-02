@@ -19,7 +19,7 @@ final class NativeRevision73UITests: XCTestCase {
     func testSelectingDayKeepsMonthVisibleAndExpansionIsExplicit() {
         let app = launch()
         capture("73-dashboard-alignment")
-        app.tabBars.buttons["Calendario"].tap()
+        app.openOtherDestination("Calendario")
         let month = app.scrollViews["calendar-scroll"], today = app.buttons["calendar-day-" + day()]
         XCTAssertTrue(month.waitForExistence(timeout: 10))
         for _ in 0..<12 { if today.isHittable { break }; month.swipeUp(velocity: .slow) }
@@ -44,7 +44,7 @@ final class NativeRevision73UITests: XCTestCase {
     }
     func testInlineAgendaRemainsUsableWithLargeTextAndReducedMotion() {
         let app = launch(["--large-text", "--reduce-motion"])
-        app.tabBars.buttons["Calendario"].tap()
+        app.openOtherDestination("Calendario")
         let month = app.scrollViews["calendar-scroll"], today = app.buttons["calendar-day-" + day()]
         XCTAssertTrue(month.waitForExistence(timeout: 10))
         for _ in 0..<12 { if today.isHittable { break }; month.swipeUp(velocity: .slow) }

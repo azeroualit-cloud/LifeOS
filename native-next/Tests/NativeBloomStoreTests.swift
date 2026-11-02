@@ -68,6 +68,22 @@ import XCTest
         XCTAssertEqual(restarted.archive.items.count, 2)
         XCTAssertEqual(restarted.archive.lifeosImportReports?.last?.skipped, 1)
     }
+    func testBulkCategoriesAndCategoryRemovalPreserveNotesAndOtherTags() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let store = NativeBloomStore(directory: root), first = note(), second = note()
+        try store.save(first); try store.save(second)
+        let category = try store.addCategory("Viaggi"), remaining = try store.addCategory("Idee")
+        let ids = Set([first.text("id"), second.text("id")])
+        try store.updateNotes(ids, category: category); try store.updateNotes(ids, category: remaining)
+        try store.removeCategory(category)
+        XCTAssertEqual(store.archive.items.count, 2)
+        for row in store.archive.items { XCTAssertEqual(row["tagIDs"]?.array.map(\.string), [remaining]) }
+        try store.updateNotes(ids, archived: true)
+        XCTAssertTrue(store.archive.items.allSatisfy { $0.flag("archived") })
+        try store.updateNotes(ids, archived: false)
+        XCTAssertTrue(store.archive.items.allSatisfy { !$0.flag("archived") })
+    }
     func testImportedTrashIsNotAutomaticallyDeleted() throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }

@@ -9,6 +9,7 @@ struct NativeNutritionScreen: View {
     @State private var date = Date()
     @State private var editing: UUID?
     @State private var notice: String?
+    @FocusState private var focusedField: String?
     private var draft: NativeNutritionEntry? {
         guard let p = NativeNutritionEntry.grams(protein), let c = NativeNutritionEntry.grams(carbohydrate), let f = NativeNutritionEntry.grams(fat) else { return nil }
         return .init(id: editing ?? UUID(), revision: 0, date: date, protein: p, carbohydrate: c, fat: f, confirmed: false)
@@ -19,7 +20,12 @@ struct NativeNutritionScreen: View {
                 field("Proteine", text: $protein)
                 field("Carboidrati", text: $carbohydrate)
                 field("Grassi", text: $fat)
-                LabeledContent("Calorie", value: draft.map { NSDecimalNumber(decimal: $0.calories).stringValue + " kcal" } ?? "Valori non validi")
+                HStack {
+                    Text("Calorie")
+                    Spacer()
+                    Text(draft.map { NSDecimalNumber(decimal: $0.calories).stringValue + " kcal" } ?? "Valori non validi")
+                        .accessibilityIdentifier("nutrition-calories-value")
+                }.accessibilityElement(children: .contain)
                 DatePicker("Data e ora", selection: $date)
                 Button(editing == nil ? "Aggiungi ad Apple Salute" : "Salva modifiche") {
                     guard let value = draft else { return }
@@ -53,9 +59,10 @@ struct NativeNutritionScreen: View {
             }
             Section { NavigationLink("Peso, calorie, fonti e TDEE") { NativeHealthDetail(health: health, demo: NativeHealthLaunchPolicy.simulated) } }
         }.navigationTitle("Salute")
+            .toolbar { ToolbarItemGroup(placement: .keyboard) { Spacer(); Button("Fine") { focusedField = nil } } }
     }
     private func field(_ title: String, text: Binding<String>) -> some View {
-        HStack { Text(title); TextField("0", text: text).keyboardType(.decimalPad).multilineTextAlignment(.trailing).accessibilityLabel(title + " in grammi").accessibilityIdentifier("nutrition-" + title); Text("g").foregroundStyle(.secondary) }
+        HStack { Text(title); TextField("0", text: text).focused($focusedField, equals: title).keyboardType(.decimalPad).multilineTextAlignment(.trailing).accessibilityLabel(title + " in grammi").accessibilityIdentifier("nutrition-" + title); Text("g").foregroundStyle(.secondary) }
     }
     private func clear() { editing = nil; protein = ""; carbohydrate = ""; fat = ""; date = Date() }
 }
