@@ -67,6 +67,7 @@ enum NativeSheet: Identifiable {
 @MainActor final class NativeRouter: ObservableObject {
     @Published var tab: NativeTab = .dashboard
     @Published var otherPath: [NativeOtherDestination] = []
+    @Published var bloomCaptureURL: String?
     @Published var sheet: NativeSheet?
     @Published var taskCategory = "action"
     @Published var financeSection = "Panoramica"
@@ -179,6 +180,14 @@ struct NativeRoot: View {
                 router.showCalendar(day: target.day); store.calendarMonth = String(target.day.prefix(7))
                 if target.kind == .event, let record = store.events.first(where: { $0.integer("id") == target.id && $0.text("day") == target.day }) { router.sheet = .event(record) }
             }
+            return
+        }
+        if url.scheme == "lifeos", url.host == "bloom" {
+            if let raw = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first(where: { $0.name == "url" })?.value {
+                guard let target = URL(string: raw), ["https", "http"].contains(target.scheme?.lowercased() ?? ""), target.host != nil else { store.error = "Link Bloom non valido."; return }
+                router.bloomCaptureURL = raw
+            }
+            NativeIntentDraft.pendingURL = nil; router.tab = .other; router.otherPath = [.bloom]
             return
         }
         if url.scheme == "lifeos", url.host == "weight", url.query != nil {

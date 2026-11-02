@@ -11,6 +11,10 @@ struct NativeBloomImportReport: Codable, Identifiable {
     var added: Int
     var skipped: Int
     var resolvedConflicts: Int
+    var categoryMappings: [String: String]? = nil
+    var fileCount: Int? = nil
+    var byteCount: Int? = nil
+    var sourceSHA256: String? = nil
 }
 
 struct NativeBloomArchive: Codable {
@@ -20,9 +24,11 @@ struct NativeBloomArchive: Codable {
     var collections: [Record] = []
     var items: [Record] = []
     var lifeosImportReports: [NativeBloomImportReport]? = nil
+    var lifeosImportMappings: [String: String]? = nil
 }
 
 @MainActor final class NativeBloomStore: ObservableObject {
+    static let shared = NativeBloomStore()
     @Published private(set) var archive = NativeBloomArchive()
     @Published var error: String?
     private let root: URL
@@ -105,7 +111,22 @@ struct NativeBloomArchive: Codable {
     }
     func preview(_ data: Data) throws -> NativeBloomArchive {
         guard data.count <= 100 * 1024 * 1024 else { throw Message(text: "Backup superiore a 100 MiB.") }
-        let incoming = try JSONDecoder().decode(NativeBloomArchive.self, from: data)
+        var incoming = try JSONDecoder().decode(NativeBloomArchive.self, from: data)
+        func normalized(_ source: Record) -> Record {
+            var row = source
+            for key in ["id", "collectionID"] {
+                if let id = UUID(uuidString: row.text(key)) { row[key] = .string(id.uuidString) }
+            }
+            for key in ["tagIDs", "pinnedCategoryIDs"] {
+                if case .array(let values)? = row[key] { row[key] = .array(values.map { value in
+                    if case .string(let raw) = value, let id = UUID(uuidString: raw) { return .string(id.uuidString) }; return value
+                }) }
+            }
+            if case .array(let values)? = row["noteFiles"] { row["noteFiles"] = .array(values.map { value in if case .object(let file) = value { return .object(normalized(file)) }; return value }) }
+            return row
+        }
+        incoming.collections = incoming.collections.map(normalized)
+        incoming.items = incoming.items.map(normalized)
         guard incoming.format == "Bloom", [1, 2].contains(incoming.version), incoming.items.count <= 10000, incoming.collections.count <= 2000 else { throw Message(text: "Formato o limiti backup non supportati.") }
         try NativeBloomValidation.validate(incoming)
         let categories = Set(incoming.collections.map { $0.text("id") })
@@ -136,14 +157,31 @@ struct NativeBloomArchive: Codable {
         let incoming = try preview(data)
         let encoder = JSONEncoder(); encoder.outputFormatting = [.sortedKeys]
         var result: [NativeBloomConflict] = []
-        for category in incoming.collections {
+        let sourceHash = digest(data)
+        let mappings = archive.lifeosImportMappings ?? [:]
+        for source in incoming.collections {
+            var category = source
+            if let mapped = mappings[sourceHash + ":category:" + source.text("id")] { category["id"] = .string(mapped) }
             if let old = archive.collections.first(where: { $0.text("id") == category.text("id") }), try encoder.encode(old) != encoder.encode(category) {
-                result.append(.init(id: "category:" + category.text("id"), title: category.text("name")))
+                result.append(.init(id: "category:" + source.text("id"), title: category.text("name")))
             }
         }
-        for item in incoming.items {
+        for source in incoming.items {
+            var item = source
+            if let mapped = mappings[sourceHash + ":note:" + source.text("id")] { item["id"] = .string(mapped) }
+            for key in ["collectionID"] { if let mapped = mappings[sourceHash + ":category:" + item.text(key)] { item[key] = .string(mapped) } }
+            for key in ["tagIDs", "pinnedCategoryIDs"] {
+                if case .array(let values)? = item[key] { item[key] = .array(values.map { value in .string(mappings[sourceHash + ":category:" + value.string] ?? value.string) }) }
+            }
             if let old = archive.items.first(where: { $0.text("id") == item.text("id") }), try encoder.encode(hydrated(old)) != encoder.encode(item) {
-                result.append(.init(id: "note:" + item.text("id"), title: item.text("title", fallback: String(item.text("text").prefix(80)))))
+                result.append(.init(id: "note:" + source.text("id"), title: item.text("title", fallback: String(item.text("text").prefix(80)))))
+            }
+        }
+        let categoryConflicts = Set(result.filter { $0.id.hasPrefix("category:") }.map { String($0.id.dropFirst("category:".count)) })
+        for item in incoming.items where archive.items.contains(where: { $0.text("id") == item.text("id") }) {
+            let tags = Set(item["tagIDs"]?.array.map(\.string) ?? [item.text("collectionID")])
+            if !tags.isDisjoint(with: categoryConflicts), !result.contains(where: { $0.id == "note:" + item.text("id") }) {
+                result.append(.init(id: "note:" + item.text("id"), title: item.text("title", fallback: "Relazioni categoria della nota")))
             }
         }
         return result
@@ -153,23 +191,29 @@ struct NativeBloomArchive: Codable {
         var next = archive, added = 0, skipped = 0
         let encoder = JSONEncoder(); encoder.outputFormatting = [.sortedKeys]
         var categoryMap: [String: String] = [:]
-        for category in incoming.collections {
+        var mappings = next.lifeosImportMappings ?? [:]
+        let sourceHash = digest(data)
+        for source in incoming.collections {
+            var category = source
+            let originalID = source.text("id")
+            if let mapped = mappings[sourceHash + ":category:" + originalID] { category["id"] = .string(mapped); categoryMap[originalID] = mapped }
             let id = category.text("id")
             if let index = next.collections.firstIndex(where: { $0.text("id") == id }) {
                 if try encoder.encode(next.collections[index]) != encoder.encode(category) {
-                    guard let choice = resolutions["category:" + id] else { throw Message(text: "Risolvi il conflitto della categoria prima di importare.") }
+                    guard let choice = resolutions["category:" + originalID] else { throw Message(text: "Risolvi il conflitto della categoria prima di importare.") }
                     switch choice {
                     case .keep: break
                     case .replace: next.collections[index] = category
                     case .copy:
                         var copy = category; let newID = UUID().uuidString
-                        copy["id"] = .string(newID); categoryMap[id] = newID; next.collections.append(copy)
+                        copy["id"] = .string(newID); categoryMap[originalID] = newID; mappings[sourceHash + ":category:" + originalID] = newID; next.collections.append(copy)
                     }
                 }
             } else { next.collections.append(category) }
         }
         for source in incoming.items {
             var item = source
+            if let mapped = mappings[sourceHash + ":note:" + source.text("id")] { item["id"] = .string(mapped) }
             if let mapped = categoryMap[item.text("collectionID")] { item["collectionID"] = .string(mapped) }
             for key in ["tagIDs", "pinnedCategoryIDs"] {
                 if case .array(let values)? = item[key] { item[key] = .array(values.map { value in
@@ -182,7 +226,10 @@ struct NativeBloomArchive: Codable {
                 switch choice {
                 case .keep: skipped += 1
                 case .replace: next.items[index] = try externalize(item)
-                case .copy: item["id"] = .string(UUID().uuidString); next.items.append(try externalize(item)); added += 1
+                case .copy:
+                    let newID = UUID().uuidString; item["id"] = .string(newID)
+                    mappings[sourceHash + ":note:" + source.text("id")] = newID
+                    next.items.append(try externalize(item)); added += 1
                 }
             } else { next.items.append(try externalize(item)); added += 1 }
         }
@@ -190,8 +237,11 @@ struct NativeBloomArchive: Codable {
         // and never referenced until the atomic index commit succeeds.
         try data.write(to: root.appendingPathComponent("backup-" + digest(data) + ".json"), options: [.atomic, .completeFileProtection])
         var reports = next.lifeosImportReports ?? []
-        reports.append(.init(added: added, skipped: skipped, resolvedConflicts: resolutions.count))
+        let files = incoming.items.flatMap { item -> [Record] in (item["data"] != nil && item["data"] != .null ? [item] : []) + item.records("noteFiles") }
+        let bytes = files.reduce(0) { $0 + (Data(base64Encoded: $1.text("data"))?.count ?? 0) }
+        reports.append(.init(added: added, skipped: skipped, resolvedConflicts: resolutions.count, categoryMappings: categoryMap, fileCount: files.count, byteCount: bytes, sourceSHA256: digest(data)))
         next.lifeosImportReports = reports
+        next.lifeosImportMappings = mappings
         try commit(next)
         return "Importate \(added) note; \(skipped) già presenti."
     }

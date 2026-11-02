@@ -52,6 +52,22 @@ import XCTest
         }
         XCTAssertTrue(store.archive.items.isEmpty)
     }
+    func testCopyResolutionRemainsIdempotentAfterRestart() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let store = NativeBloomStore(directory: root), original = note()
+        try store.save(original)
+        var incoming = original; incoming["text"] = .string("Versione da conservare separatamente")
+        let data = try JSONEncoder().encode(NativeBloomArchive(items: [incoming]))
+        let conflicts = try store.conflicts(data); XCTAssertEqual(conflicts.count, 1)
+        _ = try store.importBackup(data, resolutions: [conflicts[0].id: .copy])
+        XCTAssertEqual(store.archive.items.count, 2)
+        let restarted = NativeBloomStore(directory: root)
+        XCTAssertTrue(try restarted.conflicts(data).isEmpty)
+        _ = try restarted.importBackup(data)
+        XCTAssertEqual(restarted.archive.items.count, 2)
+        XCTAssertEqual(restarted.archive.lifeosImportReports?.last?.skipped, 1)
+    }
     func testImportedTrashIsNotAutomaticallyDeleted() throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }

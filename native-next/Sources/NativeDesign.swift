@@ -43,6 +43,11 @@ enum NativeDesign {
         static let bottom: CGFloat = 32
     }
     enum Layout {
+        static let bloomMarkdownFirstColumn: CGFloat = 140
+        static let bloomMarkdownColumn: CGFloat = 220
+        static let bloomMapFitTop: CGFloat = 72
+        static let bloomMapFitSide: CGFloat = 48
+        static let bloomMapFitBottom: CGFloat = 88
         // Finance amount remains prominent without dominating the screen.
         static let budgetAmount: CGFloat = 40
         static let screenInset = Space.xLarge
