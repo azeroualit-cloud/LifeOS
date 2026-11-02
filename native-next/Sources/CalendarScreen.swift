@@ -20,9 +20,10 @@ struct CalendarScreen: View {
     @State private var windowAnchor: String?
     @State private var restoringWindow = false
     @State private var monthPositionReady = false
-    @State private var positioningMonth: String?
-    @State private var positioningDay: String?
-    @State private var previewScrollTarget: String?
+    @State private var positionRequest = UUID()
+    @State private var requestedWeek: String?
+    @State private var scrollWeek: String?
+    @State private var viewportHeight: CGFloat = 0
     @State private var monthDays: [String: [CalendarDayPresentation]] = [:]
     @State private var monthData: [String: Record] = [:]
     @State private var eventsByDay: [String: [Record]] = [:]
@@ -98,101 +99,78 @@ struct CalendarScreen: View {
             if let loadError { HStack { NativeInlineMessage(text: loadError); Button("Riprova") { reload += 1 } }.padding(.horizontal) }
             weekdayLabels.padding(.horizontal, NativeDesign.Layout.screenInset)
             Divider()
-            ScrollViewReader { proxy in
+            Group {
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: NativeDesign.Space.none) {
                         ForEach(calendarWeeks) { week in
                             weekGrid(week.month, week: week.index).id(week.id)
                                 .background {
                                     GeometryReader { geometry in
-                                        Color.clear.preference(key: NativeCalendarMonthFrames.self, value: [week.month: geometry.frame(in: .named("calendar-viewport"))])
+                                        Color.clear.preference(key: NativeCalendarMonthFrames.self, value: [week.id: geometry.frame(in: .named("calendar-viewport"))])
                                     }
                                 }
                         }
                     }.scrollTargetLayout().padding(.horizontal, NativeDesign.Layout.screenInset)
                         .padding(.vertical, NativeDesign.Space.large).padding(.bottom, NativeDesign.Layout.scrollClearance)
-                }.scrollPosition(id: $previewScrollTarget, anchor: .center)
+                }.scrollPosition(id: $scrollWeek, anchor: showingPreview ? .center : .top)
                 .accessibilityIdentifier("calendar-scroll")
                 .coordinateSpace(name: "calendar-viewport")
                 .onPreferenceChange(NativeCalendarMonthFrames.self) { frames in
                     guard !showingDay else { return }
-                    if let target = positioningMonth {
-                        // A date inside an offscreen lazy month is not yet a scroll
-                        // target. First realize its parent, then position the date.
+                    if let target = requestedWeek {
                         guard let frame = frames[target], frame.maxY > 0,
-                              abs(frame.minY) <= NativeDesign.Space.section else { return }
-                        let day = positioningDay
-                        positioningMonth = nil; positioningDay = nil
-                        restoringWindow = false; monthPositionReady = true; visibleMonth = target
-                        if let day { proxy.scrollTo(weekID(for: day), anchor: .center) }
-                        return
+                              frame.minY < viewportHeight else { return }
+                        requestedWeek = nil; restoringWindow = false; monthPositionReady = true
                     }
                     guard monthPositionReady, !restoringWindow else { return }
                     let first = frames.filter { $0.value.maxY > 0 }.min { $0.value.minY < $1.value.minY }?.key
-                    if let first, months.contains(first), first != visibleMonth { visibleMonth = first }
+                    if let first, let month = calendarWeeks.first(where: { $0.id == first })?.month, month != visibleMonth { visibleMonth = month }
                 }
-                .task { position(month: String(selected.prefix(7)), day: selected, proxy: proxy) }
+                .task { position(month: String(selected.prefix(7)), day: selected) }
                 .background {
                     GeometryReader { geometry in
                         Color.clear.preference(key: NativeCalendarViewportHeight.self, value: geometry.size.height)
                     }
                 }
                 .onPreferenceChange(NativeCalendarViewportHeight.self) { height in
-                    guard showingPreview, height > 0 else { return }
-                    revealSelectedWeek()
+                    viewportHeight = height
+                    if showingPreview, height > 0 { revealSelectedWeek() }
                 }
                 .onChange(of: selected) { _, _ in
                     if showingPreview { revealSelectedWeek() }
                 }
                 .onChange(of: showingPreview) { _, preview in
                     if preview { revealSelectedWeek() }
-                    else { previewScrollTarget = nil }
                 }
                 .onChange(of: windowAnchor) { _, month in
                     guard let month else { return }
                     windowAnchor = nil
-                    position(month: month, day: nil, proxy: proxy)
+                    position(month: month, day: nil)
                 }
                 .onChange(of: jumpMonth) { _, month in
                     guard let month else { return }
                     ensureWindow(around: month, preservePosition: false)
-                    position(month: month, day: selected.hasPrefix(month) ? selected : nil, proxy: proxy)
+                    position(month: month, day: selected.hasPrefix(month) ? selected : nil)
                     jumpMonth = nil
                 }
             }
         }
     }
     private func revealSelectedWeek() {
-        positioningMonth = nil; positioningDay = nil
-        restoringWindow = false; monthPositionReady = true
-        let target = weekID(for: selected)
-        previewScrollTarget = nil
+        position(month: String(selected.prefix(7)), day: selected)
+    }
+    private func position(month: String, day: String?) {
+        let target = day.map(weekID(for:)) ?? calendarWeeks.first(where: { $0.month == month })?.id
+        guard let target else { return }
+        let request = UUID(); positionRequest = request
+        requestedWeek = target; monthPositionReady = false; restoringWindow = true
+        scrollWeek = nil
         Task { @MainActor in
             await Task.yield()
-            guard showingPreview, !showingDay, target == weekID(for: selected) else { return }
+            guard positionRequest == request, !showingDay else { return }
             var transaction = Transaction(animation: nil)
             transaction.disablesAnimations = true
-            withTransaction(transaction) { previewScrollTarget = target }
-        }
-    }
-    private func position(month: String, day: String?, proxy: ScrollViewProxy) {
-        // Boundary weeks belong to the month of their Monday, not to
-        // the month printed in a Sunday date such as 1 November.
-        let targetMonth: String
-        if let day {
-            let weekday = CivilDate.calendar.component(.weekday, from: CivilDate.date(day))
-            let monday = CivilDate.adding(-((weekday + 5) % 7), to: day)
-            let owner = String(monday.prefix(7))
-            targetMonth = months.contains(owner) ? owner : month
-        } else { targetMonth = month }
-        monthPositionReady = false; restoringWindow = true
-        positioningMonth = targetMonth; positioningDay = day
-        Task { @MainActor in
-            await Task.yield()
-            guard positioningMonth == targetMonth, !showingDay else { return }
-            if let week = calendarWeeks.first(where: { $0.month == targetMonth }) {
-                proxy.scrollTo(week.id, anchor: .top)
-            }
+            withTransaction(transaction) { scrollWeek = target }
         }
     }
     private var dayAgenda: some View {

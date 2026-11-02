@@ -221,6 +221,8 @@ final class NativeInterfaceTests: XCTestCase {
         app.buttons["calendar-today"].tap()
         let formatter = DateFormatter(); formatter.locale = Locale(identifier: "en_US_POSIX"); formatter.timeZone = TimeZone(identifier: "Europe/Rome"); formatter.dateFormat = "yyyy-MM-dd"
         let day = formatter.string(from: Date()), cell = app.buttons["calendar-day-" + day]
+        capture("calendar-after-repeated-scroll-and-today")
+        print("CALENDAR_RETURN_TODAY " + app.debugDescription)
         XCTAssertTrue(cell.waitForExistence(timeout: 10)); XCTAssertTrue(cell.isSelected)
         XCTAssertEqual(app.buttons.matching(identifier: "calendar-day-" + day).count,1)
         capture("calendar-after-repeated-scroll-and-today")

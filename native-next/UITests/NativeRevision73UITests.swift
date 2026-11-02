@@ -28,6 +28,8 @@ final class NativeRevision73UITests: XCTestCase {
         XCTAssertTrue(agenda.waitForExistence(timeout: 10))
         XCTAssertTrue(month.exists); XCTAssertTrue(month.isHittable)
         XCTAssertTrue(today.isSelected)
+        capture("73-inline-calendar-agenda")
+        print("CALENDAR_DENSE_PREVIEW cell=\(today.frame) viewport=\(month.frame)")
         expectation(for: NSPredicate { _, _ in today.isHittable }, evaluatedWith: today)
         waitForExpectations(timeout: 3)
         XCTAssertTrue(today.isHittable)
