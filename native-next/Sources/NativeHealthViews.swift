@@ -324,6 +324,8 @@ private struct NativeHealthCaloriesChart: View {
 struct NativeHealthDetail: View {
     @ObservedObject var health: NativeHealthStore
     let demo: Bool
+    @State private var showingNutrition = false
+    @State private var addingWeight = false
     @State private var intakeText = ""
     @State private var scrubbingCharts = Set<String>()
     private func setChartScrubbing(_ id: String, _ active: Bool) {
@@ -342,6 +344,11 @@ struct NativeHealthDetail: View {
         ScrollView {
             VStack(alignment: .leading, spacing: NativeDesign.Space.section) {
                 if demo { Text("Dati illustrativi").font(.caption).foregroundStyle(NativeDesign.secondary) }
+                HStack {
+                    Button("Aggiungi peso", systemImage: "plus") { addingWeight = true }
+                    Spacer()
+                    Button("Registrazioni macro", systemImage: "list.bullet") { showingNutrition = true }
+                }.frame(minHeight: NativeDesign.Layout.touchTarget)
                 tdeeSection
                 NativeCard {
                     Text("Peso").font(NativeDesign.heading)
@@ -355,7 +362,9 @@ struct NativeHealthDetail: View {
                 connectionSections
                 methodSection
             }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.vertical, NativeDesign.Space.large)
-        }.background(NativeDesign.canvas).navigationTitle("Peso e calorie").navigationBarTitleDisplayMode(.inline)
+        }.background(NativeDesign.canvas).navigationTitle("Salute")
+            .sheet(isPresented: $showingNutrition) { NavigationStack { NativeNutritionScreen().toolbar { DoneButton() } } }
+            .sheet(isPresented: $addingWeight) { NativeAddWeightSheet(health: health) }.navigationBarTitleDisplayMode(.inline)
             .accessibilityIdentifier("health-detail-scroll")
             .scrollDisabled(!scrubbingCharts.isEmpty)
             .modifier(NativeUITestValue(value: "scrubbing=" + scrubbingCharts.sorted().joined(separator: ",")))

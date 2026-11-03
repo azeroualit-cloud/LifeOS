@@ -50,8 +50,8 @@ import UIKit
         #endif
     }
 }
-enum NativeTab: Hashable { case dashboard, tasks, health, other }
-enum NativeOtherDestination: Hashable { case finance, calendar, bloom }
+enum NativeTab: Hashable { case dashboard, tasks, health, bloom }
+enum NativeDashboardDestination: Hashable { case finance, calendar }
 enum NativeSheet: Identifiable {
     case weight(NativeWeightTransfer?)
     case financePlan, settings, task(Record), event(Record), movement(Record), extra(Record), routines, categories, budget, recurring(Record), planning
@@ -66,7 +66,7 @@ enum NativeSheet: Identifiable {
 }
 @MainActor final class NativeRouter: ObservableObject {
     @Published var tab: NativeTab = .dashboard
-    @Published var otherPath: [NativeOtherDestination] = []
+    @Published var dashboardPath: [NativeDashboardDestination] = []
     @Published var bloomCaptureURL: String?
     @Published var sheet: NativeSheet?
     @Published var taskCategory = "action"
@@ -87,11 +87,11 @@ enum NativeSheet: Identifiable {
         requestedCalendarDay = nil; calendarDay = day; calendarFocusRequest = UUID()
         return day
     }
-    func showCalendar(day: String = CivilDate.day()) {
-        calendarOpensDay = true
-        let alreadyOpen = tab == .other && otherPath.last == .calendar
-        requestedCalendarDay = alreadyOpen ? nil : day; calendarDay = day; tab = .other
-        otherPath = [.calendar]; calendarFocusRequest = UUID()
+    func showCalendar(day: String = CivilDate.day(), opensDay: Bool = true) {
+        calendarOpensDay = opensDay
+        let alreadyOpen = tab == .dashboard && dashboardPath.last == .calendar
+        requestedCalendarDay = alreadyOpen ? nil : day; calendarDay = day; tab = .dashboard
+        dashboardPath = [.calendar]; calendarFocusRequest = UUID()
     }
 }
 struct NativeRoot: View {
@@ -189,7 +189,7 @@ struct NativeRoot: View {
                 guard let target = URL(string: raw), ["https", "http"].contains(target.scheme?.lowercased() ?? ""), target.host != nil else { store.error = "Link Bloom non valido."; return }
                 router.bloomCaptureURL = raw
             }
-            NativeIntentDraft.pendingURL = nil; router.tab = .other; router.otherPath = [.bloom]
+            NativeIntentDraft.pendingURL = nil; router.tab = .bloom
             return
         }
         if url.scheme == "lifeos", url.host == "weight", url.query != nil {
@@ -210,7 +210,7 @@ struct NativeRoot: View {
             if let title = NativeIntentDraft.taskTitle { record["title"] = .string(title); NativeIntentDraft.taskTitle = nil }
             router.tab = .tasks; router.sheet = .task(record)
         case .weight: router.tab = .dashboard; router.sheet = .weight(nil)
-        case .calendar: router.showCalendar()
+        case .calendar: router.showCalendar(opensDay: false)
         case .dashboard: router.tab = .dashboard
         }
     }
@@ -219,28 +219,22 @@ struct NativeRoot: View {
         TabView(selection: $router.tab) {
             dashboard.tabItem { Label("Dashboard", systemImage: "square.grid.2x2") }.tag(NativeTab.dashboard)
             tasks.tabItem { Label("Attività", systemImage: "checklist") }.tag(NativeTab.tasks)
-            NavigationStack { NativeNutritionScreen() }.tabItem { Label("Salute", systemImage: "heart") }.tag(NativeTab.health)
-            other.tabItem { Label("Altro", systemImage: "ellipsis") }.tag(NativeTab.other)
+            NavigationStack { NativeHealthDetail(health: health, demo: NativeHealthLaunchPolicy.simulated) }.tabItem { Label("Salute", systemImage: "heart") }.tag(NativeTab.health)
+            NavigationStack { NativeBloomScreen() }.tabItem { Label("Bloom", systemImage: "books.vertical") }.tag(NativeTab.bloom)
         }
     }
-    private var dashboard: some View { NavigationStack { DashboardScreen().toolbar { tools }.navigationTitle("Dashboard").navigationBarTitleDisplayMode(.inline) } }
-    private var tasks: some View { NavigationStack { TasksScreen().toolbar { tools }.navigationTitle("Attività").navigationBarTitleDisplayMode(.inline) } }
-    private var other: some View {
-        NavigationStack(path: $router.otherPath) {
-            List {
-                NavigationLink(value: NativeOtherDestination.finance) { Label("Finanza", systemImage: "chart.bar") }
-                Button { router.requestedCalendarDay = nil; router.calendarOpensDay = false; router.calendarDay = CivilDate.day(); store.calendarMonth = CivilDate.month(); router.calendarFocusRequest = UUID(); router.otherPath = [.calendar] } label: { Label("Calendario", systemImage: "calendar") }
-                NavigationLink(value: NativeOtherDestination.bloom) { Label("Bloom", systemImage: "books.vertical") }
-            }.navigationTitle("Altro")
-                .navigationDestination(for: NativeOtherDestination.self) { destination in
+    private var dashboard: some View {
+        NavigationStack(path: $router.dashboardPath) {
+            DashboardScreen().toolbar { tools }.navigationTitle("Dashboard").navigationBarTitleDisplayMode(.inline)
+                .navigationDestination(for: NativeDashboardDestination.self) { destination in
                     switch destination {
                     case .finance: FinanceScreen()
                     case .calendar: CalendarScreen()
-                    case .bloom: NativeBloomScreen()
                     }
                 }
         }
     }
+    private var tasks: some View { NavigationStack { TasksScreen().toolbar { tools }.navigationTitle("Attività").navigationBarTitleDisplayMode(.inline) } }
     @ToolbarContentBuilder private var tools: some ToolbarContent {
         if #available(iOS 26.0, *) {
             ToolbarItem(placement: .topBarTrailing) { addControl }
@@ -264,7 +258,7 @@ struct NativeRoot: View {
         switch router.tab {
         case .dashboard: router.sheet = .movement([:])
         case .health: break
-        case .other: router.sheet = router.otherPath.last == .calendar ? .event(["day": .string(router.calendarDay)]) : .movement([:])
+        case .bloom: break
         case .tasks: router.sheet = .task(["list_kind": .string(router.taskCategory)])
         }
     }
@@ -272,7 +266,7 @@ struct NativeRoot: View {
         switch router.tab {
         case .dashboard: return "Aggiungi spesa"
         case .health: return "Aggiungi nutrienti"
-        case .other: return router.otherPath.last == .calendar ? "Aggiungi evento" : "Aggiungi spesa"
+        case .bloom: return "Nuova nota"
         case .tasks: return "Aggiungi attività"
         }
     }

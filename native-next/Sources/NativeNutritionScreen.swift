@@ -2,7 +2,7 @@ import SwiftUI
 
 struct NativeNutritionScreen: View {
     @EnvironmentObject private var health: NativeHealthStore
-    @StateObject private var nutrition = NativeNutritionStore()
+    @StateObject private var nutrition = NativeNutritionStore.shared
     @State private var protein = ""
     @State private var carbohydrate = ""
     @State private var fat = ""
@@ -61,8 +61,12 @@ struct NativeNutritionScreen: View {
                 }
             }
             Section { NavigationLink("Peso, calorie, fonti e TDEE") { NativeHealthDetail(health: health, demo: NativeHealthLaunchPolicy.simulated) } }
-        }.navigationTitle("Salute")
-            .toolbar { ToolbarItemGroup(placement: .keyboard) { Spacer(); Button("Fine") { focusedField = nil } } }
+        }.navigationTitle("Nutrizione")
+            .toolbar { ToolbarItemGroup(placement: .keyboard) { Spacer()
+                if focusedField == "Proteine" || focusedField == "Carboidrati" {
+                    Button("Avanti") { focusedField = focusedField == "Proteine" ? "Carboidrati" : "Grassi" }
+                }
+                Button("Fine") { focusedField = nil } } }
     }
     private func field(_ title: String, text: Binding<String>) -> some View {
         HStack { Text(title); TextField("0", text: text).focused($focusedField, equals: title).keyboardType(.decimalPad).multilineTextAlignment(.trailing).accessibilityLabel(title + " in grammi").accessibilityIdentifier("nutrition-" + title); Text("g").foregroundStyle(.secondary) }

@@ -2,6 +2,14 @@ import XCTest
 @testable import LifeOSProbe
 
 final class NativeExpenseRoutingTests: XCTestCase {
+    func testServerCapabilityFailureDoesNotSuggestNetworkRepair() {
+        let capability = NativeExpenseCapabilityError.message(for: NativeExpenseCapabilityError.utilityCompetence)
+        XCTAssertTrue(capability.contains("server"))
+        XCTAssertFalse(capability.contains("Controlla la rete"))
+        let offline = NativeExpenseCapabilityError.message(for: URLError(.notConnectedToInternet))
+        XCTAssertTrue(offline.contains("Controlla la rete"))
+        XCTAssertFalse(offline.contains("Occorre aggiornarlo"))
+    }
     func testSuggestionRequiresChoiceForMultipleMatchesAndSplitNeverExceedsPayment() {
         XCTAssertEqual(NativeExpenseRouting.suggestion([]), NativeExpenseRouting.ordinary)
         XCTAssertEqual(NativeExpenseRouting.suggestion([["id": .string("a")]]), "a")

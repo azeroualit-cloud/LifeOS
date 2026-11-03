@@ -38,8 +38,8 @@ import XCTest
         XCTAssertEqual(router.enterCalendar(today:"2026-10-30"),"2026-10-30")
         router.showCalendar(day:"2026-11-02")
         XCTAssertEqual(router.enterCalendar(today:"2026-10-30"),"2026-11-02")
-        XCTAssertEqual(router.otherPath,[.calendar])
-        router.tab = .dashboard;router.tab = .other
+        XCTAssertEqual(router.dashboardPath,[.calendar])
+        router.tab = .dashboard;router.tab = .dashboard
         XCTAssertEqual(router.enterCalendar(today:"2026-10-30"),"2026-10-30")
         router.showCalendar(day:"2026-12-01")
         XCTAssertNil(router.requestedCalendarDay,"Same-tab navigation does not leave an old request for the next entry")

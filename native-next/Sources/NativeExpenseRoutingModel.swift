@@ -27,3 +27,21 @@ enum NativeExpenseRouting {
     }
 }
 
+
+/// Capability failures must never be presented as connectivity failures.
+enum NativeExpenseCapabilityError: LocalizedError {
+    case routing, utilityCompetence
+    var errorDescription: String? {
+        switch self {
+        case .routing: return "Il server collegato deve essere aggiornato per gestire fondi e pagamenti. I dati inseriti restano nell’editor."
+        case .utilityCompetence: return "Il server collegato non supporta ancora il periodo della bolletta. Occorre aggiornarlo prima di confermare. I dati inseriti restano nell’editor."
+        }
+    }
+    static func message(for error: Error) -> String {
+        if let capability = error as? NativeExpenseCapabilityError { return capability.localizedDescription }
+        if let network = error as? URLError, [.notConnectedToInternet, .networkConnectionLost, .timedOut, .cannotFindHost, .cannotConnectToHost, .dnsLookupFailed].contains(network.code) {
+            return "Connessione al server non disponibile. Controlla la rete e riprova. I dati inseriti restano nell’editor."
+        }
+        return "Non posso verificare la destinazione. " + error.localizedDescription + " I dati inseriti restano nell’editor."
+    }
+}

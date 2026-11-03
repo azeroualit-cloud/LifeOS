@@ -346,6 +346,14 @@ struct NativeBloomArchive: Codable {
                 }
             } else { next.items.append(try externalize(item)); added += 1 }
         }
+        // Preserve a hydrated snapshot before replacing any existing records.
+        // It is a standalone Bloom backup, including attachment bytes.
+        let previous = try export()
+        let snapshot = root.appendingPathComponent("before-import-" + digest(previous) + ".json")
+        try writeFile(previous, snapshot)
+        guard try Data(contentsOf: snapshot) == previous else {
+            throw Message(text: "Copia di sicurezza non verificata: importazione interrotta.")
+        }
         // Keep the source before publishing the index. File orphans are harmless
         // and never referenced until the atomic index commit succeeds.
         try writeFile(data, root.appendingPathComponent("backup-" + digest(data) + ".json"))

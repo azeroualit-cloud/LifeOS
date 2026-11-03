@@ -60,6 +60,18 @@ struct NativeBloomScreen: View {
                 NativeBloomSectionButton(title: "Mappa", symbol: "map", id: "map", selection: $section)
                 NativeBloomSectionButton(title: "Riscopri", symbol: "sparkles", id: "rediscovery", selection: $section)
             }.padding(.horizontal, NativeDesign.Layout.screenInset)
+            if store.archive.items.isEmpty && section == "Libreria" {
+                VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+                    Text("Hai già contenuti in Bloom?").font(.headline)
+                    Text("Importa il backup esportato dall’app Bloom. Note, raccolte e allegati verranno conservati su questo iPhone.")
+                        .font(.subheadline).foregroundStyle(.secondary)
+                    Button("Importa backup Bloom", systemImage: "square.and.arrow.down") { importing = true }
+                        .buttonStyle(.borderedProminent)
+                        .frame(minHeight: NativeDesign.Layout.touchTarget)
+                        .accessibilityIdentifier("bloom.importBackup")
+                }.frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(NativeDesign.Layout.screenInset)
+            }
             if let notice { Text(notice).font(.caption).foregroundStyle(.secondary) }
             if section == "Mappa" {
                 HStack {
@@ -195,7 +207,7 @@ struct NativeBloomScreen: View {
                         }
                         Button("Importa") {
                             guard let data = pendingData else { return }
-                            do { notice = try store.importBackup(data, resolutions: resolutions); pendingData = nil }
+                            do { notice = try store.importBackup(data, resolutions: resolutions); category = ""; search = ""; showTrash = false; section = "Libreria"; pendingData = nil }
                             catch { store.error = error.localizedDescription }
                         }.disabled(importConflicts.contains { resolutions[$0.id] == nil })
                         if let error = store.error { Text(error).foregroundStyle(.red) }

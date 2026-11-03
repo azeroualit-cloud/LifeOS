@@ -23,6 +23,33 @@ import XCTest
         XCTAssertEqual(restored.items.first { $0.text("id") == id.uuidString }?["data"], .string(bytes.base64EncodedString()))
         XCTAssertEqual(restored.items.first { $0.text("id") == id.uuidString }?.text("fileName"), "../../originale.pdf")
     }
+    func testImportSnapshotPreservesReplacedContentAndAttachmentBytes() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let store = NativeBloomStore(directory: root)
+        var original = note()
+        original["noteFiles"] = .array([.object(["id": .string(UUID().uuidString), "name": .string("test.bin"), "type": .string("public.data"), "data": .string(Data([3, 1, 4]).base64EncodedString())])])
+        try store.save(original)
+        var incoming = original; incoming["text"] = .string("Updated")
+        _ = try store.importBackup(JSONEncoder().encode(NativeBloomArchive(items: [incoming])), resolutions: ["note:" + original.text("id"): .replace])
+        let snapshots = try FileManager.default.contentsOfDirectory(at: root, includingPropertiesForKeys: nil).filter { $0.lastPathComponent.hasPrefix("before-import-") }
+        XCTAssertEqual(snapshots.count, 1)
+        let snapshot = try store.preview(Data(contentsOf: XCTUnwrap(snapshots.first)))
+        XCTAssertEqual(snapshot.items, [original])
+        XCTAssertEqual(NativeBloomStore(directory: root).archive.items.first?.text("text"), "Updated")
+    }
+    func testSnapshotFailureLeavesExistingArchiveUntouched() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let store = NativeBloomStore(directory: root, writeFile: { bytes, url in
+            if url.lastPathComponent.hasPrefix("before-import-") { throw CocoaError(.fileWriteOutOfSpace) }
+            try bytes.write(to: url, options: .atomic)
+        })
+        let original = note(); try store.save(original)
+        XCTAssertThrowsError(try store.importBackup(JSONEncoder().encode(NativeBloomArchive(items: [note()]))))
+        XCTAssertEqual(store.archive.items, [original])
+        XCTAssertEqual(NativeBloomStore(directory: root).archive.items, [original])
+    }
     func testConflictPreviewComparesOriginalAttachmentBytesWithoutRetainingBase64() {
         let bytes = Data([0, 1, 2, 255])
         let file: Record = ["name": .string("originale.bin"), "data": .string(bytes.base64EncodedString())]

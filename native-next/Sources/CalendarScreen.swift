@@ -94,7 +94,7 @@ struct CalendarScreen: View {
     private var monthOverview: some View {
         VStack(spacing: NativeDesign.Space.none) {
             HStack {
-                Button { dismiss() } label: { Image(systemName: "chevron.left").frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget) }.accessibilityLabel("Torna ad Altro").accessibilityIdentifier("other-back")
+                Button { dismiss() } label: { Image(systemName: "chevron.left").frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget) }.accessibilityLabel("Torna alla Dashboard").accessibilityIdentifier("other-back")
                 Text(CivilDate.monthTitle(showingPreview ? String(selected.prefix(7)) : focusMonth)).font(showingPreview ? .headline : .title.bold()).lineLimit(1).minimumScaleFactor(0.7)
                     .accessibilityAddTraits(.isHeader).accessibilityIdentifier("calendar-month-heading-" + focusMonth)
                 Spacer(minLength: NativeDesign.Space.small)

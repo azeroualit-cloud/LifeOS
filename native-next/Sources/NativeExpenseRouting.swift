@@ -77,9 +77,9 @@ struct NativeExpenseRouteSection: View {
                     payload["competenceEndMonth"] = .string(bill.months == nil ? String(day.prefix(7)) : bill.end)
                 }
                 let result = try await store.read("getExpenseRouting", args: [.object(payload)]).object
-                guard result.integer("version") == 1 else { throw Message(text: "Il server collegato deve essere aggiornato per gestire fondi e pagamenti.") }
+                guard result.integer("version") == 1 else { throw NativeExpenseCapabilityError.routing }
                 if NativeUtilityPeriodDraft.categories.contains(category) || bill.enabled {
-                    guard result.integer("utilityCompetenceVersion") == 1 else { throw Message(text: "Aggiorna il server per conservare il periodo della bolletta. I dati inseriti restano nell’editor.") }
+                    guard result.integer("utilityCompetenceVersion") == 1 else { throw NativeExpenseCapabilityError.utilityCompetence }
                 }
                 if movementID > 0 && (result.integer("amountCents") != amount || result.text("date") != day || result.text("category") != category) { throw Message(text: "Il movimento è cambiato. Chiudi e riaprilo.") }
                 rows = result.records("plans")
@@ -93,7 +93,7 @@ struct NativeExpenseRouteSection: View {
         catch {
             guard !Task.isCancelled else { return }
             loading = false; ready = false
-            issue = "Non posso verificare la destinazione. Controlla la connessione e riprova. " + error.localizedDescription
+            issue = NativeExpenseCapabilityError.message(for: error)
         }
     }
 }

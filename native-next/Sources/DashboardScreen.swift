@@ -3,6 +3,7 @@ import SwiftUI
 struct DashboardScreen: View {
     @EnvironmentObject var store: NativeStore
     @EnvironmentObject var router: NativeRouter
+    @AppStorage("native-hide-money") private var hiddenMoney = false
     @State private var routineBusy: Int?
     @State private var routineFeedback = false
     @State private var showingTimes = false
@@ -20,8 +21,8 @@ struct DashboardScreen: View {
                     rollingCalendar(today)
                     routines
                     agenda(summary, today: today)
-                    nextTime(context.date)
-                    NativeHealthCard(health: health, demo: NativeHealthLaunchPolicy.simulated)
+                    financeOverview
+                    NativeNutritionQuickEntry()
                     NativeConnectionBadge()
                     if let notice = store.notice { Text(notice).font(.caption).foregroundStyle(NativeDesign.secondary) }
                 }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.top, NativeDesign.Space.small).padding(.bottom, NativeDesign.Layout.scrollClearance)
@@ -55,33 +56,34 @@ struct DashboardScreen: View {
                             Text(["D", "L", "M", "M", "G", "V", "S"][weekday - 1]).font(.caption).foregroundStyle(day < today ? NativeDesign.pastCalendarSecondary : NativeDesign.secondary)
                             CalendarDayCell(item: item, active: current, appearance: .week).equatable()
                         }.frame(maxWidth: .infinity).contentShape(Rectangle())
-                    }.buttonStyle(.plain).opacity(day < today ? NativeDesign.Layout.pastDayOpacity : 1).accessibilityIdentifier("dashboard-day-" + day)
+                    }.buttonStyle(NativePressStyle()).opacity(day < today ? NativeDesign.Layout.pastDayOpacity : 1).accessibilityIdentifier("dashboard-day-" + day)
                         .accessibilityLabel(CivilDate.label(day) + ", " + (shift?.title ?? "Turno non disponibile"))
                         .accessibilityAddTraits(current ? .isSelected : [])
                 }
             }.dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-        }
+        }.padding(NativeDesign.Space.small).background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: 16))
     }
     private func openCalendar(_ day: String) {
-        store.calendarMonth = String(day.prefix(7)); router.showCalendar(day: day)
+        store.calendarMonth = String(day.prefix(7)); router.showCalendar(day: day, opensDay: false)
         Task { await store.sync(scope: .life) }
     }
     private func heading(_ summary: NativeHomeSummary, today: String, now: Date) -> some View {
         ViewThatFits(in: .horizontal) {
             HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.medium) {
-                headingText(summary, today: today)
+                headingText(summary, today: today, now: now)
                 Spacer(minLength: NativeDesign.Space.small)
                 activeShift(now: now, today: today)
             }
             VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-                headingText(summary, today: today)
+                headingText(summary, today: today, now: now)
                 activeShift(now: now, today: today)
             }
         }
     }
-    private func headingText(_ summary: NativeHomeSummary, today: String) -> some View {
+    private func headingText(_ summary: NativeHomeSummary, today: String, now: Date) -> some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-            Text(CivilDate.label(today).capitalized).accessibilityIdentifier("home-today").font(NativeDesign.value).accessibilityAddTraits(.isHeader)
+            Text(CivilDate.label(today).capitalized).accessibilityIdentifier("home-today").font(.title.bold()).accessibilityAddTraits(.isHeader)
+            nextTime(now)
         }
     }
     private func focusDate(_ now: Date) -> Date {
@@ -104,7 +106,7 @@ struct DashboardScreen: View {
                 }.frame(minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle())
             }.buttonStyle(NativePressStyle()).accessibilityIdentifier("home-focus")
                 .accessibilityLabel(model.title + ", " + model.remainingText + " alla fine")
-                .accessibilityHint("Apre il giorno nel calendario")
+                .accessibilityHint("Apre il calendario completo")
                 .transition(reduceMotion ? .identity : .opacity.combined(with: .scale(scale: NativeDesign.Motion.pressedScale)))
         }
         }.animation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration), value: model.phase)
@@ -171,6 +173,24 @@ struct DashboardScreen: View {
                         }.modifier(NativeListAppearance()).navigationTitle("Orari").navigationBarTitleDisplayMode(.inline).toolbar { DoneButton() }
                     }.presentationDetents([.medium, .large])
                 }
+        }
+    }
+    private var financeOverview: some View {
+        NativeCard {
+            NavigationLink(value: NativeDashboardDestination.finance) {
+                HStack {
+                    Label("Finanza", systemImage: "chart.bar").font(.headline)
+                    Spacer()
+                    NativeDisclosureIndicator()
+                }.frame(minHeight: NativeDesign.Layout.touchTarget)
+            }.buttonStyle(NativePressStyle())
+            let overview = NativeFinanceOverview(summary: store.summary, month: store.financeMonth)
+            LabeledContent("Budget rimanente", value: hiddenMoney ? "•••• €" : overview.remaining.map(\.euro) ?? "Da aggiornare")
+            LabeledContent("Conto principale", value: hiddenMoney ? "•••• €" : overview.balance.map(\.euro) ?? "Da aggiornare")
+                .foregroundStyle(NativeDesign.secondary)
+            Text(CivilDate.monthTitle(store.financeMonth)).font(.caption).foregroundStyle(NativeDesign.secondary)
+            Button("Aggiungi spesa", systemImage: "plus") { router.sheet = .movement([:]) }
+                .frame(minHeight: NativeDesign.Layout.touchTarget)
         }
     }
     private var routines: some View {

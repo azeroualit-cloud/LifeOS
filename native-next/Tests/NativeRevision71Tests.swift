@@ -38,6 +38,20 @@ import UIKit
         XCTAssertFalse(router.calendarOpensDay)
         XCTAssertEqual(router.calendarDay, "2026-10-31")
     }
+    func testDashboardCalendarOpensFullMonthAndPreservesEditor() {
+        let router = NativeRouter()
+        router.sheet = .movement([:])
+        router.tab = .bloom
+        router.showCalendar(day: "2026-11-03", opensDay: false)
+        XCTAssertEqual(router.tab, .dashboard)
+        XCTAssertEqual(router.dashboardPath, [.calendar])
+        XCTAssertEqual(router.calendarDay, "2026-11-03")
+        XCTAssertFalse(router.calendarOpensDay)
+        XCTAssertNotNil(router.sheet)
+        router.showCalendar(day: "2026-11-04", opensDay: false)
+        XCTAssertEqual(router.dashboardPath, [.calendar])
+        XCTAssertFalse(router.calendarOpensDay)
+    }
     func testContinuousMonthWeeksHaveNoDuplicatesOrGapsAtBoundaries() {
         let months = ["2026-10", "2026-11", "2026-12"]
         let days = months.enumerated().flatMap { index, month -> [String] in

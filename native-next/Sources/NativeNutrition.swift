@@ -45,6 +45,7 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
 }
 
 @MainActor final class NativeNutritionStore: ObservableObject {
+    static let shared = NativeNutritionStore()
     @Published private(set) var entries: [NativeNutritionEntry] = []
     @Published private(set) var busy = false
     @Published private(set) var error: String?
