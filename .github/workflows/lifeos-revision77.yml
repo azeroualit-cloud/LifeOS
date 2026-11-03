@@ -29,7 +29,7 @@ jobs:
         run: |
           set -o pipefail
           xcrun simctl bootstatus "$MAIN_DEVICE" -b
-          xcodebuild test-without-building -derivedDataPath simulator-build -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 300 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeTests -only-testing:LifeOSProbeUITests/NativeRevision77UITests -resultBundlePath build/Revision77.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- 2>&1 | tee build/revision77.log
+          xcodebuild test-without-building -derivedDataPath simulator-build -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 300 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeTests -only-testing:LifeOSProbeUITests/NativeRevision77UITests -only-testing:LifeOSProbeUITests/NativeRevision74UITests -only-testing:LifeOSProbeUITests/NativeRevision75UITests -resultBundlePath build/Revision77.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- 2>&1 | tee build/revision77.log
       - name: Prepare verified saved session for Release startup
         working-directory: app
         shell: bash

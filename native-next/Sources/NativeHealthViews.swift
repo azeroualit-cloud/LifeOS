@@ -322,6 +322,7 @@ private struct NativeHealthCaloriesChart: View {
 }
 
 struct NativeHealthDetail: View {
+    @Environment(\.dynamicTypeSize) private var typeSize
     @ObservedObject var health: NativeHealthStore
     let demo: Bool
     @State private var showingNutrition = false
@@ -344,11 +345,13 @@ struct NativeHealthDetail: View {
         ScrollView {
             VStack(alignment: .leading, spacing: NativeDesign.Space.section) {
                 if demo { Text("Dati illustrativi").font(.caption).foregroundStyle(NativeDesign.secondary) }
-                HStack {
+                let actionsLayout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: NativeDesign.Space.small)) : AnyLayout(HStackLayout(spacing: NativeDesign.Space.medium))
+                actionsLayout {
                     Button("Aggiungi peso", systemImage: "plus") { addingWeight = true }
-                    Spacer()
+                        .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
                     Button("Registrazioni macro", systemImage: "list.bullet") { showingNutrition = true }
-                }.frame(minHeight: NativeDesign.Layout.touchTarget)
+                        .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
+                }
                 tdeeSection
                 NativeCard {
                     Text("Peso").font(NativeDesign.heading)

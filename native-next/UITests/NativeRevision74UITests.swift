@@ -14,9 +14,10 @@ final class NativeRevision74UITests: XCTestCase {
     }
     func testFourTabsAndNutritionCalculation() {
         let app = launch()
-        for name in ["Dashboard", "Attività", "Salute", "Altro"] { XCTAssertTrue(app.tabBars.buttons[name].exists) }
+        for name in ["Dashboard", "Attività", "Salute", "Bloom"] { XCTAssertTrue(app.tabBars.buttons[name].exists) }
         XCTAssertFalse(app.tabBars.buttons["Finanza"].exists); XCTAssertFalse(app.tabBars.buttons["Calendario"].exists)
         app.tabBars.buttons["Salute"].tap()
+        app.buttons["Registrazioni macro"].tap()
         for (label, value) in [("Proteine", "10"), ("Carboidrati", "20"), ("Grassi", "5")] {
             let field = app.textFields["nutrition-" + label]
             XCTAssertTrue(field.waitForExistence(timeout: 10)); field.tap(); field.typeText(value)
@@ -30,11 +31,9 @@ final class NativeRevision74UITests: XCTestCase {
         capture("74-nutrition-calculation")
     }
     func testHealthChartsAllowVerticalScrollAndNativeSelection() {
-        let app = launch(), dashboard = app.scrollViews["dashboard-scroll"]
-        let detail = app.buttons["home-health-detail"]
-        for _ in 0..<12 { if detail.isHittable { break }; dashboard.swipeUp(velocity: .slow) }
-        XCTAssertTrue(detail.isHittable); detail.tap()
-        XCTAssertTrue(app.navigationBars["Peso e calorie"].waitForExistence(timeout: 10))
+        let app = launch()
+        app.tabBars.buttons["Salute"].tap()
+        XCTAssertTrue(app.navigationBars["Salute"].waitForExistence(timeout: 10))
         let chart = app.descendants(matching: .any).matching(identifier: "health-weight-chart").firstMatch
         let surface = app.scrollViews["health-detail-scroll"]
         for _ in 0..<10 {
@@ -67,9 +66,7 @@ final class NativeRevision74UITests: XCTestCase {
         XCTAssertLessThan(chart.frame.minY, y - 20)
     }
     func testMoreDestinationsAndBloomNotePersistsAcrossNavigation() {
-        let app = launch(); app.tabBars.buttons["Altro"].tap()
-        for name in ["Finanza", "Calendario", "Bloom"] { XCTAssertTrue(app.buttons[name].waitForExistence(timeout: 10)) }
-        app.buttons["Bloom"].tap()
+        let app = launch(); app.tabBars.buttons["Bloom"].tap()
         capture("74-bloom-entry")
         let add = app.buttons["Nuova nota"]
         let ready = add.waitForExistence(timeout: 10)
@@ -98,7 +95,7 @@ final class NativeRevision74UITests: XCTestCase {
         }
         XCTAssertTrue(note.waitForExistence(timeout: 10)); XCTAssertTrue(second.exists)
         capture("74-bloom-library")
-        app.tabBars.buttons["Dashboard"].tap(); app.tabBars.buttons["Altro"].tap()
+        app.tabBars.buttons["Dashboard"].tap(); app.tabBars.buttons["Bloom"].tap()
         XCTAssertTrue(note.waitForExistence(timeout: 10))
         app.openOtherDestination("Calendario")
         let formatter = DateFormatter(); formatter.timeZone = TimeZone(identifier: "Europe/Rome"); formatter.dateFormat = "yyyy-MM-dd"
