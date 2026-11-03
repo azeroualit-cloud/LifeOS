@@ -54,6 +54,18 @@ import XCTest
         XCTAssertTrue(NativeNutritionStore(directory: root, writer: writer).entries.isEmpty)
         XCTAssertEqual(writer.deletions, [original.id, original.id])
     }
+    func testStaleEditorCannotRecreateDeletedRecord() async {
+        let root = directory(); defer { try? FileManager.default.removeItem(at: root) }
+        let writer = NutritionWriterProbe(), original = entry()
+        let store = NativeNutritionStore(directory: root, writer: writer)
+        let saved = await store.save(original); XCTAssertTrue(saved)
+        let revision = store.entries[0].revision
+        let removed = await store.delete(original.id); XCTAssertTrue(removed)
+        let stale = await store.save(original, expectedRevision: revision)
+        XCTAssertFalse(stale)
+        XCTAssertTrue(store.entries.isEmpty)
+        XCTAssertEqual(writer.writes.count, 1)
+    }
     func testRetryAfterRestartRetainsIdentityRevisionAndPayload() async {
         let root = directory(); defer { try? FileManager.default.removeItem(at: root) }
         let writer = NutritionWriterProbe(); writer.fail = true

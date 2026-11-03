@@ -85,7 +85,7 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
         try JSONEncoder().encode(rows).write(to: file, options: [.atomic, .completeFileProtection])
         entries = rows
     }
-    func save(_ value: NativeNutritionEntry, retry: Bool = false) async -> Bool {
+    func save(_ value: NativeNutritionEntry, retry: Bool = false, expectedRevision: Int? = nil) async -> Bool {
         guard loaded, !busy else { return false }
         guard !entries.contains(where: { $0.deletionPending == true }) else {
             error = "Completa prima l’eliminazione in sospeso dalla cronologia."
@@ -98,6 +98,9 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
         do {
             try await writer.authorize()
             let old = entries.first { $0.id == value.id }
+            if let expectedRevision, old?.revision != expectedRevision {
+                throw Message(text: "La registrazione è cambiata o è stata eliminata. Riaprila dalla cronologia prima di modificarla.")
+            }
             if entries.contains(where: { !$0.confirmed && $0.id != value.id }) { throw Message(text: "Completa prima la registrazione in sospeso usando Riprova.") }
             var pending = value
             if retry, let old, !old.confirmed { pending = old }
