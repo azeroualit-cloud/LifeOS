@@ -18,7 +18,7 @@ enum NativeHealthMetric: String, CaseIterable, Identifiable {
     }
     private static let nutritionSymbol = UIImage(systemName: "apple.slice") == nil ? "fork.knife" : "apple.slice"
     var color: Color {
-        switch self { case .tdee: return .pink; case .weight: return .blue; case .calories: return .orange; case .simulation: return .purple }
+        switch self { case .tdee: return .orange; case .weight: return .purple; case .calories: return .green; case .simulation: return .blue }
     }
     var unit: String {
         switch self { case .weight, .simulation: return "kg"; case .tdee: return "kcal/giorno"; case .calories: return "kcal" }

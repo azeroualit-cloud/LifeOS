@@ -94,12 +94,12 @@ final class NativeRevision78UITests: XCTestCase {
     func testBloomCancelClosesFilesAndAllowsRetry() {
         let app = launch(["--bloom-import-fixture"])
         app.tabBars.buttons["Bloom"].tap()
-        app.buttons["bloom-archive-menu"].tap(); app.buttons["Importa backup Bloom"].tap()
+        app.buttons["bloom-archive-menu"].tap(); app.buttons.matching(NSPredicate(format: "label == %@ AND identifier != %@", "Importa backup Bloom", "bloom.importBackup")).firstMatch.tap()
         let cancel = app.buttons["Annulla"]
         XCTAssertTrue(cancel.waitForExistence(timeout: 15)); cancel.tap()
         XCTAssertTrue(app.buttons["bloom-section-library"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.buttons["bloom-section-library"].isHittable)
-        app.buttons["bloom-archive-menu"].tap(); app.buttons["Importa backup Bloom"].tap()
+        app.buttons["bloom-archive-menu"].tap(); app.buttons.matching(NSPredicate(format: "label == %@ AND identifier != %@", "Importa backup Bloom", "bloom.importBackup")).firstMatch.tap()
         XCTAssertTrue(cancel.waitForExistence(timeout: 15)); cancel.tap()
         capture("78-bloom-picker-cancel", app)
     }
@@ -111,7 +111,7 @@ final class NativeRevision78UITests: XCTestCase {
         XCTAssertGreaterThanOrEqual(section.frame.height, 44)
         XCTAssertLessThanOrEqual(section.frame.height, 48)
         app.buttons["bloom-archive-menu"].tap()
-        app.buttons["Importa backup Bloom"].tap()
+        app.buttons.matching(NSPredicate(format: "label == %@ AND identifier != %@", "Importa backup Bloom", "bloom.importBackup")).firstMatch.tap()
         let file = app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", "Bloom-UI-Fixture")).firstMatch
         let visible = file.waitForExistence(timeout: 20)
         if !visible { print("FILES_PICKER_TREE " + app.debugDescription) }

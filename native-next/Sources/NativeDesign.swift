@@ -64,8 +64,8 @@ enum NativeDesign {
         static let touchTarget: CGFloat = 44
         static let toolbarVisual: CGFloat = 36
         static let healthSummaryRow: CGFloat = 132
-        static let healthSummaryChartWidth: CGFloat = 104
-        static let healthSummaryChartHeight: CGFloat = 60
+        static let healthSummaryChartWidth: CGFloat = 80
+        static let healthSummaryChartHeight: CGFloat = 52
         static let healthOverviewChart: CGFloat = 88
         static let healthSelectionCaptionHeight: CGFloat = 28
         static let rowHeight: CGFloat = 52

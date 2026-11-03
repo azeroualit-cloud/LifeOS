@@ -164,7 +164,7 @@ struct NativeBloomScreen: View {
     private var archiveMenu: some View {
         Menu {
             Button(showTrash ? "Mostra Libreria" : "Cestino") { showTrash.toggle() }
-            Button("Importa backup Bloom", action: startImport)
+            Button("Importa backup Bloom", action: startImport).accessibilityIdentifier("bloom-import-menu-item")
             Button("Catture da completare (\(captureInbox.requests.count))") { showingCaptures = true }
             Button("Ultimo rapporto importazione") { showingReport = true }.disabled(store.archive.lifeosImportReports?.isEmpty != false)
             Button("Esporta backup") { do { exportData = try store.export(); exporting = true } catch { store.error = error.localizedDescription } }
