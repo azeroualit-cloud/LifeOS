@@ -5,7 +5,9 @@ out=Path('release-launch');out.mkdir(exist_ok=True)
 device=os.environ['MAIN_DEVICE'];bundle='com.nas.lifeos.probe'
 app=Path('release-build/Build/Products/Release-iphonesimulator/LifeOSProbe.app')
 subprocess.run(['xcrun','simctl','install',device,str(app)],check=True)
-for mode in ['fresh','synthetic-upgrade','synthetic-populated-upgrade']:
+modes=['fresh','synthetic-upgrade','synthetic-populated-upgrade']
+if os.environ.get('LIFEOS_RELEASE_SESSION_FIXTURE')=='1':modes.append('synthetic-session-upgrade')
+for mode in modes:
     if mode!='fresh':
         subprocess.run(['xcrun','simctl','terminate',device,bundle],check=False,capture_output=True)
         container=Path(subprocess.check_output(['xcrun','simctl','get_app_container',device,bundle,'data'],text=True).strip())
@@ -19,6 +21,9 @@ for mode in ['fresh','synthetic-upgrade','synthetic-populated-upgrade']:
                 'events':[event],'upcomingEvents':[event],'activityEvents':[event],
                 'shifts':[{'day':today,'kind':'morning'}],
                 'health':[{'day':(datetime.date.today()-datetime.timedelta(days=i+1)).isoformat(),'weight_kg':80+i*0.02,'calories':2400} for i in range(31)]})
+        if mode=='synthetic-session-upgrade':
+            state['endpoint']='https://release-startup.lifeos.invalid'
+            state['pending']=[]
         file.write_text(json.dumps(state))
     log=out/(mode+'.log')
     with log.open('w') as f:
@@ -36,4 +41,4 @@ for mode in ['fresh','synthetic-upgrade','synthetic-populated-upgrade']:
     if report.exists():
         for p in report.glob('LifeOSProbe*'):shutil.copy2(p,out/p.name)
     if not alive:raise SystemExit('Release startup failed: '+mode)
-print('RELEASE_LAUNCH_SMOKE_PASSED: no DEBUG flags, real service initialization, fresh, empty-upgrade and populated-upgrade storage')
+print('RELEASE_LAUNCH_SMOKE_PASSED: no DEBUG flags, real services; cases='+','.join(modes))

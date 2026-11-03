@@ -1,0 +1,141 @@
+name: LifeOS 76 early-beta startup compatibility
+on:
+  push:
+    paths: ['.github/workflows/lifeos-compat76.yml', '.github/actions/native-compat76/**', 'scripts/select-compatible-xcode76.py', 'scripts/verify-startup-imports.py', 'native-next/project.yml', 'native-next/Tests/NativeSessionVaultTests.swift']
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: lifeos-compat76-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    if: contains(github.event.head_commit.message, '[compat-76]')
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [primary, compact, package]
+    runs-on: xcode-27
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/native-compat76
+        with:
+          variant: ${{ matrix.variant }}
+      - name: Compile app and behavioral tests
+        if: matrix.variant != 'package'
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcodebuild build-for-testing -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compile.log
+          xcrun simctl bootstatus "$MAIN_DEVICE" -b
+      - name: Primary domain and representative app flows
+        if: matrix.variant == 'primary'
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcodebuild test-without-building -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeTests -only-testing:LifeOSProbeUITests/NativeRevision74UITests -only-testing:LifeOSProbeUITests/NativeRevision75UITests -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testLargeTextAndSixWeekCalendar -resultBundlePath build/Primary76.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/primary.log
+      - name: Compact representative app flows
+        if: matrix.variant == 'compact'
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcodebuild test-without-building -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeRevision74UITests -only-testing:LifeOSProbeUITests/NativeRevision75UITests -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination -resultBundlePath build/Compact76.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compact.log
+      - name: Prepare verified saved-session fixture after UI app installs
+        if: matrix.variant == 'primary'
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcodebuild test-without-building -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeTests/NativeSessionVaultTests/testPrepareSyntheticSavedSessionForReleaseStartup -resultBundlePath build/SessionFixture76.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/session-fixture.log
+      - name: Exercise real Release startup including a saved session
+        if: matrix.variant == 'primary'
+        working-directory: app
+        env:
+          LIFEOS_RELEASE_SESSION_FIXTURE: '1'
+        run: |
+          set -euo pipefail
+          xcodebuild build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -configuration Release -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -derivedDataPath release-build CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/release-compile.log
+          python3 ../scripts/verify-release-launch75.py
+      - name: Prove the delivered 75 binary has the reported incompatible import
+        if: matrix.variant == 'package'
+        run: |
+          curl -fLsS https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.14-build75/LifeOS-75.ipa -o /tmp/original75.ipa
+          python3 - <<'PY'
+          import hashlib,importlib.util
+          from pathlib import Path
+          file=Path('/tmp/original75.ipa')
+          assert hashlib.sha256(file.read_bytes()).hexdigest()=='94e64ccf0cc5a139208a05cb094a67241d6436305a9b4cd4e93b4737b05bf39d'
+          spec=importlib.util.spec_from_file_location('check','scripts/verify-startup-imports.py');module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+          try:module.verify_ipa(file)
+          except ValueError as error:
+              assert '_$s10Foundation4DateV2leoiySbAC_ACtFZ' in str(error)
+              print('DELIVERED_75_REGRESSION_CONFIRMED',error)
+          else:raise AssertionError('Actual incompatible build 75 must fail this gate')
+          PY
+      - name: Archive device IPA with compatible imports and preserve debug symbols
+        if: matrix.variant == 'package'
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcodebuild archive -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -configuration Release -destination 'generic/platform=iOS' -archivePath build/LifeOS76.xcarchive CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/archive.log
+          mkdir -p build/Payload download
+          cp -R build/LifeOS76.xcarchive/Products/Applications/LifeOSProbe.app build/Payload/
+          cd build
+          zip -qr ../download/LifeOS-76.ipa Payload
+          cd ..
+          python3 ../scripts/verify-native-package.py download/LifeOS-76.ipa --version 0.10.15 --build 76
+          python3 ../scripts/verify-startup-imports.py download/LifeOS-76.ipa
+          cd download
+          shasum -a 256 LifeOS-76.ipa > SHA256.txt
+      - name: Export synthetic UI evidence
+        if: always() && matrix.variant != 'package'
+        working-directory: app
+        run: |
+          for result in build/Primary76.xcresult build/Compact76.xcresult; do
+            if [ -f "$result/Info.plist" ]; then
+              xcrun xcresulttool export attachments --path "$result" --output-path "${result%.xcresult}-screenshots"
+            fi
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: LifeOS-76-${{ matrix.variant }}
+          retention-days: 7
+          path: |
+            app/build/*.log
+            app/build/*.xcresult
+            app/build/*-screenshots
+            app/build/LifeOS76.xcarchive/dSYMs
+            app/release-launch
+            app/download
+  deliver:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v5
+        with:
+          name: LifeOS-76-package
+          path: checked76
+      - name: Recheck the exact compatibility IPA before delivery
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,shutil,subprocess
+          found=list(Path('checked76').rglob('LifeOS-76.ipa'));assert len(found)==1
+          ipa=found[0]
+          expected=(ipa.parent/'SHA256.txt').read_text().split()[0]
+          assert hashlib.sha256(ipa.read_bytes()).hexdigest()==expected
+          subprocess.run(['python3','scripts/verify-native-package.py',str(ipa),'--version','0.10.15','--build','76'],check=True)
+          subprocess.run(['python3','scripts/verify-startup-imports.py',str(ipa)],check=True)
+          Path('delivery').mkdir();shutil.copy2(ipa,'delivery/LifeOS-76.ipa');shutil.copy2(ipa.parent/'SHA256.txt','delivery/SHA256.txt')
+          PY
+      - name: Deliver startup compatibility fix only; no backend changes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd delivery
+          gh release create ios-0.10.15-build76 LifeOS-76.ipa SHA256.txt --repo azeroualit-cloud/LifeOS --target "$GITHUB_SHA" --title 'Life OS 0.10.15 build 76' --notes 'Compatibilità di avvio con le prime beta iOS 27.2: rimossi i riferimenti deboli ai nuovi confronti Foundation.Date che potevano risolversi a zero durante il ripristino della sessione. Toolchain precedente compatibile, controllo degli import su app/widget, test unitari e UI, avvio Release con sessione sintetica salvata. Stessi bundle ID, dati e funzionalità; nessun aggiornamento Cloudflare. Rifirmare con Signulous e aggiornare senza disinstallare. Conferma finale sul telefono necessaria.'

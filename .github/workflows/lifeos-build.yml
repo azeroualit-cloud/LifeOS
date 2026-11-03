@@ -18,23 +18,8 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@v5
-      - name: Seleziona SDK Apple recente
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          import os, pathlib, re
-          found = []
-          for path in pathlib.Path('/Applications').glob('Xcode_*.app'):
-              match = re.fullmatch(r'Xcode_([0-9.]+)\.app', path.name)
-              if match:
-                  version = tuple(map(int, match[1].split('.')))
-                  if version[0] >= 26: found.append((version, path))
-          assert found, 'Serve Xcode 26 o successivo per il design Apple attuale.'
-          path = max(found, key=lambda x: x[0])[1]
-          with open(os.environ['GITHUB_ENV'], 'a') as f:
-              f.write('DEVELOPER_DIR=' + str(path / 'Contents/Developer') + '\n')
-          print('Xcode selezionato:', path.name)
-          PY
+      - name: Seleziona toolchain compatibile con le prime beta iOS 27.2
+        run: python3 scripts/select-compatible-xcode76.py
       - name: Prepara progetto
         run: |
           set -euo pipefail
@@ -185,14 +170,14 @@ jobs:
           set -euo pipefail
           xcrun simctl boot "$MAIN_DEVICE" || true
           xcrun simctl bootstatus "$MAIN_DEVICE" -b
-          xcrun simctl io "$MAIN_DEVICE" recordVideo --codec=h264 build/LifeOS-75-flussi.mp4 > build/video.log 2>&1 &
+          xcrun simctl io "$MAIN_DEVICE" recordVideo --codec=h264 build/LifeOS-76-flussi.mp4 > build/video.log 2>&1 &
           VIDEO_PID=$!
           stop_video() { kill -INT "$VIDEO_PID" 2>/dev/null || true; wait "$VIDEO_PID" 2>/dev/null || true; }
           trap stop_video EXIT
           xcodebuild test-without-building -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 300 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeRevision75UITests -only-testing:LifeOSProbeUITests/NativeRevision74UITests -resultBundlePath build/Native74.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/native74-tests.log
           stop_video
           trap - EXIT
-          test -s build/LifeOS-75-flussi.mp4
+          test -s build/LifeOS-76-flussi.mp4
       - name: Esporta schermate dei nuovi flussi anche in caso di errore
         if: always()
         working-directory: app
@@ -316,7 +301,8 @@ jobs:
           cd build
           zip -qr ../download/LifeOS-unsigned.ipa Payload
           cd ../download
-          python3 ../../scripts/verify-native-package.py LifeOS-unsigned.ipa --version 0.10.14 --build 75
+          python3 ../../scripts/verify-native-package.py LifeOS-unsigned.ipa --version 0.10.15 --build 76
+          python3 ../../scripts/verify-startup-imports.py LifeOS-unsigned.ipa
           shasum -a 256 LifeOS-unsigned.ipa > SHA256.txt
       - name: Errori XCTest in annotazioni
         if: always()
@@ -371,7 +357,7 @@ jobs:
             app/build/Regression.xcresult
             app/build/Focused.xcresult
             app/build/Native74.xcresult
-            app/build/LifeOS-75-flussi.mp4
+            app/build/LifeOS-76-flussi.mp4
             app/build/Compact.xcresult
           retention-days: 1
           if-no-files-found: ignore
@@ -383,7 +369,7 @@ jobs:
           cd app/download
           shasum -a 256 -c SHA256.txt
           unzip -tq LifeOS-unsigned.ipa
-          cp LifeOS-unsigned.ipa LifeOS-75.ipa
-          cp ../build/LifeOS-75-flussi.mp4 LifeOS-75-flussi.mp4
-          shasum -a 256 LifeOS-75.ipa LifeOS-75-flussi.mp4 > SHA256.txt
-          gh release create ios-0.10.14-build75 LifeOS-75.ipa LifeOS-75-flussi.mp4 SHA256.txt --repo azeroualit-cloud/LifeOS --target "$GITHUB_SHA" --title "Life OS 0.10.14 build 75" --notes "Bollette ripartite sui mesi espliciti di competenza, pagamento bancario unico e fondo separato. Corretto il riferimento salariale quando il nuovo mese non è ancora pagato. Conservati Salute, Bloom, calendario e controlli nativi della build 74. Compilata con SDK iOS $NATIVE_SDK_VERSION; verificata su simulatore iPhone 15 Pro iOS $NATIVE_RUNTIME_VERSION e iPhone compatto. Prova fisica e confronto con Apple su iOS 27.2 separati. IPA non firmata per Signulous, pubblicata dopo verifiche Apple. Sorgente: $GITHUB_SHA."
+          cp LifeOS-unsigned.ipa LifeOS-76.ipa
+          cp ../build/LifeOS-76-flussi.mp4 LifeOS-76-flussi.mp4
+          shasum -a 256 LifeOS-76.ipa LifeOS-76-flussi.mp4 > SHA256.txt
+          gh release create ios-0.10.15-build76 LifeOS-76.ipa LifeOS-76-flussi.mp4 SHA256.txt --repo azeroualit-cloud/LifeOS --target "$GITHUB_SHA" --title "Life OS 0.10.15 build 76" --notes "Bollette ripartite sui mesi espliciti di competenza, pagamento bancario unico e fondo separato. Corretto il riferimento salariale quando il nuovo mese non è ancora pagato. Conservati Salute, Bloom, calendario e controlli nativi della build 74. Compilata con SDK iOS $NATIVE_SDK_VERSION; verificata su simulatore iPhone 15 Pro iOS $NATIVE_RUNTIME_VERSION e iPhone compatto. Prova fisica e confronto con Apple su iOS 27.2 separati. IPA non firmata per Signulous, pubblicata dopo verifiche Apple. Sorgente: $GITHUB_SHA."

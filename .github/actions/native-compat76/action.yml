@@ -1,0 +1,49 @@
+name: Prepare compatible native app
+inputs:
+  variant:
+    required: true
+    description: primary, compact or package
+runs:
+  using: composite
+  steps:
+    - name: Select compatible Foundation toolchain
+      shell: bash
+      run: python3 scripts/select-compatible-xcode76.py
+    - name: Assemble exact pinned baseline and canonical overlay
+      shell: bash
+      run: |
+        set -euo pipefail
+        curl -fLsS https://raw.githubusercontent.com/azeroualit-cloud/LifeOS/02c2c089841833a67fc9a223b367710edf7e37b9/lifeos-native.zip -o /tmp/base.zip
+        python3 - <<'PY'
+        from pathlib import Path,PurePosixPath
+        import hashlib,zipfile,shutil
+        file=Path('/tmp/base.zip')
+        assert hashlib.sha256(file.read_bytes()).hexdigest()=='b09762b88e4dc017d2c89fa7582ac38daf1fddf5aa0dd12fed94d73f6099ef03'
+        with zipfile.ZipFile(file) as archive:
+            assert all(not PurePosixPath(n).is_absolute() and '..' not in PurePosixPath(n).parts for n in archive.namelist())
+            archive.extractall('app')
+        shutil.copytree('native-next','app',dirs_exist_ok=True)
+        PY
+        cd app
+        brew install xcodegen
+        python3 scripts/check-design-system.py
+        xcodegen generate
+        mkdir -p build
+    - name: Prepare actual supported simulator
+      if: inputs.variant != 'package'
+      shell: bash
+      env:
+        VARIANT: ${{ inputs.variant }}
+      run: |
+        python3 - <<'PY'
+        import os,json,subprocess
+        kind='com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation' if os.environ['VARIANT']=='compact' else 'com.apple.CoreSimulator.SimDeviceType.iPhone-15-Pro'
+        runtimes=json.loads(subprocess.check_output(['xcrun','simctl','list','runtimes','-j']))['runtimes']
+        choices=[r for r in runtimes if r.get('isAvailable') and '.iOS-' in r['identifier'] and any(d['identifier']==kind for d in r.get('supportedDeviceTypes',[]))]
+        assert choices,'No runtime supporting requested device'
+        runtime=max(choices,key=lambda r:tuple(map(int,r['version'].split('.'))))
+        device=subprocess.check_output(['xcrun','simctl','create','LifeOS 76 '+os.environ['VARIANT'],kind,runtime['identifier']],text=True).strip()
+        with open(os.environ['GITHUB_ENV'],'a') as f:f.write('MAIN_DEVICE='+device+'\nCOMPAT_RUNTIME='+runtime['version']+'\n')
+        print('COMPAT_TEST_DEVICE',kind,'RUNTIME',runtime['version'])
+        subprocess.run(['xcrun','simctl','boot',device],check=True)
+        PY
