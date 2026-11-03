@@ -46,6 +46,7 @@ struct NativeNutritionQuickEntry: View {
                 if nutrition.busy { ProgressView().accessibilityLabel("Salvataggio") }
                 Button { save() } label: {
                     Text(pending == nil ? "Aggiungi" : "Riprova")
+                        .foregroundStyle(NativeDesign.onAccent)
                         .frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget)
                         .contentShape(Rectangle())
                 }.buttonStyle(.borderedProminent)

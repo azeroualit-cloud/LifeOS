@@ -65,8 +65,11 @@ struct NativeBloomScreen: View {
                     Text("Hai già contenuti in Bloom?").font(.headline)
                     Text("Importa il backup esportato dall’app Bloom. Note, raccolte e allegati verranno conservati su questo iPhone.")
                         .font(.subheadline).foregroundStyle(.secondary)
-                    Button("Importa backup Bloom", systemImage: "square.and.arrow.down") { importing = true }
-                        .buttonStyle(.borderedProminent)
+                    Button { importing = true } label: {
+                        Label("Importa backup Bloom", systemImage: "square.and.arrow.down")
+                            .foregroundStyle(NativeDesign.onAccent)
+                            .frame(minHeight: NativeDesign.Layout.touchTarget)
+                    }.buttonStyle(.borderedProminent)
                         .frame(minHeight: NativeDesign.Layout.touchTarget)
                         .accessibilityIdentifier("bloom.importBackup")
                 }.frame(maxWidth: .infinity, alignment: .leading)
