@@ -178,25 +178,35 @@ final class NativeAppleHealthReferenceUITests: XCTestCase {
         let edit = health.buttons["UIA.Health.Inevidenza.Detail"]
         XCTAssertTrue(edit.waitForExistence(timeout: 15)); edit.tap()
         capture("favorites-editor", health)
-        for (title, identifier) in [("Dietary Energy", "HKQuantityTypeIdentifierDietaryEnergyConsumed"), ("Weight", "HKQuantityTypeIdentifierBodyMass")] {
-            let search = health.searchFields.firstMatch
-            XCTAssertTrue(search.exists && search.isHittable)
-            search.tap()
-            let clear = search.buttons["Cancella testo"]
-            if clear.exists { clear.tap() }
-            search.typeText(title)
-            let keyboardNotice = health.buttons["Continue"]
-            if keyboardNotice.exists && keyboardNotice.isHittable { keyboardNotice.tap() }
+        // Health's metric dictionary may finish loading after the editor opens.
+        // Its display names can be Italian or English independently of the chrome.
+        let anyMetric = health.cells.matching(NSPredicate(format: "identifier BEGINSWITH %@", "UIA.Health.FavoritesEdit.HKQuantityTypeIdentifier")).firstMatch
+        _ = anyMetric.waitForExistence(timeout: 45)
+        for (titles, identifier) in [(["Energia alimentare", "Dietary Energy"], "HKQuantityTypeIdentifierDietaryEnergyConsumed"), (["Peso", "Weight"], "HKQuantityTypeIdentifierBodyMass")] {
             let row = health.cells["UIA.Health.FavoritesEdit." + identifier]
-            let found = row.waitForExistence(timeout: 10)
-            if found && row.isHittable { row.tap() }
-            else { capture("favorite-not-found-" + title, health); XCTFail("Favorite metric not found: " + identifier) }
-            capture("favorite-" + title, health)
+            var found = false
+            for title in titles {
+                let search = health.searchFields.firstMatch
+                XCTAssertTrue(search.waitForExistence(timeout: 10) && search.isHittable)
+                search.tap()
+                let clear = search.buttons.matching(NSPredicate(format: "label IN %@", ["Cancella testo", "Clear text"])).firstMatch
+                if clear.exists { clear.tap() }
+                search.typeText(title)
+                let keyboardNotice = health.buttons["Continue"]
+                if keyboardNotice.exists && keyboardNotice.isHittable { keyboardNotice.tap() }
+                if row.waitForExistence(timeout: 10) && row.isHittable { found = true; break }
+            }
+            if found { row.tap() }
+            else { capture("favorite-not-found-" + identifier, health); XCTFail("Favorite metric not found: " + identifier) }
+            capture("favorite-" + identifier, health)
         }
         let done = health.buttons.matching(NSPredicate(format: "label IN %@", ["Fine", "Done"])).firstMatch
         if done.exists && done.isHittable { done.tap() }
         let summary = health.tabBars.buttons["Riepilogo"]
         if summary.exists && summary.isHittable { summary.tap() }
+        for identifier in ["HKQuantityTypeIdentifierDietaryEnergyConsumed", "HKQuantityTypeIdentifierBodyMass"] {
+            XCTAssertTrue(health.cells["UIA.Health.Snippet." + identifier].waitForExistence(timeout: 15))
+        }
         capture("populated-summary", health)
     }
 }

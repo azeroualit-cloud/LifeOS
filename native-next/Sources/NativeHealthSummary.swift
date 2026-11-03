@@ -18,7 +18,7 @@ enum NativeHealthMetric: String, CaseIterable, Identifiable {
     }
     private static let nutritionSymbol = UIImage(systemName: "apple.slice") == nil ? "fork.knife" : "apple.slice"
     var color: Color {
-        switch self { case .tdee: return .orange; case .weight: return .purple; case .calories: return .green; case .simulation: return .blue }
+        switch self { case .tdee: return .orange; case .weight: return NativeDesign.healthWeight; case .calories: return .green; case .simulation: return .blue }
     }
     var unit: String {
         switch self { case .weight, .simulation: return "kg"; case .tdee: return "kcal/giorno"; case .calories: return "kcal" }
@@ -130,7 +130,7 @@ private struct NativeHealthSummaryRow: View {
             }
         }.padding(NativeDesign.Layout.compactCardInset)
             .frame(minHeight: rowHeight, maxHeight: .infinity, alignment: .leading)
-            .background(NativeDesign.healthSurface, in: RoundedRectangle(cornerRadius: NativeDesign.cardRadius))
+            .background(NativeDesign.healthSurface, in: RoundedRectangle(cornerRadius: NativeDesign.Layout.healthSummaryRadius))
             .contentShape(Rectangle())
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(metric.title + ", " + value + " " + metric.unit + ", " + contextLabel)
@@ -180,11 +180,11 @@ private struct NativeHealthSummaryRowsLayout: Layout {
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         let width = proposal.width ?? subviews.map { $0.sizeThatFits(.unspecified).width }.max() ?? 0
         let height = subviews.map { $0.sizeThatFits(.init(width: width, height: nil)).height }.max() ?? 0
-        return CGSize(width: width, height: height * CGFloat(subviews.count) + NativeDesign.Space.medium * CGFloat(max(0, subviews.count - 1)))
+        return CGSize(width: width, height: height * CGFloat(subviews.count) + NativeDesign.Layout.healthSummaryGap * CGFloat(max(0, subviews.count - 1)))
     }
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
         guard !subviews.isEmpty else { return }
-        let spacing = NativeDesign.Space.medium
+        let spacing = NativeDesign.Layout.healthSummaryGap
         let height = (bounds.height - spacing * CGFloat(subviews.count - 1)) / CGFloat(subviews.count)
         for (index, view) in subviews.enumerated() {
             view.place(at: CGPoint(x: bounds.minX, y: bounds.minY + CGFloat(index) * (height + spacing)),

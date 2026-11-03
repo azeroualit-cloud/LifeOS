@@ -20,6 +20,10 @@ enum NativeDesign {
     static func calendarNumber(size: CGFloat) -> Font { .system(size: size, weight: .regular, design: .default) }
     static let healthCanvas = Color(uiColor: .systemGroupedBackground)
     static let healthSurface = Color(uiColor: .secondarySystemGroupedBackground)
+    // Measured from the populated Apple Health dark reference; adapt in light mode.
+    static let healthWeight = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark ? UIColor(red: 219 / 255, green: 52 / 255, blue: 242 / 255, alpha: 1) : .systemPurple
+    })
     static let healthAccent = Color(uiColor: .systemOrange)
     static let healthGray = Color(uiColor: .systemGray)
     static let healthHistoricalBar = healthGray.opacity(0.28)
@@ -64,8 +68,10 @@ enum NativeDesign {
         static let touchTarget: CGFloat = 44
         static let toolbarVisual: CGFloat = 36
         static let healthSummaryRow: CGFloat = 132
+        static let healthSummaryGap: CGFloat = 10
+        static let healthSummaryRadius: CGFloat = 28
         static let healthSummaryChartWidth: CGFloat = 80
-        static let healthSummaryChartHeight: CGFloat = 52
+        static let healthSummaryChartHeight: CGFloat = 50
         static let healthOverviewChart: CGFloat = 88
         static let healthSelectionCaptionHeight: CGFloat = 28
         static let rowHeight: CGFloat = 52
