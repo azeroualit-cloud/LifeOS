@@ -1,6 +1,14 @@
+## Build 76 — startup compatibility fix delivered
+
+[**Download LifeOS-76.ipa**](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.15-build76/LifeOS-76.ipa) · [cause, fix and checks](native/REVISIONE-76.md) · [build/tests/delivery](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41612277726) · [public download verification](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41612623334).
+
+The supplied phone report identifies a null weak Foundation Date comparison during restoration of saved Keychain cookies. Compiling with Xcode/SDK 27.0 removes the incompatible 27.2 imports; a binary gate rejects the exact public build 75 and passes app/widget in build 76. Same bundle IDs, data, icon and device signing format. Update via Signulous without uninstalling.
+
+247 unit tests, 13 UI tests across iPhone 15 Pro and SE 3 simulators, verified Keychain fixture, and four bounded real Release startup checks passed. Runtime actually tested: iOS 27.0. Release screenshots show the native Health authorization sheet; no post-authorization Dashboard or physical iOS 27.2 success is claimed. Public IPA downloaded and independently checked: SHA-256 `b0827a1104f84dcd97426f17b7e8e129036fd52d8871647fadb4072931fc9cab`. No backend deployment or personal financial-data query.
+
 ## Build 75 launch failure reported — investigation open
 
-The user reports immediate exit on iPhone 15 Pro / iOS 27.2 after re-signing. [Startup review and evidence](native/LAUNCH-75-REVIEW.md). Real Release probes reached the Dashboard on iOS 27.2 (iPhone 18 Pro simulator), and on iPhone 15 Pro / iOS 27.0 with fresh and populated synthetic-upgrade storage. Exact 15 Pro / 27.2 simulation could not run with the downloaded device-specific runtime. These results do not resolve or disprove the physical-device failure. Device crash report requested; no confirmed code fix, replacement IPA or signing diagnosis claimed.
+The user reports immediate exit on iPhone 15 Pro / iOS 27.2 after re-signing. [Startup review and evidence](native/LAUNCH-75-REVIEW.md). Real Release probes reached the Dashboard on iOS 27.2 (iPhone 18 Pro simulator), and on iPhone 15 Pro / iOS 27.0 with fresh and populated synthetic-upgrade storage. Exact 15 Pro / 27.2 simulation could not run with the downloaded device-specific runtime. These results do not resolve or disprove the physical-device failure. Historical investigation before the supplied report. That report now identifies the weak Date comparison; build 76 above corrects its compile-time ABI dependency.
 
 ## IPA 75 consegnata — 3 novembre 2026, backend utenze in attesa
 

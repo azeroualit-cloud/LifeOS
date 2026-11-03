@@ -1,3 +1,7 @@
+## Update: supplied device report identifies the failing call
+
+The missing-evidence sections below are retained as investigation history. The report has since been received and matched to the delivered build 75. Disassembly identifies a null weak Foundation Date comparison in saved-session restoration. [Build 76 analysis, replacement IPA and completed verification](REVISIONE-76.md). No certificate replacement, logout, uninstall or archive reset is indicated by this evidence.
+
 # Build 75 — immediate launch exit investigation
 
 Status: the reported physical-device failure is **unresolved**. No application-code fix or replacement IPA is claimed. The user specified iPhone 15 Pro, iOS 27.2 and immediate return to the Home Screen; do not ask for the OS version again.
