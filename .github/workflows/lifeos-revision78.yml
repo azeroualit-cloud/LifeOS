@@ -7,7 +7,7 @@ permissions:
   contents: read
   actions: read
 concurrency:
-  group: revision78-${{ github.ref }}
+  group: revision78-${{ github.ref }}-${{ github.sha }}
   cancel-in-progress: false
 jobs:
   validate:
