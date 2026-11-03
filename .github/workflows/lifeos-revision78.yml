@@ -22,20 +22,22 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24.22.1'
-      - name: Inspect shipped Apple Health resources with REA
-        timeout-minutes: 10
-        shell: bash
-        run: |
-          set -euo pipefail
-          xcrun simctl bootstatus "$MAIN_DEVICE" -b
-          npm install --prefix .rea78 --cache .rea78/cache --no-audit --no-fund rea-agents@6.8.0
-          python3 scripts/inspect-apple-health78.py
       - name: Compile app and tests
         working-directory: app
         shell: bash
         run: |
           set -euo pipefail
           xcodebuild build-for-testing -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- 2>&1 | tee build/compile78.log
+      - name: Inspect shipped Apple Health resources with REA
+        timeout-minutes: 15
+        env:
+          REA_SWIFTC_COMPILE_TIMEOUT_MS: '300000'
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcrun simctl bootstatus "$MAIN_DEVICE" -b
+          npm install --prefix .rea78 --cache .rea78/cache --no-audit --no-fund rea-agents@6.8.0
+          python3 scripts/inspect-apple-health78.py
       - name: Retrieve the measured populated Apple Health reference
         uses: actions/download-artifact@v5
         with:

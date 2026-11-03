@@ -39,7 +39,7 @@ with (output / 'rea-stderr.log').open('w') as error_log:
         process.stdin.flush()
 
     def receive(request_id):
-        deadline = time.monotonic() + 240
+        deadline = time.monotonic() + 600
         while time.monotonic() < deadline:
             if not selector.select(timeout=1):
                 if process.poll() is not None:
@@ -58,7 +58,7 @@ with (output / 'rea-stderr.log').open('w') as error_log:
         initialization = receive(1)
         (output / 'initialization.json').write_text(json.dumps(initialization, indent=2))
         send({'method': 'notifications/initialized'})
-        for request_id, name, arguments in [(2, 'open_bundle_resources', {'path': str(bundle)}), (3, 'inspect_plist', {'native_command_timeout_ms': 180000}), (4, 'inspect_asset_catalog', {'offset': 0, 'limit': 1000})]:
+        for request_id, name, arguments in [(2, 'open_bundle_resources', {'path': str(bundle)}), (3, 'inspect_plist', {'native_command_timeout_ms': 420000}), (4, 'inspect_asset_catalog', {'offset': 0, 'limit': 1000})]:
             send({'id': request_id, 'method': 'tools/call', 'params': {'name': name, 'arguments': arguments}})
             result = receive(request_id)
             (output / (name + '.json')).write_text(json.dumps(result, indent=2))
