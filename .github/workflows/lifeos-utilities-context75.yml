@@ -1,6 +1,7 @@
-name: LifeOS 75 live code compatibility
+name: LifeOS live utility compatibility audit
 on:
   push:
+    branches: ['codex/revision77']
     paths: ['scripts/deploy-utilities-75.py', 'backend/utilities/competence.mjs', '.github/workflows/lifeos-utilities-context75.yml']
   workflow_dispatch:
 permissions:
