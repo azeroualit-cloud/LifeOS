@@ -1,6 +1,6 @@
 # Revisione 75 — bollette per competenza
 
-Stato: **IPA 0.10.14 build 75 compilata e verificata**, disponibile come [artefatto di revisione](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41592894317/artifacts/13212036759). Pubblicazione della release e distribuzione Cloudflare sospese in attesa di autorizzazione esplicita dopo il blocco della revisione automatica. Nessun Worker aggiornato e nessuna bolletta reale creata.
+Stato: **IPA 0.10.14 build 75 pubblicata e scaricata/verificata dal link pubblico**: [LifeOS-75.ipa](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.14-build75/LifeOS-75.ipa). Consegna del solo file IPA richiesta esplicitamente dall’utente. Distribuzione Cloudflare ancora in attesa di autorizzazione: la nuova funzione utenze richiede quell’aggiornamento. Nessun Worker aggiornato e nessuna bolletta reale creata.
 
 SHA-256 IPA: `94e64ccf0cc5a139208a05cb094a67241d6436305a9b4cd4e93b4737b05bf39d`. Sorgente del pacchetto: `14d40ef496bece1ae084ff50a4030471a5cb172d`. Artefatto disponibile fino al 10 novembre 2026, 07:18 UTC; comprende `download/LifeOS-unsigned.ipa`, checksum e prove.
 
@@ -42,3 +42,10 @@ Archivio Release e controllo IPA riusciti: ZIP integro, versione/build, identifi
 La revisione automatica ha rifiutato l’attivazione del commit `f0cb2d1992ce2b2bfef44fd4bd20d18219b8babd`: avrebbe distribuito il codice ai Worker e pubblicato una release con permessi di scrittura, azioni considerate non sufficientemente autorizzate per quel ref. Il commit non è stato applicato al ramo. È stato invece applicato `14d40ef...`, con soli test e creazione dell’artefatto, permessi Contents Read e nessun accesso Cloudflare. Non aggirare il blocco: occorre l’autorizzazione esplicita dell’utente prima di distribuire `lifeos` e `lifeos-native-test` e pubblicare l’IPA.
 
 Proposta locale non attivata: `work/revision75/pending-release/lifeos-publish75.yml`. Riusa l’IPA già verificata con il checksum sopra, ricontrolla identità dei sorgenti e i due xcresult corretti, verifica Health purpose strings e package, prepara e verifica la patch contro il codice Cloudflare attuale, distribuisce senza creare movimenti, quindi pubblica gli stessi byte. Richiede l’approvazione reale dell’utente: il marker del commit non vale come autorizzazione. Dopo la pubblicazione verificare indipendentemente IPA, video e SHA-256 dal link pubblico prima di considerare conclusa la consegna.
+
+
+## Consegna del singolo IPA richiesta successivamente
+
+Alla richiesta «dammi l’ipa non lo zip», il [run 41596472472](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41596472472) ha pubblicato esclusivamente l’IPA già compilata, con verifica preventiva del checksum e dell’identità dei sorgenti. Nessun accesso Cloudflare, nessun deploy e nessuna query finanziaria. Scaricata poi dal link pubblico: 1.895.216 byte, SHA-256 esattamente `94e64ccf0cc5a139208a05cb094a67241d6436305a9b4cd4e93b4737b05bf39d`, CRC ZIP, versione, app/widget arm64 iPhoneOS, purpose strings Health e schema URL verificati.
+
+La release `ios-0.10.14-build75` ora esiste e l’IPA è consegnata. Le istruzioni precedenti sulla sospensione della pubblicazione descrivono il blocco originario, superato per la sola consegna del file dalla richiesta esplicita successiva. La distribuzione del codice ai due Worker e la diagnosi finanziaria personale restano sospese. Non attivare il vecchio workflow locale che ricrea la release: dopo autorizzazione, preparare il solo deploy guardato e aggiornare le note della release esistente.

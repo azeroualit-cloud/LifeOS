@@ -1,12 +1,12 @@
-## Build 75 pronta — 3 novembre 2026, distribuzione in attesa
+## IPA 75 consegnata — 3 novembre 2026, backend utenze in attesa
 
-[Pacchetto verificato con IPA](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41592894317/artifacts/13212036759) · [prove finali](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41592894317) · [comportamento, integrità ed esiti](native/REVISIONE-75.md).
+[**Scarica LifeOS-75.ipa**](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.14-build75/LifeOS-75.ipa) · [prove finali](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41592894317) · [consegna del singolo file](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41596472472) · [dettagli](native/REVISIONE-75.md).
 
-221,79 € agosto–ottobre diventano 73,93 € per mese nel budget; il pagamento rimane un’unica uscita bancaria alla data effettiva. Stime e accantonamenti del fondo separati. Riprodotto e corretto su dati sintetici un problema della media salariale al cambio mese; causa del negativo personale non ancora confermata.
+IPA 0.10.14/build 75 scaricata dal link pubblico e verificata per integrità, checksum, versione, app/widget arm64 iPhoneOS, purpose strings Health e URL LifeOS. SHA-256 `94e64ccf0cc5a139208a05cb094a67241d6436305a9b4cd4e93b4737b05bf39d`. Consegna autorizzata dalla richiesta esplicita del singolo IPA, senza ZIP esterno.
 
-245 unitari e tutte le 47 posizioni UI previste verificate combinando prove su sorgenti di produzione identici e ripetizione del solo test compatto corretto sui due simulatori. IPA 0.10.14/build 75 verificata, SHA-256 `94e64ccf0cc5a139208a05cb094a67241d6436305a9b4cd4e93b4737b05bf39d`. SDK 27.2; runtime effettivo 27.0.
+245 unitari e tutte le 47 posizioni UI previste verificate combinando prove su sorgenti di produzione identici e ripetizione del solo test corretto sui due simulatori. SDK 27.2; runtime effettivo 27.0. Aggiornare con Signulous senza disinstallare.
 
-**Nessuna distribuzione Cloudflare e nessuna release 75 pubblicata:** la revisione automatica ha richiesto autorizzazione esplicita per queste operazioni. Il pacchetto è un artefatto di revisione disponibile fino al 10 novembre. Il download pubblico e le prove fisiche restano successivi. La build 74 sotto resta la consegna pubblica attuale.
+**Cloudflare non aggiornato:** la nuova logica utenze richiede ancora il deploy autorizzato ai Worker esistenti. Codice e test pronti per 221,79 € agosto–ottobre → 73,93 € per mese, un solo addebito, fondo separato. Correzione salariale di novembre verificata su dati sintetici; causa del valore personale non confermata. Prove fisiche e diagnosi finanziaria personale restano distinte e non eseguite.
 
 ## Consegna verificata — 2 novembre 2026, 0.10.13 build 74
 
