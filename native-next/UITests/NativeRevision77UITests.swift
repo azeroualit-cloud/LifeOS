@@ -28,6 +28,51 @@ final class NativeRevision77UITests: XCTestCase {
         XCTAssertTrue(app.scrollViews["health-detail-scroll"].waitForExistence(timeout: 10))
         capture("Salute testo grande", app)
     }
+    func testCalendarReturnsToDashboardAndFinanceOpens() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--visual-test", "--busy-home", "--dark", "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"]
+        app.launch()
+        let day = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "dashboard-day-")).firstMatch
+        XCTAssertTrue(day.waitForExistence(timeout: 15))
+        day.tap()
+        XCTAssertTrue(app.scrollViews["calendar-scroll"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.tabBars.buttons["Dashboard"].isSelected)
+        capture("Calendario completo", app)
+        app.buttons["other-back"].tap()
+        let finance = app.buttons["home-finance"]
+        reveal(finance, app: app)
+        finance.tap()
+        XCTAssertTrue(app.scrollViews["finance-scroll"].waitForExistence(timeout: 10))
+        capture("Finanza", app)
+        app.buttons["other-back"].tap()
+        XCTAssertTrue(app.scrollViews["dashboard-scroll"].exists)
+    }
+    func testCompactMacroDecimalInputAndKeyboardProgression() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--visual-test", "--empty-home", "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"]
+        app.launch()
+        let protein = app.textFields["quick-nutrition-Proteine"]
+        reveal(protein, app: app)
+        protein.tap(); protein.typeText("10")
+        app.buttons["Avanti"].tap()
+        app.textFields["quick-nutrition-Carboidrati"].typeText("0,2")
+        app.buttons["Avanti"].tap()
+        app.textFields["quick-nutrition-Grassi"].typeText("5")
+        app.buttons["Fine"].tap()
+        XCTAssertEqual(app.staticTexts["quick-nutrition-calories"].label, "85.8 kcal")
+        let save = app.buttons["quick-nutrition-save"]
+        reveal(save, app: app)
+        XCTAssertTrue(save.isEnabled)
+        XCTAssertGreaterThanOrEqual(save.frame.height, 44)
+        capture("Macro compatti", app)
+    }
+    private func reveal(_ element: XCUIElement, app: XCUIApplication) {
+        for _ in 0..<12 {
+            if element.exists && element.isHittable { return }
+            app.scrollViews["dashboard-scroll"].swipeUp(velocity: .slow)
+        }
+        XCTAssertTrue(element.isHittable)
+    }
     private func capture(_ name: String, _ app: XCUIApplication) {
         let attachment = XCTAttachment(screenshot: app.screenshot())
         attachment.name = name; attachment.lifetime = .keepAlways

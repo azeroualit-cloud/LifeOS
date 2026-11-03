@@ -82,7 +82,10 @@ struct DashboardScreen: View {
     private func headingText(_ summary: NativeHomeSummary, today: String, now: Date) -> some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
             Text(CivilDate.label(today).capitalized).accessibilityIdentifier("home-today").font(.title.bold()).accessibilityAddTraits(.isHeader)
-            nextTime(now)
+            HStack(spacing: NativeDesign.Space.small) {
+                Text(now.formatted(date: .omitted, time: .shortened)).monospacedDigit().font(.subheadline).foregroundStyle(NativeDesign.secondary)
+                nextTime(now)
+            }
         }
     }
     private func focusDate(_ now: Date) -> Date {
@@ -181,7 +184,7 @@ struct DashboardScreen: View {
                     Spacer()
                     NativeDisclosureIndicator()
                 }.frame(minHeight: NativeDesign.Layout.touchTarget)
-            }.buttonStyle(NativePressStyle())
+            }.buttonStyle(NativePressStyle()).accessibilityIdentifier("home-finance")
             let overview = NativeFinanceOverview(summary: store.summary, month: store.financeMonth)
             LabeledContent("Budget rimanente", value: hiddenMoney ? "•••• €" : overview.remaining.map(\.euro) ?? "Da aggiornare")
             LabeledContent("Conto principale", value: hiddenMoney ? "•••• €" : overview.balance.map(\.euro) ?? "Da aggiornare")
