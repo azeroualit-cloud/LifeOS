@@ -21,7 +21,7 @@ struct NativeNutritionQuickEntry: View {
         return .init(id: id, revision: 0, date: date, protein: p, carbohydrate: c, fat: f, confirmed: false)
     }
     var body: some View {
-        NativeCard {
+        NativeCard(density: .compact) {
             HStack {
                 Label("Nutrizione", systemImage: "fork.knife").font(.headline)
                 Spacer()

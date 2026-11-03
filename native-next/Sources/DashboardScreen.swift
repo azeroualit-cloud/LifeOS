@@ -177,7 +177,7 @@ struct DashboardScreen: View {
         }
     }
     private var financeOverview: some View {
-        NativeCard {
+        NativeCard(density: .compact) {
             NavigationLink(value: NativeDashboardDestination.finance) {
                 HStack {
                     Label("Finanza", systemImage: "chart.bar").font(.headline)
