@@ -1,5 +1,6 @@
 import SwiftUI
 import Charts
+import UIKit
 
 enum NativeHealthMetric: String, CaseIterable, Identifiable {
     case tdee, weight, calories, simulation
@@ -8,8 +9,14 @@ enum NativeHealthMetric: String, CaseIterable, Identifiable {
         switch self { case .tdee: return "TDEE"; case .weight: return "Peso"; case .calories: return "Calorie"; case .simulation: return "Simulazione" }
     }
     var symbol: String {
-        switch self { case .tdee: return "flame.fill"; case .weight: return "figure.stand"; case .calories: return "fork.knife"; case .simulation: return "chart.xyaxis.line" }
+        switch self {
+        case .tdee: return "flame.fill"
+        case .weight: return "figure"
+        case .calories: return Self.nutritionSymbol
+        case .simulation: return "chart.xyaxis.line"
+        }
     }
+    private static let nutritionSymbol = UIImage(systemName: "apple.slice") == nil ? "fork.knife" : "apple.slice"
     var color: Color {
         switch self { case .tdee: return .pink; case .weight: return .blue; case .calories: return .orange; case .simulation: return .purple }
     }
@@ -47,9 +54,9 @@ struct NativeHealthDetail: View {
             .safeAreaInset(edge: .bottom) {
                 HStack(spacing: NativeDesign.Space.medium) {
                     Spacer()
-                    NativeToolbarButton(symbol: "figure.stand", label: "Aggiungi peso") { addingWeight = true }
+                    NativeToolbarButton(symbol: NativeHealthMetric.weight.symbol, label: "Aggiungi peso") { addingWeight = true }
                         .accessibilityIdentifier("health-add-weight")
-                    NativeToolbarButton(symbol: "carrot.fill", label: "Registrazioni macro") { showingNutrition = true }
+                    NativeToolbarButton(symbol: NativeHealthMetric.calories.symbol, label: "Registrazioni macro") { showingNutrition = true }
                         .accessibilityIdentifier("health-add-nutrition")
                 }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.vertical, NativeDesign.Space.small)
             }

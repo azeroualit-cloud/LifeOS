@@ -349,10 +349,14 @@ struct NativeChecklistListRow: ViewModifier {
 /// Keep diagnostics out of production accessibility values.
 struct NativeUITestValue: ViewModifier {
     let value: String
+    var identifier: String? = nil
     @ViewBuilder func body(content: Content) -> some View {
         #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("--visual-test") { content.accessibilityValue(value) }
-        else { content }
+        if ProcessInfo.processInfo.arguments.contains("--visual-test") {
+            if let identifier {
+                content.accessibilityElement(children: .contain).accessibilityIdentifier(identifier).accessibilityValue(value)
+            } else { content.accessibilityValue(value) }
+        } else { content }
         #else
         content
         #endif

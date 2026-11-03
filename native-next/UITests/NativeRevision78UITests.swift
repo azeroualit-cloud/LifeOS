@@ -30,6 +30,27 @@ final class NativeRevision78UITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Orari"].waitForExistence(timeout: 10))
         capture("78-prayers", app)
     }
+    func testFinanceBudgetAndThumbActionUseTheSameRow() {
+        let app = launch()
+        let button = app.buttons["home-add-expense"]
+        for _ in 0..<15 {
+            if button.exists && button.isHittable { break }
+            app.scrollViews["dashboard-scroll"].swipeUp(velocity: .slow)
+        }
+        XCTAssertTrue(button.isHittable)
+        let value = app.staticTexts["home-budget-value"], label = app.staticTexts["home-budget-label"]
+        let header = app.buttons["home-finance"]
+        XCTAssertTrue(value.exists); XCTAssertTrue(label.exists)
+        XCTAssertEqual(label.label, "Budget")
+        XCTAssertEqual(value.frame.minX, label.frame.minX, accuracy: 1)
+        XCTAssertLessThanOrEqual(value.frame.maxY, label.frame.minY)
+        XCTAssertGreaterThan(button.frame.minX, value.frame.maxX)
+        XCTAssertLessThanOrEqual(button.frame.maxX, header.frame.maxX + 1)
+        XCTAssertGreaterThanOrEqual(button.frame.height, 44)
+        capture("78-dashboard-budget-action", app)
+        button.tap()
+        XCTAssertTrue(app.textFields["movement-amount"].waitForExistence(timeout: 10))
+    }
     func testHealthUniformRowsAndCompactActions() {
         let app = launch()
         app.tabBars.buttons["Salute"].tap()
@@ -129,8 +150,14 @@ final class NativeAppleHealthReferenceUITests: XCTestCase {
         XCTAssertEqual(XCTWaiter.wait(for: [authorization], timeout: 20), .completed)
         if seed.switches.firstMatch.exists {
                 for toggle in seed.switches.allElementsBoundByIndex where toggle.isHittable && (toggle.value as? String) == "0" { toggle.tap() }
-                let allow = seed.buttons.matching(NSPredicate(format: "label IN %@", ["Consenti", "Allow", "Fine", "Done"])).firstMatch
-                if allow.exists && allow.isHittable { allow.tap() }
+                // iOS 27 exposes the footer action as StaticText in a scrollable
+                // authorization sheet; it is initially below the viewport.
+                let allow = seed.staticTexts.matching(NSPredicate(format: "label IN %@", ["Consenti", "Allow"])).firstMatch
+                for _ in 0..<6 {
+                    if allow.exists && allow.isHittable { break }
+                    seed.swipeUp()
+                }
+                XCTAssertTrue(allow.isHittable); allow.tap()
         }
         let prepared = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label == %@", "Dati pronti"), object: status)
         let preparation = XCTWaiter.wait(for: [prepared], timeout: 30)
@@ -145,24 +172,25 @@ final class NativeAppleHealthReferenceUITests: XCTestCase {
             let deny = springboard.alerts.buttons.matching(NSPredicate(format: "label BEGINSWITH %@ OR label BEGINSWITH %@", "Don", "Non")).firstMatch
             if deny.exists { deny.tap() }
         }
+        let notificationTile = health.buttons["UIA.Health.NotificationAuthorizationTile.Header.Accessory"]
+        if notificationTile.exists && notificationTile.isHittable { notificationTile.tap() }
         capture("summary-before-favorites", health)
         let edit = health.buttons["UIA.Health.Inevidenza.Detail"]
         XCTAssertTrue(edit.waitForExistence(timeout: 15)); edit.tap()
         capture("favorites-editor", health)
-        for title in ["Energia alimentare", "Peso"] {
+        for (title, identifier) in [("Dietary Energy", "HKQuantityTypeIdentifierDietaryEnergyConsumed"), ("Weight", "HKQuantityTypeIdentifierBodyMass")] {
             let search = health.searchFields.firstMatch
-            if search.exists && search.isHittable {
-                search.tap()
-                let old = (search.value as? String) ?? ""
-                search.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: old.count) + title)
-            }
-            let row = health.cells.matching(NSPredicate(format: "label CONTAINS[c] %@", title)).firstMatch
-            for _ in 0..<18 {
-                if row.exists && row.isHittable { break }
-                health.swipeUp()
-            }
-            if row.exists && row.isHittable { row.tap() }
-            else { print("REFERENCE_FAVORITE_NOT_FOUND " + title) }
+            XCTAssertTrue(search.exists && search.isHittable)
+            search.tap()
+            let clear = search.buttons["Cancella testo"]
+            if clear.exists { clear.tap() }
+            search.typeText(title)
+            let keyboardNotice = health.buttons["Continue"]
+            if keyboardNotice.exists && keyboardNotice.isHittable { keyboardNotice.tap() }
+            let row = health.cells["UIA.Health.FavoritesEdit." + identifier]
+            let found = row.waitForExistence(timeout: 10)
+            if found && row.isHittable { row.tap() }
+            else { capture("favorite-not-found-" + title, health); XCTFail("Favorite metric not found: " + identifier) }
             capture("favorite-" + title, health)
         }
         let done = health.buttons.matching(NSPredicate(format: "label IN %@", ["Fine", "Done"])).firstMatch

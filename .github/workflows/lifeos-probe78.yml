@@ -1,0 +1,49 @@
+name: LifeOS 78 focused UI probe
+on:
+  push:
+    branches: ['codex/revision77']
+    paths: ['native-next/**', '.github/workflows/lifeos-probe78.yml']
+permissions:
+  contents: read
+concurrency:
+  group: probe78-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  probe:
+    if: contains(github.event.head_commit.message, '[probe-78]')
+    runs-on: xcode-27
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/native-compat76
+        with:
+          variant: primary
+      - name: Build current app and test targets
+        working-directory: app
+        shell: bash
+        run: |
+          set -o pipefail
+          xcodebuild build-for-testing -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- 2>&1 | tee build/probe78-compile.log
+      - name: Exercise reference and changed UI flows
+        working-directory: app
+        shell: bash
+        run: |
+          set -o pipefail
+          xcrun simctl bootstatus "$MAIN_DEVICE" -b
+          xcrun simctl ui "$MAIN_DEVICE" appearance dark
+          xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeTests -only-testing:LifeOSProbeUITests/NativeAppleHealthReferenceUITests -only-testing:LifeOSProbeUITests/NativeRevision78UITests -resultBundlePath build/Probe78.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- 2>&1 | tee build/probe78.log
+      - name: Export evidence
+        if: always()
+        shell: bash
+        run: |
+          if [ -f app/build/Probe78.xcresult/Info.plist ]; then
+            xcrun xcresulttool export attachments --path app/build/Probe78.xcresult --output-path app/build/probe78-screenshots
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: revision78-focused-ui
+          path: |
+            app/build/probe78*.log
+            app/build/probe78-screenshots
+            app/build/Probe78.xcresult

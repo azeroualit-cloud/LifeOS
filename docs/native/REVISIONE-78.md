@@ -80,3 +80,38 @@ contenuti effettivi e uniformate al massimo necessario. Il grafico mini calorie
 usa bin giornalieri e barre proporzionali, anziché barre sovrapposte. Restano da
 verificare sul nuovo commit sia questi cambiamenti sia il flusso di importazione
 che nella prima esecuzione non era stato raggiunto.
+
+
+La seconda ispezione REA è riuscita: Info.plist binario e inventario completo di
+929 record in Assets.car. Evidenze `ev_a0e72492adfd1d1694c114b30ea753fff75bf02f21b4aafda01a4c95041efeb1`
+e `ev_9dfa31b7169520ea6528b64bdd3b7a229bda59fa1573b9d631021e50a4d614c8`.
+Il catalogo ha SHA-256 `b8d92c28f61ea5b4b60b4a74003248109110766998e99448f142ca937833ef91`;
+non sono stati copiati asset o binari Apple nel prodotto. La vista nativa di
+consenso ha confermato i simboli `figure` per Peso e `apple.slice` per Nutrizione,
+ora riusati nei due pulsanti con fallback per sistemi che non contengono il simbolo.
+
+Il secondo test del riferimento non ha completato il consenso: i due switch erano
+attivi, ma il comando Allow è esposto come StaticText e si trova sotto il viewport.
+Inoltre i nomi delle metriche nel simulatore sono in inglese anche con la navigazione
+italiana. Il test successivo scorre fino ad Allow e cerca le metriche tramite
+identificativi HealthKit, usando i nomi osservati Dietary Energy e Weight.
+Un nuovo gate impedisce il pacchetto se l'acquisizione del riferimento non passa,
+pur consentendo di raccogliere gli esiti indipendenti dei test LifeOS.
+
+
+Sul commit `1c0db695c49893bb185b3deda7f36ea882709b68` sono passati 264 test
+unitari e 13 dei 14 test UI LifeOS, inclusi scorrimento grafici, dimensioni dei
+pulsanti e uniformità delle card con testo accessibilità. Il test mancante ha
+raggiunto la selezione reale del JSON in File: il selettore si è chiuso senza
+presentare l'anteprima, riproducendo il problema segnalato. Il passaggio viene
+ora gestito da un handoff che accetta i due eventi (risultato e chiusura) in
+entrambi gli ordini, consegnando i byte una sola volta. Tre regressioni unitari
+coprono risultato-prima, chiusura-prima e annullamento con nuovo tentativo;
+il percorso del selettore di sistema resta una prova UI obbligatoria.
+
+Le iterazioni diagnostiche marcate `[probe-78]` eseguono tutti i test unitari e
+le prove UI della revisione 78 e del riferimento Apple, con artefatti completi.
+Non generano pacchetti. Il commit candidato finale, senza questo marcatore,
+richiede ancora il workflow completo con regressioni 74/75/77/78, avvii Release
+e verifica dell'IPA. Il cerchio visivo dei pulsanti toolbar è 36 pt, come il
+Profilo osservato in Apple Salute; la regione di interazione resta 44 pt.

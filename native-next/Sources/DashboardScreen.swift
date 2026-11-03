@@ -8,6 +8,7 @@ struct DashboardScreen: View {
     @State private var routineFeedback = false
     @State private var showingTimes = false
     @EnvironmentObject private var health: NativeHealthStore
+    @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.nativeReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
 
@@ -164,16 +165,19 @@ struct DashboardScreen: View {
                 }.frame(minHeight: NativeDesign.Layout.touchTarget)
             }.buttonStyle(NativePressStyle()).accessibilityIdentifier("home-finance")
             let overview = NativeFinanceOverview(summary: store.summary, month: store.financeMonth)
-            HStack(alignment: .center, spacing: NativeDesign.Space.medium) {
+            let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: NativeDesign.Space.medium)) : AnyLayout(HStackLayout(alignment: .center, spacing: NativeDesign.Space.medium))
+            layout {
                 VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
                     Text(hiddenMoney ? "•••• €" : overview.remaining.map(\.euro) ?? "—")
-                        .font(.title2.weight(.semibold)).monospacedDigit()
-                    Text("Budget").font(.caption).foregroundStyle(NativeDesign.secondary)
+                        .font(.title2.weight(.semibold)).monospacedDigit().accessibilityIdentifier("home-budget-value")
+                    Text("Budget").font(.caption).foregroundStyle(NativeDesign.secondary).accessibilityIdentifier("home-budget-label")
                 }
-                Spacer(minLength: NativeDesign.Space.small)
-                Button("Aggiungi spesa", systemImage: "plus") { router.sheet = .movement([:]) }
-                    .frame(minHeight: NativeDesign.Layout.touchTarget)
-                    .accessibilityIdentifier("home-add-expense")
+                if !typeSize.isAccessibilitySize { Spacer(minLength: NativeDesign.Space.small) }
+                Button { router.sheet = .movement([:]) } label: {
+                    Label("Aggiungi spesa", systemImage: "plus")
+                        .frame(maxWidth: typeSize.isAccessibilitySize ? .infinity : nil, minHeight: NativeDesign.Layout.touchTarget)
+                        .contentShape(Rectangle())
+                }.buttonStyle(NativeCompactPrimaryButtonStyle()).accessibilityIdentifier("home-add-expense")
             }
 
         }

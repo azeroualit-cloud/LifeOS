@@ -10,6 +10,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   validate:
+    if: "!contains(github.event.head_commit.message, '[probe-78]')"
     runs-on: xcode-27
     timeout-minutes: 65
     steps:
@@ -36,6 +37,7 @@ jobs:
           set -euo pipefail
           xcodebuild build-for-testing -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- 2>&1 | tee build/compile78.log
       - name: Capture native Apple Health reference
+        id: reference
         timeout-minutes: 10
         continue-on-error: true
         working-directory: app
@@ -99,6 +101,11 @@ jobs:
             app/build/screenshots78
             app/build/apple-health-reference
             app/build/apple-health-reference-screenshots78
+      - name: Require successful Apple Health reference capture
+        if: always()
+        shell: bash
+        run: |
+          test '${{ steps.reference.outcome }}' = 'success' || { echo 'Apple Health reference did not pass; package remains blocked.'; exit 1; }
 
   package:
     needs: validate

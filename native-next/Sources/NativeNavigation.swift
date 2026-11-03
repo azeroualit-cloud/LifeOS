@@ -23,7 +23,12 @@ struct NativeToolbarButton: View {
 
 struct NativeToolbarIcon: View {
     let symbol: String
-    @ViewBuilder var body: some View {
+    var body: some View {
+        materialIcon
+            .frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget)
+            .contentShape(Rectangle())
+    }
+    @ViewBuilder private var materialIcon: some View {
         if #available(iOS 26.0, *) { icon.glassEffect(.regular.interactive(), in: Circle()) }
         else { icon.background(.thinMaterial, in: Circle()) }
     }
@@ -31,7 +36,6 @@ struct NativeToolbarIcon: View {
         Image(systemName: symbol).font(NativeDesign.symbol)
             .symbolRenderingMode(.monochrome).foregroundStyle(NativeDesign.accent)
             .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-            .frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget)
-            .contentShape(Rectangle())
+            .frame(width: NativeDesign.Layout.toolbarVisual, height: NativeDesign.Layout.toolbarVisual)
     }
 }

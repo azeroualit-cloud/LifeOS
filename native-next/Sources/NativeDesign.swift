@@ -62,6 +62,7 @@ enum NativeDesign {
         static let compactCardInset = Space.large
         static let groupedInset = Space.large
         static let touchTarget: CGFloat = 44
+        static let toolbarVisual: CGFloat = 36
         static let healthSummaryRow: CGFloat = 132
         static let healthSummaryChartWidth: CGFloat = 104
         static let healthSummaryChartHeight: CGFloat = 60

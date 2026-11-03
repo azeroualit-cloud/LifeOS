@@ -25,7 +25,7 @@ struct NativeBloomScreen: View {
     @State private var importing = false
     @State private var exporting = false
     @State private var exportData = Data()
-    @State private var selectedBackup: Data?
+    @State private var pickerHandoff = NativeBloomPickerHandoff()
     @State private var preparingImport = false
     @State private var pendingData: Data?
     @State private var pendingSummary = ""
@@ -67,7 +67,7 @@ struct NativeBloomScreen: View {
                     Text("Hai già contenuti in Bloom?").font(.headline)
                     Text("Importa il backup esportato dall’app Bloom. Note, raccolte e allegati verranno conservati su questo iPhone.")
                         .font(.subheadline).foregroundStyle(.secondary)
-                    Button { importing = true } label: {
+                    Button { startImport() } label: {
                         Label("Importa backup Bloom", systemImage: "square.and.arrow.down")
                             .foregroundStyle(NativeDesign.onAccent)
                             .frame(minHeight: NativeDesign.Layout.touchTarget)
@@ -100,6 +100,7 @@ struct NativeBloomScreen: View {
                 }
             }
         }.navigationTitle("Bloom")
+            .modifier(NativeUITestValue(value: pickerHandoff.diagnostic + ";preparing=\(preparingImport);preview=\(pendingData != nil)", identifier: "bloom-import-state"))
             .searchable(text: $search, prompt: "Cerca nella Libreria")
             .navigationDestination(isPresented: Binding(get: { selectedPlaceNote != nil }, set: { if !$0 { selectedPlaceNote = nil } })) {
                 if let id = selectedPlaceNote, let group = mapGroups.first(where: { $0.id == id }) {
@@ -133,14 +134,17 @@ struct NativeBloomScreen: View {
             .sheet(isPresented: $showingCaptures) { capturesSheet }
             .sheet(isPresented: $showingReport) { reportSheet }
             .sheet(isPresented: $composing) { NavigationStack { NativeBloomComposer(store: store, initial: captureRecord) } }
-            .sheet(isPresented: $importing, onDismiss: prepareSelectedBackup) {
+            .sheet(isPresented: $importing, onDismiss: {
+                pickerHandoff.didDismiss(); prepareSelectedBackup()
+            }) {
                 NativeBloomBackupPicker(completion: { result in
                     switch result {
-                    case .success(let data): selectedBackup = data
+                    case .success(let data): pickerHandoff.picked(data)
                     case .failure(let error): store.error = error.localizedDescription
                     }
                     importing = false
-                }, onCancel: { importing = false })
+                    prepareSelectedBackup()
+                }, onCancel: { pickerHandoff.cancel(); importing = false })
             }
             .sheet(isPresented: Binding(get: { pendingData != nil }, set: { if !$0 { pendingData = nil } })) { importSheet }
             .fileExporter(isPresented: $exporting, document: NativeBloomDocument(data: exportData), contentType: .json, defaultFilename: "LifeOS-Bloom-backup") { result in if case .failure(let error) = result { store.error = error.localizedDescription } }
@@ -160,7 +164,7 @@ struct NativeBloomScreen: View {
     private var archiveMenu: some View {
         Menu {
             Button(showTrash ? "Mostra Libreria" : "Cestino") { showTrash.toggle() }
-            Button("Importa backup Bloom") { importing = true }
+            Button("Importa backup Bloom", action: startImport)
             Button("Catture da completare (\(captureInbox.requests.count))") { showingCaptures = true }
             Button("Ultimo rapporto importazione") { showingReport = true }.disabled(store.archive.lifeosImportReports?.isEmpty != false)
             Button("Esporta backup") { do { exportData = try store.export(); exporting = true } catch { store.error = error.localizedDescription } }
@@ -185,9 +189,12 @@ struct NativeBloomScreen: View {
         } catch { store.error = error.localizedDescription }
         #endif
     }
+    private func startImport() {
+        guard !preparingImport else { return }
+        pickerHandoff.begin(); store.error = nil; importing = true
+    }
     private func prepareSelectedBackup() {
-        guard let data = selectedBackup else { return }
-        selectedBackup = nil
+        guard let data = pickerHandoff.takeReadyData() else { return }
         preparingImport = true
         // File picker has completed its dismissal before presenting the preview.
         Task { @MainActor in
