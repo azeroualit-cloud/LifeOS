@@ -16,7 +16,7 @@ enum NativeHealthMetric: String, CaseIterable, Identifiable {
         case .simulation: return "chart.xyaxis.line"
         }
     }
-    private static let nutritionSymbol = UIImage(systemName: "apple.slice") == nil ? "fork.knife" : "apple.slice"
+    private static let nutritionSymbol = "lifeos.nutrition.apple"
     var color: Color {
         switch self { case .tdee: return .orange; case .weight: return NativeDesign.healthWeight; case .calories: return .green; case .simulation: return .blue }
     }
@@ -108,7 +108,7 @@ private struct NativeHealthSummaryRow: View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
             let header = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: NativeDesign.Space.xs)) : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: NativeDesign.Space.small))
             header {
-                Label(metric.title, systemImage: metric.symbol).font(.subheadline.weight(.semibold)).foregroundStyle(metric.color)
+                Label { Text(metric.title) } icon: { NativeSymbol(symbol: metric.symbol) }.font(.subheadline.weight(.semibold)).foregroundStyle(metric.color)
                     .fixedSize(horizontal: false, vertical: true)
                 if !typeSize.isAccessibilitySize { Spacer(minLength: NativeDesign.Space.xs) }
                 HStack(spacing: NativeDesign.Space.xs) {

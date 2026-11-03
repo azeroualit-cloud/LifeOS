@@ -46,7 +46,9 @@ La cattura popolata verificata proviene dal test AppleHealthReference del run
 Quel caso è passato; il run complessivo era fallito per il selettore di test Bloom.
 Dati HealthKit sintetici: 7 giorni di peso e calorie. Geometria accessibile su
 393 × 852 pt: margini esterni/interni 16 pt, scheda peso 132 pt, calorie 133 pt,
-grafici larghi 80 pt e alti 44/50 pt. Energia alimentare verde con apple.slice,
+grafici larghi 80 pt e alti 44/50 pt. Energia alimentare verde con asset interno apple.slice,
+non disponibile come SF Symbol pubblico su questo runtime. LifeOS usa quindi
+un glifo vettoriale originale a forma di mela per intestazione e azione macro;
 peso viola con figure; valore grande e unità secondaria. LifeOS uniforma le
 schede a minimo 132 pt; TDEE arancio e simulazione blu distinguono metriche proprie.
 
