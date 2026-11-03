@@ -27,27 +27,26 @@ jobs:
         working-directory: app
         run: |
           set -euo pipefail
-          xcodebuild build-for-testing -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compile.log
-          python3 ../scripts/sign-simulator-session76.py simulator-build/Build/Products/Debug-iphonesimulator/LifeOSProbe.app
+          xcodebuild build-for-testing -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- 2>&1 | tee build/compile.log
           xcrun simctl bootstatus "$MAIN_DEVICE" -b
       - name: Primary domain and representative app flows
         if: matrix.variant == 'primary'
         working-directory: app
         run: |
           set -euo pipefail
-          xcodebuild test-without-building -derivedDataPath simulator-build -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeTests -only-testing:LifeOSProbeUITests/NativeRevision74UITests -only-testing:LifeOSProbeUITests/NativeRevision75UITests -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testLargeTextAndSixWeekCalendar -resultBundlePath build/Primary76.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/primary.log
+          xcodebuild test-without-building -derivedDataPath simulator-build -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeTests -only-testing:LifeOSProbeUITests/NativeRevision74UITests -only-testing:LifeOSProbeUITests/NativeRevision75UITests -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testLargeTextAndSixWeekCalendar -resultBundlePath build/Primary76.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- 2>&1 | tee build/primary.log
       - name: Compact representative app flows
         if: matrix.variant == 'compact'
         working-directory: app
         run: |
           set -euo pipefail
-          xcodebuild test-without-building -derivedDataPath simulator-build -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeRevision74UITests -only-testing:LifeOSProbeUITests/NativeRevision75UITests -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination -resultBundlePath build/Compact76.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compact.log
+          xcodebuild test-without-building -derivedDataPath simulator-build -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeRevision74UITests -only-testing:LifeOSProbeUITests/NativeRevision75UITests -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination -resultBundlePath build/Compact76.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- 2>&1 | tee build/compact.log
       - name: Prepare verified saved-session fixture after UI app installs
         if: matrix.variant == 'primary'
         working-directory: app
         run: |
           set -euo pipefail
-          xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeTests/NativeSessionVaultTests/testPrepareSyntheticSavedSessionForReleaseStartup -resultBundlePath build/SessionFixture76.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/session-fixture.log
+          xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeTests/NativeSessionVaultTests/testPrepareSyntheticSavedSessionForReleaseStartup -resultBundlePath build/SessionFixture76.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- 2>&1 | tee build/session-fixture.log
       - name: Exercise real Release startup including a saved session
         if: matrix.variant == 'primary'
         working-directory: app
@@ -55,8 +54,7 @@ jobs:
           LIFEOS_RELEASE_SESSION_FIXTURE: '1'
         run: |
           set -euo pipefail
-          xcodebuild build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -configuration Release -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -derivedDataPath release-build CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/release-compile.log
-          python3 ../scripts/sign-simulator-session76.py release-build/Build/Products/Release-iphonesimulator/LifeOSProbe.app
+          xcodebuild build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -configuration Release -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -derivedDataPath release-build CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- 2>&1 | tee build/release-compile.log
           python3 ../scripts/verify-release-launch75.py
       - name: Prove the delivered 75 binary has the reported incompatible import
         if: matrix.variant == 'package'
@@ -89,6 +87,22 @@ jobs:
           python3 ../scripts/verify-startup-imports.py download/LifeOS-76.ipa
           cd download
           shasum -a 256 LifeOS-76.ipa > SHA256.txt
+      - name: Capture simulator launch diagnostics
+        if: always() && matrix.variant != 'package'
+        working-directory: app
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json,shutil
+          out=Path('build/simulator-reports');out.mkdir(exist_ok=True)
+          for p in (Path.home()/'Library/Logs/DiagnosticReports').glob('LifeOSProbe*.ips'):
+              shutil.copy2(p,out/p.name)
+              raw=p.read_text(errors='replace')
+              try:
+                  decoder=json.JSONDecoder();_,end=decoder.raw_decode(raw);data=json.loads(raw[end:])
+                  print('SIMULATOR_CRASH_DIAGNOSTIC',p.name,data.get('exception'),data.get('termination'),data.get('asi'))
+              except Exception: print('SIMULATOR_REPORT_SAVED',p.name)
+          PY
       - name: Export synthetic UI evidence
         if: always() && matrix.variant != 'package'
         working-directory: app
@@ -104,6 +118,7 @@ jobs:
           name: LifeOS-76-${{ matrix.variant }}
           retention-days: 7
           path: |
+            app/build/simulator-reports
             app/build/*.log
             app/build/*.xcresult
             app/build/*-screenshots

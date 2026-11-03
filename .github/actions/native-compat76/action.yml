@@ -27,6 +27,9 @@ runs:
         cd app
         brew install xcodegen
         python3 scripts/check-design-system.py
+        if [ "${{ inputs.variant }}" != 'package' ]; then
+          python3 ../scripts/sign-simulator-session76.py
+        fi
         xcodegen generate
         mkdir -p build
     - name: Prepare actual supported simulator
