@@ -81,12 +81,11 @@ jobs:
           LIFEOS_ROUTING_WORKER=manual/build-75/worker.js node backend/expense-routing/tests/routing.test.mjs
           LIFEOS_ACTIVITY_WORKER=manual/build-75/worker.js node backend/activities/tests/worker.test.mjs
           node --input-type=module --check < manual/build-75/worker.js
-      - name: Verifica contesto backend live senza scritture
-        continue-on-error: true
+      - name: Verifica compatibilità delle competenze sul solo codice backend, senza query finanziarie
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           LIFEOS_BACKEND_AUDIT_ONLY: '1'
-        run: python3 scripts/deploy-unified-activities.py
+        run: python3 scripts/deploy-utilities-75.py
       - name: Verifica design system
         working-directory: app
         run: python3 scripts/check-design-system.py
