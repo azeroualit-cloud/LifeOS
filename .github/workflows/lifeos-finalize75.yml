@@ -1,0 +1,204 @@
+name: LifeOS 75 corrected regression and reviewable package
+on:
+  push:
+    paths: ['.github/workflows/lifeos-finalize75.yml', 'scripts/verify-revision75-evidence.py', 'native-next/UITests/NativeInterfaceTests.swift']
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: lifeos-finalize75-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  finalize:
+    if: contains(github.event.head_commit.message, '[finalize-75]')
+    runs-on: xcode-27
+    timeout-minutes: 55
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v5
+        with:
+          name: LifeOS-diagnostica
+          run-id: 41551009765
+          github-token: ${{ github.token }}
+          path: prior75
+      - name: Seleziona SDK Apple recente
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os, pathlib, re
+          found = []
+          for path in pathlib.Path('/Applications').glob('Xcode_*.app'):
+              match = re.fullmatch(r'Xcode_([0-9.]+)\.app', path.name)
+              if match:
+                  version = tuple(map(int, match[1].split('.')))
+                  if version[0] >= 26: found.append((version, path))
+          assert found, 'Serve Xcode 26 o successivo per il design Apple attuale.'
+          path = max(found, key=lambda x: x[0])[1]
+          with open(os.environ['GITHUB_ENV'], 'a') as f:
+              f.write('DEVELOPER_DIR=' + str(path / 'Contents/Developer') + '\n')
+          print('Xcode selezionato:', path.name)
+          PY
+      - name: Prepara progetto
+        run: |
+          set -euo pipefail
+          curl --fail --location --silent --show-error https://raw.githubusercontent.com/azeroualit-cloud/LifeOS/02c2c089841833a67fc9a223b367710edf7e37b9/lifeos-native.zip -o /tmp/lifeos-build60.zip
+          python3 - <<'PYZIP'
+          import pathlib, hashlib, zipfile, shutil
+          source = pathlib.Path('/tmp/lifeos-build60.zip')
+          assert hashlib.sha256(source.read_bytes()).hexdigest() == 'b09762b88e4dc017d2c89fa7582ac38daf1fddf5aa0dd12fed94d73f6099ef03'
+          with zipfile.ZipFile(source) as archive:
+              for name in archive.namelist():
+                  path = pathlib.PurePosixPath(name)
+                  assert not path.is_absolute() and '..' not in path.parts
+              archive.extractall('app')
+          overlay = pathlib.Path('native-next')
+          for path in overlay.rglob('*'):
+              if path.is_file() and path.parts[1] in ['Sources','Tests','UITests','Widget','Shared','project.yml','LifeOS.entitlements','Widget.entitlements']:
+                  target = pathlib.Path('app') / path.relative_to(overlay)
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  shutil.copy2(path,target)
+          PYZIP
+      - name: Verify previous XCTest evidence and exact production source identity
+        run: python3 scripts/verify-revision75-evidence.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verifica attività unificate e replay atomici
+        run: |
+          python3 scripts/build-worker-68.py
+          node backend/activities/tests/activities.test.mjs
+          node backend/activities/tests/worker.test.mjs
+          LIFEOS_ROUTING_WORKER=manual/build-68/worker.js node backend/expense-routing/tests/routing.test.mjs
+          node --input-type=module --check < manual/build-68/worker.js
+          python3 scripts/build-worker-70.py
+          node backend/movement-order/tests/creation.test.mjs
+          LIFEOS_ROUTING_WORKER=manual/build-70/worker.js node backend/expense-routing/tests/routing.test.mjs
+          LIFEOS_ACTIVITY_WORKER=manual/build-70/worker.js node backend/activities/tests/worker.test.mjs
+          python3 scripts/build-worker-75.py
+          python3 backend/utilities/tests/test_transform.py
+          node backend/utilities/tests/competence.test.mjs
+          LIFEOS_UTILITY_WORKER=manual/build-75/worker.js node backend/utilities/tests/budget.test.mjs
+          node backend/utilities/tests/routing.test.mjs
+          LIFEOS_ROUTING_WORKER=manual/build-75/worker.js node backend/expense-routing/tests/routing.test.mjs
+          LIFEOS_ACTIVITY_WORKER=manual/build-75/worker.js node backend/activities/tests/worker.test.mjs
+          node --input-type=module --check < manual/build-75/worker.js
+      - name: Verifica design system
+        working-directory: app
+        run: python3 scripts/check-design-system.py
+      - name: Genera progetto Xcode
+        working-directory: app
+        run: |
+          set -euo pipefail
+          brew install xcodegen
+          xcodegen generate
+          mkdir -p build
+      - name: Prepara iPhone 15 Pro
+        run: |
+          python3 - <<'PYDEVICE'
+          import json, os, re, subprocess
+          data=json.loads(subprocess.check_output(['xcrun','simctl','list','devices','available','-j']))
+          runtimes=json.loads(subprocess.check_output(['xcrun','simctl','list','runtimes','-j']))['runtimes']
+          kind='com.apple.CoreSimulator.SimDeviceType.iPhone-15-Pro'
+          choices=[r for r in runtimes if r.get('isAvailable') and '.iOS-' in r['identifier'] and any(d['identifier']==kind for d in r.get('supportedDeviceTypes',[]))]
+          assert choices, 'Nessun runtime compatibile con iPhone 15 Pro'
+          runtime=max(choices,key=lambda r:tuple(map(int,r['version'].split('.'))))
+          matches=[d['udid'] for d in data['devices'].get(runtime['identifier'],[]) if d['name']=='iPhone 15 Pro']
+          device=matches[0] if matches else subprocess.check_output(['xcrun','simctl','create','LifeOS iPhone 15 Pro',kind,runtime['identifier']],text=True).strip()
+          sdk=subprocess.check_output(['xcrun','--sdk','iphoneos','--show-sdk-version'],text=True).strip()
+          assert re.fullmatch(r'[0-9.]+',sdk) and re.fullmatch(r'[0-9.]+',runtime['version'])
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('MAIN_DEVICE='+device+'\nNATIVE_SDK_VERSION='+sdk+'\nNATIVE_RUNTIME_VERSION='+runtime['version']+'\n')
+          print(subprocess.check_output(['xcodebuild','-version'],text=True))
+          print('Test iPhone 15 Pro: SDK',sdk,'runtime iOS',runtime['version'])
+          PYDEVICE
+      - name: Compila app e test Apple
+        id: compile_native
+        timeout-minutes: 35
+        working-directory: app
+        run: |
+          set -euo pipefail
+          DEVICE="$MAIN_DEVICE"
+          echo "MAIN_DEVICE=$DEVICE" >> "$GITHUB_ENV"
+          xcodebuild build-for-testing -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$DEVICE" CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compile.log
+      - name: Verify corrected fund navigation on iPhone 15 Pro
+        timeout-minutes: 10
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcrun simctl boot "$MAIN_DEVICE" || true
+          xcrun simctl bootstatus "$MAIN_DEVICE" -b
+          xcodebuild test-without-building -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination -resultBundlePath build/RetryMain.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/retry-main.log
+      - name: Prepara simulatore compatto
+        id: prepare_compact
+        if: ${{ !cancelled() && steps.compile_native.outcome == 'success' }}
+        timeout-minutes: 25
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcrun simctl shutdown "$MAIN_DEVICE" || true
+          python3 - <<'PYCOMPACT'
+          import json,os,subprocess
+          kind='com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation'
+          runtimes=json.loads(subprocess.check_output(['xcrun','simctl','list','runtimes','-j']))['runtimes']
+          choices=[r for r in runtimes if r.get('isAvailable') and '.iOS-' in r['identifier'] and any(d['identifier']==kind for d in r.get('supportedDeviceTypes',[]))]
+          assert choices, 'Nessun runtime compatibile con iPhone SE 3'
+          runtime=max(choices,key=lambda r:tuple(map(int,r['version'].split('.'))))
+          device=subprocess.check_output(['xcrun','simctl','create','LifeOS compact',kind,runtime['identifier']],text=True).strip()
+          with open(os.environ['GITHUB_ENV'],'a') as f:f.write('COMPACT='+device+'\n')
+          with open('/tmp/lifeos-compact-device','w') as f:f.write(device)
+          print('Test iPhone SE 3: runtime iOS',runtime['version'])
+          PYCOMPACT
+          COMPACT=$(cat /tmp/lifeos-compact-device)
+          xcrun simctl boot "$COMPACT"
+          xcrun simctl bootstatus "$COMPACT" -b
+          xcrun simctl shutdown "$COMPACT"
+      - name: Verify corrected fund navigation on compact iPhone
+        timeout-minutes: 12
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcrun simctl boot "$COMPACT" || true
+          xcrun simctl bootstatus "$COMPACT" -b
+          xcodebuild test -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination -resultBundlePath build/RetryCompact.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/retry-compact.log
+      - name: Export retry screenshots even after failure
+        if: always()
+        working-directory: app
+        run: |
+          for kind in Main Compact; do
+            if [ -f "build/Retry$kind.xcresult/Info.plist" ]; then
+              xcrun xcresulttool export attachments --path "build/Retry$kind.xcresult" --output-path "build/retry-$kind-screenshots"
+              rm -rf build/focused-screenshots
+              cp -R "build/retry-$kind-screenshots" build/focused-screenshots
+              python3 ../scripts/print-native-previews.py main
+            fi
+          done
+      - name: Crea una sola IPA per iPhone
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcodebuild archive -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -configuration Release -destination 'generic/platform=iOS' -archivePath build/LifeOS.xcarchive CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/archive.log
+          test -d build/LifeOS.xcarchive/Products/Applications/LifeOSProbe.app
+          mkdir -p build/Payload download
+          cp -R build/LifeOS.xcarchive/Products/Applications/LifeOSProbe.app build/Payload/
+          cd build
+          zip -qr ../download/LifeOS-unsigned.ipa Payload
+          cd ../download
+          python3 ../../scripts/verify-native-package.py LifeOS-unsigned.ipa --version 0.10.14 --build 75
+          shasum -a 256 LifeOS-unsigned.ipa > SHA256.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: LifeOS-75-validated-package
+          retention-days: 7
+          path: |
+            app/build/*.log
+            app/build/*.json
+            app/build/*.xcresult
+            app/build/retry-*-screenshots
+            app/build/LifeOS-75-flussi.mp4
+            app/download

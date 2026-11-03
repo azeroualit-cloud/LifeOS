@@ -450,6 +450,25 @@ final class NativeInterfaceTests: XCTestCase {
         capture("dashboard-timeline-event-editor")
     }
 
+    private func revealExpenseFormElement(_ element: XCUIElement, in app: XCUIApplication) {
+        let list = app.collectionViews.firstMatch
+        let top = app.navigationBars.firstMatch.frame.maxY + 4
+        let bottom = min(list.frame.maxY, app.frame.maxY) - 8
+        for _ in 0..<16 {
+            if element.exists {
+                let frame = element.frame
+                if element.isHittable && frame.minY >= top && frame.maxY <= bottom { return }
+                let above = frame.midY < top
+                list.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: above ? 0.4 : 0.65))
+                    .press(forDuration: 0.05, thenDragTo: list.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: above ? 0.65 : 0.4)))
+            } else {
+                list.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.65))
+                    .press(forDuration: 0.05, thenDragTo: list.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.4)))
+            }
+        }
+        capture("expense-form-element-unreachable")
+        XCTFail("Il controllo deve essere visibile e premibile nel modulo: " + element.identifier)
+    }
     func testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination() {
         let app = launch(["--dark", "--expense-routing"])
         addButton(app).tap()
@@ -471,10 +490,15 @@ final class NativeInterfaceTests: XCTestCase {
         }
         capture("expense-category-menu-compact")
         XCTAssertTrue(water.isHittable); water.tap()
-        for _ in 0..<6 { if app.staticTexts["Dagli altri risparmi"].isHittable { break }; app.collectionViews.firstMatch.swipeUp() }
+        let initialDestination = app.buttons["expense-destination"]
+        revealExpenseFormElement(initialDestination, in: app)
+        XCTAssertTrue(initialDestination.isHittable)
+        XCTAssertTrue(initialDestination.label.contains("Acqua"))
+        let savings = app.descendants(matching: .any).matching(identifier: "expense-savings-preview").firstMatch
+        revealExpenseFormElement(savings, in: app)
+        XCTAssertTrue(savings.isHittable)
         XCTAssertTrue(app.staticTexts["Dagli altri risparmi"].exists)
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "10,00")).firstMatch.exists)
-        XCTAssertTrue(app.buttons["expense-destination"].label.contains("Acqua"))
         capture("expense-water-fund-and-savings-preview")
         app.buttons["Salva"].tap()
         XCTAssertTrue(app.tabBars.buttons["Altro"].waitForExistence(timeout: 10)); app.openOtherDestination("Finanza")
@@ -484,10 +508,12 @@ final class NativeInterfaceTests: XCTestCase {
         let row = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Acqua UI67")).firstMatch
         XCTAssertTrue(row.waitForExistence(timeout: 10)); row.tap()
         let change = app.buttons["movement-change-destination"]
-        for _ in 0..<6 { if change.isHittable { break }; app.collectionViews.firstMatch.swipeUp() }
+        revealExpenseFormElement(change, in: app)
         XCTAssertTrue(change.isHittable); change.tap()
         let destination = app.buttons["expense-destination"]
-        XCTAssertTrue(destination.waitForExistence(timeout: 10)); destination.tap(); app.buttons["Budget mensile"].tap()
+        revealExpenseFormElement(destination, in: app)
+        XCTAssertTrue(destination.waitForExistence(timeout: 10)); XCTAssertTrue(destination.isHittable)
+        destination.tap(); app.buttons["Budget mensile"].tap()
         capture("expense-change-existing-destination")
         let confirm = app.buttons["expense-destination-confirm"]
         XCTAssertTrue(confirm.isEnabled); confirm.tap()
