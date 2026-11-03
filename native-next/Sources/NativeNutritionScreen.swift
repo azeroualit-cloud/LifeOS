@@ -69,7 +69,6 @@ struct NativeNutritionScreen: View {
                     }
                 }
             }
-            Section { NavigationLink("Peso, calorie, fonti e TDEE") { NativeHealthDetail(health: health, demo: NativeHealthLaunchPolicy.simulated) } }
         }.navigationTitle("Nutrizione")
             .confirmationDialog("Eliminare questa registrazione e i suoi campioni LifeOS da Apple Salute?", isPresented: Binding(get: { deleting != nil }, set: { if !$0 { deleting = nil } })) {
                 Button("Elimina da LifeOS e Apple Salute", role: .destructive) { if let id = deleting { remove(id) }; deleting = nil }

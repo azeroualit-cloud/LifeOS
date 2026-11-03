@@ -86,7 +86,11 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
         entries = rows
     }
     func save(_ value: NativeNutritionEntry, retry: Bool = false) async -> Bool {
-        guard loaded, !busy, !entries.contains(where: { $0.deletionPending == true }) else { return false }
+        guard loaded, !busy else { return false }
+        guard !entries.contains(where: { $0.deletionPending == true }) else {
+            error = "Completa prima l’eliminazione in sospeso dalla cronologia."
+            return false
+        }
         guard value.protein >= 0, value.carbohydrate >= 0, value.fat >= 0, value.calories > 0,
               !value.calories.isNaN, NSDecimalNumber(decimal: value.calories).doubleValue.isFinite else { return false }
         busy = true; defer { busy = false }

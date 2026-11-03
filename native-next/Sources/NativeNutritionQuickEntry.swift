@@ -15,6 +15,7 @@ struct NativeNutritionQuickEntry: View {
     @FocusState private var focus: Field?
     private enum Field: Hashable { case protein, carbohydrate, fat }
     private var pending: NativeNutritionEntry? { nutrition.entries.first { $0.id == id && !$0.confirmed } }
+    private var hasPendingOperation: Bool { nutrition.entries.contains { !$0.confirmed || $0.deletionPending == true } }
     private var draft: NativeNutritionEntry? {
         guard let p = NativeNutritionEntry.grams(protein), let c = NativeNutritionEntry.grams(carbohydrate), let f = NativeNutritionEntry.grams(fat) else { return nil }
         return .init(id: id, revision: 0, date: date, protein: p, carbohydrate: c, fat: f, confirmed: false)
@@ -26,6 +27,10 @@ struct NativeNutritionQuickEntry: View {
                 Spacer()
                 Button("Cronologia") { showingHistory = true }
                     .frame(minHeight: NativeDesign.Layout.touchTarget)
+            }
+            if hasPendingOperation {
+                Button("Completa la registrazione in sospeso") { showingHistory = true }
+                    .font(.subheadline).frame(minHeight: NativeDesign.Layout.touchTarget)
             }
             let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: NativeDesign.Space.small)) : AnyLayout(HStackLayout(spacing: NativeDesign.Space.small))
             layout {
