@@ -61,7 +61,7 @@ struct DashboardScreen: View {
                         .accessibilityAddTraits(current ? .isSelected : [])
                 }
             }.dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-        }.padding(NativeDesign.Space.small).background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: 16))
+        }.padding(NativeDesign.Space.small).background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
     }
     private func openCalendar(_ day: String) {
         store.calendarMonth = String(day.prefix(7)); router.showCalendar(day: day, opensDay: false)
