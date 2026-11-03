@@ -21,6 +21,7 @@ jobs:
         with:
           node-version: '24.22.1'
       - name: Inspect shipped Apple Health resources with REA
+        timeout-minutes: 10
         continue-on-error: true
         shell: bash
         run: |
@@ -35,12 +36,29 @@ jobs:
           set -euo pipefail
           xcodebuild build-for-testing -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- 2>&1 | tee build/compile78.log
       - name: Capture native Apple Health reference
+        timeout-minutes: 10
         continue-on-error: true
         working-directory: app
         shell: bash
         run: |
           set -o pipefail
+          xcrun simctl ui "$MAIN_DEVICE" appearance dark
           xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeAppleHealthReferenceUITests -resultBundlePath build/AppleHealthReference78.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- 2>&1 | tee build/apple-health-reference78.log
+      - name: Export Apple Health reference screenshots
+        if: always()
+        shell: bash
+        run: |
+          if [ -f app/build/AppleHealthReference78.xcresult/Info.plist ]; then
+            xcrun xcresulttool export attachments --path app/build/AppleHealthReference78.xcresult --output-path app/build/apple-health-reference-screenshots78
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: revision78-apple-health-reference
+          path: |
+            app/build/apple-health-reference
+            app/build/apple-health-reference-screenshots78
+            app/build/apple-health-reference78.log
       - name: Test on iPhone 15 Pro
         working-directory: app
         shell: bash
@@ -69,9 +87,6 @@ jobs:
         run: |
           if [ -f app/build/Revision78.xcresult/Info.plist ]; then
             xcrun xcresulttool export attachments --path app/build/Revision78.xcresult --output-path app/build/screenshots78
-          fi
-          if [ -f app/build/AppleHealthReference78.xcresult/Info.plist ]; then
-            xcrun xcresulttool export attachments --path app/build/AppleHealthReference78.xcresult --output-path app/build/apple-health-reference-screenshots78
           fi
       - uses: actions/upload-artifact@v4
         if: always()

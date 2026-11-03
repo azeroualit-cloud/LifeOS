@@ -14,6 +14,12 @@ final class NativeRevision78UITests: XCTestCase {
     }
     func testPrayerSharesDateRowAndOpensAllTimes() {
         let app = launch()
+        for button in [app.buttons["Impostazioni"], app.buttons["primary-add"]] {
+            XCTAssertTrue(button.isHittable)
+            XCTAssertGreaterThanOrEqual(button.frame.width, 44)
+            XCTAssertLessThanOrEqual(button.frame.width, 48)
+            XCTAssertLessThanOrEqual(button.frame.height, 48)
+        }
         let date = app.staticTexts["home-today"], prayer = app.buttons["home-next-time"]
         XCTAssertTrue(prayer.waitForExistence(timeout: 10))
         XCTAssertLessThan(prayer.frame.minX, app.frame.maxX)
@@ -46,6 +52,36 @@ final class NativeRevision78UITests: XCTestCase {
         XCTAssertTrue(app.textFields["health-intake"].waitForExistence(timeout: 10))
         capture("78-simulation-detail", app)
     }
+    func testHealthAccessibleRowsRemainEqualAndActionsStayCompact() {
+        let app = launch(["--large-text"])
+        app.tabBars.buttons["Salute"].tap()
+        let rows = ["tdee", "weight", "calories", "simulation"].map { app.buttons["health-summary-" + $0] }
+        for row in rows { XCTAssertTrue(row.waitForExistence(timeout: 10)) }
+        let height = rows[0].frame.height
+        for row in rows { XCTAssertEqual(row.frame.height, height, accuracy: 1) }
+        capture("78-health-accessibility-top", app)
+        let surface = app.scrollViews["health-detail-scroll"]
+        for _ in 0..<4 { surface.swipeUp() }
+        capture("78-health-accessibility-bottom", app)
+        for id in ["health-add-weight", "health-add-nutrition"] {
+            let button = app.buttons[id]
+            XCTAssertTrue(button.isHittable)
+            XCTAssertEqual(button.frame.width, 44, accuracy: 1)
+            XCTAssertEqual(button.frame.height, 44, accuracy: 1)
+        }
+    }
+    func testBloomCancelClosesFilesAndAllowsRetry() {
+        let app = launch(["--bloom-import-fixture"])
+        app.tabBars.buttons["Bloom"].tap()
+        app.buttons["bloom-archive-menu"].tap(); app.buttons["Importa backup Bloom"].tap()
+        let cancel = app.buttons["Annulla"]
+        XCTAssertTrue(cancel.waitForExistence(timeout: 15)); cancel.tap()
+        XCTAssertTrue(app.buttons["bloom-section-library"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["bloom-section-library"].isHittable)
+        app.buttons["bloom-archive-menu"].tap(); app.buttons["Importa backup Bloom"].tap()
+        XCTAssertTrue(cancel.waitForExistence(timeout: 15)); cancel.tap()
+        capture("78-bloom-picker-cancel", app)
+    }
     func testBloomSystemFilesSelectionReachesPreviewAndPersists() {
         let app = launch(["--bloom-import-fixture"])
         app.tabBars.buttons["Bloom"].tap()
@@ -53,7 +89,7 @@ final class NativeRevision78UITests: XCTestCase {
         XCTAssertTrue(section.waitForExistence(timeout: 10))
         XCTAssertGreaterThanOrEqual(section.frame.height, 44)
         XCTAssertLessThanOrEqual(section.frame.height, 48)
-        app.buttons["Archivio"].tap()
+        app.buttons["bloom-archive-menu"].tap()
         app.buttons["Importa backup Bloom"].tap()
         let file = app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", "Bloom-UI-Fixture")).firstMatch
         let visible = file.waitForExistence(timeout: 20)
@@ -77,17 +113,62 @@ final class NativeRevision78UITests: XCTestCase {
 
 /// Reference capture uses a clean simulator; it never reads a personal device.
 final class NativeAppleHealthReferenceUITests: XCTestCase {
+    private func capture(_ name: String, _ app: XCUIApplication) {
+        let image = XCTAttachment(screenshot: app.screenshot())
+        image.name = name; image.lifetime = .keepAlways; add(image)
+        print("APPLE_HEALTH_REFERENCE_TREE_" + name + " " + app.debugDescription)
+    }
     func testCaptureAppleHealthReference() {
+        let seed = XCUIApplication()
+        seed.launchArguments = ["--visual-test", "--apple-health-reference-seed", "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"]
+        seed.launch()
+        let status = seed.staticTexts["apple-health-reference-seed-status"]
+        let authorization = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            (status.exists && status.label == "Dati pronti") || seed.switches.firstMatch.exists
+        }, object: nil)
+        XCTAssertEqual(XCTWaiter.wait(for: [authorization], timeout: 20), .completed)
+        if seed.switches.firstMatch.exists {
+                for toggle in seed.switches.allElementsBoundByIndex where toggle.isHittable && (toggle.value as? String) == "0" { toggle.tap() }
+                let allow = seed.buttons.matching(NSPredicate(format: "label IN %@", ["Consenti", "Allow", "Fine", "Done"])).firstMatch
+                if allow.exists && allow.isHittable { allow.tap() }
+        }
+        let prepared = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label == %@", "Dati pronti"), object: status)
+        let preparation = XCTWaiter.wait(for: [prepared], timeout: 30)
+        if preparation != .completed { capture("seed-permission-diagnostic", seed) }
+        XCTAssertEqual(preparation, .completed)
+        seed.terminate()
         let health = XCUIApplication(bundleIdentifier: "com.apple.Health")
         health.launchArguments = ["-AppleLanguages", "(it)", "-AppleLocale", "it_IT"]
         health.launch()
-        for index in 0..<12 {
-            let image = XCTAttachment(screenshot: health.screenshot())
-            image.name = "Apple-Health-reference-\(index)"; image.lifetime = .keepAlways; add(image)
-            print("APPLE_HEALTH_REFERENCE_TREE_\(index) " + health.debugDescription)
-            let names = ["Continua", "Continue", "Avanti", "Next", "Salta", "Skip", "Fine", "Done", "Non ora", "Not Now"]
-            guard let next = names.map({ health.buttons[$0] }).first(where: { $0.exists && $0.isHittable }) else { break }
-            next.tap()
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        if springboard.alerts.firstMatch.waitForExistence(timeout: 5) {
+            let deny = springboard.alerts.buttons.matching(NSPredicate(format: "label BEGINSWITH %@ OR label BEGINSWITH %@", "Don", "Non")).firstMatch
+            if deny.exists { deny.tap() }
         }
+        capture("summary-before-favorites", health)
+        let edit = health.buttons["UIA.Health.Inevidenza.Detail"]
+        XCTAssertTrue(edit.waitForExistence(timeout: 15)); edit.tap()
+        capture("favorites-editor", health)
+        for title in ["Energia alimentare", "Peso"] {
+            let search = health.searchFields.firstMatch
+            if search.exists && search.isHittable {
+                search.tap()
+                let old = (search.value as? String) ?? ""
+                search.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: old.count) + title)
+            }
+            let row = health.cells.matching(NSPredicate(format: "label CONTAINS[c] %@", title)).firstMatch
+            for _ in 0..<18 {
+                if row.exists && row.isHittable { break }
+                health.swipeUp()
+            }
+            if row.exists && row.isHittable { row.tap() }
+            else { print("REFERENCE_FAVORITE_NOT_FOUND " + title) }
+            capture("favorite-" + title, health)
+        }
+        let done = health.buttons.matching(NSPredicate(format: "label IN %@", ["Fine", "Done"])).firstMatch
+        if done.exists && done.isHittable { done.tap() }
+        let summary = health.tabBars.buttons["Riepilogo"]
+        if summary.exists && summary.isHittable { summary.tap() }
+        capture("populated-summary", health)
     }
 }

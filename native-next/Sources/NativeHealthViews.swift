@@ -447,7 +447,7 @@ struct NativeHealthMetricDetail: View {
             Text("La calibrazione usa i 30 giorni precedenti l’ultima pesata antecedente a oggi e confronta calorie cumulative e pesate originali dello stesso periodo. La mediana delle pendenze su intervalli lunghi riduce l’influenza di singole pesate anomale; la mediana mobile di 7 giorni è usata solo per disegnare il trend. Le variazioni di peso richiedono ancora una conversione energetica approssimata, 7.700 kcal/kg: acqua, glicogeno e tessuti non sono separabili esattamente da questi dati. I giorni calorici mancanti, al massimo il 10%, sono stimati dalla media e indicati esplicitamente; giorni registrati solo in parte non sono riconoscibili automaticamente. Non è una misura diretta del TDEE attuale né il modello NIH completo. La previsione mantiene il modello dinamico approssimato e presume attività futura simile a quella che il TDEE storico rappresenta. Nessuna fascia di confidenza non calibrata. I dati Salute restano in memoria sul dispositivo e non vengono inviati al server.")
                 .font(.footnote).foregroundStyle(NativeDesign.secondary)
             Link("Studio di riferimento", destination: URL(string: "https://pmc.ncbi.nlm.nih.gov/articles/PMC3880593/")!)
-        }
+        }.accessibilityIdentifier("health-method-disclosure")
     }
 
 }

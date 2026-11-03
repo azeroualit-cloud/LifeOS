@@ -26,12 +26,15 @@ import Combine
             return
         }
         guard available else { message = "Salute non è disponibile su questo dispositivo."; return }
+        loading = true
         do {
             let types: Set<HKObjectType> = [HKObjectType.quantityType(forIdentifier: .bodyMass)!, HKObjectType.quantityType(forIdentifier: .dietaryEnergyConsumed)!]
             let status = try await health.statusForAuthorizationRequest(toShare: [], read: types)
+            loading = false
             if status == .shouldRequest { await connect() }
             else { await refresh() }
         } catch {
+            loading = false
             message = "Salute non è accessibile. Verifica che la firma dell’app includa HealthKit. Controlla i permessi in Impostazioni > Salute."
         }
     }
@@ -131,13 +134,7 @@ import Combine
             item.weight = value // latest sample for a day
             result[day] = item
         }
-        var foodTotals: [Date: Double] = [:]
-        for sample in food {
-            let value = sample.quantity.doubleValue(for: .kilocalorie())
-            guard value.isFinite, value > 0 else { continue }
-            let day = calendar.startOfDay(for: sample.startDate)
-            foodTotals[day, default: 0] += value
-        }
+        let foodTotals = Self.calorieTotals(food, calendar: calendar)
         for (day, calories) in foodTotals {
             var item = result[day] ?? HealthDay(date: day)
             item.calories = calories // HealthKit wins over a local fallback, never sum both.
@@ -147,6 +144,16 @@ import Combine
         if days.isEmpty {
             message = "Nessun dato leggibile. Potrebbero mancare le registrazioni o i permessi: iOS non distingue questi casi."
         }
+    }
+    /// Every returned HealthKit energy sample contributes, irrespective of source app.
+    static func calorieTotals(_ samples: [HKQuantitySample], calendar: Calendar = .current) -> [Date: Double] {
+        var totals: [Date: Double] = [:]
+        for sample in samples {
+            let value = sample.quantity.doubleValue(for: .kilocalorie())
+            guard value.isFinite, value > 0 else { continue }
+            totals[calendar.startOfDay(for: sample.startDate), default: 0] += value
+        }
+        return totals
     }
     private func samples(_ identifier: HKQuantityTypeIdentifier, start: Date, end: Date) async throws -> [HKQuantitySample] {
         let type = HKObjectType.quantityType(forIdentifier: identifier)!

@@ -129,32 +129,43 @@ struct NativeBloomScreen: View {
                 if value == "Riscopri" { showTrash = false; hasOpenedRediscovery = true }
                 if value == "Mappa" { hasOpenedMap = true }
             }
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) { Button("Nuova nota", systemImage: "plus") { captureRecord = [:]; composing = true } }
-                ToolbarItem(placement: .secondaryAction) {
-                    Menu("Archivio", systemImage: "ellipsis") {
-                        Button(showTrash ? "Mostra Libreria" : "Cestino") { showTrash.toggle() }
-                        Button("Importa backup Bloom") { importing = true }
-                        Button("Catture da completare (\(captureInbox.requests.count))") { showingCaptures = true }
-                        Button("Ultimo rapporto importazione") { showingReport = true }.disabled(store.archive.lifeosImportReports?.isEmpty != false)
-                        Button("Esporta backup") { do { exportData = try store.export(); exporting = true } catch { store.error = error.localizedDescription } }
-                    }
-                }
-            }
+            .toolbar { bloomToolbar }
             .sheet(isPresented: $showingCaptures) { capturesSheet }
             .sheet(isPresented: $showingReport) { reportSheet }
             .sheet(isPresented: $composing) { NavigationStack { NativeBloomComposer(store: store, initial: captureRecord) } }
             .sheet(isPresented: $importing, onDismiss: prepareSelectedBackup) {
-                NativeBloomBackupPicker { result in
+                NativeBloomBackupPicker(completion: { result in
                     switch result {
                     case .success(let data): selectedBackup = data
                     case .failure(let error): store.error = error.localizedDescription
                     }
                     importing = false
-                }
+                }, onCancel: { importing = false })
             }
             .sheet(isPresented: Binding(get: { pendingData != nil }, set: { if !$0 { pendingData = nil } })) { importSheet }
             .fileExporter(isPresented: $exporting, document: NativeBloomDocument(data: exportData), contentType: .json, defaultFilename: "LifeOS-Bloom-backup") { result in if case .failure(let error) = result { store.error = error.localizedDescription } }
+    }
+    @ToolbarContentBuilder private var bloomToolbar: some ToolbarContent {
+        if #available(iOS 26.0, *) {
+            ToolbarItem(placement: .topBarLeading) { archiveMenu }.sharedBackgroundVisibility(.hidden)
+            ToolbarItem(placement: .topBarTrailing) { newNoteButton }.sharedBackgroundVisibility(.hidden)
+        } else {
+            ToolbarItem(placement: .topBarLeading) { archiveMenu }
+            ToolbarItem(placement: .topBarTrailing) { newNoteButton }
+        }
+    }
+    private var newNoteButton: some View {
+        NativeToolbarButton(symbol: "plus", label: "Nuova nota") { captureRecord = [:]; composing = true }
+    }
+    private var archiveMenu: some View {
+        Menu {
+            Button(showTrash ? "Mostra Libreria" : "Cestino") { showTrash.toggle() }
+            Button("Importa backup Bloom") { importing = true }
+            Button("Catture da completare (\(captureInbox.requests.count))") { showingCaptures = true }
+            Button("Ultimo rapporto importazione") { showingReport = true }.disabled(store.archive.lifeosImportReports?.isEmpty != false)
+            Button("Esporta backup") { do { exportData = try store.export(); exporting = true } catch { store.error = error.localizedDescription } }
+        } label: { NativeToolbarIcon(symbol: "ellipsis") }
+            .buttonStyle(.plain).accessibilityLabel("Archivio").accessibilityIdentifier("bloom-archive-menu")
     }
     private func prepareImportFixture() {
         #if DEBUG
@@ -163,7 +174,7 @@ struct NativeBloomScreen: View {
             let directory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
             let note: Record = ["id": .string("8A20F968-EF06-430B-86D4-41BB50A0D278"),
-                "kind": .string("text"), "text": .string("Bloom import UI fixture"),
+                "kind": .string("text"), "urlString": .string(""), "text": .string("Bloom import UI fixture"),
                 "title": .string("Bloom import UI fixture"), "capturedAt": .number(100),
                 "archived": .bool(false), "noteVersion": .int(1),
                 "noteFiles": .array([.object(["id": .string("8E87EC90-775A-438D-AD69-F8978087F1CD"),
@@ -183,14 +194,14 @@ struct NativeBloomScreen: View {
             await Task.yield()
             defer { preparingImport = false }
             do {
-                let preview = try store.preview(data)
+                let preview = try await Task.detached(priority: .userInitiated) { try NativeBloomStore.validatedBackup(data) }.value
                 let files = preview.items.flatMap { item -> [Record] in
                     (item["data"] != nil && item["data"] != .null ? [item] : []) + item.records("noteFiles")
                 }
                 let bytes = files.reduce(0) { $0 + (Data(base64Encoded: $1.text("data"))?.count ?? 0) }
                 let trashed = preview.items.filter { $0.flag("archived") }.count
                 pendingSummary = "\(preview.items.count) note, \(preview.collections.count) categorie, \(files.count) allegati (\(bytes) byte), \(trashed) note nel Cestino. Il Cestino viene conservato."
-                importConflicts = try store.conflicts(data); resolutions = [:]
+                importConflicts = try store.conflicts(data, validatedIncoming: preview); resolutions = [:]
                 pendingData = data
             } catch { store.error = error.localizedDescription }
         }

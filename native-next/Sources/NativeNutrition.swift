@@ -37,32 +37,34 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
 }
 
 @MainActor protocol NativeNutritionWriting {
-    func authorize() async throws
+    func authorize(includeFibre: Bool) async throws
     func write(_ entry: NativeNutritionEntry) async throws
     func delete(_ entry: NativeNutritionEntry) async throws
 }
 
 @MainActor final class NativeHealthNutritionWriter: NativeNutritionWriting {
     private let health = HKHealthStore()
-    private let identifiers: [HKQuantityTypeIdentifier] = [.dietaryProtein, .dietaryCarbohydrates, .dietaryFatTotal, .dietaryEnergyConsumed, .dietaryFiber]
-    func authorize() async throws {
+    private static let identifiers: [HKQuantityTypeIdentifier] = [.dietaryProtein, .dietaryCarbohydrates, .dietaryFatTotal, .dietaryEnergyConsumed, .dietaryFiber]
+    func authorize(includeFibre: Bool) async throws {
         guard HKHealthStore.isHealthDataAvailable() else { throw Message(text: "Apple Salute non è disponibile su questo dispositivo.") }
-        let types = identifiers.map { HKObjectType.quantityType(forIdentifier: $0)! }
+        let types = Self.identifiers.prefix(includeFibre ? 5 : 4).map { HKObjectType.quantityType(forIdentifier: $0)! }
         try await health.requestAuthorization(toShare: Set(types), read: [])
         guard types.allSatisfy({ health.authorizationStatus(for: $0) == .sharingAuthorized }) else { throw Message(text: "Autorizza la scrittura di tutti i macronutrienti e delle calorie in Apple Salute.") }
     }
     func write(_ entry: NativeNutritionEntry) async throws {
-        let amounts = [entry.protein, entry.carbohydrate, entry.fat, entry.calories, entry.fibre ?? 0]
-        let samples = zip(identifiers, amounts).enumerated().map { index, pair in
+        try await health.save(Self.samples(for: entry))
+    }
+    static func samples(for entry: NativeNutritionEntry) -> [HKQuantitySample] {
+        let amounts = [entry.protein, entry.carbohydrate, entry.fat, entry.calories] + (entry.fibre.map { [$0] } ?? [])
+        return zip(identifiers, amounts).enumerated().map { index, pair in
             HKQuantitySample(type: HKObjectType.quantityType(forIdentifier: pair.0)!, quantity: HKQuantity(unit: index == 3 ? .kilocalorie() : .gram(), doubleValue: NSDecimalNumber(decimal: pair.1).doubleValue), start: entry.date, end: entry.date,
                 metadata: [HKMetadataKeySyncIdentifier: "lifeos-nutrition-\(entry.id.uuidString)-\(index)", HKMetadataKeySyncVersion: NSNumber(value: entry.revision)])
         }
-        try await health.save(samples)
     }
     func delete(_ entry: NativeNutritionEntry) async throws {
         // deleteObjects only removes samples created by this application.
         // Preserve the original four indices; fibre is appended at index 4.
-        for (index, identifier) in identifiers.enumerated() {
+        for (index, identifier) in Self.identifiers.prefix(entry.fibre == nil ? 4 : 5).enumerated() {
             let type = HKObjectType.quantityType(forIdentifier: identifier)!
             let predicate = HKQuery.predicateForObjects(withMetadataKey: HKMetadataKeySyncIdentifier,
                 allowedValues: ["lifeos-nutrition-\(entry.id.uuidString)-\(index)"])
@@ -106,12 +108,13 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
             error = "Completa prima l’eliminazione in sospeso dalla cronologia."
             return false
         }
-        guard value.protein >= 0, value.carbohydrate >= 0, value.fat >= 0, (value.fibre ?? 0) >= 0, value.calories > 0,
-              !value.calories.isNaN, NSDecimalNumber(decimal: value.calories).doubleValue.isFinite else { return false }
+        let amounts = [value.protein, value.carbohydrate, value.fat, value.fibre ?? 0, value.calories]
+        guard amounts.allSatisfy({ !$0.isNaN && $0 >= 0 && NSDecimalNumber(decimal: $0).doubleValue.isFinite }),
+              value.calories > 0 else { return false }
         busy = true; defer { busy = false }
         error = nil
         do {
-            try await writer.authorize()
+            try await writer.authorize(includeFibre: value.fibre != nil)
             let old = entries.first { $0.id == value.id }
             if let expectedRevision, old?.revision != expectedRevision {
                 throw Message(text: "La registrazione è cambiata o è stata eliminata. Riaprila dalla cronologia prima di modificarla.")
@@ -138,7 +141,7 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
             // until every type has acknowledged deletion and the index is saved.
             entry.deletionPending = true
             try persist(entries.map { $0.id == id ? entry : $0 })
-            try await writer.authorize()
+            try await writer.authorize(includeFibre: entry.fibre != nil)
             try await writer.delete(entry)
             try persist(entries.filter { $0.id != id })
             return true

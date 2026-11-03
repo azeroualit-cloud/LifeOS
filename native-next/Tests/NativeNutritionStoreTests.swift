@@ -6,11 +6,12 @@ import XCTest
     var deletions: [UUID] = []
     var fail = false
     var denied = false
+    var authorizationRequests: [Bool] = []
     func delete(_ entry: NativeNutritionEntry) async throws {
         deletions.append(entry.id)
         if fail { throw Message(text: "Interrupted deletion") }
     }
-    func authorize() async throws { if denied { throw Message(text: "Denied") } }
+    func authorize(includeFibre: Bool) async throws { authorizationRequests.append(includeFibre); if denied { throw Message(text: "Denied") } }
     func write(_ entry: NativeNutritionEntry) async throws {
         writes.append(entry)
         if fail { throw Message(text: "Interrupted after remote save") }
@@ -41,6 +42,7 @@ import XCTest
         let saved = await restarted.save(pending, retry: true); XCTAssertTrue(saved)
         XCTAssertEqual(writer.writes.map(\.revision), [1, 1])
         XCTAssertEqual(writer.writes.map(\.calories), [90, 90])
+        XCTAssertEqual(writer.authorizationRequests, [true, true])
         XCTAssertEqual(restarted.entries.first?.fibre, Decimal(string: "1.6"))
     }
     func testDeniedDeletionRetainsRecoverableRow() async {
@@ -53,6 +55,7 @@ import XCTest
         XCTAssertEqual(store.entries.first?.id, original.id)
         XCTAssertEqual(store.entries.first?.deletionPending, true)
         XCTAssertTrue(writer.deletions.isEmpty)
+        XCTAssertEqual(writer.authorizationRequests, [false, false], "Legacy entries must not require fibre authorization")
     }
     func testInterruptedDeletionSurvivesRestartAndRetryKeepsIdentity() async {
         let root = directory(); defer { try? FileManager.default.removeItem(at: root) }

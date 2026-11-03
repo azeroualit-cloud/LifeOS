@@ -16,18 +16,22 @@ struct NativeToolbarButton: View {
     let action: () -> Void
 
     var body: some View {
-        if #available(iOS 26.0, *) {
-            Button(action: action) { icon.glassEffect(.regular.interactive(), in: Circle()) }.buttonStyle(.plain)
-                .accessibilityLabel(label)
-        } else {
-            Button(action: action) { icon.background(.thinMaterial, in: Circle()) }.buttonStyle(.plain)
-                .accessibilityLabel(label)
-        }
+        Button(action: action) { NativeToolbarIcon(symbol: symbol) }.buttonStyle(.plain)
+            .accessibilityLabel(label)
+    }
+}
+
+struct NativeToolbarIcon: View {
+    let symbol: String
+    @ViewBuilder var body: some View {
+        if #available(iOS 26.0, *) { icon.glassEffect(.regular.interactive(), in: Circle()) }
+        else { icon.background(.thinMaterial, in: Circle()) }
     }
     private var icon: some View {
         Image(systemName: symbol).font(NativeDesign.symbol)
             .symbolRenderingMode(.monochrome).foregroundStyle(NativeDesign.accent)
-            .frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget)
+            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+            .frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget)
             .contentShape(Rectangle())
     }
 }

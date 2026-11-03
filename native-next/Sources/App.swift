@@ -42,7 +42,8 @@ import UIKit
     }
     @ViewBuilder private var rootContent: some View {
         #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("--widget-preview") { NativeWidgetPreview() }
+        if ProcessInfo.processInfo.arguments.contains("--apple-health-reference-seed") { NativeAppleHealthReferenceSeed() }
+        else if ProcessInfo.processInfo.arguments.contains("--widget-preview") { NativeWidgetPreview() }
         else if ProcessInfo.processInfo.arguments.contains("--signin-preview") { NavigationStack { NativeSignInScreen {} } }
         else { NativeRoot() }
         #else

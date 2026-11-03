@@ -7,8 +7,9 @@ import UniformTypeIdentifiers
 /// picker delegate while UIKit is still dismissing that controller.
 struct NativeBloomBackupPicker: UIViewControllerRepresentable {
     let completion: (Result<Data, Error>) -> Void
+    let onCancel: () -> Void
 
-    func makeCoordinator() -> Coordinator { Coordinator(completion: completion) }
+    func makeCoordinator() -> Coordinator { Coordinator(completion: completion, onCancel: onCancel) }
     func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
         let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.json, .data], asCopy: true)
         #if DEBUG
@@ -24,12 +25,24 @@ struct NativeBloomBackupPicker: UIViewControllerRepresentable {
 
     final class Coordinator: NSObject, UIDocumentPickerDelegate {
         private let completion: (Result<Data, Error>) -> Void
+        private let onCancel: () -> Void
         private var completed = false
-        init(completion: @escaping (Result<Data, Error>) -> Void) { self.completion = completion }
+        init(completion: @escaping (Result<Data, Error>) -> Void, onCancel: @escaping () -> Void) {
+            self.completion = completion; self.onCancel = onCancel
+        }
+
+        func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+            guard !completed else { return }
+            completed = true; onCancel()
+        }
 
         func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-            guard !completed, let url = urls.first else { return }
+            guard !completed else { return }
             completed = true
+            guard let url = urls.first else {
+                completion(.failure(Message(text: "Nessun file selezionato. Riprova l’importazione.")))
+                return
+            }
             completion(Result { try Self.read(url) })
         }
         private static func read(_ url: URL) throws -> Data {

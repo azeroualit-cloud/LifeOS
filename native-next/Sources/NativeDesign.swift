@@ -18,6 +18,8 @@ enum NativeDesign {
     static let actionSurface = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor(white: 0.17, alpha: 1) : .tertiarySystemFill })
     static let calendarAccent = Color(uiColor: .systemBlue)
     static func calendarNumber(size: CGFloat) -> Font { .system(size: size, weight: .regular, design: .default) }
+    static let healthCanvas = Color(uiColor: .systemGroupedBackground)
+    static let healthSurface = Color(uiColor: .secondarySystemGroupedBackground)
     static let healthAccent = Color(uiColor: .systemOrange)
     static let healthGray = Color(uiColor: .systemGray)
     static let healthHistoricalBar = healthGray.opacity(0.28)

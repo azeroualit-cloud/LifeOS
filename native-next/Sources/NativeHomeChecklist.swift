@@ -10,7 +10,7 @@ struct NativeHomeChecklistItem: Identifiable {
 }
 
 enum NativeHomeChecklist {
-    static func rows(tasks: [Record], events: [Record], routines: [Record], today: String) -> [NativeHomeChecklistItem] {
+    static func rows(events: [Record], routines: [Record], today: String) -> [NativeHomeChecklistItem] {
         // The home is an attention window, not a second task library.
         let last = CivilDate.adding(2, to: today)
         var result: [NativeHomeChecklistItem] = events.filter {

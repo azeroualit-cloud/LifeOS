@@ -62,7 +62,7 @@ struct NativeNutritionScreen: View {
                         Button { load(entry) } label: {
                             VStack(alignment: .leading) {
                                 Text(entry.date.formatted(date: .abbreviated, time: .omitted))
-                                Text("P \(NSDecimalNumber(decimal: entry.protein)) · C \(NSDecimalNumber(decimal: entry.carbohydrate)) · G \(NSDecimalNumber(decimal: entry.fat)) g — \(NSDecimalNumber(decimal: entry.calories)) kcal").font(.caption).foregroundStyle(.secondary)
+                                Text("P \(NSDecimalNumber(decimal: entry.protein)) · C \(NSDecimalNumber(decimal: entry.carbohydrate)) · G \(NSDecimalNumber(decimal: entry.fat)) · F \(NSDecimalNumber(decimal: entry.fibre ?? 0)) g — \(NSDecimalNumber(decimal: entry.calories)) kcal").font(.caption).foregroundStyle(.secondary)
                             }
                         }
                         .swipeActions { Button("Elimina", role: .destructive) { deleting = entry.id }.disabled(nutrition.busy) }
@@ -84,8 +84,9 @@ struct NativeNutritionScreen: View {
                 Button("Annulla", role: .cancel) { deleting = nil }
             }
             .toolbar { ToolbarItemGroup(placement: .keyboard) { Spacer()
-                if focusedField == "Proteine" || focusedField == "Carboidrati" {
-                    Button("Avanti") { focusedField = focusedField == "Proteine" ? "Carboidrati" : "Grassi" }
+                let fields = ["Proteine", "Carboidrati", "Grassi", "Fibre", "Calorie etichetta", "Porzione effettiva"]
+                if let focusedField, let index = fields.firstIndex(of: focusedField), index + 1 < fields.count {
+                    Button("Avanti") { self.focusedField = fields[index + 1] }
                 }
                 Button("Fine") { focusedField = nil }.accessibilityIdentifier("nutrition-keyboard-done") } }
     }

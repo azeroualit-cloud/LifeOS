@@ -48,7 +48,9 @@ import SwiftUI
     var allocations: [Record] { state.plan.records("allocations") }
     var dashboardEvents: [Record] {
         let today = CivilDate.day()
-        return isDemo ? expandedEvents(low: today, high: CivilDate.adding(7, to: today), source: life.records("events")) : life.records("upcomingEvents")
+        // Upcoming excludes timed events that started earlier today. Open events
+        // for the attention checklist also come from the independent activity range.
+        return isDemo ? expandedEvents(low: today, high: CivilDate.adding(7, to: today), source: life.records("events")) : life.records("activityEvents") + life.records("upcomingEvents") + life.records("events")
     }
     var events: [Record] {
         guard isDemo else { return life.records("events").map { NativeActivityCatalog.calendarRecord($0) } }

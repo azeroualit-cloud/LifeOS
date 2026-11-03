@@ -14,10 +14,9 @@ struct DashboardScreen: View {
     var body: some View {
         TimelineView(.periodic(from: .now, by: 60)) { context in
             let now = context.date, today = CivilDate.day(now)
-            let summary = NativeHomeSummary(now: now, todayShift: store.shift(today), tomorrowShift: store.shift(CivilDate.adding(1, to: today)), previousShift: store.shift(CivilDate.adding(-1, to: today)), events: store.dashboardEvents, weather: store.weather == "Meteo non disponibile" ? nil : store.weatherDetails, weatherDate: store.weatherDate, calendarAvailable: NativeHomeSummary.hasCalendarData(life: store.life, demo: store.isDemo))
             ScrollView {
                 VStack(alignment: .leading, spacing: NativeDesign.Space.large) {
-                    heading(summary, today: today, now: now)
+                    heading(today: today, now: now)
                     rollingCalendar(today)
                     checklist(today: today)
                     financeOverview
@@ -66,7 +65,7 @@ struct DashboardScreen: View {
         store.calendarMonth = String(day.prefix(7)); router.showCalendar(day: day, opensDay: false)
         Task { await store.sync(scope: .life) }
     }
-    private func heading(_ summary: NativeHomeSummary, today: String, now: Date) -> some View {
+    private func heading(today: String, now: Date) -> some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
             HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.small) {
                 Text(CivilDate.label(today).capitalized).accessibilityIdentifier("home-today")
@@ -104,7 +103,7 @@ struct DashboardScreen: View {
         }.animation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration), value: model.phase)
     }
     private func checklist(today: String) -> some View {
-        let items = NativeHomeChecklist.rows(tasks: store.tasks, events: store.dashboardEvents, routines: store.todayRoutines, today: today)
+        let items = NativeHomeChecklist.rows(events: store.dashboardEvents, routines: store.todayRoutines, today: today)
         return VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
             NativeSectionHeader("Cose da fare", titleIdentifier: "home-checklist-heading") {
                 Menu("Gestisci") {
@@ -115,12 +114,12 @@ struct DashboardScreen: View {
             }
             if items.isEmpty { Text("Nessun impegno da mostrare").font(.subheadline).foregroundStyle(NativeDesign.secondary) }
             ForEach(items) { item in
-                checklistRow(item, today: today)
+                checklistRow(item)
                 if item.id != items.last?.id { Divider().padding(.leading, NativeDesign.Layout.touchTarget + NativeDesign.Space.small) }
             }
         }
     }
-    @ViewBuilder private func checklistRow(_ item: NativeHomeChecklistItem, today: String) -> some View {
+    @ViewBuilder private func checklistRow(_ item: NativeHomeChecklistItem) -> some View {
         let record = item.record
         switch item.kind {
         case .event: HomeAgendaRow(event: record)
@@ -137,14 +136,16 @@ struct DashboardScreen: View {
                     .frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget)
                     .contentShape(Rectangle())
             }.buttonStyle(NativePressStyle())
-                .accessibilityLabel("Prossimo orario, " + next.label + ", " + next.displayTime)
+                .accessibilityLabel("Prossimo orario, " + next.label + ", " + next.displayTime + (next.day == CivilDate.day(now) ? "" : ", domani"))
                 .accessibilityIdentifier("home-next-time")
                 .sheet(isPresented: $showingTimes) {
                     NavigationStack {
                         List {
-                            Section("Empoli · " + CivilDate.label(next.day)) {
-                                ForEach(NativeNextTime.schedule(day: next.day), id: \.label) { time in
-                                    LabeledContent(time.label, value: time.time).monospacedDigit()
+                            ForEach(Array(Set([CivilDate.day(now), next.day])).sorted(), id: \.self) { day in
+                                Section("Empoli · " + CivilDate.label(day)) {
+                                    ForEach(NativeNextTime.schedule(day: day), id: \.label) { time in
+                                        LabeledContent(time.label, value: time.time).monospacedDigit()
+                                    }
                                 }
                             }
                             Section { Text("Orari indicativi calcolati sul dispositivo per Empoli, nel fuso Europe/Rome.").font(.caption).foregroundStyle(NativeDesign.secondary) }

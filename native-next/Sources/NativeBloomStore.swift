@@ -217,7 +217,9 @@ struct NativeBloomArchive: Codable {
         var result = archive; result.items = try archive.items.map(hydrated); result.createdAt = Date().timeIntervalSinceReferenceDate
         return try JSONEncoder().encode(result)
     }
-    func preview(_ data: Data) throws -> NativeBloomArchive {
+    func preview(_ data: Data) throws -> NativeBloomArchive { try Self.validatedBackup(data) }
+
+    nonisolated static func validatedBackup(_ data: Data) throws -> NativeBloomArchive {
         guard data.count <= 100 * 1024 * 1024 else { throw Message(text: "Backup superiore a 100 MiB.") }
         var incoming = try JSONDecoder().decode(NativeBloomArchive.self, from: data)
         func normalized(_ source: Record) -> Record {
@@ -264,8 +266,8 @@ struct NativeBloomArchive: Codable {
         guard total <= 60 * 1024 * 1024 else { throw Message(text: "Contenuti superiori a 60 MiB.") }
         return incoming
     }
-    func conflicts(_ data: Data) throws -> [NativeBloomConflict] {
-        let incoming = try preview(data)
+    func conflicts(_ data: Data, validatedIncoming: NativeBloomArchive? = nil) throws -> [NativeBloomConflict] {
+        let incoming = try validatedIncoming ?? preview(data)
         let encoder = JSONEncoder(); encoder.outputFormatting = [.sortedKeys]
         var result: [NativeBloomConflict] = []
         let sourceHash = digest(data)

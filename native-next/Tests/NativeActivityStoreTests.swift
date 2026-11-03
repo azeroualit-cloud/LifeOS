@@ -3,6 +3,24 @@ import XCTest
 @testable import LifeOSProbe
 
 @MainActor final class NativeActivityStoreTests: XCTestCase {
+    func testHomeKeepsEarlierTodayEvenWhenUpcomingHasAlreadyExcludedIt() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let today = CivilDate.day(), tomorrow = CivilDate.adding(1, to: CivilDate.day())
+        let earlier: Record = ["id": .int(1), "day": .string(today), "start_time": .string("00:01"), "occurrence_status": .string("open")]
+        let future: Record = ["id": .int(2), "day": .string(tomorrow), "occurrence_status": .string("open")]
+        var archive = NativeArchive(); archive.demo = false; archive.routineDay = today
+        archive.life = ["today": .string(today), "routines": .array([]),
+            "activityEvents": .array([.object(earlier), .object(future)]),
+            "upcomingEvents": .array([.object(future)]), "events": .array([]),
+            "tasks": .array([.object(["id": .int(99), "title": .string("Generic task"), "status": .string("todo")])])]
+        try JSONEncoder().encode(archive).write(to: directory.appendingPathComponent("lifeos-native-v2.json"))
+        let store = NativeStore(directory: directory, migrateLegacy: false, automaticallySyncsWrites: false)
+        store.calendarMonth = "2099-10"
+        let rows = NativeHomeChecklist.rows(events: store.dashboardEvents, routines: store.todayRoutines, today: today)
+        XCTAssertEqual(rows.map(\.id), ["event:1:" + today, "event:2:" + tomorrow])
+    }
     func testOperationalEventsIgnoreCalendarFocusAndRolloverWithoutRoutines() throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)

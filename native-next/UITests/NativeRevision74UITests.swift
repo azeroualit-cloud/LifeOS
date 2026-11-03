@@ -35,6 +35,10 @@ final class NativeRevision74UITests: XCTestCase {
         app.tabBars.buttons["Salute"].tap()
         XCTAssertTrue(app.navigationBars["Salute"].waitForExistence(timeout: 10))
         app.buttons["health-summary-weight"].tap()
+        // The compact metric detail fits on screen. Expand its real method
+        // content to exercise vertical scrolling while dragging over the chart.
+        let method = app.buttons["health-method-disclosure"]
+        XCTAssertTrue(method.waitForExistence(timeout: 10)); method.tap()
         let chart = app.descendants(matching: .any).matching(identifier: "health-weight-chart").firstMatch
         let surface = app.scrollViews["health-detail-scroll"]
         for _ in 0..<10 {
