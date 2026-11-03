@@ -1,11 +1,11 @@
 # Revisione 78 — contratto e verifiche
 
-Versione prevista: 0.10.17 (78), base consegnata 0.10.16 (77).
-L’IPA 78 non è ancora consegnata: resta la verifica completa e il packaging.
+Versione verificata: 0.10.17 (78), base consegnata 0.10.16 (77).
+Sorgente applicativa: 33574a2114ea6e0d378f69d06aadf60378cf55e9.
 
 | Area | Comportamento | Verifica |
 |---|---|---|
-| Dashboard | Ora della preghiera accanto alla data; tocco apre tutti gli orari | Geometria e apertura su 15 Pro |
+| Dashboard | Solo HH:mm accanto alla data anche la sera; tocco apre tutti gli orari | Geometria e apertura su 15 Pro |
 | Toolbar | Cerchio visivo 36 pt, area tattile 44 pt | Misure UI reali |
 | Attenzione | Eventi di oggi, abitudini di oggi, eventi domani/dopodomani; nessuna attività generica | Ordinamento, esclusioni, eventi già iniziati |
 | Finanza | Titolo/icona/freccia; numero e Budget; Aggiungi spesa a destra | Geometria e apertura editor |
@@ -59,15 +59,32 @@ attuale con il riferimento. Questa scelta evita di ricatturare a ogni build il
 catalogo Apple, che su un successivo avvio è rimasto vuoto nel suo editor.
 La suite LifeOS resta interamente rieseguita sulla sorgente da consegnare.
 
-## Evidenza corrente
+## Evidenza finale
 
-[Run mirato 41709267648](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41709267648),
-sorgente 110cb0451b0683043c855a26861bad5f3aa96f25:
-267 test unitari e tutte le 6 prove UI LifeOS passano, compresa la selezione dal
-selettore File, anteprima, importazione, riavvio e nota ancora visibile. Il run
-complessivo fallisce solo per il catalogo vuoto dell’app Apple di riferimento.
+[Run completo 41721041653](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41721041653),
+sorgente 33574a2114ea6e0d378f69d06aadf60378cf55e9: validazione e packaging riusciti.
 
-La verifica finale deve rieseguire l’intera suite 74/75/77/78, verificare quattro
-avvii Release (nuova installazione, aggiornamento, dati popolati, sessione salvata),
-archiviare app e widget arm64 e verificare versione/build/import startup/hash IPA.
+- 267 test unitari e 15 prove UI su iPhone 15 Pro simulato, zero fallimenti.
+- File → JSON sintetico con allegato di 6 MiB → anteprima → importazione →
+  riavvio → nota ancora visibile. Annullamento e riapertura del selettore verificati.
+- Testo normale, modalità chiara/scura e testo accessibile: schede uniformi,
+  azioni grafiche compatte con area tattile 44 pt; controllo visivo delle schermate.
+- Caso serale della preghiera: il testo visibile è solo l’ora. Il giorno resta
+  nella descrizione VoiceOver e nella schermata degli orari.
+- Quattro avvii Release reali, ciascuno osservato per 25 secondi: installazione
+  nuova, aggiornamento, archivio sintetico popolato, sessione sintetica salvata.
+  Nessun flag DEBUG utilizzato per questi avvii.
+- Nuova ispezione REA di Info.plist e catalogo completo di 929 risorse, medesimo
+  hash Assets.car del riferimento. Il timeout di compilazione del suo helper
+  Swift è configurato a 300 secondi per i runner Xcode appena inizializzati.
+- IPA arm64 app e widget 0.10.17 (78), package verifier e startup-import verifier
+  riusciti anche sul file scaricato localmente. Nessun import debole del confronto
+  Date incompatibile con il runtime usato; SDK/runtime 27.0.
+
+SHA-256 IPA: d281d9d885ea4cc221022d3c52bf3fe00b876f77273821867d617a2be2b911e7.
+
+[IPA diretta](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.17-build78/LifeOS-78.ipa).
+Aggiornare senza disinstallare. Il backup personale va importato dal menu Archivio
+in Bloom; non è incluso nell’IPA. Il controllo del file personale è stato locale
+e in lettura, mentre le prove UI hanno utilizzato esclusivamente dati sintetici.
 Nessuna prova fisica è stata eseguita sull’iPhone dell’utente.
