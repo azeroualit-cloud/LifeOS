@@ -3,8 +3,13 @@ import XCTest
 
 @MainActor private final class NutritionWriterProbe: NativeNutritionWriting {
     var writes: [NativeNutritionEntry] = []
+    var deletions: [UUID] = []
     var fail = false
     var denied = false
+    func delete(_ entry: NativeNutritionEntry) async throws {
+        deletions.append(entry.id)
+        if fail { throw Message(text: "Interrupted deletion") }
+    }
     func authorize() async throws { if denied { throw Message(text: "Denied") } }
     func write(_ entry: NativeNutritionEntry) async throws {
         writes.append(entry)
@@ -14,6 +19,41 @@ import XCTest
 @MainActor final class NativeNutritionStoreTests: XCTestCase {
     private func directory() -> URL { FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString) }
     private func entry() -> NativeNutritionEntry { .init(id: UUID(), revision: 0, date: Date(), protein: 10, carbohydrate: 20, fat: 5, confirmed: false) }
+    func testLegacyEntriesWithoutDeletionFieldRemainReadable() throws {
+        var json = try XCTUnwrap(JSONSerialization.jsonObject(with: JSONEncoder().encode(entry())) as? [String: Any])
+        json.removeValue(forKey: "deletionPending")
+        let decoded = try JSONDecoder().decode(NativeNutritionEntry.self, from: JSONSerialization.data(withJSONObject: json))
+        XCTAssertNil(decoded.deletionPending)
+        XCTAssertEqual(decoded.calories, 165)
+    }
+    func testDeniedDeletionRetainsRecoverableRow() async {
+        let root = directory(); defer { try? FileManager.default.removeItem(at: root) }
+        let writer = NutritionWriterProbe(), original = entry()
+        let store = NativeNutritionStore(directory: root, writer: writer)
+        let saved = await store.save(original); XCTAssertTrue(saved)
+        writer.denied = true
+        let removed = await store.delete(original.id); XCTAssertFalse(removed)
+        XCTAssertEqual(store.entries.first?.id, original.id)
+        XCTAssertEqual(store.entries.first?.deletionPending, true)
+        XCTAssertTrue(writer.deletions.isEmpty)
+    }
+    func testInterruptedDeletionSurvivesRestartAndRetryKeepsIdentity() async {
+        let root = directory(); defer { try? FileManager.default.removeItem(at: root) }
+        let writer = NutritionWriterProbe(), original = entry()
+        let store = NativeNutritionStore(directory: root, writer: writer)
+        let saved = await store.save(original); XCTAssertTrue(saved)
+        writer.fail = true
+        let removed = await store.delete(original.id); XCTAssertFalse(removed)
+        XCTAssertEqual(store.entries.first?.deletionPending, true)
+        let restarted = NativeNutritionStore(directory: root, writer: writer)
+        XCTAssertEqual(restarted.entries.first?.deletionPending, true)
+        let blocked = await restarted.save(entry()); XCTAssertFalse(blocked)
+        writer.fail = false
+        let retried = await restarted.delete(original.id); XCTAssertTrue(retried)
+        XCTAssertTrue(restarted.entries.isEmpty)
+        XCTAssertTrue(NativeNutritionStore(directory: root, writer: writer).entries.isEmpty)
+        XCTAssertEqual(writer.deletions, [original.id, original.id])
+    }
     func testRetryAfterRestartRetainsIdentityRevisionAndPayload() async {
         let root = directory(); defer { try? FileManager.default.removeItem(at: root) }
         let writer = NutritionWriterProbe(); writer.fail = true

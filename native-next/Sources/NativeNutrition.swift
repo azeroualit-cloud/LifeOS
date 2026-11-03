@@ -10,6 +10,7 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
     var carbohydrate: Decimal
     var fat: Decimal
     var confirmed: Bool
+    var deletionPending: Bool? = nil
     var calories: Decimal { protein * 4 + carbohydrate * 4 + fat * 9 }
     static func grams(_ text: String) -> Decimal? {
         let value = text.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -23,6 +24,7 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
 @MainActor protocol NativeNutritionWriting {
     func authorize() async throws
     func write(_ entry: NativeNutritionEntry) async throws
+    func delete(_ entry: NativeNutritionEntry) async throws
 }
 
 @MainActor final class NativeHealthNutritionWriter: NativeNutritionWriting {
@@ -42,6 +44,23 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
         }
         try await health.save(samples)
     }
+    func delete(_ entry: NativeNutritionEntry) async throws {
+        // deleteObjects only removes samples created by this application.
+        // Exact sync identifiers include all revisions of these four samples.
+        for (index, identifier) in identifiers.enumerated() {
+            let type = HKObjectType.quantityType(forIdentifier: identifier)!
+            let predicate = HKQuery.predicateForObjects(withMetadataKey: HKMetadataKeySyncIdentifier,
+                allowedValues: ["lifeos-nutrition-\(entry.id.uuidString)-\(index)"])
+            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+                health.deleteObjects(of: type, predicate: predicate) { success, _, error in
+                    if let error { continuation.resume(throwing: error) }
+                    else if success { continuation.resume() }
+                    else { continuation.resume(throwing: Message(text: "Eliminazione da Apple Salute non confermata. Riprova dalla cronologia.")) }
+                }
+            }
+        }
+    }
+
 }
 
 @MainActor final class NativeNutritionStore: ObservableObject {
@@ -67,7 +86,7 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
         entries = rows
     }
     func save(_ value: NativeNutritionEntry, retry: Bool = false) async -> Bool {
-        guard loaded, !busy else { return false }
+        guard loaded, !busy, !entries.contains(where: { $0.deletionPending == true }) else { return false }
         guard value.protein >= 0, value.carbohydrate >= 0, value.fat >= 0, value.calories > 0,
               !value.calories.isNaN, NSDecimalNumber(decimal: value.calories).doubleValue.isFinite else { return false }
         busy = true; defer { busy = false }
@@ -88,4 +107,20 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
             return true
         } catch { self.error = error.localizedDescription; return false }
     }
+    func delete(_ id: UUID) async -> Bool {
+        guard loaded, !busy, var entry = entries.first(where: { $0.id == id }) else { return false }
+        busy = true; error = nil
+        defer { busy = false }
+        do {
+            // Commit intent before the first HealthKit side effect; keep the row
+            // until every type has acknowledged deletion and the index is saved.
+            entry.deletionPending = true
+            try persist(entries.map { $0.id == id ? entry : $0 })
+            try await writer.authorize()
+            try await writer.delete(entry)
+            try persist(entries.filter { $0.id != id })
+            return true
+        } catch { self.error = "Eliminazione da completare: " + error.localizedDescription; return false }
+    }
+
 }
