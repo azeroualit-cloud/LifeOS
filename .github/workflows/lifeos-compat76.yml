@@ -1,7 +1,7 @@
 name: LifeOS 76 early-beta startup compatibility
 on:
   push:
-    paths: ['.github/workflows/lifeos-compat76.yml', '.github/actions/native-compat76/**', 'scripts/select-compatible-xcode76.py', 'scripts/verify-startup-imports.py', 'native-next/project.yml', 'native-next/Tests/NativeSessionVaultTests.swift']
+    paths: ['.github/workflows/lifeos-compat76.yml', '.github/actions/native-compat76/**', 'scripts/select-compatible-xcode76.py', 'scripts/verify-startup-imports.py', 'scripts/sign-simulator-session76.py', 'native-next/project.yml', 'native-next/Tests/NativeSessionVaultTests.swift']
 permissions:
   contents: read
   actions: read
@@ -27,26 +27,27 @@ jobs:
         working-directory: app
         run: |
           set -euo pipefail
-          xcodebuild build-for-testing -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compile.log
+          xcodebuild build-for-testing -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compile.log
+          python3 ../scripts/sign-simulator-session76.py simulator-build/Build/Products/Debug-iphonesimulator/LifeOSProbe.app
           xcrun simctl bootstatus "$MAIN_DEVICE" -b
       - name: Primary domain and representative app flows
         if: matrix.variant == 'primary'
         working-directory: app
         run: |
           set -euo pipefail
-          xcodebuild test-without-building -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeTests -only-testing:LifeOSProbeUITests/NativeRevision74UITests -only-testing:LifeOSProbeUITests/NativeRevision75UITests -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testLargeTextAndSixWeekCalendar -resultBundlePath build/Primary76.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/primary.log
+          xcodebuild test-without-building -derivedDataPath simulator-build -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeTests -only-testing:LifeOSProbeUITests/NativeRevision74UITests -only-testing:LifeOSProbeUITests/NativeRevision75UITests -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testLargeTextAndSixWeekCalendar -resultBundlePath build/Primary76.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/primary.log
       - name: Compact representative app flows
         if: matrix.variant == 'compact'
         working-directory: app
         run: |
           set -euo pipefail
-          xcodebuild test-without-building -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeRevision74UITests -only-testing:LifeOSProbeUITests/NativeRevision75UITests -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination -resultBundlePath build/Compact76.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compact.log
+          xcodebuild test-without-building -derivedDataPath simulator-build -test-timeouts-enabled YES -default-test-execution-time-allowance 300 -maximum-test-execution-time-allowance 600 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeRevision74UITests -only-testing:LifeOSProbeUITests/NativeRevision75UITests -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testExpenseAutomaticallyOffersWaterFundAndCanChangeExistingDestination -resultBundlePath build/Compact76.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/compact.log
       - name: Prepare verified saved-session fixture after UI app installs
         if: matrix.variant == 'primary'
         working-directory: app
         run: |
           set -euo pipefail
-          xcodebuild test-without-building -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeTests/NativeSessionVaultTests/testPrepareSyntheticSavedSessionForReleaseStartup -resultBundlePath build/SessionFixture76.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/session-fixture.log
+          xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeTests/NativeSessionVaultTests/testPrepareSyntheticSavedSessionForReleaseStartup -resultBundlePath build/SessionFixture76.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/session-fixture.log
       - name: Exercise real Release startup including a saved session
         if: matrix.variant == 'primary'
         working-directory: app
@@ -55,6 +56,7 @@ jobs:
         run: |
           set -euo pipefail
           xcodebuild build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -configuration Release -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -derivedDataPath release-build CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/release-compile.log
+          python3 ../scripts/sign-simulator-session76.py release-build/Build/Products/Release-iphonesimulator/LifeOSProbe.app
           python3 ../scripts/verify-release-launch75.py
       - name: Prove the delivered 75 binary has the reported incompatible import
         if: matrix.variant == 'package'
