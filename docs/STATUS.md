@@ -1,3 +1,13 @@
+## Build 75 pronta — 3 novembre 2026, distribuzione in attesa
+
+[Pacchetto verificato con IPA](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41592894317/artifacts/13212036759) · [prove finali](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41592894317) · [comportamento, integrità ed esiti](native/REVISIONE-75.md).
+
+221,79 € agosto–ottobre diventano 73,93 € per mese nel budget; il pagamento rimane un’unica uscita bancaria alla data effettiva. Stime e accantonamenti del fondo separati. Riprodotto e corretto su dati sintetici un problema della media salariale al cambio mese; causa del negativo personale non ancora confermata.
+
+245 unitari e tutte le 47 posizioni UI previste verificate combinando prove su sorgenti di produzione identici e ripetizione del solo test compatto corretto sui due simulatori. IPA 0.10.14/build 75 verificata, SHA-256 `94e64ccf0cc5a139208a05cb094a67241d6436305a9b4cd4e93b4737b05bf39d`. SDK 27.2; runtime effettivo 27.0.
+
+**Nessuna distribuzione Cloudflare e nessuna release 75 pubblicata:** la revisione automatica ha richiesto autorizzazione esplicita per queste operazioni. Il pacchetto è un artefatto di revisione disponibile fino al 10 novembre. Il download pubblico e le prove fisiche restano successivi. La build 74 sotto resta la consegna pubblica attuale.
+
 ## Consegna verificata — 2 novembre 2026, 0.10.13 build 74
 
 [Revisione 74: Apple, Salute e Bloom](native/REVISIONE-74.md) · [IPA diretta per Signulous](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.13-build74/LifeOS-74.ipa) · [registrazione dei flussi](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.13-build74/LifeOS-74-flussi.mp4). Quattro schede native, macro e HealthKit, Bloom locale con importazione e allegati, calendario e grafici. **240 unitari e 42 esecuzioni UI superati**. SDK 27.2; runtime effettivo 27.0 su iPhone 15 Pro e SE 3 simulati. Download e app/widget verificati. Aggiornare senza disinstallare; prove fisiche e confronto Apple separati.
