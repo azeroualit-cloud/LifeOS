@@ -36,3 +36,11 @@ Solo iPhone 15 Pro come dispositivo di design. Preservare identità, archivi e c
 
 ## Esclusioni
 Nessuna nuova sincronizzazione Bloom, nessun catalogo alimentare, nessuna eliminazione di dati personali durante sviluppo. Nessun test fisico dichiarato senza esecuzione.
+
+## Validazione finale del commit d112050
+Run 41637497578: compilazione, 258 unitari e 9 UI riusciti. Fixture di sessione salvata verificata dopo i test UI. Quattro avvii Release riusciti: fresh, synthetic-upgrade, synthetic-populated-upgrade e synthetic-session-upgrade. Toolchain Xcode 27.0 / SDK 27.0. Screenshot del simulatore controllati per navigazione, testo grande, tastiera, macro, Finanza e Bloom; corretto il contrasto del pulsante Importa in scuro. Archivio dispositivo e verifica IPA ancora in esecuzione.
+
+Il backup personale è rimasto locale: 122 ID distinti, 9 raccolte e 12 file incorporati decodificati correttamente (3 immagini principali più 9 allegati). I 7 flag archived coincidono con i 7 trashedAt. Il test sintetico con la stessa struttura passa nel run finale. Il trasferimento effettivo richiede selezionare il JSON nell’app sul telefono; non è stato eseguito dal desktop.
+
+## Pacchetto verificato
+IPA 0.10.16 / build 77 scaricata dal run 41637497578 e verificata indipendentemente: app e widget arm64 dispositivo, identità e versione corrette; nessun confronto Date debolmente collegato. SHA-256: e2e6269d6442120161f9a27ae719c41c2b7966e815f8288013f40ebc3c00d707. Pubblicazione diretta predisposta con controllo del run, del commit e dello stesso checksum; release 76 immutata.

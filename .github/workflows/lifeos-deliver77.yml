@@ -1,0 +1,53 @@
+name: Deliver reviewed LifeOS 77 direct IPA
+on:
+  push:
+    branches: ['codex/revision77']
+    paths: ['.github/workflows/lifeos-deliver77.yml']
+permissions:
+  contents: write
+  actions: read
+jobs:
+  deliver:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Require the reviewed successful source run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api repos/azeroualit-cloud/LifeOS/actions/runs/41637497578 > /tmp/source-run77.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/source-run77.json'))
+          assert r['status']=='completed' and r['conclusion']=='success'
+          assert r['head_sha']=='d112050e89490b82ada2bad708cb58407e8e6597'
+          assert r['head_branch']=='codex/revision77'
+          assert r['name']=='LifeOS 77 isolated validation'
+          PY
+      - uses: actions/download-artifact@v5
+        with:
+          name: revision77-device-package
+          run-id: 41637497578
+          github-token: ${{ github.token }}
+          path: checked77
+      - name: Verify exact deliverable again
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,shutil,subprocess
+          files=list(Path('checked77').rglob('LifeOS-77.ipa'));assert len(files)==1
+          ipa=files[0]
+          checksum=ipa.parent/'SHA256.txt'
+          assert hashlib.sha256(ipa.read_bytes()).hexdigest()==checksum.read_text().split()[0]=='e2e6269d6442120161f9a27ae719c41c2b7966e815f8288013f40ebc3c00d707'
+          subprocess.run(['python3','scripts/verify-native-package.py',str(ipa),'--version','0.10.16','--build','77'],check=True)
+          subprocess.run(['python3','scripts/verify-startup-imports.py',str(ipa)],check=True)
+          Path('delivery').mkdir()
+          shutil.copy2(ipa,'delivery/LifeOS-77.ipa')
+          shutil.copy2(checksum,'delivery/SHA256.txt')
+          PY
+      - name: Publish new immutable release with direct IPA only
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create ios-0.10.16-build77 delivery/LifeOS-77.ipa delivery/SHA256.txt --repo azeroualit-cloud/LifeOS --target d112050e89490b82ada2bad708cb58407e8e6597 --title 'Life OS 0.10.16 build 77' --notes-file docs/native/RELEASE-77.md
