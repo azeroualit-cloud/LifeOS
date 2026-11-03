@@ -22,6 +22,7 @@ final class NativeRevision78UITests: XCTestCase {
         }
         let date = app.staticTexts["home-today"], prayer = app.buttons["home-next-time"]
         XCTAssertTrue(prayer.waitForExistence(timeout: 10))
+        XCTAssertNotNil((prayer.value as? String)?.range(of: "^[0-9]{2}:[0-9]{2}$", options: .regularExpression))
         XCTAssertLessThan(prayer.frame.minX, app.frame.maxX)
         XCTAssertGreaterThan(prayer.frame.midX, date.frame.midX)
         XCTAssertLessThan(abs(prayer.frame.midY - date.frame.midY), 20)

@@ -133,11 +133,12 @@ struct DashboardScreen: View {
     @ViewBuilder private func nextTime(_ now: Date) -> some View {
         if let next = NativeNextTime.next(now: now) {
             Button { showingTimes = true } label: {
-                Text(next.displayTime).font(.subheadline.weight(.medium)).monospacedDigit()
+                Text(next.time).font(.subheadline.weight(.medium)).monospacedDigit()
                     .frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget)
                     .contentShape(Rectangle())
             }.buttonStyle(NativePressStyle())
-                .accessibilityLabel("Prossimo orario, " + next.label + ", " + next.displayTime + (next.day == CivilDate.day(now) ? "" : ", domani"))
+                .accessibilityLabel("Prossimo orario, " + next.label + (next.day == CivilDate.day(now) ? "" : ", domani"))
+                .accessibilityValue(next.time)
                 .accessibilityIdentifier("home-next-time")
                 .sheet(isPresented: $showingTimes) {
                     NavigationStack {
