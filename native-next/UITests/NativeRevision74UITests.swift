@@ -22,7 +22,7 @@ final class NativeRevision74UITests: XCTestCase {
             let field = app.textFields["nutrition-" + label]
             XCTAssertTrue(field.waitForExistence(timeout: 10)); field.tap(); field.typeText(value)
         }
-        app.buttons["Fine"].tap()
+        app.buttons["nutrition-keyboard-done"].tap()
         let total = app.staticTexts["nutrition-calories-value"]
         capture("74-nutrition-calculation")
         if !total.exists { print("NUTRITION_ACCESSIBILITY " + app.debugDescription) }

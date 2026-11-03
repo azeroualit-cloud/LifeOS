@@ -80,7 +80,7 @@ struct NativeNutritionScreen: View {
                 if focusedField == "Proteine" || focusedField == "Carboidrati" {
                     Button("Avanti") { focusedField = focusedField == "Proteine" ? "Carboidrati" : "Grassi" }
                 }
-                Button("Fine") { focusedField = nil } } }
+                Button("Fine") { focusedField = nil }.accessibilityIdentifier("nutrition-keyboard-done") } }
     }
     private func remove(_ id: UUID) {
         Task {
