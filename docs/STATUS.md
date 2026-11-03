@@ -1,3 +1,7 @@
+## Build 75 launch failure reported — investigation open
+
+The user reports immediate exit on iPhone 15 Pro / iOS 27.2 after re-signing. [Startup review and evidence](native/LAUNCH-75-REVIEW.md). Real Release probes reached the Dashboard on iOS 27.2 (iPhone 18 Pro simulator), and on iPhone 15 Pro / iOS 27.0 with fresh and populated synthetic-upgrade storage. Exact 15 Pro / 27.2 simulation could not run with the downloaded device-specific runtime. These results do not resolve or disprove the physical-device failure. Device crash report requested; no confirmed code fix, replacement IPA or signing diagnosis claimed.
+
 ## IPA 75 consegnata — 3 novembre 2026, backend utenze in attesa
 
 [**Scarica LifeOS-75.ipa**](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.14-build75/LifeOS-75.ipa) · [prove finali](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41592894317) · [consegna del singolo file](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41596472472) · [dettagli](native/REVISIONE-75.md).
