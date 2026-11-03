@@ -44,3 +44,10 @@ Il backup personale è rimasto locale: 122 ID distinti, 9 raccolte e 12 file inc
 
 ## Pacchetto verificato
 IPA 0.10.16 / build 77 scaricata dal run 41637497578 e verificata indipendentemente: app e widget arm64 dispositivo, identità e versione corrette; nessun confronto Date debolmente collegato. SHA-256: e2e6269d6442120161f9a27ae719c41c2b7966e815f8288013f40ebc3c00d707. Pubblicazione diretta predisposta con controllo del run, del commit e dello stesso checksum; release 76 immutata.
+
+## Consegna pubblica verificata
+Release: https://github.com/azeroualit-cloud/LifeOS/releases/tag/ios-0.10.16-build77
+IPA diretta: https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.16-build77/LifeOS-77.ipa
+Run consegna 41645535880 riuscito. File riscaricato dal link pubblico e ricontrollato: versione 0.10.16 / build 77, app e widget dispositivo corretti, import compatibili e SHA-256 identico al pacchetto verificato. Working tree senza modifiche residue prima di questo aggiornamento documentale. Nessun test fisico sul telefono dichiarato.
+
+Passaggi sul telefono: rifirmare e aggiornare con Signulous senza disinstallare; aprire Bloom, scegliere Importa backup Bloom e selezionare il JSON personale esportato. Non eliminare l’app Bloom originale prima della riconciliazione dei contenuti importati. Il file pubblico non contiene il database personale.
