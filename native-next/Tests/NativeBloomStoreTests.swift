@@ -23,6 +23,47 @@ import XCTest
         XCTAssertEqual(restored.items.first { $0.text("id") == id.uuidString }?["data"], .string(bytes.base64EncodedString()))
         XCTAssertEqual(restored.items.first { $0.text("id") == id.uuidString }?.text("fileName"), "../../originale.pdf")
     }
+    func testFullBackupShapeRoundTrips122ItemsAndTwelveEmbeddedFiles() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let collections: [Record] = (0..<9).map { ["id": .string(UUID().uuidString), "name": .string("Synthetic collection \($0)"), "createdAt": .number(100)] }
+        let bytes = Data([0, 1, 2, 255]).base64EncodedString()
+        var items: [Record] = []
+        for index in 0..<122 {
+            var row = note()
+            let category = collections[index % collections.count].text("id")
+            row["tagIDs"] = .array([.string(category)])
+            row["pinnedCategoryIDs"] = .array(index % 2 == 0 ? [.string(category)] : [])
+            if index < 83 {
+                row["kind"] = .string("link"); row["text"] = .null
+                row["urlString"] = .string("https://example.com/synthetic/\(index)")
+            } else if index >= 119 {
+                row["kind"] = .string("image"); row["text"] = .null
+                row["fileName"] = .string("synthetic-\(index).png")
+                row["data"] = .string(bytes)
+            }
+            if index == 83 || index == 84 {
+                let count = index == 83 ? 5 : 4
+                row["noteFiles"] = .array((0..<count).map { file in .object(["id": .string(UUID().uuidString), "name": .string("synthetic-\(file).bin"), "type": .string("public.data"), "data": .string(bytes)]) })
+            }
+            if index < 7 { row["archived"] = .bool(true); row["trashedAt"] = .number(200) }
+            items.append(row)
+        }
+        let incoming = NativeBloomArchive(collections: collections, items: items)
+        let data = try JSONEncoder().encode(incoming)
+        let store = NativeBloomStore(directory: root)
+        _ = try store.importBackup(data)
+        let restarted = NativeBloomStore(directory: root)
+        let exported = try restarted.preview(restarted.export())
+        XCTAssertEqual(exported.items, items)
+        XCTAssertEqual(exported.collections, collections)
+        XCTAssertEqual(exported.items.filter { $0.flag("archived") }.count, 7)
+        XCTAssertEqual(restarted.archive.lifeosImportReports?.last?.fileCount, 12)
+        _ = try restarted.importBackup(data)
+        XCTAssertEqual(restarted.archive.items.count, 122)
+        XCTAssertEqual(restarted.archive.collections.count, 9)
+        XCTAssertEqual(restarted.archive.lifeosImportReports?.last?.skipped, 122)
+    }
     func testImportSnapshotPreservesReplacedContentAndAttachmentBytes() throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }
