@@ -3,7 +3,7 @@ import XCTest
 final class NativeRevision77UITests: XCTestCase {
     func testFourTabsAndDirectHealthAndBloom() {
         let app = XCUIApplication()
-        app.launchArguments = ["--demo", "--busy-home"]
+        app.launchArguments = ["--visual-test", "--busy-home"]
         app.launch()
         for name in ["Dashboard", "Attività", "Salute", "Bloom"] {
             XCTAssertTrue(app.tabBars.buttons[name].waitForExistence(timeout: 15))
@@ -20,7 +20,7 @@ final class NativeRevision77UITests: XCTestCase {
     }
     func testLargeTextDashboardAndHealth() {
         let app = XCUIApplication()
-        app.launchArguments = ["--demo", "--busy-home", "--large-text", "--reduce-motion"]
+        app.launchArguments = ["--visual-test", "--busy-home", "--large-text", "--reduce-motion"]
         app.launch()
         XCTAssertTrue(app.scrollViews["dashboard-scroll"].waitForExistence(timeout: 15))
         capture("Dashboard testo grande", app)

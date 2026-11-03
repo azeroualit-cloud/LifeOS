@@ -19,8 +19,7 @@ struct DashboardScreen: View {
                 VStack(alignment: .leading, spacing: NativeDesign.Space.large) {
                     heading(summary, today: today, now: now)
                     rollingCalendar(today)
-                    routines
-                    agenda(summary, today: today)
+                    checklist(today: today)
                     financeOverview
                     NativeNutritionQuickEntry()
                     NativeConnectionBadge()
@@ -111,35 +110,34 @@ struct DashboardScreen: View {
         }
         }.animation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration), value: model.phase)
     }
-    private func agenda(_ summary: NativeHomeSummary, today: String) -> some View {
-        VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
-            NativeSectionHeader("Prossimi impegni", titleIdentifier: "home-agenda-heading") {
-                if !summary.events.isEmpty {
-                    NavigationLink { HomeAgendaScreen() } label: {
-                        Text("Vedi tutti").font(.subheadline).frame(minHeight: NativeDesign.Layout.touchTarget)
-                    }.accessibilityIdentifier("home-events")
-                }
+    private func checklist(today: String) -> some View {
+        let items = NativeHomeChecklist.rows(tasks: store.tasks, events: store.dashboardEvents, routines: store.todayRoutines, today: today)
+        return VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+            NativeSectionHeader("Cose da fare", titleIdentifier: "home-checklist-heading") {
+                Menu("Gestisci") {
+                    Button("Attività") { router.tab = .tasks }
+                    Button("Abitudini") { router.sheet = .routines }
+                    Button("Calendario") { openCalendar(today) }
+                }.frame(minHeight: NativeDesign.Layout.touchTarget)
             }
-            if summary.events.isEmpty {
-                Text(NativeHomeSummary.hasCalendarData(life: store.life, demo: store.isDemo) ? "Nessun appuntamento nei prossimi 7 giorni" : "Calendario da aggiornare")
-                    .font(NativeDesign.body).foregroundStyle(NativeDesign.secondary).accessibilityIdentifier("home-agenda-empty")
-            } else {
-                let groups = Dictionary(grouping: summary.events, by: { $0.text("day") })
-                VStack(alignment: .leading, spacing: NativeDesign.Space.section) {
-                    ForEach(groups.keys.sorted(), id: \.self) { day in
-                        VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-                            HomeAgendaDayHeading(day: day, today: today)
-                            VStack(spacing: NativeDesign.Space.none) {
-                                ForEach(Array((groups[day] ?? []).enumerated()), id: \.element.agendaIdentity) { index, event in
-                                    if index > 0 { Divider().padding(.leading, NativeDesign.Layout.touchTarget + NativeDesign.Space.small) }
-                                    HomeAgendaRow(event: event)
-                                        .padding(.vertical, NativeDesign.Space.xs)
-                                }
-                            }
-                        }
-                    }
-                }
+            if items.isEmpty { Text("Nessun impegno da mostrare").font(.subheadline).foregroundStyle(NativeDesign.secondary) }
+            ForEach(items) { item in
+                checklistRow(item, today: today)
+                if item.id != items.last?.id { Divider().padding(.leading, NativeDesign.Layout.touchTarget + NativeDesign.Space.small) }
             }
+        }
+    }
+    @ViewBuilder private func checklistRow(_ item: NativeHomeChecklistItem, today: String) -> some View {
+        let record = item.record
+        switch item.kind {
+        case .event: HomeAgendaRow(event: record)
+        case .routine:
+            NativeChecklistRow(title: record.text("title"), subtitle: "Abitudine", checked: record.flag("checked"), completionLabel: "Completa abitudine " + record.text("title"), onComplete: { checkRoutine(record) }, onOpen: { router.sheet = .routines })
+                .disabled(store.busy || routineBusy != nil)
+        case .task:
+            NativeChecklistRow(title: record.text("title"), subtitle: "Attività" + (item.time.isEmpty ? "" : " · " + item.time), checked: false, dueDay: record.text("due_date"), completionLabel: "Completa attività " + record.text("title"), onComplete: {
+                Task { await store.run("setTaskStatus", ["id": .int(record.integer("id")), "status": .string(NativeTaskList.completionStatus(record))]) }
+            }, onOpen: { router.sheet = .task(record) }).disabled(store.busy)
         }
     }
     @ViewBuilder private func nextTime(_ now: Date) -> some View {
@@ -193,34 +191,6 @@ struct DashboardScreen: View {
                 .frame(minHeight: NativeDesign.Layout.touchTarget)
         }
     }
-    private var routines: some View {
-        VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
-            NativeSectionHeader("Abitudini di oggi", titleIdentifier: "home-routines-heading") {
-                NavigationLink { RoutinesEditor() } label: { Text("Gestisci").font(.subheadline).frame(minHeight: NativeDesign.Layout.touchTarget) }.accessibilityIdentifier("home-manage-routines")
-            }
-            if store.routines.isEmpty {
-                NavigationLink { RoutinesEditor() } label: { Label("Aggiungi la prima abitudine", systemImage: "plus").font(.subheadline).frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading) }.accessibilityIdentifier("home-empty-routines")
-            } else if store.todayRoutines.isEmpty {
-                Text("Nessuna abitudine prevista per oggi.").font(.subheadline).foregroundStyle(NativeDesign.secondary)
-            } else {
-                VStack(spacing: NativeDesign.Space.none) {
-                    ForEach(Array(store.todayRoutines.enumerated()), id: \.element.integerID) { index, record in
-                        if index > 0 { Divider().padding(.leading, NativeDesign.Layout.touchTarget + NativeDesign.Space.small) }
-                        Button { checkRoutine(record) } label: {
-                            HStack(spacing: NativeDesign.Space.small) {
-                                NativeCheckmark(checked: record.flag("checked"))
-                                Text(record.text("title")).font(.body).foregroundStyle(Color.primary).fixedSize(horizontal: false, vertical: true)
-                                Spacer(minLength: 0)
-                                if routineBusy == record.integer("id") { ProgressView().controlSize(.small) }
-                            }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading).contentShape(Rectangle())
-                        }.buttonStyle(NativePressStyle()).padding(.vertical, NativeDesign.Space.xs).disabled(store.busy || routineBusy != nil)
-                            .accessibilityIdentifier("home-routine-\(record.integer("id"))")
-                            .accessibilityLabel(record.text("title")).accessibilityValue(record.flag("checked") ? "Completata" : "Da completare")
-                    }
-                }
-            }
-        }
-    }
     private func checkRoutine(_ record: Record) {
         guard routineBusy == nil else { return }
         routineBusy = record.integer("id")
@@ -259,7 +229,7 @@ private struct HomeAgendaRow: View {
     let event: Record
     var body: some View {
         NativeChecklistRow(title: event.text("title", fallback: "Appuntamento"),
-            subtitle: event.text("start_time"), checked: event.text("occurrence_status") == "done",
+            subtitle: "Evento · " + CivilDate.label(event.text("day")) + (event.text("start_time").isEmpty ? "" : " · " + event.text("start_time")), checked: event.text("occurrence_status") == "done",
             showsDisclosure: false,
             completionIdentifier: "home-event-check-" + event.agendaIdentity,
             openIdentifier: "home-agenda-" + event.agendaIdentity,
