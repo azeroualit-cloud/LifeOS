@@ -25,6 +25,8 @@ struct NativeBloomScreen: View {
     @State private var importing = false
     @State private var exporting = false
     @State private var exportData = Data()
+    @State private var selectedBackup: Data?
+    @State private var preparingImport = false
     @State private var pendingData: Data?
     @State private var pendingSummary = ""
     @State private var importConflicts: [NativeBloomConflict] = []
@@ -69,12 +71,13 @@ struct NativeBloomScreen: View {
                         Label("Importa backup Bloom", systemImage: "square.and.arrow.down")
                             .foregroundStyle(NativeDesign.onAccent)
                             .frame(minHeight: NativeDesign.Layout.touchTarget)
-                    }.buttonStyle(.borderedProminent)
+                    }.buttonStyle(NativeCompactPrimaryButtonStyle())
                         .frame(minHeight: NativeDesign.Layout.touchTarget)
                         .accessibilityIdentifier("bloom.importBackup")
                 }.frame(maxWidth: .infinity, alignment: .leading)
                     .padding(NativeDesign.Layout.screenInset)
             }
+            if preparingImport { ProgressView("Preparazione backup…") }
             if let notice { Text(notice).font(.caption).foregroundStyle(.secondary) }
             if section == "Mappa" {
                 HStack {
@@ -113,6 +116,7 @@ struct NativeBloomScreen: View {
                     }.navigationTitle(group.place.name)
                 }
             }
+            .task { prepareImportFixture() }
             .onAppear { category = store.archive.collections.contains(where: { $0.text("id") == savedCategory }) ? savedCategory : "" }
             .onChange(of: store.archive.collections.map { $0.text("id") }) { _, ids in if !category.isEmpty && !ids.contains(category) { category = "" } }
             .onChange(of: router.bloomCaptureURL, initial: true) { _, raw in
@@ -140,22 +144,56 @@ struct NativeBloomScreen: View {
             .sheet(isPresented: $showingCaptures) { capturesSheet }
             .sheet(isPresented: $showingReport) { reportSheet }
             .sheet(isPresented: $composing) { NavigationStack { NativeBloomComposer(store: store, initial: captureRecord) } }
-            .fileImporter(isPresented: $importing, allowedContentTypes: [.json]) { result in
-                do {
-                    let url = try result.get(), access = url.startAccessingSecurityScopedResource()
-                    defer { if access { url.stopAccessingSecurityScopedResource() } }
-                    guard (try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0) <= 100 * 1024 * 1024 else { throw Message(text: "Backup superiore a 100 MiB.") }
-                    let data = try Data(contentsOf: url), preview = try store.preview(data)
-                    let files = preview.items.flatMap { item -> [Record] in (item["data"] != nil && item["data"] != .null ? [item] : []) + item.records("noteFiles") }
-                    let bytes = files.reduce(0) { $0 + (Data(base64Encoded: $1.text("data"))?.count ?? 0) }
-                    let trashed = preview.items.filter { $0.flag("archived") }.count
-                    pendingSummary = "\(preview.items.count) note, \(preview.collections.count) categorie, \(files.count) allegati (\(bytes) byte), \(trashed) note nel Cestino. Il Cestino viene conservato."
-                    importConflicts = try store.conflicts(data); resolutions = [:]
-                    pendingData = data
-                } catch { store.error = error.localizedDescription }
+            .sheet(isPresented: $importing, onDismiss: prepareSelectedBackup) {
+                NativeBloomBackupPicker { result in
+                    switch result {
+                    case .success(let data): selectedBackup = data
+                    case .failure(let error): store.error = error.localizedDescription
+                    }
+                    importing = false
+                }
             }
             .sheet(isPresented: Binding(get: { pendingData != nil }, set: { if !$0 { pendingData = nil } })) { importSheet }
             .fileExporter(isPresented: $exporting, document: NativeBloomDocument(data: exportData), contentType: .json, defaultFilename: "LifeOS-Bloom-backup") { result in if case .failure(let error) = result { store.error = error.localizedDescription } }
+    }
+    private func prepareImportFixture() {
+        #if DEBUG
+        guard ProcessInfo.processInfo.arguments.contains("--bloom-import-fixture") else { return }
+        do {
+            let directory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            let note: Record = ["id": .string("8A20F968-EF06-430B-86D4-41BB50A0D278"),
+                "kind": .string("text"), "text": .string("Bloom import UI fixture"),
+                "title": .string("Bloom import UI fixture"), "capturedAt": .number(100),
+                "archived": .bool(false), "noteVersion": .int(1),
+                "noteFiles": .array([.object(["id": .string("8E87EC90-775A-438D-AD69-F8978087F1CD"),
+                    "name": .string("synthetic.bin"), "type": .string("public.data"),
+                    "data": .string(Data(repeating: 42, count: 6 * 1024 * 1024).base64EncodedString())])])]
+            try JSONEncoder().encode(NativeBloomArchive(items: [note])).write(to: directory.appendingPathComponent("Bloom-UI-Fixture.json"), options: .atomic)
+            try Data("invalid JSON".utf8).write(to: directory.appendingPathComponent("Bloom-Invalid-Fixture.json"), options: .atomic)
+        } catch { store.error = error.localizedDescription }
+        #endif
+    }
+    private func prepareSelectedBackup() {
+        guard let data = selectedBackup else { return }
+        selectedBackup = nil
+        preparingImport = true
+        // File picker has completed its dismissal before presenting the preview.
+        Task { @MainActor in
+            await Task.yield()
+            defer { preparingImport = false }
+            do {
+                let preview = try store.preview(data)
+                let files = preview.items.flatMap { item -> [Record] in
+                    (item["data"] != nil && item["data"] != .null ? [item] : []) + item.records("noteFiles")
+                }
+                let bytes = files.reduce(0) { $0 + (Data(base64Encoded: $1.text("data"))?.count ?? 0) }
+                let trashed = preview.items.filter { $0.flag("archived") }.count
+                pendingSummary = "\(preview.items.count) note, \(preview.collections.count) categorie, \(files.count) allegati (\(bytes) byte), \(trashed) note nel Cestino. Il Cestino viene conservato."
+                importConflicts = try store.conflicts(data); resolutions = [:]
+                pendingData = data
+            } catch { store.error = error.localizedDescription }
+        }
     }
     private var capturesSheet: some View {
                 NavigationStack {
@@ -267,11 +305,11 @@ private struct NativeBloomSectionButton: View {
     }
     @ViewBuilder var body: some View {
         if #available(iOS 26.0, *) {
-            if selected { control.buttonStyle(.glassProminent).buttonBorderShape(.capsule) }
-            else { control.buttonStyle(.glass).buttonBorderShape(.capsule) }
+            control.buttonStyle(.plain)
+                .glassEffect(.regular.tint(selected ? NativeDesign.accent : .clear).interactive(), in: Capsule())
         } else {
-            if selected { control.buttonStyle(.borderedProminent).buttonBorderShape(.capsule) }
-            else { control.buttonStyle(.bordered).buttonBorderShape(.capsule) }
+            control.buttonStyle(.plain)
+                .background(selected ? NativeDesign.accent : NativeDesign.surface, in: Capsule())
         }
     }
 }

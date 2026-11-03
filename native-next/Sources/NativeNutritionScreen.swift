@@ -6,6 +6,9 @@ struct NativeNutritionScreen: View {
     @State private var protein = ""
     @State private var carbohydrate = ""
     @State private var fat = ""
+    @State private var fibre = ""
+    @State private var calories = ""
+    @State private var portion = "100"
     @State private var date = Date()
     @State private var draftID = UUID()
     @State private var expectedRevision: Int?
@@ -14,22 +17,26 @@ struct NativeNutritionScreen: View {
     @State private var notice: String?
     @FocusState private var focusedField: String?
     private var draft: NativeNutritionEntry? {
-        guard let p = NativeNutritionEntry.grams(protein), let c = NativeNutritionEntry.grams(carbohydrate), let f = NativeNutritionEntry.grams(fat) else { return nil }
-        return .init(id: editing ?? draftID, revision: 0, date: date, protein: p, carbohydrate: c, fat: f, confirmed: false)
+        guard let p = NativeNutritionEntry.grams(protein), let c = NativeNutritionEntry.grams(carbohydrate), let f = NativeNutritionEntry.grams(fat), let fi = NativeNutritionEntry.grams(fibre), let kcal = NativeNutritionEntry.grams(calories), let g = NativeNutritionEntry.grams(portion) else { return nil }
+        return .portion(id: editing ?? draftID, date: date, protein: p, carbohydrate: c, fat: f, fibre: fi, calories: kcal, grams: g)
     }
     var body: some View {
         Form {
-            Section("Macronutrienti") {
+            Section(editing == nil ? "Etichetta per 100 g" : "Modifica valori della registrazione") {
+                if editing != nil && nutrition.entries.first(where: { $0.id == editing })?.portionGrams == nil { Text("Questa registrazione precedente non conserva i grammi originali: i totali sono riportati su una base di 100 g.").font(.caption).foregroundStyle(.secondary) }
                 field("Proteine", text: $protein)
                 field("Carboidrati", text: $carbohydrate)
                 field("Grassi", text: $fat)
+                field("Fibre", text: $fibre)
+                field("Calorie etichetta", text: $calories, unit: "kcal")
+                field("Porzione effettiva", text: $portion)
                 HStack {
                     Text("Calorie")
                     Spacer()
                     Text(draft.map { NSDecimalNumber(decimal: $0.calories).stringValue + " kcal" } ?? "Valori non validi")
                         .accessibilityIdentifier("nutrition-calories-value")
                 }.accessibilityElement(children: .contain)
-                DatePicker("Data e ora", selection: $date)
+                DatePicker("Data", selection: $date, displayedComponents: .date)
                 Button(editing == nil ? "Aggiungi ad Apple Salute" : "Salva modifiche") {
                     guard let value = draft else { return }
                     Task {
@@ -48,13 +55,13 @@ struct NativeNutritionScreen: View {
                     if entry.deletionPending == true {
                         VStack(alignment: .leading) {
                             Text("Eliminazione da completare")
-                            Text(entry.date.formatted(date: .abbreviated, time: .shortened)).font(.caption)
+                            Text(entry.date.formatted(date: .abbreviated, time: .omitted)).font(.caption)
                             Button("Riprova eliminazione") { remove(entry.id) }.disabled(nutrition.busy)
                         }
                     } else if entry.confirmed {
-                        Button { editing = entry.id; expectedRevision = entry.revision; protein = NSDecimalNumber(decimal: entry.protein).stringValue; carbohydrate = NSDecimalNumber(decimal: entry.carbohydrate).stringValue; fat = NSDecimalNumber(decimal: entry.fat).stringValue; date = entry.date; notice = nil } label: {
+                        Button { load(entry) } label: {
                             VStack(alignment: .leading) {
-                                Text(entry.date.formatted(date: .abbreviated, time: .shortened))
+                                Text(entry.date.formatted(date: .abbreviated, time: .omitted))
                                 Text("P \(NSDecimalNumber(decimal: entry.protein)) · C \(NSDecimalNumber(decimal: entry.carbohydrate)) · G \(NSDecimalNumber(decimal: entry.fat)) g — \(NSDecimalNumber(decimal: entry.calories)) kcal").font(.caption).foregroundStyle(.secondary)
                             }
                         }
@@ -65,7 +72,7 @@ struct NativeNutritionScreen: View {
                             Text("Registrazione da completare")
                             Button("Riprova") { Task { if await nutrition.save(entry, retry: true) { if editing == entry.id { clear() }; await health.refresh() } } }.disabled(nutrition.busy)
                             Button("Modifica e riprova") {
-                                editing = entry.id; expectedRevision = entry.revision; protein = NSDecimalNumber(decimal: entry.protein).stringValue; carbohydrate = NSDecimalNumber(decimal: entry.carbohydrate).stringValue; fat = NSDecimalNumber(decimal: entry.fat).stringValue; date = entry.date; notice = nil
+                                load(entry)
                             }.disabled(nutrition.busy)
                         }
                     }
@@ -82,6 +89,15 @@ struct NativeNutritionScreen: View {
                 }
                 Button("Fine") { focusedField = nil }.accessibilityIdentifier("nutrition-keyboard-done") } }
     }
+    private func load(_ entry: NativeNutritionEntry) {
+        editing = entry.id; expectedRevision = entry.revision
+        let grams = entry.portionGrams ?? 100
+        let factor = grams / 100
+        func label(_ value: Decimal) -> String { NSDecimalNumber(decimal: value / factor).stringValue }
+        protein = label(entry.protein); carbohydrate = label(entry.carbohydrate); fat = label(entry.fat)
+        fibre = label(entry.fibre ?? 0); calories = label(entry.calories)
+        portion = NSDecimalNumber(decimal: grams).stringValue; date = entry.date; notice = nil
+    }
     private func remove(_ id: UUID) {
         Task {
             if await nutrition.delete(id) {
@@ -91,8 +107,8 @@ struct NativeNutritionScreen: View {
             }
         }
     }
-    private func field(_ title: String, text: Binding<String>) -> some View {
-        HStack { Text(title); TextField("0", text: text).focused($focusedField, equals: title).keyboardType(.decimalPad).multilineTextAlignment(.trailing).accessibilityLabel(title + " in grammi").accessibilityIdentifier("nutrition-" + title); Text("g").foregroundStyle(.secondary) }
+    private func field(_ title: String, text: Binding<String>, unit: String = "g") -> some View {
+        HStack { Text(title); TextField("0", text: text).focused($focusedField, equals: title).keyboardType(.decimalPad).multilineTextAlignment(.trailing).accessibilityLabel(title + (unit == "g" ? " in grammi" : " in kcal")).accessibilityIdentifier("nutrition-" + title); Text(unit).foregroundStyle(.secondary) }
     }
-    private func clear() { draftID = UUID(); expectedRevision = nil; editing = nil; protein = ""; carbohydrate = ""; fat = ""; date = Date() }
+    private func clear() { draftID = UUID(); expectedRevision = nil; editing = nil; protein = ""; carbohydrate = ""; fat = ""; fibre = ""; calories = ""; portion = "100"; date = Date() }
 }

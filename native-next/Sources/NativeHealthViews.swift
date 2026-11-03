@@ -321,12 +321,11 @@ private struct NativeHealthCaloriesChart: View {
     }
 }
 
-struct NativeHealthDetail: View {
+struct NativeHealthMetricDetail: View {
+    let metric: NativeHealthMetric
     @Environment(\.dynamicTypeSize) private var typeSize
     @ObservedObject var health: NativeHealthStore
     let demo: Bool
-    @State private var showingNutrition = false
-    @State private var addingWeight = false
     @State private var intakeText = ""
     @State private var scrubbingCharts = Set<String>()
     private func setChartScrubbing(_ id: String, _ active: Bool) {
@@ -345,29 +344,25 @@ struct NativeHealthDetail: View {
         ScrollView {
             VStack(alignment: .leading, spacing: NativeDesign.Space.section) {
                 if demo { Text("Dati illustrativi").font(.caption).foregroundStyle(NativeDesign.secondary) }
-                let actionsLayout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: NativeDesign.Space.small)) : AnyLayout(HStackLayout(spacing: NativeDesign.Space.medium))
-                actionsLayout {
-                    Button("Aggiungi peso", systemImage: "plus") { addingWeight = true }
-                        .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
-                    Button("Registrazioni macro", systemImage: "list.bullet") { showingNutrition = true }
-                        .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
+                switch metric {
+                case .tdee: tdeeSection
+                case .weight:
+                    NativeCard {
+                        Text("Peso").font(NativeDesign.heading)
+                        NativeHealthWeightChart(days: health.days, onScrubbing: { setChartScrubbing("weight", $0) })
+                    }
+                case .calories:
+                    NativeCard {
+                        Text("Calorie assunte").font(NativeDesign.heading)
+                        NativeHealthCaloriesChart(days: health.days, onScrubbing: { setChartScrubbing("calories", $0) })
+                    }
+                case .simulation: scenarioSection
                 }
-                tdeeSection
-                NativeCard {
-                    Text("Peso").font(NativeDesign.heading)
-                    NativeHealthWeightChart(days: health.days, onScrubbing: { setChartScrubbing("weight", $0) })
-                }
-                NativeCard {
-                    Text("Calorie assunte").font(NativeDesign.heading)
-                    NativeHealthCaloriesChart(days: health.days, onScrubbing: { setChartScrubbing("calories", $0) })
-                }
-                scenarioSection
                 connectionSections
                 methodSection
             }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.vertical, NativeDesign.Space.large)
-        }.background(NativeDesign.canvas).navigationTitle("Salute")
-            .sheet(isPresented: $showingNutrition) { NavigationStack { NativeNutritionScreen().toolbar { DoneButton() } } }
-            .sheet(isPresented: $addingWeight) { NativeAddWeightSheet(health: health) }.navigationBarTitleDisplayMode(.inline)
+        }.background(NativeDesign.canvas).navigationTitle(metric.title)
+            .navigationBarTitleDisplayMode(.inline)
             .accessibilityIdentifier("health-detail-scroll")
             .scrollDisabled(!scrubbingCharts.isEmpty)
             .modifier(NativeUITestValue(value: "scrubbing=" + scrubbingCharts.sorted().joined(separator: ",")))
@@ -441,25 +436,6 @@ struct NativeHealthDetail: View {
                         LabeledContent(day.date.formatted(date: .abbreviated, time: .omitted), value: [day.weight.map { $0.formatted() + " kg" }, day.calories.map { $0.formatted() + " kcal" }].compactMap { $0 }.joined(separator: " · "))
                     }
                 }
-            }
-        }
-        if !demo {
-            NativeCard {
-                Button { Task { await health.connect() } } label: {
-                    Label("Collega o gestisci Apple Health", systemImage: "heart")
-                        .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
-                }.disabled(health.loading).accessibilityIdentifier("health-connect")
-                if health.loading { ProgressView() }
-                if let message = health.message { Text(message).font(.caption).foregroundStyle(NativeDesign.secondary) }
-            }
-        }
-        if !health.sources.isEmpty {
-            NativeCard {
-                Text("Fonte delle calorie").font(NativeDesign.heading)
-                Picker("App alimentare", selection: $health.selectedSource) {
-                    ForEach(health.sources, id: \.self) { source in Text(health.sourceNames[source] ?? source).tag(source) }
-                }.pickerStyle(.menu).onChange(of: health.selectedSource) { _, _ in health.rebuild() }
-                Text("Usiamo una sola app per evitare doppioni. Verifica che contenga tutte le calorie assunte; una giornata registrata solo in parte altera la stima.").font(.caption).foregroundStyle(NativeDesign.secondary)
             }
         }
     }

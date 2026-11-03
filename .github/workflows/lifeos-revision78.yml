@@ -1,0 +1,119 @@
+name: LifeOS 78 isolated validation
+on:
+  push:
+    branches: ['codex/revision77']
+    paths: ['native-next/**', '.github/workflows/lifeos-revision78.yml']
+permissions:
+  contents: read
+concurrency:
+  group: revision78-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  validate:
+    runs-on: xcode-27
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/native-compat76
+        with:
+          variant: primary
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.22.1'
+      - name: Inspect shipped Apple Health resources with REA
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcrun simctl bootstatus "$MAIN_DEVICE" -b
+          npm install --prefix .rea78 --cache .rea78/cache --no-audit --no-fund rea-agents@6.8.0
+          python3 scripts/inspect-apple-health78.py
+      - name: Compile app and tests
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild build-for-testing -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- 2>&1 | tee build/compile78.log
+      - name: Capture native Apple Health reference
+        continue-on-error: true
+        working-directory: app
+        shell: bash
+        run: |
+          set -o pipefail
+          xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeAppleHealthReferenceUITests -resultBundlePath build/AppleHealthReference78.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- 2>&1 | tee build/apple-health-reference78.log
+      - name: Test on iPhone 15 Pro
+        working-directory: app
+        shell: bash
+        run: |
+          set -o pipefail
+          xcrun simctl bootstatus "$MAIN_DEVICE" -b
+          xcodebuild test-without-building -derivedDataPath simulator-build -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 300 -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeTests -only-testing:LifeOSProbeUITests/NativeRevision78UITests -only-testing:LifeOSProbeUITests/NativeRevision77UITests -only-testing:LifeOSProbeUITests/NativeRevision74UITests -only-testing:LifeOSProbeUITests/NativeRevision75UITests -resultBundlePath build/Revision78.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- 2>&1 | tee build/revision78.log
+      - name: Prepare verified saved session for Release startup
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeTests/NativeSessionVaultTests/testPrepareSyntheticSavedSessionForReleaseStartup -resultBundlePath build/SessionFixture78.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- 2>&1 | tee build/session78.log
+      - name: Verify four real Release launches with preserved session
+        working-directory: app
+        shell: bash
+        env:
+          LIFEOS_RELEASE_SESSION_FIXTURE: '1'
+        run: |
+          set -euo pipefail
+          xcodebuild build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -configuration Release -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -derivedDataPath release-build CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- 2>&1 | tee build/release78.log
+          python3 ../scripts/verify-release-launch75.py
+      - name: Export screenshots
+        if: always()
+        shell: bash
+        run: |
+          if [ -f app/build/Revision78.xcresult/Info.plist ]; then
+            xcrun xcresulttool export attachments --path app/build/Revision78.xcresult --output-path app/build/screenshots78
+          fi
+          if [ -f app/build/AppleHealthReference78.xcresult/Info.plist ]; then
+            xcrun xcresulttool export attachments --path app/build/AppleHealthReference78.xcresult --output-path app/build/apple-health-reference-screenshots78
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: revision78-iphone15pro
+          path: |
+            app/build/*.log
+            app/release-launch
+            app/build/Revision78.xcresult
+            app/build/screenshots78
+            app/build/apple-health-reference
+            app/build/apple-health-reference-screenshots78
+
+  package:
+    needs: validate
+    runs-on: xcode-27
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/native-compat76
+        with:
+          variant: package
+      - name: Archive device app and verify exact IPA
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild archive -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -configuration Release -destination 'generic/platform=iOS' -archivePath build/LifeOS78.xcarchive CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/archive78.log
+          mkdir -p build/Payload download
+          cp -R build/LifeOS78.xcarchive/Products/Applications/LifeOSProbe.app build/Payload/
+          cd build
+          zip -qr ../download/LifeOS-78.ipa Payload
+          cd ..
+          python3 ../scripts/verify-native-package.py download/LifeOS-78.ipa --version 0.10.17 --build 78
+          python3 ../scripts/verify-startup-imports.py download/LifeOS-78.ipa
+          cd download
+          shasum -a 256 LifeOS-78.ipa > SHA256.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: revision78-device-package
+          path: |
+            app/download
+            app/build/archive78.log
+            app/build/LifeOS78.xcarchive/dSYMs

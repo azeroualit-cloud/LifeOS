@@ -169,6 +169,20 @@ struct NativeRowText: View {
         else { Text(title).font(NativeDesign.body) }
     }
 }
+/// Explicit 44 pt geometry, without the additional inset of bordered styles.
+struct NativeCompactPrimaryButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var enabled
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .foregroundStyle(NativeDesign.onAccent)
+            .padding(.horizontal, NativeDesign.Space.medium)
+            .frame(minHeight: NativeDesign.Layout.touchTarget)
+            .background(NativeDesign.accent, in: Capsule())
+            .contentShape(Capsule())
+            .opacity(enabled ? (configuration.isPressed ? NativeDesign.Motion.pressedOpacity : 1) : 0.45)
+    }
+}
+
 struct NativeIconButton: View {
     let symbol: String
     let label: String

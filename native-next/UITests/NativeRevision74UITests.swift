@@ -18,7 +18,7 @@ final class NativeRevision74UITests: XCTestCase {
         XCTAssertFalse(app.tabBars.buttons["Finanza"].exists); XCTAssertFalse(app.tabBars.buttons["Calendario"].exists)
         app.tabBars.buttons["Salute"].tap()
         app.buttons["Registrazioni macro"].tap()
-        for (label, value) in [("Proteine", "10"), ("Carboidrati", "20"), ("Grassi", "5")] {
+        for (label, value) in [("Proteine", "10"), ("Carboidrati", "20"), ("Grassi", "5"), ("Fibre", "1"), ("Calorie etichetta", "165")] {
             let field = app.textFields["nutrition-" + label]
             XCTAssertTrue(field.waitForExistence(timeout: 10)); field.tap(); field.typeText(value)
         }
@@ -34,6 +34,7 @@ final class NativeRevision74UITests: XCTestCase {
         let app = launch()
         app.tabBars.buttons["Salute"].tap()
         XCTAssertTrue(app.navigationBars["Salute"].waitForExistence(timeout: 10))
+        app.buttons["health-summary-weight"].tap()
         let chart = app.descendants(matching: .any).matching(identifier: "health-weight-chart").firstMatch
         let surface = app.scrollViews["health-detail-scroll"]
         for _ in 0..<10 {

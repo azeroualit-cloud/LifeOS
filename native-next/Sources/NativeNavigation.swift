@@ -17,10 +17,10 @@ struct NativeToolbarButton: View {
 
     var body: some View {
         if #available(iOS 26.0, *) {
-            Button(action: action) { icon }.buttonStyle(.glass).buttonBorderShape(.circle)
+            Button(action: action) { icon.glassEffect(.regular.interactive(), in: Circle()) }.buttonStyle(.plain)
                 .accessibilityLabel(label)
         } else {
-            Button(action: action) { icon }.buttonStyle(.bordered).buttonBorderShape(.circle)
+            Button(action: action) { icon.background(.thinMaterial, in: Circle()) }.buttonStyle(.plain)
                 .accessibilityLabel(label)
         }
     }

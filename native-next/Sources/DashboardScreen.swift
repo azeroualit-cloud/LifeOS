@@ -67,25 +67,15 @@ struct DashboardScreen: View {
         Task { await store.sync(scope: .life) }
     }
     private func heading(_ summary: NativeHomeSummary, today: String, now: Date) -> some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.medium) {
-                headingText(summary, today: today, now: now)
-                Spacer(minLength: NativeDesign.Space.small)
-                activeShift(now: now, today: today)
-            }
-            VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-                headingText(summary, today: today, now: now)
-                activeShift(now: now, today: today)
-            }
-        }
-    }
-    private func headingText(_ summary: NativeHomeSummary, today: String, now: Date) -> some View {
-        VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-            Text(CivilDate.label(today).capitalized).accessibilityIdentifier("home-today").font(.title.bold()).accessibilityAddTraits(.isHeader)
-            HStack(spacing: NativeDesign.Space.small) {
-                Text(now.formatted(date: .omitted, time: .shortened)).monospacedDigit().font(.subheadline).foregroundStyle(NativeDesign.secondary)
+        VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+            HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.small) {
+                Text(CivilDate.label(today).capitalized).accessibilityIdentifier("home-today")
+                    .font(.title.bold()).accessibilityAddTraits(.isHeader)
+                    .layoutPriority(1)
+                Spacer(minLength: 0)
                 nextTime(now)
             }
+            activeShift(now: now, today: today)
         }
     }
     private func focusDate(_ now: Date) -> Date {
@@ -137,27 +127,14 @@ struct DashboardScreen: View {
         case .routine:
             NativeChecklistRow(title: record.text("title"), subtitle: "Abitudine", checked: record.flag("checked"), completionLabel: "Completa abitudine " + record.text("title"), onComplete: { checkRoutine(record) }, onOpen: { router.sheet = .routines })
                 .disabled(store.busy || routineBusy != nil)
-        case .task:
-            NativeChecklistRow(title: record.text("title"), subtitle: "Attività" + (item.time.isEmpty ? "" : " · " + item.time), checked: false, dueDay: record.text("due_date"), completionLabel: "Completa attività " + record.text("title"), onComplete: {
-                Task { await store.run("setTaskStatus", ["id": .int(record.integer("id")), "status": .string(NativeTaskList.completionStatus(record))]) }
-            }, onOpen: { router.sheet = .task(record) }).disabled(store.busy)
+
         }
     }
     @ViewBuilder private func nextTime(_ now: Date) -> some View {
         if let next = NativeNextTime.next(now: now) {
             Button { showingTimes = true } label: {
-                ViewThatFits(in: .horizontal) {
-                    HStack(spacing: NativeDesign.Space.small) {
-                        Image(systemName: next.symbol).foregroundStyle(NativeDesign.secondary)
-                        Text(next.label).foregroundStyle(NativeDesign.secondary)
-                        Spacer(minLength: NativeDesign.Space.small)
-                        Text(next.displayTime).fontWeight(.medium).monospacedDigit()
-                    }
-                    VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-                        Label(next.label, systemImage: next.symbol).foregroundStyle(NativeDesign.secondary)
-                        Text(next.displayTime).fontWeight(.medium).monospacedDigit()
-                    }
-                }.font(.subheadline).frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
+                Text(next.displayTime).font(.subheadline.weight(.medium)).monospacedDigit()
+                    .frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget)
                     .contentShape(Rectangle())
             }.buttonStyle(NativePressStyle())
                 .accessibilityLabel("Prossimo orario, " + next.label + ", " + next.displayTime)
@@ -186,12 +163,18 @@ struct DashboardScreen: View {
                 }.frame(minHeight: NativeDesign.Layout.touchTarget)
             }.buttonStyle(NativePressStyle()).accessibilityIdentifier("home-finance")
             let overview = NativeFinanceOverview(summary: store.summary, month: store.financeMonth)
-            LabeledContent("Budget rimanente", value: hiddenMoney ? "•••• €" : overview.remaining.map(\.euro) ?? "Da aggiornare")
-            LabeledContent("Conto principale", value: hiddenMoney ? "•••• €" : overview.balance.map(\.euro) ?? "Da aggiornare")
-                .foregroundStyle(NativeDesign.secondary)
-            Text(CivilDate.monthTitle(store.financeMonth)).font(.caption).foregroundStyle(NativeDesign.secondary)
-            Button("Aggiungi spesa", systemImage: "plus") { router.sheet = .movement([:]) }
-                .frame(minHeight: NativeDesign.Layout.touchTarget)
+            HStack(alignment: .center, spacing: NativeDesign.Space.medium) {
+                VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
+                    Text(hiddenMoney ? "•••• €" : overview.remaining.map(\.euro) ?? "—")
+                        .font(.title2.weight(.semibold)).monospacedDigit()
+                    Text("Budget").font(.caption).foregroundStyle(NativeDesign.secondary)
+                }
+                Spacer(minLength: NativeDesign.Space.small)
+                Button("Aggiungi spesa", systemImage: "plus") { router.sheet = .movement([:]) }
+                    .frame(minHeight: NativeDesign.Layout.touchTarget)
+                    .accessibilityIdentifier("home-add-expense")
+            }
+
         }
     }
     private func checkRoutine(_ record: Record) {

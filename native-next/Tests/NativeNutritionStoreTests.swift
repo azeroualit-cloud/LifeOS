@@ -26,6 +26,23 @@ import XCTest
         XCTAssertNil(decoded.deletionPending)
         XCTAssertEqual(decoded.calories, 165)
     }
+    func testLabelEnergyFibreAndPortionSurviveFailedWriteRestartAndRetry() async throws {
+        let root = directory(); defer { try? FileManager.default.removeItem(at: root) }
+        let writer = NutritionWriterProbe(); writer.fail = true
+        let value = try XCTUnwrap(NativeNutritionEntry.portion(id: UUID(), date: Date(),
+            protein: 6, carbohydrate: 60, fat: 20, fibre: 8, calories: 450, grams: 20))
+        let first = NativeNutritionStore(directory: root, writer: writer)
+        let failed = await first.save(value); XCTAssertFalse(failed)
+        let restarted = NativeNutritionStore(directory: root, writer: writer)
+        let pending = try XCTUnwrap(restarted.entries.first)
+        XCTAssertEqual(pending.calories, 90); XCTAssertEqual(pending.fibre, Decimal(string: "1.6"))
+        XCTAssertEqual(pending.portionGrams, 20)
+        writer.fail = false
+        let saved = await restarted.save(pending, retry: true); XCTAssertTrue(saved)
+        XCTAssertEqual(writer.writes.map(\.revision), [1, 1])
+        XCTAssertEqual(writer.writes.map(\.calories), [90, 90])
+        XCTAssertEqual(restarted.entries.first?.fibre, Decimal(string: "1.6"))
+    }
     func testDeniedDeletionRetainsRecoverableRow() async {
         let root = directory(); defer { try? FileManager.default.removeItem(at: root) }
         let writer = NutritionWriterProbe(), original = entry()
