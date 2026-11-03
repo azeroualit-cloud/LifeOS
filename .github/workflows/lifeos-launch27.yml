@@ -69,7 +69,9 @@ jobs:
           runtime=choices[0]
           devices=[d for d in runtime.get('supportedDeviceTypes',[]) if 'iPhone' in d.get('name','')]
           assert devices,'No iPhone supported by the iOS 27.2 runtime'
-          device_type=next((d for d in devices if 'Pro' in d.get('name','')),devices[0])
+          device_type=next((d for d in devices if d['identifier']=='com.apple.CoreSimulator.SimDeviceType.iPhone-15-Pro'),None)
+          print('ACTUAL_27_2_SUPPORTED_IPHONES',[d['name'] for d in devices],flush=True)
+          assert device_type is not None,'Downloaded iOS 27.2 runtime does not support iPhone 15 Pro; do not mislabel another phone as the user model'
           device=subprocess.check_output(['xcrun','simctl','create','LifeOS Release OS27.2 audit',device_type['identifier'],runtime['identifier']],text=True).strip()
           with open(os.environ['GITHUB_ENV'],'a') as f:f.write('MAIN_DEVICE='+device+'\n')
           print('ACTUAL_RELEASE_RUNTIME',runtime['version'],'MODEL',device_type['name'],'user iPhone 15 Pro hardware not simulated if unsupported')
