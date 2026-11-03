@@ -44,8 +44,11 @@ struct NativeNutritionQuickEntry: View {
                     .font(.subheadline).monospacedDigit().accessibilityIdentifier("quick-nutrition-calories")
                 Spacer()
                 if nutrition.busy { ProgressView().accessibilityLabel("Salvataggio") }
-                Button(pending == nil ? "Aggiungi" : "Riprova") { save() }
-                    .buttonStyle(.borderedProminent)
+                Button { save() } label: {
+                    Text(pending == nil ? "Aggiungi" : "Riprova")
+                        .frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget)
+                        .contentShape(Rectangle())
+                }.buttonStyle(.borderedProminent)
                     .disabled(nutrition.busy || draft == nil || draft?.calories == 0)
                     .frame(minHeight: NativeDesign.Layout.touchTarget)
                     .accessibilityIdentifier("quick-nutrition-save")
