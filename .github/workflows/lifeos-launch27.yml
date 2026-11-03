@@ -60,7 +60,12 @@ jobs:
           import json,os,subprocess
           runtimes=json.loads(subprocess.check_output(['xcrun','simctl','list','runtimes','-j']))['runtimes']
           choices=[r for r in runtimes if r.get('isAvailable') and r['version'].startswith('27.2') and '.iOS-' in r['identifier']]
-          assert choices,'Actual iOS 27.2 runtime unavailable; do not substitute another OS silently'
+          if not choices:
+              print('REQUESTING_ACTUAL_27_2_RUNTIME_FROM_APPLE',flush=True)
+              subprocess.run(['xcodebuild','-downloadPlatform','iOS','-buildVersion','27.2'],check=True,timeout=900)
+              runtimes=json.loads(subprocess.check_output(['xcrun','simctl','list','runtimes','-j']))['runtimes']
+              choices=[r for r in runtimes if r.get('isAvailable') and r['version'].startswith('27.2') and '.iOS-' in r['identifier']]
+          assert choices,'Actual iOS 27.2 runtime unavailable after Apple download request; no substituted OS'
           runtime=choices[0]
           devices=[d for d in runtime.get('supportedDeviceTypes',[]) if 'iPhone' in d.get('name','')]
           assert devices,'No iPhone supported by the iOS 27.2 runtime'
