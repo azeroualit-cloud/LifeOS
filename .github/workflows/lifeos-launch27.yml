@@ -1,0 +1,105 @@
+name: LifeOS 75 Release startup on actual iOS 27.2 runtime
+on:
+  push:
+    paths: ['.github/workflows/lifeos-launch27.yml']
+permissions:
+  contents: read
+jobs:
+  launch:
+    runs-on: xcode-27
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v5
+      - name: Seleziona SDK Apple recente
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os, pathlib, re
+          found = []
+          for path in pathlib.Path('/Applications').glob('Xcode_*.app'):
+              match = re.fullmatch(r'Xcode_([0-9.]+)\.app', path.name)
+              if match:
+                  version = tuple(map(int, match[1].split('.')))
+                  if version[0] >= 26: found.append((version, path))
+          assert found, 'Serve Xcode 26 o successivo per il design Apple attuale.'
+          path = max(found, key=lambda x: x[0])[1]
+          with open(os.environ['GITHUB_ENV'], 'a') as f:
+              f.write('DEVELOPER_DIR=' + str(path / 'Contents/Developer') + '\n')
+          print('Xcode selezionato:', path.name)
+          PY
+      - name: Prepara progetto
+        run: |
+          set -euo pipefail
+          curl --fail --location --silent --show-error https://raw.githubusercontent.com/azeroualit-cloud/LifeOS/02c2c089841833a67fc9a223b367710edf7e37b9/lifeos-native.zip -o /tmp/lifeos-build60.zip
+          python3 - <<'PYZIP'
+          import pathlib, hashlib, zipfile, shutil
+          source = pathlib.Path('/tmp/lifeos-build60.zip')
+          assert hashlib.sha256(source.read_bytes()).hexdigest() == 'b09762b88e4dc017d2c89fa7582ac38daf1fddf5aa0dd12fed94d73f6099ef03'
+          with zipfile.ZipFile(source) as archive:
+              for name in archive.namelist():
+                  path = pathlib.PurePosixPath(name)
+                  assert not path.is_absolute() and '..' not in path.parts
+              archive.extractall('app')
+          overlay = pathlib.Path('native-next')
+          for path in overlay.rglob('*'):
+              if path.is_file() and path.parts[1] in ['Sources','Tests','UITests','Widget','Shared','project.yml','LifeOS.entitlements','Widget.entitlements']:
+                  target = pathlib.Path('app') / path.relative_to(overlay)
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  shutil.copy2(path,target)
+          PYZIP
+      - name: Genera progetto Xcode
+        working-directory: app
+        run: |
+          set -euo pipefail
+          brew install xcodegen
+          xcodegen generate
+          mkdir -p build
+      - name: Select actual iOS 27.2 runtime and report its supported iPhone
+        run: |
+          python3 - <<'PYDEVICE'
+          import json,os,subprocess
+          runtimes=json.loads(subprocess.check_output(['xcrun','simctl','list','runtimes','-j']))['runtimes']
+          choices=[r for r in runtimes if r.get('isAvailable') and r['version'].startswith('27.2') and '.iOS-' in r['identifier']]
+          assert choices,'Actual iOS 27.2 runtime unavailable; do not substitute another OS silently'
+          runtime=choices[0]
+          devices=[d for d in runtime.get('supportedDeviceTypes',[]) if 'iPhone' in d.get('name','')]
+          assert devices,'No iPhone supported by the iOS 27.2 runtime'
+          device_type=next((d for d in devices if 'Pro' in d.get('name','')),devices[0])
+          device=subprocess.check_output(['xcrun','simctl','create','LifeOS Release OS27.2 audit',device_type['identifier'],runtime['identifier']],text=True).strip()
+          with open(os.environ['GITHUB_ENV'],'a') as f:f.write('MAIN_DEVICE='+device+'\n')
+          print('ACTUAL_RELEASE_RUNTIME',runtime['version'],'MODEL',device_type['name'],'user iPhone 15 Pro hardware not simulated if unsupported')
+          PYDEVICE
+      - name: Boot simulator and compile the real Release app
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcrun simctl boot "$MAIN_DEVICE" || true
+          xcodebuild build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -configuration Release -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -derivedDataPath release-build CODE_SIGNING_ALLOWED=NO 2>&1 | tee build/release-compile.log
+          xcrun simctl bootstatus "$MAIN_DEVICE" -b
+      - name: Observe startup without demo flags or DEBUG substitutions
+        working-directory: app
+        run: python3 ../scripts/verify-release-launch75.py
+      - name: Print synthetic launch failures and screenshots
+        if: always()
+        working-directory: app
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64,subprocess
+          root=Path('release-launch')
+          for p in root.glob('*.log'):print('RELEASE_CONSOLE',p.name,p.read_text(errors='replace')[-18000:])
+          for p in root.glob('*.ips'):print('RELEASE_CRASH',p.name,p.read_text(errors='replace')[:30000])
+          for p in root.glob('*.png'):
+              subprocess.run(['sips','-Z','900',str(p),'--out','/tmp/launch-preview.png'],check=True,capture_output=True)
+              data=base64.b64encode(Path('/tmp/launch-preview.png').read_bytes()).decode()
+              print('QA_IMAGE_START '+p.stem)
+              for i in range(0,len(data),16000):print('QA_IMAGE_DATA '+data[i:i+16000])
+              print('QA_IMAGE_END '+p.stem)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: release75-launch-actual27.2
+          path: |
+            app/release-launch
+            app/build/release-compile.log
