@@ -71,6 +71,7 @@ struct NativeBloomLinkSnapshot: Codable {
 struct NativeBloomLinkPreview: View {
     let url: URL
     let width: CGFloat
+    var showTitle = true
     @State private var snapshot: NativeBloomLinkSnapshot?
     @State private var finished = false
     var body: some View {
@@ -85,7 +86,7 @@ struct NativeBloomLinkPreview: View {
                 }.frame(width: width, height: NativeDesign.Layout.bloomThumbnailHeight)
                     .accessibilityLabel(finished ? "Anteprima non disponibile" : "Caricamento anteprima")
             }
-            if let title = snapshot?.title, !title.isEmpty {
+            if showTitle, let title = snapshot?.title, !title.isEmpty {
                 Text(title).font(.subheadline).lineLimit(3).multilineTextAlignment(.leading)
             }
             Text(url.host ?? url.absoluteString).font(.caption).foregroundStyle(.secondary).lineLimit(1)

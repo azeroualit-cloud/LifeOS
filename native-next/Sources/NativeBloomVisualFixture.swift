@@ -10,14 +10,14 @@ enum NativeBloomVisualFixture {
                 do {
                     for index in 0..<122 {
                         let kind = index % 4 == 0 ? "image" : (index % 4 == 1 ? "link" : "text")
-                        var row: Record = ["id": .string(String(format: "BA000000-0000-4000-8000-%012d", index)), "kind": .string(kind), "title": .string(index == 0 ? "Immagine verticale" : "Nota \(index): titolo lungo per verificare le colonne della libreria"), "capturedAt": .number(Double(10000 - index)), "archived": .bool(false), "noteVersion": .int(1)]
+                        var row: Record = ["id": .string(String(format: "BA000000-0000-4000-8000-%012d", index)), "kind": .string(kind), "urlString": .string(""), "title": .string(index == 0 ? "Immagine verticale" : "Nota \(index): titolo lungo per verificare le colonne della libreria"), "capturedAt": .number(Double(10000 - index)), "archived": .bool(false), "noteVersion": .int(1)]
                         if kind == "image" {
                             let portrait = index % 8 == 0
                             row["data"] = .string(image(width: portrait ? 280 : 1000, height: portrait ? 500 : 240).base64EncodedString())
                             row["fileName"] = .string("fixture.jpg"); row["contentType"] = .string("public.jpeg")
                         } else if kind == "link" {
                             row["urlString"] = .string("https://example.com/" + (index == 5 ? "unavailable" : "preview"))
-                        } else { row["text"] = .string(index % 2 == 0 ? "Testo breve" : String(repeating: "Una nota con contenuto più lungo. ", count: 8)) }
+                        } else { row["text"] = .string(index % 2 == 0 ? "Testo breve" : String(repeating: "Una nota con contenuto piÃ¹ lungo. ", count: 8)) }
                         try store.save(row)
                     }
                 } catch { store.error = error.localizedDescription }

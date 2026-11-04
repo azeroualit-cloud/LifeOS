@@ -107,9 +107,11 @@ struct NativeBloomLibraryContent: View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
             if let url = store.primaryFileURL(row) { NativeBloomThumbnail(url: url, width: width.map { max(1, $0 - NativeDesign.Space.medium * 2) }).clipped() }
             if let link = NativeBloomRow(row).previewURL {
-                NativeBloomLinkPreview(url: link, width: max(1, (width ?? NativeDesign.Layout.bloomGridMinimum) - NativeDesign.Space.medium * 2))
+                NativeBloomLinkPreview(url: link, width: max(1, (width ?? NativeDesign.Layout.bloomGridMinimum) - NativeDesign.Space.medium * 2), showTitle: row.text("title").isEmpty)
             }
-            Text(NativeBloomRow(row).displayTitle).font(.headline).lineLimit(3).multilineTextAlignment(.leading)
+            if NativeBloomRow(row).previewURL == nil || !row.text("title").isEmpty {
+                Text(NativeBloomRow(row).displayTitle).font(.headline).lineLimit(3).multilineTextAlignment(.leading)
+            }
             if !row.text("text").isEmpty { Text(row.text("text")).font(.subheadline).foregroundStyle(.secondary).lineLimit(4).multilineTextAlignment(.leading) }
         }.frame(maxWidth: .infinity, alignment: .leading).padding(NativeDesign.Space.medium)
             .frame(width: width, alignment: .leading).clipped()
