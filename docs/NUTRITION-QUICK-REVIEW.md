@@ -23,3 +23,7 @@ Testo grande: rendere esplicita l’applicazione del modifier di prova anche al 
 ## Modalità accessibilità reale
 
 Run 41845722107: 271 unitari passati, quattro UI passati e uno fallito durante input Grassi. Confermata la colonna unica e il font accessibile nel foglio. Video nativo e gerarchia mostrano il campo Grassi a y=487–534 pt, sotto pulsante fisso e barra tastiera, mentre Carboidrati manteneva il focus. Il solo isHittable restituiva un segnale insufficiente. Test corretto per verificare che l’intero campo sia nel rettangolo visibile sopra l’azione fissa prima del tap; nessun cambiamento applicativo introdotto per questo errore del test. Nuova verifica anche sulla leggibilità completa dell’errore e sulla posizione dell’azione in accessibilità.
+
+## Recupero in errore e scorrimento del foglio
+
+Run 41849578621: 271 unitari passati, input di tutti e quattro i nutrienti in accessibilità riuscito. Il video nativo mostra i valori conservati e Riprova, ma lo swipe discendente del contenuto chiude il foglio durante una registrazione pendente; il messaggio è sotto i dati e può richiedere ricerca. Correzione applicativa: contenuto con priorità allo scroll, dismiss interattivo disabilitato finché esiste la bozza persistita non confermata (X esplicita ancora disponibile), errore nel footer sopra Riprova. Test conserva tutti gli assert sui valori e verifica che la rilettura non chiuda il foglio; messaggio e azione devono essere visibili sullo schermo.

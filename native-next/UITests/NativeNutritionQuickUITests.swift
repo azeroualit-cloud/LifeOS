@@ -27,7 +27,7 @@ final class NativeNutritionQuickUITests: XCTestCase {
     }
     private func drag(_ scroll: XCUIElement, app: XCUIApplication, up: Bool) {
         let origin = app.coordinate(withNormalizedOffset: .zero)
-        let bottom = min(scroll.frame.maxY, app.buttons["quick-nutrition-save"].frame.minY) - 12
+        let bottom = min(scroll.frame.maxY, app.descendants(matching: .any).matching(identifier: "quick-nutrition-footer").firstMatch.frame.minY) - 12
         let top = scroll.frame.minY + 12
         XCTAssertGreaterThan(bottom, top)
         origin.withOffset(CGVector(dx: scroll.frame.midX, dy: up ? bottom : top)).press(forDuration: 0.05, thenDragTo: origin.withOffset(CGVector(dx: scroll.frame.midX, dy: up ? top : bottom)))
@@ -35,7 +35,7 @@ final class NativeNutritionQuickUITests: XCTestCase {
     private func visible(_ element: XCUIElement, in app: XCUIApplication) -> Bool {
         guard element.exists else { return false }
         let scroll = app.scrollViews["quick-nutrition-scroll"].frame
-        let bottom = min(scroll.maxY, app.buttons["quick-nutrition-save"].frame.minY)
+        let bottom = min(scroll.maxY, app.descendants(matching: .any).matching(identifier: "quick-nutrition-footer").firstMatch.frame.minY)
         let frame = element.frame
         return frame.minY >= scroll.minY + 1 && frame.maxY <= bottom - 1
     }
@@ -91,11 +91,9 @@ final class NativeNutritionQuickUITests: XCTestCase {
         }
         XCTAssertTrue(visible(protein, in: app))
         XCTAssertEqual(protein.value as? String, "25")
-        for _ in 0..<6 {
-            if visible(error, in: app) { break }
-            drag(scroll, app: app, up: true)
-        }
-        XCTAssertTrue(visible(error, in: app), "The recoverable error must be readable")
+        XCTAssertTrue(app.scrollViews["quick-nutrition-scroll"].exists, "Reading back values must not dismiss a pending entry")
+        XCTAssertGreaterThanOrEqual(error.frame.minY, app.frame.minY)
+        XCTAssertLessThanOrEqual(error.frame.maxY, app.buttons["quick-nutrition-save"].frame.minY)
         XCTAssertTrue(app.buttons["quick-nutrition-save"].isEnabled)
         RunLoop.current.run(until: Date().addingTimeInterval(1))
         capture("Nutrition large text recoverable error stable", app)

@@ -87,7 +87,6 @@ struct NativeNutritionQuickSheet: View {
                                     .presentationCompactAdaptation(.popover)
                             }
                     }
-                    if let error = nutrition.error { Text(error).font(.subheadline).foregroundStyle(.red).accessibilityIdentifier("quick-nutrition-error") }
                     if blocked {
                         Button("Completa la registrazione in sospeso dalla cronologia") { focus = nil; showingHistory = true }
                             .frame(minHeight: NativeDesign.Layout.touchTarget)
@@ -98,16 +97,22 @@ struct NativeNutritionQuickSheet: View {
         .toolbar(.hidden, for: .navigationBar)
         .background(NativeDesign.healthCanvas)
         .safeAreaInset(edge: .bottom, spacing: NativeDesign.Space.none) {
-            Button(action: save) {
-                HStack {
-                    if nutrition.busy { ProgressView().accessibilityLabel("Salvataggio") }
-                    Text(pending == nil ? "Aggiungi" : "Riprova").font(.headline)
-                }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.rowHeight)
-            }.buttonStyle(NativeCompactPrimaryButtonStyle())
-                .disabled(nutrition.busy || blocked || (pending ?? draft) == nil)
-                .accessibilityIdentifier("quick-nutrition-save")
-                .padding(.horizontal, NativeDesign.Layout.screenInset).padding(.vertical, NativeDesign.Space.small)
-                .background(NativeDesign.healthCanvas)
+            VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+                if let error = nutrition.error {
+                    Text(error).font(.subheadline).foregroundStyle(.red).accessibilityIdentifier("quick-nutrition-error")
+                }
+                Button(action: save) {
+                    HStack {
+                        if nutrition.busy { ProgressView().accessibilityLabel("Salvataggio") }
+                        Text(pending == nil ? "Aggiungi" : "Riprova").font(.headline)
+                    }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.rowHeight)
+                }.buttonStyle(NativeCompactPrimaryButtonStyle())
+                    .disabled(nutrition.busy || blocked || (pending ?? draft) == nil)
+                    .accessibilityIdentifier("quick-nutrition-save")
+            }
+            .padding(.horizontal, NativeDesign.Layout.screenInset).padding(.vertical, NativeDesign.Space.small)
+            .background(NativeDesign.healthCanvas)
+            .accessibilityElement(children: .contain).accessibilityIdentifier("quick-nutrition-footer")
         }
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
@@ -120,7 +125,8 @@ struct NativeNutritionQuickSheet: View {
         }
         .sheet(isPresented: $showingHistory) { NavigationStack { NativeNutritionScreen().toolbar { DoneButton() } } }
         .presentationDetents([.large]).presentationDragIndicator(.visible)
-        .interactiveDismissDisabled(nutrition.busy)
+        .presentationContentInteraction(.scrolls)
+        .interactiveDismissDisabled(nutrition.busy || pending != nil)
     }
     private var allZero: Bool {
         [protein, carbohydrate, fat, fibre].allSatisfy { NativeNutritionEntry.grams($0) == 0 }
