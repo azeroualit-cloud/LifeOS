@@ -50,3 +50,7 @@ L’ultimo aggiornamento di documentazione non cambia il fingerprint applicativo
 ## Storico
 
 I vecchi `HANDOFF.md`, README e rapporti di revisione sono evidenze storiche. Quando divergono dal registro attivo o dallo stato corrente, non usarli per ripristinare una scelta superata o dichiarare risolto un difetto aperto.
+
+## Revisione Bloom corrente
+
+Leggere [BLOOM-GRID-REVIEW.md](BLOOM-GRID-REVIEW.md): H-GRID-01 implementato e in verifica. Run 41813899400: 19 unitari e 3 UI passati, 1 UI fallito per gesto sulla tab bar, corretto nel test; run 41816351684 in corso. Richiedere accettazione del risultato visivo prima della prossima modifica di prodotto (DEV-02). Nessuna nuova IPA.
