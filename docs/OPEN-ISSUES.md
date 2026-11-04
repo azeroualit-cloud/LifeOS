@@ -1,5 +1,9 @@
 # LifeOS — correzioni e difetti aperti
 
+## Aggiornamento operativo — piano approvato, 4 novembre 2026
+
+Il piano completo è autorizzato ed è in corso: [piano](PROJECT-RELEASE-PLAN.md), [copertura](REQUIREMENT-COVERAGE.json), [manifesto](EXECUTION-MANIFEST.json). I precedenti passaggi che indicano solo pianificazione o accettazione Bloom pendente sono storici e superati. Bloom è accettato visivamente, non per produzione; retry nutrizione resta non verificato; IPA 78 non accettata. Nessuna nuova IPA né deploy autorizzati. T07 prevede anteprima e conferma dei conflitti prima della modifica di Salute.
+
 Aggiornato il 4 novembre 2026. Questa è una lista di lavoro con stato e provenienza, non un’attestazione di risoluzione. La build 78 non è accettata per la produzione.
 
 ## Difetti osservati nelle foto dell’app installata

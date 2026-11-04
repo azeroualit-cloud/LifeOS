@@ -1,0 +1,3651 @@
+{
+  "schema_version": 1,
+  "inventory_count": 238,
+  "classification_note": "Classificazione operativa distinta da stato decisionale; le prove storiche non certificano la release corrente.",
+  "items": [
+    {
+      "id": "A01",
+      "text": "Rendere l’app realmente utilizzabile e sufficientemente curata per la produzione, non soltanto compilabile.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Preservare stile attuale e verificare proporzioni; nessun redesign implicito.",
+      "task": "T11",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "A02",
+      "text": "Ridurre il carico di lettura e permettere di capire i segnali importanti a colpo d’occhio.",
+      "provenance": {
+        "origin": "S5",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Preservare stile attuale e verificare proporzioni; nessun redesign implicito.",
+      "task": "T10/T11",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "A03",
+      "text": "Rappresentare evento e abitudini con rettangoli di stato senza testo, colorati quando completati.",
+      "provenance": {
+        "origin": "S5",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Riferimento storico non completamente disponibile; verificare senza inventare.",
+      "task": "T03",
+      "exclusion_reason": null,
+      "implementation_status": "NON_VERIFICABILE"
+    },
+    {
+      "id": "A04",
+      "text": "Usare esattamente due barre orizzontali al posto dei grafici a mezza torta.",
+      "provenance": {
+        "origin": "S5",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Riferimento storico non completamente disponibile; verificare senza inventare.",
+      "task": "T03",
+      "exclusion_reason": null,
+      "implementation_status": "NON_VERIFICABILE"
+    },
+    {
+      "id": "A05",
+      "text": "Nella barra del turno evidenziare soltanto la fascia oraria del turno attuale, per esempio 06–14.",
+      "provenance": {
+        "origin": "S5",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Riferimento storico non completamente disponibile; verificare senza inventare.",
+      "task": "T03",
+      "exclusion_reason": null,
+      "implementation_status": "NON_VERIFICABILE"
+    },
+    {
+      "id": "A06",
+      "text": "Usare transizioni nette nel gradiente del componente indicato, senza sostituirlo con un’immagine decorativa.",
+      "provenance": {
+        "origin": "S5",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Riferimento storico non completamente disponibile; verificare senza inventare.",
+      "task": "T03",
+      "exclusion_reason": null,
+      "implementation_status": "NON_VERIFICABILE"
+    },
+    {
+      "id": "A07",
+      "text": "Ridurre il blu e rendere più caldi i fondi e l’accento dell’icona.",
+      "provenance": {
+        "origin": "S1",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Preservare stile attuale e verificare proporzioni; nessun redesign implicito.",
+      "task": "T10",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "A08",
+      "text": "Sostituire il vecchio logo con la A, rifiutato esplicitamente.",
+      "provenance": {
+        "origin": "S1",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Preservare stile attuale e verificare proporzioni; nessun redesign implicito.",
+      "task": "T10",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "A09",
+      "text": "Conservare l’icona originale successivamente scelta e rifiutare altre varianti non richieste.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Preservare stile attuale e verificare proporzioni; nessun redesign implicito.",
+      "task": "T10",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "A10",
+      "text": "Eliminare l’eccesso di colori, gradienti e glow dei concept iniziali.",
+      "provenance": {
+        "origin": "S2",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Preservare stile attuale e verificare proporzioni; nessun redesign implicito.",
+      "task": "T10",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "A11",
+      "text": "Concept storico con dark mode, SF Pro Rounded, vetro, microgradienti e accenti mint/indaco/arancio.",
+      "provenance": {
+        "origin": "S4",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Preservare stile attuale e verificare proporzioni; nessun redesign implicito.",
+      "task": "T10",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "A12",
+      "text": "Concept storico light/neo-brutalista, vibrante e con aspetto clay/3D; successivamente esplorato anche dark e minimale.",
+      "provenance": {
+        "origin": "S3",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Preservare stile attuale e verificare proporzioni; nessun redesign implicito.",
+      "task": "T10",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "A13",
+      "text": "Calendario semplice, moderno, utilizzabile, con testi leggibili e senza illustrazioni complesse.",
+      "provenance": {
+        "origin": "S6",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Preservare stile attuale e verificare proporzioni; nessun redesign implicito.",
+      "task": "T10/T11",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "A14",
+      "text": "Far corrispondere il redesign al riferimento fornito, evitando un’estetica percepita come app da caffetteria.",
+      "provenance": {
+        "origin": "S1",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Riferimento storico non completamente disponibile; verificare senza inventare.",
+      "task": "T03",
+      "exclusion_reason": null,
+      "implementation_status": "NON_VERIFICABILE"
+    },
+    {
+      "id": "A15",
+      "text": "Usare controlli e materiali di sistema quando appropriati, con fallback disponibili e senza inventare API.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Preservare stile attuale e verificare proporzioni; nessun redesign implicito.",
+      "task": "T10/T11",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "A16",
+      "text": "Verificare margini, padding e bottoni per proporzioni ed esperienza iOS migliorate.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Preservare stile attuale e verificare proporzioni; nessun redesign implicito.",
+      "task": "T10/T11",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "B01",
+      "text": "Struttura storica: Dashboard, Attività, Salute, Altro, con Finanza/Calendario/Bloom in Altro.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/native/REVISIONE-77.md e REVISIONE-78.md, prove storiche",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03/T05/T10",
+      "exclusion_reason": null,
+      "implementation_status": "SUPERATO"
+    },
+    {
+      "id": "B02",
+      "text": "Sostituire Altro con Bloom direttamente nella tab bar.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/native/REVISIONE-77.md e REVISIONE-78.md, prove storiche",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03/T05/T10",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "B03",
+      "text": "Conservare quattro destinazioni principali: Dashboard, Attività, Salute, Bloom.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/native/REVISIONE-77.md e REVISIONE-78.md, prove storiche",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03/T05/T10",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "B04",
+      "text": "Separare chiaramente i flussi Calendario, Attività, Salute e Finanza; la frase non conferma una diversa tab bar.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/native/REVISIONE-77.md e REVISIONE-78.md, prove storiche",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03/T05/T10",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "B05",
+      "text": "La settimana della Dashboard deve aprire il calendario completo.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/native/REVISIONE-77.md e REVISIONE-78.md, prove storiche",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03/T05/T10",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "B06",
+      "text": "Il tocco sulla settimana non deve forzare l’apertura della scheda giornaliera.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/native/REVISIONE-77.md e REVISIONE-78.md, prove storiche",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03/T05/T10",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "B07",
+      "text": "Conservare il giorno richiesto come riferimento del calendario quando appropriato.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/native/REVISIONE-77.md e REVISIONE-78.md, prove storiche",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03/T05/T10",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "B08",
+      "text": "Tornare alla Dashboard senza stack duplicati o perdita della posizione.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/native/REVISIONE-77.md e REVISIONE-78.md, prove storiche",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03/T05/T10",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "B09",
+      "text": "Aprire Salute direttamente sui contenuti, eliminando la porta d’ingresso Peso, calorie, fonti e TDEE.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/native/REVISIONE-77.md e REVISIONE-78.md, prove storiche",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03/T05/T10",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "B10",
+      "text": "Conservare deep link, azioni rapide, ritorni e ripristino dello stato.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/native/REVISIONE-77.md e REVISIONE-78.md, prove storiche",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03/T05/T10",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "C01",
+      "text": "Mostrare soltanto HH:mm della prossima preghiera a destra della data, anche quando è del giorno dopo.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "native-next/Sources/DashboardScreen.swift; test NativeRevision78UITests; docs/native/REVISIONE-78.md (storico)",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "C02",
+      "text": "Aprire tutti gli orari delle preghiere toccando quell’ora.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "native-next/Sources/DashboardScreen.swift; test NativeRevision78UITests; docs/native/REVISIONE-78.md (storico)",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "C03",
+      "text": "Header storico con data, ora corrente e prossima preghiera compatti.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/DashboardScreen.swift; test NativeRevision78UITests; docs/native/REVISIONE-78.md (storico)",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03/T05",
+      "exclusion_reason": "Sostituito da decisioni successive registrate.",
+      "implementation_status": "SUPERATO"
+    },
+    {
+      "id": "C04",
+      "text": "Ridurre il padding e l’ingombro dei tasti Impostazioni e +.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "native-next/Sources/DashboardScreen.swift; test NativeRevision78UITests; docs/native/REVISIONE-78.md (storico)",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "C05",
+      "text": "Mostrare prima gli eventi di oggi.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "native-next/Sources/DashboardScreen.swift; test NativeRevision78UITests; docs/native/REVISIONE-78.md (storico)",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "C06",
+      "text": "Mostrare subito dopo le abitudini di oggi.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "native-next/Sources/DashboardScreen.swift; test NativeRevision78UITests; docs/native/REVISIONE-78.md (storico)",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "C07",
+      "text": "Mostrare poi soltanto gli eventi a meno di tre giorni, senza estendere la lista a tutta la settimana.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "native-next/Sources/DashboardScreen.swift; test NativeRevision78UITests; docs/native/REVISIONE-78.md (storico)",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "C08",
+      "text": "Escludere dalla Dashboard le attività generiche e tutto ciò che non rientra nella finestra richiesta.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "native-next/Sources/DashboardScreen.swift; test NativeRevision78UITests; docs/native/REVISIONE-78.md (storico)",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "C09",
+      "text": "Concept storico: eventi settimanali seguiti da attività non urgenti, massimo tre righe.",
+      "provenance": {
+        "origin": "S2",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/DashboardScreen.swift; test NativeRevision78UITests; docs/native/REVISIONE-78.md (storico)",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03/T05",
+      "exclusion_reason": "Sostituito da decisioni successive registrate.",
+      "implementation_status": "SUPERATO"
+    },
+    {
+      "id": "C10",
+      "text": "Unire la presentazione delle cose da fare evitando molti contenitori e raggruppamenti.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/DashboardScreen.swift; test NativeRevision78UITests; docs/native/REVISIONE-78.md (storico)",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03/T05",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "C11",
+      "text": "Conservare identità, tipo e azioni dei record senza duplicarli nella presentazione unificata.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/DashboardScreen.swift; test NativeRevision78UITests; docs/native/REVISIONE-78.md (storico)",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03/T05",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "C12",
+      "text": "Rendere chiaramente toccabile la settimana con contenitore discreto e feedback di pressione.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/DashboardScreen.swift; test NativeRevision78UITests; docs/native/REVISIONE-78.md (storico)",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03/T05",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "C13",
+      "text": "Conservare turni, colori, indicatori e accessibilità della settimana.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/DashboardScreen.swift; test NativeRevision78UITests; docs/native/REVISIONE-78.md (storico)",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03/T05",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "C14",
+      "text": "Tenere i giorni passati della settimana all’80% di opacità e quelli futuri pienamente visibili anche oltre il mese.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/DashboardScreen.swift; test NativeRevision78UITests; docs/native/REVISIONE-78.md (storico)",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03/T05",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "C15",
+      "text": "Nel blocco Finanza mostrare soltanto titolo, icona e freccia nell’intestazione.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "native-next/Sources/DashboardScreen.swift; test NativeRevision78UITests; docs/native/REVISIONE-78.md (storico)",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03/T06",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "C16",
+      "text": "Sotto l’intestazione mostrare il numero del budget con Budget sotto.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "native-next/Sources/DashboardScreen.swift; test NativeRevision78UITests; docs/native/REVISIONE-78.md (storico)",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03/T06",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "C17",
+      "text": "Affiancare Aggiungi spesa sulla destra del budget, facilmente raggiungibile con il dito.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "native-next/Sources/DashboardScreen.swift; test NativeRevision78UITests; docs/native/REVISIONE-78.md (storico)",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03/T06",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "C18",
+      "text": "Concept storico: widget finanziario con arco del saldo e registrazione rapida delle spese.",
+      "provenance": {
+        "origin": "S2",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/DashboardScreen.swift; test NativeRevision78UITests; docs/native/REVISIONE-78.md (storico)",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03/T05",
+      "exclusion_reason": "Sostituito da decisioni successive registrate.",
+      "implementation_status": "SUPERATO"
+    },
+    {
+      "id": "C19",
+      "text": "Togliere il grafico peso dalla Dashboard e trasferirlo in Salute.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/DashboardScreen.swift; test NativeRevision78UITests; docs/native/REVISIONE-78.md (storico)",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03/T05",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "C20",
+      "text": "Contratto storico: scheda peso/calorie e relativo grafico nella Dashboard.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/DashboardScreen.swift; test NativeRevision78UITests; docs/native/REVISIONE-78.md (storico)",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03/T05",
+      "exclusion_reason": "Sostituito da decisioni successive registrate.",
+      "implementation_status": "SUPERATO"
+    },
+    {
+      "id": "C21",
+      "text": "Integrare nella Dashboard un inserimento nutrizionale rapido e compatto.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "docs/NUTRITION-QUICK-REVIEW.md: implementazione e retry non concluso",
+      "remaining_work": "Prova retry, valori, identità, storico e accettazione.",
+      "task": "T02",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_NON_VERIFICATO"
+    },
+    {
+      "id": "C22",
+      "text": "Rendere raggiungibile la cronologia senza espanderla interamente nella home.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/DashboardScreen.swift; test NativeRevision78UITests; docs/native/REVISIONE-78.md (storico)",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T03/T05",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "D01",
+      "text": "Conservare un unico editor per attività ed eventi.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "D02",
+      "text": "L’editor unificato non deve introdurre priorità.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "D03",
+      "text": "Concept iniziale di task manager con priorità.",
+      "provenance": {
+        "origin": "S3",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05/T12",
+      "exclusion_reason": "Richiesta storica superata da comportamento successivo.",
+      "implementation_status": "SUPERATO"
+    },
+    {
+      "id": "D04",
+      "text": "Separare il tocco sul titolo, che apre la scheda, dal completamento diretto in lista.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "D05",
+      "text": "Aprire l’editor come scheda nativa dal basso.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "D06",
+      "text": "Affiancare data di inizio e scadenza, con orari sotto e categoria/luogo successivi.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "D07",
+      "text": "Aprire il selettore data al primo tocco e permettere di rimuovere la data con ×.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "D08",
+      "text": "Il calendario del selettore data deve avere larghezza sufficiente, senza colonne tagliate.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "D09",
+      "text": "Conservare descrizione, metadati, stato In attesa, completamento, eliminazione e ricorrenze.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "D10",
+      "text": "Salvare subito localmente e sincronizzare in background senza duplicare operazioni.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "D11",
+      "text": "Consentire mesi continui e scorrevoli con comandi e intestazioni stabili.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "D12",
+      "text": "Soluzione storica con riquadro giorno fisso sotto il mese.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05/T12",
+      "exclusion_reason": "Richiesta storica superata da comportamento successivo.",
+      "implementation_status": "SUPERATO"
+    },
+    {
+      "id": "D13",
+      "text": "Soluzione successiva con mese a tutta altezza e apertura della giornata.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05/T12",
+      "exclusion_reason": "Richiesta storica superata da comportamento successivo.",
+      "implementation_status": "SUPERATO"
+    },
+    {
+      "id": "D14",
+      "text": "Ultimo contratto documentato: agenda integrata sotto il mese, con chiusura ed espansione esplicite.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "D15",
+      "text": "Distinguere ritorno a oggi e apertura esplicita del giorno richiesto.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "D16",
+      "text": "Conservare il mese consultato durante i ridimensionamenti e gli editor, evitando salti indesiderati.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "D17",
+      "text": "Nella giornata usare una sola intestazione con ritorno, data e +, senza secondo titolo o ingranaggio.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "D18",
+      "text": "Mostrare tutti e sette i turni della settimana nella vista del giorno.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "D19",
+      "text": "Contratto precedente: griglia oraria proporzionale a minuto e durata.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05/T12",
+      "exclusion_reason": "Richiesta storica superata da comportamento successivo.",
+      "implementation_status": "SUPERATO"
+    },
+    {
+      "id": "D20",
+      "text": "Contratto successivo: agenda compatta senza altezze proporzionali alle ore.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "D21",
+      "text": "Mostrare eventi contenuti, sovrapposizioni parziali e intervalli identici senza nascondere attività.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "D22",
+      "text": "Non inventare un’ora finale quando manca; conservare notturni e prosecuzioni da ieri.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "D23",
+      "text": "Mostrare tutto il giorno in una riga di pillole scorrevole orizzontalmente, senza pannello separato fisso.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "D24",
+      "text": "Riservare lo swipe di cambio giorno alla settimana per non interferire con le pillole.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "D25",
+      "text": "Numeri del calendario inizialmente semibold.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05/T12",
+      "exclusion_reason": "Richiesta storica superata da comportamento successivo.",
+      "implementation_status": "SUPERATO"
+    },
+    {
+      "id": "D26",
+      "text": "Numeri poi definiti SF Pro Regular 20 pt, scalabili, con selezione blu di sistema.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "D27",
+      "text": "Eliminare il cerchio grande che si sovrappone al badge del turno.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "D28",
+      "text": "Usare puntini nel colore del turno, oppure neutri quando il turno manca.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "D29",
+      "text": "Allineare abbreviazioni dei mesi e separatori alle sette colonne, con evidenza del mese corrente.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "D30",
+      "text": "Palette Dipingi compatta, orizzontale e ispirata a Supershift, con Liquid Glass nativo dove disponibile.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "D31",
+      "text": "Conservare la coda locale dei turni e non ricostruire inutilmente tutti gli eventi a ogni pennellata.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "D32",
+      "text": "Barra del turno attivo nel colore del turno, segmenti di due ore e segmento finale parziale.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "D33",
+      "text": "Microanimazione una sola volta dell’ultimo segmento completato, rispettando Riduci movimento.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "D34",
+      "text": "Non mostrare una barra grigia vuota negli stati senza turno attivo.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "D35",
+      "text": "Colori delle categorie deterministici e identità cromatica stabile fra calendario e Attività.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "D36",
+      "text": "Sveglie urgenti locali autorizzate: identità stabile, modifica, cancellazione e recupero degli errori.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "D37",
+      "text": "Non interpretare un mese non caricato come evento eliminato né sincronizzare falsamente le sveglie locali.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "native-next/Sources/NativeActivityEditor.swift e NativeLocalActivity.swift; test Activity e revisioni 72/73",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T05/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "E01",
+      "text": "Risolvere il blocco Conferma nell’editor bolletta distinguendo rete e server non compatibile.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/ARCHITECTURE-CURRENT.md e test competenza/routing: prove storiche; baseline live attuale non verificata",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T06",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "E02",
+      "text": "Non aggirare il controllo di compatibilità del periodo delle bollette.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/ARCHITECTURE-CURRENT.md e test competenza/routing: prove storiche; baseline live attuale non verificata",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T06",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "E03",
+      "text": "Conservare i dati inseriti durante errori e retry.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/ARCHITECTURE-CURRENT.md e test competenza/routing: prove storiche; baseline live attuale non verificata",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T06",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "E04",
+      "text": "221,79 € da agosto a ottobre 2026 devono produrre tre quote da 73,93 €, anche per mesi passati.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/ARCHITECTURE-CURRENT.md e test competenza/routing: prove storiche; baseline live attuale non verificata",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T06",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "E05",
+      "text": "Il periodo esplicito prevale sul titolo descrittivo della bolletta.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/ARCHITECTURE-CURRENT.md e test competenza/routing: prove storiche; baseline live attuale non verificata",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T06",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "E06",
+      "text": "Il pagamento resta un solo movimento con data e importo effettivi.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/ARCHITECTURE-CURRENT.md e test competenza/routing: prove storiche; baseline live attuale non verificata",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T06",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "E07",
+      "text": "Evitare doppi conteggi fra accantonamenti, fondo, costo per competenza e pagamento.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/ARCHITECTURE-CURRENT.md e test competenza/routing: prove storiche; baseline live attuale non verificata",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T06",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "E08",
+      "text": "Mantenere le stime nei mesi senza documento e sostituirle con le quote effettive all’arrivo della bolletta.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/ARCHITECTURE-CURRENT.md e test competenza/routing: prove storiche; baseline live attuale non verificata",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T06",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "E09",
+      "text": "Conservare l’identità del pagamento durante modifica e retry e gestire centesimi, cambio anno e interruzioni.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/ARCHITECTURE-CURRENT.md e test competenza/routing: prove storiche; baseline live attuale non verificata",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T06",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "E10",
+      "text": "Diagnosticare un saldo personale negativo sui dati effettivi senza attribuirgli una causa provata solo su esempi sintetici.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/ARCHITECTURE-CURRENT.md e test competenza/routing: prove storiche; baseline live attuale non verificata",
+      "remaining_work": "Verifica personale separata; i dati sintetici non la dimostrano.",
+      "task": "T06",
+      "exclusion_reason": null,
+      "implementation_status": "NON_VERIFICATO_PERSONALE"
+    },
+    {
+      "id": "E11",
+      "text": "Pagina Finanza aperta, con importi a sinistra, saldo del conto a destra, Budget/Analisi e movimenti con icona.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/ARCHITECTURE-CURRENT.md e test competenza/routing: prove storiche; baseline live attuale non verificata",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T06",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "E12",
+      "text": "Usare simboli semplici monocromatici bianchi per le icone Finanza.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/ARCHITECTURE-CURRENT.md e test competenza/routing: prove storiche; baseline live attuale non verificata",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T06",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "E13",
+      "text": "Ordinare i movimenti per inserimento effettivo senza mostrare l’ora e senza inventare timestamp storici.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/ARCHITECTURE-CURRENT.md e test competenza/routing: prove storiche; baseline live attuale non verificata",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T06",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "E14",
+      "text": "Importo principale Finanza 40 pt semibold, rimuovendo i divisori superflui ma conservando quelli fra transazioni.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/ARCHITECTURE-CURRENT.md e test competenza/routing: prove storiche; baseline live attuale non verificata",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T06",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "E15",
+      "text": "Concept storico della pagina Finanza con budget mensile, saldo, disponibilità giornaliera, heatmap, giorni rimanenti e spese straordinarie.",
+      "provenance": {
+        "origin": "S2",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/ARCHITECTURE-CURRENT.md e test competenza/routing: prove storiche; baseline live attuale non verificata",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T06",
+      "exclusion_reason": "Concept non approvato come requisito.",
+      "implementation_status": "PROPOSTA_NON_VINCOLANTE"
+    },
+    {
+      "id": "E16",
+      "text": "Rappresentare le uscite effettive di categoria ignota come spese da classificare, invece di ignorarle.",
+      "provenance": {
+        "origin": "S1",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/ARCHITECTURE-CURRENT.md e test competenza/routing: prove storiche; baseline live attuale non verificata",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T06",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "E17",
+      "text": "Correggere la chiamata che passa un argomento a una funzione dichiarata senza argomenti nel Worker.",
+      "provenance": {
+        "origin": "S1",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/ARCHITECTURE-CURRENT.md e test competenza/routing: prove storiche; baseline live attuale non verificata",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T06",
+      "exclusion_reason": null,
+      "implementation_status": "NON_VERIFICATO_ATTUALE"
+    },
+    {
+      "id": "E18",
+      "text": "Correggere il tipo/contratto finanziario che non espone carCommitments, senza perdere gli impegni auto.",
+      "provenance": {
+        "origin": "S1",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/ARCHITECTURE-CURRENT.md e test competenza/routing: prove storiche; baseline live attuale non verificata",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T06",
+      "exclusion_reason": null,
+      "implementation_status": "NON_VERIFICATO_ATTUALE"
+    },
+    {
+      "id": "E19",
+      "text": "Correggere il tipo/contratto finanziario che non espone otherCommitments.",
+      "provenance": {
+        "origin": "S1",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/ARCHITECTURE-CURRENT.md e test competenza/routing: prove storiche; baseline live attuale non verificata",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T06",
+      "exclusion_reason": null,
+      "implementation_status": "NON_VERIFICATO_ATTUALE"
+    },
+    {
+      "id": "E20",
+      "text": "Correggere il tipo/contratto finanziario che non espone advanceOffset.",
+      "provenance": {
+        "origin": "S1",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/ARCHITECTURE-CURRENT.md e test competenza/routing: prove storiche; baseline live attuale non verificata",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T06",
+      "exclusion_reason": null,
+      "implementation_status": "NON_VERIFICATO_ATTUALE"
+    },
+    {
+      "id": "E21",
+      "text": "Correggere il tipo/contratto finanziario che non espone extraCommitments.",
+      "provenance": {
+        "origin": "S1",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/ARCHITECTURE-CURRENT.md e test competenza/routing: prove storiche; baseline live attuale non verificata",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T06",
+      "exclusion_reason": null,
+      "implementation_status": "NON_VERIFICATO_ATTUALE"
+    },
+    {
+      "id": "E22",
+      "text": "Correggere il tipo/contratto finanziario che non espone net.",
+      "provenance": {
+        "origin": "S1",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/ARCHITECTURE-CURRENT.md e test competenza/routing: prove storiche; baseline live attuale non verificata",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T06",
+      "exclusion_reason": null,
+      "implementation_status": "NON_VERIFICATO_ATTUALE"
+    },
+    {
+      "id": "E23",
+      "text": "Correggere i contratti che rifiutano la proprietà estimated nei record previsti.",
+      "provenance": {
+        "origin": "S1",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/ARCHITECTURE-CURRENT.md e test competenza/routing: prove storiche; baseline live attuale non verificata",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T06",
+      "exclusion_reason": null,
+      "implementation_status": "NON_VERIFICATO_ATTUALE"
+    },
+    {
+      "id": "E24",
+      "text": "Correggere le chiamate che passano Date a parametri numerici, preservando la semantica delle date.",
+      "provenance": {
+        "origin": "S1",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/ARCHITECTURE-CURRENT.md e test competenza/routing: prove storiche; baseline live attuale non verificata",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T06",
+      "exclusion_reason": null,
+      "implementation_status": "NON_VERIFICATO_ATTUALE"
+    },
+    {
+      "id": "E25",
+      "text": "Non creare addebiti o movimenti bancari reali come prova durante la correzione delle bollette.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/ARCHITECTURE-CURRENT.md e test competenza/routing: prove storiche; baseline live attuale non verificata",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T06",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "F01",
+      "text": "Vecchio modulo di pochi dati: tre macro più data e ora, con calorie derivate.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/NUTRITION-QUICK-REVIEW.md e NativeNutritionHealthKitTests; nessuna prova fisica",
+      "remaining_work": "Preservare storico legacy senza ricalcolo.",
+      "task": "T02/T10",
+      "exclusion_reason": null,
+      "implementation_status": "SUPERATO_PER_NUOVI_INSERIMENTI"
+    },
+    {
+      "id": "F02",
+      "text": "Aggiungere il campo fibre.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "docs/NUTRITION-QUICK-REVIEW.md e NativeNutritionHealthKitTests; nessuna prova fisica",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T02",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "F03",
+      "text": "Inserire i nutrienti come valori per 100 g.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "SUSPENDED",
+      "evidence": "docs/NUTRITION-QUICK-REVIEW.md e NativeNutritionHealthKitTests; nessuna prova fisica",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T02",
+      "exclusion_reason": "F03–F06 sospese dalla conferma NUTRITION-DIRECT-01.",
+      "implementation_status": "SOSPESO"
+    },
+    {
+      "id": "F04",
+      "text": "Scegliere sotto i grammi effettivamente consumati.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "SUSPENDED",
+      "evidence": "docs/NUTRITION-QUICK-REVIEW.md e NativeNutritionHealthKitTests; nessuna prova fisica",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T02",
+      "exclusion_reason": "F03–F06 sospese dalla conferma NUTRITION-DIRECT-01.",
+      "implementation_status": "SOSPESO"
+    },
+    {
+      "id": "F05",
+      "text": "Inserire anche le kcal dell’etichetta per 100 g, come da tua risposta esplicita.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "SUSPENDED",
+      "evidence": "docs/NUTRITION-QUICK-REVIEW.md e NativeNutritionHealthKitTests; nessuna prova fisica",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T02",
+      "exclusion_reason": "F03–F06 sospese dalla conferma NUTRITION-DIRECT-01.",
+      "implementation_status": "SOSPESO"
+    },
+    {
+      "id": "F06",
+      "text": "Scalare nutrienti, fibre e kcal sulla porzione effettiva.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "SUSPENDED",
+      "evidence": "docs/NUTRITION-QUICK-REVIEW.md e NativeNutritionHealthKitTests; nessuna prova fisica",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T02",
+      "exclusion_reason": "F03–F06 sospese dalla conferma NUTRITION-DIRECT-01.",
+      "implementation_status": "SOSPESO"
+    },
+    {
+      "id": "F07",
+      "text": "Esporre soltanto la data, senza campo ora.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "docs/NUTRITION-QUICK-REVIEW.md e NativeNutritionHealthKitTests; nessuna prova fisica",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T02",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_REGRESSIONE_DA_VERIFICARE"
+    },
+    {
+      "id": "F08",
+      "text": "Calcolo storico immediato P×4+C×4+G×9 con Decimal.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/NUTRITION-QUICK-REVIEW.md e NativeNutritionHealthKitTests; nessuna prova fisica",
+      "remaining_work": "Preservare storico legacy senza ricalcolo.",
+      "task": "T02/T10",
+      "exclusion_reason": null,
+      "implementation_status": "SUPERATO_PER_NUOVI_INSERIMENTI"
+    },
+    {
+      "id": "F09",
+      "text": "Accettare virgola e punto decimale, trattare vuoto come zero e rifiutare input invalidi o negativi.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/NUTRITION-QUICK-REVIEW.md e NativeNutritionHealthKitTests; nessuna prova fisica",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T02/T08/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "F10",
+      "text": "Gestire Avanti/Fine fra i campi senza spostare il focus dopo la prima cifra né usare timer arbitrari.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/NUTRITION-QUICK-REVIEW.md e NativeNutritionHealthKitTests; nessuna prova fisica",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T02/T08/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "F11",
+      "text": "Conservare gli input dopo un errore ed evitare il doppio invio.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/NUTRITION-QUICK-REVIEW.md e NativeNutritionHealthKitTests; nessuna prova fisica",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T02/T08/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "F12",
+      "text": "Rendere raggiungibili cronologia e modifica delle registrazioni.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/NUTRITION-QUICK-REVIEW.md e NativeNutritionHealthKitTests; nessuna prova fisica",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T02/T08/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "F13",
+      "text": "Aggiungere eliminazione delle registrazioni create da LifeOS.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/NUTRITION-QUICK-REVIEW.md e NativeNutritionHealthKitTests; nessuna prova fisica",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T02/T08/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "F14",
+      "text": "Eliminare anche i campioni LifeOS corrispondenti in Apple Salute, lasciando intatti quelli di altre app.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/NUTRITION-QUICK-REVIEW.md e NativeNutritionHealthKitTests; nessuna prova fisica",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T02/T08/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "F15",
+      "text": "Conservare stato, identità e retry di modifica/eliminazione dopo errori e riavvii.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/NUTRITION-QUICK-REVIEW.md e NativeNutritionHealthKitTests; nessuna prova fisica",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T02/T08/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "F16",
+      "text": "Non mostrare successo prima della conferma e non presumere una transazione unica fra archivio locale e HealthKit.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/NUTRITION-QUICK-REVIEW.md e NativeNutritionHealthKitTests; nessuna prova fisica",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T02/T08/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "F17",
+      "text": "Condividere lo stesso archivio fra Dashboard e Salute, evitando due writer incoerenti.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/NUTRITION-QUICK-REVIEW.md e NativeNutritionHealthKitTests; nessuna prova fisica",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T02/T08/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "F18",
+      "text": "Il vecchio esempio P0/C0,2/G0 = 0,8 kcal deve poter essere eliminato dall’utente, senza cancellazioni automatiche durante sviluppo.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/NUTRITION-QUICK-REVIEW.md e NativeNutritionHealthKitTests; nessuna prova fisica",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T02/T08/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "G01",
+      "text": "Togliere i pulsanti Collega/Gestisci Apple Salute dalla pagina.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "docs/USER-DECISIONS.md; NativeHealthViews.swift; comportamento attuale e limiti in docs/STATUS.md",
+      "remaining_work": "Energia letta; macro tutte app e prova fisica restano da verificare.",
+      "task": "T08/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "G02",
+      "text": "Togliere la sezione di selezione della fonte calorie.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "docs/USER-DECISIONS.md; NativeHealthViews.swift; comportamento attuale e limiti in docs/STATUS.md",
+      "remaining_work": "Energia letta; macro tutte app e prova fisica restano da verificare.",
+      "task": "T08/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "G03",
+      "text": "Contare tutte le registrazioni caloriche di tutte le app presenti in Apple Salute.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "docs/USER-DECISIONS.md; NativeHealthViews.swift; comportamento attuale e limiti in docs/STATUS.md",
+      "remaining_work": "Energia letta; macro tutte app e prova fisica restano da verificare.",
+      "task": "T08/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "G04",
+      "text": "Contratto precedente con gestione fonti e precauzione contro la somma automatica dei duplicati.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md; NativeHealthViews.swift; comportamento attuale e limiti in docs/STATUS.md",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T07/T09",
+      "exclusion_reason": "Voce storica superata.",
+      "implementation_status": "SUPERATO"
+    },
+    {
+      "id": "G05",
+      "text": "Aggiunta peso e registrazione macro come due azioni grafiche senza testo.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "docs/USER-DECISIONS.md; NativeHealthViews.swift; comportamento attuale e limiti in docs/STATUS.md",
+      "remaining_work": "Preservare regole attive; redesign solo dopo anteprima e conferma dei conflitti pertinenti.",
+      "task": "T07/T09",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_ATTUALE_CONFLITTO_PENDING"
+    },
+    {
+      "id": "G06",
+      "text": "Usare omino per peso e mela per nutrizione.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "docs/USER-DECISIONS.md; NativeHealthViews.swift; comportamento attuale e limiti in docs/STATUS.md",
+      "remaining_work": "Preservare regole attive; redesign solo dopo anteprima e conferma dei conflitti pertinenti.",
+      "task": "T07/T09",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_ATTUALE_CONFLITTO_PENDING"
+    },
+    {
+      "id": "G07",
+      "text": "Applicare Liquid Glass alle due azioni e collocarle sopra la barra inferiore.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "docs/USER-DECISIONS.md; NativeHealthViews.swift; comportamento attuale e limiti in docs/STATUS.md",
+      "remaining_work": "Preservare regole attive; redesign solo dopo anteprima e conferma dei conflitti pertinenti.",
+      "task": "T07/T09",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_ATTUALE_CONFLITTO_PENDING"
+    },
+    {
+      "id": "G08",
+      "text": "Applicare lo stile della dashboard Apple Salute alle quattro schede.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "docs/USER-DECISIONS.md; NativeHealthViews.swift; comportamento attuale e limiti in docs/STATUS.md",
+      "remaining_work": "Preservare regole attive; redesign solo dopo anteprima e conferma dei conflitti pertinenti.",
+      "task": "T07/T09",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_ATTUALE_CONFLITTO_PENDING"
+    },
+    {
+      "id": "G09",
+      "text": "Dare alle quattro righe la stessa altezza.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "docs/USER-DECISIONS.md; NativeHealthViews.swift; comportamento attuale e limiti in docs/STATUS.md",
+      "remaining_work": "Preservare regole attive; redesign solo dopo anteprima e conferma dei conflitti pertinenti.",
+      "task": "T07/T09",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_ATTUALE_CONFLITTO_PENDING"
+    },
+    {
+      "id": "G10",
+      "text": "Usare icona e titolo piccoli e colorati in alto a sinistra.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "docs/USER-DECISIONS.md; NativeHealthViews.swift; comportamento attuale e limiti in docs/STATUS.md",
+      "remaining_work": "Preservare regole attive; redesign solo dopo anteprima e conferma dei conflitti pertinenti.",
+      "task": "T07/T09",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_ATTUALE_CONFLITTO_PENDING"
+    },
+    {
+      "id": "G11",
+      "text": "Usare valore grande e bianco in basso a sinistra, con unità piccola e grigia adiacente.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "docs/USER-DECISIONS.md; NativeHealthViews.swift; comportamento attuale e limiti in docs/STATUS.md",
+      "remaining_work": "Preservare regole attive; redesign solo dopo anteprima e conferma dei conflitti pertinenti.",
+      "task": "T07/T09",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_ATTUALE_CONFLITTO_PENDING"
+    },
+    {
+      "id": "G12",
+      "text": "Collocare il mini grafico sulla destra, grigio con l’ultima parte colorata.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "docs/USER-DECISIONS.md; NativeHealthViews.swift; comportamento attuale e limiti in docs/STATUS.md",
+      "remaining_work": "Preservare regole attive; redesign solo dopo anteprima e conferma dei conflitti pertinenti.",
+      "task": "T07/T09",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_ATTUALE_CONFLITTO_PENDING"
+    },
+    {
+      "id": "G13",
+      "text": "Applicare questo trattamento a TDEE, Peso, Calorie e Simulazione.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "docs/USER-DECISIONS.md; NativeHealthViews.swift; comportamento attuale e limiti in docs/STATUS.md",
+      "remaining_work": "Preservare regole attive; redesign solo dopo anteprima e conferma dei conflitti pertinenti.",
+      "task": "T07/T09",
+      "exclusion_reason": null,
+      "implementation_status": "IMPLEMENTATO_ATTUALE_CONFLITTO_PENDING"
+    },
+    {
+      "id": "G14",
+      "text": "Usare la skill REA da GitHub per analizzare il riferimento reale Apple Salute.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "docs/USER-DECISIONS.md: analisi REA storica; non prova di prodotto attuale",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T07/T11",
+      "exclusion_reason": null,
+      "implementation_status": "STORICO_ESEGUITO"
+    },
+    {
+      "id": "G15",
+      "text": "Contratti cromatici precedenti con valori peso grigi e poi valori/arancione Salute.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md; NativeHealthViews.swift; comportamento attuale e limiti in docs/STATUS.md",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T07/T09",
+      "exclusion_reason": "Voce storica superata.",
+      "implementation_status": "SUPERATO"
+    },
+    {
+      "id": "G16",
+      "text": "Calibrare TDEE sullo storico coerente e usare la stessa stima per le proiezioni, senza ancorare tutto alla pesata parziale di oggi.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md; NativeHealthViews.swift; comportamento attuale e limiti in docs/STATUS.md",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T08/T09",
+      "exclusion_reason": null,
+      "implementation_status": "PRESENTE_DA_VERIFICARE"
+    },
+    {
+      "id": "G17",
+      "text": "Conservare selezione dei grafici, scorrimento e aggiunta/modifica del peso.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md; NativeHealthViews.swift; comportamento attuale e limiti in docs/STATUS.md",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T08/T09",
+      "exclusion_reason": null,
+      "implementation_status": "PRESENTE_DA_VERIFICARE"
+    },
+    {
+      "id": "H01",
+      "text": "Ridurre dimensioni e padding eccessivi dei pulsanti Bloom.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "docs/BLOOM-GRID-REVIEW.md: run 41816351684, 19 unitari, 4 UI, 16 screenshot; accettazione visiva; no prova fisica",
+      "remaining_work": "Verificare parità privata, allegati e persistenza senza pubblicare dati.",
+      "task": "T04/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "H02",
+      "text": "Correggere selezione del backup in File che si chiude senza procedere.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "docs/BLOOM-GRID-REVIEW.md: run 41816351684, 19 unitari, 4 UI, 16 screenshot; accettazione visiva; no prova fisica",
+      "remaining_work": "Verificare parità privata, allegati e persistenza senza pubblicare dati.",
+      "task": "T04/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "H03",
+      "text": "Rendere trasferibili e visibili in LifeOS i contenuti locali conservati nell’app Bloom originale.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "docs/BLOOM-GRID-REVIEW.md: run 41816351684, 19 unitari, 4 UI, 16 screenshot; accettazione visiva; no prova fisica",
+      "remaining_work": "Verificare parità privata, allegati e persistenza senza pubblicare dati.",
+      "task": "T04/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "H04",
+      "text": "Usare il backup esportato dall’app originale come fonte del trasferimento, senza supporre che lo ZIP dei sorgenti contenga il database personale.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/BLOOM-GRID-REVIEW.md: run 41816351684, 19 unitari, 4 UI, 16 screenshot; accettazione visiva; no prova fisica",
+      "remaining_work": "Verificare parità privata, allegati e persistenza senza pubblicare dati.",
+      "task": "T04/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "H05",
+      "text": "Conservare note, raccolte, immagini, allegati, archiviati e cestino senza perdere gli originali.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/BLOOM-GRID-REVIEW.md: run 41816351684, 19 unitari, 4 UI, 16 screenshot; accettazione visiva; no prova fisica",
+      "remaining_work": "Verificare parità privata, allegati e persistenza senza pubblicare dati.",
+      "task": "T04/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "H06",
+      "text": "Mostrare anteprima dell’importazione e risolvere i conflitti esplicitamente con mantieni/sostituisci/copia.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/BLOOM-GRID-REVIEW.md: run 41816351684, 19 unitari, 4 UI, 16 screenshot; accettazione visiva; no prova fisica",
+      "remaining_work": "Verificare parità privata, allegati e persistenza senza pubblicare dati.",
+      "task": "T04/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "H07",
+      "text": "Evitare duplicazioni in reimportazione tramite identificativi e rimappamenti persistenti.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/BLOOM-GRID-REVIEW.md: run 41816351684, 19 unitari, 4 UI, 16 screenshot; accettazione visiva; no prova fisica",
+      "remaining_work": "Verificare parità privata, allegati e persistenza senza pubblicare dati.",
+      "task": "T04/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "H08",
+      "text": "Verificare allegati e archivio e conservare una copia di sicurezza prima della scrittura.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/BLOOM-GRID-REVIEW.md: run 41816351684, 19 unitari, 4 UI, 16 screenshot; accettazione visiva; no prova fisica",
+      "remaining_work": "Verificare parità privata, allegati e persistenza senza pubblicare dati.",
+      "task": "T04/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "H09",
+      "text": "Conservare un rapporto dell’importazione e renderlo consultabile.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/BLOOM-GRID-REVIEW.md: run 41816351684, 19 unitari, 4 UI, 16 screenshot; accettazione visiva; no prova fisica",
+      "remaining_work": "Verificare parità privata, allegati e persistenza senza pubblicare dati.",
+      "task": "T04/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "H10",
+      "text": "Mantenere Libreria, Mappa e Riscopri già integrati.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/BLOOM-GRID-REVIEW.md: run 41816351684, 19 unitari, 4 UI, 16 screenshot; accettazione visiva; no prova fisica",
+      "remaining_work": "Verificare parità privata, allegati e persistenza senza pubblicare dati.",
+      "task": "T04/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "H11",
+      "text": "Non introdurre una nuova sincronizzazione PKMS/Dropbox né un secondo lifecycle dell’app Bloom.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/BLOOM-GRID-REVIEW.md: run 41816351684, 19 unitari, 4 UI, 16 screenshot; accettazione visiva; no prova fisica",
+      "remaining_work": "Verificare parità privata, allegati e persistenza senza pubblicare dati.",
+      "task": "T04/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "H12",
+      "text": "Conservare ricerca, categorie multiple, fissati, selezione multipla e gestione raccolte.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/BLOOM-GRID-REVIEW.md: run 41816351684, 19 unitari, 4 UI, 16 screenshot; accettazione visiva; no prova fisica",
+      "remaining_work": "Verificare parità privata, allegati e persistenza senza pubblicare dati.",
+      "task": "T04/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "H13",
+      "text": "Conservare testo, link, foto, file, Markdown con tabelle/codice e anteprime degli originali.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/BLOOM-GRID-REVIEW.md: run 41816351684, 19 unitari, 4 UI, 16 screenshot; accettazione visiva; no prova fisica",
+      "remaining_work": "Verificare parità privata, allegati e persistenza senza pubblicare dati.",
+      "task": "T04/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "H14",
+      "text": "Mantenere ritagli non distruttivi, miniature e pager dei contenuti multipli.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/BLOOM-GRID-REVIEW.md: run 41816351684, 19 unitari, 4 UI, 16 screenshot; accettazione visiva; no prova fisica",
+      "remaining_work": "Verificare parità privata, allegati e persistenza senza pubblicare dati.",
+      "task": "T04/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "H15",
+      "text": "Conservare mappa, cluster, luoghi collegati e camera passando fra sezioni, senza obbligo di posizione corrente.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/BLOOM-GRID-REVIEW.md: run 41816351684, 19 unitari, 4 UI, 16 screenshot; accettazione visiva; no prova fisica",
+      "remaining_work": "Verificare parità privata, allegati e persistenza senza pubblicare dati.",
+      "task": "T04/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "H16",
+      "text": "Mantenere Riscopri sullo stesso archivio con giro e filtri persistenti.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/BLOOM-GRID-REVIEW.md: run 41816351684, 19 unitari, 4 UI, 16 screenshot; accettazione visiva; no prova fisica",
+      "remaining_work": "Verificare parità privata, allegati e persistenza senza pubblicare dati.",
+      "task": "T04/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "H17",
+      "text": "Conservare cattura tramite Intent/link e coda locale recuperabile, evitando writer concorrenti.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/BLOOM-GRID-REVIEW.md: run 41816351684, 19 unitari, 4 UI, 16 screenshot; accettazione visiva; no prova fisica",
+      "remaining_work": "Verificare parità privata, allegati e persistenza senza pubblicare dati.",
+      "task": "T04/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "H18",
+      "text": "Nessuna pulizia automatica del cestino e nessuna eliminazione di allegati ancora condivisi da altre note.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/BLOOM-GRID-REVIEW.md: run 41816351684, 19 unitari, 4 UI, 16 screenshot; accettazione visiva; no prova fisica",
+      "remaining_work": "Verificare parità privata, allegati e persistenza senza pubblicare dati.",
+      "task": "T04/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "I01",
+      "text": "Correggere la griglia Bloom: due colonne rigorose, nessuna card oltre la colonna e nessuna sovrapposizione.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/BLOOM-GRID-REVIEW.md; accettazione visiva H-GRID-01",
+      "remaining_work": "Preservare griglia; prova fisica e parità personale separate.",
+      "task": "T04",
+      "exclusion_reason": null,
+      "implementation_status": "ASSORBITO_H_GRID"
+    },
+    {
+      "id": "I02",
+      "text": "Gestire le diverse altezze delle card senza grandi vuoti inutili o collisioni.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/BLOOM-GRID-REVIEW.md; accettazione visiva H-GRID-01",
+      "remaining_work": "Preservare griglia; prova fisica e parità personale separate.",
+      "task": "T04",
+      "exclusion_reason": null,
+      "implementation_status": "ASSORBITO_H_GRID"
+    },
+    {
+      "id": "I03",
+      "text": "Uniformare ritaglio, proporzioni e rapporto fra miniatura e titolo.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/BLOOM-GRID-REVIEW.md; accettazione visiva H-GRID-01",
+      "remaining_work": "Preservare griglia; prova fisica e parità personale separate.",
+      "task": "T04",
+      "exclusion_reason": null,
+      "implementation_status": "ASSORBITO_H_GRID"
+    },
+    {
+      "id": "I04",
+      "text": "Aprire a tutto schermo le immagini contenenti testo, con zoom e proporzioni conservate.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Nessuna implementazione senza approvazione specifica.",
+      "task": "FUORI_RELEASE",
+      "exclusion_reason": "Proposta assistente non approvata per la release.",
+      "implementation_status": "PROPOSTA_ESCLUSA"
+    },
+    {
+      "id": "I05",
+      "text": "Distinguere immagine, link, video e nota con tipo e provenienza leggibili.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Nessuna implementazione senza approvazione specifica.",
+      "task": "FUORI_RELEASE",
+      "exclusion_reason": "Proposta assistente non approvata per la release.",
+      "implementation_status": "PROPOSTA_ESCLUSA"
+    },
+    {
+      "id": "I06",
+      "text": "Sostituire gli URL grezzi nelle card con titolo comprensibile e dominio.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/BLOOM-GRID-REVIEW.md; accettazione visiva H-GRID-01",
+      "remaining_work": "Preservare griglia; prova fisica e parità personale separate.",
+      "task": "T04",
+      "exclusion_reason": null,
+      "implementation_status": "ASSORBITO_H_GRID"
+    },
+    {
+      "id": "I07",
+      "text": "Ridurre gli strati di controlli sopra i contenuti Bloom e unire filtro/selezione/raccolte in una riga.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Nessuna implementazione senza approvazione specifica.",
+      "task": "FUORI_RELEASE",
+      "exclusion_reason": "Proposta assistente non approvata per la release.",
+      "implementation_status": "PROPOSTA_ESCLUSA"
+    },
+    {
+      "id": "I08",
+      "text": "Mostrare l’esito dell’importazione come conferma temporanea, lasciando il rapporto consultabile.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Nessuna implementazione senza approvazione specifica.",
+      "task": "FUORI_RELEASE",
+      "exclusion_reason": "Proposta assistente non approvata per la release.",
+      "implementation_status": "PROPOSTA_ESCLUSA"
+    },
+    {
+      "id": "I09",
+      "text": "Dare contesto al pulsante cartella e alle sue azioni.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Nessuna implementazione senza approvazione specifica.",
+      "task": "FUORI_RELEASE",
+      "exclusion_reason": "Proposta assistente non approvata per la release.",
+      "implementation_status": "PROPOSTA_ESCLUSA"
+    },
+    {
+      "id": "I10",
+      "text": "Rendere più discreto lo stato selezionato Libreria, evitando una grande pillola bianca dominante.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Nessuna implementazione senza approvazione specifica.",
+      "task": "FUORI_RELEASE",
+      "exclusion_reason": "Proposta assistente non approvata per la release.",
+      "implementation_status": "PROPOSTA_ESCLUSA"
+    },
+    {
+      "id": "I11",
+      "text": "Valutare una cattura Bloom più vicina al pollice, senza duplicare inutilmente il +.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Nessuna implementazione senza approvazione specifica.",
+      "task": "FUORI_RELEASE",
+      "exclusion_reason": "Proposta assistente non approvata per la release.",
+      "implementation_status": "PROPOSTA_ESCLUSA"
+    },
+    {
+      "id": "I12",
+      "text": "Rendere chiaramente modificabili i campi nutrizionali, con contorno o fondo distinto.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md: NUTRITION-DIRECT-01",
+      "remaining_work": "Porzione per 100 g sospesa; pagina separata non autorizzata.",
+      "task": "T02",
+      "exclusion_reason": null,
+      "implementation_status": "ASSORBITO_O_SUPERATO"
+    },
+    {
+      "id": "I13",
+      "text": "Aumentare la leggibilità di placeholder, zeri e unità, evitando la lettura ambigua g0.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md: NUTRITION-DIRECT-01",
+      "remaining_work": "Porzione per 100 g sospesa; pagina separata non autorizzata.",
+      "task": "T02",
+      "exclusion_reason": null,
+      "implementation_status": "ASSORBITO_O_SUPERATO"
+    },
+    {
+      "id": "I14",
+      "text": "Compattare il modulo nutrizione e rendere chiaro il percorso etichetta → porzione → totale → aggiunta.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md: NUTRITION-DIRECT-01",
+      "remaining_work": "Porzione per 100 g sospesa; pagina separata non autorizzata.",
+      "task": "T02",
+      "exclusion_reason": null,
+      "implementation_status": "ASSORBITO_O_SUPERATO"
+    },
+    {
+      "id": "I15",
+      "text": "Mostrare un riepilogo effettivo prima del salvataggio, per esempio 20 g e 90 kcal.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md: NUTRITION-DIRECT-01",
+      "remaining_work": "Porzione per 100 g sospesa; pagina separata non autorizzata.",
+      "task": "T02",
+      "exclusion_reason": null,
+      "implementation_status": "ASSORBITO_O_SUPERATO"
+    },
+    {
+      "id": "I16",
+      "text": "Non mostrare Controlla i valori come errore prima che l’utente inizi a scrivere.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md: NUTRITION-DIRECT-01",
+      "remaining_work": "Porzione per 100 g sospesa; pagina separata non autorizzata.",
+      "task": "T02",
+      "exclusion_reason": null,
+      "implementation_status": "ASSORBITO_O_SUPERATO"
+    },
+    {
+      "id": "I17",
+      "text": "Sostituire il modulo in Dashboard con una sola scorciatoia Registra un pasto e aprire una pagina dedicata.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md: NUTRITION-DIRECT-01",
+      "remaining_work": "Porzione per 100 g sospesa; pagina separata non autorizzata.",
+      "task": "T02",
+      "exclusion_reason": null,
+      "implementation_status": "ASSORBITO_O_SUPERATO"
+    },
+    {
+      "id": "I18",
+      "text": "Aggiungere Recenti e Preferiti per riutilizzare alimenti o registrazioni.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "F01",
+      "exclusion_reason": "Studio alimenti non prerequisito release.",
+      "implementation_status": "FUTURO"
+    },
+    {
+      "id": "I19",
+      "text": "Chiarire l’assenza di calorie odierne senza trasformarla in zero né colorare lo storico come fosse oggi.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/HEALTH-BODYBUILDING-BRIEF.md",
+      "remaining_work": "Anteprima e conferma conflitti, nessuna promozione implicita.",
+      "task": "T07",
+      "exclusion_reason": null,
+      "implementation_status": "PROPOSTA_A_CHIARIRE"
+    },
+    {
+      "id": "I20",
+      "text": "Scrivere Tra 8 settimane e Peso stimato per contestualizzare la simulazione.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/HEALTH-BODYBUILDING-BRIEF.md",
+      "remaining_work": "Anteprima e conferma conflitti, nessuna promozione implicita.",
+      "task": "T07",
+      "exclusion_reason": null,
+      "implementation_status": "PROPOSTA_A_CHIARIRE"
+    },
+    {
+      "id": "I21",
+      "text": "Mostrare ipotesi e limiti della proiezione e un’indicazione dell’incertezza nel dettaglio.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/HEALTH-BODYBUILDING-BRIEF.md",
+      "remaining_work": "Anteprima e conferma conflitti, nessuna promozione implicita.",
+      "task": "T07",
+      "exclusion_reason": null,
+      "implementation_status": "PROPOSTA_A_CHIARIRE"
+    },
+    {
+      "id": "I22",
+      "text": "Rendere leggibili i mini grafici riducendo densità e aumentando riconoscibilità dell’ultimo punto.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/HEALTH-BODYBUILDING-BRIEF.md",
+      "remaining_work": "Anteprima e conferma conflitti, nessuna promozione implicita.",
+      "task": "T07",
+      "exclusion_reason": null,
+      "implementation_status": "PROPOSTA_A_CHIARIRE"
+    },
+    {
+      "id": "I23",
+      "text": "Ridurre lo spazio eccessivo fra data e calendario nella Dashboard.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Nessuna implementazione senza approvazione specifica.",
+      "task": "FUORI_RELEASE",
+      "exclusion_reason": "Proposta assistente non approvata per la release.",
+      "implementation_status": "PROPOSTA_ESCLUSA"
+    },
+    {
+      "id": "I24",
+      "text": "Rendere più informative scadenze e orari e meno ripetitivi i sottotitoli Evento/Abitudine.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Nessuna implementazione senza approvazione specifica.",
+      "task": "FUORI_RELEASE",
+      "exclusion_reason": "Proposta assistente non approvata per la release.",
+      "implementation_status": "PROPOSTA_ESCLUSA"
+    },
+    {
+      "id": "I25",
+      "text": "Sostituire Gestisci con un’azione che chiarisca la destinazione.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Nessuna implementazione senza approvazione specifica.",
+      "task": "FUORI_RELEASE",
+      "exclusion_reason": "Proposta assistente non approvata per la release.",
+      "implementation_status": "PROPOSTA_ESCLUSA"
+    },
+    {
+      "id": "I26",
+      "text": "Distinguere visivamente completamento e apertura della riga, con affordance coerenti.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "Inventario storico: proposta di verifica",
+      "remaining_work": "Valutare come criterio QA, non come nuova funzione.",
+      "task": "T10/T11",
+      "exclusion_reason": null,
+      "implementation_status": "CRITERIO_QA"
+    },
+    {
+      "id": "I27",
+      "text": "Mostrare al tocco il nome completo del turno e i suoi orari, distinguendo oggi dal giorno selezionato.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Nessuna implementazione senza approvazione specifica.",
+      "task": "FUORI_RELEASE",
+      "exclusion_reason": "Proposta assistente non approvata per la release.",
+      "implementation_status": "PROPOSTA_ESCLUSA"
+    },
+    {
+      "id": "I28",
+      "text": "Rendere esplicito il periodo del budget, se coerente con il calcolo sottostante.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Nessuna implementazione senza approvazione specifica.",
+      "task": "FUORI_RELEASE",
+      "exclusion_reason": "Proposta assistente non approvata per la release.",
+      "implementation_status": "PROPOSTA_ESCLUSA"
+    },
+    {
+      "id": "I29",
+      "text": "Garantire che ogni ultimo contenuto possa scorrere completamente sopra tab bar e azioni flottanti.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "Inventario storico: proposta di verifica",
+      "remaining_work": "Valutare come criterio QA, non come nuova funzione.",
+      "task": "T10/T11",
+      "exclusion_reason": null,
+      "implementation_status": "CRITERIO_QA"
+    },
+    {
+      "id": "I30",
+      "text": "Ridurre il disordine visivo dei contenuti intravisti sotto il materiale della tab bar.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Nessuna implementazione senza approvazione specifica.",
+      "task": "FUORI_RELEASE",
+      "exclusion_reason": "Proposta assistente non approvata per la release.",
+      "implementation_status": "PROPOSTA_ESCLUSA"
+    },
+    {
+      "id": "I31",
+      "text": "Far aiutare la Dashboard a scegliere la prossima azione e distinguere ciò che può aspettare.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Nessuna implementazione senza approvazione specifica.",
+      "task": "FUORI_RELEASE",
+      "exclusion_reason": "Proposta assistente non approvata per la release.",
+      "implementation_status": "PROPOSTA_ESCLUSA"
+    },
+    {
+      "id": "I32",
+      "text": "Collegare scadenza, pagamento e budget per Affitto e materiali/contatti/prossimo passo per una riparazione.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Nessuna implementazione senza approvazione specifica.",
+      "task": "FUORI_RELEASE",
+      "exclusion_reason": "Proposta assistente non approvata per la release.",
+      "implementation_status": "PROPOSTA_ESCLUSA"
+    },
+    {
+      "id": "I33",
+      "text": "Catturare rapidamente note, spese e link con organizzazione completabile in seguito.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Nessuna implementazione senza approvazione specifica.",
+      "task": "FUORI_RELEASE",
+      "exclusion_reason": "Proposta assistente non approvata per la release.",
+      "implementation_status": "PROPOSTA_ESCLUSA"
+    },
+    {
+      "id": "I34",
+      "text": "Far riemergere in Bloom i contenuti utili per attività o progetti, oltre alla semplice archiviazione.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Nessuna implementazione senza approvazione specifica.",
+      "task": "FUORI_RELEASE",
+      "exclusion_reason": "Proposta assistente non approvata per la release.",
+      "implementation_status": "PROPOSTA_ESCLUSA"
+    },
+    {
+      "id": "I35",
+      "text": "Gestire avanzamento e prossimo passo delle attività senza ridurre tutto a completato/non completato.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Nessuna implementazione senza approvazione specifica.",
+      "task": "FUORI_RELEASE",
+      "exclusion_reason": "Proposta assistente non approvata per la release.",
+      "implementation_status": "PROPOSTA_ESCLUSA"
+    },
+    {
+      "id": "I36",
+      "text": "Spiegare gli andamenti Salute, il periodo e la sufficienza dei dati, consentendo di risalire alle registrazioni.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/HEALTH-BODYBUILDING-BRIEF.md",
+      "remaining_work": "Anteprima e conferma conflitti, nessuna promozione implicita.",
+      "task": "T07",
+      "exclusion_reason": null,
+      "implementation_status": "PROPOSTA_A_CHIARIRE"
+    },
+    {
+      "id": "I37",
+      "text": "Aggiungere una revisione breve della giornata e della settimana.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Nessuna implementazione senza approvazione specifica.",
+      "task": "FUORI_RELEASE",
+      "exclusion_reason": "Proposta assistente non approvata per la release.",
+      "implementation_status": "PROPOSTA_ESCLUSA"
+    },
+    {
+      "id": "I38",
+      "text": "Rendere comprensibile se un contenuto è locale, sincronizzato oppure incluso in un backup, senza inventare sincronizzazioni.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Nessuna implementazione senza approvazione specifica.",
+      "task": "FUORI_RELEASE",
+      "exclusion_reason": "Proposta assistente non approvata per la release.",
+      "implementation_status": "PROPOSTA_ESCLUSA"
+    },
+    {
+      "id": "I39",
+      "text": "Uniformare superfici e raggi dei componenti equivalenti senza cancellare il significato delle differenze.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Nessuna implementazione senza approvazione specifica.",
+      "task": "FUORI_RELEASE",
+      "exclusion_reason": "Proposta assistente non approvata per la release.",
+      "implementation_status": "PROPOSTA_ESCLUSA"
+    },
+    {
+      "id": "I40",
+      "text": "Usare una gerarchia più netta fra attenzione, riepiloghi e strumenti di inserimento.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Nessuna implementazione senza approvazione specifica.",
+      "task": "FUORI_RELEASE",
+      "exclusion_reason": "Proposta assistente non approvata per la release.",
+      "implementation_status": "PROPOSTA_ESCLUSA"
+    },
+    {
+      "id": "I41",
+      "text": "Ridurre contenitori annidati e riservare le card ai gruppi che ne hanno bisogno.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Nessuna implementazione senza approvazione specifica.",
+      "task": "FUORI_RELEASE",
+      "exclusion_reason": "Proposta assistente non approvata per la release.",
+      "implementation_status": "PROPOSTA_ESCLUSA"
+    },
+    {
+      "id": "I42",
+      "text": "Assegnare accenti riconoscibili alle aree, incluso blu Bloom e arancio Finanza nel concept recente.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Nessuna implementazione senza approvazione specifica.",
+      "task": "FUORI_RELEASE",
+      "exclusion_reason": "Proposta assistente non approvata per la release.",
+      "implementation_status": "PROPOSTA_ESCLUSA"
+    },
+    {
+      "id": "I43",
+      "text": "Rifinire interlinea, troncamento dei titoli/URL, allineamento cifre-unità e formati numerici.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "Inventario storico: proposta di verifica",
+      "remaining_work": "Valutare come criterio QA, non come nuova funzione.",
+      "task": "T10/T11",
+      "exclusion_reason": null,
+      "implementation_status": "CRITERIO_QA"
+    },
+    {
+      "id": "I44",
+      "text": "Uniformare peso e dimensione ottica delle icone.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "Inventario storico: proposta di verifica",
+      "remaining_work": "Valutare come criterio QA, non come nuova funzione.",
+      "task": "T10/T11",
+      "exclusion_reason": null,
+      "implementation_status": "CRITERIO_QA"
+    },
+    {
+      "id": "I45",
+      "text": "Progettare stati vuoti, primo utilizzo e ricerca senza risultati con una sola azione chiara.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "Inventario storico: proposta di verifica",
+      "remaining_work": "Valutare come criterio QA, non come nuova funzione.",
+      "task": "T10/T11",
+      "exclusion_reason": null,
+      "implementation_status": "CRITERIO_QA"
+    },
+    {
+      "id": "I46",
+      "text": "Usare feedback brevi e coerenti per completamento, aggiunta, cambio sezione e annullamento.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "Inventario storico: proposta di verifica",
+      "remaining_work": "Valutare come criterio QA, non come nuova funzione.",
+      "task": "T10/T11",
+      "exclusion_reason": null,
+      "implementation_status": "CRITERIO_QA"
+    },
+    {
+      "id": "I47",
+      "text": "Verificare tastiera, ritorno alla posizione di scorrimento, uso a una mano e possibilità di annullare.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "Inventario storico: proposta di verifica",
+      "remaining_work": "Valutare come criterio QA, non come nuova funzione.",
+      "task": "T10/T11",
+      "exclusion_reason": null,
+      "implementation_status": "CRITERIO_QA"
+    },
+    {
+      "id": "I48",
+      "text": "Dare a LifeOS una direzione grafica più autonoma e riconoscibile rispetto alla sola somiglianza iOS.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/STATUS.md e docs/PROJECT-CHECKLIST.md: stato storico, regressione attuale da verificare",
+      "remaining_work": "Nessuna implementazione senza approvazione specifica.",
+      "task": "FUORI_RELEASE",
+      "exclusion_reason": "Proposta assistente non approvata per la release.",
+      "implementation_status": "PROPOSTA_ESCLUSA"
+    },
+    {
+      "id": "L01",
+      "text": "Ricostruire tutte le correzioni di questa conversazione e delle precedenti, una per una, segnalando in rosso i conflitti.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md e docs/STATUS.md: processo e limiti",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T00/T11",
+      "exclusion_reason": null,
+      "implementation_status": "PROCESSO"
+    },
+    {
+      "id": "L02",
+      "text": "Non limitare il lavoro al solo difetto della griglia Bloom.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md e docs/STATUS.md: processo e limiti",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T00/T11",
+      "exclusion_reason": null,
+      "implementation_status": "PROCESSO"
+    },
+    {
+      "id": "L03",
+      "text": "Proposta precedente di iniziare soltanto dalla griglia Bloom, rifiutata nella tua ultima risposta.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md e docs/STATUS.md: processo e limiti",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T00/T11",
+      "exclusion_reason": "Proposta storica rifiutata.",
+      "implementation_status": "PROPOSTA_RIFIUTATA"
+    },
+    {
+      "id": "L04",
+      "text": "Ridurre cicli lunghi di lavoro che terminano con una versione ancora piena di difetti visibili.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "docs/USER-DECISIONS.md e docs/STATUS.md: processo e limiti",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T00/T11",
+      "exclusion_reason": null,
+      "implementation_status": "PROCESSO"
+    },
+    {
+      "id": "L05",
+      "text": "Non scaricare sull’utente il collaudo iniziale né costringerlo a ripetere continuamente le stesse correzioni.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "docs/USER-DECISIONS.md e docs/STATUS.md: processo e limiti",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T00/T11",
+      "exclusion_reason": null,
+      "implementation_status": "PROCESSO"
+    },
+    {
+      "id": "L06",
+      "text": "Intervenire sull’app installabile effettiva: un mockup non risolve i difetti della build.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "docs/USER-DECISIONS.md e docs/STATUS.md: processo e limiti",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T00/T11",
+      "exclusion_reason": null,
+      "implementation_status": "PROCESSO"
+    },
+    {
+      "id": "L07",
+      "text": "La richiesta di rappresentare tutte le migliorie in una sola immagine riguarda il concept, non prova l’implementazione.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md e docs/STATUS.md: processo e limiti",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T00/T11",
+      "exclusion_reason": "Concept non dimostra implementazione.",
+      "implementation_status": "CONCEPT_NON_PROVA"
+    },
+    {
+      "id": "L08",
+      "text": "Operare autonomamente entro il progetto senza impattare risorse esterne al progetto.",
+      "provenance": {
+        "origin": "U",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "ACTIVE",
+      "evidence": "docs/USER-DECISIONS.md e docs/STATUS.md: processo e limiti",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T00/T11",
+      "exclusion_reason": null,
+      "implementation_status": "PROCESSO"
+    },
+    {
+      "id": "L09",
+      "text": "Conservare dati, bundle ID, App Group, compatibilità di avvio e aggiornamento sopra l’app esistente.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md e docs/STATUS.md: processo e limiti",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T10/T11/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "L10",
+      "text": "Consegnare un’IPA diretta per Signulous, non uno ZIP.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md e docs/STATUS.md: processo e limiti",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T10/T11/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "L11",
+      "text": "Non disinstallare l’app, svuotare il Portachiavi o cancellare dati per far passare i controlli.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md e docs/STATUS.md: processo e limiti",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T10/T11/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "L12",
+      "text": "Non riproporre la stessa richiesta di versione iOS o crash report già forniti.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md e docs/STATUS.md: processo e limiti",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T10/T11/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "L13",
+      "text": "Distinguere prove simulate, demo e prove fisiche e dichiarare soltanto ciò che è effettivamente verificato.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md e docs/STATUS.md: processo e limiti",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T10/T11/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "L14",
+      "text": "Non pubblicare dati personali, credenziali o diagnostica finanziaria privata nei log.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md e docs/STATUS.md: processo e limiti",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T10/T11/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "L15",
+      "text": "Widget piccolo 2×2 con settimana, riepiloghi e +, senza esportare saldo, dati Salute o credenziali.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md e docs/STATUS.md: processo e limiti",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T10/T11/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "L16",
+      "text": "Widget offline con cache atomica e data reale dell’ultimo aggiornamento, senza fingere freschezza.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md e docs/STATUS.md: processo e limiti",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T10/T11/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "L17",
+      "text": "Mantenere un registro persistente dei difetti con prove e controllo delle regressioni.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md e docs/STATUS.md: processo e limiti",
+      "remaining_work": "Applicare come criterio, non nuova funzione.",
+      "task": "T10/T11/T12",
+      "exclusion_reason": null,
+      "implementation_status": "CRITERIO_QA"
+    },
+    {
+      "id": "L18",
+      "text": "Usare casi rappresentativi: librerie popolate, immagini diverse, titoli lunghi, dati mancanti, tastiera e testo grande.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md e docs/STATUS.md: processo e limiti",
+      "remaining_work": "Applicare come criterio, non nuova funzione.",
+      "task": "T10/T11/T12",
+      "exclusion_reason": null,
+      "implementation_status": "CRITERIO_QA"
+    },
+    {
+      "id": "L19",
+      "text": "Controllare il risultato renderizzato dell’app reale oltre agli assert automatici.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md e docs/STATUS.md: processo e limiti",
+      "remaining_work": "Applicare come criterio, non nuova funzione.",
+      "task": "T10/T11/T12",
+      "exclusion_reason": null,
+      "implementation_status": "CRITERIO_QA"
+    },
+    {
+      "id": "L20",
+      "text": "Eseguire prima verifiche pertinenti e produrre l’IPA dopo la verifica del gruppo di correzioni.",
+      "provenance": {
+        "origin": "P",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md e docs/STATUS.md: processo e limiti",
+      "remaining_work": "Applicare come criterio, non nuova funzione.",
+      "task": "T10/T11/T12",
+      "exclusion_reason": null,
+      "implementation_status": "CRITERIO_QA"
+    },
+    {
+      "id": "L21",
+      "text": "Eliminare il crash immediato di avvio osservato nella build 75, senza attribuirlo automaticamente al certificato.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md e docs/STATUS.md: processo e limiti",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T10/T11/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "L22",
+      "text": "Conservare il controllo di compatibilità degli import Foundation Date su app e widget e la toolchain compatibile documentata.",
+      "provenance": {
+        "origin": "D",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md e docs/STATUS.md: processo e limiti",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T10/T11/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "L23",
+      "text": "Verificare che aggiornamento e riavvio conservino sessione, archivi e dati già salvati.",
+      "provenance": {
+        "origin": "H",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/USER-DECISIONS.md e docs/STATUS.md: processo e limiti",
+      "remaining_work": "Verificare flusso e regressioni nel task assegnato.",
+      "task": "T10/T11/T12",
+      "exclusion_reason": null,
+      "implementation_status": "PARZIALE"
+    },
+    {
+      "id": "M01",
+      "text": "Correggere il primo allegato storico indicato con fixalo: dettaglio non ricostruibile dal solo testo disponibile.",
+      "provenance": {
+        "origin": "S1",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/decision-history/2026-11-04-inventory.md: allegati mancanti",
+      "remaining_work": "Attendere dettagli concreti, non inventare contenuto.",
+      "task": "NON_BLOCCANTE",
+      "exclusion_reason": "Allegati storici non disponibili; non blocca senza dettaglio concreto.",
+      "implementation_status": "NON_VERIFICABILE"
+    },
+    {
+      "id": "M02",
+      "text": "Correggere il secondo allegato storico, definito troppo piccolo e problematico: riferimento visivo oggi mancante.",
+      "provenance": {
+        "origin": "S1",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/decision-history/2026-11-04-inventory.md: allegati mancanti",
+      "remaining_work": "Attendere dettagli concreti, non inventare contenuto.",
+      "task": "NON_BLOCCANTE",
+      "exclusion_reason": "Allegati storici non disponibili; non blocca senza dettaglio concreto.",
+      "implementation_status": "NON_VERIFICABILE"
+    },
+    {
+      "id": "M03",
+      "text": "Ridurre i troppi colori del terzo allegato storico, conservando la struttura delle carte gradita.",
+      "provenance": {
+        "origin": "S1",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/decision-history/2026-11-04-inventory.md: allegati mancanti",
+      "remaining_work": "Attendere dettagli concreti, non inventare contenuto.",
+      "task": "NON_BLOCCANTE",
+      "exclusion_reason": "Allegati storici non disponibili; non blocca senza dettaglio concreto.",
+      "implementation_status": "NON_VERIFICABILE"
+    },
+    {
+      "id": "M04",
+      "text": "Aggiungere un accento al quarto allegato storico, definito troppo spento.",
+      "provenance": {
+        "origin": "S1",
+        "inventory": "decision-history/2026-11-04-inventory.json"
+      },
+      "status": "HISTORICAL_NON_NORMATIVE",
+      "evidence": "docs/decision-history/2026-11-04-inventory.md: allegati mancanti",
+      "remaining_work": "Attendere dettagli concreti, non inventare contenuto.",
+      "task": "NON_BLOCCANTE",
+      "exclusion_reason": "Allegati storici non disponibili; non blocca senza dettaglio concreto.",
+      "implementation_status": "NON_VERIFICABILE"
+    },
+    {
+      "id": "HEALTH-GRID-PLAN-02",
+      "text": "Progettare la griglia",
+      "provenance": "Scelta esplicita utente nella chat del piano; autorizza anteprima, non sostituisce G08/G09/G12/G13.",
+      "status": "ACTIVE",
+      "evidence": "USER-DECISIONS.json; nessuna prova di prodotto implicita",
+      "remaining_work": "Applicare gate e verificare nel task assegnato",
+      "task": "T07/T08",
+      "exclusion_reason": null
+    },
+    {
+      "id": "HEALTH-MACROS-SOURCES-01",
+      "text": "Tutte le app (Recommended)",
+      "provenance": "Scelta esplicita utente nella chat del piano; evitare doppi conteggi dei dati locali.",
+      "status": "ACTIVE",
+      "evidence": "USER-DECISIONS.json; nessuna prova di prodotto implicita",
+      "remaining_work": "Applicare gate e verificare nel task assegnato",
+      "task": "T07/T08",
+      "exclusion_reason": null
+    },
+    {
+      "id": "PROJECT-EXECUTION-01",
+      "text": "PLEASE IMPLEMENT THIS PLAN; continua",
+      "provenance": "Messaggi utente riportati nel passaggio di esecuzione; non autorizzano IPA, deploy o deroghe alle regole di layout.",
+      "status": "ACTIVE",
+      "evidence": "USER-DECISIONS.json; nessuna prova di prodotto implicita",
+      "remaining_work": "Applicare gate e verificare nel task assegnato",
+      "task": "T00–T12",
+      "exclusion_reason": null
+    },
+    {
+      "id": "HEALTH-GRID-CONFLICT-01",
+      "text": "Griglia 2x2 e mini grafici sotto il valore modificano altezza/posizione e trattamento delle schede; conferma specifica necessaria prima del codice coinvolto.",
+      "provenance": "Proposta del piano approvato da mostrare prima della modifica; non approvazione della deroga",
+      "status": "PENDING_CONFIRMATION",
+      "evidence": "USER-DECISIONS.json; nessuna prova di prodotto implicita",
+      "remaining_work": "Applicare gate e verificare nel task assegnato",
+      "task": "T07/T08",
+      "exclusion_reason": null
+    },
+    {
+      "id": "QA-RETRY",
+      "text": "QA-RETRY",
+      "provenance": "Piano esecutivo approvato",
+      "status": "PENDING",
+      "evidence": "Non ancora verificato nel piano corrente",
+      "remaining_work": "Eseguire e registrare evidenza pertinente",
+      "task": "T02",
+      "exclusion_reason": null
+    },
+    {
+      "id": "QA-BLOOM-PARITY",
+      "text": "QA-BLOOM-PARITY",
+      "provenance": "Piano esecutivo approvato",
+      "status": "PENDING",
+      "evidence": "Non ancora verificato nel piano corrente",
+      "remaining_work": "Eseguire e registrare evidenza pertinente",
+      "task": "T04",
+      "exclusion_reason": null
+    },
+    {
+      "id": "QA-FINANCE",
+      "text": "QA-FINANCE",
+      "provenance": "Piano esecutivo approvato",
+      "status": "PENDING",
+      "evidence": "Non ancora verificato nel piano corrente",
+      "remaining_work": "Eseguire e registrare evidenza pertinente",
+      "task": "T06",
+      "exclusion_reason": null
+    },
+    {
+      "id": "QA-SUITE",
+      "text": "QA-SUITE",
+      "provenance": "Piano esecutivo approvato",
+      "status": "PENDING",
+      "evidence": "Non ancora verificato nel piano corrente",
+      "remaining_work": "Eseguire e registrare evidenza pertinente",
+      "task": "T11",
+      "exclusion_reason": null
+    },
+    {
+      "id": "QA-PHYSICAL",
+      "text": "QA-PHYSICAL",
+      "provenance": "Piano esecutivo approvato",
+      "status": "PENDING",
+      "evidence": "Non ancora verificato nel piano corrente",
+      "remaining_work": "Eseguire e registrare evidenza pertinente",
+      "task": "T12",
+      "exclusion_reason": null
+    },
+    {
+      "id": "META-01",
+      "text": "Registrare in modo persistente gli input decisionali dell’utente. Se un nuovo input contraddice una regola attiva, citare ID e testo della regola, spiegare la differenza e chiedere conferma PRIMA di procedere sulla parte in conflitto. Non sostituire la regola senza risposta.",
+      "provenance": "USER-DECISIONS.json",
+      "status": "ACTIVE",
+      "evidence": "Registro decisioni; non prova di conformità prodotto",
+      "remaining_work": "Applicare e verificare durante i task pertinenti",
+      "task": "T00–T12",
+      "exclusion_reason": null
+    },
+    {
+      "id": "META-02",
+      "text": "Mantenere GitHub aggiornato con codice, stato effettivo della build e documentazione sufficiente a un’altra IA per lavorare sul progetto: regole, elenco correzioni, flussi e tecnologie.",
+      "provenance": "USER-DECISIONS.json",
+      "status": "ACTIVE",
+      "evidence": "Registro decisioni; non prova di conformità prodotto",
+      "remaining_work": "Applicare e verificare durante i task pertinenti",
+      "task": "T00–T12",
+      "exclusion_reason": null
+    },
+    {
+      "id": "DEV-01",
+      "text": "Da Windows usare la CI esistente con anteprima reale, verifiche mirate e IPA completa al termine del gruppo di correzioni; ispezionare le schermate prima della consegna.",
+      "provenance": "Approvazione esplicita dei tre percorsi descritti nel messaggio precedente",
+      "status": "ACTIVE",
+      "evidence": "Registro decisioni; non prova di conformità prodotto",
+      "remaining_work": "Applicare e verificare durante i task pertinenti",
+      "task": "T00–T12",
+      "exclusion_reason": null
+    },
+    {
+      "id": "DEV-02",
+      "text": "Proporre un problema e una soluzione concreta, attendere approvazione prima di modificare il prodotto; verificare il risultato reale e consegnarlo per revisione. Raggruppare le modifiche già approvate che condividono una compilazione.",
+      "provenance": "Proposta del ciclo confermata dall’utente approvando la prima correzione.",
+      "status": "ACTIVE",
+      "evidence": "Registro decisioni; non prova di conformità prodotto",
+      "remaining_work": "Applicare e verificare durante i task pertinenti",
+      "task": "T00–T12",
+      "exclusion_reason": null
+    },
+    {
+      "id": "H-GRID-01",
+      "text": "Griglia a due colonne, immagini contenute nella larghezza della card, altezza adattata al contenuto; includere anteprime per i link.",
+      "provenance": "USER-DECISIONS.json",
+      "status": "ACTIVE",
+      "evidence": "Registro decisioni; non prova di conformità prodotto",
+      "remaining_work": "Applicare e verificare durante i task pertinenti",
+      "task": "T00–T12",
+      "exclusion_reason": null
+    },
+    {
+      "id": "NUTRITION-DIRECT-01",
+      "text": "Quick add nella Dashboard per grammi effettivi di proteine, carboidrati, grassi e fibre; calorie automatiche. Pulsante compatto + Nutrizione apre pannello dal basso con quattro campi in due colonne, kcal in tempo reale, data oggi modificabile e Aggiungi sopra la tastiera. Prima mostrare il render e fermarsi, senza implementare altro.",
+      "provenance": "USER-DECISIONS.json",
+      "status": "ACTIVE",
+      "evidence": "Registro decisioni; non prova di conformità prodotto",
+      "remaining_work": "Applicare e verificare durante i task pertinenti",
+      "task": "T00–T12",
+      "exclusion_reason": null
+    },
+    {
+      "id": "IPA-GATE-01",
+      "text": "Non produrre, confezionare o distribuire nuove IPA finché l’utente non lo richiede esplicitamente. Approvazioni di design, implementazione, test o prosecuzione non autorizzano IPA. Restano consentiti compilazione e test al simulatore senza packaging IPA.",
+      "provenance": "USER-DECISIONS.json",
+      "status": "ACTIVE",
+      "evidence": "Registro decisioni; non prova di conformità prodotto",
+      "remaining_work": "Applicare e verificare durante i task pertinenti",
+      "task": "T00–T12",
+      "exclusion_reason": null
+    },
+    {
+      "id": "HEALTH-UX-01",
+      "text": "Progettare Salute per bodybuilding: dati essenziali subito visibili, consultazione semplice e futura aggiunta pasti rapidissima, minimo attrito e movimento del dito. Layout, pulsanti e catalogo descritti dall’utente sono proposte non obbligatorie.",
+      "provenance": "USER-DECISIONS.json",
+      "status": "ACTIVE",
+      "evidence": "Registro decisioni; non prova di conformità prodotto",
+      "remaining_work": "Applicare e verificare durante i task pertinenti",
+      "task": "T00–T12",
+      "exclusion_reason": null
+    },
+    {
+      "id": "HEALTH-PLAN-01",
+      "text": "Aggiungere obiettivo e ipotesi alla checklist e preparare passaggio Astra (piano) → Terra (incrementi successivamente approvati). Non implementare ora nuovi inserimenti peso/pasto o database; non rimuovere il quick add esistente. Nessuna IPA.",
+      "provenance": "USER-DECISIONS.json",
+      "status": "ACTIVE",
+      "evidence": "Registro decisioni; non prova di conformità prodotto",
+      "remaining_work": "Applicare e verificare durante i task pertinenti",
+      "task": "T00–T12",
+      "exclusion_reason": null
+    },
+    {
+      "id": "PROJECT-PLAN-01",
+      "text": "Preparare un mandato per Astra che ricostruisca il piano completo dell’intero progetto fino all’IPA finale, non limitato a Salute; consegna eseguibile per Terra con copertura di tutte le richieste pertinenti. Nessuna autorizzazione implicita a implementare proposte o produrre IPA.",
+      "provenance": "USER-DECISIONS.json",
+      "status": "ACTIVE",
+      "evidence": "Registro decisioni; non prova di conformità prodotto",
+      "remaining_work": "Applicare e verificare durante i task pertinenti",
+      "task": "T00–T12",
+      "exclusion_reason": null
+    },
+    {
+      "id": "QA001",
+      "text": "Griglia Bloom simulatore e accettazione visiva; manca dispositivo fisico",
+      "provenance": "Piano esecutivo approvato e checklist",
+      "status": "PENDING",
+      "implementation_status": "NON_VERIFICATO_COMPLETAMENTE",
+      "evidence": "Bloom: docs/BLOOM-GRID-REVIEW.md, visivo accettato; nessuna prova fisica",
+      "remaining_work": "Eseguire la verifica specificata e registrare i risultati",
+      "task": "T04/T12",
+      "exclusion_reason": null
+    },
+    {
+      "id": "QA002",
+      "text": "Griglia Bloom accettata visivamente; prova fisica pendente",
+      "provenance": "Piano esecutivo approvato e checklist",
+      "status": "PENDING",
+      "implementation_status": "NON_VERIFICATO_COMPLETAMENTE",
+      "evidence": "Bloom: docs/BLOOM-GRID-REVIEW.md, visivo accettato; nessuna prova fisica",
+      "remaining_work": "Eseguire la verifica specificata e registrare i risultati",
+      "task": "T04/T12",
+      "exclusion_reason": null
+    },
+    {
+      "id": "QA003",
+      "text": "Retry nutrizione, valori e identità",
+      "provenance": "Piano esecutivo approvato e checklist",
+      "status": "PENDING",
+      "implementation_status": "NON_VERIFICATO_COMPLETAMENTE",
+      "evidence": "Prova finale non ancora eseguita per il piano corrente",
+      "remaining_work": "Eseguire la verifica specificata e registrare i risultati",
+      "task": "T02",
+      "exclusion_reason": null
+    },
+    {
+      "id": "QA004",
+      "text": "Accessibilità e UI trasversale",
+      "provenance": "Piano esecutivo approvato e checklist",
+      "status": "PENDING",
+      "implementation_status": "NON_VERIFICATO_COMPLETAMENTE",
+      "evidence": "Prova finale non ancora eseguita per il piano corrente",
+      "remaining_work": "Eseguire la verifica specificata e registrare i risultati",
+      "task": "T10",
+      "exclusion_reason": null
+    },
+    {
+      "id": "QA005",
+      "text": "Anteprima e conflitti Salute",
+      "provenance": "Piano esecutivo approvato e checklist",
+      "status": "PENDING",
+      "implementation_status": "NON_VERIFICATO_COMPLETAMENTE",
+      "evidence": "Prova finale non ancora eseguita per il piano corrente",
+      "remaining_work": "Eseguire la verifica specificata e registrare i risultati",
+      "task": "T07/T09",
+      "exclusion_reason": null
+    },
+    {
+      "id": "QA006",
+      "text": "Schermi compatti e Dynamic Type",
+      "provenance": "Piano esecutivo approvato e checklist",
+      "status": "PENDING",
+      "implementation_status": "NON_VERIFICATO_COMPLETAMENTE",
+      "evidence": "Prova finale non ancora eseguita per il piano corrente",
+      "remaining_work": "Eseguire la verifica specificata e registrare i risultati",
+      "task": "T10",
+      "exclusion_reason": null
+    },
+    {
+      "id": "QA007",
+      "text": "Parità libreria privata Bloom",
+      "provenance": "Piano esecutivo approvato e checklist",
+      "status": "PENDING",
+      "implementation_status": "NON_VERIFICATO_COMPLETAMENTE",
+      "evidence": "Prova finale non ancora eseguita per il piano corrente",
+      "remaining_work": "Eseguire la verifica specificata e registrare i risultati",
+      "task": "T04/T12",
+      "exclusion_reason": null
+    },
+    {
+      "id": "QA008",
+      "text": "HealthKit e fonti, prova fisica",
+      "provenance": "Piano esecutivo approvato e checklist",
+      "status": "PENDING",
+      "implementation_status": "NON_VERIFICATO_COMPLETAMENTE",
+      "evidence": "Prova finale non ancora eseguita per il piano corrente",
+      "remaining_work": "Eseguire la verifica specificata e registrare i risultati",
+      "task": "T08/T12",
+      "exclusion_reason": null
+    },
+    {
+      "id": "QA009",
+      "text": "Persistenza, widget e aggiornamento",
+      "provenance": "Piano esecutivo approvato e checklist",
+      "status": "PENDING",
+      "implementation_status": "NON_VERIFICATO_COMPLETAMENTE",
+      "evidence": "Prova finale non ancora eseguita per il piano corrente",
+      "remaining_work": "Eseguire la verifica specificata e registrare i risultati",
+      "task": "T10/T12",
+      "exclusion_reason": null
+    },
+    {
+      "id": "QA010",
+      "text": "Finanza e competenza",
+      "provenance": "Piano esecutivo approvato e checklist",
+      "status": "PENDING",
+      "implementation_status": "NON_VERIFICATO_COMPLETAMENTE",
+      "evidence": "Prova finale non ancora eseguita per il piano corrente",
+      "remaining_work": "Eseguire la verifica specificata e registrare i risultati",
+      "task": "T06",
+      "exclusion_reason": null
+    },
+    {
+      "id": "QA011",
+      "text": "Interazione e stati trasversali",
+      "provenance": "Piano esecutivo approvato e checklist",
+      "status": "PENDING",
+      "implementation_status": "NON_VERIFICATO_COMPLETAMENTE",
+      "evidence": "Prova finale non ancora eseguita per il piano corrente",
+      "remaining_work": "Eseguire la verifica specificata e registrare i risultati",
+      "task": "T10",
+      "exclusion_reason": null
+    }
+  ],
+  "additional_count": 30
+}

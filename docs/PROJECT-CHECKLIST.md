@@ -1,5 +1,9 @@
 # LifeOS — checklist operativa unificata
 
+## Aggiornamento operativo — piano approvato, 4 novembre 2026
+
+Il piano completo è autorizzato ed è in corso: [piano](PROJECT-RELEASE-PLAN.md), [copertura](REQUIREMENT-COVERAGE.json), [manifesto](EXECUTION-MANIFEST.json). I precedenti passaggi che indicano solo pianificazione o accettazione Bloom pendente sono storici e superati. Bloom è accettato visivamente, non per produzione; retry nutrizione resta non verificato; IPA 78 non accettata. Nessuna nuova IPA né deploy autorizzati. T07 prevede anteprima e conferma dei conflitti prima della modifica di Salute.
+
 Aggiornata il 4 novembre 2026. Fonte corrente per pianificazione e passaggio Astra → Terra. [Regole](USER-DECISIONS.md), [stato tecnico](BUILD-STATE.json), [brief Salute](HEALTH-BODYBUILDING-BRIEF.md). Le caselle descrivono risultati distinti: codice implementato non significa verifica completa o accettazione per produzione.
 
 ## 0. Piano globale Astra → Terra

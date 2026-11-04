@@ -617,9 +617,55 @@
       "original_quote": "astra devi ricreare tutto il piano compreso di tutte le altre modifche discusse mancanti per arrivare a un ipa finale grazie a quel piano",
       "rule": "Preparare un mandato per Astra che ricostruisca il piano completo dell’intero progetto fino all’IPA finale, non limitato a Salute; consegna eseguibile per Terra con copertura di tutte le richieste pertinenti. Nessuna autorizzazione implicita a implementare proposte o produrre IPA.",
       "conflict_check": "Ampliamento del perimetro di pianificazione; compatibile con HEALTH-PLAN-01, DEV-02 e IPA-GATE-01. Nessuna regola di prodotto sostituita."
+    },
+    {
+      "id": "HEALTH-GRID-PLAN-02",
+      "status": "ACTIVE",
+      "scope": "LifeOS Salute: progettazione prima della IPA",
+      "recorded_on": "2026-11-04",
+      "original_quote": "Progettare la griglia",
+      "provenance": "Scelta esplicita utente nella chat del piano; autorizza anteprima, non sostituisce G08/G09/G12/G13.",
+      "rule": "Progettare e mostrare la griglia Salute prima della IPA; nessuna deroga alle regole G08/G09/G12/G13 senza conferma specifica."
+    },
+    {
+      "id": "HEALTH-MACROS-SOURCES-01",
+      "status": "ACTIVE",
+      "scope": "Letture proteine, carboidrati, grassi e fibre da HealthKit",
+      "recorded_on": "2026-11-04",
+      "original_quote": "Tutte le app (Recommended)",
+      "provenance": "Scelta esplicita utente nella chat del piano; evitare doppi conteggi dei dati locali.",
+      "rule": "Leggere proteine, carboidrati, grassi e fibre da tutte le app in HealthKit; non sommare due volte gli stessi dati locali e HealthKit; preservare G03."
+    },
+    {
+      "id": "PROJECT-EXECUTION-01",
+      "status": "ACTIVE",
+      "scope": "Esecuzione incrementale piano LifeOS",
+      "recorded_on": "2026-11-04",
+      "provenance": "Messaggi utente riportati nel passaggio di esecuzione; non autorizzano IPA, deploy o deroghe alle regole di layout.",
+      "approval_quotes": [
+        "PLEASE IMPLEMENT THIS PLAN:",
+        "continua"
+      ],
+      "rule": "Eseguire il piano operativo approvato, con gate di conflitto, senza IPA o deploy implicitamente autorizzati.",
+      "plan": "PROJECT-RELEASE-PLAN.md"
     }
   ],
-  "pending_confirmations": [],
+  "pending_confirmations": [
+    {
+      "id": "HEALTH-GRID-CONFLICT-01",
+      "status": "PENDING_CONFIRMATION",
+      "scope": "solo layout Salute dopo anteprima T07",
+      "recorded_on": "2026-11-04",
+      "provenance": "Proposta del piano approvato da mostrare prima della modifica; non approvazione della deroga",
+      "conflicts_with": [
+        "G08",
+        "G09",
+        "G12",
+        "G13"
+      ],
+      "rule": "Griglia 2x2 e mini grafici sotto il valore modificano altezza/posizione e trattamento delle schede; conferma specifica necessaria prima del codice coinvolto."
+    }
+  ],
   "history": [
     {
       "recorded_on": "2026-11-04",

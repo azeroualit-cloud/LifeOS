@@ -1,5 +1,11 @@
 # Ciclo di sviluppo iOS da Windows
 
+**Capacità CI aggiornata:** run 41873100610 tentativo 2 riuscito su macos-15-arm64, Xcode 26.3, SDK/runtime iOS 26.2. È una prova di disponibilità runner, non un test dell’app; il retry nutrizionale resta non verificato.
+
+## Aggiornamento operativo — piano approvato, 4 novembre 2026
+
+Il piano completo è autorizzato ed è in corso: [piano](PROJECT-RELEASE-PLAN.md), [copertura](REQUIREMENT-COVERAGE.json), [manifesto](EXECUTION-MANIFEST.json). I precedenti passaggi che indicano solo pianificazione o accettazione Bloom pendente sono storici e superati. Bloom è accettato visivamente, non per produzione; retry nutrizione resta non verificato; IPA 78 non accettata. Nessuna nuova IPA né deploy autorizzati. T07 prevede anteprima e conferma dei conflitti prima della modifica di Salute.
+
 Approvato dall’utente il 4 novembre 2026: «implementiamo in questo modo allora».
 
 ## Tre percorsi

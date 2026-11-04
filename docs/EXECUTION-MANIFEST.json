@@ -1,0 +1,718 @@
+{
+  "schema_version": 1,
+  "base_commit": "edd60f9e5afcb0db6e1520c183a6a7d0b10de1a1",
+  "owner": "Terra, unico writer e integratore",
+  "constraints": [
+    "META-01",
+    "META-02",
+    "DEV-02",
+    "IPA-GATE-01",
+    "No deploy backend",
+    "No catalogo o nuovi editor non inclusi nel piano",
+    "G08/G09/G12/G13 attive fino a conferma"
+  ],
+  "tasks": [
+    {
+      "id": "T00",
+      "scope": "Registro, copertura e manifesto",
+      "dependencies": [],
+      "owner": "Terra",
+      "files": [
+        "AGENTS.md",
+        "README.md",
+        "docs/USER-DECISIONS.md",
+        "docs/USER-DECISIONS.json",
+        "docs/PROJECT-RELEASE-PLAN.md",
+        "docs/REQUIREMENT-COVERAGE.json",
+        "docs/EXECUTION-MANIFEST.json",
+        "docs/STATUS.md",
+        "docs/AI-HANDOFF.md",
+        "docs/BUILD-STATE.json",
+        "docs/OPEN-ISSUES.md",
+        "docs/PROJECT-CHECKLIST.md",
+        "docs/DEVELOPMENT-CYCLE.md"
+      ],
+      "outputs": "Registro, copertura e manifesto",
+      "checks": "Confrontare tutti i 238 ID e regole/QA, verificare JSON, provenienza, classificazione, conflitti, diff e SHA remoto.",
+      "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta.",
+      "status": "completed_local_pending_sync",
+      "inputs": [
+        "docs/USER-DECISIONS.json",
+        "docs/PROJECT-RELEASE-PLAN.md",
+        "HEAD verificato",
+        "AGENTS.md",
+        "README.md",
+        "docs/USER-DECISIONS.md",
+        "docs/USER-DECISIONS.json",
+        "docs/PROJECT-RELEASE-PLAN.md",
+        "docs/REQUIREMENT-COVERAGE.json",
+        "docs/EXECUTION-MANIFEST.json",
+        "docs/STATUS.md",
+        "docs/AI-HANDOFF.md",
+        "docs/BUILD-STATE.json",
+        "docs/OPEN-ISSUES.md",
+        "docs/PROJECT-CHECKLIST.md",
+        "docs/DEVELOPMENT-CYCLE.md"
+      ],
+      "base": "HEAD del checkpoint precedente verificato; base iniziale edd60f9e5afcb0db6e1520c183a6a7d0b10de1a1",
+      "model": "gpt-6.1-terra",
+      "reasoning": "high",
+      "gate": {
+        "status": "local_checks_passed_pending_sync",
+        "requires": [],
+        "evidence_required": "Confrontare tutti i 238 ID e regole/QA, verificare JSON, provenienza, classificazione, conflitti, diff e SHA remoto.",
+        "stop_on_failure": true,
+        "approval_gates": []
+      },
+      "verification_commands_or_actions": [
+        "python -m json.tool docs/USER-DECISIONS.json",
+        "python -m json.tool docs/REQUIREMENT-COVERAGE.json",
+        "python -m json.tool docs/EXECUTION-MANIFEST.json",
+        "git diff --check",
+        "git fetch origin codex/revision77; confrontare SHA remoto"
+      ],
+      "approval_gates": []
+    },
+    {
+      "id": "T01",
+      "scope": "CI senza packaging, aree attività/calendario/turni, suite completa e quattro avvii Release",
+      "dependencies": [
+        "T00"
+      ],
+      "owner": "Terra",
+      "files": [
+        ".github/workflows/lifeos-development.yml",
+        "scripts/select-development-tests.py",
+        "scripts/test_development_selection.py",
+        "scripts/verify-release-launch75.py",
+        ".github/workflows/lifeos-final-validation.yml",
+        ".github/actions/native-compat76/action.yml"
+      ],
+      "outputs": "CI senza packaging, aree attività/calendario/turni, suite completa e quattro avvii Release",
+      "checks": "Test selettore e lint workflow; verificare suite completa e quattro avvii Release separati dal packaging su macOS quando disponibile.",
+      "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta.",
+      "status": "pending",
+      "inputs": [
+        "docs/USER-DECISIONS.json",
+        "docs/PROJECT-RELEASE-PLAN.md",
+        "HEAD verificato",
+        ".github/workflows/lifeos-development.yml",
+        "scripts/select-development-tests.py",
+        "scripts/test_development_selection.py",
+        "scripts/verify-release-launch75.py"
+      ],
+      "base": "HEAD del checkpoint precedente verificato; base iniziale edd60f9e5afcb0db6e1520c183a6a7d0b10de1a1",
+      "model": "gpt-6.1-terra",
+      "reasoning": "high",
+      "gate": {
+        "status": "pending",
+        "requires": [
+          "T00"
+        ],
+        "evidence_required": "Test selettore e lint workflow; verificare suite completa e quattro avvii Release separati dal packaging su macOS quando disponibile.",
+        "stop_on_failure": true,
+        "approval_gates": []
+      },
+      "verification_commands_or_actions": [
+        "python -m unittest scripts/test_development_selection.py",
+        "actionlint sul workflow modificato",
+        "workflow manuale finale senza packaging: suite completa e quattro avvii Release"
+      ],
+      "approval_gates": []
+    },
+    {
+      "id": "T02",
+      "scope": "Retry quick add accessibile, valori e identità, riavvio e storico",
+      "dependencies": [
+        "T01"
+      ],
+      "owner": "Terra",
+      "files": [
+        "native-next/Sources/NativeNutritionQuickEntry.swift",
+        "native-next/Sources/NativeNutrition.swift",
+        "native-next/Sources/NativeNutritionUIFixture.swift",
+        "native-next/UITests/NativeNutritionQuickUITests.swift",
+        "native-next/Tests/NativeNutritionStoreTests.swift"
+      ],
+      "outputs": "Retry quick add accessibile, valori e identità, riavvio e storico",
+      "checks": "Errore e retry con valori/ID/revisione conservati, riavvio e storico; unitari e UI accessibilità su simulatore.",
+      "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta.",
+      "status": "pending",
+      "inputs": [
+        "docs/USER-DECISIONS.json",
+        "docs/PROJECT-RELEASE-PLAN.md",
+        "HEAD verificato",
+        "native-next/Sources/NativeNutritionQuickEntry.swift",
+        "native-next/Sources/NativeNutrition.swift",
+        "native-next/Sources/NativeNutritionUIFixture.swift",
+        "native-next/UITests/NativeNutritionQuickUITests.swift",
+        "native-next/Tests/NativeNutritionStoreTests.swift"
+      ],
+      "base": "HEAD del checkpoint precedente verificato; base iniziale edd60f9e5afcb0db6e1520c183a6a7d0b10de1a1",
+      "model": "gpt-6.1-terra",
+      "reasoning": "high",
+      "gate": {
+        "status": "pending",
+        "requires": [
+          "T01"
+        ],
+        "evidence_required": "Errore e retry con valori/ID/revisione conservati, riavvio e storico; unitari e UI accessibilità su simulatore.",
+        "stop_on_failure": true,
+        "approval_gates": []
+      },
+      "verification_commands_or_actions": [
+        "workflow focused area nutrition sul commit esatto",
+        "ispezione xcresult, retry, riavvio e storico"
+      ],
+      "approval_gates": []
+    },
+    {
+      "id": "T03",
+      "scope": "Dashboard: oggi e due date, preghiera, budget, navigazione e turni",
+      "dependencies": [
+        "T02"
+      ],
+      "owner": "Terra",
+      "files": [
+        "native-next/Sources/DashboardScreen.swift",
+        "native-next/Sources/NativeDashboardFocus.swift",
+        "native-next/Tests/NativeDashboardFocusTests.swift",
+        "native-next/UITests/NativeRevision78UITests.swift"
+      ],
+      "outputs": "Dashboard: oggi e due date, preghiera, budget, navigazione e turni",
+      "checks": "Finestra oggi + due date civili, ordine, preghiera, budget, navigazione, turni e accessibilità; prove mirate e screenshot.",
+      "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta.",
+      "status": "pending",
+      "inputs": [
+        "docs/USER-DECISIONS.json",
+        "docs/PROJECT-RELEASE-PLAN.md",
+        "HEAD verificato",
+        "native-next/Sources/DashboardScreen.swift",
+        "native-next/Sources/NativeDashboardFocus.swift",
+        "native-next/Tests/NativeDashboardFocusTests.swift",
+        "native-next/UITests/NativeRevision78UITests.swift"
+      ],
+      "base": "HEAD del checkpoint precedente verificato; base iniziale edd60f9e5afcb0db6e1520c183a6a7d0b10de1a1",
+      "model": "gpt-6.1-terra",
+      "reasoning": "high",
+      "gate": {
+        "status": "pending",
+        "requires": [
+          "T02"
+        ],
+        "evidence_required": "Finestra oggi + due date civili, ordine, preghiera, budget, navigazione, turni e accessibilità; prove mirate e screenshot.",
+        "stop_on_failure": true,
+        "approval_gates": []
+      },
+      "verification_commands_or_actions": [
+        "workflow focused area dashboard sul commit esatto",
+        "esame screenshot e navigazione"
+      ],
+      "approval_gates": []
+    },
+    {
+      "id": "T04",
+      "scope": "Bloom: parità privata ID, contenuti, allegati, hash e funzioni; preservare griglia",
+      "dependencies": [
+        "T03"
+      ],
+      "owner": "Terra",
+      "files": [
+        "native-next/Sources/NativeBloomStore.swift",
+        "native-next/Sources/NativeBloomScreen.swift",
+        "native-next/Sources/NativeBloomBackupPicker.swift",
+        "native-next/Tests/NativeBloomStoreTests.swift",
+        "native-next/UITests/NativeBloomGridUITests.swift"
+      ],
+      "outputs": "Bloom: parità privata ID, contenuti, allegati, hash e funzioni; preservare griglia",
+      "checks": "Parità privata per ID, contenuti, allegati e hash, persistenza e funzioni esistenti; preservare griglia accettata e non pubblicare dati personali.",
+      "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta.",
+      "status": "pending",
+      "inputs": [
+        "docs/USER-DECISIONS.json",
+        "docs/PROJECT-RELEASE-PLAN.md",
+        "HEAD verificato",
+        "native-next/Sources/NativeBloomStore.swift",
+        "native-next/Sources/NativeBloomScreen.swift",
+        "native-next/Sources/NativeBloomBackupPicker.swift",
+        "native-next/Tests/NativeBloomStoreTests.swift",
+        "native-next/UITests/NativeBloomGridUITests.swift"
+      ],
+      "base": "HEAD del checkpoint precedente verificato; base iniziale edd60f9e5afcb0db6e1520c183a6a7d0b10de1a1",
+      "model": "gpt-6.1-terra",
+      "reasoning": "high",
+      "gate": {
+        "status": "pending",
+        "requires": [
+          "T03"
+        ],
+        "evidence_required": "Parità privata per ID, contenuti, allegati e hash, persistenza e funzioni esistenti; preservare griglia accettata e non pubblicare dati personali.",
+        "stop_on_failure": true,
+        "approval_gates": []
+      },
+      "verification_commands_or_actions": [
+        "workflow focused area bloom sul commit esatto",
+        "confronto privato ID/contenuti/hash senza pubblicare i dati"
+      ],
+      "approval_gates": []
+    },
+    {
+      "id": "T05",
+      "scope": "Editor attività, calendario, turni e sveglie: coda e identità",
+      "dependencies": [
+        "T04"
+      ],
+      "owner": "Terra",
+      "files": [
+        "native-next/Sources/NativeActivityEditor.swift",
+        "native-next/Sources/NativeActivityDraft.swift",
+        "native-next/Sources/NativeLocalActivity.swift",
+        "native-next/Sources/CalendarScreen.swift",
+        "native-next/Sources/NativeUrgentAlarm.swift",
+        "native-next/Tests/NativeActivityStoreTests.swift",
+        "native-next/UITests/NativeInterfaceTests.swift"
+      ],
+      "outputs": "Editor attività, calendario, turni e sveglie: coda e identità",
+      "checks": "Editor, completamento, coda, identité, offline/retry, calendrier, turni e sveglie; prova riavvio e regressione mirata.",
+      "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta.",
+      "status": "pending",
+      "inputs": [
+        "docs/USER-DECISIONS.json",
+        "docs/PROJECT-RELEASE-PLAN.md",
+        "HEAD verificato",
+        "native-next/Sources/NativeActivityEditor.swift",
+        "native-next/Sources/NativeActivityDraft.swift",
+        "native-next/Sources/NativeLocalActivity.swift",
+        "native-next/Sources/CalendarScreen.swift",
+        "native-next/Sources/NativeUrgentAlarm.swift",
+        "native-next/Tests/NativeActivityStoreTests.swift",
+        "native-next/UITests/NativeInterfaceTests.swift"
+      ],
+      "base": "HEAD del checkpoint precedente verificato; base iniziale edd60f9e5afcb0db6e1520c183a6a7d0b10de1a1",
+      "model": "gpt-6.1-terra",
+      "reasoning": "high",
+      "gate": {
+        "status": "pending",
+        "requires": [
+          "T04"
+        ],
+        "evidence_required": "Editor, completamento, coda, identité, offline/retry, calendrier, turni e sveglie; prova riavvio e regressione mirata.",
+        "stop_on_failure": true,
+        "approval_gates": []
+      },
+      "verification_commands_or_actions": [
+        "workflow focused area activities/calendar/turni sul commit esatto",
+        "test UI editor, retry e riavvio"
+      ],
+      "approval_gates": []
+    },
+    {
+      "id": "T06",
+      "scope": "Finanza audit live in lettura e test sintetici, limite E10",
+      "dependencies": [
+        "T05"
+      ],
+      "owner": "Terra",
+      "files": [
+        "native-next/Sources/NativeFinanceViews.swift",
+        "native-next/Sources/FinanceScreen.swift",
+        "native-next/Sources/FinanceAnalysisScreen.swift",
+        "backend/expense-routing",
+        "docs/ARCHITECTURE-CURRENT.md"
+      ],
+      "outputs": "Finanza audit live in lettura e test sintetici, limite E10",
+      "checks": "Audit live non mutante; test sintetico 221.79/3=73.93, unico movimento, capability e retry; E10 personale non dimostrabile da sintetici.",
+      "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta.",
+      "status": "pending",
+      "inputs": [
+        "docs/USER-DECISIONS.json",
+        "docs/PROJECT-RELEASE-PLAN.md",
+        "HEAD verificato",
+        "native-next/Sources/NativeFinanceViews.swift",
+        "native-next/Sources/FinanceScreen.swift",
+        "native-next/Sources/FinanceAnalysisScreen.swift",
+        "backend/expense-routing",
+        "docs/ARCHITECTURE-CURRENT.md"
+      ],
+      "base": "HEAD del checkpoint precedente verificato; base iniziale edd60f9e5afcb0db6e1520c183a6a7d0b10de1a1",
+      "model": "gpt-6.1-terra",
+      "reasoning": "high",
+      "gate": {
+        "status": "pending",
+        "requires": [
+          "T05"
+        ],
+        "evidence_required": "Audit live non mutante; test sintetico 221.79/3=73.93, unico movimento, capability e retry; E10 personale non dimostrabile da sintetici.",
+        "stop_on_failure": true,
+        "approval_gates": []
+      },
+      "verification_commands_or_actions": [
+        "node --test backend/utilities/tests/competence.test.mjs",
+        "audit live in sola lettura e prove routing/capability mirate"
+      ],
+      "approval_gates": []
+    },
+    {
+      "id": "T07",
+      "scope": "Anteprima Salute standard, compatta e accessibile, contratto e conferma conflitti",
+      "dependencies": [
+        "T00"
+      ],
+      "owner": "Terra",
+      "files": [
+        "docs/HEALTH-BODYBUILDING-BRIEF.md",
+        "docs/USER-DECISIONS.md",
+        "native-next/Sources/NativeHealthViews.swift",
+        "native-next/Sources/NativeHealthSummary.swift"
+      ],
+      "outputs": "Anteprima Salute standard, compatta e accessibile, contratto e conferma conflitti",
+      "checks": "Anteprime standard, compatta e accessibile e contratto; presentare conflitti G08/G09/G12/G13, attendere conferma prima della modifica.",
+      "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta.",
+      "status": "pending",
+      "inputs": [
+        "docs/USER-DECISIONS.json",
+        "docs/PROJECT-RELEASE-PLAN.md",
+        "HEAD verificato",
+        "docs/HEALTH-BODYBUILDING-BRIEF.md",
+        "docs/USER-DECISIONS.md",
+        "native-next/Sources/NativeHealthViews.swift",
+        "native-next/Sources/NativeHealthSummary.swift"
+      ],
+      "base": "HEAD del checkpoint precedente verificato; base iniziale edd60f9e5afcb0db6e1520c183a6a7d0b10de1a1",
+      "model": "gpt-6.1-terra",
+      "reasoning": "high",
+      "gate": {
+        "status": "pending",
+        "requires": [
+          "T00"
+        ],
+        "evidence_required": "Anteprime standard, compatta e accessibile e contratto; presentare conflitti G08/G09/G12/G13, attendere conferma prima della modifica.",
+        "stop_on_failure": true,
+        "approval_gates": []
+      },
+      "verification_commands_or_actions": [
+        "ispezione anteprime standard, compatta e accessibile",
+        "richiedere conferma esplicita prima di modifiche in conflitto"
+      ],
+      "approval_gates": []
+    },
+    {
+      "id": "T08",
+      "scope": "Macro HealthKit tutte le app, fonti e deduplicazione",
+      "dependencies": [
+        "T02",
+        "T07"
+      ],
+      "owner": "Terra",
+      "files": [
+        "native-next/Sources/NativeHealthStore.swift",
+        "native-next/Sources/NativeHealthModel.swift",
+        "native-next/Sources/NativeNutrition.swift",
+        "native-next/Tests/NativeNutritionHealthKitTests.swift",
+        "native-next/Tests/NativeHealthTests.swift"
+      ],
+      "outputs": "Macro HealthKit tutte le app, fonti e deduplicazione",
+      "checks": "Verificare valori, presenza, fonte, periodo ed esito; tutte le app, nessuna doppia somma locale/HealthKit, mantenendo tutte le fonti G03, dati mancanti e date civili.",
+      "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta.",
+      "status": "pending",
+      "inputs": [
+        "docs/USER-DECISIONS.json",
+        "docs/PROJECT-RELEASE-PLAN.md",
+        "HEAD verificato",
+        "native-next/Sources/NativeHealthStore.swift",
+        "native-next/Sources/NativeHealthModel.swift",
+        "native-next/Sources/NativeNutrition.swift",
+        "native-next/Tests/NativeNutritionHealthKitTests.swift",
+        "native-next/Tests/NativeHealthTests.swift"
+      ],
+      "base": "HEAD del checkpoint precedente verificato; base iniziale edd60f9e5afcb0db6e1520c183a6a7d0b10de1a1",
+      "model": "gpt-6.1-terra",
+      "reasoning": "high",
+      "gate": {
+        "status": "pending",
+        "requires": [
+          "T02",
+          "T07"
+        ],
+        "evidence_required": "Verificare valori, presenza, fonte, periodo ed esito; tutte le app, deduplica locale/HealthKit, dati mancanti e date civili.",
+        "stop_on_failure": true,
+        "approval_gates": [
+          "HEALTH-GRID-CONFLICT-01"
+        ]
+      },
+      "verification_commands_or_actions": [
+        "test NativeNutritionHealthKitTests e NativeHealthTests",
+        "verificare fonte/periodo/assenza di doppia somma locale/HealthKit e dispositivo quando disponibile"
+      ],
+      "approval_gates": [
+        {
+          "id": "HEALTH-GRID-CONFLICT-01",
+          "requirement": "Conferma specifica del contratto e dei conflitti pertinenti dopo anteprima T07",
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": "T09",
+      "scope": "Griglia Salute dopo conferma e letture verificate",
+      "dependencies": [
+        "T08",
+        "T07"
+      ],
+      "owner": "Terra",
+      "files": [
+        "native-next/Sources/NativeHealthViews.swift",
+        "native-next/Sources/NativeHealthSummary.swift",
+        "native-next/Sources/NativeHealthChartInteraction.swift",
+        "native-next/Tests/NativeHealthTests.swift"
+      ],
+      "outputs": "Griglia Salute dopo conferma e letture verificate",
+      "checks": "Solo dopo conferma T07 e verifica T08; screenshot standard/compatto/Dynamic Type, navigazione e semantica.",
+      "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta.",
+      "status": "pending",
+      "inputs": [
+        "docs/USER-DECISIONS.json",
+        "docs/PROJECT-RELEASE-PLAN.md",
+        "HEAD verificato",
+        "native-next/Sources/NativeHealthViews.swift",
+        "native-next/Sources/NativeHealthSummary.swift",
+        "native-next/Sources/NativeHealthChartInteraction.swift",
+        "native-next/Tests/NativeHealthTests.swift"
+      ],
+      "base": "HEAD del checkpoint precedente verificato; base iniziale edd60f9e5afcb0db6e1520c183a6a7d0b10de1a1",
+      "model": "gpt-6.1-terra",
+      "reasoning": "high",
+      "gate": {
+        "status": "pending",
+        "requires": [
+          "T08",
+          "T07"
+        ],
+        "evidence_required": "Solo dopo conferma T07 e verifica T08; screenshot standard/compatto/Dynamic Type, navigazione e semantica.",
+        "stop_on_failure": true,
+        "approval_gates": [
+          "HEALTH-GRID-CONFLICT-01"
+        ]
+      },
+      "verification_commands_or_actions": [
+        "test mirati Salute e ispezione screenshot a dimensioni standard, compatte e Dynamic Type"
+      ],
+      "approval_gates": [
+        {
+          "id": "HEALTH-GRID-CONFLICT-01",
+          "requirement": "Conferma specifica del contratto e dei conflitti pertinenti dopo anteprima T07",
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": "T10",
+      "scope": "UI condivisa, persistenza e widget",
+      "dependencies": [
+        "T03",
+        "T04",
+        "T05",
+        "T06",
+        "T09"
+      ],
+      "owner": "Terra",
+      "files": [
+        "native-next/Shared/LifeOSWidgetData.swift",
+        "native-next/Shared/LifeOSWidgetView.swift",
+        "native-next/Widget/LifeOSWidget.swift",
+        "native-next/Sources/NativeWidgetBridge.swift",
+        "native-next/Sources/NativeWidgetPreview.swift"
+      ],
+      "outputs": "UI condivisa, persistenza e widget",
+      "checks": "UI condivisa, persistenza, App Group e widget; verificare dipendenze e riavvio senza perdere dati.",
+      "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta.",
+      "status": "pending",
+      "inputs": [
+        "docs/USER-DECISIONS.json",
+        "docs/PROJECT-RELEASE-PLAN.md",
+        "HEAD verificato",
+        "native-next/Shared/LifeOSWidgetData.swift",
+        "native-next/Shared/LifeOSWidgetView.swift",
+        "native-next/Widget/LifeOSWidget.swift",
+        "native-next/Sources/NativeWidgetBridge.swift",
+        "native-next/Sources/NativeWidgetPreview.swift"
+      ],
+      "base": "HEAD del checkpoint precedente verificato; base iniziale edd60f9e5afcb0db6e1520c183a6a7d0b10de1a1",
+      "model": "gpt-6.1-terra",
+      "reasoning": "high",
+      "gate": {
+        "status": "pending",
+        "requires": [
+          "T03",
+          "T04",
+          "T05",
+          "T06",
+          "T09"
+        ],
+        "evidence_required": "UI condivisa, persistenza, App Group e widget; verificare dipendenze e riavvio senza perdere dati.",
+        "stop_on_failure": true,
+        "approval_gates": []
+      },
+      "verification_commands_or_actions": [
+        "test widget/persistenza e UI trasversale su simulatore",
+        "verificare App Group, riavvio e accessibilità"
+      ],
+      "approval_gates": []
+    },
+    {
+      "id": "T11",
+      "scope": "Gate suite completa, screenshot e quattro avvii senza IPA",
+      "dependencies": [
+        "T01",
+        "T02",
+        "T03",
+        "T04",
+        "T05",
+        "T06",
+        "T07",
+        "T08",
+        "T09",
+        "T10"
+      ],
+      "owner": "Terra",
+      "files": [
+        ".github/workflows/lifeos-development.yml",
+        "scripts/verify-release-launch75.py",
+        "docs/PROJECT-CHECKLIST.md",
+        "docs/BUILD-STATE.json"
+      ],
+      "outputs": "Gate suite completa, screenshot e quattro avvii senza IPA",
+      "checks": "Suite completa, screenshot esaminati e quattro avvii Release; nessuna IPA; registrare risultati e limiti.",
+      "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta.",
+      "status": "pending",
+      "inputs": [
+        "docs/USER-DECISIONS.json",
+        "docs/PROJECT-RELEASE-PLAN.md",
+        "HEAD verificato",
+        ".github/workflows/lifeos-development.yml",
+        "scripts/verify-release-launch75.py",
+        "docs/PROJECT-CHECKLIST.md",
+        "docs/BUILD-STATE.json"
+      ],
+      "base": "HEAD del checkpoint precedente verificato; base iniziale edd60f9e5afcb0db6e1520c183a6a7d0b10de1a1",
+      "model": "gpt-6.1-terra",
+      "reasoning": "high",
+      "gate": {
+        "status": "pending",
+        "requires": [
+          "T01",
+          "T02",
+          "T03",
+          "T04",
+          "T05",
+          "T06",
+          "T07",
+          "T08",
+          "T09",
+          "T10"
+        ],
+        "evidence_required": "Suite completa, screenshot esaminati e quattro avvii Release; nessuna IPA; registrare risultati e limiti.",
+        "stop_on_failure": true,
+        "approval_gates": []
+      },
+      "verification_commands_or_actions": [
+        "workflow suite completa senza IPA",
+        "scripts/verify-release-launch75.py con LIFEOS_RELEASE_SESSION_FIXTURE=1 su simulatore",
+        "ispezione screenshot e xcresult"
+      ],
+      "approval_gates": []
+    },
+    {
+      "id": "T12",
+      "scope": "Solo su richiesta IPA separata: packaging e prove fisiche",
+      "dependencies": [
+        "T11"
+      ],
+      "owner": "Terra",
+      "files": [
+        "docs/BUILD-STATE.json",
+        "docs/PROJECT-CHECKLIST.md",
+        "scripts/verify-native-package.py",
+        "scripts/verify-startup-imports.py",
+        "native-next/project.yml",
+        ".github/workflows/lifeos-revision78.yml"
+      ],
+      "outputs": "Solo su richiesta IPA separata: packaging e prove fisiche",
+      "checks": "Solo richiesta IPA separata dopo T11; verificare pacchetto e versione, aggiornamento, prove fisiche e accettazione.",
+      "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta. Nessuna IPA senza richiesta esplicita.",
+      "status": "pending",
+      "inputs": [
+        "docs/USER-DECISIONS.json",
+        "docs/PROJECT-RELEASE-PLAN.md",
+        "HEAD verificato",
+        "docs/BUILD-STATE.json",
+        "docs/PROJECT-CHECKLIST.md",
+        "scripts/verify-native-package.py",
+        "scripts/verify-startup-imports.py"
+      ],
+      "base": "HEAD del checkpoint precedente verificato; base iniziale edd60f9e5afcb0db6e1520c183a6a7d0b10de1a1",
+      "model": "gpt-6.1-terra",
+      "reasoning": "high",
+      "gate": {
+        "status": "pending",
+        "requires": [
+          "T11"
+        ],
+        "evidence_required": "Solo richiesta IPA separata dopo T11; verificare pacchetto e versione, aggiornamento, prove fisiche e accettazione.",
+        "stop_on_failure": true,
+        "approval_gates": [
+          "IPA-GATE-01"
+        ]
+      },
+      "verification_commands_or_actions": [
+        "solo dopo richiesta esplicita: scripts/verify-native-package.py e scripts/verify-startup-imports.py",
+        "verifica installazione e accettazione fisica"
+      ],
+      "approval_gates": [
+        {
+          "id": "IPA-GATE-01",
+          "requirement": "Richiesta esplicita nuova IPA dopo T11",
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": "F01",
+      "scope": "Studio futuro alimenti; non prerequisito release",
+      "dependencies": [],
+      "owner": "Terra",
+      "files": [
+        "docs/HEALTH-BODYBUILDING-BRIEF.md"
+      ],
+      "outputs": "Studio futuro alimenti; non prerequisito release",
+      "checks": "Studio futuro fonti/licenze e alimenti; nessuna implementazione o dipendenza release.",
+      "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta.",
+      "status": "pending",
+      "inputs": [
+        "docs/USER-DECISIONS.json",
+        "docs/PROJECT-RELEASE-PLAN.md",
+        "HEAD verificato",
+        "docs/HEALTH-BODYBUILDING-BRIEF.md"
+      ],
+      "base": "HEAD del checkpoint precedente verificato; base iniziale edd60f9e5afcb0db6e1520c183a6a7d0b10de1a1",
+      "model": "gpt-6.1-terra",
+      "reasoning": "high",
+      "gate": {
+        "status": "pending",
+        "requires": [],
+        "evidence_required": "Studio futuro fonti/licenze e alimenti; nessuna implementazione o dipendenza release.",
+        "stop_on_failure": true,
+        "approval_gates": []
+      },
+      "verification_commands_or_actions": [
+        "valutazione fonti e licenze, nessun test di release"
+      ],
+      "approval_gates": []
+    }
+  ],
+  "reviewer": {
+    "model": "gpt-6-luna",
+    "reasoning": "medium",
+    "scope": "audit in sola lettura, nessuna modifica concorrente"
+  }
+}

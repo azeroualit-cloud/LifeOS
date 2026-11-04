@@ -153,3 +153,10 @@ Griglia, nutrienti in fila, due pulsanti e catalogo locale sono proposte non obb
 ## PROJECT-PLAN-01 — ACTIVE
 
 Mandato Astra ampliato all’intero LifeOS: ricostruire tutte le modifiche discusse ancora pertinenti e mancanti fino alla consegna IPA, con task per Terra. [Brief globale](PROJECT-PLAN-BRIEF.md). Nessuna IPA autorizzata dal mandato. La domanda sui sottoagenti economici è registrata come proposta da valutare nel piano, non come obbligo di delegare ogni lavoro o configurazione già applicata. Nessun conflitto con le regole di approvazione esistenti.
+
+## Esecuzione del piano — 4 novembre 2026
+
+- **PROJECT-EXECUTION-01 — ACTIVE:** «PLEASE IMPLEMENT THIS PLAN», seguito da «continua», autorizza gli incrementi nel [piano operativo](PROJECT-RELEASE-PLAN.md), non IPA, deploy o sostituzioni delle regole di layout.
+- **HEALTH-GRID-PLAN-02 — ACTIVE:** «Progettare la griglia» prima della IPA autorizza l’anteprima T07, non la modifica del layout in conflitto.
+- **HEALTH-MACROS-SOURCES-01 — ACTIVE:** «Tutte le app (Recommended)» per letture HealthKit di proteine, carboidrati, grassi e fibre; evitare doppi conteggi.
+- **HEALTH-GRID-CONFLICT-01 — PENDING_CONFIRMATION:** griglia e grafici proposti possono confliggere con G08, G09, G12 e G13. Le regole restano ACTIVE; l’anteprima precede la domanda e nessun codice relativo alla deroga è autorizzato senza conferma.

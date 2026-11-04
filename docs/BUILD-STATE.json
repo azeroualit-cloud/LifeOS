@@ -29,7 +29,7 @@
     "user_assessment": "User explicitly rejected the delivered app as production-ready; screenshots and UX defects remain open."
   },
   "current_increment": {
-    "type": "approved nutrition quick add with automatic energy and recovery UX",
+    "type": "approved incremental project plan; T00 documentation in progress",
     "new_ipa": false,
     "application_source_changed_since_verified_build": true
   },
@@ -46,7 +46,7 @@
     "user_machine": "Windows",
     "user_owned_or_rented_mac_available": false,
     "ios_build_environment": "development: GitHub Actions macos-26 (compatible Xcode 26.x or 27.0); manual IPA workflow unchanged, forbidden without explicit user request",
-    "fast_iteration_pipeline": "preview and focused executed on macOS; focused full 271 unit tests verified; current UI retry check queued"
+    "fast_iteration_pipeline": "Capacity probe run 41873100610 attempt 2 succeeded on macos-15-arm64; this did not run app tests. Earlier attempt 1 did not acquire a runner."
   },
   "development_cycle_verification": {
     "source_commit": "9fd78770",
@@ -69,7 +69,7 @@
   },
   "current_bloom_change": {
     "rule": "H-GRID-01",
-    "status": "simulator verified; user visual acceptance pending",
+    "status": "simulator verified; visual result accepted by user; production and physical device not accepted",
     "scope": "two columns, bounded images, link previews",
     "fixture_items": 122,
     "distributed": false,
@@ -135,10 +135,20 @@
   "health_planning": {
     "goal_rule": "HEALTH-UX-01",
     "scope_rule": "HEALTH-PLAN-01",
-    "status": "brief and unified checklist documented; awaiting planning in separate chat",
+    "status": "T07 preview authorized; layout conflict confirmation pending",
     "layout_and_local_catalog": "non-binding proposals",
     "new_entry_or_food_database_implementation_authorized": false,
     "brief": "HEALTH-BODYBUILDING-BRIEF.md",
     "checklist": "PROJECT-CHECKLIST.md"
+  },
+  "runner_probe": {
+    "run": "41873100610",
+    "attempt": 2,
+    "conclusion": "success",
+    "runner": "macos-15-arm64 15.8.2",
+    "xcode": "26.3 build 17C529",
+    "sdk": "26.2",
+    "runtime": "iOS 26.2",
+    "app_tests_executed": false
   }
 }
