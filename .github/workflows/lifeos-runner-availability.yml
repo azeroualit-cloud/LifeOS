@@ -1,0 +1,24 @@
+name: LifeOS simulator runner availability
+on:
+  workflow_dispatch:
+    inputs:
+      runner_label:
+        description: Standard Mac pool to verify without compiling or packaging
+        type: choice
+        options: [macos-15, macos-26]
+        default: macos-15
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ${{ inputs.runner_label }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify compatible installed Xcode
+        run: python3 scripts/select-compatible-xcode76.py
+      - name: Record simulator environment
+        run: |
+          sw_vers
+          xcodebuild -version
+          xcrun simctl list runtimes

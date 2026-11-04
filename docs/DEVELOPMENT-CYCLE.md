@@ -37,3 +37,5 @@ Il 4 novembre un run annullato continuava il caricamento degli artefatti con `al
 ## Runner sviluppo — correzione 4 novembre 2026
 
 Dopo due job senza runner acquisito sul pool xcode-27 (41856609394 e 41859714562), il solo workflow sviluppo usa macos-26 standard. Il selettore già esistente preferisce Xcode 27.0 se disponibile, altrimenti Xcode 26.x, e rifiuta SDK 27.2. Inventario ufficiale controllato: https://github.com/actions/runner-images/blob/main/images/macos/macos-26-arm64-Readme.md (Xcode 26.6/SDK 26.5). Il runtime effettivo viene registrato dal job; non riusare la precedente dicitura iOS 27 per prove su iOS 26. Nessun packaging IPA, firma distribuzione o deploy. Il workflow IPA resta invariato e non autorizzato da questo intervento.
+
+Disponibile il workflow manuale `lifeos-runner-availability.yml`: solo checkout, selettore Xcode compatibile e inventario runtime, senza compilazione, IPA o deploy. Serve a verificare assegnazione e toolchain di macos-15/macOS-26 prima di avviare un altro ciclo completo. Non dimostra test applicativi passati.
