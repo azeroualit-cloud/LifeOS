@@ -648,13 +648,22 @@
       ],
       "rule": "Eseguire il piano operativo approvato, con gate di conflitto, senza IPA o deploy implicitamente autorizzati.",
       "plan": "PROJECT-RELEASE-PLAN.md"
+    },
+    {
+      "id": "HEALTH-GRID-02",
+      "status": "ACTIVE",
+      "scope": "Solo riepilogo Salute",
+      "recorded_on": "2026-11-04",
+      "original_quote": "va bene 2x2 e 1x4, ma voglio i pulsanti come quelli nella versione 2 (nel senso di disposizione, non di colore design ecc)",
+      "rule": "Griglia 2x2 con TDEE, previsione peso, ultima pesata e calorie; mini grafici sotto; nutrienti in fila 1x4 con reflow accessibile; due azioni affiancate come nella seconda anteprima, preservando icone senza testo G05–G07.",
+      "provenance": "Conferma utente in risposta alla richiesta esplicita di eccezione per G08/G09/G12/G13."
     }
   ],
   "pending_confirmations": [
     {
       "id": "HEALTH-GRID-CONFLICT-01",
-      "status": "PENDING_CONFIRMATION",
-      "scope": "solo layout Salute dopo anteprima T07",
+      "status": "CONFIRMED_SCOPED_EXCEPTION",
+      "scope": "Solo riepilogo Salute: griglia 2x2 e mini grafici sotto valore; nutrienti in fila 1x4 con adattamento accessibile; due azioni affiancate come nella versione 2. G05–G07 restano attive, icone omino e mela senza testo.",
       "recorded_on": "2026-11-04",
       "provenance": "Proposta del piano approvato da mostrare prima della modifica; non approvazione della deroga",
       "conflicts_with": [
@@ -663,7 +672,9 @@
         "G12",
         "G13"
       ],
-      "rule": "Griglia 2x2 e mini grafici sotto il valore modificano altezza/posizione e trattamento delle schede; conferma specifica necessaria prima del codice coinvolto."
+      "rule": "Griglia 2x2 e mini grafici sotto il valore modificano altezza/posizione e trattamento delle schede; conferma specifica necessaria prima del codice coinvolto.",
+      "confirmation_quote": "va bene 2x2 e 1x4, ma voglio i pulsanti come quelli nella versione 2 (nel senso di disposizione, non di colore design ecc)",
+      "confirmation_date": "2026-11-04"
     }
   ],
   "history": [
@@ -718,6 +729,19 @@
       "rule_id": "NUTRITION-DIRECT-01",
       "original_quote": "ok approvo",
       "interpretation": "Render approvato, procedere con implementazione del quick add a pannello. Il precedente stop al render è soddisfatto."
+    },
+    {
+      "recorded_on": "2026-11-04",
+      "type": "CONFIRMED_SCOPED_EXCEPTION",
+      "rule_id": "HEALTH-GRID-02",
+      "conflicts_with": [
+        "G08",
+        "G09",
+        "G12",
+        "G13"
+      ],
+      "confirmation_quote": "va bene 2x2 e 1x4, ma voglio i pulsanti come quelli nella versione 2 (nel senso di disposizione, non di colore design ecc)",
+      "scope": "Solo riepilogo Salute; G05–G07 conservate; vecchie regole conservate fuori eccezione."
     }
   ],
   "historical_inventory": "decision-history/2026-11-04-inventory.json",

@@ -160,3 +160,7 @@ Mandato Astra ampliato all’intero LifeOS: ricostruire tutte le modifiche discu
 - **HEALTH-GRID-PLAN-02 — ACTIVE:** «Progettare la griglia» prima della IPA autorizza l’anteprima T07, non la modifica del layout in conflitto.
 - **HEALTH-MACROS-SOURCES-01 — ACTIVE:** «Tutte le app (Recommended)» per letture HealthKit di proteine, carboidrati, grassi e fibre; evitare doppi conteggi.
 - **HEALTH-GRID-CONFLICT-01 — PENDING_CONFIRMATION:** griglia e grafici proposti possono confliggere con G08, G09, G12 e G13. Le regole restano ACTIVE; l’anteprima precede la domanda e nessun codice relativo alla deroga è autorizzato senza conferma.
+
+## HEALTH-GRID-02 — ACTIVE, eccezione confermata
+
+4 novembre 2026, risposta esplicita alla domanda sul conflitto: «va bene 2x2 e 1x4, ma voglio i pulsanti come quelli nella versione 2 (nel senso di disposizione, non di colore design ecc)». Nel solo riepilogo Salute sono approvati griglia 2×2, mini grafici sotto i valori, nutrienti 1×4 con reflow accessibile e azioni affiancate come versione 2. La deroga riguarda G08/G09/G12/G13 in questo ambito; altrove rimangono vigenti. G05–G07 restano attive: omino e mela senza testo. Nessuna IPA o deploy.
