@@ -35,7 +35,14 @@ final class NativeBloomGridUITests: XCTestCase {
             let attachment = XCTAttachment(screenshot: app.screenshot())
             attachment.name = "Bloom mixed grid \(large ? "large" : "standard") page \(page)"
             attachment.lifetime = .keepAlways; add(attachment)
-            scroll.swipeUp(velocity: .slow)
+            let bottom = min(scroll.frame.maxY, app.tabBars.firstMatch.frame.minY) - 24
+            let top = scroll.frame.minY + 24
+            XCTAssertGreaterThan(bottom - top, 44, "Insufficient reachable scroll area")
+            let origin = app.coordinate(withNormalizedOffset: .zero)
+            let start = origin.withOffset(CGVector(dx: scroll.frame.midX, dy: bottom))
+            let end = origin.withOffset(CGVector(dx: scroll.frame.midX, dy: max(top, bottom - 200)))
+            start.press(forDuration: 0.05, thenDragTo: end)
+            XCTAssertTrue(app.tabBars.buttons["Bloom"].isSelected, "Scroll must not hit the tab bar")
         }
     }
 }
