@@ -45,7 +45,7 @@
   "available_development_environment": {
     "user_machine": "Windows",
     "user_owned_or_rented_mac_available": false,
-    "ios_build_environment": "GitHub Actions macOS xcode-27",
+    "ios_build_environment": "development: GitHub Actions macos-26 (compatible Xcode 26.x or 27.0); manual IPA workflow unchanged, forbidden without explicit user request",
     "fast_iteration_pipeline": "preview and focused executed on macOS; focused full 271 unit tests verified; current UI retry check queued"
   },
   "development_cycle_verification": {
@@ -96,12 +96,12 @@
   "current_nutrition_change": {
     "rule": "NUTRITION-DIRECT-01",
     "render_approval": "ok approvo",
-    "status": "implemented; verification queued after hosted runner acquisition failure",
+    "status": "implemented; simulator checks queued on standard macos-26 after xcode-27 acquisition failures",
     "historical_entries": "not migrated or recalculated; date-only legacy edits preserve energy",
     "calculation": "4P + 4C + 9G + 2 fibre; new entries only",
     "distributed": false,
-    "source_commit": "623e3000a3193ce607de38f111bcc47c303c5de1",
-    "current_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/41859714562",
+    "source_commit": "cad0a7b5",
+    "current_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/41871989512",
     "previous_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/41853040353",
     "previous_result": {
       "unit_passed": 271,
@@ -116,7 +116,13 @@
       "run": "41856609394",
       "tests_executed": false,
       "message": "The job was not acquired by Runner of type hosted even after multiple attempts"
-    }
+    },
+    "runner_label": "macos-26",
+    "toolchain_policy": "Existing selector: prefer Xcode 27.0, otherwise 26.x; reject SDK 27.2. Actual runtime pending.",
+    "runner_acquisition_failures": [
+      "41856609394",
+      "41859714562"
+    ]
   },
   "ipa_production_gate": {
     "rule": "IPA-GATE-01",

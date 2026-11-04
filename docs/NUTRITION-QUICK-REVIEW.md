@@ -33,3 +33,7 @@ Run 41853040353: 271 unitari e quattro UI passati; test accessibilità fermato s
 ## Mancata acquisizione runner
 
 Run 41856609394: job 126666861434 terminato cancelled, run failure; nessuno step eseguito. Annotazione ufficiale: “The job was not acquired by Runner of type hosted even after multiple attempts”. Non è un fallimento dei test né una prova del codice. Dopo istruzione utente «continua», nuovo focused/nutrition/primary 41859714562 sul commit 623e3000. Nessuna IPA: IPA-GATE-01 richiede una richiesta utente esplicita separata.
+
+## Runner standard alternativo
+
+Anche 41859714562 è terminato senza runner acquisito (stessa annotazione). Su richiesta esplicita dell’utente, workflow sviluppo spostato da xcode-27 a macos-26; inventario ufficiale runner verificato, include Xcode 26.x già supportato dal selettore esistente. Nessun indebolimento dei controlli SDK, nessun cambiamento al workflow IPA. Actionlint e sei test locali selezione passati. Run 41871989512 sul commit cad0a7b5, focused/nutrition/primary, in coda. GitHub status segnala incidente Actions/Pages xr3myzj7ms51, mitigato e in monitoring alle 16:48–16:49 UTC del 4 novembre: possibile fattore per la coda corrente, non prova della causa dei precedenti tentativi. Fonte: https://www.githubstatus.com/incidents/xr3myzj7ms51 .
