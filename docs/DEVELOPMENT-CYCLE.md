@@ -29,3 +29,7 @@ Run [41800947855](https://github.com/azeroualit-cloud/LifeOS/actions/runs/418009
 Aperto campione di tre screenshot (Bloom, riepilogo Salute, calendario): export valido, non un’approvazione grafica. Fixture Bloom con poche note testuali insufficiente per QA-001/002. Nel riepilogo Salute `7EA9FE4E-5F0D-42DC-B046-D24DCA45FD24.png` le etichette Dashboard/Attività non sono visibili: QA-011 richiede riproduzione per distinguere cattura/transizione e difetto persistente.
 
 La modalità focused ha selezione coperta dai test locali; non è stata eseguita una seconda build macOS identica soltanto per questa verifica. Il percorso completo IPA non è stato rilanciato né pubblicato.
+
+## Annullamento delle anteprime superate
+
+Il 4 novembre un run annullato continuava il caricamento degli artefatti con `always()`, ritardando il nuovo run dello stesso ramo. Export, riepilogo e upload usano ora `!cancelled()`: conservano le prove dei test falliti ma non trattengono la coda quando una prova viene sostituita. Sintassi verificata con actionlint; normale percorso di esecuzione invariato. Riferimento: https://docs.github.com/en/actions/how-tos/troubleshoot-workflows

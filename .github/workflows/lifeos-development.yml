@@ -56,13 +56,13 @@ jobs:
           while IFS= read -r arg; do args+=("$arg"); done < build/development-selection.args
           xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 300 "${args[@]}" -resultBundlePath build/Development.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/development-tests.log 2>&1 || { tail -n 120 build/development-tests.log; exit 1; }
       - name: Export screenshots even when tests fail
-        if: always()
+        if: ${{ !cancelled() }}
         run: |
           if [ -f app/build/Development.xcresult/Info.plist ]; then
             xcrun xcresulttool export attachments --path app/build/Development.xcresult --output-path app/build/development-screenshots
           fi
       - name: Record scope and limits
-        if: always()
+        if: ${{ !cancelled() }}
         env:
           CHECK_RESULT: ${{ job.status }}
         run: |
@@ -75,7 +75,7 @@ jobs:
               f.write('# LifeOS development evidence\nCommit: `'+os.environ['GITHUB_SHA']+'`\n\nStatus before export: '+os.environ['CHECK_RESULT']+'\n\n```json\n'+json.dumps(selection,indent=2)+'\n```\n\nScreenshots are simulator evidence, not production acceptance. No IPA, release, REA or backend deploy. Inspect screenshots and record visual findings before delivery.\n')
           PY
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: ${{ !cancelled() }}
         with:
           name: lifeos-development-${{ inputs.mode || 'preview' }}-${{ github.sha }}
           retention-days: 7
