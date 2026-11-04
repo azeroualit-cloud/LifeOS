@@ -112,5 +112,11 @@
     "user_visual_acceptance": "approved render; implementation not yet accepted",
     "physical_healthkit_verified": false,
     "compact_device_verified": false
+  },
+  "ipa_production_gate": {
+    "rule": "IPA-GATE-01",
+    "status": "blocked until explicit user request",
+    "user_quote": "ok ma non produciamo ipa finché non te lo dico io",
+    "simulator_checks_allowed": true
   }
 }

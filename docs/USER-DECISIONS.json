@@ -577,6 +577,15 @@
         "F05",
         "F06"
       ]
+    },
+    {
+      "id": "IPA-GATE-01",
+      "status": "ACTIVE",
+      "scope": "LifeOS — produzione di IPA",
+      "recorded_on": "2026-11-04",
+      "original_quote": "ok ma non produciamo ipa finché non te lo dico io",
+      "rule": "Non produrre, confezionare o distribuire nuove IPA finché l’utente non lo richiede esplicitamente. Approvazioni di design, implementazione, test o prosecuzione non autorizzano IPA. Restano consentiti compilazione e test al simulatore senza packaging IPA.",
+      "conflict_check": "Compatibile con DEV-01 e DEV-02; rende esplicito il gate già mantenuto. Nessuna regola attiva sostituita."
     }
   ],
   "pending_confirmations": [],

@@ -44,3 +44,7 @@ META-01 e META-02 sono obblighi permanenti di ogni sessione LifeOS, non task da 
 - Prima di ogni risposta finale o passaggio di sessione: verificare che regole, report e repository descrivano lo stato attuale; se ci sono cambiamenti da conservare, eseguire commit/push e confrontare lo SHA remoto. Se nulla è cambiato, non creare commit vuoti.
 - Se la sincronizzazione fallisce, registrare e dichiarare il mancato aggiornamento; non affermare che GitHub sia sincronizzato. Preservare il lavoro e non forzare il push.
 - La procedura opera mentre un agente lavora su LifeOS. Non promettere aggiornamenti spontanei quando nessun agente è in esecuzione.
+
+## IPA-GATE-01 — nessuna IPA senza richiesta esplicita
+
+Non produrre, confezionare o distribuire nuove IPA finché l’utente non lo richiede esplicitamente. Le approvazioni di design, implementazione, test o prosecuzione non sono autorizzazione IPA. Consentite le verifiche al simulatore senza packaging. Fonte nel registro USER-DECISIONS.
