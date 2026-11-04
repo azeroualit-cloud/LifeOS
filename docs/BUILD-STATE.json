@@ -96,12 +96,12 @@
   "current_nutrition_change": {
     "rule": "NUTRITION-DIRECT-01",
     "render_approval": "ok approvo",
-    "status": "implemented; standard flow passed; latest accessibility recovery verification queued",
+    "status": "implemented; verification queued after hosted runner acquisition failure",
     "historical_entries": "not migrated or recalculated; date-only legacy edits preserve energy",
     "calculation": "4P + 4C + 9G + 2 fibre; new entries only",
     "distributed": false,
-    "source_commit": "c6c2b637",
-    "current_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/41856609394",
+    "source_commit": "623e3000a3193ce607de38f111bcc47c303c5de1",
+    "current_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/41859714562",
     "previous_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/41853040353",
     "previous_result": {
       "unit_passed": 271,
@@ -111,7 +111,12 @@
     "visual_evidence": "Native video shows pending panel open, all four values preserved, error and Retry visible. Automatic test currently fails to locate disabled protein input; broader accessibility query under verification.",
     "user_visual_acceptance": "approved render; implementation not yet accepted",
     "physical_healthkit_verified": false,
-    "compact_device_verified": false
+    "compact_device_verified": false,
+    "runner_failure": {
+      "run": "41856609394",
+      "tests_executed": false,
+      "message": "The job was not acquired by Runner of type hosted even after multiple attempts"
+    }
   },
   "ipa_production_gate": {
     "rule": "IPA-GATE-01",

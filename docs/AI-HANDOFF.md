@@ -4,7 +4,7 @@
 
 NUTRITION-DIRECT-01: render approvato con «ok approvo», implementazione autorizzata. Dashboard con solo pulsante Nutrizione; foglio con proteine/carboidrati/grassi/fibre effettivi, calorie automatiche e data. Il flusso per 100 g è sospeso; storico non migrato. Fonte e prove: [NUTRITION-QUICK-REVIEW.md](NUTRITION-QUICK-REVIEW.md).
 
-Compilazione riuscita, 271 unitari e quattro UI passati nel run 41853040353; un UI accessibilità fallito nella ricerca del campo disabilitato. Video nativo mostra valori conservati, errore e Riprova visibili, foglio aperto dopo scroll. Nuova verifica 41856609394 sul commit c6c2b637: in coda. Non dichiarare ancora completato il retry di questa versione. Nessuna nuova IPA, nessun deploy, nessuna verifica HealthKit su dispositivo fisico. Il render approvato non costituisce accettazione dell’implementazione.
+Compilazione riuscita, 271 unitari e quattro UI passati nel run 41853040353; un UI accessibilità fallito nella ricerca del campo disabilitato. Video nativo mostra valori conservati, errore e Riprova visibili, foglio aperto dopo scroll. Il run 41856609394 è terminato senza runner assegnato e senza eseguire test (annotazione GitHub: “The job was not acquired by Runner of type hosted even after multiple attempts”). Nuova verifica 41859714562 sul commit 623e3000: in coda. Non dichiarare ancora completato il retry di questa versione. Nessuna nuova IPA, nessun deploy, nessuna verifica HealthKit su dispositivo fisico. Il render approvato non costituisce accettazione dell’implementazione.
 
 Aggiornato il 4 novembre 2026. Leggere prima di pianificare o modificare il progetto.
 
