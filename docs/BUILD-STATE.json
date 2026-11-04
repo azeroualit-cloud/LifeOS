@@ -46,6 +46,25 @@
     "user_machine": "Windows",
     "user_owned_or_rented_mac_available": false,
     "ios_build_environment": "GitHub Actions macOS xcode-27",
-    "fast_iteration_pipeline": "implemented; first CI execution pending verification"
+    "fast_iteration_pipeline": "implemented; development preview verified; focused dispatch and full IPA path not rerun"
+  },
+  "development_cycle_verification": {
+    "source_commit": "9fd78770",
+    "run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/41800947855",
+    "conclusion": "success",
+    "mode": "preview",
+    "areas": "all (conservative fallback: workflow-only diff)",
+    "ui_tests": 11,
+    "failures": 0,
+    "exported_screenshots": 21,
+    "duration_seconds": 1239,
+    "compile_seconds": 516,
+    "selected_test_step_seconds": 611,
+    "local_selection_tests": 5,
+    "workflow_lint": "actionlint 1.7.12 passed; custom runner label allowed",
+    "visual_review": "3 exported screenshots opened: Bloom, Health summary, Calendar. Evidence export verified; no product QA issue closed.",
+    "focused_mode": "selection verified locally; macOS focused run not executed",
+    "full_ipa_mode": "existing complete checks retained, manual trigger; not rerun",
+    "new_ipa_distributed": false
   }
 }

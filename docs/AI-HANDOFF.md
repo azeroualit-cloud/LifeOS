@@ -28,7 +28,7 @@ Non attendere un nuovo promemoria dell’utente: META-01 e META-02 valgono a ogn
 
 L’utente lavora da Windows e ha dichiarato di non avere Mac locali o remoti. Per iOS si usa il runner macOS GitHub già configurato (`xcode-27`); non presupporre una macchina Mac interattiva disponibile. Acquisto o noleggio non approvati.
 
-Audit del job `126213552095`, run `41721041653`: setup Node 3m15s, compilazione app/test 2m41s, REA 1m33s, suite completa test 12m58s, compilazione Release + quattro avvii 7m56s. Quindi il tempo del ciclo completo non è il tempo puro per compilare l’app. Il ciclo separato è ora implementato: [DEVELOPMENT-CYCLE.md](DEVELOPMENT-CYCLE.md). La prima esecuzione va verificata; nessuna stima di velocità nuova è ancora validata.
+Audit del job `126213552095`, run `41721041653`: setup Node 3m15s, compilazione app/test 2m41s, REA 1m33s, suite completa test 12m58s, compilazione Release + quattro avvii 7m56s. Quindi il tempo del ciclo completo non è il tempo puro per compilare l’app. Il ciclo separato è ora implementato: [DEVELOPMENT-CYCLE.md](DEVELOPMENT-CYCLE.md). Prima anteprima verificata nel run 41800947855: 11 UI passati, 21 screenshot esportati, 20m39s. Compilazione da zero 8m36s; nessuna promessa di anteprima immediata. Focused verificato nella selezione locale ma non eseguito su macOS; percorso IPA completo conservato, non rieseguito.
 
 ## Come lavorare
 

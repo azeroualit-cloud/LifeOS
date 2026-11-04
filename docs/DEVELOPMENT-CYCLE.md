@@ -17,3 +17,15 @@ Scaricare l’artefatto del commit esatto, osservare screenshot, verificare alli
 Le anteprime obsolete dello stesso ramo/modalità vengono cancellate. I workflow nativi storici sovrapposti sono ora manuali; backend/deploy non modificati. Le modifiche documentali non lanciano una compilazione. Dipendenze e baseline restano verificate come prima. Nessuna cache DerivedData introdotta senza misurare toolchain e invalidazione; il primo ciclo serve a misurare tempi reali. La velocità nuova non è ancora garantita.
 
 Sintassi workflow: https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax
+
+## Verifica della selezione
+
+Eseguire `python scripts/test_development_selection.py`: copre file condivisi/sconosciuti, più aree, escalation mirata e presenza dei selettori XCTest. La verifica sintattica dei workflow è eseguita con actionlint 1.7.12 (etichetta runner personalizzata `xcode-27` ammessa).
+
+## Prima misura reale
+
+Run [41800947855](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41800947855), sorgente `9fd78770`: SUCCESS, 11 UI / 0 errori, 21 screenshot esportati e scaricati. Selezione conservativa di tutte le aree per modifica della pipeline. Durata 20m39s: compilazione da zero 8m36s, fase test 10m11s. Non è una misura di una modifica locale a una sola area e non garantisce un’anteprima rapida. Il runner differisce nei tempi dal precedente run completo; non attribuire tutta la variazione alla pipeline.
+
+Aperto campione di tre screenshot (Bloom, riepilogo Salute, calendario): export valido, non un’approvazione grafica. Fixture Bloom con poche note testuali insufficiente per QA-001/002. Nel riepilogo Salute `7EA9FE4E-5F0D-42DC-B046-D24DCA45FD24.png` le etichette Dashboard/Attività non sono visibili: QA-011 richiede riproduzione per distinguere cattura/transizione e difetto persistente.
+
+La modalità focused ha selezione coperta dai test locali; non è stata eseguita una seconda build macOS identica soltanto per questa verifica. Il percorso completo IPA non è stato rilanciato né pubblicato.

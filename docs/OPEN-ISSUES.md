@@ -34,3 +34,7 @@ Le osservazioni non autorizzano di per sé un redesign arbitrario. Per esempio C
 ## Come chiudere una voce
 
 Registrare requisito, riproduzione, cambiamento, commit, controllo pertinente, schermata reale dell’app e limiti. Controllare regressioni pertinenti e contenuti rappresentativi. Un mockup generato, il solo conteggio dei test o l’assenza di errori di compilazione non chiudono un difetto visivo.
+
+## Nuova osservazione del ciclo anteprima
+
+- **QA-011 — OBSERVED / riproduzione necessaria**: nel riepilogo Salute esportato dal run 41800947855 (`7EA9FE4E-5F0D-42DC-B046-D24DCA45FD24.png`) mancano visivamente le etichette Dashboard/Attività della tab bar. Verificare dopo stabilizzazione della schermata, con testo standard/grande, per distinguere transizione di cattura da difetto persistente. Nessuna causa o correzione ancora stabilita.

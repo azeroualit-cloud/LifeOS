@@ -40,4 +40,4 @@ Lo [storico di stato fino alla build 76 e precedenti](STATUS-HISTORY-2026-11-04.
 
 ## Ciclo CI separato
 
-Implementati anteprima automatica e verifiche mirate manuali, con screenshot e selezione test tracciabile. Il percorso completo IPA è manuale; pipeline native storiche sovrapposte non partono più a ogni push. Nessuna modifica al codice app o ai deploy. Validazione iniziale CI da verificare. Leggere [DEVELOPMENT-CYCLE.md](DEVELOPMENT-CYCLE.md).
+Implementati anteprima automatica e verifiche mirate manuali, con screenshot e selezione test tracciabile. Il percorso completo IPA è manuale; pipeline native storiche sovrapposte non partono più a ogni push. Nessuna modifica al codice app o ai deploy. Prima anteprima [41800947855](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41800947855) passata: 11 test UI, 0 errori, 21 screenshot esportati; durata 20m39s. Cinque test locali della selezione e lint dei workflow passati. Focused e IPA completa non rieseguiti. Nessun difetto grafico dichiarato chiuso. Leggere [DEVELOPMENT-CYCLE.md](DEVELOPMENT-CYCLE.md).
