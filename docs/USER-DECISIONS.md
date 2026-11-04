@@ -143,3 +143,9 @@ Render NUTRITION-DIRECT-01 approvato con «ok approvo». Lo stop al solo render 
 ## IPA-GATE-01 — ACTIVE
 
 4 novembre 2026, testo utente: «ok ma non produciamo ipa finché non te lo dico io». Nessuna nuova IPA prodotta, confezionata o distribuita senza richiesta esplicita dell’utente. Approvare design, implementazione, test o prosecuzione non autorizza IPA. Compilazione e verifiche al simulatore consentite senza packaging IPA. Compatibile con DEV-01/DEV-02.
+
+## HEALTH-UX-01 / HEALTH-PLAN-01 — ACTIVE, 4 novembre 2026
+
+Obiettivo esplicito: Salute per bodybuilding con dati subito visibili, consultazione e futura registrazione pasti con minimo attrito e movimento del dito. Ora soltanto aggiornamento checklist e passaggio Astra (pianificazione) → Terra (esecuzione di incrementi successivamente approvati), senza implementare nuovi inserimenti o database e senza rimuovere il quick add. Nessuna IPA.
+
+Griglia, nutrienti in fila, due pulsanti e catalogo locale sono proposte non obbligatorie: l’utente dice «Però tutto ciò che ho detto non è obbligatorio». «4x4» con quattro celle descritte in due righe è interpretato provvisoriamente come 2×2, da esplicitare nel piano. Regole G05–G13 conservate; prima di attuare scelte incompatibili chiedere conferma. F03–F06 restano sospese per il quick add. Dettagli e domande aperte in [HEALTH-BODYBUILDING-BRIEF.md](HEALTH-BODYBUILDING-BRIEF.md); stato completo in [PROJECT-CHECKLIST.md](PROJECT-CHECKLIST.md).

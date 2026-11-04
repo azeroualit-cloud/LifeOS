@@ -586,6 +586,28 @@
       "original_quote": "ok ma non produciamo ipa finché non te lo dico io",
       "rule": "Non produrre, confezionare o distribuire nuove IPA finché l’utente non lo richiede esplicitamente. Approvazioni di design, implementazione, test o prosecuzione non autorizzano IPA. Restano consentiti compilazione e test al simulatore senza packaging IPA.",
       "conflict_check": "Compatibile con DEV-01 e DEV-02; rende esplicito il gate già mantenuto. Nessuna regola attiva sostituita."
+    },
+    {
+      "id": "HEALTH-UX-01",
+      "status": "ACTIVE",
+      "scope": "LifeOS Salute — obiettivo di progettazione",
+      "recorded_on": "2026-11-04",
+      "original_quote": "L'obiettivo è avere la scheda salute pensate per un bodybuilder che da priorità al lowfriction",
+      "rule": "Progettare Salute per bodybuilding: dati essenziali subito visibili, consultazione semplice e futura aggiunta pasti rapidissima, minimo attrito e movimento del dito. Layout, pulsanti e catalogo descritti dall’utente sono proposte non obbligatorie.",
+      "conflict_check": "Obiettivo compatibile. Non sostituisce G05–G13 o altre regole ACTIVE; risolvere conflitti prima di attuare una proposta concreta."
+    },
+    {
+      "id": "HEALTH-PLAN-01",
+      "status": "ACTIVE",
+      "scope": "Incremento Salute corrente — solo documentazione e pianificazione",
+      "recorded_on": "2026-11-04",
+      "original_quotes": [
+        "Solo che non implementiamo per adesso l'aggiunta.",
+        "Però tutto ciò che ho detto non è obbligatorio.",
+        "Quindi aggiungiamo questo obiettivo insieme all'altra checklist così mi faccio fare un piano da gpt astra in un altra chat per far fare le operazione a gpt terra in una nuova chat per risparmiare token"
+      ],
+      "rule": "Aggiungere obiettivo e ipotesi alla checklist e preparare passaggio Astra (piano) → Terra (incrementi successivamente approvati). Non implementare ora nuovi inserimenti peso/pasto o database; non rimuovere il quick add esistente. Nessuna IPA.",
+      "conflict_check": "Compatibile con DEV-02 e IPA-GATE-01; non è richiesta di sostituire layout o funzioni esistenti."
     }
   ],
   "pending_confirmations": [],
@@ -673,5 +695,33 @@
     "user_has_remote_mac": false,
     "existing_ios_build_path": "macOS GitHub Actions runner labelled xcode-27",
     "interpretation": "Non presupporre un Mac disponibile all’utente. Le proposte operative immediate devono funzionare con Windows e la CI esistente; un acquisto/noleggio non è stato approvato."
-  }
+  },
+  "planning_proposals": [
+    {
+      "id": "HEALTH-LAYOUT-FOODS-01",
+      "status": "PROPOSAL_NOT_BINDING",
+      "recorded_on": "2026-11-04",
+      "scope": "Salute futura",
+      "items": [
+        "Utente: 4x4; quattro riquadri descritti in due righe, interpretazione provvisoria 2x2: TDEE/peso stimato tra un mese, ultima pesata/calorie",
+        "Fila 4x1: proteine/carboidrati/grassi/fibre",
+        "Due azioni peso/pasto, forma e collocazione incerte",
+        "Catalogo futuro di cibi comuni pertinenti e cibi personali",
+        "Preferenza da valutare per dati locali/offline senza sincronizzazione web o carico Cloudflare"
+      ],
+      "potential_conflicts": [
+        "G05",
+        "G06",
+        "G07",
+        "G08",
+        "G09",
+        "G10",
+        "G11",
+        "G12",
+        "G13"
+      ],
+      "brief": "HEALTH-BODYBUILDING-BRIEF.md",
+      "implementation_authorized": false
+    }
+  ]
 }

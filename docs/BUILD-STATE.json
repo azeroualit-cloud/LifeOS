@@ -96,7 +96,7 @@
   "current_nutrition_change": {
     "rule": "NUTRITION-DIRECT-01",
     "render_approval": "ok approvo",
-    "status": "implemented; simulator checks queued on standard macos-26 after xcode-27 acquisition failures",
+    "status": "implemented; final recovery verification unconfirmed; alternate Mac runs ended without runner acquisition",
     "historical_entries": "not migrated or recalculated; date-only legacy edits preserve energy",
     "calculation": "4P + 4C + 9G + 2 fibre; new entries only",
     "distributed": false,
@@ -121,7 +121,9 @@
     "toolchain_policy": "Existing selector: prefer Xcode 27.0, otherwise 26.x; reject SDK 27.2. Actual runtime pending.",
     "runner_acquisition_failures": [
       "41856609394",
-      "41859714562"
+      "41859714562",
+      "41871989512",
+      "41873100610"
     ]
   },
   "ipa_production_gate": {
@@ -129,5 +131,14 @@
     "status": "blocked until explicit user request",
     "user_quote": "ok ma non produciamo ipa finché non te lo dico io",
     "simulator_checks_allowed": true
+  },
+  "health_planning": {
+    "goal_rule": "HEALTH-UX-01",
+    "scope_rule": "HEALTH-PLAN-01",
+    "status": "brief and unified checklist documented; awaiting planning in separate chat",
+    "layout_and_local_catalog": "non-binding proposals",
+    "new_entry_or_food_database_implementation_authorized": false,
+    "brief": "HEALTH-BODYBUILDING-BRIEF.md",
+    "checklist": "PROJECT-CHECKLIST.md"
   }
 }

@@ -1,5 +1,11 @@
 # LifeOS — stato corrente
 
+## Passaggio pianificazione Salute — 4 novembre 2026
+
+Nuovo obiettivo HEALTH-UX-01: Salute per bodybuilding, dati immediati e minimo attrito. Aggiornamento documentale autorizzato, nuovi inserimenti/database NON implementati o approvati. Leggere [checklist unificata](PROJECT-CHECKLIST.md) e [brief Astra → Terra](HEALTH-BODYBUILDING-BRIEF.md): distinguere obiettivo fermo, layout/catalogo non vincolanti e conflitti da confermare. Nessuna nuova chat creata automaticamente, nessuna IPA.
+
+Ultimi controlli 41871989512 e 41873100610 terminati senza runner assegnato: annotazioni GitHub confermano capacità macOS arm64 insufficiente, nessuno step eseguito. I riferimenti «in coda» nelle note cronologiche sotto sono superati da questo aggiornamento; nessun nuovo test avviato per il passaggio.
+
 ## Incremento corrente — nutrizione rapida (4 novembre 2026)
 
 NUTRITION-DIRECT-01: render approvato con «ok approvo», implementazione autorizzata. Dashboard con solo pulsante Nutrizione; foglio con proteine/carboidrati/grassi/fibre effettivi, calorie automatiche e data. Il flusso per 100 g è sospeso; storico non migrato. Fonte e prove: [NUTRITION-QUICK-REVIEW.md](NUTRITION-QUICK-REVIEW.md).

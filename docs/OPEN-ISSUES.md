@@ -42,3 +42,7 @@ Registrare requisito, riproduzione, cambiamento, commit, controllo pertinente, s
 ## H-GRID-01 — verifica della correzione approvata
 
 QA-001/002: correzione implementata e verificata su 122 contenuti sintetici nel run [41816351684](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41816351684): 19 unitari e 4 UI passati, immagini contenute nelle card, due colonne e nessuna sovrapposizione nei quattro scorrimenti standard/testo grande. Anteprime link presenti nel caso sintetico. **Accettazione utente e prova con la libreria personale/telefono ancora pendenti**; non chiudere le voci come accettate. Rete dei singoli siti non certificata dalla fixture. Dettagli in [BLOOM-GRID-REVIEW.md](BLOOM-GRID-REVIEW.md).
+
+## Pianificazione Salute per bodybuilding
+
+HEALTH-UX-01 / HEALTH-PLAN-01 aggiungono l’obiettivo al backlog, non chiudono QA-005 o QA-006. Layout, azioni e catalogo alimentare locale sono proposte non vincolanti da valutare con Astra; nessun nuovo inserimento/database da implementare ora. Leggere [brief](HEALTH-BODYBUILDING-BRIEF.md) e [checklist unificata](PROJECT-CHECKLIST.md). Quick add esistente conservato; eventuali conflitti G05–G13 richiedono conferma prima di attuarli. Ultimi tentativi Mac 41871989512 e 41873100610 terminati senza runner, nessuno step eseguito; verifica finale quick add ancora mancante.
