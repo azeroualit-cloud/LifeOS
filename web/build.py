@@ -4,7 +4,7 @@ import json,re,subprocess,tempfile
 base=Path(__file__).parent
 source=(base/'worker.mjs').read_text()
 html=(base/'app.html').read_text()
-source,count=re.subn(r'const APP_HTML = (".*");',lambda _: 'const APP_HTML = '+json.dumps(html,ensure_ascii=True)+';',source)
+source,count=re.subn(r'(const|var) APP_HTML = (".*");',lambda m: m.group(1)+' APP_HTML = '+json.dumps(html,ensure_ascii=True)+';',source)
 assert count==1, 'Expected exactly one APP_HTML'
 with tempfile.TemporaryDirectory() as folder:
     for i,script in enumerate(re.findall(r'<script[^>]*>(.*?)</script>',html,re.S)):

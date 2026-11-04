@@ -1,10 +1,8 @@
 # Webapp Life OS
 
-`worker.mjs` conserva il backend del sorgente fornito il 17 ottobre 2026; `app.html` è il suo APP_HTML leggibile. Modificare HTML e rigenerare la costante prima del deploy. Non distribuire con nuovi binding: il worker `lifeos` deve mantenere DB, segreti e Cloudflare Access esistenti.
+`worker.mjs` è l'export del Worker live ricevuto il 3 novembre 2026 (marcatori LIFEOS_UNIFIED_ACTIVITIES_68, LIFEOS_MOVEMENT_CREATION_70, LIFEOS_UTILITY_COMPETENCE_75). `app.html` è il suo APP_HTML decodificato: modificare l'HTML e rigenerare la costante con `python3 build.py` prima del deploy. Non distribuire con nuovi binding: il worker `lifeos` deve mantenere DB, segreti, `NATIVE_DATA_MODE` e Cloudflare Access esistenti.
 
-Allineamento: palette platino, tipografia e target44; Finanza aperta con Budget / Extra / Spesa, dettagli Budget separati, grafici in Analisi, riepilogo annuale e Sankey storico rimossi dalla navigazione. Calendario uniforme senza fondi weekend, selezione sul numero. Motion ridotto rispettato.
-
-Analisi conserva per ora i grafici esistenti; previsione patrimonio, stipendi per competenza e aggregazione categorie 3/6/12 mesi richiedono un successivo allineamento funzionale. Non presentare questa revisione come parità funzionale completa. Deploy Cloudflare non eseguito finché accesso e confronto con sorgente live non sono disponibili.
+Questa baseline sostituisce quella del 17 ottobre 2026. Le modifiche di allineamento grafico fatte sulla vecchia base (palette platino, Finanza Budget / Extra / Spesa, calendario uniforme) NON sono in questa versione e vanno riapplicate sopra il live. Il commit precedente le conserva nella cronologia git.
 
 ## Verifica locale
 
@@ -12,4 +10,4 @@ Analisi conserva per ora i grafici esistenti; previsione patrimonio, stipendi pe
 
 Anteprime dark a 375 px: `previews/finanza.png`, `previews/calendario.png` (dati simulati). Il pulsante `+` contestuale è nell’intestazione; il web usa blur CSS con fallback, non le API Liquid Glass native.
 
-Backend del file allegato, esclusa la costante APP_HTML: SHA-256 `b2608965c3838aa332ecb6c6015333ebd917508955cd5d7a3533ca2989e8e6ec`. Verificato identico dopo la modifica. Prima del deploy confrontare il sorgente live con questa baseline per conservare eventuali aggiornamenti successivi; mantenere autenticazione, binding D1 e segreti. Il token Cloudflare non è presente nel runtime corrente.
+Backend dell'export live, esclusa la costante APP_HTML: SHA-256 `caf0abe178bb6aec71f430eb62da38768f9b3e5590d0ad2daa7aabca3b7f19f4`. Il build riproduce questo hash. Prima di ogni deploy esportare di nuovo il Worker live e confrontarlo con questa baseline: ogni modifica fatta dalla dashboard Cloudflare apre un nuovo divario. Token Cloudflare non presente nel runtime di Claude.
