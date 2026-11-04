@@ -27,7 +27,7 @@ enum NativeBloomVisualFixture {
                             row["fileName"] = .string("fixture.jpg"); row["contentType"] = .string("public.jpeg")
                         } else if kind == "link" {
                             row["urlString"] = .string("https://example.com/" + (index == 5 ? "unavailable" : "preview"))
-                        } else { row["text"] = .string(index % 2 == 0 ? "Testo breve" : String(repeating: "Una nota con contenuto piÃƒÂ¹ lungo. ", count: 8)) }
+                        } else { row["text"] = .string(index % 2 == 0 ? "Testo breve" : String(repeating: "Una nota con contenuto piÃ¹ lungo. ", count: 8)) }
                         try store.save(row)
                     }
     }

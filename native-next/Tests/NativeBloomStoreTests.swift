@@ -5,6 +5,18 @@ import XCTest
     private func note(_ id: UUID = UUID()) -> Record {
         ["id": .string(id.uuidString), "kind": .string("text"), "capturedAt": .number(100), "urlString": .string(""), "archived": .bool(false), "text": .string("Testo Unicode: caffè 🌱"), "noteVersion": .int(1)]
     }
+    func testMixedVisualFixturePreserves122ValidItemsAndImages() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let store = NativeBloomStore(directory: root)
+        try NativeBloomVisualFixture.seed(store)
+        XCTAssertEqual(store.archive.items.count, 122)
+        XCTAssertEqual(store.archive.items.filter { $0.text("kind") == "link" }.count, 31)
+        for image in store.archive.items.filter({ $0.text("kind") == "image" }) {
+            XCTAssertTrue(FileManager.default.fileExists(atPath: try XCTUnwrap(store.primaryFileURL(image)).path))
+        }
+        XCTAssertEqual(try store.preview(store.export()).items.count, 122)
+    }
     func testPreviewURLSupportsImportedAndAttachedLinksAndRejectsNonWebURLs() {
         XCTAssertEqual(NativeBloomRow(["urlString": .string("https://example.com/article")]).previewURL?.host, "example.com")
         XCTAssertEqual(NativeBloomRow(["noteLinks": .array([.string("https://example.com/attached")])]).previewURL?.path, "/attached")

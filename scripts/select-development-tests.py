@@ -7,7 +7,7 @@ AREAS = {
  "dashboard": ["LifeOSProbeUITests/NativeRevision78UITests/testPrayerSharesDateRowAndOpensAllTimes", "LifeOSProbeUITests/NativeRevision78UITests/testFinanceBudgetAndThumbActionUseTheSameRow", "LifeOSProbeUITests/NativeRevision77UITests/testLargeTextDashboardAndHealth"],
  "nutrition": ["LifeOSProbeUITests/NativeRevision77UITests/testCompactMacroDecimalInputAndKeyboardProgression"],
  "health": ["LifeOSProbeUITests/NativeRevision78UITests/testHealthUniformRowsAndCompactActions", "LifeOSProbeUITests/NativeRevision78UITests/testHealthAccessibleRowsRemainEqualAndActionsStayCompact", "LifeOSProbeUITests/NativeRevision74UITests/testHealthChartsAllowVerticalScrollAndNativeSelection"],
- "bloom": ["LifeOSProbeUITests/NativeRevision74UITests/testMoreDestinationsAndBloomNotePersistsAcrossNavigation", "LifeOSProbeUITests/NativeBloomGridUITests"],
+ "bloom": ["LifeOSProbeUITests/NativeRevision74UITests/testMoreDestinationsAndBloomNotePersistsAcrossNavigation", "LifeOSProbeUITests/NativeBloomGridUITests", "LifeOSProbeTests/NativeBloomStoreTests"],
  "finance": ["LifeOSProbeUITests/NativeRevision75UITests"],
 }
 def select(mode, area, paths):

@@ -19,7 +19,7 @@ class SelectionTests(unittest.TestCase):
   for selector in m.select('focused','all',[])[1]:
    parts=selector.split('/')
    if len(parts)<2: continue
-   source=(R/'native-next/UITests'/f'{parts[1]}.swift').read_text()
+   source=(R/('native-next/Tests' if parts[0] == 'LifeOSProbeTests' else 'native-next/UITests')/f'{parts[1]}.swift').read_text()
    self.assertIn('class '+parts[1],source)
    if len(parts)>2:self.assertRegex(source,r'func\s+'+re.escape(parts[2])+r'\s*\(')
 unittest.main()
