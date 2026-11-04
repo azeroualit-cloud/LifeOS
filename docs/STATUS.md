@@ -49,3 +49,7 @@ Due colonne indipendenti con larghezza esplicita, immagini proporzionate e antep
 Verifica Bloom finale: run 41816351684 passato, 19 unitari e 4 UI senza errori, 16 screenshot esportati. Catture standard e testo grande controllate. Prove e limiti in [BLOOM-GRID-REVIEW.md](BLOOM-GRID-REVIEW.md). Accettazione pendente.
 
 Aggiornamento 4 novembre: risultato visivo H-GRID-01 accettato tramite «ok, procediamo con la prossima correzzione». Prossima proposta: riconoscibilità e compattezza del modulo nutrizione in Dashboard; non ancora approvata né implementata. Accettazione globale per produzione invariata.
+
+## Quick add nutrizione approvato
+
+Render approvato, implementazione del pulsante + Nutrizione → pannello con quattro totali in grammi e kcal automatiche completata per la verifica. Storico mantenuto; nuovo inserimento per 100 g sospeso anche nell’editor Salute. Stato: compilazione/QA pending. Dettagli in [NUTRITION-QUICK-REVIEW.md](NUTRITION-QUICK-REVIEW.md). Nessuna nuova IPA o deploy.

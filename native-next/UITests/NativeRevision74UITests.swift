@@ -18,7 +18,7 @@ final class NativeRevision74UITests: XCTestCase {
         XCTAssertFalse(app.tabBars.buttons["Finanza"].exists); XCTAssertFalse(app.tabBars.buttons["Calendario"].exists)
         app.tabBars.buttons["Salute"].tap()
         app.buttons["Registrazioni macro"].tap()
-        for (label, value) in [("Proteine", "10"), ("Carboidrati", "20"), ("Grassi", "5"), ("Fibre", "1"), ("Calorie etichetta", "165")] {
+        for (label, value) in [("Proteine", "10"), ("Carboidrati", "20"), ("Grassi", "5"), ("Fibre", "1")] {
             let field = app.textFields["nutrition-" + label]
             XCTAssertTrue(field.waitForExistence(timeout: 10)); field.tap(); field.typeText(value)
         }
@@ -27,7 +27,7 @@ final class NativeRevision74UITests: XCTestCase {
         capture("74-nutrition-calculation")
         if !total.exists { print("NUTRITION_ACCESSIBILITY " + app.debugDescription) }
         XCTAssertTrue(total.waitForExistence(timeout: 10))
-        XCTAssertEqual(total.label, "165 kcal")
+        XCTAssertEqual(total.label, "167 kcal")
         capture("74-nutrition-calculation")
     }
     func testHealthChartsAllowVerticalScrollAndNativeSelection() {

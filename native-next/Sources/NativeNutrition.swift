@@ -27,6 +27,17 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
                      carbohydrate: carbohydrate * factor, fat: fat * factor, confirmed: false,
                      fibre: fibre * factor, labelCalories: calories * factor, portionGrams: grams)
     }
+    /// Direct totals. Snapshot the automatic energy so historical entries never change formula.
+    static func direct(id: UUID, date: Date, protein: Decimal, carbohydrate: Decimal, fat: Decimal, fibre: Decimal, preserving old: Self? = nil) -> Self? {
+        let values = [protein, carbohydrate, fat, fibre]
+        guard values.allSatisfy({ !$0.isNaN && $0 >= 0 && NSDecimalNumber(decimal: $0).doubleValue.isFinite }) else { return nil }
+        if var old, old.id == id, old.protein == protein, old.carbohydrate == carbohydrate, old.fat == fat, (old.fibre ?? 0) == fibre {
+            old.date = date; return old
+        }
+        let energy = protein * 4 + carbohydrate * 4 + fat * 9 + fibre * 2
+        guard !energy.isNaN, energy > 0, NSDecimalNumber(decimal: energy).doubleValue.isFinite else { return nil }
+        return .init(id: id, revision: 0, date: date, protein: protein, carbohydrate: carbohydrate, fat: fat, confirmed: false, fibre: fibre, labelCalories: energy)
+    }
     static func grams(_ text: String) -> Decimal? {
         let value = text.trimmingCharacters(in: .whitespacesAndNewlines)
         if value.isEmpty { return 0 }

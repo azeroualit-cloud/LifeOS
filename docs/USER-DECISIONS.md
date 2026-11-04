@@ -137,3 +137,5 @@ Richiesto il 4 novembre: quick add Dashboard con quantità effettive di proteine
 ## NUTRITION-DIRECT-01 — ACTIVE, conflitto confermato
 
 Conferma 4 novembre: «si, prima di procedere quindi come lo vuoi implementare lato design». F03–F06 sospese per ora; storico conservato. Approvato pulsante + Nutrizione in Dashboard → pannello dal basso con proteine/carboidrati/grassi/fibre effettivi in g, kcal automatiche, data Oggi modificabile, Aggiungi sopra tastiera. «seguiamo la tua idea, non appena hai l’immagine del render mostramela subito prima di procedere con altro»: mostrare il render prima di altre attività, nessuna implementazione applicativa in questo passo. La precedente sezione PENDING_CONFIRMATION è storica e risolta.
+
+Render NUTRITION-DIRECT-01 approvato con «ok approvo». Lo stop al solo render è soddisfatto; autorizzata implementazione del design mostrato e relative verifiche, non una nuova distribuzione.

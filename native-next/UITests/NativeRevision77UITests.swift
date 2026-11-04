@@ -51,8 +51,10 @@ final class NativeRevision77UITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["--visual-test", "--empty-home", "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"]
         app.launch()
+        let open = app.buttons["quick-nutrition-open"]
+        reveal(open, app: app); open.tap()
         let protein = app.textFields["quick-nutrition-Proteine"]
-        reveal(protein, app: app)
+        XCTAssertTrue(protein.waitForExistence(timeout: 10))
         protein.tap(); protein.typeText("10")
         app.buttons["Avanti"].tap()
         app.textFields["quick-nutrition-Carboidrati"].typeText("0,2")
@@ -60,14 +62,9 @@ final class NativeRevision77UITests: XCTestCase {
         app.textFields["quick-nutrition-Grassi"].typeText("5")
         app.buttons["Avanti"].tap()
         app.textFields["quick-nutrition-Fibre"].typeText("8")
-        app.buttons["Avanti"].tap()
-        app.textFields["quick-nutrition-Calorie"].typeText("500")
-        app.buttons["Avanti"].tap()
-        app.textFields["quick-nutrition-Porzione effettiva"].typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 3) + "20")
         app.buttons["Fine"].tap()
-        XCTAssertEqual(app.staticTexts["quick-nutrition-calories"].label, "100 kcal")
+        XCTAssertEqual(app.staticTexts["quick-nutrition-calories"].label, "101.8 kcal")
         let save = app.buttons["quick-nutrition-save"]
-        reveal(save, app: app)
         XCTAssertTrue(save.isEnabled)
         XCTAssertGreaterThanOrEqual(save.frame.height, 44)
         capture("Macro compatti", app)

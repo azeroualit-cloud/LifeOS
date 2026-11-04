@@ -5,7 +5,7 @@ from pathlib import Path
 SMOKE = "LifeOSProbeUITests/NativeRevision77UITests/testFourTabsAndDirectHealthAndBloom"
 AREAS = {
  "dashboard": ["LifeOSProbeUITests/NativeRevision78UITests/testPrayerSharesDateRowAndOpensAllTimes", "LifeOSProbeUITests/NativeRevision78UITests/testFinanceBudgetAndThumbActionUseTheSameRow", "LifeOSProbeUITests/NativeRevision77UITests/testLargeTextDashboardAndHealth"],
- "nutrition": ["LifeOSProbeUITests/NativeRevision77UITests/testCompactMacroDecimalInputAndKeyboardProgression"],
+ "nutrition": ["LifeOSProbeUITests/NativeRevision74UITests/testFourTabsAndNutritionCalculation", "LifeOSProbeUITests/NativeNutritionQuickUITests", "LifeOSProbeUITests/NativeRevision77UITests/testCompactMacroDecimalInputAndKeyboardProgression", "LifeOSProbeTests/NativeNutritionEntryTests", "LifeOSProbeTests/NativeNutritionStoreTests", "LifeOSProbeTests/NativeNutritionHealthKitTests"],
  "health": ["LifeOSProbeUITests/NativeRevision78UITests/testHealthUniformRowsAndCompactActions", "LifeOSProbeUITests/NativeRevision78UITests/testHealthAccessibleRowsRemainEqualAndActionsStayCompact", "LifeOSProbeUITests/NativeRevision74UITests/testHealthChartsAllowVerticalScrollAndNativeSelection"],
  "bloom": ["LifeOSProbeUITests/NativeRevision74UITests/testMoreDestinationsAndBloomNotePersistsAcrossNavigation", "LifeOSProbeUITests/NativeBloomGridUITests", "LifeOSProbeTests/NativeBloomStoreTests"],
  "finance": ["LifeOSProbeUITests/NativeRevision75UITests"],

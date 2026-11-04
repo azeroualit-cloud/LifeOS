@@ -9,6 +9,22 @@ final class NativeNutritionEntryTests: XCTestCase {
         XCTAssertEqual(NativeNutritionEntry.grams(""), 0)
         for invalid in ["-1", "NaN", "inf", "1,2,3", "4g"] { XCTAssertNil(NativeNutritionEntry.grams(invalid)) }
     }
+    func testDirectTotalsIncludeFibreAndRoundTripWithoutPortionScaling() throws {
+        let value = try XCTUnwrap(NativeNutritionEntry.direct(id: UUID(), date: Date(), protein: 25, carbohydrate: 40, fat: 10, fibre: 6))
+        XCTAssertEqual(value.calories, 362)
+        XCTAssertEqual(value.protein, 25); XCTAssertEqual(value.fibre, 6); XCTAssertNil(value.portionGrams)
+        XCTAssertEqual(try JSONDecoder().decode(NativeNutritionEntry.self, from: JSONEncoder().encode(value)), value)
+        XCTAssertNil(NativeNutritionEntry.direct(id: UUID(), date: Date(), protein: 0, carbohydrate: 0, fat: 0, fibre: 0))
+        XCTAssertNil(NativeNutritionEntry.direct(id: UUID(), date: Date(), protein: -1, carbohydrate: 1, fat: 0, fibre: 0))
+    }
+    func testDateOnlyEditPreservesLegacyLabelEnergyEvenWithZeroMacros() throws {
+        let old = try XCTUnwrap(NativeNutritionEntry.portion(id: UUID(), date: Date(), protein: 0, carbohydrate: 0, fat: 0, fibre: 0, calories: 450, grams: 20))
+        let date = old.date.addingTimeInterval(86400)
+        let changedDate = try XCTUnwrap(NativeNutritionEntry.direct(id: old.id, date: date, protein: 0, carbohydrate: 0, fat: 0, fibre: 0, preserving: old))
+        XCTAssertEqual(changedDate.calories, 90); XCTAssertEqual(changedDate.portionGrams, 20); XCTAssertEqual(changedDate.date, date)
+        let changedAmounts = try XCTUnwrap(NativeNutritionEntry.direct(id: old.id, date: date, protein: 10, carbohydrate: 0, fat: 0, fibre: 0, preserving: old))
+        XCTAssertEqual(changedAmounts.calories, 40); XCTAssertNil(changedAmounts.portionGrams)
+    }
     func testTwentyGramPortionUsesLabelEnergyAndScalesFibre() throws {
         let entry = try XCTUnwrap(NativeNutritionEntry.portion(id: UUID(), date: Date(),
             protein: 6, carbohydrate: 60, fat: 20, fibre: 8, calories: 450, grams: 20))

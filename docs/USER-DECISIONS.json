@@ -625,6 +625,13 @@
       "rule_id": "H-GRID-01",
       "original_quote": "ok, procediamo con la prossima correzzione",
       "interpretation": "Accettazione del risultato visivo Bloom mostrato e passaggio alla prossima proposta. Non accettazione globale per produzione, prova telefono o autorizzazione di modifiche ancora da proporre."
+    },
+    {
+      "recorded_on": "2026-11-04",
+      "type": "DESIGN_RENDER_APPROVED",
+      "rule_id": "NUTRITION-DIRECT-01",
+      "original_quote": "ok approvo",
+      "interpretation": "Render approvato, procedere con implementazione del quick add a pannello. Il precedente stop al render è soddisfatto."
     }
   ],
   "historical_inventory": "decision-history/2026-11-04-inventory.json",

@@ -2,13 +2,11 @@ import SwiftUI
 
 struct NativeNutritionScreen: View {
     @EnvironmentObject private var health: NativeHealthStore
-    @StateObject private var nutrition = NativeNutritionStore.shared
+    @StateObject private var nutrition = NativeNutritionUIFixture.current
     @State private var protein = ""
     @State private var carbohydrate = ""
     @State private var fat = ""
     @State private var fibre = ""
-    @State private var calories = ""
-    @State private var portion = "100"
     @State private var date = Date()
     @State private var draftID = UUID()
     @State private var expectedRevision: Int?
@@ -17,19 +15,17 @@ struct NativeNutritionScreen: View {
     @State private var notice: String?
     @FocusState private var focusedField: String?
     private var draft: NativeNutritionEntry? {
-        guard let p = NativeNutritionEntry.grams(protein), let c = NativeNutritionEntry.grams(carbohydrate), let f = NativeNutritionEntry.grams(fat), let fi = NativeNutritionEntry.grams(fibre), let kcal = NativeNutritionEntry.grams(calories), let g = NativeNutritionEntry.grams(portion) else { return nil }
-        return .portion(id: editing ?? draftID, date: date, protein: p, carbohydrate: c, fat: f, fibre: fi, calories: kcal, grams: g)
+        guard let p = NativeNutritionEntry.grams(protein), let c = NativeNutritionEntry.grams(carbohydrate), let f = NativeNutritionEntry.grams(fat), let fi = NativeNutritionEntry.grams(fibre) else { return nil }
+        return .direct(id: editing ?? draftID, date: date, protein: p, carbohydrate: c, fat: f, fibre: fi, preserving: nutrition.entries.first { $0.id == editing })
     }
+
     var body: some View {
         Form {
-            Section(editing == nil ? "Etichetta per 100 g" : "Modifica valori della registrazione") {
-                if editing != nil && nutrition.entries.first(where: { $0.id == editing })?.portionGrams == nil { Text("Questa registrazione precedente non conserva i grammi originali: i totali sono riportati su una base di 100 g.").font(.caption).foregroundStyle(.secondary) }
+            Section(editing == nil ? "Quantità consumate" : "Modifica quantità consumate") {
                 field("Proteine", text: $protein)
                 field("Carboidrati", text: $carbohydrate)
                 field("Grassi", text: $fat)
                 field("Fibre", text: $fibre)
-                field("Calorie etichetta", text: $calories, unit: "kcal")
-                field("Porzione effettiva", text: $portion)
                 HStack {
                     Text("Calorie")
                     Spacer()
@@ -84,7 +80,7 @@ struct NativeNutritionScreen: View {
                 Button("Annulla", role: .cancel) { deleting = nil }
             }
             .toolbar { ToolbarItemGroup(placement: .keyboard) { Spacer()
-                let fields = ["Proteine", "Carboidrati", "Grassi", "Fibre", "Calorie etichetta", "Porzione effettiva"]
+                let fields = ["Proteine", "Carboidrati", "Grassi", "Fibre"]
                 if let focusedField, let index = fields.firstIndex(of: focusedField), index + 1 < fields.count {
                     Button("Avanti") { self.focusedField = fields[index + 1] }
                 }
@@ -92,13 +88,13 @@ struct NativeNutritionScreen: View {
     }
     private func load(_ entry: NativeNutritionEntry) {
         editing = entry.id; expectedRevision = entry.revision
-        let grams = entry.portionGrams ?? 100
-        let factor = grams / 100
-        func label(_ value: Decimal) -> String { NSDecimalNumber(decimal: value / factor).stringValue }
-        protein = label(entry.protein); carbohydrate = label(entry.carbohydrate); fat = label(entry.fat)
-        fibre = label(entry.fibre ?? 0); calories = label(entry.calories)
-        portion = NSDecimalNumber(decimal: grams).stringValue; date = entry.date; notice = nil
+        protein = NSDecimalNumber(decimal: entry.protein).stringValue
+        carbohydrate = NSDecimalNumber(decimal: entry.carbohydrate).stringValue
+        fat = NSDecimalNumber(decimal: entry.fat).stringValue
+        fibre = NSDecimalNumber(decimal: entry.fibre ?? 0).stringValue
+        date = entry.date; notice = nil
     }
+
     private func remove(_ id: UUID) {
         Task {
             if await nutrition.delete(id) {
@@ -111,5 +107,5 @@ struct NativeNutritionScreen: View {
     private func field(_ title: String, text: Binding<String>, unit: String = "g") -> some View {
         HStack { Text(title); TextField("0", text: text).focused($focusedField, equals: title).keyboardType(.decimalPad).multilineTextAlignment(.trailing).accessibilityLabel(title + (unit == "g" ? " in grammi" : " in kcal")).accessibilityIdentifier("nutrition-" + title); Text(unit).foregroundStyle(.secondary) }
     }
-    private func clear() { draftID = UUID(); expectedRevision = nil; editing = nil; protein = ""; carbohydrate = ""; fat = ""; fibre = ""; calories = ""; portion = "100"; date = Date() }
+    private func clear() { draftID = UUID(); expectedRevision = nil; editing = nil; protein = ""; carbohydrate = ""; fat = ""; fibre = ""; date = Date() }
 }

@@ -8,7 +8,7 @@
   "source_of_truth": "native-next overlay assembled through .github/actions/native-compat76/action.yml",
   "native_source_fingerprint": {
     "algorithm": "SHA-256 over sorted tracked native-next paths, NUL, file bytes, NUL",
-    "sha256": "15fec8c2eacf239a6a749d94a3694d11fc840c696fccf1392d031793e1ba3c6d"
+    "sha256": "e781b6f7e0ed4357091bab26ef38d03ad474189d1e85fb291a52742d195c7e78"
   },
   "latest_distributed_build": {
     "version": "0.10.17",
@@ -92,5 +92,13 @@
     "device": "iPhone 15 Pro simulator, iOS 27.0",
     "physical_device_verified": false,
     "compact_device_verified": false
+  },
+  "current_nutrition_change": {
+    "rule": "NUTRITION-DIRECT-01",
+    "render_approval": "ok approvo",
+    "status": "implemented; focused CI pending",
+    "historical_entries": "not migrated or recalculated; date-only legacy edits preserve energy",
+    "calculation": "4P + 4C + 9G + 2 fibre; new entries only",
+    "distributed": false
   }
 }

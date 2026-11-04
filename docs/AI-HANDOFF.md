@@ -60,3 +60,7 @@ Aggiornamento 4 novembre: risultato visivo H-GRID-01 accettato tramite «ok, pro
 Nuovo input NUTRITION-DIRECT-01 in PENDING_CONFIRMATION: quick add con nutrienti effettivi e kcal automatiche, sospendendo per ora percorso 100 g/porzione/kcal etichetta. Conflitto F03–F06: chiedere conferma ai sensi META-01. La precedente proposta di restyling nutrizione non è stata approvata. Non implementare la parte confliggente prima della risposta.
 
 Aggiornamento nutrizione: conflitto NUTRITION-DIRECT-01 confermato, F03–F06 SUSPENDED per ora; nessuna migrazione/cancellazione dello storico. Design del quick add a pannello approvato come idea; ora soltanto render da mostrare immediatamente, poi fermarsi prima di implementare altro. Il precedente pending è risolto. App e build invariati.
+
+## Nutrizione: render approvato e implementazione corrente
+
+L’utente ha approvato il render con «ok approvo». Pannello quick add e inserimento diretto implementati, controlli locali della selezione passati, verifica macOS da avviare. Il precedente stop al render è soddisfatto. Leggere `NUTRITION-QUICK-REVIEW.md`: salvare lo storico senza ricalcolarlo, nessuna nuova IPA. La scelta manuale area nutrition è motivata dall’impatto limitato ai componenti nutrizione e ai relativi test (i nuovi token non cambiano altri componenti); eseguire focused con tutti gli unitari per la persistenza.
