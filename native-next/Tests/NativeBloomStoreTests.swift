@@ -5,6 +5,12 @@ import XCTest
     private func note(_ id: UUID = UUID()) -> Record {
         ["id": .string(id.uuidString), "kind": .string("text"), "capturedAt": .number(100), "urlString": .string(""), "archived": .bool(false), "text": .string("Testo Unicode: caffè 🌱"), "noteVersion": .int(1)]
     }
+    func testPreviewURLSupportsImportedAndAttachedLinksAndRejectsNonWebURLs() {
+        XCTAssertEqual(NativeBloomRow(["urlString": .string("https://example.com/article")]).previewURL?.host, "example.com")
+        XCTAssertEqual(NativeBloomRow(["noteLinks": .array([.string("https://example.com/attached")])]).previewURL?.path, "/attached")
+        XCTAssertNil(NativeBloomRow(["urlString": .string("file:///private/test")]).previewURL)
+        XCTAssertNil(NativeBloomRow([:]).previewURL)
+    }
     func testImportExportRestartAndIdempotentAttachments() throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }

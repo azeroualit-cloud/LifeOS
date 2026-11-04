@@ -10,7 +10,7 @@ Aggiornato il 4 novembre 2026. Questo documento prevale come riepilogo di stato 
 
 | Campo | Stato |
 |---|---|
-| Sorgenti app correnti | `native-next/`; nessuna modifica applicativa dopo il sorgente verificato sotto |
+| Sorgenti app correnti | `native-next/`; correzione Bloom e anteprime link successive alla build 78, verifica in corso |
 | Versione app e widget | 0.10.17 / 78 |
 | Commit sorgente IPA | `33574a2114ea6e0d378f69d06aadf60378cf55e9` |
 | Commit attuale repository | Leggere HEAD; include anche regole e report, non una nuova build |
@@ -41,3 +41,7 @@ Lo [storico di stato fino alla build 76 e precedenti](STATUS-HISTORY-2026-11-04.
 ## Ciclo CI separato
 
 Implementati anteprima automatica e verifiche mirate manuali, con screenshot e selezione test tracciabile. Il percorso completo IPA è manuale; pipeline native storiche sovrapposte non partono più a ogni push. Nessuna modifica al codice app o ai deploy. Prima anteprima [41800947855](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41800947855) passata: 11 test UI, 0 errori, 21 screenshot esportati; durata 20m39s. Cinque test locali della selezione e lint dei workflow passati. Focused e IPA completa non rieseguiti. Nessun difetto grafico dichiarato chiuso. Leggere [DEVELOPMENT-CYCLE.md](DEVELOPMENT-CYCLE.md).
+
+## Correzione approvata Bloom H-GRID-01
+
+Due colonne indipendenti con larghezza esplicita, immagini proporzionate e anteprime link tramite LinkPresentation (cache separata dalle note, fallback e timeout). Fixture sintetica di 122 contenuti misti; verifiche standard/testo grande previste. Stato: implementata, compilazione e QA visuale ancora da eseguire. Ultima IPA invariata.

@@ -121,3 +121,7 @@ Lavora da Windows e non dispone di un Mac locale o remoto. Il percorso iOS già 
 ## DEV-01 — ciclo di sviluppo da Windows (ACTIVE)
 
 Approvato il 4 novembre 2026: «implementiamo in questo modo allora». Anteprima reale, verifiche mirate e IPA finale separati. Dettagli in [DEVELOPMENT-CYCLE.md](DEVELOPMENT-CYCLE.md). Compatibile con le regole attive; nessuna accettazione automatica del prodotto.
+
+## DEV-02 / H-GRID-01 — approvazione correzioni e griglia Bloom
+
+ACTIVE, 4 novembre 2026. Proporre le modifiche di prodotto e attendere approvazione. Prima correzione approvata: due colonne, immagini contenute nelle card e altezza adattata al contenuto, con anteprime dei link. Fonte: «approvo con l’unica accortezza di per i link mostrare le anteprime». Nessun conflitto con le regole attive.

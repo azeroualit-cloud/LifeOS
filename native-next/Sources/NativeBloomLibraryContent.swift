@@ -3,9 +3,10 @@ import ImageIO
 
 struct NativeBloomThumbnail: View {
     let url: URL?
+    var width: CGFloat? = nil
     @State private var image: UIImage?
     var body: some View {
-        Group { if let image { Image(uiImage: image).resizable().scaledToFill().clipped().accessibilityHidden(true) } else { Image(systemName: "photo").foregroundStyle(.secondary).accessibilityLabel("Anteprima immagine non disponibile") } }
+        Group { if let image { Image(uiImage: image).resizable().scaledToFit().frame(width: width).clipped().accessibilityHidden(true) } else { Image(systemName: "photo").foregroundStyle(.secondary).accessibilityLabel("Anteprima immagine non disponibile") } }
             .task(id: url) {
                 guard let url else { image = nil; return }
                 let result = await Task.detached(priority: .utility) {
@@ -65,15 +66,26 @@ struct NativeBloomLibraryContent: View {
             }
             if notes.isEmpty { ContentUnavailableView("Nessuna nota", systemImage: "books.vertical", description: Text("Aggiungi una nota o importa un backup Bloom.")) }
             else if grid || rediscovery {
-                ScrollView {
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: NativeDesign.Layout.bloomGridMinimum), spacing: NativeDesign.Space.medium)], alignment: .leading, spacing: NativeDesign.Space.medium) {
-                        ForEach(notes.map { NativeBloomRow($0) }) { item in destination(item.value) }
-                    }.padding(.horizontal).padding(.bottom, NativeDesign.Layout.scrollClearance)
+                GeometryReader { geometry in
+                    let inset = NativeDesign.Space.large
+                    let gap = NativeDesign.Space.medium
+                    let width = max(1, (geometry.size.width - inset * 2 - gap) / 2)
+                    ScrollView {
+                        HStack(alignment: .top, spacing: gap) {
+                            ForEach(0..<2, id: \.self) { column in
+                                LazyVStack(spacing: gap) {
+                                    ForEach(Array(notes.enumerated()).filter { $0.offset % 2 == column }.map { NativeBloomRow($0.element) }) { item in
+                                        destination(item.value, width: width)
+                                    }
+                                }.frame(width: width, alignment: .topLeading)
+                            }
+                        }.padding(.horizontal, inset).padding(.bottom, NativeDesign.Layout.scrollClearance)
+                    }.accessibilityIdentifier("bloom-library-scroll")
                 }
             } else {
                 List {
                     ForEach(notes.map { NativeBloomRow($0) }) { item in
-                        destination(item.value).swipeActions {
+                        destination(item.value, width: nil).swipeActions {
                             Button(showTrash ? "Ripristina" : "Cestino", role: showTrash ? nil : .destructive) { perform { try store.trash(item.value, restore: showTrash) } }
                         }
                     }
@@ -82,21 +94,25 @@ struct NativeBloomLibraryContent: View {
         }.sheet(isPresented: $showingCategories) { NavigationStack { NativeBloomCategories(store: store) } }
             .onChange(of: notes.map { $0.text("id") }) { _, ids in selected.formIntersection(ids) }
     }
-    @ViewBuilder private func destination(_ row: Record) -> some View {
+    @ViewBuilder private func destination(_ row: Record, width: CGFloat?) -> some View {
         if selecting {
             Button { let id = row.text("id"); if selected.contains(id) { selected.remove(id) } else { selected.insert(id) } } label: {
-                card(row).overlay(alignment: .topTrailing) { Image(systemName: selected.contains(row.text("id")) ? "checkmark.circle.fill" : "circle").padding(NativeDesign.Space.small) }
+                card(row, width: width).overlay(alignment: .topTrailing) { Image(systemName: selected.contains(row.text("id")) ? "checkmark.circle.fill" : "circle").padding(NativeDesign.Space.small) }
             }.buttonStyle(.plain)
-        } else { NavigationLink { NativeBloomDetail(store: store, id: row.text("id")) } label: { card(row) }.buttonStyle(.plain)
+        } else { NavigationLink { NativeBloomDetail(store: store, id: row.text("id")) } label: { card(row, width: width) }.buttonStyle(.plain)
             .accessibilityIdentifier("bloom-note-" + row.text("id"))
             .accessibilityLabel(NativeBloomRow(row).displayTitle) }
     }
-    private func card(_ row: Record) -> some View {
+    private func card(_ row: Record, width: CGFloat?) -> some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-            if let url = store.primaryFileURL(row) { NativeBloomThumbnail(url: url).frame(height: NativeDesign.Layout.bloomThumbnailHeight).clipped() }
+            if let url = store.primaryFileURL(row) { NativeBloomThumbnail(url: url, width: width.map { max(1, $0 - NativeDesign.Space.medium * 2) }).clipped() }
+            if let link = NativeBloomRow(row).previewURL {
+                NativeBloomLinkPreview(url: link, width: max(1, (width ?? NativeDesign.Layout.bloomGridMinimum) - NativeDesign.Space.medium * 2))
+            }
             Text(NativeBloomRow(row).displayTitle).font(.headline).lineLimit(3).multilineTextAlignment(.leading)
             if !row.text("text").isEmpty { Text(row.text("text")).font(.subheadline).foregroundStyle(.secondary).lineLimit(4).multilineTextAlignment(.leading) }
         }.frame(maxWidth: .infinity, alignment: .leading).padding(NativeDesign.Space.medium)
+            .frame(width: width, alignment: .leading).clipped()
             .background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
             .contentShape(Rectangle())
     }

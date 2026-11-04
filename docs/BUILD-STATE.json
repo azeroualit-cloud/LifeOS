@@ -8,7 +8,7 @@
   "source_of_truth": "native-next overlay assembled through .github/actions/native-compat76/action.yml",
   "native_source_fingerprint": {
     "algorithm": "SHA-256 over sorted tracked native-next paths, NUL, file bytes, NUL",
-    "sha256": "087540e1c9869c273accd99d95851b7385a6b628f720079574018419ed122bae"
+    "sha256": "249a451185917b4459f02df6b2dec34c75e8d1340745a40e2d1cc208a99fe9d3"
   },
   "latest_distributed_build": {
     "version": "0.10.17",
@@ -66,5 +66,12 @@
     "focused_mode": "selection verified locally; macOS focused run not executed",
     "full_ipa_mode": "existing complete checks retained, manual trigger; not rerun",
     "new_ipa_distributed": false
+  },
+  "current_bloom_change": {
+    "rule": "H-GRID-01",
+    "status": "implemented, CI pending",
+    "scope": "two columns, bounded images, link previews",
+    "fixture_items": 122,
+    "distributed": false
   }
 }

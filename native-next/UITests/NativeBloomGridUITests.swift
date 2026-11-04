@@ -1,0 +1,41 @@
+import XCTest
+
+final class NativeBloomGridUITests: XCTestCase {
+    func testMixedLibraryStaysInTwoColumnsAndShowsLinkPreviews() {
+        checkGrid(large: false)
+    }
+    func testMixedLibraryWithLargeTextRemainsBounded() {
+        checkGrid(large: true)
+    }
+    private func checkGrid(large: Bool) {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments = ["--visual-test", "--bloom-grid-fixture", "--dark", "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"] + (large ? ["--large-text"] : [])
+        app.launch()
+        XCTAssertTrue(app.tabBars.buttons["Bloom"].waitForExistence(timeout: 20))
+        app.tabBars.buttons["Bloom"].tap()
+        let first = app.buttons["bloom-note-BA000000-0000-4000-8000-000000000000"]
+        XCTAssertTrue(first.waitForExistence(timeout: 20))
+        let preview = app.images["bloom-link-image"].firstMatch
+        XCTAssertTrue(preview.waitForExistence(timeout: 10))
+        let scroll = app.scrollViews["bloom-library-scroll"]
+        XCTAssertTrue(scroll.exists)
+        let initialWidth = first.frame.width
+        for page in 0..<4 {
+            let cards = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "bloom-note-")).allElementsBoundByIndex.filter { $0.exists && $0.frame.intersects(scroll.frame) }
+            XCTAssertFalse(cards.isEmpty)
+            for card in cards {
+                XCTAssertEqual(card.frame.width, initialWidth, accuracy: 1)
+                XCTAssertLessThanOrEqual(card.frame.maxX, scroll.frame.maxX + 1)
+                XCTAssertGreaterThanOrEqual(card.frame.minX, scroll.frame.minX - 1)
+                for other in cards where other.identifier != card.identifier {
+                    XCTAssertFalse(card.frame.insetBy(dx: 1, dy: 1).intersects(other.frame.insetBy(dx: 1, dy: 1)), "Overlapping cards")
+                }
+            }
+            let attachment = XCTAttachment(screenshot: app.screenshot())
+            attachment.name = "Bloom mixed grid \(large ? "large" : "standard") page \(page)"
+            attachment.lifetime = .keepAlways; add(attachment)
+            scroll.swipeUp(velocity: .slow)
+        }
+    }
+}

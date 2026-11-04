@@ -9,6 +9,11 @@ struct NativeBloomRow: Identifiable {
     var displayTitle: String {
         value.text("title", fallback: value.text("fileName", fallback: String(value.text("text", fallback: value.text("urlString", fallback: "Nota")).prefix(80))))
     }
+    var previewURL: URL? {
+        let raw = value.text("urlString", fallback: value["noteLinks"]?.array.first?.string ?? "")
+        guard let url = URL(string: raw), ["http", "https"].contains(url.scheme?.lowercased() ?? ""), url.host != nil else { return nil }
+        return url
+    }
     init(_ value: Record) { self.value = value }
 }
 

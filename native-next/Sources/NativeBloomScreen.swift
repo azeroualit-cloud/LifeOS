@@ -15,7 +15,7 @@ private struct NativeBloomDocument: FileDocument {
 struct NativeBloomScreen: View {
     @EnvironmentObject private var router: NativeRouter
     @Environment(\.dynamicTypeSize) private var typeSize
-    @StateObject private var store = NativeBloomStore.shared
+    @StateObject private var store = NativeBloomVisualFixture.store()
     @StateObject private var classifier = NativeBloomPlaceClassifier()
     @StateObject private var captureInbox = NativeBloomCaptureInbox.shared
     @State private var showingCaptures = false

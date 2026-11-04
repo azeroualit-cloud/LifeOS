@@ -20,7 +20,7 @@ Non attendere un nuovo promemoria dell’utente: META-01 e META-02 valgono a ogn
 - L’ultima IPA è 0.10.17 build 78, sorgente `33574a2114ea6e0d378f69d06aadf60378cf55e9`.
 - Compilazione, 267 unitari, 15 UI, 4 avvii Release e package verifier sono passati; questi risultati non hanno impedito difetti visibili sul telefono.
 - **L’utente ha rifiutato la build come pronta per la produzione.** Non presentarla nuovamente come pronta senza correzioni e prove adeguate.
-- Dopo la build sono cambiati documentazione e workflow CI: nessun nuovo codice app, nessuna nuova IPA distribuita e nessun deploy backend.
+- Dopo la build sono cambiati documentazione, workflow CI e griglia Bloom con anteprime link (H-GRID-01, approvato). La verifica del nuovo codice Bloom è in corso; nessuna nuova IPA distribuita e nessun deploy backend.
 - `native-next/` è l’overlay canonico; il vecchio ZIP e i vecchi handoff da soli non sono l’app corrente.
 - Un concept generato non prova una funzione o un layout reale; le proposte dell’assistente non sostituiscono le istruzioni dell’utente.
 

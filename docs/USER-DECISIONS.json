@@ -534,6 +534,23 @@
       "rule": "Da Windows usare la CI esistente con anteprima reale, verifiche mirate e IPA completa al termine del gruppo di correzioni; ispezionare le schermate prima della consegna.",
       "provenance": "Approvazione esplicita dei tre percorsi descritti nel messaggio precedente",
       "conflict_check": "Compatibile con META-01/META-02 e qualità prodotto; non sostituisce controlli finali o accettazione."
+    },
+    {
+      "id": "DEV-02",
+      "status": "ACTIVE",
+      "scope": "LifeOS product changes",
+      "rule": "Proporre un problema e una soluzione concreta, attendere approvazione prima di modificare il prodotto; verificare il risultato reale e consegnarlo per revisione. Raggruppare le modifiche già approvate che condividono una compilazione.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Proposta del ciclo confermata dall’utente approvando la prima correzione."
+    },
+    {
+      "id": "H-GRID-01",
+      "status": "ACTIVE",
+      "scope": "Bloom library",
+      "rule": "Griglia a due colonne, immagini contenute nella larghezza della card, altezza adattata al contenuto; includere anteprime per i link.",
+      "recorded_on": "2026-11-04",
+      "original_quote": "approvo con l'unica accortezza di per i link mostrare le anteprime",
+      "conflict_check": "Compatibile con regole attive; approvazione della correzione proposta."
     }
   ],
   "pending_confirmations": [],
