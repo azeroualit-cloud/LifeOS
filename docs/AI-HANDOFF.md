@@ -1,5 +1,7 @@
 # LifeOS — punto di ingresso per qualsiasi IA
 
+T01: pipeline finale manuale senza IPA e selettore attività/calendario/turni in verifica; consultare STATUS per prova runner e stato esatto. La suite finale non è stata eseguita.
+
 **Capacità CI aggiornata:** run 41873100610 tentativo 2 riuscito su macos-15-arm64, Xcode 26.3, SDK/runtime iOS 26.2. È una prova di disponibilità runner, non un test dell’app; il retry nutrizionale resta non verificato.
 
 ## Aggiornamento operativo — piano approvato, 4 novembre 2026

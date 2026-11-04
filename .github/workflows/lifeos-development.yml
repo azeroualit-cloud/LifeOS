@@ -13,7 +13,7 @@ on:
       area:
         description: Shared changes require all; auto expands unknown paths
         type: choice
-        options: [auto, all, dashboard, nutrition, health, bloom, finance]
+        options: [auto, all, dashboard, nutrition, health, bloom, finance, activities, calendar, shifts]
         default: all
       device:
         description: Screen size
@@ -27,7 +27,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   preview:
-    runs-on: macos-26
+    runs-on: macos-15
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v5

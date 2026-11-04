@@ -20,6 +20,10 @@ class SelectionTests(unittest.TestCase):
   self.assertEqual(focused.count('LifeOSProbeTests'),1)
   self.assertFalse(any(t.startswith('LifeOSProbeTests/') for t in focused))
   self.assertTrue(any(t.startswith('LifeOSProbeTests/') for t in m.select('preview','nutrition',[])[1]))
+ def test_new_areas_and_paths_are_selected(self):
+  for area, name in [('activities','NativeActivityEditor.swift'),('calendar','CalendarScreen.swift'),('shifts','NativeShiftProgress.swift')]:
+   self.assertIn(area,m.select('preview','auto',['native-next/Sources/'+name])[0])
+   self.assertEqual(m.select('preview',area,[])[0],[area])
  def test_all_selectors_exist(self):
   for selector in set(m.select('focused','all',[])[1] + m.select('preview','all',[])[1]):
    parts=selector.split('/')

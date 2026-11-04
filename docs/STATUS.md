@@ -1,5 +1,9 @@
 # LifeOS — stato corrente
 
+**T01 in verifica:** selettore esteso ad attività/calendario/turni, runner macos-15 scelto dopo probe; pipeline finale manuale completa senza packaging aggiunta, non ancora eseguita. Il push di questo checkpoint usa [skip ci] per evitare preview duplicata: segue una sola verifica focused nutrizione sul commit preciso. Il trigger automatico resta attivo per i successivi push. SDK/runtime 26.2 non equivalgono alla prova di riferimento iOS 27.
+
+**Audit preparatori:** in Salute zero viene oggi scartato e il forecast usa intervalli di 86400 secondi; test su nil/zero e date civili necessari prima di dichiarare T08/T09 verificati. Bloom ha copertura sintetica import/riavvio/copy/replace; restano da provare keep esplicito, ricerca/fissati/categorie, mappa, crop/pager, filtri Riscopri e Intent reale. Nessun backup privato letto.
+
 **Audit preparatorio T06:** test sintetici locali competenza 7/7 passati il 4 novembre 2026 (`node --test backend/utilities/tests/competence.test.mjs`); include 221,79/3 e controlli unicità. Nessun audit live eseguito e T06 resta aperto; E10 personale non dimostrato.
 
 **Capacità CI aggiornata:** run 41873100610 tentativo 2 riuscito su macos-15-arm64, Xcode 26.3, SDK/runtime iOS 26.2. È una prova di disponibilità runner, non un test dell’app; il retry nutrizionale resta non verificato.

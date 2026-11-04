@@ -9,13 +9,16 @@ AREAS = {
  "health": ["LifeOSProbeUITests/NativeRevision78UITests/testHealthUniformRowsAndCompactActions", "LifeOSProbeUITests/NativeRevision78UITests/testHealthAccessibleRowsRemainEqualAndActionsStayCompact", "LifeOSProbeUITests/NativeRevision74UITests/testHealthChartsAllowVerticalScrollAndNativeSelection"],
  "bloom": ["LifeOSProbeUITests/NativeRevision74UITests/testMoreDestinationsAndBloomNotePersistsAcrossNavigation", "LifeOSProbeUITests/NativeBloomGridUITests", "LifeOSProbeTests/NativeBloomStoreTests"],
  "finance": ["LifeOSProbeUITests/NativeRevision75UITests"],
+ "activities": ["LifeOSProbeUITests/NativeInterfaceTests/testUnifiedActivityEditorPreservesDescriptionWhenAddingAndRemovingDate", "LifeOSProbeUITests/NativeInterfaceTests/testActivityAgendaShowsOnlyRelevantItemsAndFoldsCompleted", "LifeOSProbeTests/NativeActivityStoreTests"],
+ "calendar": ["LifeOSProbeUITests/NativeInterfaceTests/testCalendarRepeatedScrollingKeepsMonthAnchorsAndReturnsToToday", "LifeOSProbeUITests/NativeInterfaceTests/testCalendarSelectionUpdatesImmediatelyAndKeepsEventIndex", "LifeOSProbeTests/NativeCalendarPerformanceTests"],
+ "shifts": ["LifeOSProbeUITests/NativeInterfaceTests/testVisibleShiftBrushPaintsAndUndoRestoresDay", "LifeOSProbeUITests/NativeInterfaceTests/testShiftExportRemainsReachableFromSettings", "LifeOSProbeTests/NativeRevision71Tests"],
 }
 def select(mode, area, paths):
     if area == "auto":
         selected=set()
         for path in paths:
             name=Path(path).name.lower()
-            matches=[key for key in AREAS if key in name or (key == "nutrition" and "macro" in name)]
+            matches=[key for key in AREAS if key in name or (key == "nutrition" and "macro" in name) or (key == "activities" and "activity" in name) or (key == "shifts" and "shift" in name)]
             if not matches: selected=set(AREAS); break
             selected.update(matches)
         if not selected: selected=set(AREAS)
