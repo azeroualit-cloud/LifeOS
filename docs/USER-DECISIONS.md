@@ -129,3 +129,7 @@ ACTIVE, 4 novembre 2026. Proporre le modifiche di prodotto e attendere approvazi
 ### Accettazione visiva H-GRID-01
 
 4 novembre 2026: «ok, procediamo con la prossima correzzione», dopo la cattura Bloom. Accettato il risultato visivo mostrato; nessuna accettazione globale per produzione o prova sul telefono. Prossima modifica di prodotto da proporre e approvare (DEV-02).
+
+## NUTRITION-DIRECT-01 — PENDING_CONFIRMATION
+
+Richiesto il 4 novembre: quick add Dashboard con quantità effettive di proteine/carboidrati/grassi/fibre e kcal automatiche; abbandonare per ora il percorso per 100 g. Conflitto con F03, F04, F05, F06. Attendere conferma della sospensione temporanea prima di modificare il prodotto; conservare dati storici. Nessuna implementazione avviata.

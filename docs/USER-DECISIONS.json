@@ -553,7 +553,23 @@
       "conflict_check": "Compatibile con regole attive; approvazione della correzione proposta."
     }
   ],
-  "pending_confirmations": [],
+  "pending_confirmations": [
+    {
+      "id": "NUTRITION-DIRECT-01",
+      "status": "PENDING_CONFIRMATION",
+      "recorded_on": "2026-11-04",
+      "original_quote": "facciamo che dalla dashboard c'è solo un quick add, il progetto dei 100g lo abbandoniamo per ora, dalla dashboard solo aggiunta di proteine carbo grassi fibre e poi avviene il calcolo delle calorie",
+      "proposal": "Quick add nella Dashboard con quantità effettive di proteine, carboidrati, grassi e fibre; calorie calcolate automaticamente. Sospendere per ora valori per 100 g, porzione e kcal manuali dell’etichetta nei nuovi inserimenti; conservare dati storici.",
+      "conflicts": [
+        "F03",
+        "F04",
+        "F05",
+        "F06"
+      ],
+      "reason": "Le regole attive richiedono valori per 100 g, porzione, kcal dell’etichetta e ridimensionamento. META-01 impone conferma prima di sostituirle o sospenderle.",
+      "implementation": "not started"
+    }
+  ],
   "history": [
     {
       "recorded_on": "2026-11-04",
