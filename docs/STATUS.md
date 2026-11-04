@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Verifica nutrizione:** run [41894390397](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41894390397), sorgente d420384, concluso con successo: compilazione, test focused ed esportazione prove riusciti. Le schermate e il video non sono ancora stati riesaminati in questa sessione; accettazione visiva e prova HealthKit fisica restano aperte. Nessuna IPA.
+
 **Salute:** HEALTH-GRID-02 confermata: griglia 2×2, nutrienti 1×4, pulsanti affiancati come seconda anteprima, senza testo e con icone esistenti. Deroga G08/G09/G12/G13 limitata al riepilogo. Implementazione e prove ancora da fare.
 
 **Checklist in corso:** run focused nutrizione [41894390397](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41894390397), sorgente d420384, avviato; esito non ancora verificato. Anteprima proposta Salute: [contratto](HEALTH-GRID-PREVIEW.md) e [immagine](design/health-grid-proposal.png); conflitto HEALTH-GRID-CONFLICT-01 in attesa di conferma esplicita. Nessuna modifica Salute autorizzata dalla sola anteprima.
