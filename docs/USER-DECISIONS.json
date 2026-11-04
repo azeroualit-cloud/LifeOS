@@ -1,0 +1,546 @@
+{
+  "schema_version": 1,
+  "project": "LifeOS",
+  "updated_on": "2026-11-04",
+  "policy": {
+    "id": "META-01",
+    "status": "ACTIVE",
+    "scope": "LifeOS",
+    "recorded_on": "2026-11-04",
+    "original_quote": "facciamo che una volta che ti dico qualcosa te te la salvi così persiste tra le sessioni, e se io ti do un nuovo input te mi farai da ora in poi sempre una domanda cheidendomi se voglio procedere dato che va in conflitto con regola x ok?",
+    "rule": "Registrare in modo persistente gli input decisionali dell’utente. Se un nuovo input contraddice una regola attiva, citare ID e testo della regola, spiegare la differenza e chiedere conferma PRIMA di procedere sulla parte in conflitto. Non sostituire la regola senza risposta.",
+    "question_template": "Il nuovo input «{nuovo_input}» è in conflitto con {id_regola}: «{regola_attiva}». Vuoi sostituire questa regola e procedere con il nuovo input?",
+    "non_conflicting_inputs": "Registrare la nuova decisione e proseguire nel perimetro autorizzato senza una domanda aggiuntiva.",
+    "conflicting_inputs": "Registrare come PENDING_CONFIRMATION; fermare solo la parte dipendente dal conflitto; attendere una risposta effettiva.",
+    "confirmed_replacement": "Conservare la vecchia versione come SUPERSEDED e aggiungere quella nuova ACTIVE, con fonte della conferma.",
+    "confirmed_exception": "Registrare ambito e durata dell’eccezione senza cancellare la regola generale.",
+    "not_a_rule": "Separare richieste una tantum, domande, esempi, ipotesi e proposte dell’assistente dalle decisioni approvate.",
+    "bootstrap": "La richiesta esplicita corrente approva questa nuova procedura: sostituisce il precedente criterio di sostituzione automatica delle regole confliggenti. Non richiedere una seconda conferma per il salvataggio già richiesto."
+  },
+  "active_rules": [
+    {
+      "id": "A01",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Rendere l’app realmente utilizzabile e sufficientemente curata per la produzione, non soltanto compilabile.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "A01"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "A16",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Verificare margini, padding e bottoni per proporzioni ed esperienza iOS migliorate.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "A16"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "C01",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Mostrare soltanto HH:mm della prossima preghiera a destra della data, anche quando è del giorno dopo.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "C01"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "C02",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Aprire tutti gli orari delle preghiere toccando quell’ora.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "C02"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "C04",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Ridurre il padding e l’ingombro dei tasti Impostazioni e +.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "C04"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "C05",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Mostrare prima gli eventi di oggi.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "C05"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "C06",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Mostrare subito dopo le abitudini di oggi.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "C06"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "C07",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Mostrare poi soltanto gli eventi a meno di tre giorni, senza estendere la lista a tutta la settimana.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "C07"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "C08",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Escludere dalla Dashboard le attività generiche e tutto ciò che non rientra nella finestra richiesta.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "C08"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "C15",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Nel blocco Finanza mostrare soltanto titolo, icona e freccia nell’intestazione.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "C15"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "C16",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Sotto l’intestazione mostrare il numero del budget con Budget sotto.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "C16"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "C17",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Affiancare Aggiungi spesa sulla destra del budget, facilmente raggiungibile con il dito.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "C17"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "C21",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Integrare nella Dashboard un inserimento nutrizionale rapido e compatto.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "C21"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "F02",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Aggiungere il campo fibre.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "F02"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "F03",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Inserire i nutrienti come valori per 100 g.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "F03"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "F04",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Scegliere sotto i grammi effettivamente consumati.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "F04"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "F05",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Inserire anche le kcal dell’etichetta per 100 g, come da tua risposta esplicita.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "F05"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "F06",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Scalare nutrienti, fibre e kcal sulla porzione effettiva.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "F06"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "F07",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Esporre soltanto la data, senza campo ora.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "F07"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "G01",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Togliere i pulsanti Collega/Gestisci Apple Salute dalla pagina.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "G01"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "G02",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Togliere la sezione di selezione della fonte calorie.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "G02"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "G03",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Contare tutte le registrazioni caloriche di tutte le app presenti in Apple Salute.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "G03"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "G05",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Aggiunta peso e registrazione macro come due azioni grafiche senza testo.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "G05"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "G06",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Usare omino per peso e mela per nutrizione.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "G06"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "G07",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Applicare Liquid Glass alle due azioni e collocarle sopra la barra inferiore.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "G07"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "G08",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Applicare lo stile della dashboard Apple Salute alle quattro schede.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "G08"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "G09",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Dare alle quattro righe la stessa altezza.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "G09"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "G10",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Usare icona e titolo piccoli e colorati in alto a sinistra.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "G10"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "G11",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Usare valore grande e bianco in basso a sinistra, con unità piccola e grigia adiacente.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "G11"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "G12",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Collocare il mini grafico sulla destra, grigio con l’ultima parte colorata.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "G12"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "G13",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Applicare questo trattamento a TDEE, Peso, Calorie e Simulazione.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "G13"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "G14",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Usare la skill REA da GitHub per analizzare il riferimento reale Apple Salute.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "G14"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "H01",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Ridurre dimensioni e padding eccessivi dei pulsanti Bloom.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "H01"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "H02",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Correggere selezione del backup in File che si chiude senza procedere.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "H02"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "H03",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Rendere trasferibili e visibili in LifeOS i contenuti locali conservati nell’app Bloom originale.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "H03"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "L04",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Ridurre cicli lunghi di lavoro che terminano con una versione ancora piena di difetti visibili.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "L04"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "L05",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Non scaricare sull’utente il collaudo iniziale né costringerlo a ripetere continuamente le stesse correzioni.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "L05"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "L06",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Intervenire sull’app installabile effettiva: un mockup non risolve i difetti della build.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "L06"
+      },
+      "source_message_date": null
+    },
+    {
+      "id": "L08",
+      "status": "ACTIVE",
+      "scope": "LifeOS",
+      "rule": "Operare autonomamente entro il progetto senza impattare risorse esterne al progetto.",
+      "recorded_on": "2026-11-04",
+      "provenance": "Richiesta esplicita utente, parafrasi: non citazione letterale",
+      "source": {
+        "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
+        "inventory_id": "L08"
+      },
+      "source_message_date": null
+    }
+  ],
+  "pending_confirmations": [],
+  "history": [
+    {
+      "recorded_on": "2026-11-04",
+      "type": "POLICY_REPLACEMENT",
+      "old": "Nuova istruzione esplicita sostituisce automaticamente quella vecchia sullo stesso punto.",
+      "new": "META-01: prima della sostituzione chiedere conferma sul conflitto.",
+      "approval": "facciamo che una volta che ti dico qualcosa te te la salvi così persiste tra le sessioni, e se io ti do un nuovo input te mi farai da ora in poi sempre una domanda cheidendomi se voglio procedere dato che va in conflitto con regola x ok?"
+    },
+    {
+      "recorded_on": "2026-11-04",
+      "type": "BASELINE_CAPTURE",
+      "description": "Conservate solo le richieste dirette U come regole attive, escluse due richieste una tantum dell’inventario e una sua interpretazione. H/D/P e concept non promossi automaticamente a regole."
+    }
+  ],
+  "historical_inventory": "decision-history/2026-11-04-inventory.json",
+  "limitations": "Persistenza locale nel progetto, non memoria globale garantita per chat o progetti diversi. Lo stato ACTIVE attesta la decisione, non che sia implementata o verificata."
+}

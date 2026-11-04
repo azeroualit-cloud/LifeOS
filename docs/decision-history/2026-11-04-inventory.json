@@ -1,0 +1,1929 @@
+{
+  "scope": "Fonti: questa conversazione, le chat precedenti pertinenti recuperate e i documenti di passaggio/revisione. Le immagini mancanti nelle chat storiche non sono state ricostruite a fantasia. Non certifico l’esaustività rispetto a chat non recuperate o ad allegati non disponibili. Questo elenco non attesta che le correzioni siano già implementate o funzionanti.",
+  "sources": {
+    "U": [
+      "Tua richiesta esplicita in questa conversazione",
+      "Questa chat LifeOS, incluse le correzioni numerate e le risposte successive."
+    ],
+    "H": [
+      "Richiesta ricostruita nel documento di passaggio",
+      "LifeOS-HANDOFF-2026-11-03.md, letto integralmente; non equivale a una citazione diretta dell’utente."
+    ],
+    "D": [
+      "Contratto riportato nei documenti del progetto",
+      "docs/native/REVISIONE-69…78.md: fonte indiretta, distinta dalle istruzioni dirette."
+    ],
+    "S1": [
+      "Tua richiesta precedente",
+      "Documento progetto Life OS — https://chatgpt.com/c/6abb7d7c-c5b4-83eb-be8a-9b37bb1250a4"
+    ],
+    "S2": [
+      "Tua richiesta precedente",
+      "Ridisegna app produttività — https://chatgpt.com/c/6acf631c-bc3c-83eb-8012-76fcd087c8ce"
+    ],
+    "S3": [
+      "Tua richiesta precedente",
+      "iOS Productivity Dashboard Design — https://chatgpt.com/c/6acf5c2a-3d08-83eb-80d2-34a9f594de71"
+    ],
+    "S4": [
+      "Tua richiesta precedente",
+      "iOS Dashboard Design — https://chatgpt.com/c/6acf5c35-bd9c-83eb-b0f5-d94d690971ab"
+    ],
+    "S5": [
+      "Tua richiesta precedente",
+      "Genera cinque versioni grafiche — https://chatgpt.com/c/6ae468e9-0838-83eb-a601-1fa51fa606d0"
+    ],
+    "S6": [
+      "Tua richiesta precedente",
+      "Calendar Design Exploration — https://chatgpt.com/c/6ac62a3f-adcc-83ed-a953-2b22676bc566"
+    ],
+    "S7": [
+      "Tua richiesta precedente",
+      "Ricreare Life OS in SwiftUI — https://chatgpt.com/c/6accb466-ce78-83ed-b0f1-fcec94e114db"
+    ],
+    "P": [
+      "Mia proposta, non requisito di implementazione approvato",
+      "Suggerimenti forniti qui dopo le quattro foto della build 78. La richiesta di rappresentarli nel concept autorizzava l’immagine, non automaticamente tutte le modifiche al codice."
+    ]
+  },
+  "conflicts": {
+    "K01": [
+      "Palette fredda/blu contro palette calda e meno blu",
+      "S1 chiede esplicitamente fondi più caldi e meno blu. I vecchi concept indaco/neon e la mia recente proposta blu/fredda non vanno applicati contemporaneamente come palette dominante. La direzione recente proposta da me non sostituisce la tua preferenza."
+    ],
+    "K02": [
+      "Molti gradienti, glow e colori contro minimalismo",
+      "I primi prompt esplorano neon, microgradienti e clay/3D; S2 li rifiuta poi esplicitamente. Conservare gli accenti semantici non significa reintrodurre effetti decorativi diffusi. Richiesta precedente superata."
+    ],
+    "K03": [
+      "Cambiare icona contro conservare l’icona attuale",
+      "S1 rifiuta il vecchio logo con A; il successivo handoff chiede di conservare l’icona scelta nel frattempo. Non è un divieto retroattivo della modifica originaria: oggi riapplicare il vecchio redesign contraddirebbe il vincolo successivo."
+    ],
+    "K04": [
+      "Conformità Apple esatta contro nuova identità visiva autonoma",
+      "La richiesta esplicita per le quattro schede Salute è di seguire esattamente lo stile Apple. Le mie proposte di nuova identità, nuove forme e minori contenitori sono applicabili altrove; se cambiano quelle schede entrano in conflitto. Non è un’autorizzazione a ridisegnare Salute liberamente."
+    ],
+    "K05": [
+      "Quattro tab con Altro contro quattro tab con Bloom",
+      "La richiesta successiva sostituisce Altro con Bloom. Dashboard, Attività, Salute, Bloom è l’istruzione esplicita più recente. Calendario/Attività/Salute/Finanza nel documento è una divisione dei flussi, non una tab bar alternativa confermata."
+    ],
+    "K06": [
+      "Attività generiche e settimana intera contro finestra breve della dashboard",
+      "I concept precedenti comprendono eventi settimanali e fino a tre attività non urgenti; il successivo messaggio esclude le attività generiche e richiede eventi di oggi, abitudini di oggi, poi eventi entro meno di tre giorni. Prevale quest’ultimo."
+    ],
+    "K07": [
+      "Segnali senza testo contro elenco descrittivo nella home",
+      "S5 chiede rettangoli senza testo per capire tutto a colpo d’occhio. Le successive richieste e le mie proposte introducono titoli, sottotitoli e contesto. Possono convivere in componenti distinti; non sostituirsi nello stesso componente senza decidere quale presentazione usare."
+    ],
+    "K08": [
+      "Una lista compatta contro ulteriori gruppi e sezioni nella dashboard",
+      "L’handoff chiede meno raggruppamenti. Le mie proposte Da fare oggi/In arrivo, riepilogo intelligente e revisione aggiungono gruppi. È una tensione di organizzazione e densità, non un difetto automaticamente risolto da un nuovo mockup."
+    ],
+    "K09": [
+      "Data e ora corrente contro data e sola ora della preghiera",
+      "Il vecchio header comprende data/ora e prossima preghiera. La richiesta successiva vuole solo l’ora della preghiera a destra della data, senza riga autonoma né prefisso Domani. Prevale la richiesta successiva."
+    ],
+    "K10": [
+      "Grafico peso in Dashboard contro trasferimento in Salute",
+      "I vecchi contratti prevedono peso e calorie nella home. L’handoff ne chiede la rimozione e il trasferimento in Salute. Non reintrodurre il grafico nella home per ripristinare un concept passato."
+    ],
+    "K11": [
+      "Widget Finanza con arco e più indicatori contro solo Budget e aggiunta spesa",
+      "I primi concept e l’handoff propongono riepiloghi più ricchi. La richiesta successiva limita il blocco a intestazione, numero, Budget e azione sulla destra. Il cambio di etichetta proposto da me è distinto dalla logica del calcolo."
+    ],
+    "K12": [
+      "Modulo macro nella Dashboard contro sola scorciatoia e pagina separata",
+      "L’inserimento compatto direttamente nella home è richiesto dall’utente. La mia proposta di sostituirlo con Registra un pasto e aprire una pagina separata cambia il flusso: è una proposta in conflitto, non una correzione già approvata."
+    ],
+    "K13": [
+      "Tre macro e pochi campi contro fibre, kcal etichetta e porzione",
+      "Il vecchio modulo di cinque dati viene esteso dalla richiesta successiva. Non si possono eliminare i nuovi campi solo per rispettare il vecchio numero di campi. La compattezza va ottenuta con il layout."
+    ],
+    "K14": [
+      "Calorie sempre 4/4/9 contro kcal dichiarate in etichetta",
+      "Hai scelto esplicitamente le kcal dell’etichetta per 100 g. I vecchi record possono mantenere il calcolo storico, ma i nuovi pasti non devono essere ricalcolati ignorando l’etichetta. Evoluzione risolta dalla tua risposta successiva."
+    ],
+    "K15": [
+      "Data e ora modificabili contro sola data",
+      "L’handoff prevede entrambe; la tua richiesta successiva dice che l’ora non interessa. Il nuovo modulo deve esporre solo la data."
+    ],
+    "K16": [
+      "Selettore/deduplicazione delle fonti contro somma di tutte le registrazioni",
+      "L’handoff conserva le fonti evitando somme automatiche di duplicati; la tua richiesta successiva impone di contare tutte le entry caloriche e togliere il selettore. Prevale l’istruzione successiva, senza cancellare dati delle altre app."
+    ],
+    "K17": [
+      "Numero Salute grigio/arancione contro valore bianco e titolo colorato",
+      "I documenti 70/71 descrivono colori precedenti diversi. Il successivo contratto richiede numero grande bianco, unità grigia, icona/titolo colorati. I contratti visivi precedenti sono superati per queste quattro schede."
+    ],
+    "K18": [
+      "Ultima parte del grafico sempre colorata contro assenza di calorie odierne",
+      "La tua richiesta dice ultima parte colorata; io propongo una deroga: se oggi manca un dato, lo storico resta grigio per evitare di farlo sembrare odierno. È un’eccezione proposta che va resa esplicita, non una tua richiesta originaria."
+    ],
+    "K19": [
+      "Agenda con altezza proporzionale alle ore contro righe compatte",
+      "Il contratto 71 descrive una griglia oraria; il 72 passa a un’agenda non proporzionale. È un’evoluzione documentata: non implementare entrambi i modelli come se fossero la stessa vista."
+    ],
+    "K20": [
+      "Dettaglio giorno fisso contro mese pieno e agenda integrata",
+      "70: riquadro inferiore fisso; 71: mese pieno e dettaglio; 73: agenda integrata con espansione esplicita. Conservare la successione delle decisioni, privilegiando l’ultima documentata finché non contraddetta da una tua istruzione diretta."
+    ],
+    "K21": [
+      "Numeri calendario semibold contro Regular",
+      "71 richiede numeri semibold; 72 li riporta a SF Pro Regular 20 pt scalabili. Il secondo è il contratto documentato successivo."
+    ],
+    "K22": [
+      "Interfaccia senza priorità contro priorità nuove",
+      "Un primo concept cita priorità; il contratto dell’editor unificato le esclude. Le mie proposte di evidenziare priorità non autorizzano ad aggiungere automaticamente un campo o algoritmo di priorità."
+    ],
+    "K23": [
+      "Icone Finanza bianche contro nuove icone colorate",
+      "Il contratto 70/71 specifica simboli monocromatici bianchi. Nel mio concept recente l’icona finanziaria è arancione: quel cambio confligge se applicato alle stesse icone. Il colore di un titolo o di un indicatore è un caso diverso."
+    ],
+    "K24": [
+      "Partire soltanto da Bloom contro ricostruire tutte le correzioni",
+      "La mia proposta di cominciare con un solo difetto non risponde alla tua ultima richiesta. Ora il compito è l’inventario globale, senza avviare modifiche al codice."
+    ]
+  },
+  "items": [
+    {
+      "id": "A01",
+      "origin": "U",
+      "text": "Rendere l’app realmente utilizzabile e sufficientemente curata per la produzione, non soltanto compilabile.",
+      "conflicts": [],
+      "section": "A"
+    },
+    {
+      "id": "A02",
+      "origin": "S5",
+      "text": "Ridurre il carico di lettura e permettere di capire i segnali importanti a colpo d’occhio.",
+      "conflicts": [],
+      "section": "A"
+    },
+    {
+      "id": "A03",
+      "origin": "S5",
+      "text": "Rappresentare evento e abitudini con rettangoli di stato senza testo, colorati quando completati.",
+      "conflicts": [
+        "K07"
+      ],
+      "section": "A"
+    },
+    {
+      "id": "A04",
+      "origin": "S5",
+      "text": "Usare esattamente due barre orizzontali al posto dei grafici a mezza torta.",
+      "conflicts": [],
+      "section": "A"
+    },
+    {
+      "id": "A05",
+      "origin": "S5",
+      "text": "Nella barra del turno evidenziare soltanto la fascia oraria del turno attuale, per esempio 06–14.",
+      "conflicts": [],
+      "section": "A"
+    },
+    {
+      "id": "A06",
+      "origin": "S5",
+      "text": "Usare transizioni nette nel gradiente del componente indicato, senza sostituirlo con un’immagine decorativa.",
+      "conflicts": [],
+      "section": "A"
+    },
+    {
+      "id": "A07",
+      "origin": "S1",
+      "text": "Ridurre il blu e rendere più caldi i fondi e l’accento dell’icona.",
+      "conflicts": [
+        "K01"
+      ],
+      "section": "A"
+    },
+    {
+      "id": "A08",
+      "origin": "S1",
+      "text": "Sostituire il vecchio logo con la A, rifiutato esplicitamente.",
+      "conflicts": [
+        "K03"
+      ],
+      "section": "A"
+    },
+    {
+      "id": "A09",
+      "origin": "H",
+      "text": "Conservare l’icona originale successivamente scelta e rifiutare altre varianti non richieste.",
+      "conflicts": [
+        "K03"
+      ],
+      "section": "A"
+    },
+    {
+      "id": "A10",
+      "origin": "S2",
+      "text": "Eliminare l’eccesso di colori, gradienti e glow dei concept iniziali.",
+      "conflicts": [
+        "K02"
+      ],
+      "section": "A"
+    },
+    {
+      "id": "A11",
+      "origin": "S4",
+      "text": "Concept storico con dark mode, SF Pro Rounded, vetro, microgradienti e accenti mint/indaco/arancio.",
+      "conflicts": [
+        "K01",
+        "K02"
+      ],
+      "section": "A"
+    },
+    {
+      "id": "A12",
+      "origin": "S3",
+      "text": "Concept storico light/neo-brutalista, vibrante e con aspetto clay/3D; successivamente esplorato anche dark e minimale.",
+      "conflicts": [
+        "K02"
+      ],
+      "section": "A"
+    },
+    {
+      "id": "A13",
+      "origin": "S6",
+      "text": "Calendario semplice, moderno, utilizzabile, con testi leggibili e senza illustrazioni complesse.",
+      "conflicts": [],
+      "section": "A"
+    },
+    {
+      "id": "A14",
+      "origin": "S1",
+      "text": "Far corrispondere il redesign al riferimento fornito, evitando un’estetica percepita come app da caffetteria.",
+      "conflicts": [],
+      "section": "A"
+    },
+    {
+      "id": "A15",
+      "origin": "H",
+      "text": "Usare controlli e materiali di sistema quando appropriati, con fallback disponibili e senza inventare API.",
+      "conflicts": [],
+      "section": "A"
+    },
+    {
+      "id": "A16",
+      "origin": "U",
+      "text": "Verificare margini, padding e bottoni per proporzioni ed esperienza iOS migliorate.",
+      "conflicts": [],
+      "section": "A"
+    },
+    {
+      "id": "B01",
+      "origin": "D",
+      "text": "Struttura storica: Dashboard, Attività, Salute, Altro, con Finanza/Calendario/Bloom in Altro.",
+      "conflicts": [
+        "K05"
+      ],
+      "section": "B"
+    },
+    {
+      "id": "B02",
+      "origin": "H",
+      "text": "Sostituire Altro con Bloom direttamente nella tab bar.",
+      "conflicts": [
+        "K05"
+      ],
+      "section": "B"
+    },
+    {
+      "id": "B03",
+      "origin": "H",
+      "text": "Conservare quattro destinazioni principali: Dashboard, Attività, Salute, Bloom.",
+      "conflicts": [],
+      "section": "B"
+    },
+    {
+      "id": "B04",
+      "origin": "H",
+      "text": "Separare chiaramente i flussi Calendario, Attività, Salute e Finanza; la frase non conferma una diversa tab bar.",
+      "conflicts": [],
+      "section": "B"
+    },
+    {
+      "id": "B05",
+      "origin": "H",
+      "text": "La settimana della Dashboard deve aprire il calendario completo.",
+      "conflicts": [],
+      "section": "B"
+    },
+    {
+      "id": "B06",
+      "origin": "H",
+      "text": "Il tocco sulla settimana non deve forzare l’apertura della scheda giornaliera.",
+      "conflicts": [],
+      "section": "B"
+    },
+    {
+      "id": "B07",
+      "origin": "H",
+      "text": "Conservare il giorno richiesto come riferimento del calendario quando appropriato.",
+      "conflicts": [],
+      "section": "B"
+    },
+    {
+      "id": "B08",
+      "origin": "H",
+      "text": "Tornare alla Dashboard senza stack duplicati o perdita della posizione.",
+      "conflicts": [],
+      "section": "B"
+    },
+    {
+      "id": "B09",
+      "origin": "H",
+      "text": "Aprire Salute direttamente sui contenuti, eliminando la porta d’ingresso Peso, calorie, fonti e TDEE.",
+      "conflicts": [],
+      "section": "B"
+    },
+    {
+      "id": "B10",
+      "origin": "H",
+      "text": "Conservare deep link, azioni rapide, ritorni e ripristino dello stato.",
+      "conflicts": [],
+      "section": "B"
+    },
+    {
+      "id": "C01",
+      "origin": "U",
+      "text": "Mostrare soltanto HH:mm della prossima preghiera a destra della data, anche quando è del giorno dopo.",
+      "conflicts": [
+        "K09"
+      ],
+      "section": "C"
+    },
+    {
+      "id": "C02",
+      "origin": "U",
+      "text": "Aprire tutti gli orari delle preghiere toccando quell’ora.",
+      "conflicts": [],
+      "section": "C"
+    },
+    {
+      "id": "C03",
+      "origin": "H",
+      "text": "Header storico con data, ora corrente e prossima preghiera compatti.",
+      "conflicts": [
+        "K09"
+      ],
+      "section": "C"
+    },
+    {
+      "id": "C04",
+      "origin": "U",
+      "text": "Ridurre il padding e l’ingombro dei tasti Impostazioni e +.",
+      "conflicts": [],
+      "section": "C"
+    },
+    {
+      "id": "C05",
+      "origin": "U",
+      "text": "Mostrare prima gli eventi di oggi.",
+      "conflicts": [],
+      "section": "C"
+    },
+    {
+      "id": "C06",
+      "origin": "U",
+      "text": "Mostrare subito dopo le abitudini di oggi.",
+      "conflicts": [],
+      "section": "C"
+    },
+    {
+      "id": "C07",
+      "origin": "U",
+      "text": "Mostrare poi soltanto gli eventi a meno di tre giorni, senza estendere la lista a tutta la settimana.",
+      "conflicts": [
+        "K06"
+      ],
+      "section": "C"
+    },
+    {
+      "id": "C08",
+      "origin": "U",
+      "text": "Escludere dalla Dashboard le attività generiche e tutto ciò che non rientra nella finestra richiesta.",
+      "conflicts": [
+        "K06"
+      ],
+      "section": "C"
+    },
+    {
+      "id": "C09",
+      "origin": "S2",
+      "text": "Concept storico: eventi settimanali seguiti da attività non urgenti, massimo tre righe.",
+      "conflicts": [
+        "K06"
+      ],
+      "section": "C"
+    },
+    {
+      "id": "C10",
+      "origin": "H",
+      "text": "Unire la presentazione delle cose da fare evitando molti contenitori e raggruppamenti.",
+      "conflicts": [
+        "K08"
+      ],
+      "section": "C"
+    },
+    {
+      "id": "C11",
+      "origin": "H",
+      "text": "Conservare identità, tipo e azioni dei record senza duplicarli nella presentazione unificata.",
+      "conflicts": [],
+      "section": "C"
+    },
+    {
+      "id": "C12",
+      "origin": "H",
+      "text": "Rendere chiaramente toccabile la settimana con contenitore discreto e feedback di pressione.",
+      "conflicts": [],
+      "section": "C"
+    },
+    {
+      "id": "C13",
+      "origin": "H",
+      "text": "Conservare turni, colori, indicatori e accessibilità della settimana.",
+      "conflicts": [],
+      "section": "C"
+    },
+    {
+      "id": "C14",
+      "origin": "D",
+      "text": "Tenere i giorni passati della settimana all’80% di opacità e quelli futuri pienamente visibili anche oltre il mese.",
+      "conflicts": [],
+      "section": "C"
+    },
+    {
+      "id": "C15",
+      "origin": "U",
+      "text": "Nel blocco Finanza mostrare soltanto titolo, icona e freccia nell’intestazione.",
+      "conflicts": [
+        "K11"
+      ],
+      "section": "C"
+    },
+    {
+      "id": "C16",
+      "origin": "U",
+      "text": "Sotto l’intestazione mostrare il numero del budget con Budget sotto.",
+      "conflicts": [],
+      "section": "C"
+    },
+    {
+      "id": "C17",
+      "origin": "U",
+      "text": "Affiancare Aggiungi spesa sulla destra del budget, facilmente raggiungibile con il dito.",
+      "conflicts": [],
+      "section": "C"
+    },
+    {
+      "id": "C18",
+      "origin": "S2",
+      "text": "Concept storico: widget finanziario con arco del saldo e registrazione rapida delle spese.",
+      "conflicts": [
+        "K11"
+      ],
+      "section": "C"
+    },
+    {
+      "id": "C19",
+      "origin": "H",
+      "text": "Togliere il grafico peso dalla Dashboard e trasferirlo in Salute.",
+      "conflicts": [
+        "K10"
+      ],
+      "section": "C"
+    },
+    {
+      "id": "C20",
+      "origin": "D",
+      "text": "Contratto storico: scheda peso/calorie e relativo grafico nella Dashboard.",
+      "conflicts": [
+        "K10"
+      ],
+      "section": "C"
+    },
+    {
+      "id": "C21",
+      "origin": "U",
+      "text": "Integrare nella Dashboard un inserimento nutrizionale rapido e compatto.",
+      "conflicts": [
+        "K12"
+      ],
+      "section": "C"
+    },
+    {
+      "id": "C22",
+      "origin": "H",
+      "text": "Rendere raggiungibile la cronologia senza espanderla interamente nella home.",
+      "conflicts": [],
+      "section": "C"
+    },
+    {
+      "id": "D01",
+      "origin": "H",
+      "text": "Conservare un unico editor per attività ed eventi.",
+      "conflicts": [],
+      "section": "D"
+    },
+    {
+      "id": "D02",
+      "origin": "D",
+      "text": "L’editor unificato non deve introdurre priorità.",
+      "conflicts": [
+        "K22"
+      ],
+      "section": "D"
+    },
+    {
+      "id": "D03",
+      "origin": "S3",
+      "text": "Concept iniziale di task manager con priorità.",
+      "conflicts": [
+        "K22"
+      ],
+      "section": "D"
+    },
+    {
+      "id": "D04",
+      "origin": "D",
+      "text": "Separare il tocco sul titolo, che apre la scheda, dal completamento diretto in lista.",
+      "conflicts": [],
+      "section": "D"
+    },
+    {
+      "id": "D05",
+      "origin": "D",
+      "text": "Aprire l’editor come scheda nativa dal basso.",
+      "conflicts": [],
+      "section": "D"
+    },
+    {
+      "id": "D06",
+      "origin": "D",
+      "text": "Affiancare data di inizio e scadenza, con orari sotto e categoria/luogo successivi.",
+      "conflicts": [],
+      "section": "D"
+    },
+    {
+      "id": "D07",
+      "origin": "D",
+      "text": "Aprire il selettore data al primo tocco e permettere di rimuovere la data con ×.",
+      "conflicts": [],
+      "section": "D"
+    },
+    {
+      "id": "D08",
+      "origin": "D",
+      "text": "Il calendario del selettore data deve avere larghezza sufficiente, senza colonne tagliate.",
+      "conflicts": [],
+      "section": "D"
+    },
+    {
+      "id": "D09",
+      "origin": "D",
+      "text": "Conservare descrizione, metadati, stato In attesa, completamento, eliminazione e ricorrenze.",
+      "conflicts": [],
+      "section": "D"
+    },
+    {
+      "id": "D10",
+      "origin": "D",
+      "text": "Salvare subito localmente e sincronizzare in background senza duplicare operazioni.",
+      "conflicts": [],
+      "section": "D"
+    },
+    {
+      "id": "D11",
+      "origin": "D",
+      "text": "Consentire mesi continui e scorrevoli con comandi e intestazioni stabili.",
+      "conflicts": [],
+      "section": "D"
+    },
+    {
+      "id": "D12",
+      "origin": "D",
+      "text": "Soluzione storica con riquadro giorno fisso sotto il mese.",
+      "conflicts": [
+        "K20"
+      ],
+      "section": "D"
+    },
+    {
+      "id": "D13",
+      "origin": "D",
+      "text": "Soluzione successiva con mese a tutta altezza e apertura della giornata.",
+      "conflicts": [
+        "K20"
+      ],
+      "section": "D"
+    },
+    {
+      "id": "D14",
+      "origin": "D",
+      "text": "Ultimo contratto documentato: agenda integrata sotto il mese, con chiusura ed espansione esplicite.",
+      "conflicts": [
+        "K20"
+      ],
+      "section": "D"
+    },
+    {
+      "id": "D15",
+      "origin": "D",
+      "text": "Distinguere ritorno a oggi e apertura esplicita del giorno richiesto.",
+      "conflicts": [],
+      "section": "D"
+    },
+    {
+      "id": "D16",
+      "origin": "D",
+      "text": "Conservare il mese consultato durante i ridimensionamenti e gli editor, evitando salti indesiderati.",
+      "conflicts": [],
+      "section": "D"
+    },
+    {
+      "id": "D17",
+      "origin": "D",
+      "text": "Nella giornata usare una sola intestazione con ritorno, data e +, senza secondo titolo o ingranaggio.",
+      "conflicts": [],
+      "section": "D"
+    },
+    {
+      "id": "D18",
+      "origin": "D",
+      "text": "Mostrare tutti e sette i turni della settimana nella vista del giorno.",
+      "conflicts": [],
+      "section": "D"
+    },
+    {
+      "id": "D19",
+      "origin": "D",
+      "text": "Contratto precedente: griglia oraria proporzionale a minuto e durata.",
+      "conflicts": [
+        "K19"
+      ],
+      "section": "D"
+    },
+    {
+      "id": "D20",
+      "origin": "D",
+      "text": "Contratto successivo: agenda compatta senza altezze proporzionali alle ore.",
+      "conflicts": [
+        "K19"
+      ],
+      "section": "D"
+    },
+    {
+      "id": "D21",
+      "origin": "D",
+      "text": "Mostrare eventi contenuti, sovrapposizioni parziali e intervalli identici senza nascondere attività.",
+      "conflicts": [],
+      "section": "D"
+    },
+    {
+      "id": "D22",
+      "origin": "D",
+      "text": "Non inventare un’ora finale quando manca; conservare notturni e prosecuzioni da ieri.",
+      "conflicts": [],
+      "section": "D"
+    },
+    {
+      "id": "D23",
+      "origin": "D",
+      "text": "Mostrare tutto il giorno in una riga di pillole scorrevole orizzontalmente, senza pannello separato fisso.",
+      "conflicts": [],
+      "section": "D"
+    },
+    {
+      "id": "D24",
+      "origin": "D",
+      "text": "Riservare lo swipe di cambio giorno alla settimana per non interferire con le pillole.",
+      "conflicts": [],
+      "section": "D"
+    },
+    {
+      "id": "D25",
+      "origin": "D",
+      "text": "Numeri del calendario inizialmente semibold.",
+      "conflicts": [
+        "K21"
+      ],
+      "section": "D"
+    },
+    {
+      "id": "D26",
+      "origin": "D",
+      "text": "Numeri poi definiti SF Pro Regular 20 pt, scalabili, con selezione blu di sistema.",
+      "conflicts": [
+        "K21"
+      ],
+      "section": "D"
+    },
+    {
+      "id": "D27",
+      "origin": "D",
+      "text": "Eliminare il cerchio grande che si sovrappone al badge del turno.",
+      "conflicts": [],
+      "section": "D"
+    },
+    {
+      "id": "D28",
+      "origin": "D",
+      "text": "Usare puntini nel colore del turno, oppure neutri quando il turno manca.",
+      "conflicts": [],
+      "section": "D"
+    },
+    {
+      "id": "D29",
+      "origin": "D",
+      "text": "Allineare abbreviazioni dei mesi e separatori alle sette colonne, con evidenza del mese corrente.",
+      "conflicts": [],
+      "section": "D"
+    },
+    {
+      "id": "D30",
+      "origin": "D",
+      "text": "Palette Dipingi compatta, orizzontale e ispirata a Supershift, con Liquid Glass nativo dove disponibile.",
+      "conflicts": [],
+      "section": "D"
+    },
+    {
+      "id": "D31",
+      "origin": "D",
+      "text": "Conservare la coda locale dei turni e non ricostruire inutilmente tutti gli eventi a ogni pennellata.",
+      "conflicts": [],
+      "section": "D"
+    },
+    {
+      "id": "D32",
+      "origin": "D",
+      "text": "Barra del turno attivo nel colore del turno, segmenti di due ore e segmento finale parziale.",
+      "conflicts": [],
+      "section": "D"
+    },
+    {
+      "id": "D33",
+      "origin": "D",
+      "text": "Microanimazione una sola volta dell’ultimo segmento completato, rispettando Riduci movimento.",
+      "conflicts": [],
+      "section": "D"
+    },
+    {
+      "id": "D34",
+      "origin": "D",
+      "text": "Non mostrare una barra grigia vuota negli stati senza turno attivo.",
+      "conflicts": [],
+      "section": "D"
+    },
+    {
+      "id": "D35",
+      "origin": "D",
+      "text": "Colori delle categorie deterministici e identità cromatica stabile fra calendario e Attività.",
+      "conflicts": [],
+      "section": "D"
+    },
+    {
+      "id": "D36",
+      "origin": "D",
+      "text": "Sveglie urgenti locali autorizzate: identità stabile, modifica, cancellazione e recupero degli errori.",
+      "conflicts": [],
+      "section": "D"
+    },
+    {
+      "id": "D37",
+      "origin": "D",
+      "text": "Non interpretare un mese non caricato come evento eliminato né sincronizzare falsamente le sveglie locali.",
+      "conflicts": [],
+      "section": "D"
+    },
+    {
+      "id": "E01",
+      "origin": "H",
+      "text": "Risolvere il blocco Conferma nell’editor bolletta distinguendo rete e server non compatibile.",
+      "conflicts": [],
+      "section": "E"
+    },
+    {
+      "id": "E02",
+      "origin": "H",
+      "text": "Non aggirare il controllo di compatibilità del periodo delle bollette.",
+      "conflicts": [],
+      "section": "E"
+    },
+    {
+      "id": "E03",
+      "origin": "H",
+      "text": "Conservare i dati inseriti durante errori e retry.",
+      "conflicts": [],
+      "section": "E"
+    },
+    {
+      "id": "E04",
+      "origin": "H",
+      "text": "221,79 € da agosto a ottobre 2026 devono produrre tre quote da 73,93 €, anche per mesi passati.",
+      "conflicts": [],
+      "section": "E"
+    },
+    {
+      "id": "E05",
+      "origin": "H",
+      "text": "Il periodo esplicito prevale sul titolo descrittivo della bolletta.",
+      "conflicts": [],
+      "section": "E"
+    },
+    {
+      "id": "E06",
+      "origin": "H",
+      "text": "Il pagamento resta un solo movimento con data e importo effettivi.",
+      "conflicts": [],
+      "section": "E"
+    },
+    {
+      "id": "E07",
+      "origin": "H",
+      "text": "Evitare doppi conteggi fra accantonamenti, fondo, costo per competenza e pagamento.",
+      "conflicts": [],
+      "section": "E"
+    },
+    {
+      "id": "E08",
+      "origin": "H",
+      "text": "Mantenere le stime nei mesi senza documento e sostituirle con le quote effettive all’arrivo della bolletta.",
+      "conflicts": [],
+      "section": "E"
+    },
+    {
+      "id": "E09",
+      "origin": "H",
+      "text": "Conservare l’identità del pagamento durante modifica e retry e gestire centesimi, cambio anno e interruzioni.",
+      "conflicts": [],
+      "section": "E"
+    },
+    {
+      "id": "E10",
+      "origin": "H",
+      "text": "Diagnosticare un saldo personale negativo sui dati effettivi senza attribuirgli una causa provata solo su esempi sintetici.",
+      "conflicts": [],
+      "section": "E"
+    },
+    {
+      "id": "E11",
+      "origin": "D",
+      "text": "Pagina Finanza aperta, con importi a sinistra, saldo del conto a destra, Budget/Analisi e movimenti con icona.",
+      "conflicts": [],
+      "section": "E"
+    },
+    {
+      "id": "E12",
+      "origin": "D",
+      "text": "Usare simboli semplici monocromatici bianchi per le icone Finanza.",
+      "conflicts": [
+        "K23"
+      ],
+      "section": "E"
+    },
+    {
+      "id": "E13",
+      "origin": "D",
+      "text": "Ordinare i movimenti per inserimento effettivo senza mostrare l’ora e senza inventare timestamp storici.",
+      "conflicts": [],
+      "section": "E"
+    },
+    {
+      "id": "E14",
+      "origin": "D",
+      "text": "Importo principale Finanza 40 pt semibold, rimuovendo i divisori superflui ma conservando quelli fra transazioni.",
+      "conflicts": [],
+      "section": "E"
+    },
+    {
+      "id": "E15",
+      "origin": "S2",
+      "text": "Concept storico della pagina Finanza con budget mensile, saldo, disponibilità giornaliera, heatmap, giorni rimanenti e spese straordinarie.",
+      "conflicts": [],
+      "section": "E"
+    },
+    {
+      "id": "E16",
+      "origin": "S1",
+      "text": "Rappresentare le uscite effettive di categoria ignota come spese da classificare, invece di ignorarle.",
+      "conflicts": [],
+      "section": "E"
+    },
+    {
+      "id": "E17",
+      "origin": "S1",
+      "text": "Correggere la chiamata che passa un argomento a una funzione dichiarata senza argomenti nel Worker.",
+      "conflicts": [],
+      "section": "E"
+    },
+    {
+      "id": "E18",
+      "origin": "S1",
+      "text": "Correggere il tipo/contratto finanziario che non espone carCommitments, senza perdere gli impegni auto.",
+      "conflicts": [],
+      "section": "E"
+    },
+    {
+      "id": "E19",
+      "origin": "S1",
+      "text": "Correggere il tipo/contratto finanziario che non espone otherCommitments.",
+      "conflicts": [],
+      "section": "E"
+    },
+    {
+      "id": "E20",
+      "origin": "S1",
+      "text": "Correggere il tipo/contratto finanziario che non espone advanceOffset.",
+      "conflicts": [],
+      "section": "E"
+    },
+    {
+      "id": "E21",
+      "origin": "S1",
+      "text": "Correggere il tipo/contratto finanziario che non espone extraCommitments.",
+      "conflicts": [],
+      "section": "E"
+    },
+    {
+      "id": "E22",
+      "origin": "S1",
+      "text": "Correggere il tipo/contratto finanziario che non espone net.",
+      "conflicts": [],
+      "section": "E"
+    },
+    {
+      "id": "E23",
+      "origin": "S1",
+      "text": "Correggere i contratti che rifiutano la proprietà estimated nei record previsti.",
+      "conflicts": [],
+      "section": "E"
+    },
+    {
+      "id": "E24",
+      "origin": "S1",
+      "text": "Correggere le chiamate che passano Date a parametri numerici, preservando la semantica delle date.",
+      "conflicts": [],
+      "section": "E"
+    },
+    {
+      "id": "E25",
+      "origin": "H",
+      "text": "Non creare addebiti o movimenti bancari reali come prova durante la correzione delle bollette.",
+      "conflicts": [],
+      "section": "E"
+    },
+    {
+      "id": "F01",
+      "origin": "H",
+      "text": "Vecchio modulo di pochi dati: tre macro più data e ora, con calorie derivate.",
+      "conflicts": [
+        "K13",
+        "K14",
+        "K15"
+      ],
+      "section": "F"
+    },
+    {
+      "id": "F02",
+      "origin": "U",
+      "text": "Aggiungere il campo fibre.",
+      "conflicts": [
+        "K13"
+      ],
+      "section": "F"
+    },
+    {
+      "id": "F03",
+      "origin": "U",
+      "text": "Inserire i nutrienti come valori per 100 g.",
+      "conflicts": [],
+      "section": "F"
+    },
+    {
+      "id": "F04",
+      "origin": "U",
+      "text": "Scegliere sotto i grammi effettivamente consumati.",
+      "conflicts": [],
+      "section": "F"
+    },
+    {
+      "id": "F05",
+      "origin": "U",
+      "text": "Inserire anche le kcal dell’etichetta per 100 g, come da tua risposta esplicita.",
+      "conflicts": [
+        "K14"
+      ],
+      "section": "F"
+    },
+    {
+      "id": "F06",
+      "origin": "U",
+      "text": "Scalare nutrienti, fibre e kcal sulla porzione effettiva.",
+      "conflicts": [],
+      "section": "F"
+    },
+    {
+      "id": "F07",
+      "origin": "U",
+      "text": "Esporre soltanto la data, senza campo ora.",
+      "conflicts": [
+        "K15"
+      ],
+      "section": "F"
+    },
+    {
+      "id": "F08",
+      "origin": "H",
+      "text": "Calcolo storico immediato P×4+C×4+G×9 con Decimal.",
+      "conflicts": [
+        "K14"
+      ],
+      "section": "F"
+    },
+    {
+      "id": "F09",
+      "origin": "H",
+      "text": "Accettare virgola e punto decimale, trattare vuoto come zero e rifiutare input invalidi o negativi.",
+      "conflicts": [],
+      "section": "F"
+    },
+    {
+      "id": "F10",
+      "origin": "H",
+      "text": "Gestire Avanti/Fine fra i campi senza spostare il focus dopo la prima cifra né usare timer arbitrari.",
+      "conflicts": [],
+      "section": "F"
+    },
+    {
+      "id": "F11",
+      "origin": "H",
+      "text": "Conservare gli input dopo un errore ed evitare il doppio invio.",
+      "conflicts": [],
+      "section": "F"
+    },
+    {
+      "id": "F12",
+      "origin": "H",
+      "text": "Rendere raggiungibili cronologia e modifica delle registrazioni.",
+      "conflicts": [],
+      "section": "F"
+    },
+    {
+      "id": "F13",
+      "origin": "H",
+      "text": "Aggiungere eliminazione delle registrazioni create da LifeOS.",
+      "conflicts": [],
+      "section": "F"
+    },
+    {
+      "id": "F14",
+      "origin": "H",
+      "text": "Eliminare anche i campioni LifeOS corrispondenti in Apple Salute, lasciando intatti quelli di altre app.",
+      "conflicts": [],
+      "section": "F"
+    },
+    {
+      "id": "F15",
+      "origin": "H",
+      "text": "Conservare stato, identità e retry di modifica/eliminazione dopo errori e riavvii.",
+      "conflicts": [],
+      "section": "F"
+    },
+    {
+      "id": "F16",
+      "origin": "H",
+      "text": "Non mostrare successo prima della conferma e non presumere una transazione unica fra archivio locale e HealthKit.",
+      "conflicts": [],
+      "section": "F"
+    },
+    {
+      "id": "F17",
+      "origin": "H",
+      "text": "Condividere lo stesso archivio fra Dashboard e Salute, evitando due writer incoerenti.",
+      "conflicts": [],
+      "section": "F"
+    },
+    {
+      "id": "F18",
+      "origin": "H",
+      "text": "Il vecchio esempio P0/C0,2/G0 = 0,8 kcal deve poter essere eliminato dall’utente, senza cancellazioni automatiche durante sviluppo.",
+      "conflicts": [],
+      "section": "F"
+    },
+    {
+      "id": "G01",
+      "origin": "U",
+      "text": "Togliere i pulsanti Collega/Gestisci Apple Salute dalla pagina.",
+      "conflicts": [],
+      "section": "G"
+    },
+    {
+      "id": "G02",
+      "origin": "U",
+      "text": "Togliere la sezione di selezione della fonte calorie.",
+      "conflicts": [
+        "K16"
+      ],
+      "section": "G"
+    },
+    {
+      "id": "G03",
+      "origin": "U",
+      "text": "Contare tutte le registrazioni caloriche di tutte le app presenti in Apple Salute.",
+      "conflicts": [
+        "K16"
+      ],
+      "section": "G"
+    },
+    {
+      "id": "G04",
+      "origin": "H",
+      "text": "Contratto precedente con gestione fonti e precauzione contro la somma automatica dei duplicati.",
+      "conflicts": [
+        "K16"
+      ],
+      "section": "G"
+    },
+    {
+      "id": "G05",
+      "origin": "U",
+      "text": "Aggiunta peso e registrazione macro come due azioni grafiche senza testo.",
+      "conflicts": [],
+      "section": "G"
+    },
+    {
+      "id": "G06",
+      "origin": "U",
+      "text": "Usare omino per peso e mela per nutrizione.",
+      "conflicts": [],
+      "section": "G"
+    },
+    {
+      "id": "G07",
+      "origin": "U",
+      "text": "Applicare Liquid Glass alle due azioni e collocarle sopra la barra inferiore.",
+      "conflicts": [],
+      "section": "G"
+    },
+    {
+      "id": "G08",
+      "origin": "U",
+      "text": "Applicare lo stile della dashboard Apple Salute alle quattro schede.",
+      "conflicts": [
+        "K04"
+      ],
+      "section": "G"
+    },
+    {
+      "id": "G09",
+      "origin": "U",
+      "text": "Dare alle quattro righe la stessa altezza.",
+      "conflicts": [],
+      "section": "G"
+    },
+    {
+      "id": "G10",
+      "origin": "U",
+      "text": "Usare icona e titolo piccoli e colorati in alto a sinistra.",
+      "conflicts": [],
+      "section": "G"
+    },
+    {
+      "id": "G11",
+      "origin": "U",
+      "text": "Usare valore grande e bianco in basso a sinistra, con unità piccola e grigia adiacente.",
+      "conflicts": [
+        "K17"
+      ],
+      "section": "G"
+    },
+    {
+      "id": "G12",
+      "origin": "U",
+      "text": "Collocare il mini grafico sulla destra, grigio con l’ultima parte colorata.",
+      "conflicts": [
+        "K18"
+      ],
+      "section": "G"
+    },
+    {
+      "id": "G13",
+      "origin": "U",
+      "text": "Applicare questo trattamento a TDEE, Peso, Calorie e Simulazione.",
+      "conflicts": [],
+      "section": "G"
+    },
+    {
+      "id": "G14",
+      "origin": "U",
+      "text": "Usare la skill REA da GitHub per analizzare il riferimento reale Apple Salute.",
+      "conflicts": [],
+      "section": "G"
+    },
+    {
+      "id": "G15",
+      "origin": "D",
+      "text": "Contratti cromatici precedenti con valori peso grigi e poi valori/arancione Salute.",
+      "conflicts": [
+        "K17"
+      ],
+      "section": "G"
+    },
+    {
+      "id": "G16",
+      "origin": "D",
+      "text": "Calibrare TDEE sullo storico coerente e usare la stessa stima per le proiezioni, senza ancorare tutto alla pesata parziale di oggi.",
+      "conflicts": [],
+      "section": "G"
+    },
+    {
+      "id": "G17",
+      "origin": "H",
+      "text": "Conservare selezione dei grafici, scorrimento e aggiunta/modifica del peso.",
+      "conflicts": [],
+      "section": "G"
+    },
+    {
+      "id": "H01",
+      "origin": "U",
+      "text": "Ridurre dimensioni e padding eccessivi dei pulsanti Bloom.",
+      "conflicts": [],
+      "section": "H"
+    },
+    {
+      "id": "H02",
+      "origin": "U",
+      "text": "Correggere selezione del backup in File che si chiude senza procedere.",
+      "conflicts": [],
+      "section": "H"
+    },
+    {
+      "id": "H03",
+      "origin": "U",
+      "text": "Rendere trasferibili e visibili in LifeOS i contenuti locali conservati nell’app Bloom originale.",
+      "conflicts": [],
+      "section": "H"
+    },
+    {
+      "id": "H04",
+      "origin": "H",
+      "text": "Usare il backup esportato dall’app originale come fonte del trasferimento, senza supporre che lo ZIP dei sorgenti contenga il database personale.",
+      "conflicts": [],
+      "section": "H"
+    },
+    {
+      "id": "H05",
+      "origin": "H",
+      "text": "Conservare note, raccolte, immagini, allegati, archiviati e cestino senza perdere gli originali.",
+      "conflicts": [],
+      "section": "H"
+    },
+    {
+      "id": "H06",
+      "origin": "D",
+      "text": "Mostrare anteprima dell’importazione e risolvere i conflitti esplicitamente con mantieni/sostituisci/copia.",
+      "conflicts": [],
+      "section": "H"
+    },
+    {
+      "id": "H07",
+      "origin": "D",
+      "text": "Evitare duplicazioni in reimportazione tramite identificativi e rimappamenti persistenti.",
+      "conflicts": [],
+      "section": "H"
+    },
+    {
+      "id": "H08",
+      "origin": "D",
+      "text": "Verificare allegati e archivio e conservare una copia di sicurezza prima della scrittura.",
+      "conflicts": [],
+      "section": "H"
+    },
+    {
+      "id": "H09",
+      "origin": "D",
+      "text": "Conservare un rapporto dell’importazione e renderlo consultabile.",
+      "conflicts": [],
+      "section": "H"
+    },
+    {
+      "id": "H10",
+      "origin": "H",
+      "text": "Mantenere Libreria, Mappa e Riscopri già integrati.",
+      "conflicts": [],
+      "section": "H"
+    },
+    {
+      "id": "H11",
+      "origin": "H",
+      "text": "Non introdurre una nuova sincronizzazione PKMS/Dropbox né un secondo lifecycle dell’app Bloom.",
+      "conflicts": [],
+      "section": "H"
+    },
+    {
+      "id": "H12",
+      "origin": "D",
+      "text": "Conservare ricerca, categorie multiple, fissati, selezione multipla e gestione raccolte.",
+      "conflicts": [],
+      "section": "H"
+    },
+    {
+      "id": "H13",
+      "origin": "D",
+      "text": "Conservare testo, link, foto, file, Markdown con tabelle/codice e anteprime degli originali.",
+      "conflicts": [],
+      "section": "H"
+    },
+    {
+      "id": "H14",
+      "origin": "D",
+      "text": "Mantenere ritagli non distruttivi, miniature e pager dei contenuti multipli.",
+      "conflicts": [],
+      "section": "H"
+    },
+    {
+      "id": "H15",
+      "origin": "D",
+      "text": "Conservare mappa, cluster, luoghi collegati e camera passando fra sezioni, senza obbligo di posizione corrente.",
+      "conflicts": [],
+      "section": "H"
+    },
+    {
+      "id": "H16",
+      "origin": "D",
+      "text": "Mantenere Riscopri sullo stesso archivio con giro e filtri persistenti.",
+      "conflicts": [],
+      "section": "H"
+    },
+    {
+      "id": "H17",
+      "origin": "D",
+      "text": "Conservare cattura tramite Intent/link e coda locale recuperabile, evitando writer concorrenti.",
+      "conflicts": [],
+      "section": "H"
+    },
+    {
+      "id": "H18",
+      "origin": "D",
+      "text": "Nessuna pulizia automatica del cestino e nessuna eliminazione di allegati ancora condivisi da altre note.",
+      "conflicts": [],
+      "section": "H"
+    },
+    {
+      "id": "I01",
+      "origin": "P",
+      "text": "Correggere la griglia Bloom: due colonne rigorose, nessuna card oltre la colonna e nessuna sovrapposizione.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I02",
+      "origin": "P",
+      "text": "Gestire le diverse altezze delle card senza grandi vuoti inutili o collisioni.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I03",
+      "origin": "P",
+      "text": "Uniformare ritaglio, proporzioni e rapporto fra miniatura e titolo.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I04",
+      "origin": "P",
+      "text": "Aprire a tutto schermo le immagini contenenti testo, con zoom e proporzioni conservate.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I05",
+      "origin": "P",
+      "text": "Distinguere immagine, link, video e nota con tipo e provenienza leggibili.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I06",
+      "origin": "P",
+      "text": "Sostituire gli URL grezzi nelle card con titolo comprensibile e dominio.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I07",
+      "origin": "P",
+      "text": "Ridurre gli strati di controlli sopra i contenuti Bloom e unire filtro/selezione/raccolte in una riga.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I08",
+      "origin": "P",
+      "text": "Mostrare l’esito dell’importazione come conferma temporanea, lasciando il rapporto consultabile.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I09",
+      "origin": "P",
+      "text": "Dare contesto al pulsante cartella e alle sue azioni.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I10",
+      "origin": "P",
+      "text": "Rendere più discreto lo stato selezionato Libreria, evitando una grande pillola bianca dominante.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I11",
+      "origin": "P",
+      "text": "Valutare una cattura Bloom più vicina al pollice, senza duplicare inutilmente il +.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I12",
+      "origin": "P",
+      "text": "Rendere chiaramente modificabili i campi nutrizionali, con contorno o fondo distinto.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I13",
+      "origin": "P",
+      "text": "Aumentare la leggibilità di placeholder, zeri e unità, evitando la lettura ambigua g0.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I14",
+      "origin": "P",
+      "text": "Compattare il modulo nutrizione e rendere chiaro il percorso etichetta → porzione → totale → aggiunta.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I15",
+      "origin": "P",
+      "text": "Mostrare un riepilogo effettivo prima del salvataggio, per esempio 20 g e 90 kcal.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I16",
+      "origin": "P",
+      "text": "Non mostrare Controlla i valori come errore prima che l’utente inizi a scrivere.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I17",
+      "origin": "P",
+      "text": "Sostituire il modulo in Dashboard con una sola scorciatoia Registra un pasto e aprire una pagina dedicata.",
+      "conflicts": [
+        "K12"
+      ],
+      "section": "I"
+    },
+    {
+      "id": "I18",
+      "origin": "P",
+      "text": "Aggiungere Recenti e Preferiti per riutilizzare alimenti o registrazioni.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I19",
+      "origin": "P",
+      "text": "Chiarire l’assenza di calorie odierne senza trasformarla in zero né colorare lo storico come fosse oggi.",
+      "conflicts": [
+        "K18"
+      ],
+      "section": "I"
+    },
+    {
+      "id": "I20",
+      "origin": "P",
+      "text": "Scrivere Tra 8 settimane e Peso stimato per contestualizzare la simulazione.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I21",
+      "origin": "P",
+      "text": "Mostrare ipotesi e limiti della proiezione e un’indicazione dell’incertezza nel dettaglio.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I22",
+      "origin": "P",
+      "text": "Rendere leggibili i mini grafici riducendo densità e aumentando riconoscibilità dell’ultimo punto.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I23",
+      "origin": "P",
+      "text": "Ridurre lo spazio eccessivo fra data e calendario nella Dashboard.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I24",
+      "origin": "P",
+      "text": "Rendere più informative scadenze e orari e meno ripetitivi i sottotitoli Evento/Abitudine.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I25",
+      "origin": "P",
+      "text": "Sostituire Gestisci con un’azione che chiarisca la destinazione.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I26",
+      "origin": "P",
+      "text": "Distinguere visivamente completamento e apertura della riga, con affordance coerenti.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I27",
+      "origin": "P",
+      "text": "Mostrare al tocco il nome completo del turno e i suoi orari, distinguendo oggi dal giorno selezionato.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I28",
+      "origin": "P",
+      "text": "Rendere esplicito il periodo del budget, se coerente con il calcolo sottostante.",
+      "conflicts": [
+        "K11"
+      ],
+      "section": "I"
+    },
+    {
+      "id": "I29",
+      "origin": "P",
+      "text": "Garantire che ogni ultimo contenuto possa scorrere completamente sopra tab bar e azioni flottanti.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I30",
+      "origin": "P",
+      "text": "Ridurre il disordine visivo dei contenuti intravisti sotto il materiale della tab bar.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I31",
+      "origin": "P",
+      "text": "Far aiutare la Dashboard a scegliere la prossima azione e distinguere ciò che può aspettare.",
+      "conflicts": [
+        "K06",
+        "K08",
+        "K22"
+      ],
+      "section": "I"
+    },
+    {
+      "id": "I32",
+      "origin": "P",
+      "text": "Collegare scadenza, pagamento e budget per Affitto e materiali/contatti/prossimo passo per una riparazione.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I33",
+      "origin": "P",
+      "text": "Catturare rapidamente note, spese e link con organizzazione completabile in seguito.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I34",
+      "origin": "P",
+      "text": "Far riemergere in Bloom i contenuti utili per attività o progetti, oltre alla semplice archiviazione.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I35",
+      "origin": "P",
+      "text": "Gestire avanzamento e prossimo passo delle attività senza ridurre tutto a completato/non completato.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I36",
+      "origin": "P",
+      "text": "Spiegare gli andamenti Salute, il periodo e la sufficienza dei dati, consentendo di risalire alle registrazioni.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I37",
+      "origin": "P",
+      "text": "Aggiungere una revisione breve della giornata e della settimana.",
+      "conflicts": [
+        "K08"
+      ],
+      "section": "I"
+    },
+    {
+      "id": "I38",
+      "origin": "P",
+      "text": "Rendere comprensibile se un contenuto è locale, sincronizzato oppure incluso in un backup, senza inventare sincronizzazioni.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I39",
+      "origin": "P",
+      "text": "Uniformare superfici e raggi dei componenti equivalenti senza cancellare il significato delle differenze.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I40",
+      "origin": "P",
+      "text": "Usare una gerarchia più netta fra attenzione, riepiloghi e strumenti di inserimento.",
+      "conflicts": [
+        "K07"
+      ],
+      "section": "I"
+    },
+    {
+      "id": "I41",
+      "origin": "P",
+      "text": "Ridurre contenitori annidati e riservare le card ai gruppi che ne hanno bisogno.",
+      "conflicts": [
+        "K04"
+      ],
+      "section": "I"
+    },
+    {
+      "id": "I42",
+      "origin": "P",
+      "text": "Assegnare accenti riconoscibili alle aree, incluso blu Bloom e arancio Finanza nel concept recente.",
+      "conflicts": [
+        "K01",
+        "K23"
+      ],
+      "section": "I"
+    },
+    {
+      "id": "I43",
+      "origin": "P",
+      "text": "Rifinire interlinea, troncamento dei titoli/URL, allineamento cifre-unità e formati numerici.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I44",
+      "origin": "P",
+      "text": "Uniformare peso e dimensione ottica delle icone.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I45",
+      "origin": "P",
+      "text": "Progettare stati vuoti, primo utilizzo e ricerca senza risultati con una sola azione chiara.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I46",
+      "origin": "P",
+      "text": "Usare feedback brevi e coerenti per completamento, aggiunta, cambio sezione e annullamento.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I47",
+      "origin": "P",
+      "text": "Verificare tastiera, ritorno alla posizione di scorrimento, uso a una mano e possibilità di annullare.",
+      "conflicts": [],
+      "section": "I"
+    },
+    {
+      "id": "I48",
+      "origin": "P",
+      "text": "Dare a LifeOS una direzione grafica più autonoma e riconoscibile rispetto alla sola somiglianza iOS.",
+      "conflicts": [
+        "K04"
+      ],
+      "section": "I"
+    },
+    {
+      "id": "L01",
+      "origin": "U",
+      "text": "Ricostruire tutte le correzioni di questa conversazione e delle precedenti, una per una, segnalando in rosso i conflitti.",
+      "conflicts": [
+        "K24"
+      ],
+      "section": "L"
+    },
+    {
+      "id": "L02",
+      "origin": "U",
+      "text": "Non limitare il lavoro al solo difetto della griglia Bloom.",
+      "conflicts": [
+        "K24"
+      ],
+      "section": "L"
+    },
+    {
+      "id": "L03",
+      "origin": "P",
+      "text": "Proposta precedente di iniziare soltanto dalla griglia Bloom, rifiutata nella tua ultima risposta.",
+      "conflicts": [
+        "K24"
+      ],
+      "section": "L"
+    },
+    {
+      "id": "L04",
+      "origin": "U",
+      "text": "Ridurre cicli lunghi di lavoro che terminano con una versione ancora piena di difetti visibili.",
+      "conflicts": [],
+      "section": "L"
+    },
+    {
+      "id": "L05",
+      "origin": "U",
+      "text": "Non scaricare sull’utente il collaudo iniziale né costringerlo a ripetere continuamente le stesse correzioni.",
+      "conflicts": [],
+      "section": "L"
+    },
+    {
+      "id": "L06",
+      "origin": "U",
+      "text": "Intervenire sull’app installabile effettiva: un mockup non risolve i difetti della build.",
+      "conflicts": [],
+      "section": "L"
+    },
+    {
+      "id": "L07",
+      "origin": "U",
+      "text": "La richiesta di rappresentare tutte le migliorie in una sola immagine riguarda il concept, non prova l’implementazione.",
+      "conflicts": [],
+      "section": "L"
+    },
+    {
+      "id": "L08",
+      "origin": "U",
+      "text": "Operare autonomamente entro il progetto senza impattare risorse esterne al progetto.",
+      "conflicts": [],
+      "section": "L"
+    },
+    {
+      "id": "L09",
+      "origin": "H",
+      "text": "Conservare dati, bundle ID, App Group, compatibilità di avvio e aggiornamento sopra l’app esistente.",
+      "conflicts": [],
+      "section": "L"
+    },
+    {
+      "id": "L10",
+      "origin": "H",
+      "text": "Consegnare un’IPA diretta per Signulous, non uno ZIP.",
+      "conflicts": [],
+      "section": "L"
+    },
+    {
+      "id": "L11",
+      "origin": "H",
+      "text": "Non disinstallare l’app, svuotare il Portachiavi o cancellare dati per far passare i controlli.",
+      "conflicts": [],
+      "section": "L"
+    },
+    {
+      "id": "L12",
+      "origin": "H",
+      "text": "Non riproporre la stessa richiesta di versione iOS o crash report già forniti.",
+      "conflicts": [],
+      "section": "L"
+    },
+    {
+      "id": "L13",
+      "origin": "H",
+      "text": "Distinguere prove simulate, demo e prove fisiche e dichiarare soltanto ciò che è effettivamente verificato.",
+      "conflicts": [],
+      "section": "L"
+    },
+    {
+      "id": "L14",
+      "origin": "H",
+      "text": "Non pubblicare dati personali, credenziali o diagnostica finanziaria privata nei log.",
+      "conflicts": [],
+      "section": "L"
+    },
+    {
+      "id": "L15",
+      "origin": "D",
+      "text": "Widget piccolo 2×2 con settimana, riepiloghi e +, senza esportare saldo, dati Salute o credenziali.",
+      "conflicts": [],
+      "section": "L"
+    },
+    {
+      "id": "L16",
+      "origin": "D",
+      "text": "Widget offline con cache atomica e data reale dell’ultimo aggiornamento, senza fingere freschezza.",
+      "conflicts": [],
+      "section": "L"
+    },
+    {
+      "id": "L17",
+      "origin": "P",
+      "text": "Mantenere un registro persistente dei difetti con prove e controllo delle regressioni.",
+      "conflicts": [],
+      "section": "L"
+    },
+    {
+      "id": "L18",
+      "origin": "P",
+      "text": "Usare casi rappresentativi: librerie popolate, immagini diverse, titoli lunghi, dati mancanti, tastiera e testo grande.",
+      "conflicts": [],
+      "section": "L"
+    },
+    {
+      "id": "L19",
+      "origin": "P",
+      "text": "Controllare il risultato renderizzato dell’app reale oltre agli assert automatici.",
+      "conflicts": [],
+      "section": "L"
+    },
+    {
+      "id": "L20",
+      "origin": "P",
+      "text": "Eseguire prima verifiche pertinenti e produrre l’IPA dopo la verifica del gruppo di correzioni.",
+      "conflicts": [],
+      "section": "L"
+    },
+    {
+      "id": "L21",
+      "origin": "H",
+      "text": "Eliminare il crash immediato di avvio osservato nella build 75, senza attribuirlo automaticamente al certificato.",
+      "conflicts": [],
+      "section": "L"
+    },
+    {
+      "id": "L22",
+      "origin": "D",
+      "text": "Conservare il controllo di compatibilità degli import Foundation Date su app e widget e la toolchain compatibile documentata.",
+      "conflicts": [],
+      "section": "L"
+    },
+    {
+      "id": "L23",
+      "origin": "H",
+      "text": "Verificare che aggiornamento e riavvio conservino sessione, archivi e dati già salvati.",
+      "conflicts": [],
+      "section": "L"
+    },
+    {
+      "id": "M01",
+      "origin": "S1",
+      "text": "Correggere il primo allegato storico indicato con fixalo: dettaglio non ricostruibile dal solo testo disponibile.",
+      "conflicts": [],
+      "section": "M"
+    },
+    {
+      "id": "M02",
+      "origin": "S1",
+      "text": "Correggere il secondo allegato storico, definito troppo piccolo e problematico: riferimento visivo oggi mancante.",
+      "conflicts": [],
+      "section": "M"
+    },
+    {
+      "id": "M03",
+      "origin": "S1",
+      "text": "Ridurre i troppi colori del terzo allegato storico, conservando la struttura delle carte gradita.",
+      "conflicts": [],
+      "section": "M"
+    },
+    {
+      "id": "M04",
+      "origin": "S1",
+      "text": "Aggiungere un accento al quarto allegato storico, definito troppo spento.",
+      "conflicts": [],
+      "section": "M"
+    }
+  ]
+}
