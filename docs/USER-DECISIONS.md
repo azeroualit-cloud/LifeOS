@@ -74,10 +74,10 @@ Le seguenti sono parafrasi, non citazioni letterali. Gli ID corrispondono all’
 - **C17 — ACTIVE:** Affiancare Aggiungi spesa sulla destra del budget, facilmente raggiungibile con il dito.
 - **C21 — ACTIVE:** Integrare nella Dashboard un inserimento nutrizionale rapido e compatto.
 - **F02 — ACTIVE:** Aggiungere il campo fibre.
-- **F03 — ACTIVE:** Inserire i nutrienti come valori per 100 g.
-- **F04 — ACTIVE:** Scegliere sotto i grammi effettivamente consumati.
-- **F05 — ACTIVE:** Inserire anche le kcal dell’etichetta per 100 g, come da tua risposta esplicita.
-- **F06 — ACTIVE:** Scalare nutrienti, fibre e kcal sulla porzione effettiva.
+- **F03 — SUSPENDED:** Inserire i nutrienti come valori per 100 g.
+- **F04 — SUSPENDED:** Scegliere sotto i grammi effettivamente consumati.
+- **F05 — SUSPENDED:** Inserire anche le kcal dell’etichetta per 100 g, come da tua risposta esplicita.
+- **F06 — SUSPENDED:** Scalare nutrienti, fibre e kcal sulla porzione effettiva.
 - **F07 — ACTIVE:** Esporre soltanto la data, senza campo ora.
 - **G01 — ACTIVE:** Togliere i pulsanti Collega/Gestisci Apple Salute dalla pagina.
 - **G02 — ACTIVE:** Togliere la sezione di selezione della fonte calorie.
@@ -133,3 +133,7 @@ ACTIVE, 4 novembre 2026. Proporre le modifiche di prodotto e attendere approvazi
 ## NUTRITION-DIRECT-01 — PENDING_CONFIRMATION
 
 Richiesto il 4 novembre: quick add Dashboard con quantità effettive di proteine/carboidrati/grassi/fibre e kcal automatiche; abbandonare per ora il percorso per 100 g. Conflitto con F03, F04, F05, F06. Attendere conferma della sospensione temporanea prima di modificare il prodotto; conservare dati storici. Nessuna implementazione avviata.
+
+## NUTRITION-DIRECT-01 — ACTIVE, conflitto confermato
+
+Conferma 4 novembre: «si, prima di procedere quindi come lo vuoi implementare lato design». F03–F06 sospese per ora; storico conservato. Approvato pulsante + Nutrizione in Dashboard → pannello dal basso con proteine/carboidrati/grassi/fibre effettivi in g, kcal automatiche, data Oggi modificabile, Aggiungi sopra tastiera. «seguiamo la tua idea, non appena hai l’immagine del render mostramela subito prima di procedere con altro»: mostrare il render prima di altre attività, nessuna implementazione applicativa in questo passo. La precedente sezione PENDING_CONFIRMATION è storica e risolta.

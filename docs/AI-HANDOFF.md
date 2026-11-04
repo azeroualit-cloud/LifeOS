@@ -58,3 +58,5 @@ Leggere [BLOOM-GRID-REVIEW.md](BLOOM-GRID-REVIEW.md): H-GRID-01 implementato e i
 Aggiornamento 4 novembre: risultato visivo H-GRID-01 accettato tramite «ok, procediamo con la prossima correzzione». Prossima proposta: riconoscibilità e compattezza del modulo nutrizione in Dashboard; non ancora approvata né implementata. Accettazione globale per produzione invariata.
 
 Nuovo input NUTRITION-DIRECT-01 in PENDING_CONFIRMATION: quick add con nutrienti effettivi e kcal automatiche, sospendendo per ora percorso 100 g/porzione/kcal etichetta. Conflitto F03–F06: chiedere conferma ai sensi META-01. La precedente proposta di restyling nutrizione non è stata approvata. Non implementare la parte confliggente prima della risposta.
+
+Aggiornamento nutrizione: conflitto NUTRITION-DIRECT-01 confermato, F03–F06 SUSPENDED per ora; nessuna migrazione/cancellazione dello storico. Design del quick add a pannello approvato come idea; ora soltanto render da mostrare immediatamente, poi fermarsi prima di implementare altro. Il precedente pending è risolto. App e build invariati.

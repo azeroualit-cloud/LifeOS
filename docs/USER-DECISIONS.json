@@ -202,7 +202,7 @@
     },
     {
       "id": "F03",
-      "status": "ACTIVE",
+      "status": "SUSPENDED",
       "scope": "LifeOS",
       "rule": "Inserire i nutrienti come valori per 100 g.",
       "recorded_on": "2026-11-04",
@@ -211,11 +211,14 @@
         "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
         "inventory_id": "F03"
       },
-      "source_message_date": null
+      "source_message_date": null,
+      "suspension_confirmed_on": "2026-11-04",
+      "confirmation_quote": "si, prima di procedere quindi come lo vuoi implementare lato design",
+      "suspension_scope": "Percorso 100 g/porzione/kcal etichetta sospeso per ora nei nuovi inserimenti; conservare storico."
     },
     {
       "id": "F04",
-      "status": "ACTIVE",
+      "status": "SUSPENDED",
       "scope": "LifeOS",
       "rule": "Scegliere sotto i grammi effettivamente consumati.",
       "recorded_on": "2026-11-04",
@@ -224,11 +227,14 @@
         "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
         "inventory_id": "F04"
       },
-      "source_message_date": null
+      "source_message_date": null,
+      "suspension_confirmed_on": "2026-11-04",
+      "confirmation_quote": "si, prima di procedere quindi come lo vuoi implementare lato design",
+      "suspension_scope": "Percorso 100 g/porzione/kcal etichetta sospeso per ora nei nuovi inserimenti; conservare storico."
     },
     {
       "id": "F05",
-      "status": "ACTIVE",
+      "status": "SUSPENDED",
       "scope": "LifeOS",
       "rule": "Inserire anche le kcal dell’etichetta per 100 g, come da tua risposta esplicita.",
       "recorded_on": "2026-11-04",
@@ -237,11 +243,14 @@
         "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
         "inventory_id": "F05"
       },
-      "source_message_date": null
+      "source_message_date": null,
+      "suspension_confirmed_on": "2026-11-04",
+      "confirmation_quote": "si, prima di procedere quindi come lo vuoi implementare lato design",
+      "suspension_scope": "Percorso 100 g/porzione/kcal etichetta sospeso per ora nei nuovi inserimenti; conservare storico."
     },
     {
       "id": "F06",
-      "status": "ACTIVE",
+      "status": "SUSPENDED",
       "scope": "LifeOS",
       "rule": "Scalare nutrienti, fibre e kcal sulla porzione effettiva.",
       "recorded_on": "2026-11-04",
@@ -250,7 +259,10 @@
         "chat": "01a1a117-f522-7dd0-9bbb-8b848c7185c4",
         "inventory_id": "F06"
       },
-      "source_message_date": null
+      "source_message_date": null,
+      "suspension_confirmed_on": "2026-11-04",
+      "confirmation_quote": "si, prima di procedere quindi come lo vuoi implementare lato design",
+      "suspension_scope": "Percorso 100 g/porzione/kcal etichetta sospeso per ora nei nuovi inserimenti; conservare storico."
     },
     {
       "id": "F07",
@@ -551,25 +563,23 @@
       "recorded_on": "2026-11-04",
       "original_quote": "approvo con l'unica accortezza di per i link mostrare le anteprime",
       "conflict_check": "Compatibile con regole attive; approvazione della correzione proposta."
-    }
-  ],
-  "pending_confirmations": [
+    },
     {
       "id": "NUTRITION-DIRECT-01",
-      "status": "PENDING_CONFIRMATION",
+      "status": "ACTIVE",
       "recorded_on": "2026-11-04",
-      "original_quote": "facciamo che dalla dashboard c'è solo un quick add, il progetto dei 100g lo abbandoniamo per ora, dalla dashboard solo aggiunta di proteine carbo grassi fibre e poi avviene il calcolo delle calorie",
-      "proposal": "Quick add nella Dashboard con quantità effettive di proteine, carboidrati, grassi e fibre; calorie calcolate automaticamente. Sospendere per ora valori per 100 g, porzione e kcal manuali dell’etichetta nei nuovi inserimenti; conservare dati storici.",
-      "conflicts": [
+      "rule": "Quick add nella Dashboard per grammi effettivi di proteine, carboidrati, grassi e fibre; calorie automatiche. Pulsante compatto + Nutrizione apre pannello dal basso con quattro campi in due colonne, kcal in tempo reale, data oggi modificabile e Aggiungi sopra la tastiera. Prima mostrare il render e fermarsi, senza implementare altro.",
+      "approval_quote": "seguiamo la tua idea, non appena hai l'immagine del render mostramela subito prima di procedere con altro",
+      "implementation": "design render only; app unchanged",
+      "replaces_temporarily": [
         "F03",
         "F04",
         "F05",
         "F06"
-      ],
-      "reason": "Le regole attive richiedono valori per 100 g, porzione, kcal dell’etichetta e ridimensionamento. META-01 impone conferma prima di sostituirle o sospenderle.",
-      "implementation": "not started"
+      ]
     }
   ],
+  "pending_confirmations": [],
   "history": [
     {
       "recorded_on": "2026-11-04",
