@@ -41,6 +41,21 @@ Ad ogni incremento significativo o nuova decisione, e prima del passaggio di ses
 
 Questa regola si aggiunge a META-01; un futuro conflitto di prodotto richiede comunque la tua conferma. È una procedura delle sessioni di lavoro, non una promessa di sincronizzazione quando nessun agente è attivo.
 
+
+### Aggiornamento continuo, senza promemoria dell’utente
+
+META-01 e META-02 sono obblighi permanenti di ogni sessione LifeOS, non task da eseguire una volta sola. Non aspettare che l’utente chieda di nuovo «salva», «aggiorna il report» o «aggiorna GitHub».
+
+- A ogni nuovo input: rileggere le decisioni pertinenti, distinguere domanda/task/decisione e controllare i conflitti. Salvare automaticamente decisioni, richieste pendenti e conferme; un conflitto resta sospeso fino alla risposta richiesta da META-01.
+- Durante il lavoro: aggiornare i documenti interessati quando cambiano codice, difetti, flussi, tecnologie, esiti dei controlli o stato della build. Pubblicare i checkpoint significativi senza accumulare tutto fino all’ultima consegna.
+- Prima di ogni risposta finale o passaggio di sessione: verificare che regole, report e repository descrivano lo stato attuale; se ci sono cambiamenti da conservare, eseguire commit/push e confrontare lo SHA remoto. Se nulla è cambiato, non creare commit vuoti.
+- Se la sincronizzazione fallisce, registrare e dichiarare il mancato aggiornamento; non affermare che GitHub sia sincronizzato. Preservare il lavoro e non forzare il push.
+- La procedura opera mentre un agente lavora su LifeOS. Non promettere aggiornamenti spontanei quando nessun agente è in esecuzione.
+
+Richiesta di chiarimento dell’utente del 4 novembre 2026:
+
+> ma deve essere una cosa che aggiorni continuamente come le regole e non solo ora che te l'ho deatto
+
 ## Regole attive ricostruite dalle richieste dirette
 
 Le seguenti sono parafrasi, non citazioni letterali. Gli ID corrispondono all’inventario precedente. ACTIVE indica una decisione, non la qualità o il completamento della sua implementazione.

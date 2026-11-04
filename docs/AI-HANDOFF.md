@@ -11,6 +11,10 @@ Aggiornato il 4 novembre 2026. Leggere prima di pianificare o modificare il prog
 5. `ARCHITECTURE-CURRENT.md` — tecnologie, flussi, dati, build e comandi.
 6. `decision-history/2026-11-04-inventory.md` — elenco storico completo con origine e contraddizioni; non sono 238 ordini tutti attivi.
 
+## Manutenzione permanente del report
+
+Non attendere un nuovo promemoria dell’utente: META-01 e META-02 valgono a ogni sessione. Controllare ogni nuovo input, registrare decisioni e conflitti, aggiornare i documenti interessati durante il lavoro. Prima di ogni risposta finale o passaggio di sessione verificare che lo stato documentato sia corrente e che i cambiamenti siano stati sincronizzati e verificati su GitHub. Nessun commit vuoto se lo stato non cambia; nessuna dichiarazione di sincronizzazione se il push fallisce.
+
 ## Fatti da non perdere
 
 - L’ultima IPA è 0.10.17 build 78, sorgente `33574a2114ea6e0d378f69d06aadf60378cf55e9`.

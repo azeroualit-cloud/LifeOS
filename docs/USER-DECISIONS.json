@@ -549,6 +549,16 @@
         "saprò come ccomporarsi e lavoraci, integrando il report con regole, elenchi, flussi e tecnlogie, tutto up to date"
       ],
       "conflict_check": "Compatibile con META-01 e L08: aggiornamento del solo repository LifeOS, senza sostituire regole di prodotto."
+    },
+    {
+      "recorded_on": "2026-11-04",
+      "type": "CONTINUOUS_MAINTENANCE_CLARIFIED",
+      "policy_ids": [
+        "META-01",
+        "META-02"
+      ],
+      "approval_quote": "ma deve essere una cosa che aggiorni continuamente come le regole e non solo ora che te l'ho deatto",
+      "conflict_check": "Chiarimento compatibile: nessuna regola di prodotto sostituita; nessuna ulteriore conferma necessaria."
     }
   ],
   "historical_inventory": "decision-history/2026-11-04-inventory.json",
@@ -568,6 +578,8 @@
     "scope_guard": "Solo il progetto LifeOS. Non includere segreti, backup personali, database, dati sanitari/finanziari, log privati o modifiche estranee.",
     "safety": "Fetch prima del push, preservare lavoro concorrente, niente force push. Ispezionare trigger CI prima di aggiornare rami. Un push documentale non autorizza deploy backend o nuova distribuzione IPA.",
     "evidence": "Non riusare risultati della build precedente come prova di codice cambiato; registrare pending/failed/not-run quando appropriato. Non presentare una build come pronta se i difetti o il rifiuto dell’utente restano aperti.",
-    "no_background_guarantee": "Questa è una procedura delle sessioni che lavorano nel repository, non un servizio di sincronizzazione in background mentre nessun agente è attivo."
+    "no_background_guarantee": "Questa è una procedura delle sessioni che lavorano nel repository, non un servizio di sincronizzazione in background mentre nessun agente è attivo.",
+    "clarification_quote": "ma deve essere una cosa che aggiorni continuamente come le regole e non solo ora che te l'ho deatto",
+    "automatic_maintenance": "Obbligo permanente, senza promemoria: controllare ogni nuovo input e aggiornare automaticamente i documenti pertinenti durante il lavoro. Prima di ogni risposta finale o passaggio di sessione, verificare lo stato documentale e la sincronizzazione remota; fare commit/push se ci sono cambiamenti. Non generare commit vuoti e non dichiarare sincronizzato un remoto non verificato."
   }
 }

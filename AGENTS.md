@@ -34,3 +34,13 @@ Leggere `docs/AI-HANDOFF.md` e `docs/STATUS.md` all’avvio. Mantenere aggiornat
 Aggiornare `docs/BUILD-STATE.json` quando cambia lo stato della build e `docs/OPEN-ISSUES.md` quando cambia un difetto o la sua prova. Il README del ramo predefinito deve indicare lo stato e l’eventuale ramo corrente. Regole, elenchi, flussi, tecnologie e limiti devono essere leggibili anche da una IA diversa da Codex.
 
 Distinguere risultato tecnico dei test e accettazione del prodotto. La build 78 è stata rifiutata dall’utente come pronta per la produzione: non dichiararla pronta grazie ai vecchi test verdi. Non pubblicare backup, credenziali o dati personali. Ispezionare i workflow: sincronizzare il repository non autorizza un deploy backend o una nuova release.
+
+### Aggiornamento continuo, senza promemoria dell’utente
+
+META-01 e META-02 sono obblighi permanenti di ogni sessione LifeOS, non task da eseguire una volta sola. Non aspettare che l’utente chieda di nuovo «salva», «aggiorna il report» o «aggiorna GitHub».
+
+- A ogni nuovo input: rileggere le decisioni pertinenti, distinguere domanda/task/decisione e controllare i conflitti. Salvare automaticamente decisioni, richieste pendenti e conferme; un conflitto resta sospeso fino alla risposta richiesta da META-01.
+- Durante il lavoro: aggiornare i documenti interessati quando cambiano codice, difetti, flussi, tecnologie, esiti dei controlli o stato della build. Pubblicare i checkpoint significativi senza accumulare tutto fino all’ultima consegna.
+- Prima di ogni risposta finale o passaggio di sessione: verificare che regole, report e repository descrivano lo stato attuale; se ci sono cambiamenti da conservare, eseguire commit/push e confrontare lo SHA remoto. Se nulla è cambiato, non creare commit vuoti.
+- Se la sincronizzazione fallisce, registrare e dichiarare il mancato aggiornamento; non affermare che GitHub sia sincronizzato. Preservare il lavoro e non forzare il push.
+- La procedura opera mentre un agente lavora su LifeOS. Non promettere aggiornamenti spontanei quando nessun agente è in esecuzione.
