@@ -19,3 +19,7 @@ Corretto anche il selettore focused: quando si richiede tutta LifeOSProbeTests, 
 Run 41841832626 PASSATO: 271 unitari e 5 UI, 16 screenshot. Cattura a schermo intero dopo Fine mostra il pannello completo, mentre la contemporanea acquisizione app-only risulta vuota: non usare app-only come prova del rendering di questo foglio nel simulatore. Cattura errore ancora insufficiente: acquisire solo schermo intero e confrontare con video nativo del simulatore sintetico.
 
 Testo grande: rendere esplicita l’applicazione del modifier di prova anche al foglio locale, come già avviene per i fogli del router, e verificare le coordinate effettive dei campi (una colonna in accessibilità, due in standard). Senza questo assert il nome del test non certifica la dimensione attiva. Nessuna modifica di comportamento al rendering normale per questo override DEBUG.
+
+## Modalità accessibilità reale
+
+Run 41845722107: 271 unitari passati, quattro UI passati e uno fallito durante input Grassi. Confermata la colonna unica e il font accessibile nel foglio. Video nativo e gerarchia mostrano il campo Grassi a y=487–534 pt, sotto pulsante fisso e barra tastiera, mentre Carboidrati manteneva il focus. Il solo isHittable restituiva un segnale insufficiente. Test corretto per verificare che l’intero campo sia nel rettangolo visibile sopra l’azione fissa prima del tap; nessun cambiamento applicativo introdotto per questo errore del test. Nuova verifica anche sulla leggibilità completa dell’errore e sulla posizione dell’azione in accessibilità.

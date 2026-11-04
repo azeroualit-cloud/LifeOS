@@ -32,18 +32,22 @@ final class NativeNutritionQuickUITests: XCTestCase {
         XCTAssertGreaterThan(bottom, top)
         origin.withOffset(CGVector(dx: scroll.frame.midX, dy: up ? bottom : top)).press(forDuration: 0.05, thenDragTo: origin.withOffset(CGVector(dx: scroll.frame.midX, dy: up ? top : bottom)))
     }
+    private func visible(_ element: XCUIElement, in app: XCUIApplication) -> Bool {
+        guard element.exists else { return false }
+        let scroll = app.scrollViews["quick-nutrition-scroll"].frame
+        let bottom = min(scroll.maxY, app.buttons["quick-nutrition-save"].frame.minY)
+        let frame = element.frame
+        return frame.minY >= scroll.minY + 1 && frame.maxY <= bottom - 1
+    }
     private func fill(_ app: XCUIApplication) {
         let scroll = app.scrollViews["quick-nutrition-scroll"]
         for (label, value) in [("Proteine", "25"), ("Carboidrati", "40"), ("Grassi", "10"), ("Fibre", "6")] {
             let field = app.textFields["quick-nutrition-" + label]
-            for _ in 0..<5 {
-                if field.isHittable { break }
-                let origin = app.coordinate(withNormalizedOffset: .zero)
-                let bottom = min(scroll.frame.maxY, app.buttons["quick-nutrition-save"].frame.minY) - 12
-                let top = scroll.frame.minY + 12
-                XCTAssertGreaterThan(bottom, top)
-                origin.withOffset(CGVector(dx: scroll.frame.midX, dy: bottom)).press(forDuration: 0.05, thenDragTo: origin.withOffset(CGVector(dx: scroll.frame.midX, dy: top)))
+            for _ in 0..<6 {
+                if visible(field, in: app) { break }
+                drag(scroll, app: app, up: true)
             }
+            XCTAssertTrue(visible(field, in: app), "Input must be above the pinned action and keyboard")
             XCTAssertTrue(field.isHittable); field.tap(); field.typeText(value)
         }
     }
@@ -73,6 +77,8 @@ final class NativeNutritionQuickUITests: XCTestCase {
     func testLargeTextErrorKeepsValuesAndRetryCompletes() {
         let app = open(large: true, failure: true)
         fill(app)
+        XCTAssertLessThanOrEqual(app.buttons["quick-nutrition-save"].frame.maxY, app.keyboards.firstMatch.frame.minY + 1)
+        capture("Nutrition accessibility keyboard", app)
         app.buttons["quick-nutrition-keyboard-done"].tap()
         app.buttons["quick-nutrition-save"].tap()
         let error = app.staticTexts["quick-nutrition-error"]
@@ -80,16 +86,16 @@ final class NativeNutritionQuickUITests: XCTestCase {
         let protein = app.textFields["quick-nutrition-Proteine"]
         let scroll = app.scrollViews["quick-nutrition-scroll"]
         for _ in 0..<6 {
-            if protein.exists && protein.isHittable { break }
+            if visible(protein, in: app) { break }
             drag(scroll, app: app, up: false)
         }
-        XCTAssertTrue(protein.isHittable)
+        XCTAssertTrue(visible(protein, in: app))
         XCTAssertEqual(protein.value as? String, "25")
         for _ in 0..<6 {
-            if error.isHittable { break }
+            if visible(error, in: app) { break }
             drag(scroll, app: app, up: true)
         }
-        XCTAssertTrue(error.isHittable, "The recoverable error must be readable")
+        XCTAssertTrue(visible(error, in: app), "The recoverable error must be readable")
         XCTAssertTrue(app.buttons["quick-nutrition-save"].isEnabled)
         RunLoop.current.run(until: Date().addingTimeInterval(1))
         capture("Nutrition large text recoverable error stable", app)
