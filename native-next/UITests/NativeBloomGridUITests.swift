@@ -41,7 +41,10 @@ final class NativeBloomGridUITests: XCTestCase {
             let origin = app.coordinate(withNormalizedOffset: .zero)
             let start = origin.withOffset(CGVector(dx: scroll.frame.midX, dy: bottom))
             let end = origin.withOffset(CGVector(dx: scroll.frame.midX, dy: max(top, bottom - 200)))
+            let tracked = app.buttons[cards[0].identifier]
+            let previousY = tracked.frame.minY
             start.press(forDuration: 0.05, thenDragTo: end)
+            XCTAssertTrue(!tracked.exists || tracked.frame.minY < previousY - 1, "The library must actually scroll")
             XCTAssertTrue(app.tabBars.buttons["Bloom"].isSelected, "Scroll must not hit the tab bar")
         }
     }
