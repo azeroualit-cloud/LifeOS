@@ -1,5 +1,11 @@
 # LifeOS — stato corrente
 
+## Incremento corrente — nutrizione rapida (4 novembre 2026)
+
+NUTRITION-DIRECT-01: render approvato con «ok approvo», implementazione autorizzata. Dashboard con solo pulsante Nutrizione; foglio con proteine/carboidrati/grassi/fibre effettivi, calorie automatiche e data. Il flusso per 100 g è sospeso; storico non migrato. Fonte e prove: [NUTRITION-QUICK-REVIEW.md](NUTRITION-QUICK-REVIEW.md).
+
+Compilazione riuscita, 271 unitari e quattro UI passati nel run 41853040353; un UI accessibilità fallito nella ricerca del campo disabilitato. Video nativo mostra valori conservati, errore e Riprova visibili, foglio aperto dopo scroll. Nuova verifica 41856609394 sul commit c6c2b637: in coda. Non dichiarare ancora completato il retry di questa versione. Nessuna nuova IPA, nessun deploy, nessuna verifica HealthKit su dispositivo fisico. Il render approvato non costituisce accettazione dell’implementazione.
+
 Aggiornato il 4 novembre 2026. Questo documento prevale come riepilogo di stato sui vecchi handoff e sui rapporti cronologici. Le istruzioni dell’utente restano nel registro delle decisioni.
 
 ## Valutazione del prodotto
@@ -10,7 +16,7 @@ Aggiornato il 4 novembre 2026. Questo documento prevale come riepilogo di stato 
 
 | Campo | Stato |
 |---|---|
-| Sorgenti app correnti | `native-next/`; correzione Bloom e anteprime link successive alla build 78, verifica in corso |
+| Sorgenti app correnti | `native-next/`; Bloom con anteprime verificato e accettato visivamente; nutrizione rapida implementata, verifica recupero accessibilità in corso |
 | Versione app e widget | 0.10.17 / 78 |
 | Commit sorgente IPA | `33574a2114ea6e0d378f69d06aadf60378cf55e9` |
 | Commit attuale repository | Leggere HEAD; include anche regole e report, non una nuova build |
@@ -25,7 +31,7 @@ Aggiornato il 4 novembre 2026. Questo documento prevale come riepilogo di stato 
 
 - L’utente ha mostrato importazione di 122 note completata. Questo non certifica da solo la parità di ogni contenuto/allegato con l’app Bloom originale.
 - La prova UI sintetica copre File → anteprima → importazione → riavvio e dato ancora visibile; non copre sufficientemente una libreria eterogenea di 122 elementi.
-- Sono presenti le modifiche richieste a Dashboard, nutrizione per 100 g e schede Salute, ma qualità visiva e UX sono ancora da correggere e rivalidare con casi rappresentativi.
+- La build 78 includeva il modulo per 100 g; quel flusso è ora sospeso e sostituito nel sorgente dall’inserimento diretto approvato. Restano le altre correzioni da approvare separatamente.
 - I concept generati dopo la consegna sono proposte visive: non sono stati implementati come nuova versione dell’app.
 
 ## Backend e web

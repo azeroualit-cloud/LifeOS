@@ -8,7 +8,7 @@
   "source_of_truth": "native-next overlay assembled through .github/actions/native-compat76/action.yml",
   "native_source_fingerprint": {
     "algorithm": "SHA-256 over sorted tracked native-next paths, NUL, file bytes, NUL",
-    "sha256": "e781b6f7e0ed4357091bab26ef38d03ad474189d1e85fb291a52742d195c7e78"
+    "sha256": "7777c0befa9c2276eae3645a598d5d3405148252569078bb29ce4eb50f5682b4"
   },
   "latest_distributed_build": {
     "version": "0.10.17",
@@ -29,9 +29,9 @@
     "user_assessment": "User explicitly rejected the delivered app as production-ready; screenshots and UX defects remain open."
   },
   "current_increment": {
-    "type": "project documentation, durable decisions and remote synchronization",
+    "type": "approved nutrition quick add with automatic energy and recovery UX",
     "new_ipa": false,
-    "application_source_changed_since_verified_build": false
+    "application_source_changed_since_verified_build": true
   },
   "backend": {
     "last_documented_utilities_deploy_run": "41630715615",
@@ -46,7 +46,7 @@
     "user_machine": "Windows",
     "user_owned_or_rented_mac_available": false,
     "ios_build_environment": "GitHub Actions macOS xcode-27",
-    "fast_iteration_pipeline": "implemented; development preview verified; focused dispatch and full IPA path not rerun"
+    "fast_iteration_pipeline": "preview and focused executed on macOS; focused full 271 unit tests verified; current UI retry check queued"
   },
   "development_cycle_verification": {
     "source_commit": "9fd78770",
@@ -63,7 +63,7 @@
     "local_selection_tests": 5,
     "workflow_lint": "actionlint 1.7.12 passed; custom runner label allowed",
     "visual_review": "3 exported screenshots opened: Bloom, Health summary, Calendar. Evidence export verified; no product QA issue closed.",
-    "focused_mode": "selection verified locally; macOS focused run not executed",
+    "focused_mode": "executed on macOS; 271 unit tests and 5 UI passed in run 41841832626; later accessibility recovery work tracked separately",
     "full_ipa_mode": "existing complete checks retained, manual trigger; not rerun",
     "new_ipa_distributed": false
   },
@@ -96,9 +96,21 @@
   "current_nutrition_change": {
     "rule": "NUTRITION-DIRECT-01",
     "render_approval": "ok approvo",
-    "status": "implemented; focused CI pending",
+    "status": "implemented; standard flow passed; latest accessibility recovery verification queued",
     "historical_entries": "not migrated or recalculated; date-only legacy edits preserve energy",
     "calculation": "4P + 4C + 9G + 2 fibre; new entries only",
-    "distributed": false
+    "distributed": false,
+    "source_commit": "c6c2b637",
+    "current_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/41856609394",
+    "previous_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/41853040353",
+    "previous_result": {
+      "unit_passed": 271,
+      "ui_passed": 4,
+      "ui_failed": 1
+    },
+    "visual_evidence": "Native video shows pending panel open, all four values preserved, error and Retry visible. Automatic test currently fails to locate disabled protein input; broader accessibility query under verification.",
+    "user_visual_acceptance": "approved render; implementation not yet accepted",
+    "physical_healthkit_verified": false,
+    "compact_device_verified": false
   }
 }
