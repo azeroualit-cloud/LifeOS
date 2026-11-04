@@ -41,5 +41,11 @@
   },
   "decisions": "USER-DECISIONS.json",
   "open_issues": "OPEN-ISSUES.md",
-  "handoff": "AI-HANDOFF.md"
+  "handoff": "AI-HANDOFF.md",
+  "available_development_environment": {
+    "user_machine": "Windows",
+    "user_owned_or_rented_mac_available": false,
+    "ios_build_environment": "GitHub Actions macOS xcode-27",
+    "fast_iteration_pipeline": "proposed, not implemented"
+  }
 }

@@ -24,6 +24,12 @@ Non attendere un nuovo promemoria dell’utente: META-01 e META-02 valgono a ogn
 - `native-next/` è l’overlay canonico; il vecchio ZIP e i vecchi handoff da soli non sono l’app corrente.
 - Un concept generato non prova una funzione o un layout reale; le proposte dell’assistente non sostituiscono le istruzioni dell’utente.
 
+## Ambiente effettivamente disponibile
+
+L’utente lavora da Windows e ha dichiarato di non avere Mac locali o remoti. Per iOS si usa il runner macOS GitHub già configurato (`xcode-27`); non presupporre una macchina Mac interattiva disponibile. Acquisto o noleggio non approvati.
+
+Audit del job `126213552095`, run `41721041653`: setup Node 3m15s, compilazione app/test 2m41s, REA 1m33s, suite completa test 12m58s, compilazione Release + quattro avvii 7m56s. Quindi il tempo del ciclo completo non è il tempo puro per compilare l’app. Una pipeline di sviluppo mirata, separata dalla validazione finale, è una proposta da implementare e misurare: non è già stata realizzata.
+
 ## Come lavorare
 
 1. Leggere regole e stato; verificare branch, HEAD, working tree e remoto. Preservare modifiche di altre sessioni.

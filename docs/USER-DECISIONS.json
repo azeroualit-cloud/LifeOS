@@ -559,6 +559,12 @@
       ],
       "approval_quote": "ma deve essere una cosa che aggiorni continuamente come le regole e non solo ora che te l'ho deatto",
       "conflict_check": "Chiarimento compatibile: nessuna regola di prodotto sostituita; nessuna ulteriore conferma necessaria."
+    },
+    {
+      "recorded_on": "2026-11-04",
+      "type": "ENVIRONMENT_FACT_RECORDED",
+      "source_quote": "non ho ne mac locali ne mac remoti però, è li il problema",
+      "conflict_check": "Nessuna regola ACTIVE sostituita; il consiglio precedente di un Mac persistente era una proposta, non una decisione approvata."
     }
   ],
   "historical_inventory": "decision-history/2026-11-04-inventory.json",
@@ -581,5 +587,15 @@
     "no_background_guarantee": "Questa è una procedura delle sessioni che lavorano nel repository, non un servizio di sincronizzazione in background mentre nessun agente è attivo.",
     "clarification_quote": "ma deve essere una cosa che aggiorni continuamente come le regole e non solo ora che te l'ho deatto",
     "automatic_maintenance": "Obbligo permanente, senza promemoria: controllare ogni nuovo input e aggiornare automaticamente i documenti pertinenti durante il lavoro. Prima di ogni risposta finale o passaggio di sessione, verificare lo stato documentale e la sincronizzazione remota; fare commit/push se ci sono cambiamenti. Non generare commit vuoti e non dichiarare sincronizzato un remoto non verificato."
+  },
+  "operating_context": {
+    "recorded_on": "2026-11-04",
+    "source_quote": "non ho ne mac locali ne mac remoti però, è li il problema",
+    "type": "ENVIRONMENT_FACT",
+    "local_environment": "Windows",
+    "user_has_local_mac": false,
+    "user_has_remote_mac": false,
+    "existing_ios_build_path": "macOS GitHub Actions runner labelled xcode-27",
+    "interpretation": "Non presupporre un Mac disponibile all’utente. Le proposte operative immediate devono funzionare con Windows e la CI esistente; un acquisto/noleggio non è stato approvato."
   }
 }

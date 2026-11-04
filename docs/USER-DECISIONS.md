@@ -112,3 +112,8 @@ Le seguenti sono parafrasi, non citazioni letterali. Gli ID corrispondono all’
 ## Limite della persistenza
 
 Questi file sono versionati nel repository LifeOS e richiamati dai suoi AGENTS.md. La sincronizzazione remota segue META-02. Non costituiscono memoria globale garantita di ogni chat o di altri progetti. Nessuna istruzione generale dell’utente è stata modificata. Nessun codice applicativo, dato o rilascio è stato cambiato per salvare questo registro.
+
+## Ambiente disponibile — fatto operativo, non nuova funzione
+
+Il 4 novembre 2026 l’utente precisa: «non ho ne mac locali ne mac remoti però, è li il problema».
+Lavora da Windows e non dispone di un Mac locale o remoto. Il percorso iOS già utilizzato è la CI GitHub con runner macOS `xcode-27`. Non presupporre un Mac a sua disposizione o un acquisto/noleggio approvato. Il precedente consiglio di un Mac persistente resta una proposta.
