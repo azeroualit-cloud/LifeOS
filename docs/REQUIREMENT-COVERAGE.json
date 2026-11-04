@@ -3645,6 +3645,20 @@
       "remaining_work": "Eseguire la verifica specificata e registrare i risultati",
       "task": "T10",
       "exclusion_reason": null
+    },
+    {
+      "id": "HEALTH-GRID-02",
+      "text": "Griglia 2×2, nutrienti 1×4 e azioni affiancate come versione 2; icone senza testo conservate.",
+      "provenance": {
+        "origin": "user",
+        "source": "Conferma esplicita su HEALTH-GRID-CONFLICT-01"
+      },
+      "status": "ACTIVE",
+      "implementation_status": "DA_FARE",
+      "evidence": "Anteprima illustrativa approvata; nessuna prova applicativa.",
+      "remaining_work": "Implementare dopo T02/T08 e verificare accessibilità e fonti.",
+      "task": "T09",
+      "exclusion_reason": null
     }
   ],
   "additional_count": 30

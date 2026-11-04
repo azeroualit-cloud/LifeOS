@@ -135,11 +135,12 @@
   "health_planning": {
     "goal_rule": "HEALTH-UX-01",
     "scope_rule": "HEALTH-PLAN-01",
-    "status": "T07 preview authorized; layout conflict confirmation pending",
+    "status": "HEALTH-GRID-02 approved scoped exception; implementation and verification pending",
     "layout_and_local_catalog": "non-binding proposals",
     "new_entry_or_food_database_implementation_authorized": false,
     "brief": "HEALTH-BODYBUILDING-BRIEF.md",
-    "checklist": "PROJECT-CHECKLIST.md"
+    "checklist": "PROJECT-CHECKLIST.md",
+    "grid_confirmation": "2x2 and 1x4, two icon actions side by side; G05-G07 preserved"
   },
   "runner_probe": {
     "run": "41873100610",
