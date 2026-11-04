@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Checklist in corso:** run focused nutrizione [41894390397](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41894390397), sorgente d420384, avviato; esito non ancora verificato. Anteprima proposta Salute: [contratto](HEALTH-GRID-PREVIEW.md) e [immagine](design/health-grid-proposal.png); conflitto HEALTH-GRID-CONFLICT-01 in attesa di conferma esplicita. Nessuna modifica Salute autorizzata dalla sola anteprima.
+
 **Verifiche del reparto:** 35/35 test sintetici Finanza passati con `manual/build-75/worker.js` per entrambe le baseline; il primo tentativo con budget build-70 ha avuto 5 fallimenti per baseline precedente. Nessun audit live o deploy. Aggiunto test Bloom esplicito per la scelta mantieni: compilazione e verifica simulatore ancora da eseguire.
 
 **T01 in verifica:** selettore esteso ad attività/calendario/turni, runner macos-15 scelto dopo probe; pipeline finale manuale completa senza packaging aggiunta, non ancora eseguita. Il push di questo checkpoint usa [skip ci] per evitare preview duplicata: segue una sola verifica focused nutrizione sul commit preciso. Il trigger automatico resta attivo per i successivi push. SDK/runtime 26.2 non equivalgono alla prova di riferimento iOS 27.
