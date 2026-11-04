@@ -1,3 +1,5 @@
+> **Documento storico / evidenza tecnica.** Lo stato corrente e l’accettazione del prodotto sono in [STATUS.md](STATUS.md). Leggere anche [AI-HANDOFF.md](AI-HANDOFF.md). La build 78 non è accettata dall’utente come pronta per la produzione.
+
 ## Consegna verificata — 0.9.0 build 51
 
 **Build Apple riuscita, IPA unica disponibile.** [Pacchetto Signulous](https://github.com/azeroualit-cloud/LifeOS/actions/runs/38978815976/artifacts/12081542774) · [esecuzione CI](https://github.com/azeroualit-cloud/LifeOS/actions/runs/38978815976) · [istruzioni e prove](native/CONSEGNA-0.9.0.md).

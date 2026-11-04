@@ -1,3 +1,5 @@
+> **Documento storico / evidenza tecnica.** Lo stato corrente e l’accettazione del prodotto sono in [docs/STATUS.md](../STATUS.md). Leggere anche [AI-HANDOFF.md](../AI-HANDOFF.md). La build 78 non è accettata dall’utente come pronta per la produzione.
+
 # Revisione 78 — contratto e verifiche
 
 Versione verificata: 0.10.17 (78), base consegnata 0.10.16 (77).

@@ -1,3 +1,5 @@
+> **Documento storico / evidenza tecnica.** Lo stato corrente e l’accettazione del prodotto sono in [STATUS.md](STATUS.md). Leggere anche [AI-HANDOFF.md](AI-HANDOFF.md). La build 78 non è accettata dall’utente come pronta per la produzione.
+
 # Life OS — stato dopo la revisione 0.4.0 build 11
 
 ## Completato

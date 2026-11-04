@@ -22,6 +22,25 @@ Formula della domanda:
 
 Questa procedura sostituisce la precedente applicazione automatica dell’ultima istruzione confliggente. La richiesta corrente costituisce l’approvazione di questo cambio; non serve chiederla di nuovo.
 
+## META-02 — GitHub e passaggio di consegne sempre aggiornati
+
+Stato: ACTIVE. Richiesta esplicita del 4 novembre 2026, in due messaggi consecutivi:
+
+> inoltre devia aggiungere una regola che aggiorna il github remoto con lo stato attuale della build sempre, così se voglio posso far leggere a un altra qualasiasi IA il repo, e già sapr
+>
+> saprò come ccomporarsi e lavoraci, integrando il report con regole, elenchi, flussi e tecnlogie, tutto up to date
+
+Ad ogni incremento significativo o nuova decisione, e prima del passaggio di sessione:
+
+1. Aggiornare codice e documenti pertinenti: stato build, regole, correzioni, flussi e tecnologie.
+2. Registrare fonte, ramo, commit verificato, risultato dei controlli, artefatto e limiti effettivi.
+3. Fare fetch, preservare lavoro concorrente, commit e push nel solo repository LifeOS; verificare lo SHA remoto. Niente force push.
+4. Rendere lo stato corrente raggiungibile dal README del ramo predefinito, indicando il ramo di lavoro quando diverso.
+5. Non pubblicare segreti, dati personali o backup. Ispezionare la CI per evitare deploy involontari.
+6. Un aggiornamento del repository non equivale a una nuova build o a un deploy. Non cambiare il valore dei risultati di QA per far apparire pronto il prodotto.
+
+Questa regola si aggiunge a META-01; un futuro conflitto di prodotto richiede comunque la tua conferma. È una procedura delle sessioni di lavoro, non una promessa di sincronizzazione quando nessun agente è attivo.
+
 ## Regole attive ricostruite dalle richieste dirette
 
 Le seguenti sono parafrasi, non citazioni letterali. Gli ID corrispondono all’inventario precedente. ACTIVE indica una decisione, non la qualità o il completamento della sua implementazione.
@@ -77,4 +96,4 @@ Le seguenti sono parafrasi, non citazioni letterali. Gli ID corrispondono all’
 
 ## Limite della persistenza
 
-Questi file persistono nel progetto e sono richiamati dai suoi AGENTS.md. Non costituiscono memoria globale garantita di ogni chat o di altri progetti. Nessuna istruzione generale dell’utente è stata modificata. Nessun codice applicativo, dato o rilascio è stato cambiato per salvare questo registro.
+Questi file sono versionati nel repository LifeOS e richiamati dai suoi AGENTS.md. La sincronizzazione remota segue META-02. Non costituiscono memoria globale garantita di ogni chat o di altri progetti. Nessuna istruzione generale dell’utente è stata modificata. Nessun codice applicativo, dato o rilascio è stato cambiato per salvare questo registro.

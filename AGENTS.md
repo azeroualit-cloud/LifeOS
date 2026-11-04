@@ -4,7 +4,7 @@ Queste istruzioni valgono esclusivamente per LifeOS, non per altri progetti.
 
 ## Decisioni dell’utente e conflitti
 
-Prima di iniziare una nuova sessione o modificare il prodotto, leggere il registro indicato sotto.
+Prima di iniziare una nuova sessione o modificare il prodotto, leggere `docs/AI-HANDOFF.md`, lo stato attuale e il registro indicato sotto.
 Ad ogni nuovo input decisionale dell’utente, confrontarlo con le regole ACTIVE del registro.
 
 - Salvare le decisioni esplicite con ID, ambito, provenienza, data di registrazione e stato. Conservare il testo originale quando disponibile; indicare chiaramente le parafrasi.
@@ -26,3 +26,11 @@ La procedura META-01 è stata approvata esplicitamente dall’utente il 4 novemb
 - `docs/decision-history/2026-11-04-inventory.md`: cronologia delle richieste/proposte, non elenco di requisiti tutti approvati.
 
 I sorgenti canonici dell’app sono `native-next/`. Il salvataggio delle decisioni non autorizza nuove funzioni, deploy o modifiche a dati reali.
+
+## META-02 — sincronizzazione e report per altre IA
+
+Leggere `docs/AI-HANDOFF.md` e `docs/STATUS.md` all’avvio. Mantenere aggiornati GitHub e i documenti di stato dopo incrementi significativi, decisioni e verifiche, e prima della consegna: commit e push del solo progetto LifeOS, poi confronto SHA locale/remoto. Fare fetch e preservare il lavoro concorrente; non forzare il push.
+
+Aggiornare `docs/BUILD-STATE.json` quando cambia lo stato della build e `docs/OPEN-ISSUES.md` quando cambia un difetto o la sua prova. Il README del ramo predefinito deve indicare lo stato e l’eventuale ramo corrente. Regole, elenchi, flussi, tecnologie e limiti devono essere leggibili anche da una IA diversa da Codex.
+
+Distinguere risultato tecnico dei test e accettazione del prodotto. La build 78 è stata rifiutata dall’utente come pronta per la produzione: non dichiararla pronta grazie ai vecchi test verdi. Non pubblicare backup, credenziali o dati personali. Ispezionare i workflow: sincronizzare il repository non autorizza un deploy backend o una nuova release.

@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "reported_on": "2026-11-04",
+  "project": "LifeOS",
+  "default_branch": "main",
+  "working_branch": "codex/revision77",
+  "repository_head": "Use git rev-parse HEAD or the GitHub commit currently being read; documentation commits do not create a new IPA.",
+  "source_of_truth": "native-next overlay assembled through .github/actions/native-compat76/action.yml",
+  "native_source_fingerprint": {
+    "algorithm": "SHA-256 over sorted tracked native-next paths, NUL, file bytes, NUL",
+    "sha256": "087540e1c9869c273accd99d95851b7385a6b628f720079574018419ed122bae"
+  },
+  "latest_distributed_build": {
+    "version": "0.10.17",
+    "build": 78,
+    "source_commit": "33574a2114ea6e0d378f69d06aadf60378cf55e9",
+    "ipa_sha256": "d281d9d885ea4cc221022d3c52bf3fe00b876f77273821867d617a2be2b911e7",
+    "release": "https://github.com/azeroualit-cloud/LifeOS/releases/tag/ios-0.10.17-build78",
+    "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/41721041653",
+    "technical_checks": "passed",
+    "unit_tests": 267,
+    "ui_tests": 15,
+    "release_launches": 4,
+    "test_device": "iPhone 15 Pro simulator",
+    "sdk": "27.0",
+    "runtime": "27.0",
+    "physical_device_verified_by_agent": false,
+    "accepted_for_production": false,
+    "user_assessment": "User explicitly rejected the delivered app as production-ready; screenshots and UX defects remain open."
+  },
+  "current_increment": {
+    "type": "project documentation, durable decisions and remote synchronization",
+    "new_ipa": false,
+    "application_source_changed_since_verified_build": false
+  },
+  "backend": {
+    "last_documented_utilities_deploy_run": "41630715615",
+    "source": "docs/native/REVISIONE-77.md",
+    "live_state_reaudited_for_this_documentation_update": false,
+    "web_worker_parity_with_live": "not established by this update"
+  },
+  "decisions": "USER-DECISIONS.json",
+  "open_issues": "OPEN-ISSUES.md",
+  "handoff": "AI-HANDOFF.md"
+}

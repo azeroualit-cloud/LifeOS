@@ -539,8 +539,35 @@
       "recorded_on": "2026-11-04",
       "type": "BASELINE_CAPTURE",
       "description": "Conservate solo le richieste dirette U come regole attive, escluse due richieste una tantum dell’inventario e una sua interpretazione. H/D/P e concept non promossi automaticamente a regole."
+    },
+    {
+      "recorded_on": "2026-11-04",
+      "type": "REMOTE_SYNC_POLICY_APPROVED",
+      "policy_id": "META-02",
+      "approval_quotes": [
+        "inoltre devia aggiungere una regola che aggiorna il github remoto con lo stato attuale della build sempre, così se voglio posso far leggere a un altra qualasiasi IA il repo, e già sapr",
+        "saprò come ccomporarsi e lavoraci, integrando il report con regole, elenchi, flussi e tecnlogie, tutto up to date"
+      ],
+      "conflict_check": "Compatibile con META-01 e L08: aggiornamento del solo repository LifeOS, senza sostituire regole di prodotto."
     }
   ],
   "historical_inventory": "decision-history/2026-11-04-inventory.json",
-  "limitations": "Persistenza locale nel progetto, non memoria globale garantita per chat o progetti diversi. Lo stato ACTIVE attesta la decisione, non che sia implementata o verificata."
+  "limitations": "Registro versionato e sincronizzato nel repository LifeOS. Le nuove sessioni devono leggere AGENTS.md; nessuna memoria globale o sincronizzazione a agente inattivo è garantita.",
+  "remote_sync_policy": {
+    "id": "META-02",
+    "status": "ACTIVE",
+    "recorded_on": "2026-11-04",
+    "scope": "Repository GitHub azeroualit-cloud/LifeOS",
+    "original_quotes": [
+      "inoltre devia aggiungere una regola che aggiorna il github remoto con lo stato attuale della build sempre, così se voglio posso far leggere a un altra qualasiasi IA il repo, e già sapr",
+      "saprò come ccomporarsi e lavoraci, integrando il report con regole, elenchi, flussi e tecnlogie, tutto up to date"
+    ],
+    "rule": "Mantenere GitHub aggiornato con codice, stato effettivo della build e documentazione sufficiente a un’altra IA per lavorare sul progetto: regole, elenco correzioni, flussi e tecnologie.",
+    "checkpoints": "Dopo ogni incremento significativo, decisione salvata o cambiamento dell’esito di una verifica, e prima di una consegna o passaggio di sessione, aggiornare i documenti pertinenti, fare commit e push nel repository LifeOS e verificarne lo SHA remoto.",
+    "source_of_truth": "README.md e AGENTS.md nel ramo predefinito devono rendere rintracciabile lo stato corrente. Distinguere ramo di lavoro, commit del codice, ultimo artefatto, commit verificato e accettazione per produzione.",
+    "scope_guard": "Solo il progetto LifeOS. Non includere segreti, backup personali, database, dati sanitari/finanziari, log privati o modifiche estranee.",
+    "safety": "Fetch prima del push, preservare lavoro concorrente, niente force push. Ispezionare trigger CI prima di aggiornare rami. Un push documentale non autorizza deploy backend o nuova distribuzione IPA.",
+    "evidence": "Non riusare risultati della build precedente come prova di codice cambiato; registrare pending/failed/not-run quando appropriato. Non presentare una build come pronta se i difetti o il rifiuto dell’utente restano aperti.",
+    "no_background_guarantee": "Questa è una procedura delle sessioni che lavorano nel repository, non un servizio di sincronizzazione in background mentre nessun agente è attivo."
+  }
 }
