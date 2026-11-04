@@ -1,7 +1,6 @@
 name: LifeOS 76 early-beta startup compatibility
 on:
-  push:
-    paths: ['.github/workflows/lifeos-compat76.yml', '.github/actions/native-compat76/**', 'scripts/select-compatible-xcode76.py', 'scripts/verify-startup-imports.py', 'scripts/sign-simulator-session76.py', 'native-next/project.yml', 'native-next/Tests/NativeSessionVaultTests.swift']
+  workflow_dispatch:
 permissions:
   contents: read
   actions: read
@@ -10,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   verify:
-    if: contains(github.event.head_commit.message, '[compat-76]')
+    if: github.event_name == 'workflow_dispatch'
     strategy:
       fail-fast: false
       matrix:

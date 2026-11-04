@@ -1,8 +1,6 @@
 name: Life OS - App nativa
 on:
   workflow_dispatch:
-  push:
-    paths: ['lifeos-native.zip', '.github/workflows/lifeos-build.yml', '.github/workflows/ios.yml', 'Sources/**', 'Tests/**', 'Assets.xcassets/**', 'project.yml', 'native/**', 'native-next/**', 'backend/activities/**', 'manual/build-68/**', 'scripts/deploy-activities-68.py', 'scripts/print-native-previews.py']
 permissions:
   contents: write
 concurrency:
@@ -10,7 +8,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   build:
-    if: github.event.repository.private == false && !contains(github.event.head_commit.message, '[validation-74]') && !contains(github.event.head_commit.message, '[validation-75]') && !contains(github.event.head_commit.message, '[package-only-71]')
+    if: github.event_name == 'workflow_dispatch'
     runs-on: xcode-27
     timeout-minutes: 145
     defaults:

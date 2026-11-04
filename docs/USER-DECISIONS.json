@@ -524,6 +524,16 @@
         "inventory_id": "L08"
       },
       "source_message_date": null
+    },
+    {
+      "id": "DEV-01",
+      "status": "ACTIVE",
+      "scope": "LifeOS development workflow",
+      "recorded_on": "2026-11-04",
+      "original_quote": "implementiamo in questo modo allora",
+      "rule": "Da Windows usare la CI esistente con anteprima reale, verifiche mirate e IPA completa al termine del gruppo di correzioni; ispezionare le schermate prima della consegna.",
+      "provenance": "Approvazione esplicita dei tre percorsi descritti nel messaggio precedente",
+      "conflict_check": "Compatibile con META-01/META-02 e qualità prodotto; non sostituisce controlli finali o accettazione."
     }
   ],
   "pending_confirmations": [],

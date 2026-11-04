@@ -117,3 +117,7 @@ Questi file sono versionati nel repository LifeOS e richiamati dai suoi AGENTS.m
 
 Il 4 novembre 2026 l’utente precisa: «non ho ne mac locali ne mac remoti però, è li il problema».
 Lavora da Windows e non dispone di un Mac locale o remoto. Il percorso iOS già utilizzato è la CI GitHub con runner macOS `xcode-27`. Non presupporre un Mac a sua disposizione o un acquisto/noleggio approvato. Il precedente consiglio di un Mac persistente resta una proposta.
+
+## DEV-01 — ciclo di sviluppo da Windows (ACTIVE)
+
+Approvato il 4 novembre 2026: «implementiamo in questo modo allora». Anteprima reale, verifiche mirate e IPA finale separati. Dettagli in [DEVELOPMENT-CYCLE.md](DEVELOPMENT-CYCLE.md). Compatibile con le regole attive; nessuna accettazione automatica del prodotto.

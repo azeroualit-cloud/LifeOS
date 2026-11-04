@@ -1,7 +1,6 @@
 name: LifeOS 75 corrected regression and reviewable package
 on:
-  push:
-    paths: ['.github/workflows/lifeos-finalize75.yml', 'scripts/verify-revision75-evidence.py', 'native-next/UITests/NativeInterfaceTests.swift']
+  workflow_dispatch:
 permissions:
   contents: read
   actions: read
@@ -10,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   finalize:
-    if: contains(github.event.head_commit.message, '[finalize-75]')
+    if: github.event_name == 'workflow_dispatch'
     runs-on: xcode-27
     timeout-minutes: 55
     defaults:

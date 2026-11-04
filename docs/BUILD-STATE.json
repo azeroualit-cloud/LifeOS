@@ -46,6 +46,6 @@
     "user_machine": "Windows",
     "user_owned_or_rented_mac_available": false,
     "ios_build_environment": "GitHub Actions macOS xcode-27",
-    "fast_iteration_pipeline": "proposed, not implemented"
+    "fast_iteration_pipeline": "implemented; first CI execution pending verification"
   }
 }

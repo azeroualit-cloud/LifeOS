@@ -1,7 +1,5 @@
 name: Life OS - Pacchetto 71 con verifiche riutilizzate
 on:
-  push:
-    paths: ['.github/workflows/lifeos-package71.yml', 'native-next/project.yml']
   workflow_dispatch:
 permissions:
   contents: write
@@ -11,7 +9,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   package:
-    if: github.event.repository.private == false && (github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[package-only-71]'))
+    if: github.event_name == 'workflow_dispatch'
     runs-on: macos-15
     timeout-minutes: 25
     defaults:

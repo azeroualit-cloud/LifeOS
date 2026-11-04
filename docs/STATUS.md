@@ -37,3 +37,7 @@ L’ultimo deploy utenze documentato è il run 41630715615, riportato in [REVISI
 Leggere [difetti aperti](OPEN-ISSUES.md), [regole attive](USER-DECISIONS.md), [report di passaggio](AI-HANDOFF.md) e [architettura/flussi](ARCHITECTURE-CURRENT.md). Le 238 voci storiche distinguono richieste dirette, ricostruzioni e proposte; non sono tutte requisiti attivi né tutte correzioni ancora da fare.
 
 Lo [storico di stato fino alla build 76 e precedenti](STATUS-HISTORY-2026-11-04.md) è conservato senza usarlo come stato attuale.
+
+## Ciclo CI separato
+
+Implementati anteprima automatica e verifiche mirate manuali, con screenshot e selezione test tracciabile. Il percorso completo IPA è manuale; pipeline native storiche sovrapposte non partono più a ogni push. Nessuna modifica al codice app o ai deploy. Validazione iniziale CI da verificare. Leggere [DEVELOPMENT-CYCLE.md](DEVELOPMENT-CYCLE.md).

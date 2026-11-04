@@ -1,8 +1,6 @@
 name: LifeOS 75 utilities validation SDK 27.2
 on:
   workflow_dispatch:
-  push:
-    paths: ['native-next/**', 'backend/utilities/**', 'backend/expense-routing/**', 'scripts/build-worker-75.py', 'scripts/deploy-utilities-75.py', '.github/workflows/lifeos-validation75.yml']
 permissions:
   contents: read
 concurrency:
@@ -10,7 +8,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   validate:
-    if: github.event_name == 'workflow_dispatch' || (contains(github.event.head_commit.message, '[validation-75]') && !contains(github.event.head_commit.message, '[calendar-ui-only]') && !contains(github.event.head_commit.message, '[finalize-75]'))
+    if: github.event_name == 'workflow_dispatch'
     runs-on: xcode-27
     timeout-minutes: 70
     steps:

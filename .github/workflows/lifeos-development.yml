@@ -1,0 +1,86 @@
+name: LifeOS development preview and focused checks
+on:
+  push:
+    branches: ['codex/**']
+    paths: ['native-next/**', '.github/workflows/lifeos-development.yml', 'scripts/select-development-tests.py', '.github/actions/native-compat76/**', 'scripts/select-compatible-xcode76.py', 'scripts/sign-simulator-session76.py']
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Preview or focused regression (never packages an IPA)
+        type: choice
+        options: [preview, focused]
+        default: preview
+      area:
+        description: Shared changes require all; auto expands unknown paths
+        type: choice
+        options: [auto, all, dashboard, nutrition, health, bloom, finance]
+        default: all
+      device:
+        description: Screen size
+        type: choice
+        options: [primary, compact]
+        default: primary
+permissions:
+  contents: read
+concurrency:
+  group: lifeos-development-${{ github.ref }}-${{ inputs.mode || 'preview' }}
+  cancel-in-progress: true
+jobs:
+  preview:
+    runs-on: xcode-27
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/native-compat76
+        with:
+          variant: ${{ inputs.device || 'primary' }}
+      - name: Select bounded checks
+        env:
+          MODE: ${{ inputs.mode || 'preview' }}
+          AREA: ${{ inputs.area || 'auto' }}
+          BASE: ${{ github.event.before }}
+        run: python3 scripts/select-development-tests.py --mode "$MODE" --area "$AREA" --base "$BASE"
+      - name: Compile once
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcodebuild build-for-testing -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/development-build.log 2>&1 || { tail -n 100 build/development-build.log; exit 1; }
+      - name: Run selected checks and capture real screens
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcrun simctl bootstatus "$MAIN_DEVICE" -b
+          args=()
+          while IFS= read -r arg; do args+=("$arg"); done < build/development-selection.args
+          xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 300 "${args[@]}" -resultBundlePath build/Development.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/development-tests.log 2>&1 || { tail -n 120 build/development-tests.log; exit 1; }
+      - name: Export screenshots even when tests fail
+        if: always()
+        run: |
+          if [ -f app/build/Development.xcresult/Info.plist ]; then
+            xcrun xcresulttool export attachments --path app/build/Development.xcresult --output-path app/build/development-screenshots
+          fi
+      - name: Record scope and limits
+        if: always()
+        env:
+          CHECK_RESULT: ${{ job.status }}
+        run: |
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          p=Path('app/build/development-selection.json')
+          selection=json.loads(p.read_text()) if p.exists() else {'selection':'not reached'}
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f:
+              f.write('# LifeOS development evidence\nCommit: `'+os.environ['GITHUB_SHA']+'`\n\nStatus before export: '+os.environ['CHECK_RESULT']+'\n\n```json\n'+json.dumps(selection,indent=2)+'\n```\n\nScreenshots are simulator evidence, not production acceptance. No IPA, release, REA or backend deploy. Inspect screenshots and record visual findings before delivery.\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lifeos-development-${{ inputs.mode || 'preview' }}-${{ github.sha }}
+          retention-days: 7
+          path: |
+            app/build/development-*.log
+            app/build/development-selection.*
+            app/build/development-screenshots
+            app/build/Development.xcresult

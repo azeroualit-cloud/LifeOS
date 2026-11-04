@@ -1,4 +1,5 @@
 name: Prepare compatible native app
+description: Assemble pinned native baseline and select compatible simulator toolchain
 inputs:
   variant:
     required: true

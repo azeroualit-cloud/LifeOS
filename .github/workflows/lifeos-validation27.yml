@@ -1,8 +1,6 @@
 name: LifeOS 74 validation SDK 27.2
 on:
   workflow_dispatch:
-  push:
-    paths: ['native-next/**', '.github/workflows/lifeos-validation27.yml']
 permissions:
   contents: read
 concurrency:
@@ -10,7 +8,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   validate:
-    if: github.event_name == 'workflow_dispatch' || (contains(github.event.head_commit.message, '[validation-74]') && !contains(github.event.head_commit.message, '[calendar-ui-only]'))
+    if: github.event_name == 'workflow_dispatch'
     runs-on: xcode-27
     timeout-minutes: 70
     steps:
