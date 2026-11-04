@@ -43,7 +43,7 @@ struct NativeNutritionQuickSheet: View {
         return .direct(id: id, date: date, protein: p, carbohydrate: c, fat: f, fibre: fi)
     }
     var body: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: NativeDesign.Space.none) {
             HStack(alignment: .top) {
                 Text("Aggiungi nutrienti").font(.title2.bold()).accessibilityAddTraits(.isHeader)
                 Spacer(minLength: NativeDesign.Space.small)
@@ -96,7 +96,7 @@ struct NativeNutritionQuickSheet: View {
         }
         .toolbar(.hidden, for: .navigationBar)
         .background(NativeDesign.healthCanvas)
-        .safeAreaInset(edge: .bottom, spacing: 0) {
+        .safeAreaInset(edge: .bottom, spacing: NativeDesign.Space.none) {
             Button(action: save) {
                 HStack {
                     if nutrition.busy { ProgressView().accessibilityLabel("Salvataggio") }
