@@ -23,6 +23,8 @@ def select(mode, area, paths):
     tests=[SMOKE]
     for key in sorted(selected): tests.extend(AREAS[key])
     if mode == "focused":
+        # XCTest target-wide selection must not coexist with narrower filters for that target.
+        tests = [test for test in tests if not test.startswith("LifeOSProbeTests/")]
         tests.append("LifeOSProbeTests")
         if "bloom" in selected:
             tests.extend(["LifeOSProbeUITests/NativeRevision78UITests/testBloomCancelClosesFilesAndAllowsRetry", "LifeOSProbeUITests/NativeRevision78UITests/testBloomSystemFilesSelectionReachesPreviewAndPersists"])

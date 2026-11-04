@@ -15,8 +15,13 @@ class SelectionTests(unittest.TestCase):
   a=m.select('preview','bloom',[])[1];b=m.select('focused','bloom',[])[1]
   self.assertNotIn('LifeOSProbeTests',a);self.assertIn('LifeOSProbeTests',b)
   self.assertTrue(any('AllowsRetry' in t for t in b));self.assertGreater(len(b),len(a))
+ def test_full_unit_selection_does_not_retain_narrower_filters(self):
+  focused=m.select('focused','nutrition',[])[1]
+  self.assertEqual(focused.count('LifeOSProbeTests'),1)
+  self.assertFalse(any(t.startswith('LifeOSProbeTests/') for t in focused))
+  self.assertTrue(any(t.startswith('LifeOSProbeTests/') for t in m.select('preview','nutrition',[])[1]))
  def test_all_selectors_exist(self):
-  for selector in m.select('focused','all',[])[1]:
+  for selector in set(m.select('focused','all',[])[1] + m.select('preview','all',[])[1]):
    parts=selector.split('/')
    if len(parts)<2: continue
    source=(R/('native-next/Tests' if parts[0] == 'LifeOSProbeTests' else 'native-next/UITests')/f'{parts[1]}.swift').read_text(encoding='utf-8')
