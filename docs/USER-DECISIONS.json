@@ -592,6 +592,13 @@
       "type": "ENVIRONMENT_FACT_RECORDED",
       "source_quote": "non ho ne mac locali ne mac remoti però, è li il problema",
       "conflict_check": "Nessuna regola ACTIVE sostituita; il consiglio precedente di un Mac persistente era una proposta, non una decisione approvata."
+    },
+    {
+      "recorded_on": "2026-11-04",
+      "type": "VISUAL_ACCEPTANCE",
+      "rule_id": "H-GRID-01",
+      "original_quote": "ok, procediamo con la prossima correzzione",
+      "interpretation": "Accettazione del risultato visivo Bloom mostrato e passaggio alla prossima proposta. Non accettazione globale per produzione, prova telefono o autorizzazione di modifiche ancora da proporre."
     }
   ],
   "historical_inventory": "decision-history/2026-11-04-inventory.json",

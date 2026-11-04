@@ -47,3 +47,5 @@ Implementati anteprima automatica e verifiche mirate manuali, con screenshot e s
 Due colonne indipendenti con larghezza esplicita, immagini proporzionate e anteprime link tramite LinkPresentation (cache separata dalle note, fallback e timeout). Fixture sintetica di 122 contenuti misti; verifiche standard/testo grande previste. Stato: verificata al simulatore su fixture sintetica, accettazione visiva utente pendente. Ultima IPA invariata.
 
 Verifica Bloom finale: run 41816351684 passato, 19 unitari e 4 UI senza errori, 16 screenshot esportati. Catture standard e testo grande controllate. Prove e limiti in [BLOOM-GRID-REVIEW.md](BLOOM-GRID-REVIEW.md). Accettazione pendente.
+
+Aggiornamento 4 novembre: risultato visivo H-GRID-01 accettato tramite «ok, procediamo con la prossima correzzione». Prossima proposta: riconoscibilità e compattezza del modulo nutrizione in Dashboard; non ancora approvata né implementata. Accettazione globale per produzione invariata.

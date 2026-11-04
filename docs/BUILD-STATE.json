@@ -81,7 +81,7 @@
       "ui_failed": 1,
       "diagnosis": "Test swipe began in tab bar and selected Activities; gesture corrected without reducing layout assertions"
     },
-    "user_acceptance": "pending",
+    "user_acceptance": "visual result accepted: user requested next correction; production/physical-device acceptance unchanged",
     "live_site_metadata": "not certified by synthetic preview fixture",
     "verified_commit": "3a1579147a4959df7eac20f04c103fa195cd4c8f",
     "unit_passed": 19,

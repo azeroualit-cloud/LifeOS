@@ -125,3 +125,7 @@ Approvato il 4 novembre 2026: «implementiamo in questo modo allora». Anteprima
 ## DEV-02 / H-GRID-01 — approvazione correzioni e griglia Bloom
 
 ACTIVE, 4 novembre 2026. Proporre le modifiche di prodotto e attendere approvazione. Prima correzione approvata: due colonne, immagini contenute nelle card e altezza adattata al contenuto, con anteprime dei link. Fonte: «approvo con l’unica accortezza di per i link mostrare le anteprime». Nessun conflitto con le regole attive.
+
+### Accettazione visiva H-GRID-01
+
+4 novembre 2026: «ok, procediamo con la prossima correzzione», dopo la cattura Bloom. Accettato il risultato visivo mostrato; nessuna accettazione globale per produzione o prova sul telefono. Prossima modifica di prodotto da proporre e approvare (DEV-02).
