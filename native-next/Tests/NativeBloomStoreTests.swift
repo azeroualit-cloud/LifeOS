@@ -171,6 +171,27 @@ import XCTest
         XCTAssertEqual(store.archive.items, [original])
         XCTAssertEqual(NativeBloomStore(directory: root).archive.items, [original])
     }
+    func testKeepResolutionExplicitlyPreservesConflictingNoteAndImportsOtherNotes() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let store = NativeBloomStore(directory: root), original = note()
+        try store.save(original)
+        var conflict = original; conflict["text"] = .string("Versione importata")
+        let unrelated = note()
+        let data = try JSONEncoder().encode(NativeBloomArchive(items: [conflict, unrelated]))
+        let conflicts = try store.conflicts(data)
+        XCTAssertEqual(conflicts.map(\.id), ["note:" + original.text("id")])
+
+        _ = try store.importBackup(data, resolutions: [conflicts[0].id: .keep])
+
+        XCTAssertEqual(store.archive.items.count, 2)
+        XCTAssertEqual(store.archive.items.first { $0.text("id") == original.text("id") }?["text"], original["text"])
+        XCTAssertNotNil(store.archive.items.first { $0.text("id") == unrelated.text("id") })
+        XCTAssertEqual(store.archive.lifeosImportReports?.last?.added, 1)
+        XCTAssertEqual(store.archive.lifeosImportReports?.last?.skipped, 1)
+        XCTAssertEqual(store.archive.lifeosImportReports?.last?.resolvedConflicts, 1)
+        XCTAssertEqual(NativeBloomStore(directory: root).archive.items.first { $0.text("id") == original.text("id") }?["text"], original["text"])
+    }
     func testMalformedMetadataAndInternalFileReferencesAreRejected() throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }

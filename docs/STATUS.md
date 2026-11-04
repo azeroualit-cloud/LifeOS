@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Verifiche del reparto:** 35/35 test sintetici Finanza passati con `manual/build-75/worker.js` per entrambe le baseline; il primo tentativo con budget build-70 ha avuto 5 fallimenti per baseline precedente. Nessun audit live o deploy. Aggiunto test Bloom esplicito per la scelta mantieni: compilazione e verifica simulatore ancora da eseguire.
+
 **T01 in verifica:** selettore esteso ad attività/calendario/turni, runner macos-15 scelto dopo probe; pipeline finale manuale completa senza packaging aggiunta, non ancora eseguita. Il push di questo checkpoint usa [skip ci] per evitare preview duplicata: segue una sola verifica focused nutrizione sul commit preciso. Il trigger automatico resta attivo per i successivi push. SDK/runtime 26.2 non equivalgono alla prova di riferimento iOS 27.
 
 **Audit preparatori:** in Salute zero viene oggi scartato e il forecast usa intervalli di 86400 secondi; test su nil/zero e date civili necessari prima di dichiarare T08/T09 verificati. Bloom ha copertura sintetica import/riavvio/copy/replace; restano da provare keep esplicito, ricerca/fissati/categorie, mappa, crop/pager, filtri Riscopri e Intent reale. Nessun backup privato letto.
