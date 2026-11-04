@@ -15,6 +15,7 @@ struct NativeNutritionQuickEntry: View {
             if let notice { Text(notice).font(.caption).foregroundStyle(.secondary).accessibilityIdentifier("quick-nutrition-notice") }
         }.sheet(isPresented: $showing) {
             NavigationStack { NativeNutritionQuickSheet { notice = "Registrazione salvata in Apple Salute." } }
+                .modifier(NativeVisualTestSize()).modifier(NativeVisualTestMotion())
         }
     }
 }

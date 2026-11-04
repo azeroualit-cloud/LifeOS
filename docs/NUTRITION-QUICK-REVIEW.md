@@ -13,3 +13,9 @@ Run 41823044927 fermato prima della compilazione dal controllo di due spaziature
 QA visivo: cattura con tastiera coerente con il pannello; catture app-only dopo la chiusura della tastiera parzialmente vuote. Risultato non ancora consegnabile come completamente verificato. Verifica discriminante: confrontare acquisizione app e schermo intero dopo transizione tastiera, senza modificare il codice applicativo. Salvataggio, retry, dati e requisiti UI non vengono indeboliti.
 
 Corretto anche il selettore focused: quando si richiede tutta LifeOSProbeTests, eliminare i filtri più stretti di quel target. Il run precedente ha dimostrato che tenerli insieme restringeva l’esecuzione ai 16 unitari nutrizione. Regressione della selezione coperta da test locale; nuovo avvio con selezione target-wide unica.
+
+## Seconda verifica discriminante
+
+Run 41841832626 PASSATO: 271 unitari e 5 UI, 16 screenshot. Cattura a schermo intero dopo Fine mostra il pannello completo, mentre la contemporanea acquisizione app-only risulta vuota: non usare app-only come prova del rendering di questo foglio nel simulatore. Cattura errore ancora insufficiente: acquisire solo schermo intero e confrontare con video nativo del simulatore sintetico.
+
+Testo grande: rendere esplicita l’applicazione del modifier di prova anche al foglio locale, come già avviene per i fogli del router, e verificare le coordinate effettive dei campi (una colonna in accessibilità, due in standard). Senza questo assert il nome del test non certifica la dimensione attiva. Nessuna modifica di comportamento al rendering normale per questo override DEBUG.
