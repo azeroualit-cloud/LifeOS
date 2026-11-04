@@ -20,7 +20,7 @@ Non attendere un nuovo promemoria dell’utente: META-01 e META-02 valgono a ogn
 - L’ultima IPA è 0.10.17 build 78, sorgente `33574a2114ea6e0d378f69d06aadf60378cf55e9`.
 - Compilazione, 267 unitari, 15 UI, 4 avvii Release e package verifier sono passati; questi risultati non hanno impedito difetti visibili sul telefono.
 - **L’utente ha rifiutato la build come pronta per la produzione.** Non presentarla nuovamente come pronta senza correzioni e prove adeguate.
-- Dopo la build sono cambiati documentazione, workflow CI e griglia Bloom con anteprime link (H-GRID-01, approvato). La verifica del nuovo codice Bloom è in corso; nessuna nuova IPA distribuita e nessun deploy backend.
+- Dopo la build sono cambiati documentazione, workflow CI e griglia Bloom con anteprime link (H-GRID-01, approvato). La verifica Bloom al simulatore è passata (19 unitari e 4 UI); accettazione utente pendente; nessuna nuova IPA distribuita e nessun deploy backend.
 - `native-next/` è l’overlay canonico; il vecchio ZIP e i vecchi handoff da soli non sono l’app corrente.
 - Un concept generato non prova una funzione o un layout reale; le proposte dell’assistente non sostituiscono le istruzioni dell’utente.
 
@@ -53,4 +53,4 @@ I vecchi `HANDOFF.md`, README e rapporti di revisione sono evidenze storiche. Qu
 
 ## Revisione Bloom corrente
 
-Leggere [BLOOM-GRID-REVIEW.md](BLOOM-GRID-REVIEW.md): H-GRID-01 implementato e in verifica. Run 41813899400: 19 unitari e 3 UI passati, 1 UI fallito per gesto sulla tab bar, corretto nel test; run 41816351684 in corso. Richiedere accettazione del risultato visivo prima della prossima modifica di prodotto (DEV-02). Nessuna nuova IPA.
+Leggere [BLOOM-GRID-REVIEW.md](BLOOM-GRID-REVIEW.md): H-GRID-01 implementato e in verifica. Run 41813899400: 19 unitari e 3 UI passati, 1 UI fallito per gesto sulla tab bar, corretto nel test; run 41816351684 PASSATO: 19 unitari, 4 UI, 16 screenshot; controllo visivo di standard e testo grande completato. Richiedere accettazione del risultato visivo prima della prossima modifica di prodotto (DEV-02). Nessuna nuova IPA.

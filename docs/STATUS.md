@@ -44,6 +44,6 @@ Implementati anteprima automatica e verifiche mirate manuali, con screenshot e s
 
 ## Correzione approvata Bloom H-GRID-01
 
-Due colonne indipendenti con larghezza esplicita, immagini proporzionate e anteprime link tramite LinkPresentation (cache separata dalle note, fallback e timeout). Fixture sintetica di 122 contenuti misti; verifiche standard/testo grande previste. Stato: implementata, compilazione e QA visuale ancora da eseguire. Ultima IPA invariata.
+Due colonne indipendenti con larghezza esplicita, immagini proporzionate e anteprime link tramite LinkPresentation (cache separata dalle note, fallback e timeout). Fixture sintetica di 122 contenuti misti; verifiche standard/testo grande previste. Stato: verificata al simulatore su fixture sintetica, accettazione visiva utente pendente. Ultima IPA invariata.
 
-Verifica Bloom intermedia: 19 unitari e 3 UI passati; correzione del gesto del test con testo grande in verifica nel run 41816351684. Prove e limiti in [BLOOM-GRID-REVIEW.md](BLOOM-GRID-REVIEW.md). Accettazione pendente.
+Verifica Bloom finale: run 41816351684 passato, 19 unitari e 4 UI senza errori, 16 screenshot esportati. Catture standard e testo grande controllate. Prove e limiti in [BLOOM-GRID-REVIEW.md](BLOOM-GRID-REVIEW.md). Accettazione pendente.

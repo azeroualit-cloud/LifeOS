@@ -71,3 +71,7 @@ python3 scripts/verify-startup-imports.py <file.ipa>
 Workflow della build 78: `.github/workflows/lifeos-revision78.yml`; è vincolato al ramo storico `codex/revision77`. Non assumere che un push su main avvii lo stesso percorso. Il vecchio workflow generale può contenere deploy: leggerlo prima di usarlo. Nuovi cambi applicativi richiedono verifiche pertinenti; non usare skip CI per fingere controlli passati.
 
 Per il web esistono `npm ci`, `npm run build`, `npm test`, `npm run test:tasks` dentro `web/`; consultare `web/README.md` per fixture e browser. Le sue vecchie dichiarazioni di allineamento non certificano la parità live attuale. Per backend usare test sintetici appropriati e verificare i binding; non fare prove su movimenti reali.
+
+## Bloom: griglia e anteprime link (H-GRID-01)
+
+`NativeBloomLibraryContent.swift` usa due colonne lazy con larghezze esplicite e immagini proporzionate. `NativeBloomLinkPreview.swift` recupera immagine/titolo tramite LinkPresentation, conserva una cache eliminabile separata dall’archivio e mostra un fallback se i metadati non arrivano. `NativeBloomVisualFixture.swift` espone solo in DEBUG la fixture mista separata; non modifica lo store personale quando i flag di prova non sono presenti. Nessuna migrazione dello schema delle note. Flusso: card visibile → cache/metadati → preview o fallback → apertura del dettaglio originale. Prove e limiti in `BLOOM-GRID-REVIEW.md`.

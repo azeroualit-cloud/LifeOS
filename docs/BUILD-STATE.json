@@ -69,7 +69,7 @@
   },
   "current_bloom_change": {
     "rule": "H-GRID-01",
-    "status": "standard grid and archive verified; corrected large-text gesture check running",
+    "status": "simulator verified; user visual acceptance pending",
     "scope": "two columns, bounded images, link previews",
     "fixture_items": 122,
     "distributed": false,
@@ -82,6 +82,15 @@
       "diagnosis": "Test swipe began in tab bar and selected Activities; gesture corrected without reducing layout assertions"
     },
     "user_acceptance": "pending",
-    "live_site_metadata": "not certified by synthetic preview fixture"
+    "live_site_metadata": "not certified by synthetic preview fixture",
+    "verified_commit": "3a1579147a4959df7eac20f04c103fa195cd4c8f",
+    "unit_passed": 19,
+    "ui_passed": 4,
+    "failures": 0,
+    "exported_screenshots": 16,
+    "visual_review": "Opened standard page 0 and large-text page 1 from the successful run; bounded media/cards and link preview observed.",
+    "device": "iPhone 15 Pro simulator, iOS 27.0",
+    "physical_device_verified": false,
+    "compact_device_verified": false
   }
 }

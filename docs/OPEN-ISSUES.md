@@ -38,3 +38,7 @@ Registrare requisito, riproduzione, cambiamento, commit, controllo pertinente, s
 ## Nuova osservazione del ciclo anteprima
 
 - **QA-011 — OBSERVED / riproduzione necessaria**: nel riepilogo Salute esportato dal run 41800947855 (`7EA9FE4E-5F0D-42DC-B046-D24DCA45FD24.png`) mancano visivamente le etichette Dashboard/Attività della tab bar. Verificare dopo stabilizzazione della schermata, con testo standard/grande, per distinguere transizione di cattura da difetto persistente. Nessuna causa o correzione ancora stabilita.
+
+## H-GRID-01 — verifica della correzione approvata
+
+QA-001/002: correzione implementata e verificata su 122 contenuti sintetici nel run [41816351684](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41816351684): 19 unitari e 4 UI passati, immagini contenute nelle card, due colonne e nessuna sovrapposizione nei quattro scorrimenti standard/testo grande. Anteprime link presenti nel caso sintetico. **Accettazione utente e prova con la libreria personale/telefono ancora pendenti**; non chiudere le voci come accettate. Rete dei singoli siti non certificata dalla fixture. Dettagli in [BLOOM-GRID-REVIEW.md](BLOOM-GRID-REVIEW.md).
