@@ -8,12 +8,12 @@ Aggiornato il 4 novembre 2026. Questa è una lista di lavoro con stato e proveni
 |---|---|---|
 | QA-001 | OPEN — visibile | Bloom: immagini/card oltre le colonne e sovrapposizioni. Riprodurre con molte note, immagini verticali/orizzontali e titoli lunghi; nessuna card deve uscire dalla propria colonna o interferire con le altre. |
 | QA-002 | OPEN — osservazione UI | Bloom: vuoti e gerarchia irregolare nella griglia. Stabilire il layout coerente con le richieste, poi verificare libreria popolata, scorrimento e miniature. |
-| QA-003 | OPEN — osservazione UI | Nutrizione: campi poco riconoscibili, zeri e unità difficili da associare, spazio verticale eccessivo. Verificare input reali, porzione, tastiera, calcolo e testo grande senza perdere i campi richiesti. |
+| QA-003 | IMPLEMENTED — verifica recupero accessibilità pendente | NUTRITION-DIRECT-01 sostituisce il modulo inline con quick add, quattro campi riconoscibili, unità e calorie automatiche. Standard con tastiera e salvataggio verificato; testo grande con valori conservati e recupero visibile osservato nel video. Retry automatico ultima versione da confermare nel run 41856609394. Percorso porzione sospeso; approvato il render, accettazione dell’implementazione pendente. |
 | QA-004 | OPEN — osservazione UI | Contenuti sotto la tab bar: verificare che l’ultimo elemento e ogni azione siano completamente raggiungibili sopra la barra, anche con tastiera e testo grande. |
 | QA-005 | OPEN — osservazione UI | Salute: calorie odierne mancanti e grafico storico con punto/barra colorata richiedono semantica chiara. Applicare G12; se si propone una deroga alla regola del colore, chiedere conferma prima. |
 | QA-006 | OPEN — revisione complessiva | Margini, densità, proporzioni, selezioni, icone e feedback dell’app installabile devono essere controllati con casi rappresentativi. I test esistenti non dimostrano qualità complessiva. |
 
-Le osservazioni non autorizzano di per sé un redesign arbitrario. Per esempio C21 richiede inserimento nutrizione in Dashboard: sostituirlo con una scorciatoia confligge e richiede META-01.
+Le osservazioni non autorizzano di per sé un redesign arbitrario. Il conflitto del quick add con il percorso per 100 g è già stato risolto esplicitamente: NUTRITION-DIRECT-01 ACTIVE e F03–F06 SUSPENDED. Non riproporre la vecchia restrizione come ancora attiva.
 
 ## Verifiche funzionali ancora distinte dalle prove già passate
 

@@ -28,7 +28,7 @@ La mela nutrizione ha un glifo vettoriale originale di fallback: l’asset inter
 Dashboard ─┬─ settimana → Calendario completo → giorno/agenda/editor
            ├─ eventi oggi → abitudini oggi → eventi domani/dopodomani
            ├─ Finanza → dettagli; Aggiungi spesa → editor movimento
-           ├─ nutrizione inline → valori/100g → porzione → salvataggio
+           ├─ pulsante Nutrizione → foglio quantità consumate → kcal automatiche → salvataggio
            └─ ora preghiera → orari completi
 Attività ─── elenco → editor unificato → stato/completamento/sincronizzazione
 Salute ───── TDEE / Peso / Calorie / Simulazione → dettagli
@@ -40,7 +40,7 @@ Bloom ────── Libreria / Mappa / Riscopri
 
 ### Integrità dei dati
 
-- Nutrizione: valori per 100 g scalati sui grammi reali; kcal dell’etichetta per i nuovi record. I legacy conservano la propria semantica. Scrittura locale prima dell’operazione HealthKit, identificativi/revisioni stabili per retry; nessuna cancellazione dei campioni di altre app.
+- Nutrizione (NUTRITION-DIRECT-01): quantità consumate di proteine/carboidrati/grassi/fibre; nuovi record con energia 4P + 4C + 9G + 2 fibre. Il percorso per 100 g/porzione/kcal etichetta è sospeso. I record storici conservano la propria semantica; modifiche della sola data non ricalcolano l’energia. Quick add in foglio con campi a due colonne, una in accessibilità, azione fissa sopra tastiera ed errore sopra Riprova. Bozza pendente non chiudibile con swipe, X intenzionale disponibile. Scrittura locale prima dell’operazione HealthKit, identificativi/revisioni stabili per retry; nessuna cancellazione dei campioni di altre app.
 - Lettura calorie: somma delle registrazioni di tutte le fonti nel periodo letto, senza selettore fonte. Evitare duplicazioni create dai retry LifeOS non significa deduplicare arbitrariamente le fonti lette.
 - Bloom: backup personale esterno ai sorgenti, importazione con anteprima e conflitti, copia di sicurezza e allegati verificati. Nessuna nuova sincronizzazione remota Bloom implicita.
 - Bollette: periodo esplicito, quote per competenza che sostituiscono stime, pagamento bancario unico e nessun doppio conteggio con il fondo. Verificare compatibilità server prima dell’invio.

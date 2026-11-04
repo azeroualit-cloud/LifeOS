@@ -61,6 +61,10 @@ I vecchi `HANDOFF.md`, README e rapporti di revisione sono evidenze storiche. Qu
 
 Leggere [BLOOM-GRID-REVIEW.md](BLOOM-GRID-REVIEW.md): H-GRID-01 implementato e in verifica. Run 41813899400: 19 unitari e 3 UI passati, 1 UI fallito per gesto sulla tab bar, corretto nel test; run 41816351684 PASSATO: 19 unitari, 4 UI, 16 screenshot; controllo visivo di standard e testo grande completato. Richiedere accettazione del risultato visivo prima della prossima modifica di prodotto (DEV-02). Nessuna nuova IPA.
 
+## Cronologia delle decisioni — gli stati successivi sostituiscono i precedenti
+
+Le note sotto conservano la sequenza; per lo stato operativo leggere l’incremento corrente in apertura e il registro ACTIVE.
+
 Aggiornamento 4 novembre: risultato visivo H-GRID-01 accettato tramite «ok, procediamo con la prossima correzzione». Prossima proposta: riconoscibilità e compattezza del modulo nutrizione in Dashboard; non ancora approvata né implementata. Accettazione globale per produzione invariata.
 
 Nuovo input NUTRITION-DIRECT-01 in PENDING_CONFIRMATION: quick add con nutrienti effettivi e kcal automatiche, sospendendo per ora percorso 100 g/porzione/kcal etichetta. Conflitto F03–F06: chiedere conferma ai sensi META-01. La precedente proposta di restyling nutrizione non è stata approvata. Non implementare la parte confliggente prima della risposta.
