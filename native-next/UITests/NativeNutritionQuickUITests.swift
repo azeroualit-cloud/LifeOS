@@ -83,14 +83,16 @@ final class NativeNutritionQuickUITests: XCTestCase {
         app.buttons["quick-nutrition-save"].tap()
         let error = app.staticTexts["quick-nutrition-error"]
         XCTAssertTrue(error.waitForExistence(timeout: 15))
-        let protein = app.textFields["quick-nutrition-Proteine"]
+        let protein = app.descendants(matching: .any).matching(identifier: "quick-nutrition-Proteine").firstMatch
         let scroll = app.scrollViews["quick-nutrition-scroll"]
         for _ in 0..<6 {
             if visible(protein, in: app) { break }
             drag(scroll, app: app, up: false)
         }
-        XCTAssertTrue(visible(protein, in: app))
-        XCTAssertEqual(protein.value as? String, "25")
+        let hierarchy = XCTAttachment(string: app.debugDescription); hierarchy.name = "Pending nutrition accessibility hierarchy"; hierarchy.lifetime = .keepAlways; add(hierarchy)
+        capture("Nutrition pending values after scrolling", app)
+        XCTAssertTrue(visible(protein, in: app), app.debugDescription)
+        XCTAssertEqual((protein.value as? String) ?? protein.label, "25")
         XCTAssertTrue(app.scrollViews["quick-nutrition-scroll"].exists, "Reading back values must not dismiss a pending entry")
         XCTAssertGreaterThanOrEqual(error.frame.minY, app.frame.minY)
         XCTAssertLessThanOrEqual(error.frame.maxY, app.buttons["quick-nutrition-save"].frame.minY)
