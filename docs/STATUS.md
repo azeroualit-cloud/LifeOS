@@ -1,5 +1,9 @@
 # LifeOS — stato corrente
 
+## Mandato Astra aggiornato — piano dell’intero progetto
+
+L’utente richiede il piano completo di tutte le modifiche mancanti fino all’IPA finale, non solo Salute. Leggere [PROJECT-PLAN-BRIEF.md](PROJECT-PLAN-BRIEF.md); il brief Salute è un allegato. Includere una proposta di task per Terra e sottoagenti con modelli economici, verificando costi e capacità reali. Nessun agente avviato o configurato da questo aggiornamento, nessuna implementazione e nessuna IPA autorizzate.
+
 ## Passaggio pianificazione Salute — 4 novembre 2026
 
 Nuovo obiettivo HEALTH-UX-01: Salute per bodybuilding, dati immediati e minimo attrito. Aggiornamento documentale autorizzato, nuovi inserimenti/database NON implementati o approvati. Leggere [checklist unificata](PROJECT-CHECKLIST.md) e [brief Astra → Terra](HEALTH-BODYBUILDING-BRIEF.md): distinguere obiettivo fermo, layout/catalogo non vincolanti e conflitti da confermare. Nessuna nuova chat creata automaticamente, nessuna IPA.

@@ -608,6 +608,15 @@
       ],
       "rule": "Aggiungere obiettivo e ipotesi alla checklist e preparare passaggio Astra (piano) → Terra (incrementi successivamente approvati). Non implementare ora nuovi inserimenti peso/pasto o database; non rimuovere il quick add esistente. Nessuna IPA.",
       "conflict_check": "Compatibile con DEV-02 e IPA-GATE-01; non è richiesta di sostituire layout o funzioni esistenti."
+    },
+    {
+      "id": "PROJECT-PLAN-01",
+      "status": "ACTIVE",
+      "recorded_on": "2026-11-04",
+      "scope": "Astra — pianificazione globale LifeOS",
+      "original_quote": "astra devi ricreare tutto il piano compreso di tutte le altre modifche discusse mancanti per arrivare a un ipa finale grazie a quel piano",
+      "rule": "Preparare un mandato per Astra che ricostruisca il piano completo dell’intero progetto fino all’IPA finale, non limitato a Salute; consegna eseguibile per Terra con copertura di tutte le richieste pertinenti. Nessuna autorizzazione implicita a implementare proposte o produrre IPA.",
+      "conflict_check": "Ampliamento del perimetro di pianificazione; compatibile con HEALTH-PLAN-01, DEV-02 e IPA-GATE-01. Nessuna regola di prodotto sostituita."
     }
   ],
   "pending_confirmations": [],
@@ -722,6 +731,13 @@
       ],
       "brief": "HEALTH-BODYBUILDING-BRIEF.md",
       "implementation_authorized": false
+    },
+    {
+      "id": "DELEGATION-COST-01",
+      "status": "PROPOSAL_TO_EVALUATE",
+      "recorded_on": "2026-11-04",
+      "original_quote": "magari anche dividendo il lavoro e facendo utilizzo di sottoagenti cosicchè possa utilizzare magari un modello cheap ? dici che è fattibile?",
+      "proposal": "Valutare nel piano divisione in task delimitati e sottoagenti con modello meno costoso per le parti adatte, coordinamento e revisione delle parti delicate. Nessuna garanzia di risparmio; nessuna nuova configurazione globale o esecuzione autonoma avviata qui."
     }
   ]
 }

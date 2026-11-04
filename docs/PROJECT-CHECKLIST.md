@@ -2,6 +2,14 @@
 
 Aggiornata il 4 novembre 2026. Fonte corrente per pianificazione e passaggio Astra → Terra. [Regole](USER-DECISIONS.md), [stato tecnico](BUILD-STATE.json), [brief Salute](HEALTH-BODYBUILDING-BRIEF.md). Le caselle descrivono risultati distinti: codice implementato non significa verifica completa o accettazione per produzione.
 
+## 0. Piano globale Astra → Terra
+
+- [x] Mandato esteso all’intero progetto fino all’IPA finale: [PROJECT-PLAN-BRIEF.md](PROJECT-PLAN-BRIEF.md).
+- [ ] Ricostruire copertura di tutte le richieste attive, comprese quelle non riassunte in questa checklist.
+- [ ] Piano unico con dipendenze, priorità, conflitti, criteri di accettazione e gate di rilascio.
+- [ ] Task autonomi per Terra e proposta di delega economica limitata a incarichi adatti.
+- [ ] Approvazione delle decisioni e degli incrementi prima dell’esecuzione; IPA solo su richiesta esplicita.
+
 ## 1. Regole e processo
 
 - [x] Registro decisioni persistente; conferma prima di sostituire regole ACTIVE in conflitto.

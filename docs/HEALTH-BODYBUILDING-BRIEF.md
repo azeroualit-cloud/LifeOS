@@ -1,5 +1,7 @@
 # Salute per bodybuilding — brief per Astra e passaggio a Terra
 
+Il mandato principale di Astra è ora [il piano globale LifeOS](PROJECT-PLAN-BRIEF.md); questo documento copre la sola area Salute e non limita il piano complessivo.
+
 4 novembre 2026. Stato: obiettivo e pianificazione autorizzati; layout e architettura sono ipotesi. Nessuna nuova implementazione richiesta in questa fase. Questo brief integra [la checklist completa](PROJECT-CHECKLIST.md), non la sostituisce.
 
 ## Obiettivo esplicito

@@ -8,6 +8,7 @@ Applicazione iPhone nativa per attività, turni, finanza, salute e raccolta di c
 
 Ultima IPA distribuita: **0.10.17 / build 78**. Test tecnici superati sul simulatore, ma **l’utente ha rifiutato la build come pronta per la produzione**. Restano difetti UI/UX da correggere. Nessuna nuova IPA prodotta dall’aggiornamento dei documenti.
 
+- [Mandato Astra: piano completo fino all’IPA](docs/PROJECT-PLAN-BRIEF.md).
 - [Checklist unificata](docs/PROJECT-CHECKLIST.md) · [Brief Salute bodybuilding per Astra → Terra](docs/HEALTH-BODYBUILDING-BRIEF.md).
 - [Stato corrente e limiti](docs/STATUS.md) · [stato build strutturato](docs/BUILD-STATE.json).
 - [Istruzioni di lavoro](AGENTS.md) · [decisioni utente e conferme sui conflitti](docs/USER-DECISIONS.md).

@@ -149,3 +149,7 @@ Render NUTRITION-DIRECT-01 approvato con «ok approvo». Lo stop al solo render 
 Obiettivo esplicito: Salute per bodybuilding con dati subito visibili, consultazione e futura registrazione pasti con minimo attrito e movimento del dito. Ora soltanto aggiornamento checklist e passaggio Astra (pianificazione) → Terra (esecuzione di incrementi successivamente approvati), senza implementare nuovi inserimenti o database e senza rimuovere il quick add. Nessuna IPA.
 
 Griglia, nutrienti in fila, due pulsanti e catalogo locale sono proposte non obbligatorie: l’utente dice «Però tutto ciò che ho detto non è obbligatorio». «4x4» con quattro celle descritte in due righe è interpretato provvisoriamente come 2×2, da esplicitare nel piano. Regole G05–G13 conservate; prima di attuare scelte incompatibili chiedere conferma. F03–F06 restano sospese per il quick add. Dettagli e domande aperte in [HEALTH-BODYBUILDING-BRIEF.md](HEALTH-BODYBUILDING-BRIEF.md); stato completo in [PROJECT-CHECKLIST.md](PROJECT-CHECKLIST.md).
+
+## PROJECT-PLAN-01 — ACTIVE
+
+Mandato Astra ampliato all’intero LifeOS: ricostruire tutte le modifiche discusse ancora pertinenti e mancanti fino alla consegna IPA, con task per Terra. [Brief globale](PROJECT-PLAN-BRIEF.md). Nessuna IPA autorizzata dal mandato. La domanda sui sottoagenti economici è registrata come proposta da valutare nel piano, non come obbligo di delegare ogni lavoro o configurazione già applicata. Nessun conflitto con le regole di approvazione esistenti.
