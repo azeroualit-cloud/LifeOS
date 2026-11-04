@@ -5,3 +5,9 @@ Render approvato dall’utente il 4 novembre 2026: «ok approvo». Pulsante comp
 Calcolo nuovi inserimenti: 4P + 4C + 9G + 2 fibre (carboidrati disponibili, convenzione UE). Fonte: https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A02011R1169-20250401, allegato XIV. È una stima dai nutrienti, non un valore dell’etichetta; non comprende polialcoli/alcol non inseriti. Energia calcolata conservata nello snapshot esistente, senza migrare o ricalcolare lo storico. Nell’editor storico, una modifica della sola data conserva esattamente i vecchi valori; cambiando i nutrienti si usa il nuovo calcolo.
 
 Stesso store, identità della bozza e retry già esistenti; chiusura solo dopo salvataggio confermato, campi conservati in errore, nessun doppio invio durante busy. Fixture DEBUG separata per successo/errore di scrittura, nessuna scrittura HealthKit reale nei test UI sintetici. Test invarianti precedenti su dati, HealthKit e porzioni storiche conservati. Stato: implementazione pronta per verifica; non ancora compilata o accettata come app reale. Nessuna nuova IPA.
+
+## Prima verifica e controllo visivo
+
+Run 41823044927 fermato prima della compilazione dal controllo di due spaziature numeriche, poi corrette in token e verificate anche localmente. Run 41823446725 (sorgente 7327d676): compilazione, 16 unitari nutrizione e 5 UI passati, 11 screenshot scaricati. Nota: la selezione xcodebuild sovrapposta di suite e sottosuite ha eseguito 16 unitari nutrizione, non l’intera suite: non dichiarare tutti gli unitari passati da questo run.
+
+QA visivo: cattura con tastiera coerente con il pannello; catture app-only dopo la chiusura della tastiera parzialmente vuote. Risultato non ancora consegnabile come completamente verificato. Verifica discriminante: confrontare acquisizione app e schermo intero dopo transizione tastiera, senza modificare il codice applicativo. Salvataggio, retry, dati e requisiti UI non vengono indeboliti.

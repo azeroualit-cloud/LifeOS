@@ -20,6 +20,7 @@ final class NativeNutritionQuickUITests: XCTestCase {
     }
     private func capture(_ name: String, _ app: XCUIApplication) {
         let a = XCTAttachment(screenshot: app.screenshot()); a.name = name; a.lifetime = .keepAlways; add(a)
+        let screen = XCTAttachment(screenshot: XCUIScreen.main.screenshot()); screen.name = name + " full screen"; screen.lifetime = .keepAlways; add(screen)
     }
     private func fill(_ app: XCUIApplication) {
         let scroll = app.scrollViews["quick-nutrition-scroll"]
@@ -48,7 +49,11 @@ final class NativeNutritionQuickUITests: XCTestCase {
         XCTAssertEqual(app.staticTexts["quick-nutrition-calories"].label, "362 kcal")
         XCTAssertFalse(app.textFields["quick-nutrition-Porzione effettiva"].exists)
         XCTAssertFalse(app.textFields["quick-nutrition-Calorie"].exists)
-        capture("Nutrition approved panel", app)
+        let hiddenKeyboard = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in !app.keyboards.firstMatch.exists }, object: nil)
+        XCTAssertEqual(XCTWaiter.wait(for: [hiddenKeyboard], timeout: 5), .completed)
+        // Capture once the keyboard/layout transition has had a separate render turn.
+        RunLoop.current.run(until: Date().addingTimeInterval(1))
+        capture("Nutrition approved panel stable", app)
         save.tap()
         XCTAssertTrue(app.staticTexts["quick-nutrition-notice"].waitForExistence(timeout: 15))
         app.buttons["quick-nutrition-open"].tap()
@@ -64,7 +69,8 @@ final class NativeNutritionQuickUITests: XCTestCase {
         XCTAssertTrue(error.waitForExistence(timeout: 15))
         XCTAssertEqual(app.textFields["quick-nutrition-Proteine"].value as? String, "25")
         XCTAssertTrue(app.buttons["quick-nutrition-save"].isEnabled)
-        capture("Nutrition large text recoverable error", app)
+        RunLoop.current.run(until: Date().addingTimeInterval(1))
+        capture("Nutrition large text recoverable error stable", app)
         app.buttons["quick-nutrition-save"].tap()
         XCTAssertTrue(app.staticTexts["quick-nutrition-notice"].waitForExistence(timeout: 15))
     }
