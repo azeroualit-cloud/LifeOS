@@ -1,5 +1,19 @@
 # LifeOS — checklist operativa unificata
 
+## Stato corrente — 5 novembre 2026
+
+- [x] Piano completo approvato e matrice requisiti documentata.
+- [x] Bloom: griglia accettata visivamente; frame accessibile 44 pt e importazione sintetica verificati nel run 42005224764. Parità libreria personale e iPhone restano aperte.
+- [x] Nutrizione: retry e correzione sovrapposizione verificati al simulatore; accettazione visiva e HealthKit fisico pendenti.
+- [x] Salute: griglia 2×2, nutrienti HealthKit e titoli leggibili implementati; prove mirate simulatore passate. Accettazione e HealthKit fisico pendenti.
+- [x] Test Calendario corretto e passato; 19 test sintetici Attività/movimenti passati. Verifiche complete flussi e iPhone pendenti.
+- [x] Finanza: 35 test sintetici e audit live non mutante passati. Parità integrale Worker e dati reali non verificati.
+- [ ] QA visiva trasversale, tab bar, piccolo schermo, accessibilità, persistenza e regressione complessiva.
+- [ ] Verifica fisica HealthKit, App Group, widget e AlarmKit; revisione e accettazione utente.
+- [ ] Richiesta esplicita IPA, poi confezionamento, controllo e installazione senza perdita dati.
+
+Le sezioni precedenti del 4 novembre sotto sono cronologiche ove contrastano con questo aggiornamento.
+
 ## Aggiornamento operativo — piano approvato, 4 novembre 2026
 
 Il piano completo è autorizzato ed è in corso: [piano](PROJECT-RELEASE-PLAN.md), [copertura](REQUIREMENT-COVERAGE.json), [manifesto](EXECUTION-MANIFEST.json). I precedenti passaggi che indicano solo pianificazione o accettazione Bloom pendente sono storici e superati. Bloom è accettato visivamente, non per produzione; retry nutrizione resta non verificato; IPA 78 non accettata. Nessuna nuova IPA né deploy autorizzati. T07 prevede anteprima e conferma dei conflitti prima della modifica di Salute.
