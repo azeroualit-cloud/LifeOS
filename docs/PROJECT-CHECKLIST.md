@@ -8,7 +8,8 @@
 - [x] Salute: griglia 2×2, nutrienti HealthKit e titoli leggibili implementati; prove mirate simulatore passate. Accettazione e HealthKit fisico pendenti.
 - [x] Test Calendario corretto e passato; 19 test sintetici Attività/movimenti passati. Verifiche complete flussi e iPhone pendenti.
 - [x] Finanza: 35 test sintetici e audit live non mutante passati. Parità integrale Worker e dati reali non verificati.
-- [ ] QA visiva trasversale, tab bar, piccolo schermo, accessibilità, persistenza e regressione complessiva.
+- [x] QA-004: ultimo contenuto raggiungibile su simulatore principale e compatto, anche con testo grande (run 42044400960 e 42056808149).
+- [ ] QA visiva trasversale, tab bar, accessibilità, persistenza e regressione complessiva; revisione della leggibilità Bloom compatta con testo grande.
 - [ ] Verifica fisica HealthKit, App Group, widget e AlarmKit; revisione e accettazione utente.
 - [ ] Richiesta esplicita IPA, poi confezionamento, controllo e installazione senza perdita dati.
 
