@@ -184,3 +184,7 @@ Mandato Astra ampliato all’intero LifeOS: ricostruire tutte le modifiche discu
 ## CALENDAR-CIVIL-DATE-FIX-01 — correzione approvata
 
 5 novembre 2026: «approvo, ma metterci 5 ore é eccessivo», in risposta alla correzione proposta per la data dell’editor calendario. Autorizzata correzione mirata del fuso civile e verifica con fusi diversi; usare prove mirate per ridurre tempi e attese. Nessuna IPA o deploy autorizzati.
+
+## IPA-DELIVERY-2026-11-05 — autorizzazione per questa consegna
+
+Fonte: richiesta diretta del 5 novembre 2026. «Ti chiedo esplicitamente di produrre e consegnarmi una nuova IPA, ma solo dopo aver completato con successo il collaudo pre-IPA.» IPA-GATE-01 applicata. Deploy backend e cancellazioni esclusi. La release 78 resta intatta. La nuova IPA diventa finale solo dopo prove iPhone e accettazione esplicita.

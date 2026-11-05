@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "reported_on": "2026-11-04",
+  "reported_on": "2026-11-05",
   "project": "LifeOS",
   "default_branch": "main",
   "working_branch": "codex/revision77",
@@ -29,7 +29,7 @@
     "user_assessment": "User explicitly rejected the delivered app as production-ready; screenshots and UX defects remain open."
   },
   "current_increment": {
-    "type": "approved incremental project plan; T00 documentation in progress",
+    "type": "Collaudo completo pre-IPA della consegna autorizzata",
     "new_ipa": false,
     "application_source_changed_since_verified_build": true
   },
@@ -151,5 +151,11 @@
     "sdk": "26.2",
     "runtime": "iOS 26.2",
     "app_tests_executed": false
+  },
+  "pre_ipa_validation": {
+    "source_commit": "2d33d8aba9dad6d996cbaff81b99a1212a53ba20",
+    "run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42124676946",
+    "status": "in_progress",
+    "release_launches_required": 4
   }
 }

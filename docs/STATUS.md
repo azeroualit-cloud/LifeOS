@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Consegna corrente (5 novembre 2026).** Autorizzata una singola nuova IPA dopo il superamento del collaudo pre-IPA. Suite completa e quattro avvii Release nel [run 42124676946](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42124676946) sul candidato 2d33d8aba9dad6d996cbaff81b99a1212a53ba20. Esito da acquisire. Ultima release verificata: 0.10.17 build 78. Firma Signulous, verifica iPhone e accettazione utente restano separate. Nessun deploy backend o cancellazione autorizzati.
+
 **Calendario corretto e verificato:** run 42116279080 sul commit 9e06668, build riuscita, 7/7 NativeActivityTests inclusi quattro fusi e cambi ora, UI calendario 1/1. In GMT evento 5 novembre mostra 5 nell’editor prima e dopo salvataggio e resta nell’agenda del 5. Accettazione su telefono e collaudo finale complessivo restano aperti. Nessuna IPA/deploy.
 
 **Calendario:** correzione del fuso civile approvata esplicitamente dall’utente; implementata la visualizzazione della data nell’editor con il calendario civile esistente, test su fusi e DST e UI preparati. Prove sul simulatore da eseguire; non dichiarare risolta prima dell’esito.

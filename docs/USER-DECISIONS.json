@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "LifeOS",
-  "updated_on": "2026-11-04",
+  "updated_on": "2026-11-05",
   "policy": {
     "id": "META-01",
     "status": "ACTIVE",
@@ -854,5 +854,13 @@
       "original_quote": "magari anche dividendo il lavoro e facendo utilizzo di sottoagenti cosicchè possa utilizzare magari un modello cheap ? dici che è fattibile?",
       "proposal": "Valutare nel piano divisione in task delimitati e sottoagenti con modello meno costoso per le parti adatte, coordinamento e revisione delle parti delicate. Nessuna garanzia di risparmio; nessuna nuova configurazione globale o esecuzione autonoma avviata qui."
     }
-  ]
+  ],
+  "current_ipa_delivery_authorization": {
+    "id": "IPA-DELIVERY-2026-11-05",
+    "status": "AUTHORIZED_AFTER_PRE_IPA_PASS",
+    "recorded_on": "2026-11-05",
+    "source": "Richiesta diretta utente",
+    "original_quote": "Ti chiedo esplicitamente di produrre e consegnarmi una nuova IPA, ma solo dopo aver completato con successo il collaudo pre-IPA.",
+    "scope": "Una sola consegna. Preservare release 78. Nessun deploy backend o cancellazione. Accettazione esplicita dopo prove iPhone."
+  }
 }
