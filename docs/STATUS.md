@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Run 41944119975, commit 4f920f9:** compilazione e 275 unitari passati, 24/26 UI passati. QA-012: nuovo test testo grande+tastiera passato e screenshot EFC67C7C verificato, calorie e bottone separati; accettazione visiva utente e prova iPhone pendenti. Fallimenti UI: test Calendario antecedente alla correzione bdb2749; Bloom misura frame accessibile 18pt contro 44pt, causa da distinguere dalla dimensione touch reale. Griglia Salute verificata al simulatore ma titoli spezzati: correzione visiva proposta, approvazione pendente.
+
 **Run 41944119975:** commit 4f920f9, compilazione riuscita; 26 UI con 2 fallimenti, di cui uno nella suite Salute. Identità e cause in analisi: log completo nell’artefatto non ancora letto. QA-012 non dichiarato risolto.
 
 **Backend sintetico, 5 novembre:** 19/19 test Attività/movement-order passati su SQLite in memoria e bundle locali build-68/build-70; nessuna verifica live. Test calendario aggiornato nel commit bdb2749 per espandere la giornata prima di controllarla; ancora da eseguire su simulatore.

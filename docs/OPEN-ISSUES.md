@@ -1,5 +1,11 @@
 # LifeOS — correzioni e difetti aperti
 
+**QA-013 — Bloom, diagnosi:** run 41944119975 misura frame accessibile del pulsante Libreria 18pt, test richiede 44pt. Il codice imposta un target di 44pt; verificare hitbox reale e gerarchia prima di decidere correzione, senza ridurre assert. Il test si è fermato prima di importare.
+
+**QA-014 — Salute:** screenshot B26E8722 nel run 41944119975 mostra titoli TDEE/Peso previsto spezzati nelle card. Rifinitura proposta all’utente, approvazione pendente.
+
+**QA-012 aggiornamento:** nel run 41944119975 test testo grande e tastiera passato; screenshot EFC67C7C mostra calorie e pulsante separati. Resta accettazione visiva e verifica iPhone.
+
 **QA-012 — osservato, diagnosi da approfondire:** nel run 41894390397 screenshot `CDE933D8-219D-46EB-91F4-04C6AEAC0635.png`, con testo accessibile e tastiera attiva, il pulsante Aggiungi appare sovrapposto al contenuto calorie, con testo parzialmente coperto. Verificare scroll, safe area e leggibilità nel simulatore prima di proporre una correzione. Il test retry è passato ma non prova questo requisito visivo.
 
 ## Aggiornamento operativo — piano approvato, 4 novembre 2026
