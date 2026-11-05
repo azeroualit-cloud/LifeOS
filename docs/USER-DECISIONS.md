@@ -176,3 +176,7 @@ Mandato Astra ampliato all’intero LifeOS: ricostruire tutte le modifiche discu
 ## QA-013 — correzione Bloom approvata
 
 5 novembre 2026, dopo screenshot reale: «Sì, mantieni questo aspetto». Conservare dimensione visibile delle pillole Bloom; correggere solo il riquadro riconosciuto dall’accessibilità. Nessuna IPA o deploy.
+
+## EXECUTION-AUTONOMY-01 — ACTIVE
+
+5 novembre 2026: «intanto fai tutte le cose che te puoi fare, e poi una volta fatte lascia tutte  le cose che devo fare io alla fine». Eseguire autonomamente ciò che è autorizzato e possibile; raccogliere alla fine le attività che richiedono l’utente, mantenendo META-01, DEV-02 e IPA-GATE-01.
