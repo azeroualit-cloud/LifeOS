@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Run Salute 41940411529:** sorgente 5bf5f5e, compilazione passata; suite UI 22 test con 2 fallimenti, suite NativeRevision78UITests 4/4 passati. Cause in analisi tramite artefatti; nessuna accettazione visiva o prova fisica. QA-012 successivo, non incluso nel run.
+
 **QA-012:** correzione della sovrapposizione e test UI aggiunti su richiesta utente; ipotesi da verificare al simulatore, non ancora dichiarata risolta.
 
 **Salute T08/T09:** prima implementazione sul commit 5bf5f5e, anteprima simulatore run 41940411529 in corso. Lettura macro, griglia e cronologia sono implementate ma non ancora verificate. Nessuna IPA o deploy.
