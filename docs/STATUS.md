@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**QA-013 verificata al simulatore:** run [42005224764](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42005224764), commit 6833eb6, compilazione, 275 unitari e 7 UI passati. Frame accessibile pillole 44pt, elemento unico/label, tap al bordo e importazione/persistenza sintetica passati. Screenshot confrontato: aspetto pillole conservato. Verifica su iPhone e accettazione prodotto restano pendenti.
+
 **Verifica Bloom:** run [42005224764](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42005224764) focused/bloom, sorgente 6833eb6, avviato; esito pendente.
 
 **QA-013 correzione compilazione:** sostituito modifier `.accessibilityFrame` non disponibile con `contentShape(.accessibility, Capsule())`; effettiva compilazione e frame AX ancora da verificare.

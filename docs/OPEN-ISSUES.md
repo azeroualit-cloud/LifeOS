@@ -1,5 +1,7 @@
 # LifeOS — correzioni e difetti aperti
 
+**QA-013 aggiornamento finale simulatore:** run 42005224764 passata, frame AX 44pt, elemento unico, tap bordo e import sintetico con persistenza verificati; screenshot confrontato con stato precedente, aspetto invariato. Prova iPhone e accettazione prodotto ancora pendenti.
+
 **QA-011 aggiornamento:** screenshot `4EAB5DA4-4FE3-4A2A-AF45-825F66D16FFF.png`, run 42000813725, Salute testo grande, mostra tutte le quattro etichette tab; osservazione precedente non riprodotta in questa schermata, non chiusa in tutti gli stati. QA-004: contenuto scorre visivamente dietro la tab bar in questo frame, ma raggiungibilità ultimo elemento dopo scroll non dimostrata.
 
 **QA-013 aggiornamento:** run 41948496725 conferma tap al bordo (21pt dal centro) riuscito, frame accessibile Libreria 18pt (requisito 44pt) fallito. Correzione mirata proposta, risposta utente pendente. Il test importazione si è fermato prima del picker.
