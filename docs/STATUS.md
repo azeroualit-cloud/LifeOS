@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Verifica Bloom:** run [42005224764](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42005224764) focused/bloom, sorgente 6833eb6, avviato; esito pendente.
+
 **QA-013 correzione compilazione:** sostituito modifier `.accessibilityFrame` non disponibile con `contentShape(.accessibility, Capsule())`; effettiva compilazione e frame AX ancora da verificare.
 
 **Run 42004075338:** commit ea5a71e, compilazione fallita: SwiftUI View non espone `.accessibilityFrame`; nessun test eseguito. Diagnosi e correzione in corso. QA-013 non risolto; nessuna IPA.
