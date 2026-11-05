@@ -1,5 +1,7 @@
 # LifeOS — punto di ingresso per qualsiasi IA
 
+**Aggiornamento ultimo:** calendario visualizza 4 novembre per evento del 5 con simulatore GMT (run 42109968064), dato in agenda al 5; fix prodotto richiede approvazione DEV-02. Apple Health reference superato nel run 42113026579 dopo precedente errore consenso. Suite finale 364/367 nel run 42094752571; avvii Release saltati. IPA non autorizzata.
+
 **Stato operativo aggiornato, 5 novembre 2026:** il piano è in esecuzione; Salute e le correzioni approvate sono implementate, con prove al simulatore descritte in STATUS. Nutrizione retry e Bloom accessibilità hanno prove automatiche riuscite; accettazione utente e prove fisiche restano aperte. Main aggiornato con autorizzazione utente; collaudo finale 42060601929 fallito su 25/92 prove UI, 275 unitari passati e avvii Release non eseguiti; diagnosi e test storici in corso. QA-004 compatto superato al simulatore nel run 42056808149; spazio visibile Bloom molto ridotto con testo grande, da rivedere. Consultare STATUS per gli esiti più recenti; le sezioni successive riportano anche storia superata. Nessuna IPA o deploy autorizzati.
 
 Aggiornamento 5 novembre: run focused nutrizione 41894390397 passato, dettagli in STATUS; revisione video e prova fisica restano aperte. HEALTH-GRID-02 approvata con eccezione limitata al riepilogo; implementazione in corso, nessuna IPA o deploy. Le sezioni precedenti su retry non verificato e conferma Salute pendente sono storiche.
