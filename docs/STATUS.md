@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Audit Finanza live:** run [41949645412](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41949645412), commit 2bb3f94, passato con `LIFEOS_BACKEND_AUDIT_ONLY=1`: lettura settings/sorgenti e confronto patch guardata, 3 test trasformazione passati; nessun record finanziario interrogato né deploy. Non dimostra comportamento o importi reali né parità integrale Worker.
+
 **Run corrente 41948496725:** focused/all su bfca462, avviato per test calendario aggiornato e diagnosi target Bloom; esito pendente. Non equivale a verifica finale o IPA.
 
 **Run 41944119975, commit 4f920f9:** compilazione e 275 unitari passati, 24/26 UI passati. QA-012: nuovo test testo grande+tastiera passato e screenshot EFC67C7C verificato, calorie e bottone separati; accettazione visiva utente e prova iPhone pendenti. Fallimenti UI: test Calendario antecedente alla correzione bdb2749; Bloom misura frame accessibile 18pt contro 44pt, causa da distinguere dalla dimensione touch reale. Griglia Salute verificata al simulatore ma titoli spezzati: correzione visiva proposta, approvazione pendente.
