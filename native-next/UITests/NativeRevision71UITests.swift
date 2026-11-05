@@ -61,8 +61,15 @@ final class NativeRevision71UITests: XCTestCase {
     func testDashboardExplicitDayAndCalendarEntryResumeDefaults() {
         let app = launch()
         app.buttons["dashboard-day-" + day(1)].tap()
-        let explicit = app.buttons["calendar-week-day-" + day(1)]
-        XCTAssertTrue(exists(explicit, app: app)); XCTAssertTrue(explicit.isSelected)
+        let explicit = app.buttons["calendar-day-" + day(1)]
+        let monthScroll = app.scrollViews["calendar-scroll"]
+        XCTAssertTrue(monthScroll.waitForExistence(timeout: 10))
+        reveal(explicit, in: monthScroll, app: app); explicit.tap()
+        XCTAssertTrue(app.buttons["calendar-expand-day"].waitForExistence(timeout: 10))
+        XCTAssertTrue(explicit.isSelected)
+        app.buttons["calendar-expand-day"].tap()
+        let focused = app.buttons["calendar-week-day-" + day(1)]
+        XCTAssertTrue(exists(focused, app: app)); XCTAssertTrue(focused.isSelected)
         app.openOtherDestination("Finanza"); app.openOtherDestination("Calendario")
         XCTAssertTrue(app.scrollViews["calendar-scroll"].waitForExistence(timeout: 10))
         let today = app.buttons["calendar-day-" + day()]
@@ -191,16 +198,17 @@ final class NativeRevision71UITests: XCTestCase {
         reveal(all, in: surface, app: app); all.tap()
         XCTAssertTrue(app.navigationBars["Movimenti"].waitForExistence(timeout: 10))
     }
-    func testDashboardShowsDateWithoutGreetingOrWeatherAndHealthOpens() {
+    func testDashboardDateAndHealthTabNavigation() {
         let app = launch()
         XCTAssertTrue(app.staticTexts["home-today"].waitForExistence(timeout: 10))
         XCTAssertFalse(app.staticTexts["home-greeting"].exists)
         XCTAssertFalse(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "A Empoli,")).firstMatch.exists)
         XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "dashboard-day-")).count, 7)
-        let health = app.buttons["home-health-detail"]
-        reveal(health, in: app.scrollViews["dashboard-scroll"], app: app)
-        capture("71-dashboard-health-accent")
-        health.tap(); XCTAssertTrue(app.navigationBars["Peso e calorie"].waitForExistence(timeout: 10))
+        app.tabBars.buttons["Salute"].tap()
+        let health = app.buttons["health-summary-weight"]
+        XCTAssertTrue(health.waitForExistence(timeout: 10)); XCTAssertTrue(health.isHittable)
+        capture("71-health-weight-summary")
+        health.tap(); XCTAssertTrue(app.navigationBars["Peso"].waitForExistence(timeout: 10))
     }
     func testCompletedTimedActivityKeepsItsStateInTheDayTimeline() {
         let app = launch()

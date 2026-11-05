@@ -1,5 +1,7 @@
 # LifeOS — correzioni e difetti aperti
 
+**Collaudo finale 42060601929:** 25/92 UI falliti; test storici in aggiornamento, evento calendario non trovato nel giorno selezionato e riferimento Apple BodyMass assente dal sistema da investigare. Quattro avvii Release non eseguiti.
+
 **QA-004 compact aggiornamento:** run 42056808149 supera standard e testo grande, ultima nota raggiunta e aperta; spazio visibile molto ridotto a testo grande resta da valutare visivamente. Verifica fisica e revisione globale aperte.
 
 **QA-004 compatto, run 42053108157:** Bloom testo grande inconcluso per attesa inattività e timeout query UI dopo 12 gesti; nessuna conclusione sulla causa. Finanza: secondo confronto geometrico soggetto ad arrotondamento; prova aggiornata da rieseguire.

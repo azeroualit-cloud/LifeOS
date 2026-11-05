@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Collaudo finale run 42060601929:** main 85caca8 autorizzato e sincronizzato; compilazione e 275 unitari riusciti; UI 25 fallimenti su 92. Dieci test revisione 78 riusciti. Gli avvii Release sono stati saltati. Analisi log: numerosi test storici presumevano tab, card o finestra home precedenti; aggiornamenti ai test preparati e da verificare. Evento calendario mancante nel giorno atteso e riferimento BodyMass non visibile in Apple Salute richiedono diagnosi; non sono classificati come risolti. Preparato artifact diagnostico leggero per prossime esecuzioni. Nessuna IPA o deploy.
+
 **Main:** il 5 novembre 2026 l’utente ha autorizzato esplicitamente l’aggiornamento diretto del ramo principale con il ramo di lavoro, per sbloccare il collaudo finale. Verificare l’esito effettivo del push e lo SHA remoto; nessuna autorizzazione IPA o deploy.
 
 **QA-004 compatto run 42056808149:** commit 4adc7bf, compilazione riuscita, 275/275 unitari e 6/6 UI passati. Finanza supera il confronto geometrico. Bloom standard raggiunge il fondo; con testo grande arriva alla nota 121 al gesto 67 e la apre. Screenshot finale controllato: ultima card raggiungibile sopra tab; spazio visibile ridotto con testo molto grande, non valutato come accettazione visiva. Prova su iPhone ancora necessaria.

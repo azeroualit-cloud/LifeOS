@@ -23,6 +23,51 @@ jobs:
           set -euo pipefail
           xcrun simctl bootstatus "$MAIN_DEVICE" -b
           xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 660 -resultBundlePath build/Final.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/final-tests.log 2>&1 || { tail -n 120 build/final-tests.log; exit 1; }
+      - name: Collect lightweight test diagnostics
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -u
+          mkdir -p app/build/final-diagnostics
+          diag=app/build/final-diagnostics
+          result=app/build/Final.xcresult
+          printf 'Commit: %s\nRun: %s attempt %s\n' "$GITHUB_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" > "$diag/context.txt"
+          if [ -f app/build/final-tests.log ]; then
+            cp app/build/final-tests.log "$diag/final-tests.log"
+            # Preserve every matching line; the complete log remains available for context.
+            grep -E 'error:|Test Case .*failed|Executed [0-9]+ tests?, with [0-9]+ failures?' app/build/final-tests.log > "$diag/failures-and-counts.txt" || true
+          else
+            printf 'Test log unavailable: the test step may not have started.\n' > "$diag/failures-and-counts.txt"
+          fi
+          if [ -f "$result/Info.plist" ]; then
+            for kind in summary tests; do
+              if xcrun xcresulttool get test-results "$kind" --path "$result" > "$diag/$kind.json.tmp" 2> "$diag/$kind-error.txt"; then
+                mv "$diag/$kind.json.tmp" "$diag/$kind.json"
+                rm "$diag/$kind-error.txt"
+              else
+                rm -f "$diag/$kind.json.tmp"
+                printf '%s extraction failed; see %s-error.txt.\n' "$kind" "$kind" >> "$diag/context.txt"
+              fi
+            done
+          else
+            printf 'Result bundle unavailable or incomplete; structured extraction not attempted.\n' >> "$diag/context.txt"
+          fi
+          {
+            printf '## LifeOS final test diagnostics\n\n'
+            printf 'Commit: `%s` · Run: `%s`, attempt `%s`\n\n' "$GITHUB_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT"
+            printf 'Lightweight artifact: `lifeos-final-diagnostics-%s-%s`.\n\n' "$GITHUB_SHA" "$GITHUB_RUN_ATTEMPT"
+            printf 'First 100 failure/count lines (complete list and log in artifact):\n\n```text\n'
+            head -n 100 "$diag/failures-and-counts.txt"
+            printf '\n```\n\n'
+            cat "$diag/context.txt"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload lightweight test diagnostics
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: lifeos-final-diagnostics-${{ github.sha }}-${{ github.run_attempt }}
+          if-no-files-found: warn
+          path: app/build/final-diagnostics
       - name: Create isolated simulators for Release startup checks
         shell: bash
         run: |
