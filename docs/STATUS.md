@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**QA-004 run 42044400960:** 275 unitari e 6 UI passati; Dashboard, Salute, Bloom ultimo contenuto raggiungibile sopra tab, standard e testo grande su simulatore principale. Bloom con 122 note raggiunge la 121 al gesto 96; screenshot controllato. Compatibilità schermo compatto e iPhone fisico ancora da verificare.
+
 **QA-004 verifica estesa:** run [42044400960](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42044400960), focused/dashboard su b1ef2ff, avviata dopo evidenza 81% a 80 gesti; esito pendente.
 
 **QA-004 diagnosi run 42019184325:** Bloom grande avanza 0→19→40→81% in 80 gesti, con note fino a 120 visibili; nota 121 non ancora raggiunta. Limite del test esteso a 120 gesti, assert invariati; nuova prova necessaria.

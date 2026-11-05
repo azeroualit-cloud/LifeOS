@@ -1,5 +1,7 @@
 # LifeOS — correzioni e difetti aperti
 
+**QA-004 aggiornamento:** run 42044400960 passato standard/testo grande su simulatore principale, ultima nota Bloom raggiunta e apribile; screen compatto e iPhone ancora da verificare.
+
 **QA-013 aggiornamento finale simulatore:** run 42005224764 passata, frame AX 44pt, elemento unico, tap bordo e import sintetico con persistenza verificati; screenshot confrontato con stato precedente, aspetto invariato. Prova iPhone e accettazione prodotto ancora pendenti.
 
 **QA-011 aggiornamento:** screenshot `4EAB5DA4-4FE3-4A2A-AF45-825F66D16FFF.png`, run 42000813725, Salute testo grande, mostra tutte le quattro etichette tab; osservazione precedente non riprodotta in questa schermata, non chiusa in tutti gli stati. QA-004: contenuto scorre visivamente dietro la tab bar in questo frame, ma raggiungibilità ultimo elemento dopo scroll non dimostrata.
