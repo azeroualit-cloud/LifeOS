@@ -1,5 +1,7 @@
 # LifeOS — correzioni e difetti aperti
 
+**Calendario data — verifica tecnica superata:** run 42116279080, 7/7 unitari e 1/1 UI, incluso GMT e riapertura; verifica iPhone ancora pendente.
+
 **Apple Health reference:** run mirata 42113026579 superata (energia e peso sintetici visibili); precedente errore consenso non riprodotto, prova fisica ancora aperta.
 
 **Calendario — errore data visualizzata:** run 42109968064, selezione/agenda 5 novembre, editor 4 novembre prima e dopo salvataggio con simulatore GMT. Possibile formattazione con fuso non civile; correzione richiede approvazione DEV-02.

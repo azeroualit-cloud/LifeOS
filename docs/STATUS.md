@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Calendario corretto e verificato:** run 42116279080 sul commit 9e06668, build riuscita, 7/7 NativeActivityTests inclusi quattro fusi e cambi ora, UI calendario 1/1. In GMT evento 5 novembre mostra 5 nell’editor prima e dopo salvataggio e resta nell’agenda del 5. Accettazione su telefono e collaudo finale complessivo restano aperti. Nessuna IPA/deploy.
+
 **Calendario:** correzione del fuso civile approvata esplicitamente dall’utente; implementata la visualizzazione della data nell’editor con il calendario civile esistente, test su fusi e DST e UI preparati. Prove sul simulatore da eseguire; non dichiarare risolta prima dell’esito.
 
 **Apple Health reference 42113026579:** 0f8c78a, build e test dedicato 1/1 passati; consenso sintetico via UI, fixture Dati pronti, Salute mostra 2200 cal e 176,4 lb. Il precedente errore di autorizzazione non si è ripetuto; stabilità e prova HealthKit fisica non sono garantite da una singola ripetizione. Calendario: errore data visualizzata riprodotto e correzione prodotto in attesa di approvazione DEV-02; vedi sotto. Navigazione test aggiornato ancora da rieseguire, quattro avvii Release non eseguiti.

@@ -52,6 +52,15 @@ jobs:
             tail -n 120 build/ios-diagnostics-tests.log
             result=1
           fi
+          if [ "$DIAGNOSTIC_CASE" = calendar ] && ! grep -F "testEditorDateUsesCivilTimeZoneAcrossDeviceZonesAndDaylightSaving]' passed" build/ios-diagnostics-unit.log > /dev/null; then
+            printf 'Expected time-zone unit test did not pass or did not run.\n' >&2
+            result=1
+          fi
+          expected_ui=${selector##*/}
+          if ! grep -F "$expected_ui]' passed" build/ios-diagnostics-tests.log > /dev/null; then
+            printf 'Expected UI test did not pass or did not run: %s\n' "$expected_ui" >&2
+            result=1
+          fi
           exit "$result"
       - name: Export test diagnostics
         if: ${{ !cancelled() }}
