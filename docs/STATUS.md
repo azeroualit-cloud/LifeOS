@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**QA-004 compatto:** run [42048485584](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42048485584), focused/dashboard/compact su 8190eef, avviato; esito pendente.
+
 **QA-004 run 42044400960:** 275 unitari e 6 UI passati; Dashboard, Salute, Bloom ultimo contenuto raggiungibile sopra tab, standard e testo grande su simulatore principale. Bloom con 122 note raggiunge la 121 al gesto 96; screenshot controllato. Compatibilità schermo compatto e iPhone fisico ancora da verificare.
 
 **QA-004 verifica estesa:** run [42044400960](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42044400960), focused/dashboard su b1ef2ff, avviata dopo evidenza 81% a 80 gesti; esito pendente.
