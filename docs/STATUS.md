@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Run 41948496725, bfca462:** compilazione e 275 unitari passati, 26/27 UI passati. Calendario corretto passato. Bloom: tap a 21pt dal centro risponde, ma frame accessibile Libreria misura 18pt contro requisito 44pt; test import si ferma prima del picker. Correzione proposta, in attesa di risposta. Nessuna IPA.
+
 **Audit Finanza live:** run [41949645412](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41949645412), commit 2bb3f94, passato con `LIFEOS_BACKEND_AUDIT_ONLY=1`: lettura settings/sorgenti e confronto patch guardata, 3 test trasformazione passati; nessun record finanziario interrogato né deploy. Non dimostra comportamento o importi reali né parità integrale Worker.
 
 **Run corrente 41948496725:** focused/all su bfca462, avviato per test calendario aggiornato e diagnosi target Bloom; esito pendente. Non equivale a verifica finale o IPA.

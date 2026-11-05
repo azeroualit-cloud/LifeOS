@@ -1,5 +1,7 @@
 # LifeOS — correzioni e difetti aperti
 
+**QA-013 aggiornamento:** run 41948496725 conferma tap al bordo (21pt dal centro) riuscito, frame accessibile Libreria 18pt (requisito 44pt) fallito. Correzione mirata proposta, risposta utente pendente. Il test importazione si è fermato prima del picker.
+
 **QA-013 — Bloom, diagnosi:** run 41944119975 misura frame accessibile del pulsante Libreria 18pt, test richiede 44pt. Il codice imposta un target di 44pt; verificare hitbox reale e gerarchia prima di decidere correzione, senza ridurre assert. Il test si è fermato prima di importare.
 
 **QA-014 — Salute:** screenshot B26E8722 nel run 41944119975 mostra titoli TDEE/Peso previsto spezzati nelle card. Rifinitura proposta all’utente, approvazione pendente.
