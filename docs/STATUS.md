@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**QA-004 run 42011651611:** 275 unitari e 5/6 UI passati; Dashboard/Salute standard e grandi e Bloom standard verificati visivamente. Bloom grande inconcluso: il gesto del test ha selezionato la tab Attività; corretto test confinando il drag sopra la barra senza ridurre assert, ripetizione necessaria.
+
 **QA-004 ripetizione:** run [42011651611](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42011651611), focused/dashboard su 5601cb7, avviato con selettore Bloom robusto; esito pendente.
 
 **QA-004 run 42009421635:** 275 unitari e 5/6 UI passati. Dashboard/Salute testo grande e prova standard inclusa Bloom riuscite; test Bloom testo grande interrotto perché XCTest ha perso identifier dello scroll. Selettore del test reso robusto senza eliminare assert su ultima nota, posizione e apertura; ripetizione necessaria.

@@ -154,26 +154,24 @@ final class NativeRevision78UITests: XCTestCase {
         let bloom = app.scrollViews["bloom-library-scroll"]
         XCTAssertTrue(bloom.waitForExistence(timeout: 20))
         let last = app.buttons["bloom-note-BA000000-0000-4000-8000-000000000121"]
-        func currentBloomScroll() -> XCUIElement {
-            if bloom.exists { return bloom }
-            // XCTest can temporarily lose the identifier after scrolling with large text.
-            // Only use the unnamed scroll if it is unique and the library is still active.
-            let candidates = app.scrollViews
-            XCTAssertEqual(candidates.count, 1, "Expected one scroll view when Bloom's identifier is absent")
-            XCTAssertTrue(app.tabBars.buttons["Bloom"].isSelected)
-            XCTAssertTrue(app.buttons["bloom-section-library"].isSelected)
-            XCTAssertTrue(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "bloom-note-")).firstMatch.exists)
-            return candidates.element(boundBy: 0)
-        }
         for _ in 0..<80 {
-            let current = currentBloomScroll()
-            if last.exists && last.isHittable && last.frame.maxY <= min(current.frame.maxY, tabBar.frame.minY) { break }
-            current.swipeUp(velocity: .fast)
+            XCTAssertTrue(bloom.exists, "The identified Bloom library scroll must remain present")
+            if last.exists && last.isHittable && last.frame.maxY <= min(bloom.frame.maxY, tabBar.frame.minY) { break }
+            // Limit the drag to the visible library, above the tab bar. XCTest's
+            // synthesized swipe can start below that boundary at large text sizes.
+            let top = max(bloom.frame.minY, app.frame.minY) + 24
+            let bottom = min(bloom.frame.maxY, tabBar.frame.minY) - 24
+            XCTAssertGreaterThan(bottom - top, 44, "The visible Bloom scroll region must permit a gesture")
+            let origin = app.coordinate(withNormalizedOffset: .zero)
+            let start = origin.withOffset(CGVector(dx: bloom.frame.midX, dy: bottom))
+            let end = origin.withOffset(CGVector(dx: bloom.frame.midX, dy: max(top, bottom - 200)))
+            start.press(forDuration: 0.05, thenDragTo: end)
+            XCTAssertTrue(app.tabBars.buttons["Bloom"].isSelected, "Scrolling the library must not select another tab")
         }
-        let finalScroll = currentBloomScroll()
+        XCTAssertTrue(bloom.exists, "The identified Bloom library scroll must remain present")
         XCTAssertTrue(last.exists, "The last fixture note must be reached")
         XCTAssertTrue(last.isHittable)
-        XCTAssertLessThanOrEqual(last.frame.maxY, min(finalScroll.frame.maxY, tabBar.frame.minY))
+        XCTAssertLessThanOrEqual(last.frame.maxY, min(bloom.frame.maxY, tabBar.frame.minY))
         capture(large ? "safe-area-bloom-large" : "safe-area-bloom-standard", app)
         last.tap()
         XCTAssertTrue(app.navigationBars["Nota"].waitForExistence(timeout: 10))
