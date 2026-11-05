@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**QA-004 run 42009421635:** 275 unitari e 5/6 UI passati. Dashboard/Salute testo grande e prova standard inclusa Bloom riuscite; test Bloom testo grande interrotto perché XCTest ha perso identifier dello scroll. Selettore del test reso robusto senza eliminare assert su ultima nota, posizione e apertura; ripetizione necessaria.
+
 **QA-004 verifica:** run [42009421635](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42009421635), focused/dashboard su commit 54f287b, avviato. Include test standard e testo grande su Dashboard, Salute e Bloom. Esito pendente.
 
 **T11 blocco dispatch:** workflow finale non registrato sul ramo predefinito; tentativo fast-forward main rifiutato da revisione automatica per rischio di modifica diretta al ramo principale. Nessun push main, deploy o IPA. Continuano prove indipendenti sul ramo codex/revision77; approvazione necessaria per avanzare main.

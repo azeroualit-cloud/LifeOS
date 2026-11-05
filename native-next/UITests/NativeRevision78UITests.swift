@@ -154,13 +154,26 @@ final class NativeRevision78UITests: XCTestCase {
         let bloom = app.scrollViews["bloom-library-scroll"]
         XCTAssertTrue(bloom.waitForExistence(timeout: 20))
         let last = app.buttons["bloom-note-BA000000-0000-4000-8000-000000000121"]
-        for _ in 0..<80 {
-            if last.exists && last.isHittable && last.frame.maxY <= min(bloom.frame.maxY, tabBar.frame.minY) { break }
-            bloom.swipeUp(velocity: .fast)
+        func currentBloomScroll() -> XCUIElement {
+            if bloom.exists { return bloom }
+            // XCTest can temporarily lose the identifier after scrolling with large text.
+            // Only use the unnamed scroll if it is unique and the library is still active.
+            let candidates = app.scrollViews
+            XCTAssertEqual(candidates.count, 1, "Expected one scroll view when Bloom's identifier is absent")
+            XCTAssertTrue(app.tabBars.buttons["Bloom"].isSelected)
+            XCTAssertTrue(app.buttons["bloom-section-library"].isSelected)
+            XCTAssertTrue(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "bloom-note-")).firstMatch.exists)
+            return candidates.element(boundBy: 0)
         }
+        for _ in 0..<80 {
+            let current = currentBloomScroll()
+            if last.exists && last.isHittable && last.frame.maxY <= min(current.frame.maxY, tabBar.frame.minY) { break }
+            current.swipeUp(velocity: .fast)
+        }
+        let finalScroll = currentBloomScroll()
         XCTAssertTrue(last.exists, "The last fixture note must be reached")
         XCTAssertTrue(last.isHittable)
-        XCTAssertLessThanOrEqual(last.frame.maxY, min(bloom.frame.maxY, tabBar.frame.minY))
+        XCTAssertLessThanOrEqual(last.frame.maxY, min(finalScroll.frame.maxY, tabBar.frame.minY))
         capture(large ? "safe-area-bloom-large" : "safe-area-bloom-standard", app)
         last.tap()
         XCTAssertTrue(app.navigationBars["Nota"].waitForExistence(timeout: 10))
