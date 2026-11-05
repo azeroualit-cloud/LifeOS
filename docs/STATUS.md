@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**QA-004 ripetizione:** run [42011651611](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42011651611), focused/dashboard su 5601cb7, avviato con selettore Bloom robusto; esito pendente.
+
 **QA-004 run 42009421635:** 275 unitari e 5/6 UI passati. Dashboard/Salute testo grande e prova standard inclusa Bloom riuscite; test Bloom testo grande interrotto perché XCTest ha perso identifier dello scroll. Selettore del test reso robusto senza eliminare assert su ultima nota, posizione e apertura; ripetizione necessaria.
 
 **QA-004 verifica:** run [42009421635](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42009421635), focused/dashboard su commit 54f287b, avviato. Include test standard e testo grande su Dashboard, Salute e Bloom. Esito pendente.
