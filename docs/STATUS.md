@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**QA-004 run 42015355697:** compilazione e 275 unitari passati; 5/6 UI passati. Standard Dashboard/Salute/Bloom passato; testo grande Dashboard/Salute passati; Bloom grande non ha raggiunto la nota finale nella fixture. Diagnosi causa in corso, nessuna correzione app autorizzata implicitamente.
+
 **QA-004 run corrente:** [42015355697](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42015355697), focused/dashboard su 8bba1c6, ripete il test con gesto confinato sopra tab; esito pendente.
 
 **QA-004 run 42011651611:** 275 unitari e 5/6 UI passati; Dashboard/Salute standard e grandi e Bloom standard verificati visivamente. Bloom grande inconcluso: il gesto del test ha selezionato la tab Attività; corretto test confinando il drag sopra la barra senza ridurre assert, ripetizione necessaria.
