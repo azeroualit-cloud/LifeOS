@@ -17,13 +17,20 @@ final class NativeRevision74UITests: XCTestCase {
         for name in ["Dashboard", "Attività", "Salute", "Bloom"] { XCTAssertTrue(app.tabBars.buttons[name].exists) }
         XCTAssertFalse(app.tabBars.buttons["Finanza"].exists); XCTAssertFalse(app.tabBars.buttons["Calendario"].exists)
         app.tabBars.buttons["Salute"].tap()
-        app.buttons["Registrazioni macro"].tap()
+        let add = app.buttons["health-add-nutrition"]
+        XCTAssertTrue(add.waitForExistence(timeout: 10)); XCTAssertTrue(add.isHittable); add.tap()
+        XCTAssertTrue(app.staticTexts["Aggiungi nutrienti"].waitForExistence(timeout: 10))
+        XCTAssertFalse(app.buttons["quick-nutrition-save"].isEnabled)
+        let scroll = app.scrollViews["quick-nutrition-scroll"]
         for (label, value) in [("Proteine", "10"), ("Carboidrati", "20"), ("Grassi", "5"), ("Fibre", "1")] {
-            let field = app.textFields["nutrition-" + label]
-            XCTAssertTrue(field.waitForExistence(timeout: 10)); field.tap(); field.typeText(value)
+            let field = app.textFields["quick-nutrition-" + label]
+            XCTAssertTrue(field.waitForExistence(timeout: 10))
+            for _ in 0..<5 where !field.isHittable { scroll.swipeUp() }
+            XCTAssertTrue(field.isHittable); field.tap(); field.typeText(value)
         }
-        app.buttons["nutrition-keyboard-done"].tap()
-        let total = app.staticTexts["nutrition-calories-value"]
+        app.buttons["quick-nutrition-keyboard-done"].tap()
+        let total = app.staticTexts["quick-nutrition-calories"]
+        XCTAssertTrue(app.buttons["quick-nutrition-save"].isEnabled)
         capture("74-nutrition-calculation")
         if !total.exists { print("NUTRITION_ACCESSIBILITY " + app.debugDescription) }
         XCTAssertTrue(total.waitForExistence(timeout: 10))
