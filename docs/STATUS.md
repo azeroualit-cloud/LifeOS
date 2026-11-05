@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**QA-004 diagnosi run 42019184325:** Bloom grande avanza 0→19→40→81% in 80 gesti, con note fino a 120 visibili; nota 121 non ancora raggiunta. Limite del test esteso a 120 gesti, assert invariati; nuova prova necessaria.
+
 **QA-004 diagnostica:** run [42019184325](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42019184325), focused/dashboard su fd79435, avviato con catture intermedie note visibili; esito pendente.
 
 **QA-004 Bloom grande:** run 42015355697 non raggiunge la nota 121 dopo 80 gesti; causa non stabilita. Aggiunte catture e identificativi delle note visibili durante lo scroll, senza ridurre assert; nuova prova diagnostica necessaria.

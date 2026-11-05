@@ -119,7 +119,7 @@ final class NativeRevision78UITests: XCTestCase {
     func testSafeAreaLastContentStandard() { checkSafeAreaLastContent(large: false) }
     func testSafeAreaLastContentLargeText() { checkSafeAreaLastContent(large: true) }
     private func checkSafeAreaLastContent(large: Bool) {
-        executionTimeAllowance = 300
+        executionTimeAllowance = 360
         let app = launch(["--bloom-grid-fixture"] + (large ? ["--large-text"] : []))
         let tabBar = app.tabBars.firstMatch
         let dashboard = app.scrollViews["dashboard-scroll"]
@@ -167,9 +167,9 @@ final class NativeRevision78UITests: XCTestCase {
             capture(prefix, app)
         }
         var gestures = 0
-        for step in 0..<80 {
+        for step in 0..<120 {
             XCTAssertTrue(bloom.exists, "The identified Bloom library scroll must remain present")
-            if [0, 20, 40].contains(step) { recordBloomProgress(step) }
+            if [0, 20, 40, 100].contains(step) { recordBloomProgress(step) }
             if last.exists && last.isHittable && last.frame.maxY <= min(bloom.frame.maxY, tabBar.frame.minY) { break }
             // Limit the drag to the visible library, above the tab bar. XCTest's
             // synthesized swipe can start below that boundary at large text sizes.
