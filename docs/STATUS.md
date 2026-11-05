@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**QA-012:** correzione della sovrapposizione e test UI aggiunti su richiesta utente; ipotesi da verificare al simulatore, non ancora dichiarata risolta.
+
 **Salute T08/T09:** prima implementazione sul commit 5bf5f5e, anteprima simulatore run 41940411529 in corso. Lettura macro, griglia e cronologia sono implementate ma non ancora verificate. Nessuna IPA o deploy.
 
 **Nutrizione, verifica visiva:** run 41894390397: 272 unitari e 5 UI passati, incluso retry accessibile. Screenshot del pannello con tastiera e testo grande mostra possibile sovrapposizione del bottone al riepilogo calorie: QA-012 aperto. Video non analizzato; nessuna accettazione visiva o prova fisica.

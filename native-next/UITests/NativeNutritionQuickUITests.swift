@@ -74,6 +74,26 @@ final class NativeNutritionQuickUITests: XCTestCase {
         XCTAssertTrue(app.textFields["quick-nutrition-Proteine"].waitForExistence(timeout: 10))
         XCTAssertFalse(app.buttons["quick-nutrition-save"].isEnabled)
     }
+    func testLargeTextCaloriesRemainReadableAboveActionWithKeyboard() {
+        let app = open(large: true)
+        fill(app)
+        let scroll = app.scrollViews["quick-nutrition-scroll"]
+        let summary = app.descendants(matching: .any).matching(identifier: "quick-nutrition-calorie-summary").firstMatch
+        let value = app.staticTexts["quick-nutrition-calories"]
+        let save = app.buttons["quick-nutrition-save"]
+        XCTAssertTrue(app.keyboards.firstMatch.exists)
+        for _ in 0..<8 {
+            if visible(summary, in: app) { break }
+            drag(scroll, app: app, up: true)
+        }
+        XCTAssertTrue(visible(summary, in: app), "The entire calorie summary must be reachable above the pinned action with the keyboard open")
+        XCTAssertTrue(visible(value, in: app))
+        XCTAssertEqual(value.label, "362 kcal")
+        XCTAssertLessThanOrEqual(summary.frame.maxY, save.frame.minY)
+        XCTAssertTrue(save.isHittable)
+        XCTAssertLessThanOrEqual(save.frame.maxY, app.keyboards.firstMatch.frame.minY + 1)
+        capture("Nutrition accessibility calories above action", app)
+    }
     func testLargeTextErrorKeepsValuesAndRetryCompletes() {
         let app = open(large: true, failure: true)
         fill(app)

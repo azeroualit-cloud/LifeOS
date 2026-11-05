@@ -70,7 +70,7 @@ struct NativeNutritionQuickSheet: View {
                         Spacer(minLength: NativeDesign.Space.small)
                         Text(draft.map { NSDecimalNumber(decimal: $0.calories).stringValue + " kcal" } ?? (allZero ? "0 kcal" : "Valori non validi"))
                             .font(.title2.bold()).monospacedDigit().accessibilityIdentifier("quick-nutrition-calories")
-                    }
+                    }.accessibilityElement(children: .contain).accessibilityIdentifier("quick-nutrition-calorie-summary")
                     Divider()
                     HStack {
                         Text("Data")
@@ -92,7 +92,7 @@ struct NativeNutritionQuickSheet: View {
                             .frame(minHeight: NativeDesign.Layout.touchTarget)
                     }
                 }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.vertical, NativeDesign.Space.medium)
-            }.scrollDismissesKeyboard(.interactively).accessibilityIdentifier("quick-nutrition-scroll")
+            }.clipped().scrollDismissesKeyboard(.interactively).accessibilityIdentifier("quick-nutrition-scroll")
         }
         .toolbar(.hidden, for: .navigationBar)
         .background(NativeDesign.healthCanvas)
