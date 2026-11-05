@@ -128,6 +128,15 @@ final class NativeRevision78UITests: XCTestCase {
         app.tabBars.buttons["Bloom"].tap()
         let section = app.buttons["bloom-section-library"]
         XCTAssertTrue(section.waitForExistence(timeout: 10))
+        print("BLOOM_SECTION_ACCESSIBILITY_FRAME \(section.frame) hittable=\(section.isHittable) selected=\(section.isSelected)")
+        let hierarchy = XCTAttachment(string: app.debugDescription)
+        hierarchy.name = "78 Bloom section before touch target assertion hierarchy"
+        hierarchy.lifetime = .keepAlways
+        add(hierarchy)
+        let sectionScreenshot = XCTAttachment(screenshot: app.screenshot())
+        sectionScreenshot.name = "78 Bloom section before touch target assertion"
+        sectionScreenshot.lifetime = .keepAlways
+        add(sectionScreenshot)
         XCTAssertGreaterThanOrEqual(section.frame.height, 44)
         XCTAssertLessThanOrEqual(section.frame.height, 48)
         app.buttons["bloom-archive-menu"].tap()
@@ -149,6 +158,21 @@ final class NativeRevision78UITests: XCTestCase {
         app.terminate(); app.launch(); app.tabBars.buttons["Bloom"].tap()
         XCTAssertTrue(note.waitForExistence(timeout: 20))
         capture("78-bloom-import-persisted", app)
+    }
+    func testBloomSectionRespondsAtLowerEdgeOf44PointTouchTarget() {
+        let app = launch()
+        app.tabBars.buttons["Bloom"].tap()
+        let section = app.buttons["bloom-section-map"]
+        XCTAssertTrue(section.waitForExistence(timeout: 10))
+        XCTAssertFalse(section.isSelected)
+        let bounds = app.frame
+        let frame = section.frame
+        let target = app.coordinate(withNormalizedOffset: CGVector(
+            dx: (frame.midX - bounds.minX) / bounds.width,
+            dy: (frame.midY + 21 - bounds.minY) / bounds.height
+        ))
+        target.tap()
+        XCTAssertTrue(section.isSelected, "The section button should respond at the lower edge of its 44 pt target.")
     }
 }
 

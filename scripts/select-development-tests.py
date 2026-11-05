@@ -30,7 +30,7 @@ def select(mode, area, paths):
         tests = [test for test in tests if not test.startswith("LifeOSProbeTests/")]
         tests.append("LifeOSProbeTests")
         if "bloom" in selected:
-            tests.extend(["LifeOSProbeUITests/NativeRevision78UITests/testBloomCancelClosesFilesAndAllowsRetry", "LifeOSProbeUITests/NativeRevision78UITests/testBloomSystemFilesSelectionReachesPreviewAndPersists"])
+            tests.extend(["LifeOSProbeUITests/NativeRevision78UITests/testBloomCancelClosesFilesAndAllowsRetry", "LifeOSProbeUITests/NativeRevision78UITests/testBloomSystemFilesSelectionReachesPreviewAndPersists", "LifeOSProbeUITests/NativeRevision78UITests/testBloomSectionRespondsAtLowerEdgeOf44PointTouchTarget"])
     return sorted(selected),list(dict.fromkeys(tests))
 if __name__ == "__main__":
     p=argparse.ArgumentParser();p.add_argument("--mode",choices=["preview","focused"],default="preview");p.add_argument("--area",choices=["auto","all",*AREAS],default="auto");p.add_argument("--base");p.add_argument("--output",default="app/build/development-selection.json");a=p.parse_args()
