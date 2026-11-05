@@ -172,3 +172,7 @@ Mandato Astra ampliato all’intero LifeOS: ricostruire tutte le modifiche discu
 ## QA-014 — approvata; QA-013 — in attesa
 
 5 novembre 2026: «per salute si, per bloom non so se 44pixel é corretto finche non lo vedo». Approvata correzione della leggibilità titoli Salute mantenendo 2×2. Per Bloom non approvata alcuna modifica prima di vedere il risultato; 44 indica punti iOS, non pixel.
+
+## QA-013 — correzione Bloom approvata
+
+5 novembre 2026, dopo screenshot reale: «Sì, mantieni questo aspetto». Conservare dimensione visibile delle pillole Bloom; correggere solo il riquadro riconosciuto dall’accessibilità. Nessuna IPA o deploy.
