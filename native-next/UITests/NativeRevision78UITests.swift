@@ -57,6 +57,11 @@ final class NativeRevision78UITests: XCTestCase {
         app.tabBars.buttons["Salute"].tap()
         let rows = ["tdee", "weight", "calories", "simulation"].map { app.buttons["health-summary-" + $0] }
         for row in rows { XCTAssertTrue(row.waitForExistence(timeout: 10)) }
+        XCTAssertTrue(rows[0].label.contains("TDEE")); XCTAssertTrue(rows[0].label.contains("Stima storica"))
+        XCTAssertTrue(rows[3].label.contains("Peso previsto"))
+        XCTAssertTrue(rows[1].label.contains("Peso"))
+        XCTAssertNotNil(rows[3].label.components(separatedBy: ", ").last?.range(of: "[0-9]", options: .regularExpression), "The forecast date remains in the accessible summary")
+        XCTAssertNotNil(rows[1].label.components(separatedBy: ", ").last?.range(of: "[0-9]", options: .regularExpression), "The latest weight and date remain in the accessible summary")
         XCTAssertLessThan(rows[0].frame.midY, rows[1].frame.midY)
         XCTAssertEqual(rows[0].frame.midY, rows[3].frame.midY, accuracy: 2)
         XCTAssertEqual(rows[1].frame.midY, rows[2].frame.midY, accuracy: 2)

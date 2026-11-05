@@ -175,17 +175,17 @@ private struct NativeHealthSummaryRow: View {
     let points: [HealthPoint]
     let contextLabel: String
     @ScaledMetric(relativeTo: .largeTitle) private var rowHeight = NativeDesign.Layout.healthSummaryRow
-    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-            let header = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: NativeDesign.Space.xs)) : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: NativeDesign.Space.small))
-            header {
-                Label { Text(metric.title) } icon: { NativeSymbol(symbol: metric.symbol) }.font(.subheadline.weight(.semibold)).foregroundStyle(metric.color)
+            VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
+                Label { Text(metric.title) } icon: { NativeSymbol(symbol: metric.symbol) }
+                    .font(.subheadline.weight(.semibold)).foregroundStyle(metric.color)
                     .fixedSize(horizontal: false, vertical: true)
-                if !typeSize.isAccessibilitySize { Spacer(minLength: NativeDesign.Space.xs) }
-                HStack(spacing: NativeDesign.Space.xs) {
-                    Text(contextLabel).font(.caption2)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xs) {
+                    Text(contextLabel).font(.caption2).fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: NativeDesign.Space.xs)
                     Image(systemName: "chevron.right").font(.caption.weight(.semibold))
                 }.foregroundStyle(.secondary)
             }
