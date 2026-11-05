@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**QA-004 verifica:** run [42009421635](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42009421635), focused/dashboard su commit 54f287b, avviato. Include test standard e testo grande su Dashboard, Salute e Bloom. Esito pendente.
+
 **T11 blocco dispatch:** workflow finale non registrato sul ramo predefinito; tentativo fast-forward main rifiutato da revisione automatica per rischio di modifica diretta al ramo principale. Nessun push main, deploy o IPA. Continuano prove indipendenti sul ramo codex/revision77; approvazione necessaria per avanzare main.
 
 **Collaudo finale in preparazione:** aggiunti test UI diagnostici per ultimo contenuto sopra tab bar (standard/testo grande) e separati i simulatori del ciclo Release per avvio fresh e sessione sintetica. Verifiche locali sintassi Python/selettore passate; comportamento iOS e quattro avvii non ancora eseguiti sul nuovo workflow. Nessuna IPA.
