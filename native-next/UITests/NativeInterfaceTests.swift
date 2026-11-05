@@ -813,7 +813,7 @@ final class NativeInterfaceTests: XCTestCase {
         let foundStrip = strip.waitForExistence(timeout: 10)
         let event = app.buttons["Evento dopo scorrimento"]
         print("CALENDAR_DATE_DIAGNOSTIC selectedCivilDay=\(selectedDay) matchingAgendaStrip=\(foundStrip) eventExists=\(event.exists)")
-        if !foundStrip || !event.exists { capture("calendar-date-event-not-found", app) }
+        if !foundStrip || !event.exists { capture("calendar-date-event-not-found") }
         XCTAssertTrue(foundStrip)
         XCTAssertTrue(event.isHittable); assertMinimumTouchTarget(event)
         capture("calendar-event-after-scroll")
