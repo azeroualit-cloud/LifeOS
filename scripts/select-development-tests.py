@@ -29,6 +29,9 @@ def select(mode, area, paths):
         # XCTest target-wide selection must not coexist with narrower filters for that target.
         tests = [test for test in tests if not test.startswith("LifeOSProbeTests/")]
         tests.append("LifeOSProbeTests")
+        if "dashboard" in selected:
+            # Cross-area bottom-edge checks cover Dashboard, Health and Bloom.
+            tests.extend(["LifeOSProbeUITests/NativeRevision78UITests/testSafeAreaLastContentStandard", "LifeOSProbeUITests/NativeRevision78UITests/testSafeAreaLastContentLargeText"])
         if "bloom" in selected:
             tests.extend(["LifeOSProbeUITests/NativeRevision78UITests/testBloomCancelClosesFilesAndAllowsRetry", "LifeOSProbeUITests/NativeRevision78UITests/testBloomSystemFilesSelectionReachesPreviewAndPersists", "LifeOSProbeUITests/NativeRevision78UITests/testBloomSectionRespondsAtLowerEdgeOf44PointTouchTarget"])
     return sorted(selected),list(dict.fromkeys(tests))

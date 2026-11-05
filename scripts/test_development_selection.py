@@ -24,6 +24,13 @@ class SelectionTests(unittest.TestCase):
   for area, name in [('activities','NativeActivityEditor.swift'),('calendar','CalendarScreen.swift'),('shifts','NativeShiftProgress.swift')]:
    self.assertIn(area,m.select('preview','auto',['native-next/Sources/'+name])[0])
    self.assertEqual(m.select('preview',area,[])[0],[area])
+ def test_safe_area_checks_are_focused_cross_area_only(self):
+  checks = ["LifeOSProbeUITests/NativeRevision78UITests/testSafeAreaLastContentStandard", "LifeOSProbeUITests/NativeRevision78UITests/testSafeAreaLastContentLargeText"]
+  for area in ["all", "dashboard"]:
+   focused=m.select("focused",area,[])[1]
+   for test in checks: self.assertEqual(focused.count(test),1)
+  for mode,area in [("preview","all"),("focused","nutrition")]:
+   for test in checks: self.assertNotIn(test,m.select(mode,area,[])[1])
  def test_all_selectors_exist(self):
   for selector in set(m.select('focused','all',[])[1] + m.select('preview','all',[])[1]):
    parts=selector.split('/')
