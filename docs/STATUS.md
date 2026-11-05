@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Verifica Bloom QA-013:** run [42004075338](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42004075338), focused/bloom su ea5a71e, avviato; controlla frame, unicità, tocco e import. Esito pendente.
+
 **QA-013:** secondo intervento usa geometria della pillola per il frame accessibile, senza modifica visiva. Prima correzione non efficace nel run 42000813725; seconda ancora da compilare/verificare al simulatore.
 
 **Run 42000813725:** commit d2dbe6b, 275 unitari e 26/27 UI passati. Salute QA-014: test passati, screenshot titoli non spezzati; accettazione utente e dispositivo fisico pendenti. Bloom QA-013: tap al bordo passato, frame AX ancora 18pt anziché 44; prima correzione non efficace, nuova diagnosi in corso. Calendario passato. Nessuna IPA.
