@@ -48,7 +48,7 @@ final class NativeRevision78UITests: XCTestCase {
         // Permit at most one physical pixel for fractional coordinate rounding.
         XCTAssertLessThanOrEqual(value.frame.maxY, label.frame.minY + 1 / UIScreen.main.scale)
         XCTAssertGreaterThan(button.frame.minX, value.frame.maxX)
-        XCTAssertLessThanOrEqual(button.frame.maxX, header.frame.maxX + 1)
+        XCTAssertLessThanOrEqual(button.frame.maxX, header.frame.maxX + 1 + 1 / UIScreen.main.scale)
         XCTAssertGreaterThanOrEqual(button.frame.height, 44)
         capture("78-dashboard-budget-action", app)
         button.tap()
@@ -172,15 +172,16 @@ final class NativeRevision78UITests: XCTestCase {
         for step in 0..<120 {
             XCTAssertTrue(bloom.exists, "The identified Bloom library scroll must remain present")
             if [0, 20, 40, 100].contains(step) { recordBloomProgress(step) }
-            if last.exists && last.isHittable && last.frame.maxY <= min(bloom.frame.maxY, tabBar.frame.minY) { break }
-            // Limit the drag to the visible library, above the tab bar. XCTest's
-            // synthesized swipe can start below that boundary at large text sizes.
-            let top = max(bloom.frame.minY, app.frame.minY) + 24
-            let bottom = min(bloom.frame.maxY, tabBar.frame.minY) - 24
+            let scrollFrame = bloom.frame
+            let tabTop = tabBar.frame.minY
+            if last.exists && last.isHittable && last.frame.maxY <= min(scrollFrame.maxY, tabTop) { break }
+            // Resolve the bounds once per gesture; repeated XCTest snapshots are expensive.
+            let top = max(scrollFrame.minY, app.frame.minY) + 24
+            let bottom = min(scrollFrame.maxY, tabTop) - 24
             XCTAssertGreaterThan(bottom - top, 44, "The visible Bloom scroll region must permit a gesture")
             let origin = app.coordinate(withNormalizedOffset: .zero)
-            let start = origin.withOffset(CGVector(dx: bloom.frame.midX, dy: bottom))
-            let end = origin.withOffset(CGVector(dx: bloom.frame.midX, dy: max(top, bottom - 200)))
+            let start = origin.withOffset(CGVector(dx: scrollFrame.midX, dy: bottom))
+            let end = origin.withOffset(CGVector(dx: scrollFrame.midX, dy: max(top, bottom - 200)))
             start.press(forDuration: 0.05, thenDragTo: end)
             gestures += 1
             XCTAssertTrue(app.tabBars.buttons["Bloom"].isSelected, "Scrolling the library must not select another tab")

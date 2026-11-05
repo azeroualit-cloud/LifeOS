@@ -1,5 +1,7 @@
 # LifeOS — correzioni e difetti aperti
 
+**QA-004 compatto, run 42053108157:** Bloom testo grande inconcluso per attesa inattività e timeout query UI dopo 12 gesti; nessuna conclusione sulla causa. Finanza: secondo confronto geometrico soggetto ad arrotondamento; prova aggiornata da rieseguire.
+
 **QA-004 aggiornamento:** run 42044400960 passato standard/testo grande su simulatore principale, ultima nota Bloom raggiunta e apribile; screen compatto e iPhone ancora da verificare.
 
 **QA-013 aggiornamento finale simulatore:** run 42005224764 passata, frame AX 44pt, elemento unico, tap bordo e import sintetico con persistenza verificati; screenshot confrontato con stato precedente, aspetto invariato. Prova iPhone e accettazione prodotto ancora pendenti.

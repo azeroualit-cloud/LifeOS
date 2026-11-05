@@ -1,5 +1,7 @@
 # LifeOS — punto di ingresso per qualsiasi IA
 
+**Stato operativo aggiornato, 5 novembre 2026:** il piano è in esecuzione; Salute e le correzioni approvate sono implementate, con prove al simulatore descritte in STATUS. Nutrizione retry e Bloom accessibilità hanno prove automatiche riuscite; accettazione utente e prove fisiche restano aperte. Il collaudo finale senza IPA non è ancora eseguito: workflow non registrato su main, aggiornamento diretto di main rifiutato dalla revisione automatica. La verifica compatta QA-004 è ancora inconclusa. Consultare STATUS per gli esiti più recenti; le sezioni successive riportano anche storia superata. Nessuna IPA o deploy autorizzati.
+
 Aggiornamento 5 novembre: run focused nutrizione 41894390397 passato, dettagli in STATUS; revisione video e prova fisica restano aperte. HEALTH-GRID-02 approvata con eccezione limitata al riepilogo; implementazione in corso, nessuna IPA o deploy. Le sezioni precedenti su retry non verificato e conferma Salute pendente sono storiche.
 
 T01: pipeline finale manuale senza IPA e selettore attività/calendario/turni in verifica; consultare STATUS per prova runner e stato esatto. La suite finale non è stata eseguita.
