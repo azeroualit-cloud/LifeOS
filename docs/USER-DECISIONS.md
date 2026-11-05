@@ -164,3 +164,7 @@ Mandato Astra ampliato all’intero LifeOS: ricostruire tutte le modifiche discu
 ## HEALTH-GRID-02 — ACTIVE, eccezione confermata
 
 4 novembre 2026, risposta esplicita alla domanda sul conflitto: «va bene 2x2 e 1x4, ma voglio i pulsanti come quelli nella versione 2 (nel senso di disposizione, non di colore design ecc)». Nel solo riepilogo Salute sono approvati griglia 2×2, mini grafici sotto i valori, nutrienti 1×4 con reflow accessibile e azioni affiancate come versione 2. La deroga riguarda G08/G09/G12/G13 in questo ambito; altrove rimangono vigenti. G05–G07 restano attive: omino e mela senza testo. Nessuna IPA o deploy.
+
+## QA-012 — correzione approvata
+
+5 novembre 2026: «Sì, correggi» in risposta alla proposta di rendere leggibili e raggiungibili riepilogo calorie e pulsante Aggiungi con testo molto grande e tastiera aperta. Autorizzazione limitata alla correzione; nessuna IPA o deploy.

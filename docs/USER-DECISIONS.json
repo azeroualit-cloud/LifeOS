@@ -742,6 +742,15 @@
       ],
       "confirmation_quote": "va bene 2x2 e 1x4, ma voglio i pulsanti come quelli nella versione 2 (nel senso di disposizione, non di colore design ecc)",
       "scope": "Solo riepilogo Salute; G05–G07 conservate; vecchie regole conservate fuori eccezione."
+    },
+    {
+      "recorded_on": "2026-11-05",
+      "type": "TASK_APPROVAL",
+      "id": "QA-012-FIX-APPROVED",
+      "scope": "Correzione mirata sovrapposizione nutrizione con testo accessibile e tastiera",
+      "approval_quote": "Sì, correggi",
+      "source": "Risposta alla proposta QA-012",
+      "conflict_check": "Nessuna modifica delle regole attive; mantenere Aggiungi sopra la tastiera e preservare il flusso."
     }
   ],
   "historical_inventory": "decision-history/2026-11-04-inventory.json",
