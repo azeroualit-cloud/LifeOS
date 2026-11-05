@@ -407,13 +407,15 @@ final class NativeInterfaceTests: XCTestCase {
         for title in ["Finanza", "Attività", "Calendario", "Dashboard", "Calendario", "Attività", "Dashboard"] {
             if title == "Finanza" || title == "Calendario" { app.openOtherDestination(title) }
             else {
+                let reselectingDashboard = title == "Dashboard" && app.tabBars.buttons["Dashboard"].isSelected
                 app.tabBars.buttons[title].tap()
-                if title == "Dashboard" {
-                    // Dashboard owns the calendar stack and retains it across tab switches.
+                if title == "Dashboard" && !reselectingDashboard {
+                    // Returning from another tab retains Dashboard's calendar stack.
                     XCTAssertTrue(app.scrollViews["calendar-scroll"].waitForExistence(timeout: 10))
                     let back = app.buttons["other-back"]
                     XCTAssertTrue(back.waitForExistence(timeout: 10)); back.tap()
                 }
+                // Reselecting an already active Dashboard tab returns to its root.
             }
             let destination = title == "Finanza" ? app.staticTexts["finance-heading"] : (title == "Calendario" ? app.scrollViews["calendar-scroll"] : app.navigationBars[title])
             XCTAssertTrue(destination.waitForExistence(timeout: 10))
@@ -799,19 +801,31 @@ final class NativeInterfaceTests: XCTestCase {
         let expectedDate = displayFormat.string(from: try XCTUnwrap(inputFormat.date(from: selectedDay)))
         let editorDate = app.buttons["activity-date-Inizio"]
         XCTAssertTrue(editorDate.waitForExistence(timeout: 10))
-        XCTAssertEqual(editorDate.label, expectedDate, "The event editor must retain the explicitly selected day after scrolling")
+        let initialDate = editorDate.label
+        print("CALENDAR_DATE_DIAGNOSTIC runnerTimeZone=\(TimeZone.current.identifier) offset=\(TimeZone.current.secondsFromGMT()) selectedCivilDay=\(selectedDay) expected=\(expectedDate) initialEditor=\(initialDate) match=\(initialDate == expectedDate)")
+        capture("calendar-date-before-save")
         title.tap(); title.typeText("Evento dopo scorrimento")
         app.buttons["Salva"].tap()
         app.buttons["calendar-today"].tap()
         revealCalendarDay(selectedDay, in: app)
         app.buttons["calendar-day-" + selectedDay].tap()
-        XCTAssertTrue(app.scrollViews["calendar-all-day-strip"].waitForExistence(timeout: 10))
+        let strip = app.scrollViews["calendar-all-day-strip"]
+        let foundStrip = strip.waitForExistence(timeout: 10)
         let event = app.buttons["Evento dopo scorrimento"]
+        print("CALENDAR_DATE_DIAGNOSTIC selectedCivilDay=\(selectedDay) matchingAgendaStrip=\(foundStrip) eventExists=\(event.exists)")
+        if !foundStrip || !event.exists { capture("calendar-date-event-not-found", app) }
+        XCTAssertTrue(foundStrip)
         XCTAssertTrue(event.isHittable); assertMinimumTouchTarget(event)
         capture("calendar-event-after-scroll")
         event.tap()
         XCTAssertTrue(app.navigationBars["Modifica attività"].waitForExistence(timeout: 10))
         XCTAssertEqual(title.value as? String, "Evento dopo scorrimento")
+        XCTAssertTrue(editorDate.waitForExistence(timeout: 10))
+        let reopenedDate = editorDate.label
+        print("CALENDAR_DATE_DIAGNOSTIC selectedCivilDay=\(selectedDay) expected=\(expectedDate) initialEditor=\(initialDate) reopenedEditor=\(reopenedDate) initialMatch=\(initialDate == expectedDate) reopenedMatch=\(reopenedDate == expectedDate)")
+        capture("calendar-date-reopened")
+        XCTAssertEqual(initialDate, expectedDate, "The editor must display the selected civil day before saving")
+        XCTAssertEqual(reopenedDate, expectedDate, "The reopened event must display the saved civil day")
         app.buttons["Annulla"].tap()
     }
     func testCalendarSelectionUpdatesImmediatelyAndKeepsEventIndex() {

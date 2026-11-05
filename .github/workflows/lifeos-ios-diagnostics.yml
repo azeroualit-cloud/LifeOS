@@ -1,0 +1,68 @@
+name: LifeOS iOS calendar and Health reference diagnostics
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: lifeos-ios-diagnostics-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  diagnose:
+    runs-on: macos-15
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/native-compat76
+        with:
+          variant: primary
+      - name: Compile simulator app and tests
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcodebuild build-for-testing -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/ios-diagnostics-build.log 2>&1 || { tail -n 100 build/ios-diagnostics-build.log; exit 1; }
+      - name: Run calendar and Apple Health reference tests
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcrun simctl bootstatus "$MAIN_DEVICE" -b
+          xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 420 -only-testing:LifeOSProbeUITests/NativeInterfaceTests/testCalendarEventCanBeCreatedAfterBoundaryScroll -only-testing:LifeOSProbeUITests/NativeAppleHealthReferenceUITests/testCaptureAppleHealthReference -resultBundlePath build/IOSDiagnostics.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/ios-diagnostics-tests.log 2>&1 || { tail -n 120 build/ios-diagnostics-tests.log; exit 1; }
+      - name: Export test diagnostics
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -u
+          mkdir -p app/build/ios-diagnostics
+          if [ -f app/build/IOSDiagnostics.xcresult/Info.plist ]; then
+            for kind in summary tests; do
+              if xcrun xcresulttool get test-results "$kind" --path app/build/IOSDiagnostics.xcresult > "app/build/ios-diagnostics/$kind.json.tmp" 2> "app/build/ios-diagnostics/$kind-error.txt"; then
+                mv "app/build/ios-diagnostics/$kind.json.tmp" "app/build/ios-diagnostics/$kind.json"
+                rm "app/build/ios-diagnostics/$kind-error.txt"
+              else
+                rm -f "app/build/ios-diagnostics/$kind.json.tmp"
+              fi
+            done
+            xcrun xcresulttool export attachments --path app/build/IOSDiagnostics.xcresult --output-path app/build/ios-diagnostics-attachments > app/build/ios-diagnostics-export.log 2>&1 || true
+          else
+            printf 'Result bundle unavailable or incomplete.\n' > app/build/ios-diagnostics/missing-result.txt
+          fi
+          {
+            printf '## LifeOS iOS diagnostics\n\nCommit: `%s` · Run: `%s`\n\n' "$GITHUB_SHA" "$GITHUB_RUN_ID"
+            printf 'Calendar boundary and Apple Health reference only. Simulator evidence; no IPA, release or deploy.\n\n'
+            if [ -f app/build/ios-diagnostics-tests.log ]; then
+              printf 'Failures and counts (complete log in artifact):\n\n```text\n'
+              grep -E 'error:|Test Case .*failed|Executed [0-9]+ tests?, with [0-9]+ failures?' app/build/ios-diagnostics-tests.log || true
+              printf '\n```\n'
+            else
+              printf 'Test log unavailable; tests may not have started.\n'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: lifeos-ios-diagnostics-${{ github.sha }}-${{ github.run_attempt }}
+          retention-days: 7
+          path: |
+            app/build/ios-diagnostics-*.log
+            app/build/ios-diagnostics
+            app/build/ios-diagnostics-attachments
+            app/build/IOSDiagnostics.xcresult

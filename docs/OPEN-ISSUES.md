@@ -1,5 +1,7 @@
 # LifeOS — correzioni e difetti aperti
 
+**42094752571:** tre UI ancora fallite: data calendario 4 vs 5, consenso scrittura fixture HealthKit simulatore e navigazione (test adeguato, non verificato). Diagnostica dedicata preparata; avvii Release non eseguiti.
+
 **42079725780:** cinque test UI falliti; aggiornamenti ai test diagnostici per calendario, scheda Salute, stack navigazione, feed Apple Health e tastiera abitudini non ancora verificati sul simulatore. Quattro avvii Release saltati.
 
 **Collaudo finale 42060601929:** 25/92 UI falliti; test storici in aggiornamento, evento calendario non trovato nel giorno selezionato e riferimento Apple BodyMass assente dal sistema da investigare. Quattro avvii Release non eseguiti.
