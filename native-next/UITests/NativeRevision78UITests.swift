@@ -116,6 +116,55 @@ final class NativeRevision78UITests: XCTestCase {
         app.navigationBars.buttons.firstMatch.tap()
         XCTAssertTrue(surface.waitForExistence(timeout: 10))
     }
+    func testSafeAreaLastContentStandard() { checkSafeAreaLastContent(large: false) }
+    func testSafeAreaLastContentLargeText() { checkSafeAreaLastContent(large: true) }
+    private func checkSafeAreaLastContent(large: Bool) {
+        executionTimeAllowance = 300
+        let app = launch(["--bloom-grid-fixture"] + (large ? ["--large-text"] : []))
+        let tabBar = app.tabBars.firstMatch
+        let dashboard = app.scrollViews["dashboard-scroll"]
+        let quick = app.buttons["quick-nutrition-open"]
+        let status = dashboard.staticTexts.matching(NSPredicate(format: "label IN %@", ["Demo", "Salvataggio", "Sincronizzazione", "Da aggiornare", "Condiviso con il sito", "Sul dispositivo", "Collegato"])).firstMatch
+        for _ in 0..<15 {
+            if quick.isHittable && status.exists && status.frame.maxY <= tabBar.frame.minY { break }
+            dashboard.swipeUp(velocity: .slow)
+        }
+        XCTAssertTrue(quick.isHittable, "Dashboard bottom action must be reachable")
+        XCTAssertTrue(status.exists, "The final connection status must remain readable")
+        XCTAssertLessThanOrEqual(quick.frame.maxY, tabBar.frame.minY)
+        XCTAssertLessThanOrEqual(status.frame.maxY, tabBar.frame.minY)
+        capture(large ? "safe-area-dashboard-large" : "safe-area-dashboard-standard", app)
+
+        app.tabBars.buttons["Salute"].tap()
+        let health = app.scrollViews["health-detail-scroll"]
+        let history = app.buttons["health-nutrition-history"]
+        let weight = app.buttons["health-add-weight"], food = app.buttons["health-add-nutrition"]
+        XCTAssertTrue(health.waitForExistence(timeout: 10))
+        for _ in 0..<15 {
+            if history.isHittable && history.frame.maxY <= min(weight.frame.minY, food.frame.minY) { break }
+            health.swipeUp(velocity: .slow)
+        }
+        XCTAssertTrue(history.isHittable, "The last Health action must be reachable")
+        XCTAssertLessThanOrEqual(history.frame.maxY, min(weight.frame.minY, food.frame.minY))
+        XCTAssertTrue(weight.isHittable); XCTAssertTrue(food.isHittable)
+        XCTAssertLessThanOrEqual(max(weight.frame.maxY, food.frame.maxY), tabBar.frame.minY)
+        capture(large ? "safe-area-health-large" : "safe-area-health-standard", app)
+
+        app.tabBars.buttons["Bloom"].tap()
+        let bloom = app.scrollViews["bloom-library-scroll"]
+        XCTAssertTrue(bloom.waitForExistence(timeout: 20))
+        let last = app.buttons["bloom-note-BA000000-0000-4000-8000-000000000121"]
+        for _ in 0..<80 {
+            if last.exists && last.isHittable && last.frame.maxY <= min(bloom.frame.maxY, tabBar.frame.minY) { break }
+            bloom.swipeUp(velocity: .fast)
+        }
+        XCTAssertTrue(last.exists, "The last fixture note must be reached")
+        XCTAssertTrue(last.isHittable)
+        XCTAssertLessThanOrEqual(last.frame.maxY, min(bloom.frame.maxY, tabBar.frame.minY))
+        capture(large ? "safe-area-bloom-large" : "safe-area-bloom-standard", app)
+        last.tap()
+        XCTAssertTrue(app.navigationBars["Nota"].waitForExistence(timeout: 10))
+    }
     func testBloomCancelClosesFilesAndAllowsRetry() {
         let app = launch(["--bloom-import-fixture"])
         app.tabBars.buttons["Bloom"].tap()

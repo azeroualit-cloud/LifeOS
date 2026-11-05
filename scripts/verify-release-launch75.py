@@ -1,16 +1,26 @@
-"""Launch the real Release path using only fresh/synthetic simulator storage."""
+"""Launch the real Release path using only fresh/synthetic simulator storage.
+
+The final-validation workflow supplies a fresh simulator and a separate fixture
+simulator after the full test suite. Keep these checks optional because older
+compatibility workflows use this script without those separate simulators.
+"""
 from pathlib import Path
 import os,subprocess,json,time,shutil,datetime
 out=Path('release-launch');out.mkdir(exist_ok=True)
-device=os.environ['MAIN_DEVICE'];bundle='com.nas.lifeos.probe'
+device=os.environ['MAIN_DEVICE'];fresh_device=os.environ.get('FRESH_DEVICE',device);bundle='com.nas.lifeos.probe'
+test_device=os.environ.get('FINAL_VALIDATION_TEST_DEVICE')
+if test_device and (device==test_device or fresh_device==test_device or fresh_device==device):
+    raise SystemExit('Release startup checks require separate full-suite, fresh, and fixture simulators')
 app=Path('release-build/Build/Products/Release-iphonesimulator/LifeOSProbe.app')
-subprocess.run(['xcrun','simctl','install',device,str(app)],check=True)
+for target_device in dict.fromkeys((fresh_device,device)):
+    subprocess.run(['xcrun','simctl','install',target_device,str(app)],check=True)
 modes=['fresh','synthetic-upgrade','synthetic-populated-upgrade']
 if os.environ.get('LIFEOS_RELEASE_SESSION_FIXTURE')=='1':modes.append('synthetic-session-upgrade')
 for mode in modes:
+    target_device=fresh_device if mode=='fresh' else device
     if mode!='fresh':
-        subprocess.run(['xcrun','simctl','terminate',device,bundle],check=False,capture_output=True)
-        container=Path(subprocess.check_output(['xcrun','simctl','get_app_container',device,bundle,'data'],text=True).strip())
+        subprocess.run(['xcrun','simctl','terminate',target_device,bundle],check=False,capture_output=True)
+        container=Path(subprocess.check_output(['xcrun','simctl','get_app_container',target_device,bundle,'data'],text=True).strip())
         file=container/'Library/Application Support/lifeos-native-v2.json'
         state=json.loads(file.read_text());state['demo']=False;state['endpoint']=None
         state['life']={'tasks':[],'categories':[],'routines':[],'events':[],'activityEvents':[],'upcomingEvents':[],'shifts':[],'occurrences':{},'health':[]}
@@ -27,14 +37,14 @@ for mode in modes:
         file.write_text(json.dumps(state))
     log=out/(mode+'.log')
     with log.open('w') as f:
-        launch=subprocess.Popen(['xcrun','simctl','launch','--terminate-running-process','--console-pty',device,bundle],stdout=f,stderr=subprocess.STDOUT)
+        launch=subprocess.Popen(['xcrun','simctl','launch','--terminate-running-process','--console-pty',target_device,bundle],stdout=f,stderr=subprocess.STDOUT)
         time.sleep(25)
         alive=launch.poll() is None
-        subprocess.run(['xcrun','simctl','io',device,'screenshot',str(out/(mode+'.png'))],check=True)
+        subprocess.run(['xcrun','simctl','io',target_device,'screenshot',str(out/(mode+'.png'))],check=True)
         print('RELEASE_LAUNCH',mode,'console_process_alive',alive,flush=True)
         if not alive:
             print(log.read_text(errors='replace')[-16000:],flush=True)
-        subprocess.run(['xcrun','simctl','terminate',device,bundle],check=False,capture_output=True)
+        subprocess.run(['xcrun','simctl','terminate',target_device,bundle],check=False,capture_output=True)
         try:launch.wait(timeout=10)
         except subprocess.TimeoutExpired:launch.terminate();launch.wait(timeout=10)
     report=Path.home()/'Library/Logs/DiagnosticReports'

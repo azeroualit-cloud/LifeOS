@@ -23,6 +23,30 @@ jobs:
           set -euo pipefail
           xcrun simctl bootstatus "$MAIN_DEVICE" -b
           xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 300 -resultBundlePath build/Final.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/final-tests.log 2>&1 || { tail -n 120 build/final-tests.log; exit 1; }
+      - name: Create isolated simulators for Release startup checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os,subprocess
+          test_device=os.environ['MAIN_DEVICE']
+          runtime=os.environ['COMPAT_RUNTIME']
+          device_type='com.apple.CoreSimulator.SimDeviceType.iPhone-15-Pro'
+          runtime_id='com.apple.CoreSimulator.SimRuntime.iOS-'+runtime.replace('.','-')
+          available=json.loads(subprocess.check_output(['xcrun','simctl','list','runtimes','-j']))['runtimes']
+          assert any(r['identifier']==runtime_id and r.get('isAvailable') for r in available),f'Compatible simulator runtime unavailable: {runtime_id}'
+          fresh_device=subprocess.check_output(['xcrun','simctl','create','LifeOS final fresh startup',device_type,runtime_id],text=True).strip()
+          fixture_device=subprocess.check_output(['xcrun','simctl','create','LifeOS final fixture startup',device_type,runtime_id],text=True).strip()
+          assert fresh_device and fixture_device and len({test_device,fresh_device,fixture_device})==3
+          for device in (fresh_device,fixture_device):
+              subprocess.run(['xcrun','simctl','boot',device],check=True)
+              subprocess.run(['xcrun','simctl','bootstatus',device,'-b'],check=True)
+          with open(os.environ['GITHUB_ENV'],'a') as env:
+              env.write('FINAL_VALIDATION_TEST_DEVICE='+test_device+'\n')
+              env.write('MAIN_DEVICE='+fixture_device+'\n')
+              env.write('FRESH_DEVICE='+fresh_device+'\n')
+          print('FINAL_STARTUP_SIMULATORS fresh='+fresh_device,'fixture='+fixture_device,'TYPE',device_type,'RUNTIME',runtime_id)
+          PY
       - name: Prepare synthetic saved session
         working-directory: app
         run: |
