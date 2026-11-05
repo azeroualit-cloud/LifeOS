@@ -133,6 +133,11 @@ final class NativeRevision78UITests: XCTestCase {
         app.tabBars.buttons["Bloom"].tap()
         let section = app.buttons["bloom-section-library"]
         XCTAssertTrue(section.waitForExistence(timeout: 10))
+        for (id, label) in [("library", "Libreria"), ("map", "Mappa"), ("rediscovery", "Riscopri")] {
+            let matches = app.descendants(matching: .any).matching(identifier: "bloom-section-" + id)
+            XCTAssertEqual(matches.count, 1, "Each section must expose exactly one identified accessibility element")
+            XCTAssertEqual(matches.element(boundBy: 0).label, label)
+        }
         print("BLOOM_SECTION_ACCESSIBILITY_FRAME \(section.frame) hittable=\(section.isHittable) selected=\(section.isSelected)")
         let hierarchy = XCTAttachment(string: app.debugDescription)
         hierarchy.name = "78 Bloom section before touch target assertion hierarchy"

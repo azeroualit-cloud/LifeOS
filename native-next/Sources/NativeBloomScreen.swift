@@ -311,6 +311,7 @@ private struct NativeBloomSectionButton: View {
     let symbol: String
     let id: String
     @Binding var selection: String
+    @State private var accessibilityFrame: CGRect = .zero
     private var selected: Bool { selection == title }
     private var control: some View {
         Button { selection = title } label: {
@@ -318,12 +319,26 @@ private struct NativeBloomSectionButton: View {
                 .foregroundStyle(selected ? NativeDesign.onAccent : Color.primary)
                 .lineLimit(1).minimumScaleFactor(0.8)
                 .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget)
-        }.accessibilityElement(children: .ignore)
+        }
+    }
+    var body: some View {
+        styledControl
+            .background {
+                GeometryReader { geometry in
+                    Color.clear
+                        .onChange(of: geometry.frame(in: .global), initial: true) { _, frame in
+                            accessibilityFrame = frame
+                        }
+                }.accessibilityHidden(true)
+            }
+            .accessibilityElement(children: .ignore)
             .accessibilityLabel(title)
             .accessibilityIdentifier("bloom-section-" + id)
             .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton)
+            .accessibilityFrame(accessibilityFrame)
+            .accessibilityAction { selection = title }
     }
-    @ViewBuilder var body: some View {
+    @ViewBuilder private var styledControl: some View {
         if #available(iOS 26.0, *) {
             control.buttonStyle(.plain)
                 .glassEffect(.regular.tint(selected ? NativeDesign.accent : .clear).interactive(), in: Capsule())

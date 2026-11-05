@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**QA-013:** secondo intervento usa geometria della pillola per il frame accessibile, senza modifica visiva. Prima correzione non efficace nel run 42000813725; seconda ancora da compilare/verificare al simulatore.
+
 **Run 42000813725:** commit d2dbe6b, 275 unitari e 26/27 UI passati. Salute QA-014: test passati, screenshot titoli non spezzati; accettazione utente e dispositivo fisico pendenti. Bloom QA-013: tap al bordo passato, frame AX ancora 18pt anziché 44; prima correzione non efficace, nuova diagnosi in corso. Calendario passato. Nessuna IPA.
 
 **Verifica Salute/Bloom:** run [42000813725](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42000813725) focused/all su d2dbe6b, avviata; esito pendente. Il run Bloom 42000362118 è stato annullato prima della compilazione per unificare controlli. QA-013 e QA-014 non ancora verificate al simulatore.
