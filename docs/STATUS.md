@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Run 42000813725:** commit d2dbe6b, 275 unitari e 26/27 UI passati. Salute QA-014: test passati, screenshot titoli non spezzati; accettazione utente e dispositivo fisico pendenti. Bloom QA-013: tap al bordo passato, frame AX ancora 18pt anziché 44; prima correzione non efficace, nuova diagnosi in corso. Calendario passato. Nessuna IPA.
+
 **Verifica Salute/Bloom:** run [42000813725](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42000813725) focused/all su d2dbe6b, avviata; esito pendente. Il run Bloom 42000362118 è stato annullato prima della compilazione per unificare controlli. QA-013 e QA-014 non ancora verificate al simulatore.
 
 **Preview Bloom 41998067334:** commit e9eb9dd, 20 test unitari e 2 UI Bloom passati. Il selettore preview non include test frame AX/picker/bordo: verifica focused Bloom successiva necessaria. QA-013 ancora aperto, nessuna IPA. QA-014 Salute non coperto da questa run.
