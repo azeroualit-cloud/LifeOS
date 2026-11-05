@@ -1,5 +1,7 @@
 # LifeOS — correzioni e difetti aperti
 
+**Calendario — errore data visualizzata:** run 42109968064, selezione/agenda 5 novembre, editor 4 novembre prima e dopo salvataggio con simulatore GMT. Possibile formattazione con fuso non civile; correzione richiede approvazione DEV-02.
+
 **42094752571:** tre UI ancora fallite: data calendario 4 vs 5, consenso scrittura fixture HealthKit simulatore e navigazione (test adeguato, non verificato). Diagnostica dedicata preparata; avvii Release non eseguiti.
 
 **42079725780:** cinque test UI falliti; aggiornamenti ai test diagnostici per calendario, scheda Salute, stack navigazione, feed Apple Health e tastiera abitudini non ancora verificati sul simulatore. Quattro avvii Release saltati.

@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Diagnostica calendario 42109968064:** compilazione riuscita; giorno selezionato 2026-11-05, fuso processo GMT. Editor mostra 4 novembre prima e dopo riapertura, mentre evento compare nell’agenda del 5: discrepanza di presentazione riprodotta, non perdita del record. Fix prodotto da proporre secondo DEV-02. Apple Health non è stato eseguito in questa run, nonostante selettore previsto; workflow aggiornato per una prova mirata per volta.
+
 **Collaudo finale 42094752571:** c2bb2af, 364/367 prove passate, 3 UI fallite e quattro avvii Release saltati. Il calendario mostra 4 novembre dopo selezione del 5: possibile differenza di fuso, dati salvati da verificare. Apple Health fixture ha segnalato scrittura non autorizzata dopo consenso UI, sebbene riuscita in run precedente. Navigazione: test adeguato allo stack. Preparata diagnosi dedicata per calendario e HealthKit, ancora da eseguire; nessuna modifica prodotto, IPA o deploy.
 
 **Collaudo finale 42079725780:** main 9bd4a13, compilazione riuscita, 362/367 test passati inclusi 275 unitari; cinque UI falliti (precedente: 25). Avvii Release saltati. Analisi: test calendario cercava una data diversa da quella selezionata; Salute fermava scroll prima di mostrare la scheda intera; navigazione ignorava stack calendario conservato; Apple Health cercava peso senza scorrere feed virtualizzato; Abitudini aveva tastiera aperta sopra Salva. Modifiche diagnostiche ai test preparate, ancora da eseguire; non assumere che i problemi siano risolti. Nessuna IPA o deploy.
