@@ -1,6 +1,16 @@
 import Foundation
 
 enum NativeActivityDraft {
+    /// The stored day is civil in Europe/Rome; never render it in the device's time zone.
+    static func dateLabel(_ date: Date, locale: Locale = .current) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = locale
+        formatter.calendar = CivilDate.calendar
+        formatter.timeZone = CivilDate.calendar.timeZone
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return formatter.string(from: date)
+    }
     static func validate(_ p: Record) throws {
         let title = p.text("title").trimmingCharacters(in: .whitespacesAndNewlines)
         guard !p.text("uid").isEmpty, !title.isEmpty, title.utf16.count <= 160, p.text("notes").utf16.count <= 1000, p.text("location").utf16.count <= 160 else { throw Message(text: "Controlla titolo (massimo 160 caratteri), descrizione (1000) e luogo (160).") }

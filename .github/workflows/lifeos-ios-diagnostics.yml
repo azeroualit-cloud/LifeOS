@@ -39,8 +39,20 @@ jobs:
             health) selector='LifeOSProbeUITests/NativeAppleHealthReferenceUITests/testCaptureAppleHealthReference' ;;
             *) printf 'Unsupported diagnostic case: %s\n' "$DIAGNOSTIC_CASE" >&2; exit 1 ;;
           esac
-          printf 'Diagnostic case: %s\nSelector: %s\n' "$DIAGNOSTIC_CASE" "$selector"
-          xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 420 "-only-testing:$selector" -resultBundlePath build/IOSDiagnostics.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/ios-diagnostics-tests.log 2>&1 || { tail -n 120 build/ios-diagnostics-tests.log; exit 1; }
+          printf 'Diagnostic case: %s\nUI selector: %s\n' "$DIAGNOSTIC_CASE" "$selector"
+          result=0
+          if [ "$DIAGNOSTIC_CASE" = calendar ]; then
+            # Separate invocation ensures the unit target is not lost among UI selectors.
+            if ! xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 420 -only-testing:LifeOSProbeTests/NativeActivityTests -resultBundlePath build/IOSDiagnosticsUnit.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/ios-diagnostics-unit.log 2>&1; then
+              tail -n 120 build/ios-diagnostics-unit.log
+              result=1
+            fi
+          fi
+          if ! xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 420 "-only-testing:$selector" -resultBundlePath build/IOSDiagnostics.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/ios-diagnostics-tests.log 2>&1; then
+            tail -n 120 build/ios-diagnostics-tests.log
+            result=1
+          fi
+          exit "$result"
       - name: Export test diagnostics
         if: ${{ !cancelled() }}
         shell: bash
@@ -58,18 +70,29 @@ jobs:
             done
             xcrun xcresulttool export attachments --path app/build/IOSDiagnostics.xcresult --output-path app/build/ios-diagnostics-attachments > app/build/ios-diagnostics-export.log 2>&1 || true
           else
-            printf 'Result bundle unavailable or incomplete.\n' > app/build/ios-diagnostics/missing-result.txt
+            printf 'UI result bundle unavailable or incomplete.\n' > app/build/ios-diagnostics/missing-result.txt
+          fi
+          if [ "$DIAGNOSTIC_CASE" = calendar ]; then
+            if [ -f app/build/IOSDiagnosticsUnit.xcresult/Info.plist ]; then
+              if ! xcrun xcresulttool get test-results summary --path app/build/IOSDiagnosticsUnit.xcresult > app/build/ios-diagnostics/unit-summary.json 2> app/build/ios-diagnostics/unit-summary-error.txt; then
+                rm -f app/build/ios-diagnostics/unit-summary.json
+              fi
+            else
+              printf 'Unit result bundle unavailable or incomplete.\n' > app/build/ios-diagnostics/missing-unit-result.txt
+            fi
           fi
           {
             printf '## LifeOS iOS diagnostics\n\nCommit: `%s` · Run: `%s`\n\n' "$GITHUB_SHA" "$GITHUB_RUN_ID"
             printf 'Selected case: `%s`. Simulator evidence; no IPA, release or deploy.\n\n' "$DIAGNOSTIC_CASE"
-            if [ -f app/build/ios-diagnostics-tests.log ]; then
-              printf 'Failures and counts (complete log in artifact):\n\n```text\n'
-              grep -E 'error:|Test Case .*failed|Executed [0-9]+ tests?, with [0-9]+ failures?' app/build/ios-diagnostics-tests.log || true
-              printf '\n```\n'
-            else
-              printf 'Test log unavailable; tests may not have started.\n'
-            fi
+            for log in app/build/ios-diagnostics-unit.log app/build/ios-diagnostics-tests.log; do
+              if [ -f "$log" ]; then
+                printf 'Failures and counts in `%s` (complete log in artifact):\n\n```text\n' "$log"
+                grep -E 'error:|Test Case .*failed|Executed [0-9]+ tests?, with [0-9]+ failures?' "$log" || true
+                printf '\n```\n'
+              elif [ "$log" = app/build/ios-diagnostics-tests.log ] || [ "$DIAGNOSTIC_CASE" = calendar ]; then
+                printf 'Expected log `%s` unavailable; test may not have started.\n' "$log"
+              fi
+            done
           } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
@@ -81,3 +104,4 @@ jobs:
             app/build/ios-diagnostics
             app/build/ios-diagnostics-attachments
             app/build/IOSDiagnostics.xcresult
+            app/build/IOSDiagnosticsUnit.xcresult

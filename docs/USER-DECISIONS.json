@@ -666,6 +666,15 @@
       "original_quote": "intanto fai tutte le cose che te puoi fare, e poi una volta fatte lascia tutte  le cose che devo fare io alla fine",
       "rule": "Eseguire autonomamente le attività autorizzate e possibili; raggruppare alla fine revisione e prove che richiedono direttamente l’utente, mantenendo i gate di conferma conflitti, deploy e IPA.",
       "provenance": "Richiesta diretta dell’utente del 5 novembre 2026."
+    },
+    {
+      "id": "CALENDAR-CIVIL-DATE-FIX-01",
+      "status": "ACTIVE",
+      "scope": "correzione mirata della data mostrata nell’editor calendario",
+      "recorded_on": "2026-11-05",
+      "source": "risposta in chat alla proposta di correzione del giorno mostrato nel fuso civile",
+      "original_quote": "approvo, ma metterci 5 ore é eccessivo",
+      "rule": "Correggere la data visualizzata usando il fuso civile del calendario e verificare apertura, salvataggio e riapertura con fusi diversi. Prediligere verifiche mirate e ridurre tempi e attese inutili."
     }
   ],
   "pending_confirmations": [

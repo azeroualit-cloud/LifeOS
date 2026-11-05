@@ -180,3 +180,7 @@ Mandato Astra ampliato all’intero LifeOS: ricostruire tutte le modifiche discu
 ## EXECUTION-AUTONOMY-01 — ACTIVE
 
 5 novembre 2026: «intanto fai tutte le cose che te puoi fare, e poi una volta fatte lascia tutte  le cose che devo fare io alla fine». Eseguire autonomamente ciò che è autorizzato e possibile; raccogliere alla fine le attività che richiedono l’utente, mantenendo META-01, DEV-02 e IPA-GATE-01.
+
+## CALENDAR-CIVIL-DATE-FIX-01 — correzione approvata
+
+5 novembre 2026: «approvo, ma metterci 5 ore é eccessivo», in risposta alla correzione proposta per la data dell’editor calendario. Autorizzata correzione mirata del fuso civile e verifica con fusi diversi; usare prove mirate per ridurre tempi e attese. Nessuna IPA o deploy autorizzati.

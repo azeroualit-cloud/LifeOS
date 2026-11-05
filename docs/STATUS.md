@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Calendario:** correzione del fuso civile approvata esplicitamente dall’utente; implementata la visualizzazione della data nell’editor con il calendario civile esistente, test su fusi e DST e UI preparati. Prove sul simulatore da eseguire; non dichiarare risolta prima dell’esito.
+
 **Apple Health reference 42113026579:** 0f8c78a, build e test dedicato 1/1 passati; consenso sintetico via UI, fixture Dati pronti, Salute mostra 2200 cal e 176,4 lb. Il precedente errore di autorizzazione non si è ripetuto; stabilità e prova HealthKit fisica non sono garantite da una singola ripetizione. Calendario: errore data visualizzata riprodotto e correzione prodotto in attesa di approvazione DEV-02; vedi sotto. Navigazione test aggiornato ancora da rieseguire, quattro avvii Release non eseguiti.
 
 **Diagnostica calendario 42109968064:** compilazione riuscita; giorno selezionato 2026-11-05, fuso processo GMT. Editor mostra 4 novembre prima e dopo riapertura, mentre evento compare nell’agenda del 5: discrepanza di presentazione riprodotta, non perdita del record. Fix prodotto da proporre secondo DEV-02. Apple Health non è stato eseguito in questa run, nonostante selettore previsto; workflow aggiornato per una prova mirata per volta.

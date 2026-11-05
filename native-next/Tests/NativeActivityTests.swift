@@ -3,6 +3,21 @@ import XCTest
 
 final class NativeActivityTests: XCTestCase {
     private var draft: Record { ["uid": .string("task:7"), "source": .string("task"), "sourceId": .int(7), "localID": .int(-1), "title": .string("Attività unica"), "notes": .string("Descrizione"), "frequency": .string("none"), "list_kind": .string("action")] }
+    func testEditorDateUsesCivilTimeZoneAcrossDeviceZonesAndDaylightSaving() throws {
+        let originalTimeZone = NSTimeZone.default
+        defer { NSTimeZone.default = originalTimeZone }
+        let locale = Locale(identifier: "it_IT")
+        let examples = [("2026-11-05", "5 nov 2026"), ("2026-03-29", "29 mar 2026"), ("2026-10-25", "25 ott 2026")]
+        for zoneID in ["GMT", "America/Los_Angeles", "Europe/Rome", "Asia/Tokyo"] {
+            NSTimeZone.default = try XCTUnwrap(TimeZone(identifier: zoneID))
+            XCTAssertEqual(NSTimeZone.default.identifier, zoneID)
+            for (day, expected) in examples {
+                let date = CivilDate.date(day)
+                XCTAssertEqual(CivilDate.day(date), day)
+                XCTAssertEqual(NativeActivityDraft.dateLabel(date, locale: locale), expected, "Device time zone: " + zoneID)
+            }
+        }
+    }
     func testLocalDateConversionHasOneIdentityAndNoDuplicate() throws {
         var life: Record = ["tasks": .array([.object(["id": .int(7), "title": .string("Prima"), "status": .string("todo")])])]
         var p = draft; p["day"] = .string("2026-11-01")

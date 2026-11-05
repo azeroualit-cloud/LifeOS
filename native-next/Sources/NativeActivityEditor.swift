@@ -148,7 +148,7 @@ struct NativeActivityEditor: View {
                     enabled.wrappedValue = true
                     presented.wrappedValue = true
                 } label: {
-                    Text(enabled.wrappedValue ? date.wrappedValue.formatted(.dateTime.day().month(.abbreviated).year()) : "Aggiungi data")
+                    Text(enabled.wrappedValue ? NativeActivityDraft.dateLabel(date.wrappedValue) : "Aggiungi data")
                         .font(.subheadline).frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading).contentShape(Rectangle())
                 }.buttonStyle(.plain).accessibilityIdentifier("activity-date-" + title)
                 if enabled.wrappedValue {
