@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Collaudo finale 42079725780:** main 9bd4a13, compilazione riuscita, 362/367 test passati inclusi 275 unitari; cinque UI falliti (precedente: 25). Avvii Release saltati. Analisi: test calendario cercava una data diversa da quella selezionata; Salute fermava scroll prima di mostrare la scheda intera; navigazione ignorava stack calendario conservato; Apple Health cercava peso senza scorrere feed virtualizzato; Abitudini aveva tastiera aperta sopra Salva. Modifiche diagnostiche ai test preparate, ancora da eseguire; non assumere che i problemi siano risolti. Nessuna IPA o deploy.
+
 **Collaudo finale run 42060601929:** main 85caca8 autorizzato e sincronizzato; compilazione e 275 unitari riusciti; UI 25 fallimenti su 92. Dieci test revisione 78 riusciti. Gli avvii Release sono stati saltati. Analisi log: numerosi test storici presumevano tab, card o finestra home precedenti; aggiornamenti ai test preparati e da verificare. Evento calendario mancante nel giorno atteso e riferimento BodyMass non visibile in Apple Salute richiedono diagnosi; non sono classificati come risolti. Preparato artifact diagnostico leggero per prossime esecuzioni. Nessuna IPA o deploy.
 
 **Main:** il 5 novembre 2026 l’utente ha autorizzato esplicitamente l’aggiornamento diretto del ramo principale con il ramo di lavoro, per sbloccare il collaudo finale. Verificare l’esito effettivo del push e lo SHA remoto; nessuna autorizzazione IPA o deploy.

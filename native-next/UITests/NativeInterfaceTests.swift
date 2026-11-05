@@ -289,6 +289,10 @@ final class NativeInterfaceTests: XCTestCase {
         app.buttons["Gestisci"].tap(); app.buttons["Abitudini"].tap()
         XCTAssertTrue(app.navigationBars["Abitudini"].waitForExistence(timeout: 10))
         let name = app.textFields["routine-name"]; show(name); name.tap(); name.typeText("Allenamento programmato")
+        let keyboard = app.keyboards.firstMatch
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 10))
+        name.typeText(XCUIKeyboardKey.return.rawValue)
+        XCTAssertTrue(keyboard.waitForNonExistence(timeout: 10), "Return must dismiss the keyboard before saving the habit")
         let repeatPicker = app.buttons["routine-repeat"]; show(repeatPicker); repeatPicker.tap(); app.buttons["Ogni N giorni"].tap()
         let save = app.buttons["routine-save"]; show(save); save.tap()
         let edit = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "routine-edit-", "Allenamento programmato")).firstMatch
@@ -316,8 +320,12 @@ final class NativeInterfaceTests: XCTestCase {
             let detail = app.buttons["health-summary-weight"]
             XCTAssertTrue(detail.waitForExistence(timeout: 10))
             let scroll = app.scrollViews["health-detail-scroll"]
-            for _ in 0..<8 where !detail.isHittable { scroll.swipeUp(velocity: .slow) }
+            for _ in 0..<8 {
+                if detail.isHittable && detail.frame.minY >= scroll.frame.minY && detail.frame.maxY <= app.tabBars.firstMatch.frame.minY { break }
+                scroll.swipeUp(velocity: .slow)
+            }
             XCTAssertTrue(detail.isHittable)
+            XCTAssertGreaterThanOrEqual(detail.frame.minY, scroll.frame.minY)
             XCTAssertLessThanOrEqual(detail.frame.maxY, app.tabBars.firstMatch.frame.minY)
             XCTAssertGreaterThanOrEqual(detail.frame.minX, 0)
             XCTAssertLessThanOrEqual(detail.frame.maxX, app.frame.maxX)
@@ -398,7 +406,15 @@ final class NativeInterfaceTests: XCTestCase {
         let initial = app.tabBars.buttons["Dashboard"].frame
         for title in ["Finanza", "Attività", "Calendario", "Dashboard", "Calendario", "Attività", "Dashboard"] {
             if title == "Finanza" || title == "Calendario" { app.openOtherDestination(title) }
-            else { app.tabBars.buttons[title].tap() }
+            else {
+                app.tabBars.buttons[title].tap()
+                if title == "Dashboard" {
+                    // Dashboard owns the calendar stack and retains it across tab switches.
+                    XCTAssertTrue(app.scrollViews["calendar-scroll"].waitForExistence(timeout: 10))
+                    let back = app.buttons["other-back"]
+                    XCTAssertTrue(back.waitForExistence(timeout: 10)); back.tap()
+                }
+            }
             let destination = title == "Finanza" ? app.staticTexts["finance-heading"] : (title == "Calendario" ? app.scrollViews["calendar-scroll"] : app.navigationBars[title])
             XCTAssertTrue(destination.waitForExistence(timeout: 10))
             let host = title == "Finanza" || title == "Calendario" ? "Dashboard" : title
@@ -762,19 +778,33 @@ final class NativeInterfaceTests: XCTestCase {
         }
     }
 
-    func testCalendarEventCanBeCreatedAfterBoundaryScroll() {
+    func testCalendarEventCanBeCreatedAfterBoundaryScroll() throws {
         let app = launch(["--dark"])
         app.openOtherDestination("Calendario")
         let scroll = app.scrollViews["calendar-scroll"]
         XCTAssertTrue(scroll.waitForExistence(timeout: 10))
+        let selectedDay = Self.today()
+        // Establish a known selected day; scrolling the month does not change it.
+        app.buttons["calendar-today"].tap()
+        revealCalendarDay(selectedDay, in: app)
+        XCTAssertTrue(app.buttons["calendar-day-" + selectedDay].isSelected)
         for _ in 0..<4 { scroll.swipeUp(velocity: .fast) }
         addButton(app).tap()
         let title = app.textFields["activity-title"]
-        XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText("Evento dopo scorrimento")
+        XCTAssertTrue(title.waitForExistence(timeout: 10))
+        let inputFormat = DateFormatter(); inputFormat.locale = Locale(identifier: "en_US_POSIX")
+        inputFormat.timeZone = TimeZone(identifier: "Europe/Rome"); inputFormat.dateFormat = "yyyy-MM-dd"
+        let displayFormat = DateFormatter(); displayFormat.locale = Locale(identifier: "it_IT")
+        displayFormat.timeZone = inputFormat.timeZone; displayFormat.dateStyle = .medium; displayFormat.timeStyle = .none
+        let expectedDate = displayFormat.string(from: try XCTUnwrap(inputFormat.date(from: selectedDay)))
+        let editorDate = app.buttons["activity-date-Inizio"]
+        XCTAssertTrue(editorDate.waitForExistence(timeout: 10))
+        XCTAssertEqual(editorDate.label, expectedDate, "The event editor must retain the explicitly selected day after scrolling")
+        title.tap(); title.typeText("Evento dopo scorrimento")
         app.buttons["Salva"].tap()
         app.buttons["calendar-today"].tap()
-        revealCalendarDay(Self.today(), in: app)
-        app.buttons["calendar-day-" + Self.today()].tap()
+        revealCalendarDay(selectedDay, in: app)
+        app.buttons["calendar-day-" + selectedDay].tap()
         XCTAssertTrue(app.scrollViews["calendar-all-day-strip"].waitForExistence(timeout: 10))
         let event = app.buttons["Evento dopo scorrimento"]
         XCTAssertTrue(event.isHittable); assertMinimumTouchTarget(event)

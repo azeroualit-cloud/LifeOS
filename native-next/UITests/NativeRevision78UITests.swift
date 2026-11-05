@@ -337,9 +337,37 @@ final class NativeAppleHealthReferenceUITests: XCTestCase {
         if done.exists && done.isHittable { done.tap() }
         let summary = health.tabBars.buttons["Riepilogo"]
         if summary.exists && summary.isHittable { summary.tap() }
-        for identifier in ["HKQuantityTypeIdentifierDietaryEnergyConsumed", "HKQuantityTypeIdentifierBodyMass"] {
-            XCTAssertTrue(health.cells["UIA.Health.Snippet." + identifier].waitForExistence(timeout: 15))
+        let feed = health.collectionViews["UIA.Health.SummaryFeedViewController.CollectionView"]
+        XCTAssertTrue(feed.waitForExistence(timeout: 15))
+        let identifiers = ["HKQuantityTypeIdentifierDietaryEnergyConsumed", "HKQuantityTypeIdentifierBodyMass"]
+        var found: [String: String] = [:]
+        for _ in 0..<13 {
+            for identifier in identifiers where found[identifier] == nil {
+                let cell = health.cells["UIA.Health.Snippet." + identifier]
+                if cell.exists && cell.isHittable {
+                    found[identifier] = cell.label.lowercased()
+                    capture("reference-visible-" + identifier, health)
+                }
+            }
+            if found.count == identifiers.count { break }
+            let top = max(feed.frame.minY, health.frame.minY) + 24
+            let bottom = min(feed.frame.maxY, health.tabBars.firstMatch.frame.minY) - 24
+            XCTAssertGreaterThan(bottom - top, 44)
+            let origin = health.coordinate(withNormalizedOffset: .zero)
+            let start = origin.withOffset(CGVector(dx: feed.frame.midX, dy: bottom))
+            let end = origin.withOffset(CGVector(dx: feed.frame.midX, dy: max(top, bottom - 300)))
+            start.press(forDuration: 0.05, thenDragTo: end)
         }
+        if found.count != identifiers.count { capture("reference-missing-metrics", health) }
+        for identifier in identifiers {
+            XCTAssertNotNil(found[identifier], "The seeded Health metric must be visible: " + identifier)
+        }
+        let energy = found[identifiers[0]] ?? ""
+        XCTAssertTrue(energy.filter { $0.isNumber }.contains("2200"), "Expected seeded 2,200 calories: " + energy)
+        let weight = found[identifiers[1]] ?? ""
+        let kilograms = weight.range(of: "(?<![0-9])80([.,]0+)?\\s*(kg|kilogram)", options: .regularExpression) != nil
+        let pounds = weight.range(of: "(?<![0-9])176[.,]4[0-9]*\\s*(lb|pound)", options: .regularExpression) != nil
+        XCTAssertTrue(kilograms || pounds, "Expected seeded 80 kg (or its pound equivalent): " + weight)
         capture("populated-summary", health)
     }
 }

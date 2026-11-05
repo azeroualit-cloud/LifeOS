@@ -1,5 +1,7 @@
 # LifeOS — correzioni e difetti aperti
 
+**42079725780:** cinque test UI falliti; aggiornamenti ai test diagnostici per calendario, scheda Salute, stack navigazione, feed Apple Health e tastiera abitudini non ancora verificati sul simulatore. Quattro avvii Release saltati.
+
 **Collaudo finale 42060601929:** 25/92 UI falliti; test storici in aggiornamento, evento calendario non trovato nel giorno selezionato e riferimento Apple BodyMass assente dal sistema da investigare. Quattro avvii Release non eseguiti.
 
 **QA-004 compact aggiornamento:** run 42056808149 supera standard e testo grande, ultima nota raggiunta e aperta; spazio visibile molto ridotto a testo grande resta da valutare visivamente. Verifica fisica e revisione globale aperte.
