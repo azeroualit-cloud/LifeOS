@@ -168,3 +168,7 @@ Mandato Astra ampliato all’intero LifeOS: ricostruire tutte le modifiche discu
 ## QA-012 — correzione approvata
 
 5 novembre 2026: «Sì, correggi» in risposta alla proposta di rendere leggibili e raggiungibili riepilogo calorie e pulsante Aggiungi con testo molto grande e tastiera aperta. Autorizzazione limitata alla correzione; nessuna IPA o deploy.
+
+## QA-014 — approvata; QA-013 — in attesa
+
+5 novembre 2026: «per salute si, per bloom non so se 44pixel é corretto finche non lo vedo». Approvata correzione della leggibilità titoli Salute mantenendo 2×2. Per Bloom non approvata alcuna modifica prima di vedere il risultato; 44 indica punti iOS, non pixel.

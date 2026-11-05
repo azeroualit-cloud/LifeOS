@@ -751,6 +751,15 @@
       "approval_quote": "Sì, correggi",
       "source": "Risposta alla proposta QA-012",
       "conflict_check": "Nessuna modifica delle regole attive; mantenere Aggiungi sopra la tastiera e preservare il flusso."
+    },
+    {
+      "recorded_on": "2026-11-05",
+      "type": "TASK_APPROVAL",
+      "id": "QA-014-FIX-APPROVED",
+      "scope": "Salute: leggibilità titoli griglia 2×2",
+      "approval_quote": "per salute si, per bloom non so se 44pixel é corretto finche non lo vedo",
+      "source": "Risposta alla proposta QA-014 e QA-013",
+      "interpretation": "Salute approvata; Bloom nessuna approvazione prima di vedere dimensioni. 44 sono punti iOS, non pixel."
     }
   ],
   "historical_inventory": "decision-history/2026-11-04-inventory.json",
