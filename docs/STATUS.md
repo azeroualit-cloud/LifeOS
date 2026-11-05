@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Backend sintetico, 5 novembre:** 19/19 test Attività/movement-order passati su SQLite in memoria e bundle locali build-68/build-70; nessuna verifica live. Test calendario aggiornato nel commit bdb2749 per espandere la giornata prima di controllarla; ancora da eseguire su simulatore.
+
 **Verifica corrente:** run [41944119975](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41944119975), focused/all, commit 4f920f9, avviato; esito pendente. Comprende la correzione QA-012, il test Salute aggiornato e la regressione calendario. Run precedente 41940411529: 272 unitari e 20 UI passati, 2 UI falliti; diagnosi calendario in corso.
 
 **Run Salute 41940411529:** sorgente 5bf5f5e, compilazione passata; suite UI 22 test con 2 fallimenti, suite NativeRevision78UITests 4/4 passati. Cause in analisi tramite artefatti; nessuna accettazione visiva o prova fisica. QA-012 successivo, non incluso nel run.
