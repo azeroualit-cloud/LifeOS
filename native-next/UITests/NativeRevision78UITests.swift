@@ -57,8 +57,11 @@ final class NativeRevision78UITests: XCTestCase {
         app.tabBars.buttons["Salute"].tap()
         let rows = ["tdee", "weight", "calories", "simulation"].map { app.buttons["health-summary-" + $0] }
         for row in rows { XCTAssertTrue(row.waitForExistence(timeout: 10)) }
-        let height = rows[0].frame.height
-        for row in rows { XCTAssertEqual(row.frame.height, height, accuracy: 1) }
+        XCTAssertLessThan(rows[0].frame.midY, rows[1].frame.midY)
+        XCTAssertEqual(rows[0].frame.midY, rows[3].frame.midY, accuracy: 2)
+        XCTAssertEqual(rows[1].frame.midY, rows[2].frame.midY, accuracy: 2)
+        XCTAssertLessThan(rows[0].frame.midX, rows[3].frame.midX)
+        XCTAssertLessThan(rows[1].frame.midX, rows[2].frame.midX)
         for id in ["health-add-weight", "health-add-nutrition"] {
             let button = app.buttons[id]
             XCTAssertTrue(button.isHittable)
@@ -79,18 +82,34 @@ final class NativeRevision78UITests: XCTestCase {
         app.tabBars.buttons["Salute"].tap()
         let rows = ["tdee", "weight", "calories", "simulation"].map { app.buttons["health-summary-" + $0] }
         for row in rows { XCTAssertTrue(row.waitForExistence(timeout: 10)) }
-        let height = rows[0].frame.height
-        for row in rows { XCTAssertEqual(row.frame.height, height, accuracy: 1) }
+        let ordered = [rows[0], rows[3], rows[1], rows[2]]
+        for pair in zip(ordered, ordered.dropFirst()) { XCTAssertLessThan(pair.0.frame.midY, pair.1.frame.midY) }
         capture("78-health-accessibility-top", app)
         let surface = app.scrollViews["health-detail-scroll"]
         for _ in 0..<4 { surface.swipeUp() }
         capture("78-health-accessibility-bottom", app)
+        XCTAssertTrue(app.descendants(matching: .any)["health-nutrient-HKQuantityTypeIdentifierDietaryFiber"].exists)
         for id in ["health-add-weight", "health-add-nutrition"] {
             let button = app.buttons[id]
             XCTAssertTrue(button.isHittable)
             XCTAssertEqual(button.frame.width, 44, accuracy: 1)
             XCTAssertEqual(button.frame.height, 44, accuracy: 1)
         }
+    }
+    func testHealthNutritionQuickAddAndHistoryAreReachable() {
+        let app = launch()
+        app.tabBars.buttons["Salute"].tap()
+        let add = app.buttons["health-add-nutrition"]
+        XCTAssertTrue(add.waitForExistence(timeout: 10)); add.tap()
+        XCTAssertTrue(app.staticTexts["Aggiungi nutrienti"].waitForExistence(timeout: 10))
+        app.buttons["quick-nutrition-close"].tap()
+        let history = app.buttons["health-nutrition-history"]
+        let surface = app.scrollViews["health-detail-scroll"]
+        for _ in 0..<6 where !history.isHittable { surface.swipeUp() }
+        XCTAssertTrue(history.isHittable); history.tap()
+        XCTAssertTrue(app.navigationBars["Nutrizione"].waitForExistence(timeout: 10))
+        app.navigationBars.buttons.firstMatch.tap()
+        XCTAssertTrue(surface.waitForExistence(timeout: 10))
     }
     func testBloomCancelClosesFilesAndAllowsRetry() {
         let app = launch(["--bloom-import-fixture"])

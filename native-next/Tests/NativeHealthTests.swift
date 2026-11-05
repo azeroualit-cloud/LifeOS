@@ -34,6 +34,16 @@ final class NativeHealthTests: XCTestCase {
         XCTAssertEqual(chart.end, rome.date(from: DateComponents(year: 2026, month: 11, day: 17)))
         XCTAssertEqual(rome.component(.hour, from: chart.end), 0, "Calendar bounds must survive daylight-saving changes")
     }
+    func testForecastUsesCivilDaysAcrossDaylightSavingAndKeepsBaseline() throws {
+        var rome = calendar; rome.timeZone = TimeZone(identifier: "Europe/Rome")!
+        let baseline = try XCTUnwrap(rome.date(from: DateComponents(year: 2026, month: 3, day: 20)))
+        let estimate = HealthEstimate(tdee: 2400, averageIntake: 2600, startWeight: 80, lastDate: baseline, days: 30)
+        let points = NativeHealthMath.forecast(estimate, intake: estimate.averageIntake, weeks: 6, calendar: rome)
+        XCTAssertEqual(points.first?.value, 80)
+        XCTAssertEqual(points[10].date, rome.date(byAdding: .day, value: 10, to: baseline))
+        XCTAssertEqual(rome.component(.hour, from: points[10].date), 0)
+        XCTAssertGreaterThan(points[10].value, 80)
+    }
     func testDashboardKeepsOnlyRecentHistoryAndPreservesMissingCalories() {
         var rows = history()
         rows[20].calories = nil

@@ -34,4 +34,23 @@ import HealthKit
         XCTAssertEqual(totals[today], 650)
         XCTAssertEqual(totals[tomorrow], 100)
     }
+    func testNutrientReadsDistinguishNoSampleAndRecordedZero() {
+        let type = HKObjectType.quantityType(forIdentifier: .dietaryProtein)!
+        let date = Date()
+        func sample(_ value: Double, _ manual: Bool) -> HKQuantitySample {
+            HKQuantitySample(type: type, quantity: HKQuantity(unit: .gram(), doubleValue: value),
+                start: date, end: date, metadata: [HKMetadataKeyWasUserEntered: manual])
+        }
+        XCTAssertNil(NativeHealthStore.nutrientTotal([]))
+        XCTAssertEqual(NativeHealthStore.nutrientTotal([sample(0, true)]), 0)
+        XCTAssertEqual(NativeHealthStore.nutrientTotal([sample(12.5, true), sample(4, false)]), 16.5)
+    }
+    func testEnergyZeroIsNotMissing() {
+        let type = HKObjectType.quantityType(forIdentifier: .dietaryEnergyConsumed)!
+        let day = Calendar.current.startOfDay(for: Date())
+        let sample = HKQuantitySample(type: type, quantity: HKQuantity(unit: .kilocalorie(), doubleValue: 0), start: day, end: day)
+        XCTAssertEqual(NativeHealthStore.calorieTotals([sample])[day], 0)
+        XCTAssertNil(NativeHealthStore.calorieTotals([])[day])
+    }
+
 }

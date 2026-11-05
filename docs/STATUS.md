@@ -1,10 +1,12 @@
 # LifeOS — stato corrente
 
+**Nutrizione, verifica visiva:** run 41894390397: 272 unitari e 5 UI passati, incluso retry accessibile. Screenshot del pannello con tastiera e testo grande mostra possibile sovrapposizione del bottone al riepilogo calorie: QA-012 aperto. Video non analizzato; nessuna accettazione visiva o prova fisica.
+
 **Verifica nutrizione:** run [41894390397](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41894390397), sorgente d420384, concluso con successo: compilazione, test focused ed esportazione prove riusciti. Le schermate e il video non sono ancora stati riesaminati in questa sessione; accettazione visiva e prova HealthKit fisica restano aperte. Nessuna IPA.
 
 **Salute:** HEALTH-GRID-02 confermata: griglia 2×2, nutrienti 1×4, pulsanti affiancati come seconda anteprima, senza testo e con icone esistenti. Deroga G08/G09/G12/G13 limitata al riepilogo. Implementazione e prove ancora da fare.
 
-**Checklist in corso:** run focused nutrizione [41894390397](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41894390397), sorgente d420384, avviato; esito non ancora verificato. Anteprima proposta Salute: [contratto](HEALTH-GRID-PREVIEW.md) e [immagine](design/health-grid-proposal.png); conflitto HEALTH-GRID-CONFLICT-01 in attesa di conferma esplicita. Nessuna modifica Salute autorizzata dalla sola anteprima.
+**Nota cronologica superata:** run focused nutrizione [41894390397](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41894390397), sorgente d420384, avviato; esito non ancora verificato. Anteprima proposta Salute: [contratto](HEALTH-GRID-PREVIEW.md) e [immagine](design/health-grid-proposal.png); conflitto HEALTH-GRID-CONFLICT-01 in attesa di conferma esplicita. Nessuna modifica Salute autorizzata dalla sola anteprima.
 
 **Verifiche del reparto:** 35/35 test sintetici Finanza passati con `manual/build-75/worker.js` per entrambe le baseline; il primo tentativo con budget build-70 ha avuto 5 fallimenti per baseline precedente. Nessun audit live o deploy. Aggiunto test Bloom esplicito per la scelta mantieni: compilazione e verifica simulatore ancora da eseguire.
 

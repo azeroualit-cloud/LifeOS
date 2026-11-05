@@ -7,6 +7,14 @@ import Combine
     @Published private(set) var loading = false
     @Published private(set) var message: String?
     @Published private(set) var localDays: [HealthDay] = []
+    /// HealthKit only: local pending entries remain separate and are never added here.
+    @Published private(set) var nutrientTotals: [HKQuantityTypeIdentifier: Double] = [:]
+    @Published private(set) var nutrientMessage: String?
+    @Published private(set) var nutrientFailures: Set<HKQuantityTypeIdentifier> = []
+    private static let nutrientTypes: [HKQuantityTypeIdentifier] = [.dietaryProtein, .dietaryCarbohydrates, .dietaryFatTotal, .dietaryFiber]
+    private static var readTypes: Set<HKObjectType> {
+        Set(([HKQuantityTypeIdentifier.bodyMass, .dietaryEnergyConsumed] + nutrientTypes).map { HKObjectType.quantityType(forIdentifier: $0)! })
+    }
     private let health = HKHealthStore()
     private var didStart = false
     private var demo = false
@@ -28,7 +36,7 @@ import Combine
         guard available else { message = "Salute non è disponibile su questo dispositivo."; return }
         loading = true
         do {
-            let types: Set<HKObjectType> = [HKObjectType.quantityType(forIdentifier: .bodyMass)!, HKObjectType.quantityType(forIdentifier: .dietaryEnergyConsumed)!]
+            let types = Self.readTypes
             let status = try await health.statusForAuthorizationRequest(toShare: [], read: types)
             loading = false
             if status == .shouldRequest { await connect() }
@@ -43,12 +51,12 @@ import Combine
         guard available else { message = "Salute non è disponibile su questo dispositivo."; return }
         loading = true; message = nil
         do {
-            let types: Set<HKObjectType> = [HKObjectType.quantityType(forIdentifier: .bodyMass)!, HKObjectType.quantityType(forIdentifier: .dietaryEnergyConsumed)!]
+            let types = Self.readTypes
             try await health.requestAuthorization(toShare: [], read: types)
             loading = false
             await refresh()
         } catch {
-            days = []; food = []; weights = []
+            days = []; food = []; weights = []; nutrientTotals = [:]; nutrientFailures = []
             rebuild()
             loading = false; message = "Accesso a Salute non completato. Verifica i permessi in Impostazioni > Salute."
         }
@@ -65,9 +73,22 @@ import Combine
             let newFood = try await samples(.dietaryEnergyConsumed, start: start, end: end)
             weights = newWeights; food = newFood
             rebuild()
+            // Each read has an independent outcome; one failure must not hide other nutrients.
+            // Every readable HealthKit source contributes; the local journal is not added.
+            var totals: [HKQuantityTypeIdentifier: Double] = [:]
+            var failures: Set<HKQuantityTypeIdentifier> = []
+            for type in Self.nutrientTypes {
+                do {
+                    let values = try await samples(type, start: today, end: end)
+                    if let value = Self.nutrientTotal(values) { totals[type] = value }
+                } catch { failures.insert(type) }
+            }
+            nutrientTotals = totals; nutrientFailures = failures
+            nutrientMessage = failures.isEmpty ? nil : "Alcuni nutrienti non sono stati letti. Aggiorna per riprovare."
+
         } catch {
             // Clear old samples rather than continuing to expose stale or revoked data.
-            days = []; food = []; weights = []
+            days = []; food = []; weights = []; nutrientTotals = [:]; nutrientFailures = []
             rebuild()
             message = "Lettura Salute non riuscita. Sblocca iPhone e riprova; verifica anche la firma HealthKit dell’app."
         }
@@ -150,10 +171,15 @@ import Combine
         var totals: [Date: Double] = [:]
         for sample in samples {
             let value = sample.quantity.doubleValue(for: .kilocalorie())
-            guard value.isFinite, value > 0 else { continue }
+            guard value.isFinite, value >= 0 else { continue }
             totals[calendar.startOfDay(for: sample.startDate), default: 0] += value
         }
         return totals
+    }
+    /// nil means no readable sample; zero is a valid recorded quantity.
+    static func nutrientTotal(_ samples: [HKQuantitySample]) -> Double? {
+        let values = samples.map { $0.quantity.doubleValue(for: .gram()) }.filter { $0.isFinite && $0 >= 0 }
+        return values.isEmpty ? nil : values.reduce(0, +)
     }
     private func samples(_ identifier: HKQuantityTypeIdentifier, start: Date, end: Date) async throws -> [HKQuantitySample] {
         let type = HKObjectType.quantityType(forIdentifier: identifier)!

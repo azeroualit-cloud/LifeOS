@@ -111,14 +111,15 @@ enum NativeHealthMath {
         let sorted = values.sorted(), middle = values.count / 2
         return values.count % 2 == 0 ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle]
     }
-    static func forecast(_ estimate: HealthEstimate, intake: Double, weeks: Int = 8) -> [HealthPoint] {
+    static func forecast(_ estimate: HealthEstimate, intake: Double, weeks: Int = 8, calendar: Calendar = .current) -> [HealthPoint] {
         guard intake.isFinite, (800...6000).contains(intake), (1...12).contains(weeks) else { return [] }
         // Analytic solution of dW/dt = (intake - TDEE0 - k * (W-W0)) / rho.
         return (0...(weeks * 7)).compactMap { day in
             let change = (intake - estimate.tdee) / expenditurePerKG * (1 - exp(-expenditurePerKG * Double(day) / energyPerKG))
             let value = estimate.startWeight + change
             guard value > 0 else { return nil }
-            return HealthPoint(date: estimate.lastDate.addingTimeInterval(Double(day) * 86400), value: value)
+            guard let date = calendar.date(byAdding: .day, value: day, to: estimate.lastDate) else { return nil }
+            return HealthPoint(date: date, value: value)
         }
     }
     static func demo(now: Date = Date(), calendar: Calendar = .current) -> [HealthDay] {
@@ -171,7 +172,7 @@ struct NativeHealthDashboardData {
         // is seven days old. Keep the actual calibration baseline; do not reset it to today.
         if let estimate, estimate.lastDate <= now,
            estimate.lastDate >= calendar.date(byAdding: .day, value: -7, to: today)! {
-            forecast = NativeHealthMath.forecast(estimate, intake: estimate.averageIntake, weeks: 6)
+            forecast = NativeHealthMath.forecast(estimate, intake: estimate.averageIntake, weeks: 6, calendar: calendar)
                 .filter { $0.date >= today && $0.date <= end }
         } else { forecast = [] }
         if let last = trend.last, let first = forecast.first {

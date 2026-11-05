@@ -23,7 +23,7 @@ targets:
       properties:
         NSAlarmKitUsageDescription: Life OS programma le sveglie urgenti degli eventi che scegli, anche in silenzioso e Full immersion.
         NSHealthUpdateUsageDescription: Life OS salva in Apple Salute pesate, proteine, carboidrati, grassi, fibre e calorie che inserisci, solo su tua richiesta.
-        NSHealthShareUsageDescription: Life OS legge peso e calorie alimentari per mostrare andamento e scenari di peso, solo sul dispositivo.
+        NSHealthShareUsageDescription: Life OS legge peso, calorie e nutrienti alimentari da Apple Salute per mostrare riepiloghi e scenari, solo sul dispositivo.
         UIFileSharingEnabled: true
         LSSupportsOpeningDocumentsInPlace: true
         CFBundleShortVersionString: $(MARKETING_VERSION)
