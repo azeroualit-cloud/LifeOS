@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Run 42004075338:** commit ea5a71e, compilazione fallita: SwiftUI View non espone `.accessibilityFrame`; nessun test eseguito. Diagnosi e correzione in corso. QA-013 non risolto; nessuna IPA.
+
 **Verifica Bloom QA-013:** run [42004075338](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42004075338), focused/bloom su ea5a71e, avviato; controlla frame, unicità, tocco e import. Esito pendente.
 
 **QA-013:** secondo intervento usa geometria della pillola per il frame accessibile, senza modifica visiva. Prima correzione non efficace nel run 42000813725; seconda ancora da compilare/verificare al simulatore.
