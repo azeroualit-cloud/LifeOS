@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Main:** il 5 novembre 2026 l’utente ha autorizzato esplicitamente l’aggiornamento diretto del ramo principale con il ramo di lavoro, per sbloccare il collaudo finale. Verificare l’esito effettivo del push e lo SHA remoto; nessuna autorizzazione IPA o deploy.
+
 **QA-004 compatto run 42056808149:** commit 4adc7bf, compilazione riuscita, 275/275 unitari e 6/6 UI passati. Finanza supera il confronto geometrico. Bloom standard raggiunge il fondo; con testo grande arriva alla nota 121 al gesto 67 e la apre. Screenshot finale controllato: ultima card raggiungibile sopra tab; spazio visibile ridotto con testo molto grande, non valutato come accettazione visiva. Prova su iPhone ancora necessaria.
 
 **QA-004 compatto run 42053108157:** 275 unitari e verifica standard passati. La prova Bloom con testo grande è inconclusa: dopo 12 gesti XCTest ha atteso 60 secondi lo stato inattivo, poi la query della tab è scaduta; la causa non è stabilita. Il confronto Finanza è fallito per un secondo errore infinitesimale di arrotondamento. Preparata una ripetizione con tolleranza di un pixel e meno letture ripetute di coordinate, mantenendo gli assert.
