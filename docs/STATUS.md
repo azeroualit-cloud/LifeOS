@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**QA-004 diagnostica:** run [42019184325](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42019184325), focused/dashboard su fd79435, avviato con catture intermedie note visibili; esito pendente.
+
 **QA-004 Bloom grande:** run 42015355697 non raggiunge la nota 121 dopo 80 gesti; causa non stabilita. Aggiunte catture e identificativi delle note visibili durante lo scroll, senza ridurre assert; nuova prova diagnostica necessaria.
 
 **QA-004 run 42015355697:** compilazione e 275 unitari passati; 5/6 UI passati. Standard Dashboard/Salute/Bloom passato; testo grande Dashboard/Salute passati; Bloom grande non ha raggiunto la nota finale nella fixture. Diagnosi causa in corso, nessuna correzione app autorizzata implicitamente.
