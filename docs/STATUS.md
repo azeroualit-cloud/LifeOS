@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Salute T08/T09:** prima implementazione sul commit 5bf5f5e, anteprima simulatore run 41940411529 in corso. Lettura macro, griglia e cronologia sono implementate ma non ancora verificate. Nessuna IPA o deploy.
+
 **Nutrizione, verifica visiva:** run 41894390397: 272 unitari e 5 UI passati, incluso retry accessibile. Screenshot del pannello con tastiera e testo grande mostra possibile sovrapposizione del bottone al riepilogo calorie: QA-012 aperto. Video non analizzato; nessuna accettazione visiva o prova fisica.
 
 **Verifica nutrizione:** run [41894390397](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41894390397), sorgente d420384, concluso con successo: compilazione, test focused ed esportazione prove riusciti. Le schermate e il video non sono ancora stati riesaminati in questa sessione; accettazione visiva e prova HealthKit fisica restano aperte. Nessuna IPA.
