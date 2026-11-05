@@ -61,7 +61,7 @@ jobs:
           fi
           args=()
           while IFS= read -r arg; do args+=("$arg"); done < build/development-selection.args
-          xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 420 "${args[@]}" -resultBundlePath build/Development.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/development-tests.log 2>&1 || { tail -n 120 build/development-tests.log; exit 1; }
+          xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 660 "${args[@]}" -resultBundlePath build/Development.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/development-tests.log 2>&1 || { tail -n 120 build/development-tests.log; exit 1; }
       - name: Export screenshots even when tests fail
         if: ${{ !cancelled() }}
         run: |

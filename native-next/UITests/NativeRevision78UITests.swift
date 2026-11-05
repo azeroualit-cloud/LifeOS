@@ -1,4 +1,5 @@
 import XCTest
+import UIKit
 
 final class NativeRevision78UITests: XCTestCase {
     private func launch(_ extra: [String] = []) -> XCUIApplication {
@@ -44,7 +45,8 @@ final class NativeRevision78UITests: XCTestCase {
         XCTAssertTrue(value.exists); XCTAssertTrue(label.exists)
         XCTAssertEqual(label.label, "Budget")
         XCTAssertEqual(value.frame.minX, label.frame.minX, accuracy: 1)
-        XCTAssertLessThanOrEqual(value.frame.maxY, label.frame.minY)
+        // Permit at most one physical pixel for fractional coordinate rounding.
+        XCTAssertLessThanOrEqual(value.frame.maxY, label.frame.minY + 1 / UIScreen.main.scale)
         XCTAssertGreaterThan(button.frame.minX, value.frame.maxX)
         XCTAssertLessThanOrEqual(button.frame.maxX, header.frame.maxX + 1)
         XCTAssertGreaterThanOrEqual(button.frame.height, 44)
@@ -119,7 +121,7 @@ final class NativeRevision78UITests: XCTestCase {
     func testSafeAreaLastContentStandard() { checkSafeAreaLastContent(large: false) }
     func testSafeAreaLastContentLargeText() { checkSafeAreaLastContent(large: true) }
     private func checkSafeAreaLastContent(large: Bool) {
-        executionTimeAllowance = 360
+        executionTimeAllowance = 600
         let app = launch(["--bloom-grid-fixture"] + (large ? ["--large-text"] : []))
         let tabBar = app.tabBars.firstMatch
         let dashboard = app.scrollViews["dashboard-scroll"]

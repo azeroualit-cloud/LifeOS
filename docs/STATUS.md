@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**QA-004 compact run 42048485584:** 275 unitari passati; standard raggiunge il fondo. Testo grande interrotto a timeout 360s, dopo checkpoint 20 al 28%, senza raggiungere la nota finale: tempo del test esteso sulla base della prova, assert invariati. Altro test UI Finanza fallito per differenza floating point 0,00000000000006pt: confronto reso robusto con tolleranza di un pixel fisico. Nuova verifica necessaria.
+
 **QA-004 compatto:** run [42048485584](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42048485584), focused/dashboard/compact su 8190eef, avviato; esito pendente.
 
 **QA-004 run 42044400960:** 275 unitari e 6 UI passati; Dashboard, Salute, Bloom ultimo contenuto raggiungibile sopra tab, standard e testo grande su simulatore principale. Bloom con 122 note raggiunge la 121 al gesto 96; screenshot controllato. Compatibilità schermo compatto e iPhone fisico ancora da verificare.
