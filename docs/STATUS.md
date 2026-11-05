@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Preview Bloom 41998067334:** commit e9eb9dd, 20 test unitari e 2 UI Bloom passati. Il selettore preview non include test frame AX/picker/bordo: verifica focused Bloom successiva necessaria. QA-013 ancora aperto, nessuna IPA. QA-014 Salute non coperto da questa run.
+
 **QA-013 e QA-014:** approvate correzioni Bloom (solo frame accessibile, aspetto invariato) e titoli Salute; modifiche preparate, verifica simulatore pending.
 
 **QA-014:** utente ha approvato correzione titoli Salute; intestazioni aggiornate con titolo e data su righe distinte. Compilazione e resa visiva ancora da verificare. QA-013 Bloom in attesa scelta dopo visualizzazione della schermata reale.
