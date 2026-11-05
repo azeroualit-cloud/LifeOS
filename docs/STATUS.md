@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Run 41944119975:** commit 4f920f9, compilazione riuscita; 26 UI con 2 fallimenti, di cui uno nella suite Salute. Identità e cause in analisi: log completo nell’artefatto non ancora letto. QA-012 non dichiarato risolto.
+
 **Backend sintetico, 5 novembre:** 19/19 test Attività/movement-order passati su SQLite in memoria e bundle locali build-68/build-70; nessuna verifica live. Test calendario aggiornato nel commit bdb2749 per espandere la giornata prima di controllarla; ancora da eseguire su simulatore.
 
 **Verifica corrente:** run [41944119975](https://github.com/azeroualit-cloud/LifeOS/actions/runs/41944119975), focused/all, commit 4f920f9, avviato; esito pendente. Comprende la correzione QA-012, il test Salute aggiornato e la regressione calendario. Run precedente 41940411529: 272 unitari e 20 UI passati, 2 UI falliti; diagnosi calendario in corso.
