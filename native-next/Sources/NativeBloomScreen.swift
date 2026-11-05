@@ -318,8 +318,10 @@ private struct NativeBloomSectionButton: View {
                 .foregroundStyle(selected ? NativeDesign.onAccent : Color.primary)
                 .lineLimit(1).minimumScaleFactor(0.8)
                 .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget)
-        }.accessibilityIdentifier("bloom-section-" + id)
-            .accessibilityAddTraits(selected ? .isSelected : [])
+        }.accessibilityElement(children: .ignore)
+            .accessibilityLabel(title)
+            .accessibilityIdentifier("bloom-section-" + id)
+            .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton)
     }
     @ViewBuilder var body: some View {
         if #available(iOS 26.0, *) {

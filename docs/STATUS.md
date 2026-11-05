@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**QA-013 e QA-014:** approvate correzioni Bloom (solo frame accessibile, aspetto invariato) e titoli Salute; modifiche preparate, verifica simulatore pending.
+
 **QA-014:** utente ha approvato correzione titoli Salute; intestazioni aggiornate con titolo e data su righe distinte. Compilazione e resa visiva ancora da verificare. QA-013 Bloom in attesa scelta dopo visualizzazione della schermata reale.
 
 **Run 41948496725, bfca462:** compilazione e 275 unitari passati, 26/27 UI passati. Calendario corretto passato. Bloom: tap a 21pt dal centro risponde, ma frame accessibile Libreria misura 18pt contro requisito 44pt; test import si ferma prima del picker. Correzione proposta, in attesa di risposta. Nessuna IPA.
