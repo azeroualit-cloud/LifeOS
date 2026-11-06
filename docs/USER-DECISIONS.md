@@ -192,3 +192,9 @@ Fonte: richiesta diretta del 5 novembre 2026. «Ti chiedo esplicitamente di prod
 ## UI-80-01 — ACTIVE, deroga confermata
 
 6 novembre 2026, richiesta diretta dopo le quattro schermate su iPhone. Correggere gli allineamenti e usare Liquid Glass neutro per Aggiungi spesa e Aggiungi alimento in Dashboard, con azione alimento dentro la scheda Nutrizione. «Sì, confermo la deroga»: in Salute le due azioni con testo visibile sono centrate nel riquadro Nutrienti, in deroga a G05/G07 e alla disposizione HEALTH-GRID-02; icone G06 conservate. Autorizzata una nuova IPA per questa consegna dopo il collaudo pre-IPA.
+
+## UX-REACH-01 — ACTIVE, 6 novembre 2026
+
+I pulsanti che nel normale utilizzo previsto possono essere premuti molte volte al giorno non devono mai trovarsi in alto a destra. Collocarli dove il pollice li raggiunge comodamente.
+
+Fonte. Richiesta esplicita durante la revisione della bozza Nutrizione.
