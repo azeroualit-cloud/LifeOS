@@ -8,7 +8,7 @@
   "source_of_truth": "native-next overlay assembled through .github/actions/native-compat76/action.yml",
   "native_source_fingerprint": {
     "algorithm": "SHA-256 over sorted tracked native-next paths, NUL, file bytes, NUL",
-    "sha256": "13623579d49735915641edbece16e41a72be8cfdef792bdf1fcbacd51a875e85"
+    "sha256": "3fa622cf5f0be94c212bc860bd04651ac3af2ba5e095fdb03d025e5ede4105ea"
   },
   "latest_distributed_build": {
     "version": "0.10.19",
@@ -29,9 +29,12 @@
     "accepted_for_production": false
   },
   "current_increment": {
-    "type": "IPA consegnata; verifica iPhone e accettazione aperte",
-    "new_ipa": true,
-    "application_source_changed_since_verified_build": false
+    "type": "Redesign Dashboard, Salute e Nutrizione",
+    "candidate_version": "0.10.20",
+    "candidate_build": 82,
+    "new_ipa": false,
+    "application_source_changed_since_verified_build": true,
+    "validation": "GitHub Actions pre-IPA; artifact only after both validation jobs pass"
   },
   "backend": {
     "last_documented_utilities_deploy_run": "41630715615",

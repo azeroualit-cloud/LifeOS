@@ -873,5 +873,12 @@
     "source": "Richiesta diretta utente",
     "original_quote": "Ti chiedo esplicitamente di produrre e consegnarmi una nuova IPA, ma solo dopo aver completato con successo il collaudo pre-IPA.",
     "scope": "Una sola consegna. Preservare release 78. Nessun deploy backend o cancellazione. Accettazione esplicita dopo prove iPhone."
+  },
+  "redesign_ipa_delivery_authorization": {
+    "id": "IPA-REDESIGN-82",
+    "status": "AUTHORIZED_AFTER_PRE_IPA_PASS",
+    "recorded_on": "2026-11-06",
+    "source": "Richiesta diretta utente",
+    "scope": "Redesign Dashboard, Salute e Nutrizione. Consegna artifact IPA e link Actions."
   }
 }

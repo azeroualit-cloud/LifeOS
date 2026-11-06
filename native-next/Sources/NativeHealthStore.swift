@@ -2,6 +2,14 @@ import Foundation
 import HealthKit
 import Combine
 
+struct NativeHealthFoodEntry: Identifiable {
+    let id: UUID
+    let lifeOSID: UUID?
+    let date: Date
+    let name: String?
+    let calories: Double
+}
+
 @MainActor final class NativeHealthStore: ObservableObject {
     @Published private(set) var days: [HealthDay] = []
     @Published private(set) var loading = false
@@ -23,6 +31,26 @@ import Combine
     private let calendar = Calendar.current
     var estimate: HealthEstimate? { NativeHealthMath.estimate(days) }
     var available: Bool { HKHealthStore.isHealthDataAvailable() }
+
+    var todayCalories: Double? {
+        days.first(where: { calendar.isDateInToday($0.date) })?.calories
+    }
+
+    var todayFoodEntries: [NativeHealthFoodEntry] {
+        food.reversed().compactMap { sample in
+            guard calendar.isDateInToday(sample.startDate) else { return nil }
+            let calories = sample.quantity.doubleValue(for: .kilocalorie())
+            guard calories.isFinite, calories >= 0 else { return nil }
+            let sync = sample.metadata?[HKMetadataKeySyncIdentifier] as? String
+            let prefix = "lifeos-nutrition-"
+            let lifeOSID = sync.flatMap { key -> UUID? in
+                guard key.hasPrefix(prefix), key.hasSuffix("-3") else { return nil }
+                return UUID(uuidString: String(key.dropFirst(prefix.count).dropLast(2)))
+            }
+            return NativeHealthFoodEntry(id: sample.uuid, lifeOSID: lifeOSID, date: sample.startDate,
+                name: sample.metadata?[HKMetadataKeyFoodType] as? String, calories: calories)
+        }
+    }
 
     func start(demo: Bool) async {
         guard !didStart else { return }

@@ -198,3 +198,7 @@ Fonte: richiesta diretta del 5 novembre 2026. «Ti chiedo esplicitamente di prod
 I pulsanti che nel normale utilizzo previsto possono essere premuti molte volte al giorno non devono mai trovarsi in alto a destra. Collocarli dove il pollice li raggiunge comodamente.
 
 Fonte. Richiesta esplicita durante la revisione della bozza Nutrizione.
+
+## IPA-REDESIGN-82 — consegna autorizzata, 6 novembre 2026
+
+«no voglio l'ipa di tutto il redesign, e lasciami il link actions per capire se é prodotto o meno cosí te non sorechi token». Autorizzazione per questa consegna, con suite completa e quattro avvii Release prima del confezionamento. Ordine Dashboard esistente e percorsi manuali preservati.

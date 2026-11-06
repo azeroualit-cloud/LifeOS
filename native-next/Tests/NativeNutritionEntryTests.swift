@@ -1,6 +1,15 @@
 import XCTest
 @testable import LifeOSProbe
 final class NativeNutritionEntryTests: XCTestCase {
+    func testBundledFoodUsesPortionAndPreservesName() throws {
+        XCTAssertGreaterThan(NativeGenericFood.catalog.count, 4000)
+        let food = try XCTUnwrap(NativeGenericFood.catalog.first { $0.id == "169757" })
+        let entry = try XCTUnwrap(food.portion(id: UUID(), date: Date(), grams: 150))
+        XCTAssertEqual(entry.foodName, "Riso bianco, cotto")
+        XCTAssertEqual(entry.portionGrams, 150)
+        XCTAssertEqual(entry.calories, food.calories * 150 / 100)
+        XCTAssertEqual(try JSONDecoder().decode(NativeNutritionEntry.self, from: JSONEncoder().encode(entry)), entry)
+    }
     func testItalianDecimalsAndFourFourNineCalculation() {
         let entry = NativeNutritionEntry(id: UUID(), revision: 1, date: Date(), protein: 10, carbohydrate: 20, fat: 5, confirmed: false)
         XCTAssertEqual(entry.calories, 165)

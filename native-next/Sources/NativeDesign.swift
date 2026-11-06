@@ -16,6 +16,12 @@ enum NativeDesign {
         UIColor(white: traits.userInterfaceStyle == .dark ? 0.72 : 0.27, alpha: 1)
     })
     static let actionSurface = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor(white: 0.17, alpha: 1) : .tertiarySystemFill })
+    static let financeTitle = Color(uiColor: UIColor { trait in
+        trait.userInterfaceStyle == .dark ? UIColor(red: 0.66, green: 0.78, blue: 1, alpha: 1) : UIColor(red: 0.09, green: 0.30, blue: 0.67, alpha: 1)
+    })
+    static let nutritionTitle = Color(uiColor: UIColor { trait in
+        trait.userInterfaceStyle == .dark ? UIColor(red: 0.55, green: 0.88, blue: 0.71, alpha: 1) : UIColor(red: 0.08, green: 0.40, blue: 0.28, alpha: 1)
+    })
     static let calendarAccent = Color(uiColor: .systemBlue)
     static func calendarNumber(size: CGFloat) -> Font { .system(size: size, weight: .regular, design: .default) }
     static let healthCanvas = Color(uiColor: .systemGroupedBackground)

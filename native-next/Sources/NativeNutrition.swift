@@ -14,6 +14,7 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
     var fibre: Decimal? = nil
     var labelCalories: Decimal? = nil
     var portionGrams: Decimal? = nil
+    var foodName: String? = nil
     var calories: Decimal { labelCalories ?? (protein * 4 + carbohydrate * 4 + fat * 9) }
 
     /// Label values are per 100 g; persisted measurements always describe the portion.
@@ -36,7 +37,7 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
         }
         let energy = protein * 4 + carbohydrate * 4 + fat * 9 + fibre * 2
         guard !energy.isNaN, energy > 0, NSDecimalNumber(decimal: energy).doubleValue.isFinite else { return nil }
-        return .init(id: id, revision: 0, date: date, protein: protein, carbohydrate: carbohydrate, fat: fat, confirmed: false, fibre: fibre, labelCalories: energy)
+        return .init(id: id, revision: 0, date: date, protein: protein, carbohydrate: carbohydrate, fat: fat, confirmed: false, fibre: fibre, labelCalories: energy, foodName: old?.foodName)
     }
     static func grams(_ text: String) -> Decimal? {
         let value = text.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -68,8 +69,13 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
     static func samples(for entry: NativeNutritionEntry) -> [HKQuantitySample] {
         let amounts = [entry.protein, entry.carbohydrate, entry.fat, entry.calories] + (entry.fibre.map { [$0] } ?? [])
         return zip(identifiers, amounts).enumerated().map { index, pair in
-            HKQuantitySample(type: HKObjectType.quantityType(forIdentifier: pair.0)!, quantity: HKQuantity(unit: index == 3 ? .kilocalorie() : .gram(), doubleValue: NSDecimalNumber(decimal: pair.1).doubleValue), start: entry.date, end: entry.date,
-                metadata: [HKMetadataKeySyncIdentifier: "lifeos-nutrition-\(entry.id.uuidString)-\(index)", HKMetadataKeySyncVersion: NSNumber(value: entry.revision)])
+            var metadata: [String: Any] = [
+                HKMetadataKeySyncIdentifier: "lifeos-nutrition-\(entry.id.uuidString)-\(index)",
+                HKMetadataKeySyncVersion: NSNumber(value: entry.revision)
+            ]
+            if let name = entry.foodName { metadata[HKMetadataKeyFoodType] = name }
+            return HKQuantitySample(type: HKObjectType.quantityType(forIdentifier: pair.0)!, quantity: HKQuantity(unit: index == 3 ? .kilocalorie() : .gram(), doubleValue: NSDecimalNumber(decimal: pair.1).doubleValue), start: entry.date, end: entry.date,
+                metadata: metadata)
         }
     }
     func delete(_ entry: NativeNutritionEntry) async throws {

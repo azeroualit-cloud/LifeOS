@@ -67,16 +67,19 @@ struct DashboardScreen: View {
         Task { await store.sync(scope: .life) }
     }
     private func heading(today: String, now: Date) -> some View {
-        VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+        let layout = typeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: NativeDesign.Space.xs))
+            : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: NativeDesign.Space.small))
+        return layout {
             HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.small) {
                 Text(CivilDate.date(today).formatted(.dateTime.day().month(.abbreviated).locale(Locale(identifier: "it_IT"))))
                     .accessibilityLabel(CivilDate.label(today)).accessibilityIdentifier("home-today")
                     .font(.title.bold()).accessibilityAddTraits(.isHeader)
                     .layoutPriority(1)
                 nextTime(now)
-                Spacer(minLength: 0)
-                activeShift(now: now, today: today)
             }
+            if !typeSize.isAccessibilitySize { Spacer(minLength: 0) }
+            activeShift(now: now, today: today)
         }
     }
     private func focusDate(_ now: Date) -> Date {
@@ -92,11 +95,14 @@ struct DashboardScreen: View {
         ZStack(alignment: .trailing) {
         if model.phase == "Adesso" {
             Button { openCalendar(today) } label: {
-                VStack(alignment: .trailing, spacing: NativeDesign.Space.small) {
-                    Text(model.title).font(NativeDesign.heading).foregroundStyle(model.shift?.color ?? NativeDesign.accent)
-                    NativeShiftProgressBar(model: model, now: focusNow, activation: router.activationDate)
-                        .frame(width: NativeDesign.Layout.shiftProgressWidth)
-                }.frame(minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle())
+                Text(model.title).font(.subheadline.weight(.semibold))
+                    .padding(.horizontal, NativeDesign.Space.medium)
+                    .padding(.vertical, NativeDesign.Space.xs)
+                    .background {
+                        NativeShiftProgressBar(model: model, now: focusNow, activation: router.activationDate)
+                    }
+                    .clipShape(Capsule())
+                    .frame(minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle())
             }.buttonStyle(NativePressStyle()).accessibilityIdentifier("home-focus")
                 .accessibilityLabel(model.title + ", " + model.remainingText + " alla fine")
                 .accessibilityHint("Apre il calendario completo")
@@ -161,7 +167,7 @@ struct DashboardScreen: View {
         NativeCard(density: .compact) {
             NavigationLink(value: NativeDashboardDestination.finance) {
                 HStack {
-                    Label("Finanza", systemImage: "chart.bar").font(.headline)
+                    Label("Finanza", systemImage: "chart.bar").font(.headline).foregroundStyle(NativeDesign.financeTitle)
                     Spacer()
                     NativeDisclosureIndicator()
                 }.frame(minHeight: NativeDesign.Layout.touchTarget)

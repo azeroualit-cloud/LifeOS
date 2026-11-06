@@ -57,6 +57,7 @@ struct NativeNutritionScreen: View {
                     } else if entry.confirmed {
                         Button { load(entry) } label: {
                             VStack(alignment: .leading) {
+                                if let name = entry.foodName { Text(name) }
                                 Text(entry.date.formatted(date: .abbreviated, time: .omitted))
                                 Text("P \(NSDecimalNumber(decimal: entry.protein)) · C \(NSDecimalNumber(decimal: entry.carbohydrate)) · G \(NSDecimalNumber(decimal: entry.fat)) · F \(NSDecimalNumber(decimal: entry.fibre ?? 0)) g — \(NSDecimalNumber(decimal: entry.calories)) kcal").font(.caption).foregroundStyle(.secondary)
                             }

@@ -1,30 +1,50 @@
 import SwiftUI
 
 struct NativeNutritionQuickEntry: View {
-    @State private var showing = false
-    @State private var notice: String?
+    @EnvironmentObject private var health: NativeHealthStore
+    @EnvironmentObject private var router: NativeRouter
     @Environment(\.dynamicTypeSize) private var typeSize
+    @State private var showing = false
+    @State private var addingWeight = false
+    @State private var notice: String?
+
     var body: some View {
         NativeCard(density: .compact) {
+            Button { router.tab = .health } label: {
+                HStack {
+                    Label { Text("Nutrizione") } icon: { NativeSymbol(symbol: NativeHealthMetric.calories.symbol) }
+                        .font(.headline).foregroundStyle(NativeDesign.nutritionTitle)
+                    Spacer()
+                    NativeDisclosureIndicator()
+                }.frame(minHeight: NativeDesign.Layout.touchTarget)
+                    .contentShape(Rectangle())
+            }.buttonStyle(NativePressStyle()).accessibilityIdentifier("home-nutrition")
             let layout = typeSize >= .xxxLarge
                 ? AnyLayout(VStackLayout(alignment: .leading, spacing: NativeDesign.Space.small))
                 : AnyLayout(HStackLayout(spacing: NativeDesign.Space.small))
             layout {
-                Text("Nutrizione").font(.headline)
-                if typeSize < .xxxLarge { Spacer(minLength: NativeDesign.Space.small) }
-                addFoodButton
+                HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xs) {
+                    Text(health.todayCalories?.formatted(.number.precision(.fractionLength(0))) ?? "—")
+                        .font(.title2.weight(.semibold)).monospacedDigit()
+                    Text("kcal").font(.caption).foregroundStyle(NativeDesign.secondary)
+                }.accessibilityLabel("Calorie di oggi")
+                if typeSize < .xxxLarge { Spacer(minLength: 0) }
+                Button { addingWeight = true } label: {
+                    Label("Peso", systemImage: "plus")
+                }.buttonStyle(NativeGlassButtonStyle()).accessibilityLabel("Aggiungi peso")
+                Button { notice = nil; showing = true } label: {
+                    Label("Cibo", systemImage: "plus")
+                }.buttonStyle(NativeGlassButtonStyle()).accessibilityLabel("Aggiungi alimento")
+                    .accessibilityIdentifier("quick-nutrition-open")
             }.frame(maxWidth: .infinity, alignment: .leading)
+            NativeNutrientValues(health: health, includesFibre: false)
             if let notice { Text(notice).font(.caption).foregroundStyle(.secondary).accessibilityIdentifier("quick-nutrition-notice") }
         }.sheet(isPresented: $showing) {
             NavigationStack { NativeNutritionQuickSheet { notice = "Registrazione salvata in Apple Salute." } }
                 .modifier(NativeVisualTestSize()).modifier(NativeVisualTestMotion())
+        }.sheet(isPresented: $addingWeight) {
+            NativeAddWeightSheet(health: health)
         }
-    }
-
-    private var addFoodButton: some View {
-        Button { notice = nil; showing = true } label: {
-            Label("Aggiungi alimento", systemImage: "plus")
-        }.buttonStyle(NativeGlassButtonStyle()).accessibilityIdentifier("quick-nutrition-open")
     }
 }
 
@@ -43,11 +63,18 @@ struct NativeNutritionQuickSheet: View {
     @State private var date = Date()
     @State private var showingHistory = false
     @State private var showingDate = false
+    @State private var showingCatalog = false
+    @State private var selectedFood: NativeGenericFood?
+    @State private var portionGrams = "100"
     @FocusState private var focus: Field?
-    private enum Field: Int, CaseIterable { case protein, carbohydrate, fat, fibre }
+    private enum Field: Int, CaseIterable { case protein, carbohydrate, fat, fibre, portion }
     private var pending: NativeNutritionEntry? { nutrition.entries.first { $0.id == id && !$0.confirmed } }
     private var blocked: Bool { nutrition.entries.contains { ($0.id != id && !$0.confirmed) || $0.deletionPending == true } }
     private var draft: NativeNutritionEntry? {
+        if let selectedFood {
+            guard let grams = NativeNutritionEntry.grams(portionGrams), grams <= 9999 else { return nil }
+            return selectedFood.portion(id: id, date: date, grams: grams)
+        }
         guard let p = NativeNutritionEntry.grams(protein), let c = NativeNutritionEntry.grams(carbohydrate), let f = NativeNutritionEntry.grams(fat), let fi = NativeNutritionEntry.grams(fibre) else { return nil }
         return .direct(id: id, date: date, protein: p, carbohydrate: c, fat: f, fibre: fi)
     }
@@ -63,13 +90,30 @@ struct NativeNutritionQuickSheet: View {
             }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.top, typeSize.isAccessibilitySize ? NativeDesign.Space.small : NativeDesign.Space.large)
             ScrollView {
                 VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
-                    Text("Quantità consumate").font(.subheadline).foregroundStyle(.secondary)
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: NativeDesign.Space.medium), count: typeSize.isAccessibilitySize ? 1 : 2), spacing: NativeDesign.Space.medium) {
-                        grams("Proteine", text: $protein, field: .protein)
-                        grams("Carboidrati", text: $carbohydrate, field: .carbohydrate)
-                        grams("Grassi", text: $fat, field: .fat)
-                        grams("Fibre", text: $fibre, field: .fibre)
-                    }.disabled(nutrition.busy || pending != nil)
+                    Button("Alimenti generici") { focus = nil; showingCatalog = true }
+                        .frame(minHeight: NativeDesign.Layout.touchTarget)
+                        .disabled(nutrition.busy || pending != nil)
+                        .accessibilityIdentifier("quick-nutrition-catalog")
+                    if let selectedFood {
+                        Text(selectedFood.name).font(.headline)
+                        grams("Porzione", text: $portionGrams, field: .portion)
+                            .disabled(nutrition.busy || pending != nil)
+                        if let draft {
+                            Text("P \(NSDecimalNumber(decimal: draft.protein)) · C \(NSDecimalNumber(decimal: draft.carbohydrate)) · G \(NSDecimalNumber(decimal: draft.fat)) · F \(NSDecimalNumber(decimal: draft.fibre ?? 0)) g")
+                                .font(.caption).foregroundStyle(.secondary)
+                        }
+                        Button("Inserisci nutrienti a mano") { self.selectedFood = nil; focus = nil }
+                            .frame(minHeight: NativeDesign.Layout.touchTarget)
+                            .disabled(nutrition.busy || pending != nil)
+                    } else {
+                        Text("Quantità consumate").font(.subheadline).foregroundStyle(.secondary)
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: NativeDesign.Space.medium), count: typeSize.isAccessibilitySize ? 1 : 2), spacing: NativeDesign.Space.medium) {
+                            grams("Proteine", text: $protein, field: .protein)
+                            grams("Carboidrati", text: $carbohydrate, field: .carbohydrate)
+                            grams("Grassi", text: $fat, field: .fat)
+                            grams("Fibre", text: $fibre, field: .fibre)
+                        }.disabled(nutrition.busy || pending != nil)
+                    }
                     HStack(alignment: .firstTextBaseline) {
                         VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
                             Text("Calorie").font(.headline)
@@ -125,9 +169,17 @@ struct NativeNutritionQuickSheet: View {
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 if let focus {
-                    if focus != .fibre { Button("Avanti") { self.focus = Field(rawValue: focus.rawValue + 1) } }
+                    if focus.rawValue < Field.fibre.rawValue { Button("Avanti") { self.focus = Field(rawValue: focus.rawValue + 1) } }
                     Spacer()
                     Button("Fine") { self.focus = nil }.accessibilityIdentifier("quick-nutrition-keyboard-done")
+                }
+            }
+        }
+        .sheet(isPresented: $showingCatalog) {
+            NavigationStack {
+                NativeFoodPicker { food in
+                    selectedFood = food
+                    portionGrams = "100"
                 }
             }
         }
@@ -138,7 +190,7 @@ struct NativeNutritionQuickSheet: View {
         .interactiveDismissDisabled(nutrition.busy || pending != nil)
     }
     private var allZero: Bool {
-        [protein, carbohydrate, fat, fibre].allSatisfy { NativeNutritionEntry.grams($0) == 0 }
+        selectedFood == nil && [protein, carbohydrate, fat, fibre].allSatisfy { NativeNutritionEntry.grams($0) == 0 }
     }
     private func grams(_ title: String, text: Binding<String>, field: Field) -> some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
