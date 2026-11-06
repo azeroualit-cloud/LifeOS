@@ -153,11 +153,11 @@
     "app_tests_executed": false
   },
   "pre_ipa_validation": {
-    "source_commit": "f3329b16e9124e7a5576e1d939df194afb46a924",
-    "run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42203045463",
+    "source_commit": "384dc458420d1a7c31edb1a8dd4a6b7850ed01ef",
+    "run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42213901536",
     "status": "failed",
-    "passed_tests": 362,
-    "failed_tests": 6,
+    "passed_tests": 366,
+    "failed_tests": 2,
     "release_launches_passed": 4
   },
   "previous_distributed_build": {

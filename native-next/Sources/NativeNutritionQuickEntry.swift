@@ -53,25 +53,22 @@ struct NativeNutritionQuickSheet: View {
     }
     var body: some View {
         VStack(spacing: NativeDesign.Space.none) {
-            HStack {
+            HStack(alignment: typeSize.isAccessibilitySize ? .top : .center) {
                 Text("Aggiungi nutrienti").font(.title2.bold()).accessibilityAddTraits(.isHeader)
                 Spacer(minLength: NativeDesign.Space.small)
                 Button { dismiss() } label: {
                     Image(systemName: "xmark").frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget)
                         .background(NativeDesign.actionSurface, in: Circle())
                 }.buttonStyle(.plain).disabled(nutrition.busy).accessibilityLabel("Chiudi").accessibilityIdentifier("quick-nutrition-close")
-            }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.top, NativeDesign.Space.large)
+            }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.top, typeSize.isAccessibilitySize ? NativeDesign.Space.small : NativeDesign.Space.large)
             ScrollView {
                 VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
                     Text("Quantità consumate").font(.subheadline).foregroundStyle(.secondary)
-                    Group {
-                        if typeSize.isAccessibilitySize {
-                            VStack(spacing: NativeDesign.Space.medium) { nutrientFields }
-                        } else {
-                            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: NativeDesign.Space.medium), count: 2), spacing: NativeDesign.Space.medium) {
-                                nutrientFields
-                            }
-                        }
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: NativeDesign.Space.medium), count: typeSize.isAccessibilitySize ? 1 : 2), spacing: NativeDesign.Space.medium) {
+                        grams("Proteine", text: $protein, field: .protein)
+                        grams("Carboidrati", text: $carbohydrate, field: .carbohydrate)
+                        grams("Grassi", text: $fat, field: .fat)
+                        grams("Fibre", text: $fibre, field: .fibre)
                     }.disabled(nutrition.busy || pending != nil)
                     HStack(alignment: .firstTextBaseline) {
                         VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
@@ -140,13 +137,6 @@ struct NativeNutritionQuickSheet: View {
         .presentationContentInteraction(.scrolls)
         .interactiveDismissDisabled(nutrition.busy || pending != nil)
     }
-    @ViewBuilder private var nutrientFields: some View {
-        grams("Proteine", text: $protein, field: .protein)
-        grams("Carboidrati", text: $carbohydrate, field: .carbohydrate)
-        grams("Grassi", text: $fat, field: .fat)
-        grams("Fibre", text: $fibre, field: .fibre)
-    }
-
     private var allZero: Bool {
         [protein, carbohydrate, fat, fibre].allSatisfy { NativeNutritionEntry.grams($0) == 0 }
     }
@@ -154,7 +144,7 @@ struct NativeNutritionQuickSheet: View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
             Text(title).font(.caption).foregroundStyle(.secondary)
             HStack {
-                TextField(title, text: text, prompt: Text("0").foregroundStyle(NativeDesign.secondary)).keyboardType(.decimalPad).focused($focus, equals: field)
+                TextField("0", text: text, prompt: typeSize.isAccessibilitySize ? nil : Text("0").foregroundStyle(NativeDesign.secondary)).keyboardType(.decimalPad).focused($focus, equals: field)
                     .font(.title2.weight(.semibold)).frame(minHeight: NativeDesign.Layout.nutritionInputLine)
                     .accessibilityLabel(title + " in grammi").accessibilityIdentifier("quick-nutrition-" + title)
                 Text("g").foregroundStyle(.secondary)
