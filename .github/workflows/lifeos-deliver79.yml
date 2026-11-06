@@ -1,0 +1,71 @@
+name: Deliver validated LifeOS 0.10.18 build 79
+on:
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: write
+concurrency:
+  group: lifeos-deliver79
+jobs:
+  package:
+    runs-on: macos-15
+    timeout-minutes: 65
+    env:
+      SOURCE_SHA: 2d33d8aba9dad6d996cbaff81b99a1212a53ba20
+      VALIDATION_RUN: '42124676946'
+      LAUNCH_RUN: '42189948045'
+      LAUNCH_WORKFLOW_SHA: b7fe2d2f30dd4ec5008dcdcc0722a2400ee427f5
+      VERSION: '0.10.18'
+      BUILD: '79'
+      TAG: ios-0.10.18-build79
+    steps:
+      - name: Require the complete suite, four Release launches and previous release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = 'azeroualit-cloud/LifeOS'
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$VALIDATION_RUN" |
+            jq -e --arg sha "$SOURCE_SHA" '.status == "completed" and .head_sha == $sha and .path == ".github/workflows/lifeos-final-validation.yml"'
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$VALIDATION_RUN/jobs" |
+            jq -e '.jobs | any(.steps | any(.name == "Run all unit and UI tests" and .conclusion == "success"))'
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$LAUNCH_RUN" |
+            jq -e --arg sha "$LAUNCH_WORKFLOW_SHA" '.status == "completed" and .conclusion == "success" and .head_sha == $sha and .path == ".github/workflows/lifeos-final-release-launches.yml"'
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$LAUNCH_RUN/jobs" |
+            jq -e '.jobs | any(.conclusion == "success" and (.steps | any(.name == "Build Release and verify four launches" and .conclusion == "success")))'
+          test "$(gh api "repos/$GITHUB_REPOSITORY/releases/latest" --jq .tag_name)" = 'ios-0.10.17-build78'
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+      - uses: ./.github/actions/native-compat76
+        with:
+          variant: package
+      - name: Archive and verify unsigned device IPA
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          xcodebuild archive -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -configuration Release -destination 'generic/platform=iOS' -archivePath build/LifeOS.xcarchive CODE_SIGNING_ALLOWED=NO MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$BUILD" 2>&1 | tee build/archive79.log
+          mkdir -p build/Payload download
+          cp -R build/LifeOS.xcarchive/Products/Applications/LifeOSProbe.app build/Payload/
+          (cd build && zip -qr "../download/LifeOS-$BUILD.ipa" Payload)
+          python3 ../scripts/verify-native-package.py "download/LifeOS-$BUILD.ipa" --version "$VERSION" --build "$BUILD"
+          python3 ../scripts/verify-startup-imports.py "download/LifeOS-$BUILD.ipa"
+          (cd download && shasum -a 256 "LifeOS-$BUILD.ipa" | tee SHA256.txt)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lifeos-verified-ipa-79
+          path: app/download
+          if-no-files-found: error
+      - name: Publish a separate release with the verified IPA
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(gh api "repos/$GITHUB_REPOSITORY/releases/latest" --jq .tag_name)" = 'ios-0.10.17-build78'
+          gh release create "$TAG" "app/download/LifeOS-$BUILD.ipa" app/download/SHA256.txt \
+            --repo "$GITHUB_REPOSITORY" --target "$SOURCE_SHA" --title "LifeOS $VERSION build $BUILD" \
+            --notes "Unsigned iPhone IPA for Signulous. Source: $SOURCE_SHA. Full suite: https://github.com/$GITHUB_REPOSITORY/actions/runs/$VALIDATION_RUN. Four Release launches: https://github.com/$GITHUB_REPOSITORY/actions/runs/$LAUNCH_RUN. Device testing and user acceptance pending."

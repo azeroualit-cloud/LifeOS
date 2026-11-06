@@ -155,12 +155,14 @@
   "pre_ipa_validation": {
     "source_commit": "2d33d8aba9dad6d996cbaff81b99a1212a53ba20",
     "run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42124676946",
-    "status": "suite_passed_release_launches_incomplete",
+    "status": "passed",
     "release_launches_required": 4,
     "suite_summary": {
       "passed": 368,
       "failed": 0,
       "skipped": 0
-    }
+    },
+    "release_launch_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42189948045",
+    "release_launches_passed": 4
   }
 }
