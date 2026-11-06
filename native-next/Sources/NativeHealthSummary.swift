@@ -113,10 +113,11 @@ struct NativeHealthDetail: View {
     @ViewBuilder private var nutritionActions: some View {
         Button { addingWeight = true } label: {
             Label { Text("Aggiungi peso") } icon: { NativeSymbol(symbol: NativeHealthMetric.weight.symbol) }
-                .fixedSize(horizontal: true, vertical: false)
+                .font(.subheadline.weight(.semibold))
         }.buttonStyle(NativeGlassButtonStyle()).accessibilityIdentifier("health-add-weight")
         Button { showingNutrition = true } label: {
             Label { Text("Aggiungi alimento") } icon: { NativeSymbol(symbol: NativeHealthMetric.calories.symbol) }
+                .font(.subheadline.weight(.semibold))
                 .fixedSize(horizontal: false, vertical: true)
         }.buttonStyle(NativeGlassButtonStyle()).accessibilityIdentifier("health-add-nutrition")
     }
@@ -198,6 +199,7 @@ private struct NativeHealthSummaryRow: View {
                 HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xs) { amountText; unitText }.fixedSize()
                 VStack(alignment: .leading, spacing: NativeDesign.Space.xs) { amountText; unitText }
             }.frame(maxWidth: .infinity, alignment: .leading)
+            Spacer(minLength: 0)
             if !points.isEmpty { historyChart }
 
         }.padding(NativeDesign.Layout.compactCardInset)
@@ -212,7 +214,7 @@ private struct NativeHealthSummaryRow: View {
         Text(value).font(.largeTitle.weight(.bold)).foregroundStyle(.primary).monospacedDigit()
     }
     private var unitText: some View {
-        Text(metric.unit).font(.subheadline).foregroundStyle(.secondary)
+        Text(metric.unit).font(.caption).foregroundStyle(.secondary)
     }
     private var historyChart: some View {
         Chart(points) { point in

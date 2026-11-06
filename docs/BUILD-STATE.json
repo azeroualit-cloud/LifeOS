@@ -153,16 +153,11 @@
     "app_tests_executed": false
   },
   "pre_ipa_validation": {
-    "source_commit": "2d33d8aba9dad6d996cbaff81b99a1212a53ba20",
-    "run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42124676946",
-    "status": "passed",
-    "release_launches_required": 4,
-    "suite_summary": {
-      "passed": 368,
-      "failed": 0,
-      "skipped": 0
-    },
-    "release_launch_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42189948045",
+    "source_commit": "f3329b16e9124e7a5576e1d939df194afb46a924",
+    "run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42203045463",
+    "status": "failed",
+    "passed_tests": 362,
+    "failed_tests": 6,
     "release_launches_passed": 4
   },
   "previous_distributed_build": {
@@ -182,5 +177,18 @@
     "physical_device_verified_by_agent": false,
     "accepted_for_production": false,
     "user_assessment": "User explicitly rejected the delivered app as production-ready; screenshots and UX defects remain open."
+  },
+  "previous_pre_ipa_validation": {
+    "source_commit": "2d33d8aba9dad6d996cbaff81b99a1212a53ba20",
+    "run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42124676946",
+    "status": "passed",
+    "release_launches_required": 4,
+    "suite_summary": {
+      "passed": 368,
+      "failed": 0,
+      "skipped": 0
+    },
+    "release_launch_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42189948045",
+    "release_launches_passed": 4
   }
 }

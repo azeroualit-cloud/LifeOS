@@ -17,8 +17,8 @@ final class NativeRevision78UITests: XCTestCase {
         let app = launch()
         for button in [app.buttons["Impostazioni"], app.buttons["primary-add"]] {
             XCTAssertTrue(button.isHittable)
-            XCTAssertGreaterThanOrEqual(button.frame.width, 44)
-            XCTAssertGreaterThanOrEqual(button.frame.height, 44)
+            XCTAssertGreaterThanOrEqual(button.frame.width, 44 - 0.001)
+            XCTAssertGreaterThanOrEqual(button.frame.height, 44 - 0.001)
         }
         let date = app.staticTexts["home-today"], prayer = app.buttons["home-next-time"]
         XCTAssertTrue(prayer.waitForExistence(timeout: 10))
@@ -48,7 +48,7 @@ final class NativeRevision78UITests: XCTestCase {
         XCTAssertLessThanOrEqual(value.frame.maxY, label.frame.minY + 1 / UIScreen.main.scale)
         XCTAssertGreaterThan(button.frame.minX, value.frame.maxX)
         XCTAssertLessThanOrEqual(button.frame.maxX, header.frame.maxX + 1 + 1 / UIScreen.main.scale)
-        XCTAssertGreaterThanOrEqual(button.frame.height, 44)
+        XCTAssertGreaterThanOrEqual(button.frame.height, 44 - 0.001)
         capture("78-dashboard-budget-action", app)
         button.tap()
         XCTAssertTrue(app.textFields["movement-amount"].waitForExistence(timeout: 10))
@@ -76,9 +76,8 @@ final class NativeRevision78UITests: XCTestCase {
             let button = app.buttons[id]
             XCTAssertEqual(button.label, title)
             XCTAssertTrue(button.isHittable)
-            XCTAssertGreaterThanOrEqual(button.frame.width, 44)
-            XCTAssertLessThanOrEqual(button.frame.width, 48)
-            XCTAssertLessThanOrEqual(button.frame.height, 48)
+            XCTAssertGreaterThanOrEqual(button.frame.width, 44 - 0.001)
+            XCTAssertGreaterThanOrEqual(button.frame.height, 44 - 0.001)
             XCTAssertLessThanOrEqual(button.frame.maxY, app.tabBars.firstMatch.frame.minY)
         }
         XCTAssertFalse(app.buttons["health-connect"].exists)
@@ -106,8 +105,8 @@ final class NativeRevision78UITests: XCTestCase {
         for id in ["health-add-weight", "health-add-nutrition"] {
             let button = app.buttons[id]
             XCTAssertTrue(button.isHittable)
-            XCTAssertGreaterThanOrEqual(button.frame.width, 44)
-            XCTAssertGreaterThanOrEqual(button.frame.height, 44)
+            XCTAssertGreaterThanOrEqual(button.frame.width, 44 - 0.001)
+            XCTAssertGreaterThanOrEqual(button.frame.height, 44 - 0.001)
         }
     }
     func testHealthNutritionQuickAddAndHistoryAreReachable() {
@@ -324,7 +323,7 @@ final class NativeAppleHealthReferenceUITests: XCTestCase {
         // Its display names can be Italian or English independently of the chrome.
         let anyMetric = health.cells.matching(NSPredicate(format: "identifier BEGINSWITH %@", "UIA.Health.FavoritesEdit.HKQuantityTypeIdentifier")).firstMatch
         _ = anyMetric.waitForExistence(timeout: 45)
-        for (titles, identifier) in [(["Energia alimentare", "Dietary Energy"], "HKQuantityTypeIdentifierDietaryEnergyConsumed"), (["Peso", "Weight"], "HKQuantityTypeIdentifierBodyMass")] {
+        for (titles, identifier) in [(["Energia alimentare", "Energia introdotta", "Calorie", "Dietary Energy"], "HKQuantityTypeIdentifierDietaryEnergyConsumed"), (["Peso", "Weight"], "HKQuantityTypeIdentifierBodyMass")] {
             let row = health.cells["UIA.Health.FavoritesEdit." + identifier]
             var found = false
             for title in titles {

@@ -3,19 +3,17 @@ import SwiftUI
 struct NativeNutritionQuickEntry: View {
     @State private var showing = false
     @State private var notice: String?
+    @Environment(\.dynamicTypeSize) private var typeSize
     var body: some View {
         NativeCard(density: .compact) {
-            ViewThatFits(in: .horizontal) {
-                HStack {
-                    Text("Nutrizione").font(.headline)
-                    Spacer(minLength: NativeDesign.Space.small)
-                    addFoodButton
-                }
-                VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-                    Text("Nutrizione").font(.headline)
-                    addFoodButton
-                }.frame(maxWidth: .infinity, alignment: .leading)
-            }
+            let layout = typeSize >= .xxxLarge
+                ? AnyLayout(VStackLayout(alignment: .leading, spacing: NativeDesign.Space.small))
+                : AnyLayout(HStackLayout(spacing: NativeDesign.Space.small))
+            layout {
+                Text("Nutrizione").font(.headline)
+                if typeSize < .xxxLarge { Spacer(minLength: NativeDesign.Space.small) }
+                addFoodButton
+            }.frame(maxWidth: .infinity, alignment: .leading)
             if let notice { Text(notice).font(.caption).foregroundStyle(.secondary).accessibilityIdentifier("quick-nutrition-notice") }
         }.sheet(isPresented: $showing) {
             NavigationStack { NativeNutritionQuickSheet { notice = "Registrazione salvata in Apple Salute." } }
@@ -66,11 +64,14 @@ struct NativeNutritionQuickSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
                     Text("Quantità consumate").font(.subheadline).foregroundStyle(.secondary)
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: NativeDesign.Space.medium), count: typeSize.isAccessibilitySize ? 1 : 2), spacing: NativeDesign.Space.medium) {
-                        grams("Proteine", text: $protein, field: .protein)
-                        grams("Carboidrati", text: $carbohydrate, field: .carbohydrate)
-                        grams("Grassi", text: $fat, field: .fat)
-                        grams("Fibre", text: $fibre, field: .fibre)
+                    Group {
+                        if typeSize.isAccessibilitySize {
+                            VStack(spacing: NativeDesign.Space.medium) { nutrientFields }
+                        } else {
+                            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: NativeDesign.Space.medium), count: 2), spacing: NativeDesign.Space.medium) {
+                                nutrientFields
+                            }
+                        }
                     }.disabled(nutrition.busy || pending != nil)
                     HStack(alignment: .firstTextBaseline) {
                         VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
@@ -139,6 +140,13 @@ struct NativeNutritionQuickSheet: View {
         .presentationContentInteraction(.scrolls)
         .interactiveDismissDisabled(nutrition.busy || pending != nil)
     }
+    @ViewBuilder private var nutrientFields: some View {
+        grams("Proteine", text: $protein, field: .protein)
+        grams("Carboidrati", text: $carbohydrate, field: .carbohydrate)
+        grams("Grassi", text: $fat, field: .fat)
+        grams("Fibre", text: $fibre, field: .fibre)
+    }
+
     private var allZero: Bool {
         [protein, carbohydrate, fat, fibre].allSatisfy { NativeNutritionEntry.grams($0) == 0 }
     }
