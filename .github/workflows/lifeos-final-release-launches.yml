@@ -6,7 +6,7 @@ permissions:
 jobs:
   validate:
     runs-on: macos-15
-    timeout-minutes: 65
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v5
         with:
@@ -26,6 +26,7 @@ jobs:
           python3 - <<'PY'
           import json,os,subprocess
           test_device=os.environ['MAIN_DEVICE']
+          subprocess.run(['xcrun','simctl','shutdown',test_device],check=True,timeout=120)
           runtime=os.environ['COMPAT_RUNTIME']
           device_type='com.apple.CoreSimulator.SimDeviceType.iPhone-15-Pro'
           runtime_id='com.apple.CoreSimulator.SimRuntime.iOS-'+runtime.replace('.','-')
