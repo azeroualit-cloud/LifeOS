@@ -8,18 +8,18 @@
   "source_of_truth": "native-next overlay assembled through .github/actions/native-compat76/action.yml",
   "native_source_fingerprint": {
     "algorithm": "SHA-256 over sorted tracked native-next paths, NUL, file bytes, NUL",
-    "sha256": "0b863dd809ab54112578df17e3a538a6006207ae09dd042a8f67a8cb4927048a"
+    "sha256": "13623579d49735915641edbece16e41a72be8cfdef792bdf1fcbacd51a875e85"
   },
   "latest_distributed_build": {
-    "version": "0.10.18",
-    "build": 79,
-    "source_commit": "2d33d8aba9dad6d996cbaff81b99a1212a53ba20",
-    "ipa_sha256": "f7a9155e27fc27fd30a39e8422a43bfa26bdfdae69f0920ed87cf4c1d22a6f15",
-    "release": "https://github.com/azeroualit-cloud/LifeOS/releases/tag/ios-0.10.18-build79",
-    "direct_ipa": "https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.18-build79/LifeOS-79.ipa",
-    "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42124676946",
-    "release_launch_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42189948045",
-    "package_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42194114583",
+    "version": "0.10.19",
+    "build": 80,
+    "source_commit": "5aba0d5b888471025a45568d6ff567199b5a4fec",
+    "ipa_sha256": "80a4e4759c810e2f2f69ef860a128d8cd020cf133cfa2e223cc4d51edf9f60c0",
+    "release": "https://github.com/azeroualit-cloud/LifeOS/releases/tag/ios-0.10.19-build80",
+    "direct_ipa": "https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.19-build80/LifeOS-80.ipa",
+    "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42224387516",
+    "release_launch_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42224387516",
+    "package_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42235788082",
     "technical_checks": "passed",
     "full_suite_passed": 368,
     "release_launches": 4,
@@ -29,9 +29,9 @@
     "accepted_for_production": false
   },
   "current_increment": {
-    "type": "UI-80-01: correzioni grafiche dopo prova iPhone build 79",
-    "new_ipa": false,
-    "application_source_changed_since_verified_build": true
+    "type": "IPA consegnata; verifica iPhone e accettazione aperte",
+    "new_ipa": true,
+    "application_source_changed_since_verified_build": false
   },
   "backend": {
     "last_documented_utilities_deploy_run": "41630715615",
@@ -163,22 +163,22 @@
     "release_launches_passed": 4
   },
   "previous_distributed_build": {
-    "version": "0.10.17",
-    "build": 78,
-    "source_commit": "33574a2114ea6e0d378f69d06aadf60378cf55e9",
-    "ipa_sha256": "d281d9d885ea4cc221022d3c52bf3fe00b876f77273821867d617a2be2b911e7",
-    "release": "https://github.com/azeroualit-cloud/LifeOS/releases/tag/ios-0.10.17-build78",
-    "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/41721041653",
+    "version": "0.10.18",
+    "build": 79,
+    "source_commit": "2d33d8aba9dad6d996cbaff81b99a1212a53ba20",
+    "ipa_sha256": "f7a9155e27fc27fd30a39e8422a43bfa26bdfdae69f0920ed87cf4c1d22a6f15",
+    "release": "https://github.com/azeroualit-cloud/LifeOS/releases/tag/ios-0.10.18-build79",
+    "direct_ipa": "https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.18-build79/LifeOS-79.ipa",
+    "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42124676946",
+    "release_launch_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42189948045",
+    "package_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42194114583",
     "technical_checks": "passed",
-    "unit_tests": 267,
-    "ui_tests": 15,
+    "full_suite_passed": 368,
     "release_launches": 4,
-    "test_device": "iPhone 15 Pro simulator",
-    "sdk": "27.0",
-    "runtime": "27.0",
+    "sdk": "26.2",
+    "runtime": "26.2",
     "physical_device_verified_by_agent": false,
-    "accepted_for_production": false,
-    "user_assessment": "User explicitly rejected the delivered app as production-ready; screenshots and UX defects remain open."
+    "accepted_for_production": false
   },
   "previous_pre_ipa_validation": {
     "source_commit": "2d33d8aba9dad6d996cbaff81b99a1212a53ba20",
