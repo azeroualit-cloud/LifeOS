@@ -69,13 +69,14 @@ struct DashboardScreen: View {
     private func heading(today: String, now: Date) -> some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
             HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.small) {
-                Text(CivilDate.label(today).capitalized).accessibilityIdentifier("home-today")
+                Text(CivilDate.date(today).formatted(.dateTime.day().month(.abbreviated).locale(Locale(identifier: "it_IT"))))
+                    .accessibilityLabel(CivilDate.label(today)).accessibilityIdentifier("home-today")
                     .font(.title.bold()).accessibilityAddTraits(.isHeader)
                     .layoutPriority(1)
-                Spacer(minLength: 0)
                 nextTime(now)
+                Spacer(minLength: 0)
+                activeShift(now: now, today: today)
             }
-            activeShift(now: now, today: today)
         }
     }
     private func focusDate(_ now: Date) -> Date {

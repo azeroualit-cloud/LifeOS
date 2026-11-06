@@ -1,6 +1,11 @@
 name: LifeOS build 80 pre-IPA validation
 on:
   workflow_dispatch:
+    inputs:
+      package81:
+        description: Package build 81 after validation
+        type: boolean
+        default: false
 permissions:
   contents: read
 jobs:
@@ -143,3 +148,31 @@ jobs:
             app/build/final-*.log
             app/build/FinalSession.xcresult
             app/release-launch
+  package81:
+    if: inputs.package81
+    needs: [full-suite, release-launches]
+    runs-on: macos-15
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/native-compat76
+        with:
+          variant: package
+      - name: Archive and verify IPA
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          xcodebuild archive -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -configuration Release -destination 'generic/platform=iOS' -archivePath build/LifeOS.xcarchive CODE_SIGNING_ALLOWED=NO MARKETING_VERSION=0.10.20 CURRENT_PROJECT_VERSION=81 > build/archive81.log 2>&1 || { tail -n 100 build/archive81.log; exit 1; }
+          mkdir -p build/Payload download
+          cp -R build/LifeOS.xcarchive/Products/Applications/LifeOSProbe.app build/Payload/
+          (cd build && zip -qr ../download/LifeOS-81.ipa Payload)
+          python3 ../scripts/verify-native-package.py download/LifeOS-81.ipa --version 0.10.20 --build 81
+          python3 ../scripts/verify-startup-imports.py download/LifeOS-81.ipa
+          (cd download && shasum -a 256 LifeOS-81.ipa > SHA256.txt)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LifeOS-81
+          path: app/download/
+          if-no-files-found: error
