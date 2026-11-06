@@ -139,16 +139,29 @@ private struct NativeBloomCategories: View {
             Section("Categorie") {
                 ForEach(store.archive.collections.map { NativeBloomRow($0) }) { row in
                     let members = store.archive.items.filter { !$0.flag("archived") && ($0["tagIDs"]?.array.map(\.string) ?? [$0.text("collectionID")]).contains(row.value.text("id")) }
-                    HStack {
-                        ForEach(Array(members.prefix(3).enumerated()), id: \.offset) { _, member in
-                            if let url = store.primaryFileURL(member) { NativeBloomThumbnail(url: url).frame(width: NativeDesign.Layout.iconTile, height: NativeDesign.Layout.iconTile).clipped() }
-                        }
-                        Button(row.value.text("name") + " (\(members.count))") { editing = row.value.text("id"); name = row.value.text("name") }
-                    }.swipeActions { Button("Elimina", role: .destructive) { deleting = row.value.text("id") } }
+                    Button {
+                        editing = row.value.text("id")
+                        name = row.value.text("name")
+                    } label: {
+                        HStack(spacing: NativeDesign.Space.small) {
+                            Text(row.value.text("name") + " (\(members.count))")
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            ForEach(Array(members.prefix(3).enumerated()), id: \.offset) { _, member in
+                                if let url = store.primaryFileURL(member) {
+                                    NativeBloomThumbnail(url: url)
+                                        .frame(width: NativeDesign.Layout.iconTile, height: NativeDesign.Layout.iconTile)
+                                        .background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.Space.xs))
+                                        .clipShape(RoundedRectangle(cornerRadius: NativeDesign.Space.xs))
+                                        .accessibilityHidden(true)
+                                }
+                            }
+                        }.frame(minHeight: max(NativeDesign.Layout.touchTarget, NativeDesign.Layout.iconTile))
+                            .contentShape(Rectangle())
+                    }.buttonStyle(NativePressStyle()).swipeActions { Button("Elimina", role: .destructive) { deleting = row.value.text("id") } }
                 }
             }
             if let error = store.error { Text(error).foregroundStyle(.red) }
-        }.navigationTitle("Categorie").toolbar { Button("Fine") { dismiss() } }
+        }.navigationTitle("Categorie").navigationBarTitleDisplayMode(.inline).toolbar { Button("Fine") { dismiss() } }
             .confirmationDialog("Eliminare la categoria? Le note vengono conservate nella Libreria.", isPresented: Binding(get: { deleting != nil }, set: { if !$0 { deleting = nil } })) {
                 Button("Elimina categoria", role: .destructive) { guard let deleting else { return }; do { try store.removeCategory(deleting); self.deleting = nil } catch { store.error = error.localizedDescription } }
             }

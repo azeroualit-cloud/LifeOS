@@ -59,17 +59,8 @@ struct NativeHealthDetail: View {
                 if health.loading { ProgressView().accessibilityLabel("Lettura Salute") }
                 if let message = health.message { Text(message).font(.caption).foregroundStyle(.secondary) }
             }.padding(.horizontal, NativeDesign.Layout.listInset).padding(.vertical, NativeDesign.Space.large)
-        }.background(NativeDesign.healthCanvas).navigationTitle("Salute").navigationBarTitleDisplayMode(.large)
+        }.background(NativeDesign.healthCanvas).navigationTitle("Salute").navigationBarTitleDisplayMode(.inline)
             .accessibilityIdentifier("health-detail-scroll")
-            .safeAreaInset(edge: .bottom) {
-                HStack(spacing: NativeDesign.Space.medium) {
-                    Spacer()
-                    NativeToolbarButton(symbol: NativeHealthMetric.weight.symbol, label: "Aggiungi peso") { addingWeight = true }
-                        .accessibilityIdentifier("health-add-weight")
-                    NativeToolbarButton(symbol: NativeHealthMetric.calories.symbol, label: "Aggiungi nutrienti") { showingNutrition = true }
-                        .accessibilityIdentifier("health-add-nutrition")
-                }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.vertical, NativeDesign.Space.small)
-            }
             .sheet(isPresented: $addingWeight) { NativeAddWeightSheet(health: health) }
             .sheet(isPresented: $showingNutrition) { NavigationStack { NativeNutritionQuickSheet() }.environmentObject(health) }
             .refreshable { await health.refresh() }
@@ -111,9 +102,23 @@ struct NativeHealthDetail: View {
                 Label("Cronologia nutrizione", systemImage: "clock.arrow.circlepath")
                     .frame(minHeight: NativeDesign.Layout.touchTarget)
             }.accessibilityIdentifier("health-nutrition-history")
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: NativeDesign.Space.small) { nutritionActions }.fixedSize(horizontal: true, vertical: false)
+                VStack(spacing: NativeDesign.Space.small) { nutritionActions }
+            }.frame(maxWidth: .infinity)
         }.padding(NativeDesign.Layout.compactCardInset)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(NativeDesign.healthSurface, in: RoundedRectangle(cornerRadius: NativeDesign.Layout.healthSummaryRadius))
+    }
+    @ViewBuilder private var nutritionActions: some View {
+        Button { addingWeight = true } label: {
+            Label { Text("Aggiungi peso") } icon: { NativeSymbol(symbol: NativeHealthMetric.weight.symbol) }
+                .fixedSize(horizontal: true, vertical: false)
+        }.buttonStyle(NativeGlassButtonStyle()).accessibilityIdentifier("health-add-weight")
+        Button { showingNutrition = true } label: {
+            Label { Text("Aggiungi alimento") } icon: { NativeSymbol(symbol: NativeHealthMetric.calories.symbol) }
+                .fixedSize(horizontal: false, vertical: true)
+        }.buttonStyle(NativeGlassButtonStyle()).accessibilityIdentifier("health-add-nutrition")
     }
     private func nutrientGrid(columns: Int) -> some View {
         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: NativeDesign.Space.small), count: columns), spacing: NativeDesign.Space.small) {
@@ -196,7 +201,7 @@ private struct NativeHealthSummaryRow: View {
             if !points.isEmpty { historyChart }
 
         }.padding(NativeDesign.Layout.compactCardInset)
-            .frame(minHeight: rowHeight, maxHeight: .infinity, alignment: .leading)
+            .frame(minHeight: rowHeight, maxHeight: .infinity, alignment: .topLeading)
             .background(NativeDesign.healthSurface, in: RoundedRectangle(cornerRadius: NativeDesign.Layout.healthSummaryRadius))
             .contentShape(Rectangle())
             .accessibilityElement(children: .ignore)

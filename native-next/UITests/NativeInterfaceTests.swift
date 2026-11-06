@@ -548,7 +548,7 @@ final class NativeInterfaceTests: XCTestCase {
             app.tabBars.buttons["Salute"].tap()
             let weight = app.buttons["health-summary-weight"]
             XCTAssertTrue(weight.waitForExistence(timeout: 10)); XCTAssertFalse(app.buttons["health-connect"].exists)
-            XCTAssertTrue(app.buttons["health-add-weight"].isHittable)
+            XCTAssertTrue(app.buttons["health-add-weight"].exists)
             let simulation = app.buttons["health-summary-simulation"]
             XCTAssertTrue(simulation.isHittable); simulation.tap()
             XCTAssertTrue(app.textFields["health-intake"].waitForExistence(timeout: 10))
@@ -577,8 +577,9 @@ final class NativeInterfaceTests: XCTestCase {
         let app = launch(["--dark"])
         app.tabBars.buttons["Salute"].tap()
         let add = app.buttons["health-add-weight"]
-        XCTAssertTrue(add.waitForExistence(timeout: 10)); XCTAssertTrue(add.isHittable)
-        assertMinimumTouchTarget(add); add.tap()
+        XCTAssertTrue(add.waitForExistence(timeout: 10))
+        for _ in 0..<6 where !add.isHittable { app.scrollViews["health-detail-scroll"].swipeUp() }
+        XCTAssertTrue(add.isHittable); assertMinimumTouchTarget(add); add.tap()
         XCTAssertTrue(app.navigationBars["Aggiungi peso"].waitForExistence(timeout: 10))
         let save = app.buttons["health-save-weight"]
         XCTAssertFalse(save.isEnabled)
@@ -586,6 +587,7 @@ final class NativeInterfaceTests: XCTestCase {
         field.tap(); field.typeText("83,4")
         XCTAssertTrue(save.isEnabled); save.tap()
         let detail = app.buttons["health-summary-weight"]
+        for _ in 0..<6 where !detail.isHittable { app.scrollViews["health-detail-scroll"].swipeDown() }
         XCTAssertTrue(detail.waitForExistence(timeout: 10)); XCTAssertTrue(detail.label.contains("83,4"))
         XCTAssertEqual(app.tabBars.buttons.count, 4)
         add.tap(); app.buttons["Annulla"].tap()

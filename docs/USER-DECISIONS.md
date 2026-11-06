@@ -188,3 +188,7 @@ Mandato Astra ampliato all’intero LifeOS: ricostruire tutte le modifiche discu
 ## IPA-DELIVERY-2026-11-05 — autorizzazione per questa consegna
 
 Fonte: richiesta diretta del 5 novembre 2026. «Ti chiedo esplicitamente di produrre e consegnarmi una nuova IPA, ma solo dopo aver completato con successo il collaudo pre-IPA.» IPA-GATE-01 applicata. Deploy backend e cancellazioni esclusi. La release 78 resta intatta. La nuova IPA diventa finale solo dopo prove iPhone e accettazione esplicita.
+
+## UI-80-01 — ACTIVE, deroga confermata
+
+6 novembre 2026, richiesta diretta dopo le quattro schermate su iPhone. Correggere gli allineamenti e usare Liquid Glass neutro per Aggiungi spesa e Aggiungi alimento in Dashboard, con azione alimento dentro la scheda Nutrizione. «Sì, confermo la deroga»: in Salute le due azioni con testo visibile sono centrate nel riquadro Nutrienti, in deroga a G05/G07 e alla disposizione HEALTH-GRID-02; icone G06 conservate. Autorizzata una nuova IPA per questa consegna dopo il collaudo pre-IPA.

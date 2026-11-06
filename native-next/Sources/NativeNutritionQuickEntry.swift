@@ -4,19 +4,29 @@ struct NativeNutritionQuickEntry: View {
     @State private var showing = false
     @State private var notice: String?
     var body: some View {
-        VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-            HStack {
-                Spacer()
-                Button { notice = nil; showing = true } label: {
-                    Label("Nutrizione", systemImage: "plus")
-                        .frame(minHeight: NativeDesign.Layout.touchTarget)
-                }.buttonStyle(NativeCompactPrimaryButtonStyle()).accessibilityIdentifier("quick-nutrition-open")
+        NativeCard(density: .compact) {
+            ViewThatFits(in: .horizontal) {
+                HStack {
+                    Text("Nutrizione").font(.headline)
+                    Spacer(minLength: NativeDesign.Space.small)
+                    addFoodButton
+                }
+                VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+                    Text("Nutrizione").font(.headline)
+                    addFoodButton
+                }.frame(maxWidth: .infinity, alignment: .leading)
             }
             if let notice { Text(notice).font(.caption).foregroundStyle(.secondary).accessibilityIdentifier("quick-nutrition-notice") }
         }.sheet(isPresented: $showing) {
             NavigationStack { NativeNutritionQuickSheet { notice = "Registrazione salvata in Apple Salute." } }
                 .modifier(NativeVisualTestSize()).modifier(NativeVisualTestMotion())
         }
+    }
+
+    private var addFoodButton: some View {
+        Button { notice = nil; showing = true } label: {
+            Label("Aggiungi alimento", systemImage: "plus")
+        }.buttonStyle(NativeGlassButtonStyle()).accessibilityIdentifier("quick-nutrition-open")
     }
 }
 
@@ -45,14 +55,14 @@ struct NativeNutritionQuickSheet: View {
     }
     var body: some View {
         VStack(spacing: NativeDesign.Space.none) {
-            HStack(alignment: .top) {
+            HStack {
                 Text("Aggiungi nutrienti").font(.title2.bold()).accessibilityAddTraits(.isHeader)
                 Spacer(minLength: NativeDesign.Space.small)
                 Button { dismiss() } label: {
                     Image(systemName: "xmark").frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget)
                         .background(NativeDesign.actionSurface, in: Circle())
                 }.buttonStyle(.plain).disabled(nutrition.busy).accessibilityLabel("Chiudi").accessibilityIdentifier("quick-nutrition-close")
-            }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.top, NativeDesign.Space.small)
+            }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.top, NativeDesign.Space.large)
             ScrollView {
                 VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
                     Text("Quantità consumate").font(.subheadline).foregroundStyle(.secondary)
@@ -106,7 +116,7 @@ struct NativeNutritionQuickSheet: View {
                         if nutrition.busy { ProgressView().accessibilityLabel("Salvataggio") }
                         Text(pending == nil ? "Aggiungi" : "Riprova").font(.headline)
                     }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.rowHeight)
-                }.buttonStyle(NativeCompactPrimaryButtonStyle())
+                }.buttonStyle(NativeCompactPrimaryButtonStyle(readableDisabled: true))
                     .disabled(nutrition.busy || blocked || (pending ?? draft) == nil)
                     .accessibilityIdentifier("quick-nutrition-save")
             }
@@ -124,7 +134,8 @@ struct NativeNutritionQuickSheet: View {
             }
         }
         .sheet(isPresented: $showingHistory) { NavigationStack { NativeNutritionScreen().toolbar { DoneButton() } } }
-        .presentationDetents([.large]).presentationDragIndicator(.visible)
+        .presentationDetents(typeSize.isAccessibilitySize ? [.large] : [.fraction(0.72), .large])
+        .presentationDragIndicator(.visible)
         .presentationContentInteraction(.scrolls)
         .interactiveDismissDisabled(nutrition.busy || pending != nil)
     }
@@ -135,7 +146,7 @@ struct NativeNutritionQuickSheet: View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
             Text(title).font(.caption).foregroundStyle(.secondary)
             HStack {
-                TextField("0", text: text).keyboardType(.decimalPad).focused($focus, equals: field)
+                TextField(title, text: text, prompt: Text("0").foregroundStyle(NativeDesign.secondary)).keyboardType(.decimalPad).focused($focus, equals: field)
                     .font(.title2.weight(.semibold)).frame(minHeight: NativeDesign.Layout.nutritionInputLine)
                     .accessibilityLabel(title + " in grammi").accessibilityIdentifier("quick-nutrition-" + title)
                 Text("g").foregroundStyle(.secondary)

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "LifeOS",
-  "updated_on": "2026-11-05",
+  "updated_on": "2026-11-06",
   "policy": {
     "id": "META-01",
     "status": "ACTIVE",
@@ -675,6 +675,16 @@
       "source": "risposta in chat alla proposta di correzione del giorno mostrato nel fuso civile",
       "original_quote": "approvo, ma metterci 5 ore é eccessivo",
       "rule": "Correggere la data visualizzata usando il fuso civile del calendario e verificare apertura, salvataggio e riapertura con fusi diversi. Prediligere verifiche mirate e ridurre tempi e attese inutili."
+    },
+    {
+      "id": "UI-80-01",
+      "status": "ACTIVE",
+      "scope": "Correzioni grafiche build 79 e una nuova IPA LifeOS",
+      "recorded_on": "2026-11-06",
+      "source": "Richiesta diretta e risposta alla conferma della deroga",
+      "rule": "Correggere le discrepanze mostrate su Dashboard, pannello nutrizione, Salute e Categorie Bloom. In Dashboard azioni spesa e nutrizione in Liquid Glass neutro, azione alimento dentro scheda. In Salute due azioni esplicite al centro del riquadro Nutrienti.",
+      "confirmed_exception": "Sì, confermo la deroga. Testo visibile e posizione centrale in Nutrienti derogano a G05/G07 e HEALTH-GRID-02 per le due azioni. Le icone G06 sono conservate.",
+      "ipa_authorized": true
     }
   ],
   "pending_confirmations": [

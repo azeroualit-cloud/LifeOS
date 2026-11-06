@@ -97,6 +97,17 @@ struct NativeGlass: ViewModifier {
         } else { content.background(.regularMaterial, in: Capsule()) }
     }
 }
+struct NativeGlassButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .foregroundStyle(Color.primary)
+            .padding(.horizontal, NativeDesign.Space.medium)
+            .frame(minHeight: NativeDesign.Layout.touchTarget)
+            .contentShape(Capsule())
+            .modifier(NativeGlass())
+            .opacity(configuration.isPressed ? NativeDesign.Motion.pressedOpacity : 1)
+    }
+}
 struct NativeConnectionBadge: View {
     @EnvironmentObject var store: NativeStore
     private var text: String {
@@ -172,14 +183,15 @@ struct NativeRowText: View {
 /// Explicit 44 pt geometry, without the additional inset of bordered styles.
 struct NativeCompactPrimaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var enabled
+    var readableDisabled = false
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .foregroundStyle(NativeDesign.onAccent)
+            .foregroundStyle(!enabled && readableDisabled ? NativeDesign.secondary : NativeDesign.onAccent)
             .padding(.horizontal, NativeDesign.Space.medium)
             .frame(minHeight: NativeDesign.Layout.touchTarget)
-            .background(NativeDesign.accent, in: Capsule())
+            .background(!enabled && readableDisabled ? NativeDesign.actionSurface : NativeDesign.accent, in: Capsule())
             .contentShape(Capsule())
-            .opacity(enabled ? (configuration.isPressed ? NativeDesign.Motion.pressedOpacity : 1) : 0.45)
+            .opacity(enabled ? (configuration.isPressed ? NativeDesign.Motion.pressedOpacity : 1) : (readableDisabled ? 1 : 0.45))
     }
 }
 

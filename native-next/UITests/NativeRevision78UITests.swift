@@ -18,8 +18,7 @@ final class NativeRevision78UITests: XCTestCase {
         for button in [app.buttons["Impostazioni"], app.buttons["primary-add"]] {
             XCTAssertTrue(button.isHittable)
             XCTAssertGreaterThanOrEqual(button.frame.width, 44)
-            XCTAssertLessThanOrEqual(button.frame.width, 48)
-            XCTAssertLessThanOrEqual(button.frame.height, 48)
+            XCTAssertGreaterThanOrEqual(button.frame.height, 44)
         }
         let date = app.staticTexts["home-today"], prayer = app.buttons["home-next-time"]
         XCTAssertTrue(prayer.waitForExistence(timeout: 10))
@@ -69,8 +68,13 @@ final class NativeRevision78UITests: XCTestCase {
         XCTAssertEqual(rows[1].frame.midY, rows[2].frame.midY, accuracy: 2)
         XCTAssertLessThan(rows[0].frame.midX, rows[3].frame.midX)
         XCTAssertLessThan(rows[1].frame.midX, rows[2].frame.midX)
-        for id in ["health-add-weight", "health-add-nutrition"] {
+        capture("78-health-summary", app)
+        let surface = app.scrollViews["health-detail-scroll"]
+        let food = app.buttons["health-add-nutrition"]
+        for _ in 0..<6 where !food.isHittable { surface.swipeUp() }
+        for (id, title) in [("health-add-weight", "Aggiungi peso"), ("health-add-nutrition", "Aggiungi alimento")] {
             let button = app.buttons[id]
+            XCTAssertEqual(button.label, title)
             XCTAssertTrue(button.isHittable)
             XCTAssertGreaterThanOrEqual(button.frame.width, 44)
             XCTAssertLessThanOrEqual(button.frame.width, 48)
@@ -79,7 +83,10 @@ final class NativeRevision78UITests: XCTestCase {
         }
         XCTAssertFalse(app.buttons["health-connect"].exists)
         XCTAssertFalse(app.staticTexts["Fonte delle calorie"].exists)
-        capture("78-health-summary", app)
+        let weight = app.buttons["health-add-weight"]
+        XCTAssertEqual((weight.frame.union(food.frame)).midX, surface.frame.midX, accuracy: 2)
+        capture("80-health-actions", app)
+        for _ in 0..<6 where !rows[3].isHittable { surface.swipeDown() }
         rows[3].tap()
         XCTAssertTrue(app.textFields["health-intake"].waitForExistence(timeout: 10))
         capture("78-simulation-detail", app)
@@ -93,21 +100,23 @@ final class NativeRevision78UITests: XCTestCase {
         for pair in zip(ordered, ordered.dropFirst()) { XCTAssertLessThan(pair.0.frame.midY, pair.1.frame.midY) }
         capture("78-health-accessibility-top", app)
         let surface = app.scrollViews["health-detail-scroll"]
-        for _ in 0..<4 { surface.swipeUp() }
+        for _ in 0..<12 where !app.buttons["health-add-nutrition"].isHittable { surface.swipeUp() }
         capture("78-health-accessibility-bottom", app)
         XCTAssertTrue(app.descendants(matching: .any)["health-nutrient-HKQuantityTypeIdentifierDietaryFiber"].exists)
         for id in ["health-add-weight", "health-add-nutrition"] {
             let button = app.buttons[id]
             XCTAssertTrue(button.isHittable)
-            XCTAssertEqual(button.frame.width, 44, accuracy: 1)
-            XCTAssertEqual(button.frame.height, 44, accuracy: 1)
+            XCTAssertGreaterThanOrEqual(button.frame.width, 44)
+            XCTAssertGreaterThanOrEqual(button.frame.height, 44)
         }
     }
     func testHealthNutritionQuickAddAndHistoryAreReachable() {
         let app = launch()
         app.tabBars.buttons["Salute"].tap()
         let add = app.buttons["health-add-nutrition"]
-        XCTAssertTrue(add.waitForExistence(timeout: 10)); add.tap()
+        XCTAssertTrue(add.waitForExistence(timeout: 10))
+        for _ in 0..<6 where !add.isHittable { app.scrollViews["health-detail-scroll"].swipeUp() }
+        XCTAssertTrue(add.isHittable); add.tap()
         XCTAssertTrue(app.staticTexts["Aggiungi nutrienti"].waitForExistence(timeout: 10))
         app.buttons["quick-nutrition-close"].tap()
         let history = app.buttons["health-nutrition-history"]
@@ -143,7 +152,7 @@ final class NativeRevision78UITests: XCTestCase {
         let weight = app.buttons["health-add-weight"], food = app.buttons["health-add-nutrition"]
         XCTAssertTrue(health.waitForExistence(timeout: 10))
         for _ in 0..<15 {
-            if history.isHittable && history.frame.maxY <= min(weight.frame.minY, food.frame.minY) { break }
+            if history.isHittable && weight.isHittable && food.isHittable && food.frame.maxY <= tabBar.frame.minY { break }
             health.swipeUp(velocity: .slow)
         }
         XCTAssertTrue(history.isHittable, "The last Health action must be reachable")

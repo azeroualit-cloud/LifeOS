@@ -178,7 +178,7 @@ struct DashboardScreen: View {
                     Label("Aggiungi spesa", systemImage: "plus")
                         .frame(maxWidth: typeSize.isAccessibilitySize ? .infinity : nil, minHeight: NativeDesign.Layout.touchTarget)
                         .contentShape(Rectangle())
-                }.buttonStyle(NativeCompactPrimaryButtonStyle()).accessibilityIdentifier("home-add-expense")
+                }.buttonStyle(NativeGlassButtonStyle()).accessibilityIdentifier("home-add-expense")
             }
 
         }

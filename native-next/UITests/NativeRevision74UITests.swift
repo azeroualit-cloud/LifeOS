@@ -18,7 +18,9 @@ final class NativeRevision74UITests: XCTestCase {
         XCTAssertFalse(app.tabBars.buttons["Finanza"].exists); XCTAssertFalse(app.tabBars.buttons["Calendario"].exists)
         app.tabBars.buttons["Salute"].tap()
         let add = app.buttons["health-add-nutrition"]
-        XCTAssertTrue(add.waitForExistence(timeout: 10)); XCTAssertTrue(add.isHittable); add.tap()
+        XCTAssertTrue(add.waitForExistence(timeout: 10))
+        for _ in 0..<6 where !add.isHittable { app.scrollViews["health-detail-scroll"].swipeUp() }
+        XCTAssertTrue(add.isHittable); add.tap()
         XCTAssertTrue(app.staticTexts["Aggiungi nutrienti"].waitForExistence(timeout: 10))
         XCTAssertFalse(app.buttons["quick-nutrition-save"].isEnabled)
         let scroll = app.scrollViews["quick-nutrition-scroll"]

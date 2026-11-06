@@ -29,9 +29,9 @@
     "accepted_for_production": false
   },
   "current_increment": {
-    "type": "IPA consegnata; verifica iPhone e accettazione aperte",
-    "new_ipa": true,
-    "application_source_changed_since_verified_build": false
+    "type": "UI-80-01: correzioni grafiche dopo prova iPhone build 79",
+    "new_ipa": false,
+    "application_source_changed_since_verified_build": true
   },
   "backend": {
     "last_documented_utilities_deploy_run": "41630715615",
