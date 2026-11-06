@@ -1,0 +1,67 @@
+name: LifeOS final four Release launches without IPA
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: macos-15
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: 2d33d8aba9dad6d996cbaff81b99a1212a53ba20
+      - uses: ./.github/actions/native-compat76
+        with:
+          variant: primary
+      - name: Compile app and synthetic session test
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcodebuild build-for-testing -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/final-compile.log 2>&1 || { tail -n 100 build/final-compile.log; exit 1; }
+      - name: Create isolated simulators for Release startup checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os,subprocess
+          test_device=os.environ['MAIN_DEVICE']
+          runtime=os.environ['COMPAT_RUNTIME']
+          device_type='com.apple.CoreSimulator.SimDeviceType.iPhone-15-Pro'
+          runtime_id='com.apple.CoreSimulator.SimRuntime.iOS-'+runtime.replace('.','-')
+          available=json.loads(subprocess.check_output(['xcrun','simctl','list','runtimes','-j']))['runtimes']
+          assert any(r['identifier']==runtime_id and r.get('isAvailable') for r in available),f'Compatible simulator runtime unavailable: {runtime_id}'
+          fresh_device=subprocess.check_output(['xcrun','simctl','create','LifeOS final fresh startup',device_type,runtime_id],text=True).strip()
+          fixture_device=subprocess.check_output(['xcrun','simctl','create','LifeOS final fixture startup',device_type,runtime_id],text=True).strip()
+          assert fresh_device and fixture_device and len({test_device,fresh_device,fixture_device})==3
+          for device in (fresh_device,fixture_device):
+              subprocess.run(['xcrun','simctl','boot',device],check=True)
+              subprocess.run(['xcrun','simctl','bootstatus',device,'-b'],check=True)
+          with open(os.environ['GITHUB_ENV'],'a') as env:
+              env.write('FINAL_VALIDATION_TEST_DEVICE='+test_device+'\n')
+              env.write('MAIN_DEVICE='+fixture_device+'\n')
+              env.write('FRESH_DEVICE='+fresh_device+'\n')
+          print('FINAL_STARTUP_SIMULATORS fresh='+fresh_device,'fixture='+fixture_device,'TYPE',device_type,'RUNTIME',runtime_id)
+          PY
+      - name: Prepare synthetic saved session
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeTests/NativeSessionVaultTests/testPrepareSyntheticSavedSessionForReleaseStartup -resultBundlePath build/FinalSession.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/final-session.log 2>&1 || { tail -n 100 build/final-session.log; exit 1; }
+      - name: Build Release and verify four launches
+        working-directory: app
+        env:
+          LIFEOS_RELEASE_SESSION_FIXTURE: '1'
+        run: |
+          set -euo pipefail
+          xcodebuild build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -configuration Release -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -derivedDataPath release-build CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/final-release.log 2>&1 || { tail -n 100 build/final-release.log; exit 1; }
+          echo 'Release build finished; starting four launch checks'
+          python3 -u ../scripts/verify-release-launch75.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lifeos-final-release-launches
+          path: |
+            app/build/final-*.log
+            app/build/FinalSession.xcresult
+            app/release-launch

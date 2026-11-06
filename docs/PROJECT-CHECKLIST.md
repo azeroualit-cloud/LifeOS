@@ -1,5 +1,7 @@
 # LifeOS — checklist operativa unificata
 
+**Collaudo pre-IPA (6 novembre 2026).** Suite completa passata nel [run 42124676946](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42124676946) sul commit 2d33d8aba9dad6d996cbaff81b99a1212a53ba20. GitHub ha interrotto la fase avvii Release al limite del job (120 minuti). Verifica separata dei quattro avvii sul medesimo sorgente, senza ripetere la suite e senza packaging.
+
 **Consegna corrente (5 novembre 2026).** Autorizzata una singola nuova IPA dopo il superamento del collaudo pre-IPA. Suite completa e quattro avvii Release nel [run 42124676946](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42124676946) sul candidato 2d33d8aba9dad6d996cbaff81b99a1212a53ba20. Esito da acquisire. Ultima release verificata: 0.10.17 build 78. Firma Signulous, verifica iPhone e accettazione utente restano separate. Nessun deploy backend o cancellazione autorizzati.
 
 ## Stato corrente — 5 novembre 2026
@@ -13,7 +15,8 @@
 - [x] QA-004: ultimo contenuto raggiungibile su simulatore principale e compatto, anche con testo grande (run 42044400960 e 42056808149).
 - [ ] QA visiva trasversale, tab bar, accessibilità, persistenza e regressione complessiva; revisione della leggibilità Bloom compatta con testo grande.
 - [ ] Verifica fisica HealthKit, App Group, widget e AlarmKit; revisione e accettazione utente.
-- [ ] Richiesta esplicita IPA, poi confezionamento, controllo e installazione senza perdita dati.
+- [x] Richiesta esplicita IPA ricevuta.
+- [ ] Completare i quattro avvii Release, confezionare e verificare l’installazione senza perdita dati.
 
 Le sezioni precedenti del 4 novembre sotto sono cronologiche ove contrastano con questo aggiornamento.
 

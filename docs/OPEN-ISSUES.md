@@ -1,5 +1,7 @@
 # LifeOS — correzioni e difetti aperti
 
+**Collaudo pre-IPA (6 novembre 2026).** Suite completa passata nel [run 42124676946](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42124676946) sul commit 2d33d8aba9dad6d996cbaff81b99a1212a53ba20. GitHub ha interrotto la fase avvii Release al limite del job (120 minuti). Verifica separata dei quattro avvii sul medesimo sorgente, senza ripetere la suite e senza packaging.
+
 **Calendario data — verifica tecnica superata:** run 42116279080, 7/7 unitari e 1/1 UI, incluso GMT e riapertura; verifica iPhone ancora pendente.
 
 **Apple Health reference:** run mirata 42113026579 superata (energia e peso sintetici visibili); precedente errore consenso non riprodotto, prova fisica ancora aperta.
