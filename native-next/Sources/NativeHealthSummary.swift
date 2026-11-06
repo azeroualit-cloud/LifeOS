@@ -127,7 +127,7 @@ struct NativeHealthDetail: View {
             }
         }.padding(NativeDesign.Layout.compactCardInset)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(NativeDesign.healthSurface, in: RoundedRectangle(cornerRadius: NativeDesign.healthSummaryRadius))
+            .background(NativeDesign.healthSurface, in: RoundedRectangle(cornerRadius: NativeDesign.Layout.healthSummaryRadius))
     }
 
     private struct DiaryRow: Identifiable {
