@@ -151,11 +151,12 @@ final class NativeRevision78UITests: XCTestCase {
         let weight = app.buttons["health-add-weight"], food = app.buttons["health-add-nutrition"]
         XCTAssertTrue(health.waitForExistence(timeout: 10))
         for _ in 0..<15 {
-            if history.isHittable && weight.isHittable && food.isHittable && food.frame.maxY <= tabBar.frame.minY { break }
+            if history.isHittable && weight.isHittable && food.isHittable && history.frame.maxY <= tabBar.frame.minY { break }
             health.swipeUp(velocity: .slow)
         }
         XCTAssertTrue(history.isHittable, "The last Health action must be reachable")
-        XCTAssertLessThanOrEqual(history.frame.maxY, min(weight.frame.minY, food.frame.minY))
+        XCTAssertLessThanOrEqual(max(weight.frame.maxY, food.frame.maxY), history.frame.minY)
+        XCTAssertLessThanOrEqual(history.frame.maxY, tabBar.frame.minY)
         XCTAssertTrue(weight.isHittable); XCTAssertTrue(food.isHittable)
         XCTAssertLessThanOrEqual(max(weight.frame.maxY, food.frame.maxY), tabBar.frame.minY)
         capture(large ? "safe-area-health-large" : "safe-area-health-standard", app)
