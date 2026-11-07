@@ -27,14 +27,21 @@
       "original_quote": "gli alimenti generici sono migliaia, in inglese, e troppo complicati da trovare, e sono basati su usda quando io volevo un database generico che coprisse i cibi in modo generico come fa fitia (quindi cerco Biscotti, e trovo Biscotti, cerco Petto di Pollo e trovo quello)",
       "rule": "Proporre cibi comuni con nomi italiani e risultati diretti. Sostituire il catalogo generico basato su USDA. Fitia è il riferimento per la semplicità della ricerca.",
       "implementation": {
-        "status": "PENDING_CONFIRMATION",
+        "status": "IMPLEMENTED_PENDING_VALIDATION",
         "approval_rule": "DEV-02",
         "proposal": "Selezione locale di voci Ciqual 2025 con nomi italiani, sinonimi e corrispondenza esatta prima delle varianti. Mostrare tipo o preparazione quando incide sul valore per 100 g.",
         "source": "https://zenodo.org/records/17550133",
         "verified_source_examples": {
           "Biscotti": "Ciqual 24001, biscotto semplice",
           "Petto di pollo": "Ciqual 36017, crudo senza pelle"
-        }
+        },
+        "approval_source": "Revisione diretta della proposta dall’utente, interpretata come via libera al catalogo e alla ricerca.",
+        "ui": "Biscotti mostra Generic. Cerca alimento con lente apre la barra di ricerca del catalogo.",
+        "catalog_entries": 145
+      },
+      "followup": {
+        "recorded_on": "2026-11-07",
+        "source_quote": "invece di \"Semplici\" usa \"Generic\", e poi deve essereci una lente con una barra di ricerca al posto di \"Alimenti Generici\" scritto in quel modo, e i 2 tasti aggiungi peso e aggiungi alimento sostali sopra la barra di navigazioni e guori dalla scheda nutrienti"
       }
     },
     {"id": "UTILITY-CURRENT-BUDGET-01", "status": "ACTIVE", "scope": "Budget utenze LifeOS", "rule": "Ricalcolare la stima di budget del mese corrente quando si corregge il periodo di competenza di una bolletta collegata a un piano stimato.", "recorded_on": "2026-11-07", "provenance": "Conferma esplicita «si» alla proposta nel thread LifeOS.", "deployment_authorized": ["lifeos", "lifeos-native-test"]},
@@ -709,6 +716,20 @@
     }
   ],
   "pending_confirmations": [
+    {
+      "id": "HEALTH-ACTIONS-BOTTOM-01",
+      "status": "PENDING_CONFIRMATION",
+      "scope": "Azioni Aggiungi peso e Aggiungi alimento nella scheda Salute",
+      "recorded_on": "2026-11-07",
+      "provenance": "Richiesta diretta utente",
+      "original_quote": "invece di \"Semplici\" usa \"Generic\", e poi deve essereci una lente con una barra di ricerca al posto di \"Alimenti Generici\" scritto in quel modo, e i 2 tasti aggiungi peso e aggiungi alimento sostali sopra la barra di navigazioni e guori dalla scheda nutrienti",
+      "requested_change": "Spostare le due azioni visibili sopra la barra di navigazione, fuori dalla scheda Nutrienti.",
+      "conflicts_with": [
+        "UI-80-01"
+      ],
+      "approval_rule": "META-01",
+      "proposed_scope": "Sostituire solo la posizione prevista da UI-80-01 e conservare le etichette visibili e le icone."
+    },
     {
       "id": "HEALTH-GRID-CONFLICT-01",
       "status": "CONFIRMED_SCOPED_EXCEPTION",

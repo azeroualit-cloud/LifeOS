@@ -1,6 +1,8 @@
 # LifeOS — stato corrente
 
-**Catalogo alimenti generici, 7 novembre 2026.** L’utente segnala che le voci USDA in inglese rendono difficile trovare cibi comuni. La correzione proposta in NUTRITION-GENERIC-IT-01 usa una selezione di cibi comuni in italiano con corrispondenze esatte in cima. Proposta in attesa di approvazione DEV-02. [Dettagli e fonte](USER-DECISIONS.md#nutrition-generic-it-01--active-7-novembre-2026).
+**Catalogo alimenti generici, 7 novembre 2026.** Il sorgente contiene 145 voci italiane Ciqual 2025, barra «Cerca alimento» con lente e «Generic» sotto Biscotti. Compilazione e prova iOS da verificare. Per lo spostamento delle azioni Salute è aperta [la conferma META-01](USER-DECISIONS.md#health-actions-bottom-01--pending_confirmation-7-novembre-2026) relativa a UI-80-01.
+
+Il nuovo catalogo cita Anses. 2025. Ciqual French food composition table. I codici delle voci nel file locale corrispondono al [dataset Ciqual 2025](https://zenodo.org/records/17550133). I valori sono per 100 g. Per il calcolo delle porzioni, «tracce» è trattato come zero e un valore indicato con un limite superiore come metà del limite. Le righe con valori mancanti sono escluse. Lo storico conserva i valori già registrati.
 
 **Correzione budget utenze approvata.** Cambiare la competenza di una bolletta collegata a un piano stimato ricalcola anche la stima del mese corrente nel budget. Le quote effettive hanno precedenza. Caso sintetico da 221,79 € verificato: 73,93 € a novembre, con movimento unico e fondo di novembre invariato. 19 test del Worker e 3 test della trasformazione passati. Deploy Cloudflare verificato su lifeos e lifeos-native-test nel [run 42372669757](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42372669757). Per una bolletta corretta prima del deploy, confermare nuovamente il periodo nel movimento esistente.
 

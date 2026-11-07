@@ -37,6 +37,11 @@
     "validation": "GitHub Actions pre-IPA; artifact only after both validation jobs pass",
     "previous_attempt": "42258943717: compilation failed; corrected NativeDesign.Layout.healthSummaryRadius reference"
   },
+  "post_candidate_native_change": {
+    "scope": "Catalogo italiano e barra di ricerca alimenti",
+    "validation": "Catalogo verificato contro il dataset Ciqual; compilazione e verifica iOS da acquisire",
+    "new_ipa": false
+  },
   "backend": {
     "last_documented_utilities_deploy_run": "41630715615",
     "source": "docs/native/REVISIONE-77.md",

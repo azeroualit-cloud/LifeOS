@@ -53,6 +53,21 @@ final class NativeNutritionQuickUITests: XCTestCase {
             XCTAssertTrue(field.isHittable); field.tap(); field.typeText(value)
         }
     }
+    func testSearchFindsGenericBiscottiAndUsesItsPortion() {
+        let app = open()
+        app.buttons["quick-nutrition-catalog"].tap()
+        let search = app.textFields["generic-food-search"]
+        XCTAssertTrue(search.waitForExistence(timeout: 10))
+        search.tap()
+        search.typeText("Biscotti")
+        let biscuits = app.buttons["generic-food-ciqual-24001"]
+        XCTAssertTrue(biscuits.waitForExistence(timeout: 5))
+        XCTAssertTrue(biscuits.isHittable)
+        capture("Generic food search for Biscotti", app)
+        biscuits.tap()
+        XCTAssertTrue(app.staticTexts["Generic"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["quick-nutrition-calories"].label, "438 kcal")
+    }
     func testQuickSheetCalculatesAndSavesThenResets() {
         let app = open()
         XCTAssertFalse(app.buttons["quick-nutrition-save"].isEnabled)

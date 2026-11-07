@@ -215,4 +215,12 @@ Fonte utente: «gli alimenti generici sono migliaia, in inglese, e troppo compli
 
 Per gli alimenti generici, usare nomi italiani di uso comune e mostrare subito la voce cercata. Sostituire il catalogo USDA. Fitia è il riferimento per la semplicità della ricerca.
 
-**Attuazione in attesa di approvazione DEV-02.** La proposta è una selezione offline da Ciqual 2025, con sinonimi e precedenza al nome esatto. Tipo o preparazione compaiono sotto il nome quando servono a distinguere i valori per 100 g. I primi riferimenti verificati nel dataset sono Biscotti semplici (24001) e Petto di pollo crudo senza pelle (36017). [Fonte Ciqual 2025](https://zenodo.org/records/17550133).
+**Attuazione del catalogo e della ricerca dopo la revisione dell’utente.** La proposta è una selezione offline da Ciqual 2025, con sinonimi e precedenza al nome esatto. Tipo o preparazione compaiono sotto il nome quando servono a distinguere i valori per 100 g. I primi riferimenti verificati nel dataset sono Biscotti semplici (24001) e Petto di pollo crudo senza pelle (36017). [Fonte Ciqual 2025](https://zenodo.org/records/17550133).
+
+Revisione utente del 7 novembre 2026: «invece di "Semplici" usa "Generic", e poi deve essereci una lente con una barra di ricerca al posto di "Alimenti Generici" scritto in quel modo, e i 2 tasti aggiungi peso e aggiungi alimento sostali sopra la barra di navigazioni e guori dalla scheda nutrienti»
+
+La revisione è stata interpretata come via libera al catalogo con le modifiche indicate. Implementate 145 voci locali, dicitura «Generic» per Biscotti e barra «Cerca alimento» con lente. Verifica iOS da completare.
+
+## HEALTH-ACTIONS-BOTTOM-01 — PENDING_CONFIRMATION, 7 novembre 2026
+
+La revisione chiede di spostare «Aggiungi peso» e «Aggiungi alimento» fuori da Nutrienti e subito sopra la barra di navigazione di Salute. Questa posizione contraddice la deroga UI-80-01. Serve conferma META-01 per sostituire la sola posizione, mantenendo testo e icone.

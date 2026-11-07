@@ -90,12 +90,26 @@ struct NativeNutritionQuickSheet: View {
             }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.top, typeSize.isAccessibilitySize ? NativeDesign.Space.small : NativeDesign.Space.large)
             ScrollView {
                 VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
-                    Button("Alimenti generici") { focus = nil; showingCatalog = true }
-                        .frame(minHeight: NativeDesign.Layout.touchTarget)
-                        .disabled(nutrition.busy || pending != nil)
-                        .accessibilityIdentifier("quick-nutrition-catalog")
+                    Button {
+                        focus = nil
+                        showingCatalog = true
+                    } label: {
+                        Label("Cerca alimento", systemImage: "magnifyingglass")
+                            .foregroundStyle(NativeDesign.secondary)
+                            .padding(.horizontal, NativeDesign.Space.medium)
+                            .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
+                            .background(NativeDesign.actionSurface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(nutrition.busy || pending != nil)
+                    .accessibilityIdentifier("quick-nutrition-catalog")
                     if let selectedFood {
-                        Text(selectedFood.name).font(.headline)
+                        VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
+                            Text(selectedFood.name).font(.headline)
+                            if let detail = selectedFood.detail {
+                                Text(detail).font(.subheadline).foregroundStyle(.secondary)
+                            }
+                        }
                         grams("Porzione", text: $portionGrams, field: .portion)
                             .disabled(nutrition.busy || pending != nil)
                         if let draft {

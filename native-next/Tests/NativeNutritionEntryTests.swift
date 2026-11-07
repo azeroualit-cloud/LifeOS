@@ -2,13 +2,25 @@ import XCTest
 @testable import LifeOSProbe
 final class NativeNutritionEntryTests: XCTestCase {
     func testBundledFoodUsesPortionAndPreservesName() throws {
-        XCTAssertGreaterThan(NativeGenericFood.catalog.count, 4000)
-        let food = try XCTUnwrap(NativeGenericFood.catalog.first { $0.id == "169757" })
+        let food = try XCTUnwrap(NativeGenericFood.matches("riso bianco cotto").first)
         let entry = try XCTUnwrap(food.portion(id: UUID(), date: Date(), grams: 150))
-        XCTAssertEqual(entry.foodName, "Riso bianco, cotto")
+        XCTAssertEqual(entry.foodName, "Riso bianco")
         XCTAssertEqual(entry.portionGrams, 150)
         XCTAssertEqual(entry.calories, food.calories * 150 / 100)
         XCTAssertEqual(try JSONDecoder().decode(NativeNutritionEntry.self, from: JSONEncoder().encode(entry)), entry)
+    }
+    func testGenericSearchPrefersCommonItalianNamesAndKeepsPreparationDistinct() {
+        let biscuits = NativeGenericFood.matches("  BISCOTTI  ").first
+        XCTAssertEqual(biscuits?.name, "Biscotti")
+        XCTAssertEqual(biscuits?.detail, "Generic")
+        XCTAssertEqual(NativeGenericFood.matches("biscotto").first?.id, biscuits?.id)
+
+        let chicken = NativeGenericFood.matches("Petto di pollo").first
+        XCTAssertEqual(chicken?.id, "ciqual-36017")
+        XCTAssertEqual(NativeGenericFood.matches("petto pollo").first?.id, chicken?.id)
+        XCTAssertEqual(NativeGenericFood.matches("petto di pollo cotto").first?.id, "ciqual-36018")
+        XCTAssertEqual(NativeGenericFood.matches("caffe").first?.name, "Caffè espresso")
+        XCTAssertTrue(NativeGenericFood.matches("alimento inesistente").isEmpty)
     }
     func testItalianDecimalsAndFourFourNineCalculation() {
         let entry = NativeNutritionEntry(id: UUID(), revision: 1, date: Date(), protein: 10, carbohydrate: 20, fat: 5, confirmed: false)
