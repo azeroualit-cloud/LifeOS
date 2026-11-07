@@ -39,6 +39,7 @@
   },
   "post_candidate_native_change": {
     "scope": "Catalogo italiano e barra di ricerca alimenti",
+    "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42386785838",
     "validation": "Catalogo verificato contro il dataset Ciqual; compilazione e verifica iOS da acquisire",
     "new_ipa": false
   },
