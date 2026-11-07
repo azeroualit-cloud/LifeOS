@@ -61,7 +61,8 @@ export function utilityMonthlyCost(context, category, month, fallbackCents, cont
   if (shares.length) return { amountCents: shares.reduce((n, s) => n + s.amountCents, 0), source: 'actual' };
   const profiles = (context?.profiles || []).filter(p => p.category === category && p.status !== 'cancelled'
     && month >= p.startMonth && (!p.stopAfter || month <= p.stopAfter) && (!p.closedMonth || month <= p.closedMonth));
-  return { amountCents: profiles.length ? profiles.reduce((n, p) => n + contribution(p, month), 0) : fallbackCents, source: 'estimate' };
+  const estimate = profiles.reduce((n, p) => n + (p.budgetEstimates?.[month] ?? contribution(p, month)), 0);
+  return { amountCents: profiles.length ? estimate : fallbackCents, source: 'estimate' };
 }
 
 export function hasUtilityBill(context, movementId) {
@@ -98,6 +99,9 @@ export function refreshUtilityEstimate(state, planId, today) {
   if (!history.length) return;
   const count = history.reduce((n, p) => n + p.competenceMonths, 0);
   const amountCents = Math.max(1, Math.round(history.reduce((n, p) => n + p.amountCents, 0) / count));
+  // A period correction updates this month's budget estimate. Fund contributions use rateChanges.
+  plan.budgetEstimates ??= {};
+  plan.budgetEstimates[today.slice(0, 7)] = amountCents;
   const fromMonth = new Date(Date.UTC(Number(today.slice(0, 4)), Number(today.slice(5, 7)), 1)).toISOString().slice(0, 7);
   plan.rateChanges = (plan.rateChanges || []).filter(c => c.fromMonth !== fromMonth);
   plan.rateChanges.push({ fromMonth, amountCents });

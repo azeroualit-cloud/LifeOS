@@ -5,7 +5,7 @@ import { readFile, writeFile, mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { utilityCompetenceContext } from '../competence.mjs';
+import { utilityCompetenceContext, utilityMonthlyCost } from '../competence.mjs';
 
 const dir = await mkdtemp(join(tmpdir(), 'utility-routing-'));
 const source = await readFile('manual/build-75/worker.js', 'utf8');
@@ -120,4 +120,34 @@ test('editing competence on a stopped fund preserves payment identity, fund stat
   assert.equal(state.plans.water.status, 'stopped'); assert.equal(Object.values(state.payments).filter(p => p.status === 'posted').length, 1);
   assert.deepEqual({ ...rows()[0] }, before);
   await assert.rejects(core.expenseRouting.change({ ...ctx, input: { ...edit, requestId: 'utility-stale-edit', competenceStartMonth: '2026-07' } }), /periodo.*cambiato/i);
+});
+
+test('correcting a linked October bill in November updates the budget estimate without a second debit', async () => {
+  const { ctx, payload, rows } = await fixture();
+  const october = '2026-10-31';
+  const octoberService = new core.PlanService(ctx.repository, ctx.service.cash, october);
+  const input = { ...payload, expenseDestination: 'plan', planId: 'water', expectedAvailableCents: 5000,
+    date: october, competenceStartMonth: '2026-10', competenceEndMonth: '2026-10' };
+  await core.expenseRouting.save({ ...ctx, service: octoberService, today: october, input });
+  const bankRow = { ...rows()[0] };
+  const before = (await ctx.repository.read()).state;
+  const novemberFund = core.balance(before, before.plans.water, '2026-11');
+  assert.equal(before.plans.water.rateChanges.find(rate => rate.fromMonth === '2026-11').amountCents, 22179);
+
+  const edit = { requestId: 'utility-november-estimate', movementId: bankRow.source_row, expenseDestination: 'plan',
+    planId: 'water', expectedPaymentId: input.requestId, expectedAmountCents: 22179, expectedDate: october,
+    expectedCategory: 'Acqua', competenceStartMonth: '2026-08', competenceEndMonth: '2026-10',
+    expectedCompetenceStartMonth: '2026-10', expectedCompetenceEndMonth: '2026-10' };
+  await core.expenseRouting.change({ ...ctx, input: edit });
+  await core.expenseRouting.change({ ...ctx, input: edit });
+
+  const { state } = await ctx.repository.read();
+  const competence = utilityCompetenceContext(state, rows());
+  assert.equal(rows().length, 1);
+  assert.deepEqual({ ...rows()[0] }, bankRow);
+  assert.deepEqual(core.balance(state, state.plans.water, '2026-11'), novemberFund);
+  const rate = (plan, month) => plan.rateChanges.filter(change => change.fromMonth <= month).at(-1)?.amountCents ?? plan.amountCents;
+  assert.deepEqual(utilityMonthlyCost(competence, 'Acqua', '2026-10', 5000, rate), { amountCents: 7393, source: 'actual' });
+  assert.deepEqual(utilityMonthlyCost(competence, 'Acqua', '2026-11', 5000, rate), { amountCents: 7393, source: 'estimate' });
+  assert.deepEqual(utilityMonthlyCost(competence, 'Acqua', '2026-12', 5000, rate), { amountCents: 7393, source: 'estimate' });
 });

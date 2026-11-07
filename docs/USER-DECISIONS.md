@@ -202,3 +202,7 @@ Fonte. Richiesta esplicita durante la revisione della bozza Nutrizione.
 ## IPA-REDESIGN-82 — consegna autorizzata, 6 novembre 2026
 
 «no voglio l'ipa di tutto il redesign, e lasciami il link actions per capire se é prodotto o meno cosí te non sorechi token». Autorizzazione per questa consegna, con suite completa e quattro avvii Release prima del confezionamento. Ordine Dashboard esistente e percorsi manuali preservati.
+
+## UTILITY-CURRENT-BUDGET-01 — ACTIVE, 7 novembre 2026
+
+Approvato con «si» il ricalcolo della stima nel budget del mese corrente quando si corregge il periodo di una bolletta collegata a un piano stimato.

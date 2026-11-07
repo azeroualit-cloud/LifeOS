@@ -1,6 +1,7 @@
 """Context-guarded utility competence patch; unrelated live modules stay intact."""
 from pathlib import Path
 import importlib.util
+import hashlib
 
 spec = importlib.util.spec_from_file_location('deployment', Path(__file__).with_name('deploy-unified-activities.py'))
 deployment = importlib.util.module_from_spec(spec)
@@ -9,9 +10,15 @@ spec.loader.exec_module(deployment)
 def transform(source):
     payload = Path('backend/utilities/competence.mjs').read_text().replace('export async function ', 'async function ').replace('export function ', 'function ')
     marker = '// LIFEOS_UTILITY_COMPETENCE_75\n' + payload
-    if '// LIFEOS_UTILITY_COMPETENCE_75' in source:
-        if not source.endswith(marker): raise RuntimeError('Versione competenze differente; nessuna scrittura.')
+    if source.endswith(marker):
         return source
+    previous_marker = '// LIFEOS_UTILITY_COMPETENCE_75\n'
+    if previous_marker in source:
+        offset = source.rindex(previous_marker)
+        previous_digest = hashlib.sha256(source[offset:].encode()).hexdigest()
+        if previous_digest != '6597945ef64933b1ca34ea0bed1049a39dba78d7f7c9f693b9a08f10a9c10cfa':
+            raise RuntimeError('Versione competenze differente; nessuna scrittura.')
+        return source[:offset] + marker
     def patch(old, new):
         nonlocal source
         if source.count(old) != 1: raise RuntimeError('Contesto competenze non riconosciuto; nessuna scrittura.')
