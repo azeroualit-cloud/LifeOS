@@ -282,6 +282,7 @@ final class NativeAppleHealthReferenceUITests: XCTestCase {
         print("APPLE_HEALTH_REFERENCE_TREE_" + name + " " + app.debugDescription)
     }
     func testCaptureAppleHealthReference() {
+        executionTimeAllowance = 300
         let seed = XCUIApplication()
         seed.launchArguments = ["--visual-test", "--apple-health-reference-seed", "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"]
         seed.launch()
