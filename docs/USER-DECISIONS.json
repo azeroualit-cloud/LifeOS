@@ -19,6 +19,19 @@
   },
   "active_rules": [
     {
+      "id": "HEALTH-ACTIONS-BOTTOM-01",
+      "status": "ACTIVE",
+      "scope": "Azioni Aggiungi peso e Aggiungi alimento nella scheda Salute",
+      "recorded_on": "2026-11-07",
+      "provenance": "Richiesta diretta utente",
+      "original_quote": "invece di \"Semplici\" usa \"Generic\", e poi deve essereci una lente con una barra di ricerca al posto di \"Alimenti Generici\" scritto in quel modo, e i 2 tasti aggiungi peso e aggiungi alimento sostali sopra la barra di navigazioni e guori dalla scheda nutrienti",
+      "rule": "Tenere Aggiungi peso e Aggiungi alimento subito sopra la barra di navigazione di Salute e fuori dalla scheda Nutrienti. Conservare etichette visibili, icone e adattamento al testo grande.",
+      "confirmation_quote": "si",
+      "confirmation_date": "2026-11-07",
+      "confirmation_context": "Risposta diretta alla richiesta di sostituire la sola posizione UI-80-01 secondo META-01.",
+      "supersedes": "Solo la posizione delle due azioni Salute in UI-80-01."
+    },
+    {
       "id": "NUTRITION-GENERIC-IT-01",
       "status": "ACTIVE",
       "scope": "Catalogo alimenti generici LifeOS",
@@ -712,24 +725,17 @@
       "source": "Richiesta diretta e risposta alla conferma della deroga",
       "rule": "Correggere le discrepanze mostrate su Dashboard, pannello nutrizione, Salute e Categorie Bloom. In Dashboard azioni spesa e nutrizione in Liquid Glass neutro, azione alimento dentro scheda. In Salute due azioni esplicite al centro del riquadro Nutrienti.",
       "confirmed_exception": "Sì, confermo la deroga. Testo visibile e posizione centrale in Nutrienti derogano a G05/G07 e HEALTH-GRID-02 per le due azioni. Le icone G06 sono conservate.",
-      "ipa_authorized": true
+      "ipa_authorized": true,
+      "health_action_placement": {
+        "status": "SUPERSEDED",
+        "previous_value": "Centro del riquadro Nutrienti",
+        "replaced_by": "HEALTH-ACTIONS-BOTTOM-01",
+        "confirmation_quote": "si",
+        "confirmation_date": "2026-11-07"
+      }
     }
   ],
   "pending_confirmations": [
-    {
-      "id": "HEALTH-ACTIONS-BOTTOM-01",
-      "status": "PENDING_CONFIRMATION",
-      "scope": "Azioni Aggiungi peso e Aggiungi alimento nella scheda Salute",
-      "recorded_on": "2026-11-07",
-      "provenance": "Richiesta diretta utente",
-      "original_quote": "invece di \"Semplici\" usa \"Generic\", e poi deve essereci una lente con una barra di ricerca al posto di \"Alimenti Generici\" scritto in quel modo, e i 2 tasti aggiungi peso e aggiungi alimento sostali sopra la barra di navigazioni e guori dalla scheda nutrienti",
-      "requested_change": "Spostare le due azioni visibili sopra la barra di navigazione, fuori dalla scheda Nutrienti.",
-      "conflicts_with": [
-        "UI-80-01"
-      ],
-      "approval_rule": "META-01",
-      "proposed_scope": "Sostituire solo la posizione prevista da UI-80-01 e conservare le etichette visibili e le icone."
-    },
     {
       "id": "HEALTH-GRID-CONFLICT-01",
       "status": "CONFIRMED_SCOPED_EXCEPTION",

@@ -43,6 +43,12 @@
     "validation": "Catalogo verificato contro il dataset Ciqual; compilazione e verifica iOS da acquisire",
     "new_ipa": false
   },
+  "health_bottom_actions": {
+    "scope": "Azioni Salute sopra la barra di navigazione e fuori da Nutrienti",
+    "decision": "HEALTH-ACTIONS-BOTTOM-01",
+    "validation": "Verifica iOS da acquisire",
+    "new_ipa": false
+  },
   "backend": {
     "last_documented_utilities_deploy_run": "41630715615",
     "source": "docs/native/REVISIONE-77.md",

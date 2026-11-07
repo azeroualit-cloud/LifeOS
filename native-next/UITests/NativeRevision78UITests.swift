@@ -71,7 +71,6 @@ final class NativeRevision78UITests: XCTestCase {
         capture("78-health-summary", app)
         let surface = app.scrollViews["health-detail-scroll"]
         let food = app.buttons["health-add-nutrition"]
-        for _ in 0..<6 where !food.isHittable { surface.swipeUp() }
         for (id, title) in [("health-add-weight", "Aggiungi peso"), ("health-add-nutrition", "Aggiungi alimento")] {
             let button = app.buttons[id]
             XCTAssertEqual(button.label, title)
@@ -84,7 +83,12 @@ final class NativeRevision78UITests: XCTestCase {
         XCTAssertFalse(app.staticTexts["Fonte delle calorie"].exists)
         let weight = app.buttons["health-add-weight"]
         XCTAssertEqual((weight.frame.union(food.frame)).midX, surface.frame.midX, accuracy: 2)
-        capture("80-health-actions", app)
+        capture("health-actions-above-navigation", app)
+        let initialWeightFrame = weight.frame
+        let initialFoodFrame = food.frame
+        surface.swipeUp()
+        XCTAssertEqual(weight.frame.minY, initialWeightFrame.minY, accuracy: 1)
+        XCTAssertEqual(food.frame.minY, initialFoodFrame.minY, accuracy: 1)
         for _ in 0..<6 where !rows[3].isHittable { surface.swipeDown() }
         rows[3].tap()
         XCTAssertTrue(app.textFields["health-intake"].waitForExistence(timeout: 10))
@@ -98,23 +102,24 @@ final class NativeRevision78UITests: XCTestCase {
         let ordered = [rows[0], rows[3], rows[1], rows[2]]
         for pair in zip(ordered, ordered.dropFirst()) { XCTAssertLessThan(pair.0.frame.midY, pair.1.frame.midY) }
         capture("78-health-accessibility-top", app)
-        let surface = app.scrollViews["health-detail-scroll"]
-        for _ in 0..<12 where !app.buttons["health-add-nutrition"].isHittable { surface.swipeUp() }
-        capture("78-health-accessibility-bottom", app)
-        XCTAssertTrue(app.descendants(matching: .any)["health-nutrient-HKQuantityTypeIdentifierDietaryFiber"].exists)
+        capture("health-accessible-actions-above-navigation", app)
         for id in ["health-add-weight", "health-add-nutrition"] {
             let button = app.buttons[id]
             XCTAssertTrue(button.isHittable)
             XCTAssertGreaterThanOrEqual(button.frame.width, 44 - 0.001)
             XCTAssertGreaterThanOrEqual(button.frame.height, 44 - 0.001)
+            XCTAssertLessThanOrEqual(button.frame.maxY, app.tabBars.firstMatch.frame.minY)
         }
+        let fibre = app.descendants(matching: .any)["health-nutrient-HKQuantityTypeIdentifierDietaryFiber"]
+        let surface = app.scrollViews["health-detail-scroll"]
+        for _ in 0..<12 where !fibre.isHittable { surface.swipeUp() }
+        XCTAssertTrue(fibre.isHittable)
     }
     func testHealthNutritionQuickAddAndHistoryAreReachable() {
         let app = launch()
         app.tabBars.buttons["Salute"].tap()
         let add = app.buttons["health-add-nutrition"]
         XCTAssertTrue(add.waitForExistence(timeout: 10))
-        for _ in 0..<6 where !add.isHittable { app.scrollViews["health-detail-scroll"].swipeUp() }
         XCTAssertTrue(add.isHittable); add.tap()
         XCTAssertTrue(app.staticTexts["Aggiungi nutrienti"].waitForExistence(timeout: 10))
         app.buttons["quick-nutrition-close"].tap()
@@ -151,12 +156,11 @@ final class NativeRevision78UITests: XCTestCase {
         let weight = app.buttons["health-add-weight"], food = app.buttons["health-add-nutrition"]
         XCTAssertTrue(health.waitForExistence(timeout: 10))
         for _ in 0..<15 {
-            if history.isHittable && weight.isHittable && food.isHittable && history.frame.maxY <= tabBar.frame.minY { break }
+            if history.isHittable && history.frame.maxY <= min(weight.frame.minY, food.frame.minY) { break }
             health.swipeUp(velocity: .slow)
         }
         XCTAssertTrue(history.isHittable, "The last Health action must be reachable")
-        XCTAssertLessThanOrEqual(max(weight.frame.maxY, food.frame.maxY), history.frame.minY)
-        XCTAssertLessThanOrEqual(history.frame.maxY, tabBar.frame.minY)
+        XCTAssertLessThanOrEqual(history.frame.maxY, min(weight.frame.minY, food.frame.minY))
         XCTAssertTrue(weight.isHittable); XCTAssertTrue(food.isHittable)
         XCTAssertLessThanOrEqual(max(weight.frame.maxY, food.frame.maxY), tabBar.frame.minY)
         capture(large ? "safe-area-health-large" : "safe-area-health-standard", app)

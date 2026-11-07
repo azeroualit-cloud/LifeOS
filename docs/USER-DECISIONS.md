@@ -221,6 +221,6 @@ Revisione utente del 7 novembre 2026: «invece di "Semplici" usa "Generic", e po
 
 La revisione è stata interpretata come via libera al catalogo con le modifiche indicate. Implementate 145 voci locali, dicitura «Generic» per Biscotti e barra «Cerca alimento» con lente. Verifica iOS da completare.
 
-## HEALTH-ACTIONS-BOTTOM-01 — PENDING_CONFIRMATION, 7 novembre 2026
+## HEALTH-ACTIONS-BOTTOM-01 — ACTIVE, 7 novembre 2026
 
-La revisione chiede di spostare «Aggiungi peso» e «Aggiungi alimento» fuori da Nutrienti e subito sopra la barra di navigazione di Salute. Questa posizione contraddice la deroga UI-80-01. Serve conferma META-01 per sostituire la sola posizione, mantenendo testo e icone.
+La revisione chiede di spostare «Aggiungi peso» e «Aggiungi alimento» fuori da Nutrienti e subito sopra la barra di navigazione di Salute. L’utente ha risposto «si» alla domanda META-01. La posizione al centro di Nutrienti prevista da UI-80-01 è SUPERSEDED per le due azioni Salute. Le etichette visibili e le icone restano previste.

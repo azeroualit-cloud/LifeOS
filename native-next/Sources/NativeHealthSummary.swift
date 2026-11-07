@@ -57,11 +57,17 @@ struct NativeHealthDetail: View {
                 if health.loading { ProgressView().accessibilityLabel("Lettura Salute") }
                 if let message = health.message { Text(message).font(.caption).foregroundStyle(.secondary) }
             }.padding(.horizontal, NativeDesign.Layout.listInset).padding(.vertical, NativeDesign.Space.large)
-        }.background(NativeDesign.healthCanvas).navigationTitle("Salute").navigationBarTitleDisplayMode(.inline)
+        }
             .accessibilityIdentifier("health-detail-scroll")
+            .refreshable { await health.refresh() }
+            .safeAreaInset(edge: .bottom, spacing: NativeDesign.Space.none) {
+                nutritionActionBar
+            }
+            .background(NativeDesign.healthCanvas)
+            .navigationTitle("Salute")
+            .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $addingWeight) { NativeAddWeightSheet(health: health) }
             .sheet(isPresented: $showingNutrition) { NavigationStack { NativeNutritionQuickSheet() }.environmentObject(health) }
-            .refreshable { await health.refresh() }
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active { Task { await health.refresh() } }
             }
@@ -79,14 +85,22 @@ struct NativeHealthDetail: View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
             Text("Nutrienti").font(.headline).foregroundStyle(NativeDesign.nutritionTitle)
             NativeNutrientValues(health: health, includesFibre: true)
-            ViewThatFits(in: .horizontal) {
-                HStack(spacing: NativeDesign.Space.small) { nutritionActions }.fixedSize(horizontal: true, vertical: false)
-                VStack(spacing: NativeDesign.Space.small) { nutritionActions }
-            }.frame(maxWidth: .infinity)
         }.padding(NativeDesign.Layout.compactCardInset)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(NativeDesign.healthSurface, in: RoundedRectangle(cornerRadius: NativeDesign.Layout.healthSummaryRadius))
     }
+    private var nutritionActionBar: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: NativeDesign.Space.small) { nutritionActions }
+                .fixedSize(horizontal: true, vertical: false)
+            VStack(spacing: NativeDesign.Space.small) { nutritionActions }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, NativeDesign.Layout.listInset)
+        .padding(.vertical, NativeDesign.Space.small)
+        .background(NativeDesign.healthCanvas)
+    }
+
     @ViewBuilder private var nutritionActions: some View {
         Button { addingWeight = true } label: {
             Label { Text("Aggiungi peso") } icon: { NativeSymbol(symbol: NativeHealthMetric.weight.symbol) }
