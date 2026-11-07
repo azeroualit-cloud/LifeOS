@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Catalogo alimenti generici, 7 novembre 2026.** L’utente segnala che le voci USDA in inglese rendono difficile trovare cibi comuni. La correzione proposta in NUTRITION-GENERIC-IT-01 usa una selezione di cibi comuni in italiano con corrispondenze esatte in cima. Proposta in attesa di approvazione DEV-02. [Dettagli e fonte](USER-DECISIONS.md#nutrition-generic-it-01--active-7-novembre-2026).
+
 **Correzione budget utenze approvata.** Cambiare la competenza di una bolletta collegata a un piano stimato ricalcola anche la stima del mese corrente nel budget. Le quote effettive hanno precedenza. Caso sintetico da 221,79 € verificato: 73,93 € a novembre, con movimento unico e fondo di novembre invariato. 19 test del Worker e 3 test della trasformazione passati. Deploy Cloudflare verificato su lifeos e lifeos-native-test nel [run 42372669757](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42372669757). Per una bolletta corretta prima del deploy, confermare nuovamente il periodo nel movimento esistente.
 
 **Build 82 (0.10.20), candidata.** Redesign nativo Dashboard e Salute autorizzato con richiesta esplicita di IPA. Il workflow pre-IPA esegue la suite completa e quattro avvii Release prima di produrre LifeOS-82.ipa come artifact. Catalogo offline USDA SR Legacy (4.612 voci) e diario con registrazioni locali e campioni energetici leggibili in Apple Salute. Collaudo e packaging da verificare in Actions.

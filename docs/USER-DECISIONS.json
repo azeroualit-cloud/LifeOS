@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "LifeOS",
-  "updated_on": "2026-11-06",
+  "updated_on": "2026-11-07",
   "policy": {
     "id": "META-01",
     "status": "ACTIVE",
@@ -18,6 +18,25 @@
     "bootstrap": "La richiesta esplicita corrente approva questa nuova procedura: sostituisce il precedente criterio di sostituzione automatica delle regole confliggenti. Non richiedere una seconda conferma per il salvataggio già richiesto."
   },
   "active_rules": [
+    {
+      "id": "NUTRITION-GENERIC-IT-01",
+      "status": "ACTIVE",
+      "scope": "Catalogo alimenti generici LifeOS",
+      "recorded_on": "2026-11-07",
+      "provenance": "Feedback diretto dell’utente sul catalogo LifeOS.",
+      "original_quote": "gli alimenti generici sono migliaia, in inglese, e troppo complicati da trovare, e sono basati su usda quando io volevo un database generico che coprisse i cibi in modo generico come fa fitia (quindi cerco Biscotti, e trovo Biscotti, cerco Petto di Pollo e trovo quello)",
+      "rule": "Proporre cibi comuni con nomi italiani e risultati diretti. Sostituire il catalogo generico basato su USDA. Fitia è il riferimento per la semplicità della ricerca.",
+      "implementation": {
+        "status": "PENDING_CONFIRMATION",
+        "approval_rule": "DEV-02",
+        "proposal": "Selezione locale di voci Ciqual 2025 con nomi italiani, sinonimi e corrispondenza esatta prima delle varianti. Mostrare tipo o preparazione quando incide sul valore per 100 g.",
+        "source": "https://zenodo.org/records/17550133",
+        "verified_source_examples": {
+          "Biscotti": "Ciqual 24001, biscotto semplice",
+          "Petto di pollo": "Ciqual 36017, crudo senza pelle"
+        }
+      }
+    },
     {"id": "UTILITY-CURRENT-BUDGET-01", "status": "ACTIVE", "scope": "Budget utenze LifeOS", "rule": "Ricalcolare la stima di budget del mese corrente quando si corregge il periodo di competenza di una bolletta collegata a un piano stimato.", "recorded_on": "2026-11-07", "provenance": "Conferma esplicita «si» alla proposta nel thread LifeOS.", "deployment_authorized": ["lifeos", "lifeos-native-test"]},
     {"id":"UX-REACH-01","status":"ACTIVE","scope":"Interfaccia LifeOS","rule":"I pulsanti che nel normale utilizzo previsto possono essere premuti molte volte al giorno non devono mai trovarsi in alto a destra. Collocarli dove il pollice li raggiunge comodamente.","recorded_on":"2026-11-06","provenance":"Richiesta esplicita utente durante la revisione della bozza Nutrizione","source_message_date":"2026-11-06"},
     {

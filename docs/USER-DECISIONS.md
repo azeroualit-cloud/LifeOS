@@ -208,3 +208,11 @@ Fonte. Richiesta esplicita durante la revisione della bozza Nutrizione.
 Approvato con «si» il ricalcolo della stima nel budget del mese corrente quando si corregge il periodo di una bolletta collegata a un piano stimato.
 
 Deploy Cloudflare autorizzato con la successiva conferma «si» per entrambi i Worker, `lifeos` e `lifeos-native-test`.
+
+## NUTRITION-GENERIC-IT-01 — ACTIVE, 7 novembre 2026
+
+Fonte utente: «gli alimenti generici sono migliaia, in inglese, e troppo complicati da trovare, e sono basati su usda quando io volevo un database generico che coprisse i cibi in modo generico come fa fitia (quindi cerco Biscotti, e trovo Biscotti, cerco Petto di Pollo e trovo quello)»
+
+Per gli alimenti generici, usare nomi italiani di uso comune e mostrare subito la voce cercata. Sostituire il catalogo USDA. Fitia è il riferimento per la semplicità della ricerca.
+
+**Attuazione in attesa di approvazione DEV-02.** La proposta è una selezione offline da Ciqual 2025, con sinonimi e precedenza al nome esatto. Tipo o preparazione compaiono sotto il nome quando servono a distinguere i valori per 100 g. I primi riferimenti verificati nel dataset sono Biscotti semplici (24001) e Petto di pollo crudo senza pelle (36017). [Fonte Ciqual 2025](https://zenodo.org/records/17550133).
