@@ -56,6 +56,8 @@
     "build": 83,
     "authorization": "IPA-DELIVERY-2026-11-07",
     "candidate_ref": "codex/revision77",
+    "source_commit": "75a9af4dc3c86c99993931aaa7643c5b800dd3a8",
+    "release_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42404491236",
     "release_tag": "ios-0.10.21-build83",
     "validation": "Suite completa, quattro avvii Release e verifica IPA prima della pubblicazione",
     "published": false

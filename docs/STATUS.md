@@ -1,6 +1,6 @@
 # LifeOS — stato corrente
 
-**Build 83 (0.10.21), rilascio autorizzato.** Catalogo italiano Ciqual, ricerca con lente e pulsanti Salute sopra la navigazione. La pipeline pubblica l’IPA su GitHub Releases dopo suite completa, quattro avvii Release e verifica del pacchetto.
+**Build 83 (0.10.21), rilascio autorizzato.** Catalogo italiano Ciqual, ricerca con lente e pulsanti Salute sopra la navigazione. La pipeline pubblica l’IPA su GitHub Releases dopo suite completa, quattro avvii Release e verifica del pacchetto. Il [run di rilascio](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42404491236) è in corso sul commit `75a9af4`.
 
 **Catalogo alimenti generici, 7 novembre 2026.** Il sorgente contiene 145 voci italiane Ciqual 2025, barra «Cerca alimento» con lente e «Generic» sotto Biscotti. Catalogo e layout Salute condividono il [collaudo iOS](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42387125517) sul nuovo sorgente. Il [run precedente](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42386785838) è stato annullato dalla CI quando è arrivato il nuovo commit. Lo spostamento delle azioni Salute è [approvato](USER-DECISIONS.md#health-actions-bottom-01--active-7-novembre-2026) e implementato nel sorgente. I due pulsanti restano sopra la barra di navigazione durante lo scroll. Compilazione e test selezionati passati al simulatore sul commit c930a9f. Le prove includono la ricerca di Biscotti, la porzione e i pulsanti Salute con testo standard e grande. Verifica su iPhone ancora aperta.
 
