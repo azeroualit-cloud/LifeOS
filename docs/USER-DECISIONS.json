@@ -921,6 +921,14 @@
     "original_quote": "Ti chiedo esplicitamente di produrre e consegnarmi una nuova IPA, ma solo dopo aver completato con successo il collaudo pre-IPA.",
     "scope": "Una sola consegna. Preservare release 78. Nessun deploy backend o cancellazione. Accettazione esplicita dopo prove iPhone."
   },
+  "food_catalog_ipa_delivery_authorization": {
+    "id": "IPA-DELIVERY-2026-11-07",
+    "status": "AUTHORIZED_AFTER_PRE_IPA_PASS",
+    "recorded_on": "2026-11-07",
+    "source": "Richiesta diretta utente",
+    "original_quote": "e manda i produzione lìipa allora",
+    "scope": "Pubblicare una nuova IPA per Signulous su GitHub Releases dopo suite completa, quattro avvii Release e verifica del pacchetto. Build 83, versione 0.10.21. La prova iPhone e l’accettazione restano distinte."
+  },
   "redesign_ipa_delivery_authorization": {
     "id": "IPA-REDESIGN-82",
     "status": "AUTHORIZED_AFTER_PRE_IPA_PASS",

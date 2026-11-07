@@ -224,3 +224,7 @@ La revisione è stata interpretata come via libera al catalogo con le modifiche 
 ## HEALTH-ACTIONS-BOTTOM-01 — ACTIVE, 7 novembre 2026
 
 La revisione chiede di spostare «Aggiungi peso» e «Aggiungi alimento» fuori da Nutrienti e subito sopra la barra di navigazione di Salute. L’utente ha risposto «si» alla domanda META-01. La posizione al centro di Nutrienti prevista da UI-80-01 è SUPERSEDED per le due azioni Salute. Le etichette visibili e le icone restano previste.
+
+## IPA-DELIVERY-2026-11-07 — consegna autorizzata, 7 novembre 2026
+
+Richiesta diretta: «e manda i produzione lìipa allora». Autorizzata la pubblicazione della build 83 (0.10.21) su GitHub Releases dopo suite completa, quattro avvii Release e verifica del pacchetto. L’IPA è destinata a Signulous. Prova fisica e accettazione utente restano distinte.

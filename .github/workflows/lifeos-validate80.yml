@@ -1,11 +1,9 @@
 name: LifeOS pre-IPA validation
 on:
   workflow_dispatch:
-    inputs:
-      package82:
-        description: Package build 82 after validation
-        type: boolean
-        default: false
+  push:
+    branches: ['codex/revision77']
+    paths: ['.github/workflows/lifeos-validate80.yml']
 permissions:
   contents: read
 jobs:
@@ -154,8 +152,12 @@ jobs:
             app/build/final-*.log
             app/build/FinalSession.xcresult
             app/release-launch
-  package82:
-    if: inputs.package82
+  package83:
+    if: >-
+      github.repository == 'azeroualit-cloud/LifeOS' &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/codex/revision77' &&
+      contains(github.event.head_commit.message, '[release-ipa-83]')
     needs: [full-suite, release-launches]
     runs-on: macos-15
     timeout-minutes: 65
@@ -170,16 +172,53 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          xcodebuild archive -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -configuration Release -destination 'generic/platform=iOS' -archivePath build/LifeOS.xcarchive CODE_SIGNING_ALLOWED=NO MARKETING_VERSION=0.10.20 CURRENT_PROJECT_VERSION=82 > build/archive82.log 2>&1 || { tail -n 100 build/archive82.log; exit 1; }
+          xcodebuild archive -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -configuration Release -destination 'generic/platform=iOS' -archivePath build/LifeOS.xcarchive CODE_SIGNING_ALLOWED=NO MARKETING_VERSION=0.10.21 CURRENT_PROJECT_VERSION=83 > build/archive83.log 2>&1 || { tail -n 100 build/archive83.log; exit 1; }
           mkdir -p build/Payload download
           cp -R build/LifeOS.xcarchive/Products/Applications/LifeOSProbe.app build/Payload/
-          (cd build && zip -qr ../download/LifeOS-82.ipa Payload)
-          python3 ../scripts/verify-native-package.py download/LifeOS-82.ipa --version 0.10.20 --build 82
-          python3 ../scripts/verify-startup-imports.py download/LifeOS-82.ipa
-          unzip -Z1 download/LifeOS-82.ipa | grep -E "/generic-foods[.]json$"
-          (cd download && shasum -a 256 LifeOS-82.ipa > SHA256.txt)
+          (cd build && zip -qr ../download/LifeOS-83.ipa Payload)
+          python3 ../scripts/verify-native-package.py download/LifeOS-83.ipa --version 0.10.21 --build 83
+          python3 ../scripts/verify-startup-imports.py download/LifeOS-83.ipa
+          python3 - <<'PY'
+          import json
+          from zipfile import ZipFile
+
+          with ZipFile('download/LifeOS-83.ipa') as ipa:
+              catalogs = [name for name in ipa.namelist() if name.endswith('.app/generic-foods.json')]
+              assert len(catalogs) == 1, catalogs
+              foods = {food['id']: food for food in json.loads(ipa.read(catalogs[0]))}
+              assert foods['ciqual-24001']['name'] == 'Biscotti'
+              assert foods['ciqual-24001']['detail'] == 'Generic'
+              assert foods['ciqual-36017']['name'] == 'Petto di pollo'
+          PY
+          (cd download && shasum -a 256 LifeOS-83.ipa > SHA256.txt)
       - uses: actions/upload-artifact@v4
         with:
-          name: LifeOS-82
+          name: LifeOS-83
           path: app/download/
           if-no-files-found: error
+
+  publish83:
+    if: >-
+      github.repository == 'azeroualit-cloud/LifeOS' &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/codex/revision77' &&
+      contains(github.event.head_commit.message, '[release-ipa-83]')
+    needs: package83
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: LifeOS-83
+      - name: Verify checksum and publish the IPA
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum --check SHA256.txt
+          gh release create ios-0.10.21-build83 LifeOS-83.ipa SHA256.txt \
+            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "LifeOS 0.10.21 build 83" --latest \
+            --notes "Catalogo italiano Ciqual con ricerca e pulsanti Salute sopra la navigazione. IPA da firmare con Signulous. Sorgente: $GITHUB_SHA. Collaudo pre-IPA: https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID. Verifica su iPhone e accettazione ancora aperte."
