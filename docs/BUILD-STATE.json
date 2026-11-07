@@ -39,13 +39,15 @@
   },
   "post_candidate_native_change": {
     "scope": "Catalogo italiano e barra di ricerca alimenti",
-    "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42386785838",
+    "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42387125517",
+    "previous_validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42386785838 (cancelled by superseding push)",
     "validation": "Catalogo verificato contro il dataset Ciqual; compilazione e verifica iOS da acquisire",
     "new_ipa": false
   },
   "health_bottom_actions": {
     "scope": "Azioni Salute sopra la barra di navigazione e fuori da Nutrienti",
     "decision": "HEALTH-ACTIONS-BOTTOM-01",
+    "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42387125517",
     "validation": "Verifica iOS da acquisire",
     "new_ipa": false
   },
