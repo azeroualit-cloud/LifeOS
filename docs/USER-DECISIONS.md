@@ -219,7 +219,7 @@ Per gli alimenti generici, usare nomi italiani di uso comune e mostrare subito l
 
 Revisione utente del 7 novembre 2026: «invece di "Semplici" usa "Generic", e poi deve essereci una lente con una barra di ricerca al posto di "Alimenti Generici" scritto in quel modo, e i 2 tasti aggiungi peso e aggiungi alimento sostali sopra la barra di navigazioni e guori dalla scheda nutrienti»
 
-La revisione è stata interpretata come via libera al catalogo con le modifiche indicate. Implementate 145 voci locali, dicitura «Generic» per Biscotti e barra «Cerca alimento» con lente. Verifica iOS da completare.
+La revisione è stata interpretata come via libera al catalogo con le modifiche indicate. Implementate 145 voci locali, dicitura «Generic» per Biscotti e barra «Cerca alimento» con lente. Compilazione e prove al simulatore superate nel [run 42387125517](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42387125517).
 
 ## HEALTH-ACTIONS-BOTTOM-01 — ACTIVE, 7 novembre 2026
 

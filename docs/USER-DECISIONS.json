@@ -40,7 +40,7 @@
       "original_quote": "gli alimenti generici sono migliaia, in inglese, e troppo complicati da trovare, e sono basati su usda quando io volevo un database generico che coprisse i cibi in modo generico come fa fitia (quindi cerco Biscotti, e trovo Biscotti, cerco Petto di Pollo e trovo quello)",
       "rule": "Proporre cibi comuni con nomi italiani e risultati diretti. Sostituire il catalogo generico basato su USDA. Fitia è il riferimento per la semplicità della ricerca.",
       "implementation": {
-        "status": "IMPLEMENTED_PENDING_VALIDATION",
+        "status": "IMPLEMENTED_SIMULATOR_VERIFIED",
         "approval_rule": "DEV-02",
         "proposal": "Selezione locale di voci Ciqual 2025 con nomi italiani, sinonimi e corrispondenza esatta prima delle varianti. Mostrare tipo o preparazione quando incide sul valore per 100 g.",
         "source": "https://zenodo.org/records/17550133",
