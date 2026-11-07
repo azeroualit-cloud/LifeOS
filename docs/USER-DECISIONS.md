@@ -206,3 +206,5 @@ Fonte. Richiesta esplicita durante la revisione della bozza Nutrizione.
 ## UTILITY-CURRENT-BUDGET-01 — ACTIVE, 7 novembre 2026
 
 Approvato con «si» il ricalcolo della stima nel budget del mese corrente quando si corregge il periodo di una bolletta collegata a un piano stimato.
+
+Deploy Cloudflare autorizzato con la successiva conferma «si» per entrambi i Worker, `lifeos` e `lifeos-native-test`.

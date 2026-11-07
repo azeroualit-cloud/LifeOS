@@ -1,4 +1,4 @@
-name: LifeOS utility competence guarded deployment
+name: LifeOS deploy current-month utility budget correction
 on:
   push:
     branches: ['codex/revision77']

@@ -18,7 +18,7 @@
     "bootstrap": "La richiesta esplicita corrente approva questa nuova procedura: sostituisce il precedente criterio di sostituzione automatica delle regole confliggenti. Non richiedere una seconda conferma per il salvataggio già richiesto."
   },
   "active_rules": [
-    {"id": "UTILITY-CURRENT-BUDGET-01", "status": "ACTIVE", "scope": "Budget utenze LifeOS", "rule": "Ricalcolare la stima di budget del mese corrente quando si corregge il periodo di competenza di una bolletta collegata a un piano stimato.", "recorded_on": "2026-11-07", "provenance": "Conferma esplicita «si» alla proposta nel thread LifeOS."},
+    {"id": "UTILITY-CURRENT-BUDGET-01", "status": "ACTIVE", "scope": "Budget utenze LifeOS", "rule": "Ricalcolare la stima di budget del mese corrente quando si corregge il periodo di competenza di una bolletta collegata a un piano stimato.", "recorded_on": "2026-11-07", "provenance": "Conferma esplicita «si» alla proposta nel thread LifeOS.", "deployment_authorized": ["lifeos", "lifeos-native-test"]},
     {"id":"UX-REACH-01","status":"ACTIVE","scope":"Interfaccia LifeOS","rule":"I pulsanti che nel normale utilizzo previsto possono essere premuti molte volte al giorno non devono mai trovarsi in alto a destra. Collocarli dove il pollice li raggiunge comodamente.","recorded_on":"2026-11-06","provenance":"Richiesta esplicita utente durante la revisione della bozza Nutrizione","source_message_date":"2026-11-06"},
     {
       "id": "A01",
