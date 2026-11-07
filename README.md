@@ -4,13 +4,15 @@
 
 **LifeOS 0.10.18 build 79 consegnata.** [IPA](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.18-build79/LifeOS-79.ipa), SHA-256 f7a9155e27fc27fd30a39e8422a43bfa26bdfdae69f0920ed87cf4c1d22a6f15. Sorgente 2d33d8aba9dad6d996cbaff81b99a1212a53ba20. [Suite 368/368](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42124676946), [avvii Release 4/4](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42189948045), [confezionamento verificato](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42194114583). Restano firma Signulous, aggiornamento sul telefono, parità dei dati personali, verifiche fisiche e accettazione esplicita.
 
-**Start here / Inizia da qui:** [report corrente per qualsiasi IA](docs/AI-HANDOFF.md).
+**Start here / Inizia da qui:** [report corrente per qualsiasi IA](https://github.com/azeroualit-cloud/LifeOS/blob/codex/revision77/docs/AI-HANDOFF.md).
 
 Applicazione iPhone nativa per attività, turni, finanza, salute e raccolta di contenuti Bloom, con web/backend Cloudflare separati.
 
-## Stato attuale — 4 novembre 2026
+## Stato del progetto
 
-Ultima IPA distribuita: **0.10.17 / build 78**. Test tecnici superati sul simulatore, ma **l’utente ha rifiutato la build come pronta per la produzione**. Restano difetti UI/UX da correggere. Nessuna nuova IPA prodotta dall’aggiornamento dei documenti.
+Il lavoro corrente prosegue su **codex/revision77**. Quel ramo contiene il catalogo alimenti in italiano e i pulsanti Salute sopra la barra di navigazione. Il collaudo iOS di questo incremento è consultabile su [GitHub Actions](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42387125517).
+
+Per lo stato aggiornato delle build e dell’accettazione, consultare il [report del ramo di lavoro](https://github.com/azeroualit-cloud/LifeOS/blob/codex/revision77/docs/STATUS.md) e il relativo [registro decisioni](https://github.com/azeroualit-cloud/LifeOS/blob/codex/revision77/docs/USER-DECISIONS.md).
 
 - [Piano operativo approvato e gate](docs/PROJECT-RELEASE-PLAN.md) · [copertura requisiti](docs/REQUIREMENT-COVERAGE.json) · [manifesto](docs/EXECUTION-MANIFEST.json).
 - [Checklist unificata](docs/PROJECT-CHECKLIST.md) · [Brief Salute bodybuilding per Astra → Terra](docs/HEALTH-BODYBUILDING-BRIEF.md).
