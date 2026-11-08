@@ -19,12 +19,13 @@ targets:
       - Shared
       - Assets.xcassets
       - path: Resources/generic-foods.json
+      - path: Resources/cocktails.json
         buildPhase: resources
     info:
       path: GeneratedInfo.plist
       properties:
         NSAlarmKitUsageDescription: Life OS programma le sveglie urgenti degli eventi che scegli, anche in silenzioso e Full immersion.
-        NSHealthUpdateUsageDescription: LifeOS salva in Apple Salute pesate, calorie e nutrienti delle registrazioni che confermi. Vitamine e minerali del catalogo sono condivisi solo con i permessi che concedi.
+        NSHealthUpdateUsageDescription: LifeOS salva in Apple Salute pesate, calorie e nutrienti delle registrazioni che confermi. Vitamine, minerali e unità alcoliche stimate sono condivisi solo con i permessi che concedi.
         NSHealthShareUsageDescription: Life OS legge peso, calorie e nutrienti alimentari da Apple Salute per mostrare riepiloghi e scenari, solo sul dispositivo.
         UIFileSharingEnabled: true
         LSSupportsOpeningDocumentsInPlace: true

@@ -71,7 +71,8 @@ enum NativeTrackedNutrient: String, CaseIterable, Identifiable {
             guard let epa = Self.epa.value(in: entry), let dha = Self.dha.value(in: entry) else { return nil }
             return (epa.amount + dha.amount, epa.estimated || dha.estimated)
         }
-        guard let value = entry.nutrientValues?[rawValue] else { return nil }
+        let value = entry.nutrientValues?[rawValue] ?? (self == .folate ? entry.nutrientValues?["folateMass"] : nil)
+        guard let value else { return nil }
         return (value.amount, value.estimateSource != nil)
     }
 }

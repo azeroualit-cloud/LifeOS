@@ -18,18 +18,21 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
     var boneInWeightGrams: Decimal? = nil
     var nutrientValues: [String: NativeNutrientAmount]? = nil
     var sharedNutrientKeys: [String]? = nil
+    var cocktailServings: Decimal? = nil
+    var alcoholGrams: Decimal? = nil
+    var standardDrinks: Decimal? { alcoholGrams.map { $0 / 12 } }
     var calories: Decimal { labelCalories ?? (protein * 4 + carbohydrate * 4 + fat * 9) }
 
     /// Label values are per 100 g; persisted measurements always describe the portion.
     static func portion(id: UUID, date: Date, protein: Decimal, carbohydrate: Decimal,
-                        fat: Decimal, fibre: Decimal, calories: Decimal, grams: Decimal) -> Self? {
-        let values = [protein, carbohydrate, fat, fibre, calories, grams]
+                        fat: Decimal, fibre: Decimal?, calories: Decimal, grams: Decimal) -> Self? {
+        let values = [protein, carbohydrate, fat, fibre ?? 0, calories, grams]
         guard values.allSatisfy({ !$0.isNaN && $0 >= 0 && NSDecimalNumber(decimal: $0).doubleValue.isFinite }),
               grams > 0, calories > 0 else { return nil }
         let factor = grams / 100
         return .init(id: id, revision: 0, date: date, protein: protein * factor,
                      carbohydrate: carbohydrate * factor, fat: fat * factor, confirmed: false,
-                     fibre: fibre * factor, labelCalories: calories * factor, portionGrams: grams)
+                     fibre: fibre.map { $0 * factor }, labelCalories: calories * factor, portionGrams: grams)
     }
     /// Direct totals. Snapshot the automatic energy so historical entries never change formula.
     static func direct(id: UUID, date: Date, protein: Decimal, carbohydrate: Decimal, fat: Decimal, fibre: Decimal, preserving old: Self? = nil) -> Self? {
@@ -40,7 +43,7 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
         }
         let energy = protein * 4 + carbohydrate * 4 + fat * 9 + fibre * 2
         guard !energy.isNaN, energy > 0, NSDecimalNumber(decimal: energy).doubleValue.isFinite else { return nil }
-        return .init(id: id, revision: 0, date: date, protein: protein, carbohydrate: carbohydrate, fat: fat, confirmed: false, fibre: fibre, labelCalories: energy, foodName: old?.foodName, nutrientValues: old?.nutrientValues, sharedNutrientKeys: old?.sharedNutrientKeys)
+        return .init(id: id, revision: 0, date: date, protein: protein, carbohydrate: carbohydrate, fat: fat, confirmed: false, fibre: fibre, labelCalories: energy, foodName: old?.foodName, nutrientValues: old?.nutrientValues, sharedNutrientKeys: old?.sharedNutrientKeys, cocktailServings: old?.cocktailServings, alcoholGrams: old?.alcoholGrams)
     }
     static func grams(_ text: String) -> Decimal? {
         let value = text.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -64,6 +67,9 @@ extension NativeNutritionWriting {
 
 @MainActor final class NativeHealthNutritionWriter: NativeNutritionWriting {
     private let health = HKHealthStore()
+    private static let alcoholKey = "standardDrinks"
+    private static let folateKey = "folateMass"
+    private static let vitaminKKey = "vitaminK"
     private static let identifiers: [HKQuantityTypeIdentifier] = [.dietaryProtein, .dietaryCarbohydrates, .dietaryFatTotal, .dietaryEnergyConsumed, .dietaryFiber]
     func authorize(includeFibre: Bool) async throws {
         guard HKHealthStore.isHealthDataAvailable() else { throw Message(text: "Apple Salute non è disponibile su questo dispositivo.") }
@@ -72,7 +78,7 @@ extension NativeNutritionWriting {
         guard types.allSatisfy({ health.authorizationStatus(for: $0) == .sharingAuthorized }) else { throw Message(text: "Autorizza la scrittura di tutti i macronutrienti e delle calorie in Apple Salute.") }
     }
     func authorizeNutrients(for entry: NativeNutritionEntry) async -> Set<String> {
-        let candidates = (entry.nutrientValues ?? [:]).keys.compactMap { key -> (String, HKQuantityType)? in
+        let candidates = Self.additionalValues(for: entry).keys.compactMap { key -> (String, HKQuantityType)? in
             guard let type = Self.nutrientType(for: key) else { return nil }
             return (key, type)
         }
@@ -97,23 +103,48 @@ extension NativeNutritionWriting {
             return HKQuantitySample(type: HKObjectType.quantityType(forIdentifier: pair.0)!, quantity: HKQuantity(unit: index == 3 ? .kilocalorie() : .gram(), doubleValue: NSDecimalNumber(decimal: pair.1).doubleValue), start: entry.date, end: entry.date,
                 metadata: metadata)
         }
+        let values = additionalValues(for: entry)
         let additional = (entry.sharedNutrientKeys ?? []).compactMap { key -> HKQuantitySample? in
-            guard let nutrient = NativeTrackedNutrient(rawValue: key), let type = nutrientType(for: key),
-                  let value = entry.nutrientValues?[key] else { return nil }
+            guard let type = nutrientType(for: key), let value = values[key] else { return nil }
             var metadata: [String: Any] = [
                 HKMetadataKeySyncIdentifier: nutrientSyncID(for: entry, key: key),
                 HKMetadataKeySyncVersion: NSNumber(value: entry.revision)
             ]
             if let name = entry.foodName { metadata[HKMetadataKeyFoodType] = name }
             if let estimate = value.estimateSource { metadata["LifeOSNutrientEstimateSource"] = estimate }
-            let unit = HKUnit.gramUnit(with: nutrient.unit == "µg" ? .micro : .milli)
+            let unit: HKUnit
+            switch key {
+            case alcoholKey: unit = .count()
+            case folateKey, vitaminKKey: unit = .gramUnit(with: .micro)
+            default:
+                unit = .gramUnit(with: NativeTrackedNutrient(rawValue: key)?.unit == "µg" ? .micro : .milli)
+            }
             return HKQuantitySample(type: type, quantity: HKQuantity(unit: unit, doubleValue: NSDecimalNumber(decimal: value.amount).doubleValue),
                                     start: entry.date, end: entry.date, metadata: metadata)
         }
         return base + additional
     }
 
+    private static func additionalValues(for entry: NativeNutritionEntry) -> [String: NativeNutrientAmount] {
+        var values = entry.nutrientValues ?? [:]
+        if let k1 = values["vitaminK1"], let k2 = values["vitaminK2"] {
+            let sources = [k1.estimateSource, k2.estimateSource].compactMap { $0 }
+            values[vitaminKKey] = .init(amount: k1.amount + k2.amount,
+                                       estimateSource: sources.isEmpty ? nil : sources.joined(separator: ", "))
+        }
+        if let drinks = entry.standardDrinks {
+            values[alcoholKey] = .init(amount: drinks, estimateSource: "LifeOS: ricetta cocktail; 1 UA = 12 g")
+        }
+        return values
+    }
+
     private static func nutrientType(for key: String) -> HKQuantityType? {
+        switch key {
+        case alcoholKey: return HKObjectType.quantityType(forIdentifier: .numberOfAlcoholicBeverages)
+        case folateKey: return HKObjectType.quantityType(forIdentifier: .dietaryFolate)
+        case vitaminKKey: return HKObjectType.quantityType(forIdentifier: .dietaryVitaminK)
+        default: break
+        }
         let identifier: HKQuantityTypeIdentifier? = switch NativeTrackedNutrient(rawValue: key) {
         case .vitaminC: .dietaryVitaminC
         case .zinc: .dietaryZinc

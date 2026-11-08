@@ -18,6 +18,7 @@
     "bootstrap": "La richiesta esplicita corrente approva questa nuova procedura: sostituisce il precedente criterio di sostituzione automatica delle regole confliggenti. Non richiedere una seconda conferma per il salvataggio già richiesto."
   },
   "active_rules": [
+    {"id": "NUTRITION-CATALOG-RENDER-01", "status": "ACTIVE", "recorded_on": "2026-11-08", "scope": "LifeOS Nutrizione, Salute e revisione su simulatore", "original_quote": "per la creatina non facciamo nulla, il resto devi tutto implementarlo, mostrarmi il render grafico reale, e dopo di dirò se produrre l'ipa o meno (giusto? puoi avere i render senza la produzione di ipa?)", "provenance": "Richiesta diretta utente", "rule": "Implementare il catalogo restante, esclusa la creatina, e mostrare schermate reali del simulatore. Attendono nuova richiesta packaging e distribuzione IPA."},
     {
       "id": "HEALTH-MICRO-TARGETS-01",
       "status": "ACTIVE",

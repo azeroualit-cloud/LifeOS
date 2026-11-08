@@ -113,16 +113,27 @@ struct NativeNutritionQuickSheet: View {
                                 Text("Con osso").tag(true)
                             }
                             .pickerStyle(.menu)
+                            .accessibilityIdentifier("quick-nutrition-weighing")
                             .disabled(nutrition.busy || pending != nil)
                         }
-                        grams("Porzione", text: $portionGrams, field: .portion)
+                        grams(selectedFood.cocktail == nil ? "Porzione" : "Bicchieri", text: $portionGrams,
+                              field: .portion, unit: selectedFood.cocktail == nil ? "g" : nil)
                             .disabled(nutrition.busy || pending != nil)
                         if let draft {
+                            if let recipe = selectedFood.cocktail, let alcohol = draft.alcoholGrams, let units = draft.standardDrinks {
+                                let precision = Decimal.FormatStyle().precision(.fractionLength(0...1))
+                                Text("≈ \(alcohol.formatted(precision)) g di alcol · \(units.formatted(precision)) UA")
+                                    .font(.subheadline.weight(.semibold))
+                                    .accessibilityIdentifier("quick-nutrition-alcohol")
+                                Text("Bicchiere da circa \(recipe.volumeML) ml · 1 UA = 12 g")
+                                    .font(.caption).foregroundStyle(.secondary)
+                            }
                             if weighedWithBone, let edible = draft.portionGrams {
                                 Text("Parte edibile stimata: \(NSDecimalNumber(decimal: edible).doubleValue.formatted(.number.precision(.fractionLength(0)))) g")
                                     .font(.caption).foregroundStyle(.secondary)
                             }
-                            Text("P \(NSDecimalNumber(decimal: draft.protein)) · C \(NSDecimalNumber(decimal: draft.carbohydrate)) · G \(NSDecimalNumber(decimal: draft.fat)) · F \(NSDecimalNumber(decimal: draft.fibre ?? 0)) g")
+                            let fibreText = draft.fibre.map { NSDecimalNumber(decimal: $0).stringValue } ?? "—"
+                            Text("P \(NSDecimalNumber(decimal: draft.protein)) · C \(NSDecimalNumber(decimal: draft.carbohydrate)) · G \(NSDecimalNumber(decimal: draft.fat)) · F \(fibreText) g")
                                 .font(.caption).foregroundStyle(.secondary)
                         }
                         Button("Inserisci nutrienti a mano") { self.selectedFood = nil; focus = nil }
@@ -196,7 +207,7 @@ struct NativeNutritionQuickSheet: View {
             NavigationStack {
                 NativeFoodPicker { food in
                     selectedFood = food
-                    portionGrams = "100"
+                    portionGrams = food.cocktail == nil ? "100" : "1"
                     weighedWithBone = false
                 }
             }
@@ -254,14 +265,14 @@ struct NativeNutritionQuickSheet: View {
     private var allZero: Bool {
         selectedFood == nil && [protein, carbohydrate, fat, fibre].allSatisfy { NativeNutritionEntry.grams($0) == 0 }
     }
-    private func grams(_ title: String, text: Binding<String>, field: Field) -> some View {
+    private func grams(_ title: String, text: Binding<String>, field: Field, unit: String? = "g") -> some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
             Text(title).font(.caption).foregroundStyle(.secondary)
             HStack {
                 TextField("0", text: text, prompt: typeSize.isAccessibilitySize ? nil : Text("0").foregroundStyle(NativeDesign.secondary)).keyboardType(.decimalPad).focused($focus, equals: field)
                     .font(.title2.weight(.semibold)).frame(minHeight: NativeDesign.Layout.nutritionInputLine)
-                    .accessibilityLabel(title + " in grammi").accessibilityIdentifier("quick-nutrition-" + title)
-                Text("g").foregroundStyle(.secondary)
+                    .accessibilityLabel(unit == nil ? title : title + " in grammi").accessibilityIdentifier("quick-nutrition-" + title)
+                if let unit { Text(unit).foregroundStyle(.secondary) }
             }
         }.padding(NativeDesign.Space.small).frame(minHeight: NativeDesign.Layout.nutritionFieldHeight)
             .background(NativeDesign.nutritionInput, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))

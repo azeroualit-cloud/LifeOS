@@ -66,6 +66,61 @@ final class NativeNutritionQuickUITests: XCTestCase {
             XCTAssertTrue(field.isHittable); field.tap(); field.typeText(value)
         }
     }
+    func testRenderCocktailAndBoneInPortions() {
+        let app = open()
+        app.buttons["quick-nutrition-catalog"].tap()
+        let cocktails = app.buttons["Cocktail"]
+        XCTAssertTrue(cocktails.waitForExistence(timeout: 10))
+        cocktails.tap()
+        let gin = app.buttons["generic-food-cocktail-gin-tonic"]
+        XCTAssertTrue(gin.waitForExistence(timeout: 5))
+        capture("01 Cocktail catalog", app)
+        gin.tap()
+        let alcohol = app.staticTexts["quick-nutrition-alcohol"]
+        XCTAssertTrue(alcohol.waitForExistence(timeout: 5))
+        XCTAssertTrue(alcohol.label.contains("1,3 UA"))
+        capture("02 Cocktail portion and estimated alcohol", app)
+
+        app.buttons["quick-nutrition-catalog"].tap()
+        let search = app.textFields["generic-food-search"]
+        XCTAssertTrue(search.waitForExistence(timeout: 5))
+        search.tap()
+        search.typeText("Sovracoscia di pollo al forno con pelle")
+        let cut = app.buttons["generic-food-estimate-sovracoscia-forno-pelle"]
+        XCTAssertTrue(cut.waitForExistence(timeout: 5))
+        cut.tap()
+        let weighing = app.buttons["quick-nutrition-weighing"]
+        XCTAssertTrue(weighing.waitForExistence(timeout: 5))
+        weighing.tap()
+        app.buttons["Con osso"].tap()
+        XCTAssertTrue(app.staticTexts.containing(NSPredicate(format: "label CONTAINS %@", "Parte edibile stimata")).firstMatch.waitForExistence(timeout: 5))
+        capture("03 Chicken cut weighed with bone", app)
+    }
+
+    func testRenderPersonalFoodEditorAndSave() {
+        let app = open()
+        app.buttons["quick-nutrition-catalog"].tap()
+        let create = app.buttons["generic-food-create"]
+        XCTAssertTrue(create.waitForExistence(timeout: 10))
+        create.tap()
+        let name = app.textFields["personal-food-name"]
+        XCTAssertTrue(name.waitForExistence(timeout: 10))
+        capture("04 Personal food editor", app)
+        let title = "Crema di prova \(UUID().uuidString.prefix(4))"
+        for (id, value) in [("name", title), ("energy", "200"), ("protein", "10"), ("carbs", "20"), ("fat", "8")] {
+            let field = app.textFields["personal-food-" + id]
+            for _ in 0..<3 where !field.isHittable { app.swipeUp() }
+            XCTAssertTrue(field.isHittable, id)
+            field.tap()
+            field.typeText(value)
+        }
+        let save = app.buttons["personal-food-save"]
+        XCTAssertTrue(save.isEnabled)
+        save.tap()
+        XCTAssertTrue(app.staticTexts[title].waitForExistence(timeout: 10))
+        capture("05 Saved personal foods", app)
+    }
+
     func testDatePickerOpensFullWidthAndKeepsNutrients() {
         checkFullWidthDatePicker(large: false)
     }

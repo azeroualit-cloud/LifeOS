@@ -20,6 +20,27 @@ import HealthKit
         XCTAssertEqual(NativeHealthNutritionWriter.samples(for: legacy).count, 4)
         XCTAssertEqual(NativeHealthNutritionWriter.samples(for: legacy)[3].quantity.doubleValue(for: .kilocalorie()), 165)
     }
+    func testCocktailAndMicronutrientSamplesUseCompatibleUnits() throws {
+        let cocktail = try XCTUnwrap(NativeGenericFood.matches("Gin Tonic").first)
+        var entry = try XCTUnwrap(cocktail.portion(id: UUID(), date: Date(), grams: 2))
+        XCTAssertEqual(entry.cocktailServings, 2)
+        XCTAssertNil(entry.portionGrams)
+        XCTAssertEqual(entry.alcoholGrams, Decimal(string: "31.56"))
+        entry.nutrientValues = [
+            "vitaminK1": .init(amount: 4, estimateSource: nil),
+            "vitaminK2": .init(amount: 6, estimateSource: nil),
+            "folateMass": .init(amount: 8, estimateSource: nil)
+        ]
+        entry.sharedNutrientKeys = ["standardDrinks", "vitaminK", "folateMass"]
+        let samples = NativeHealthNutritionWriter.samples(for: entry)
+        let drink = try XCTUnwrap(samples.first { $0.quantityType.identifier == HKQuantityTypeIdentifier.numberOfAlcoholicBeverages.rawValue })
+        let vitaminK = try XCTUnwrap(samples.first { $0.quantityType.identifier == HKQuantityTypeIdentifier.dietaryVitaminK.rawValue })
+        let folate = try XCTUnwrap(samples.first { $0.quantityType.identifier == HKQuantityTypeIdentifier.dietaryFolate.rawValue })
+        XCTAssertEqual(drink.quantity.doubleValue(for: .count()), 2.63, accuracy: 0.001)
+        XCTAssertEqual(vitaminK.quantity.doubleValue(for: .gramUnit(with: .micro)), 10)
+        XCTAssertEqual(folate.quantity.doubleValue(for: .gramUnit(with: .micro)), 8)
+    }
+
     func testAuthorizedCatalogNutrientsUseStableIDsAndCorrectMassUnits() throws {
         var entry = NativeNutritionEntry(id: UUID(), revision: 2, date: Date(), protein: 1, carbohydrate: 2, fat: 3, confirmed: false)
         entry.nutrientValues = [

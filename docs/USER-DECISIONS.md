@@ -294,3 +294,7 @@ Precisazione utente, 8 novembre 2026: «no scegli te l'obiettivo e mettile nella
 Fonte utente: «ma in questo modo risparmieremmo tempo solo se fallisce uno di quei test, io volevo un risparmio di tempo sistemico». Ridurre i tempi anche a test verdi. La separazione tra IPA di prova e IPA di produzione e l’eventuale riuso di verifiche sono proposte di attuazione, non regole attive.
 
 Conferma utente: «va bene vediamo se risparmiamo tempo, intanto le modifiche che ti avevo chiesto sono state fatte?». Approvato il pilota IPA di prova con misurazione dei tempi, distinto dal percorso di produzione. L’avvio con confezionamento richiede ancora richiesta esplicita secondo IPA-GATE-01.
+
+## NUTRITION-CATALOG-RENDER-01 — ACTIVE, 8 novembre 2026
+
+Fonte utente: «per la creatina non facciamo nulla, il resto devi tutto implementarlo, mostrarmi il render grafico reale, e dopo di dirò se produrre l'ipa o meno (giusto? puoi avere i render senza la produzione di ipa?)». Autorizzati cocktail e unità alcoliche, alimenti personali, ampliamento delle varianti di carne e copertura dei micronutrienti compatibili con dati e HealthKit. Esclusa la creatina. Consegnare schermate reali dal simulatore. L’IPA richiede una nuova richiesta dopo la revisione.
