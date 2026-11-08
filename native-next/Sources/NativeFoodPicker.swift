@@ -6,6 +6,7 @@ struct NativeGenericFood: Decodable, Identifiable {
     let detail: String?
     let family: Family
     let boneInEdiblePercent: Int?
+    let nutrientValues: [String: NativeNutrientAmount]?
 
     enum Family: String, Decodable {
         case bakery, grain, egg, dairy, cheese, fat, legume, fruit, nut, poultry
@@ -52,6 +53,9 @@ struct NativeGenericFood: Decodable, Identifiable {
             carbohydrate: carbohydrate, fat: fat, fibre: fibre, calories: calories, grams: edibleGrams) else { return nil }
         entry.foodName = name
         entry.boneInWeightGrams = weighedWithBone ? grams : nil
+        entry.nutrientValues = nutrientValues?.mapValues {
+            NativeNutrientAmount(amount: $0.amount * edibleGrams / 100, estimateSource: $0.estimateSource)
+        }
         return entry
     }
 

@@ -85,6 +85,19 @@ struct NativeHealthDetail: View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
             Text("Nutrienti").font(.headline).foregroundStyle(NativeDesign.nutritionTitle)
             NativeNutrientValues(health: health, includesFibre: true)
+            NavigationLink {
+                NativeMicronutrientScreen(nutrition: nutrition)
+            } label: {
+                HStack {
+                    Text("Micronutrienti").font(.subheadline.weight(.semibold))
+                    Spacer()
+                    NativeDisclosureIndicator()
+                }
+                .frame(minHeight: NativeDesign.Layout.touchTarget)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(NativePressStyle())
+            .accessibilityIdentifier("health-micronutrients")
         }.padding(NativeDesign.Layout.compactCardInset)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(NativeDesign.healthSurface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))

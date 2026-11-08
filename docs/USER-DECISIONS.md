@@ -273,7 +273,7 @@ Fonte utente: «puoi già produrre l'ipa?». Autorizzata la build 85 (0.10.23) s
 
 Fonte utente: «dovrei anche riuscire a vedere se raggiungo alcuni valori di micronutrienti che dovrebbero interessare a me per i miei obiettivi (principalmente attrattività, e benessere generale)».
 
-In LifeOS Salute, poter scegliere micronutrienti da seguire e confrontare gli apporti registrati con riferimenti pertinenti per benessere generale e interesse per pelle e capelli. Distinguere copertura del diario, dati assenti e apporti effettivamente registrati. Le soglie personali, la selezione iniziale e il layout sono proposte da confermare secondo DEV-02. [Proposta e limiti dei dati](CALENDAR-NUTRITION-NEXT.md#monitoraggio-micronutrienti--proposta).
+In LifeOS Salute, poter scegliere micronutrienti da seguire e confrontare gli apporti registrati con riferimenti pertinenti per benessere generale e interesse per pelle e capelli. Distinguere copertura del diario, dati assenti e apporti effettivamente registrati. Le soglie personali, la selezione iniziale e il layout sono proposte da confermare secondo DEV-02. [Proposta e limiti dei dati](CALENDAR-NUTRITION-NEXT.md#monitoraggio-micronutrienti--build-86).
 
 Precisazione utente, 8 novembre 2026: «i micronutrienti non li inserisco dall'aggiunta rapida ma solo dagli alimenti nel database, se mancano dei valori puoi stimarli te e così da vere un database completo, ma siamo sicuri che questi sono i micronutrienti che mi interessano per massimizzare l'attrazione?».
 
@@ -284,3 +284,5 @@ Seguito utente, 8 novembre 2026: «ok, e come obiettivo giornaliero puntiamo su 
 Direzione proposta: riferimento alimentare per fascia di età e sesso ove cambi il valore. Confronto con la media degli apporti registrati. Il raggiungimento non incentiva l’eccesso. Nessun numero personale fissato. Omega-3 e creatina sono oggetto di discussione e restano distinti dai micronutrienti.
 
 Riscontro utente, 8 novembre 2026: «ok, valido, e tutti gli altri micronutrienti pensi che per i miei obiettivi fa realmente differenza seguirli?». Validato l’approccio dei riferimenti per profilo. La selezione dei preferiti e il layout restano da concordare.
+
+Conferma utente, 8 novembre 2026: «allora teniamo gli altri micronutrienti nascosti ma consultabili, e diamo priorità a quelli che mi interessano, procedi con il codice e subito dopo con l'ipa». Vitamina C e zinco in primo piano, altri micronutrienti in una vista consultabile e preferiti modificabili. L’utente autorizza il codice e la consegna della build 86 (0.10.24) dopo suite completa, quattro avvii Release e verifica del pacchetto.

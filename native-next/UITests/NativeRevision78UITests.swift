@@ -131,6 +131,27 @@ final class NativeRevision78UITests: XCTestCase {
         app.navigationBars.buttons.firstMatch.tap()
         XCTAssertTrue(surface.waitForExistence(timeout: 10))
     }
+    func testMicronutrientPrioritiesOpenWithOtherNutrientsInDetail() {
+        let app = launch()
+        app.tabBars.buttons["Salute"].tap()
+        let open = app.buttons["health-micronutrients"]
+        let scroll = app.scrollViews["health-detail-scroll"]
+        XCTAssertTrue(scroll.waitForExistence(timeout: 10))
+        for _ in 0..<8 where !open.isHittable { scroll.swipeUp() }
+        XCTAssertTrue(open.isHittable)
+        open.tap()
+        XCTAssertTrue(app.navigationBars["Micronutrienti"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["Vitamina C"].exists)
+        XCTAssertTrue(app.staticTexts["Zinco"].exists)
+        XCTAssertFalse(app.staticTexts["Ferro"].exists)
+        let all = app.buttons["Tutti i micronutrienti"]
+        if !all.isHittable { app.collectionViews.firstMatch.swipeUp() }
+        all.tap()
+        XCTAssertTrue(app.navigationBars["Tutti i micronutrienti"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["Vitamina C"].exists)
+        capture("Micronutrient catalogue detail", app)
+    }
+
     func testSafeAreaLastContentStandard() { checkSafeAreaLastContent(large: false) }
     func testSafeAreaLastContentLargeText() { checkSafeAreaLastContent(large: true) }
     private func checkSafeAreaLastContent(large: Bool) {

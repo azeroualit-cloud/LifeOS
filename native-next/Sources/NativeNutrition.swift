@@ -16,6 +16,8 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
     var portionGrams: Decimal? = nil
     var foodName: String? = nil
     var boneInWeightGrams: Decimal? = nil
+    var nutrientValues: [String: NativeNutrientAmount]? = nil
+    var sharedNutrientKeys: [String]? = nil
     var calories: Decimal { labelCalories ?? (protein * 4 + carbohydrate * 4 + fat * 9) }
 
     /// Label values are per 100 g; persisted measurements always describe the portion.
@@ -38,7 +40,7 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
         }
         let energy = protein * 4 + carbohydrate * 4 + fat * 9 + fibre * 2
         guard !energy.isNaN, energy > 0, NSDecimalNumber(decimal: energy).doubleValue.isFinite else { return nil }
-        return .init(id: id, revision: 0, date: date, protein: protein, carbohydrate: carbohydrate, fat: fat, confirmed: false, fibre: fibre, labelCalories: energy, foodName: old?.foodName)
+        return .init(id: id, revision: 0, date: date, protein: protein, carbohydrate: carbohydrate, fat: fat, confirmed: false, fibre: fibre, labelCalories: energy, foodName: old?.foodName, nutrientValues: old?.nutrientValues, sharedNutrientKeys: old?.sharedNutrientKeys)
     }
     static func grams(_ text: String) -> Decimal? {
         let value = text.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -51,8 +53,13 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
 
 @MainActor protocol NativeNutritionWriting {
     func authorize(includeFibre: Bool) async throws
+    func authorizeNutrients(for entry: NativeNutritionEntry) async -> Set<String>
     func write(_ entry: NativeNutritionEntry) async throws
     func delete(_ entry: NativeNutritionEntry) async throws
+}
+
+extension NativeNutritionWriting {
+    func authorizeNutrients(for entry: NativeNutritionEntry) async -> Set<String> { [] }
 }
 
 @MainActor final class NativeHealthNutritionWriter: NativeNutritionWriting {
@@ -64,12 +71,24 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
         try await health.requestAuthorization(toShare: Set(types), read: [])
         guard types.allSatisfy({ health.authorizationStatus(for: $0) == .sharingAuthorized }) else { throw Message(text: "Autorizza la scrittura di tutti i macronutrienti e delle calorie in Apple Salute.") }
     }
+    func authorizeNutrients(for entry: NativeNutritionEntry) async -> Set<String> {
+        let candidates = (entry.nutrientValues ?? [:]).keys.compactMap { key -> (String, HKQuantityType)? in
+            guard let type = Self.nutrientType(for: key) else { return nil }
+            return (key, type)
+        }
+        guard !candidates.isEmpty else { return [] }
+        let unrequested = candidates.map { $0.1 }.filter { health.authorizationStatus(for: $0) == .notDetermined }
+        if !unrequested.isEmpty {
+            try? await health.requestAuthorization(toShare: Set(unrequested), read: [])
+        }
+        return Set(candidates.filter { health.authorizationStatus(for: $0.1) == .sharingAuthorized }.map { $0.0 })
+    }
     func write(_ entry: NativeNutritionEntry) async throws {
         try await health.save(Self.samples(for: entry))
     }
     static func samples(for entry: NativeNutritionEntry) -> [HKQuantitySample] {
         let amounts = [entry.protein, entry.carbohydrate, entry.fat, entry.calories] + (entry.fibre.map { [$0] } ?? [])
-        return zip(identifiers, amounts).enumerated().map { index, pair in
+        let base = zip(identifiers, amounts).enumerated().map { index, pair in
             var metadata: [String: Any] = [
                 HKMetadataKeySyncIdentifier: "lifeos-nutrition-\(entry.id.uuidString)-\(index)",
                 HKMetadataKeySyncVersion: NSNumber(value: entry.revision)
@@ -78,14 +97,63 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
             return HKQuantitySample(type: HKObjectType.quantityType(forIdentifier: pair.0)!, quantity: HKQuantity(unit: index == 3 ? .kilocalorie() : .gram(), doubleValue: NSDecimalNumber(decimal: pair.1).doubleValue), start: entry.date, end: entry.date,
                 metadata: metadata)
         }
+        let additional = (entry.sharedNutrientKeys ?? []).compactMap { key -> HKQuantitySample? in
+            guard let nutrient = NativeTrackedNutrient(rawValue: key), let type = nutrientType(for: key),
+                  let value = entry.nutrientValues?[key] else { return nil }
+            var metadata: [String: Any] = [
+                HKMetadataKeySyncIdentifier: nutrientSyncID(for: entry, key: key),
+                HKMetadataKeySyncVersion: NSNumber(value: entry.revision)
+            ]
+            if let name = entry.foodName { metadata[HKMetadataKeyFoodType] = name }
+            if let estimate = value.estimateSource { metadata["LifeOSNutrientEstimateSource"] = estimate }
+            let unit = HKUnit.gramUnit(with: nutrient.unit == "µg" ? .micro : .milli)
+            return HKQuantitySample(type: type, quantity: HKQuantity(unit: unit, doubleValue: NSDecimalNumber(decimal: value.amount).doubleValue),
+                                    start: entry.date, end: entry.date, metadata: metadata)
+        }
+        return base + additional
     }
+
+    private static func nutrientType(for key: String) -> HKQuantityType? {
+        let identifier: HKQuantityTypeIdentifier? = switch NativeTrackedNutrient(rawValue: key) {
+        case .vitaminC: .dietaryVitaminC
+        case .zinc: .dietaryZinc
+        case .vitaminA: .dietaryVitaminA
+        case .vitaminD: .dietaryVitaminD
+        case .vitaminE: .dietaryVitaminE
+        case .vitaminB1: .dietaryThiamin
+        case .vitaminB2: .dietaryRiboflavin
+        case .vitaminB3: .dietaryNiacin
+        case .vitaminB5: .dietaryPantothenicAcid
+        case .vitaminB6: .dietaryVitaminB6
+        case .vitaminB12: .dietaryVitaminB12
+        case .calcium: .dietaryCalcium
+        case .chloride: .dietaryChloride
+        case .copper: .dietaryCopper
+        case .iron: .dietaryIron
+        case .iodine: .dietaryIodine
+        case .magnesium: .dietaryMagnesium
+        case .manganese: .dietaryManganese
+        case .phosphorus: .dietaryPhosphorus
+        case .potassium: .dietaryPotassium
+        case .selenium: .dietarySelenium
+        case .sodium: .dietarySodium
+        default: nil
+        }
+        return identifier.flatMap { HKObjectType.quantityType(forIdentifier: $0) }
+    }
+
+    private static func nutrientSyncID(for entry: NativeNutritionEntry, key: String) -> String {
+        "lifeos-nutrition-\(entry.id.uuidString)-nutrient-\(key)"
+    }
+
     func delete(_ entry: NativeNutritionEntry) async throws {
-        // deleteObjects only removes samples created by this application.
-        // Preserve the original four indices; fibre is appended at index 4.
-        for (index, identifier) in Self.identifiers.prefix(entry.fibre == nil ? 4 : 5).enumerated() {
-            let type = HKObjectType.quantityType(forIdentifier: identifier)!
+        // Use the same IDs and types as write, including only the optional samples
+        // authorized at the time of the write, even if permission has since changed.
+        for sample in Self.samples(for: entry) {
+            guard let syncID = sample.metadata?[HKMetadataKeySyncIdentifier] as? String else { continue }
+            let type = sample.quantityType
             let predicate = HKQuery.predicateForObjects(withMetadataKey: HKMetadataKeySyncIdentifier,
-                allowedValues: ["lifeos-nutrition-\(entry.id.uuidString)-\(index)"])
+                allowedValues: [syncID])
             try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
                 health.deleteObjects(of: type, predicate: predicate) { success, _, error in
                     if let error { continuation.resume(throwing: error) }
@@ -142,6 +210,10 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
             if retry, let old, !old.confirmed { pending = old }
             else {
                 pending.revision = (old?.revision ?? 0) + 1; pending.confirmed = false
+                let authorized = await writer.authorizeNutrients(for: pending)
+                let previouslyShared = Set(old?.sharedNutrientKeys ?? [])
+                let shareKeys = previouslyShared.union(authorized).sorted()
+                pending.sharedNutrientKeys = shareKeys.isEmpty ? nil : shareKeys
                 try persist(entries.filter { $0.id != pending.id } + [pending])
             }
             try await writer.write(pending)

@@ -42,6 +42,26 @@ final class NativeNutritionEntryTests: XCTestCase {
         XCTAssertEqual(NativeGenericFood.matches("tagine pollo").first?.id, "ciqual-25204")
     }
 
+    func testNutrientsUseEdiblePortionAndReportMissingDays() throws {
+        let food = try XCTUnwrap(NativeGenericFood.matches("Coscia di pollo al forno con pelle").first)
+        let per100 = try XCTUnwrap(food.nutrientValues?["zinc"])
+        var entry = try XCTUnwrap(food.portion(id: UUID(), date: Date(), grams: 200, weighedWithBone: true))
+        let zinc = try XCTUnwrap(entry.nutrientValues?["zinc"])
+        XCTAssertEqual(zinc.amount, per100.amount * 142 / 100)
+        XCTAssertEqual(zinc.estimateSource, per100.estimateSource)
+        let old = try XCTUnwrap(NativeNutritionEntry.direct(id: UUID(), date: Date(), protein: 10, carbohydrate: 0, fat: 0, fibre: 0))
+        XCTAssertNil(old.nutrientValues)
+        let week = NativeNutrientPeriod(.zinc, days: [[entry, old], [old], []])
+        XCTAssertEqual(week.amount, zinc.amount)
+        XCTAssertEqual(week.daysWithValues, 1)
+        XCTAssertEqual(week.daysWithEntries, 2)
+        XCTAssertTrue(week.partial)
+        XCTAssertNil(NativeNutrientPeriod(.zinc, days: [[old], []]).amount)
+        XCTAssertNil(NativeNutrientProfile.unset.reference(for: .zinc))
+        entry.confirmed = true
+        XCTAssertEqual(try JSONDecoder().decode(NativeNutritionEntry.self, from: JSONEncoder().encode(entry)), entry)
+    }
+
     func testItalianDecimalsAndFourFourNineCalculation() {
         let entry = NativeNutritionEntry(id: UUID(), revision: 1, date: Date(), protein: 10, carbohydrate: 20, fat: 5, confirmed: false)
         XCTAssertEqual(entry.calories, 165)

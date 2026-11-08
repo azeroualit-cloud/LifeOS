@@ -20,6 +20,25 @@ import HealthKit
         XCTAssertEqual(NativeHealthNutritionWriter.samples(for: legacy).count, 4)
         XCTAssertEqual(NativeHealthNutritionWriter.samples(for: legacy)[3].quantity.doubleValue(for: .kilocalorie()), 165)
     }
+    func testAuthorizedCatalogNutrientsUseStableIDsAndCorrectMassUnits() throws {
+        var entry = NativeNutritionEntry(id: UUID(), revision: 2, date: Date(), protein: 1, carbohydrate: 2, fat: 3, confirmed: false)
+        entry.nutrientValues = [
+            "vitaminC": .init(amount: 15, estimateSource: nil),
+            "vitaminB12": .init(amount: 2, estimateSource: "ciqual-test"),
+            "zinc": .init(amount: 4, estimateSource: nil)
+        ]
+        entry.sharedNutrientKeys = ["vitaminC", "vitaminB12"]
+        let samples = NativeHealthNutritionWriter.samples(for: entry)
+        XCTAssertEqual(samples.count, 6)
+        let vitaminC = try XCTUnwrap(samples.first { $0.quantityType.identifier == HKQuantityTypeIdentifier.dietaryVitaminC.rawValue })
+        let vitaminB12 = try XCTUnwrap(samples.first { $0.quantityType.identifier == HKQuantityTypeIdentifier.dietaryVitaminB12.rawValue })
+        XCTAssertEqual(vitaminC.quantity.doubleValue(for: .gramUnit(with: .milli)), 15, accuracy: 0.0001)
+        XCTAssertEqual(vitaminB12.quantity.doubleValue(for: .gramUnit(with: .micro)), 2, accuracy: 0.0001)
+        XCTAssertEqual(vitaminB12.metadata?[HKMetadataKeySyncIdentifier] as? String,
+                       "lifeos-nutrition-\(entry.id.uuidString)-nutrient-vitaminB12")
+        XCTAssertEqual(vitaminB12.metadata?["LifeOSNutrientEstimateSource"] as? String, "ciqual-test")
+    }
+
     func testEveryEnergyEntryContributesToItsLocalDay() {
         let type = HKObjectType.quantityType(forIdentifier: .dietaryEnergyConsumed)!
         let today = Calendar.current.startOfDay(for: Date())

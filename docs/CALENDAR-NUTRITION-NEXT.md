@@ -35,9 +35,9 @@ Verifica: apertura da mese e Dashboard, calendario senza impegni, giorno con eve
 - Per i cocktail registrare le bevande standard stimate dalla ricetta. Apple Salute espone un conteggio delle bevande e un tipo separato per l’alcol nel sangue. [Bevande alcoliche in HealthKit](https://developer.apple.com/documentation/healthkit/hkquantitytypeidentifier/numberofalcoholicbeverages)
 - Conservare gli identificativi HealthKit storici per macro, calorie e fibre. Assegnare un identificativo stabile per i campioni aggiuntivi, mantenere retry e cancellazione coerenti e testare i permessi parziali. La mancata autorizzazione di un dato aggiuntivo va resa visibile senza bloccare una registrazione alimentare già consentita.
 
-## Monitoraggio micronutrienti — proposta
+## Monitoraggio micronutrienti — build 86
 
-In Salute, aprire **Micronutrienti** da un collegamento nella scheda Nutrienti. Mostrare prima i preferiti modificabili. Selezione proposta: vitamina C e zinco per l’interesse per pelle e capelli, poi ferro, B12, magnesio e vitamina D per il quadro generale. Offrire il resto dei nutrienti quando la fonte li copre.
+Nella build 86, Salute → **Micronutrienti** apre vitamina C e zinco come preferiti iniziali. I preferiti si possono modificare e gli altri valori sono in Tutti i micronutrienti. L’app calcola i valori dalla porzione edibile registrata, indica le stime e mostra la copertura della media. Apple Salute riceve i nutrienti supportati per i quali l’utente concede il permesso.
 
 Ogni riga mostra apporto registrato oggi, unità, riferimento giornaliero per il gruppo pertinente e media dei giorni registrati negli ultimi 7 giorni, con indicatore visibile di copertura. Un giorno non registrato non entra nella media come zero. Se mancano nutrienti nel diario, mostrare «Dati parziali» o «Dati insufficienti», senza segnalare una carenza. Nel dettaglio, distinguere gli apporti calcolati dal catalogo e le eventuali fonti Apple Salute, senza contare due volte la stessa porzione.
 

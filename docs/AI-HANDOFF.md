@@ -1,6 +1,6 @@
 # LifeOS — punto di ingresso per qualsiasi IA
 
-**Micronutrienti.** Registrato HEALTH-MICRO-TARGETS-01. Proposta per preferiti, riferimenti e copertura dei giorni registrati in [Calendario e Nutrizione](CALENDAR-NUTRITION-NEXT.md#monitoraggio-micronutrienti--proposta). Audit Ciqual effettuato sul catalogo da 192 voci. L’utente ha confermato che i micronutrienti arrivano dagli alimenti del database, con stime documentate ove possibile. Approccio dei riferimenti per profilo validato. Preferiti e valori personali restano da concordare. La proposta distingue riferimenti per profilo, omega-3 e creatina. Attuazione in attesa di approvazione DEV-02.
+**Build 86 (0.10.24), rilascio autorizzato.** Aggiunge vitamina C e zinco in primo piano in Salute → Micronutrienti, dettaglio consultabile, riferimenti per profilo, copertura del diario e scrittura Apple Salute per i valori supportati e autorizzati. La pipeline richiede suite completa, quattro avvii Release e verifica dell’IPA prima della pubblicazione.
 
 **Build 85 (0.10.23), rilascio autorizzato.** Include la vista Giorno con ritorno diretto al Mese, il catalogo senza maiale con piatti marocchini, la pesatura con osso e gli aggiornamenti visivi del ramo corrente. Pubblicazione su GitHub Releases dopo suite completa, quattro avvii Release e verifica del pacchetto. [Collaudo e pubblicazione](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42496148533) in corso sul commit `646e708`.
 
@@ -10,7 +10,7 @@
 
 **Revisione post build 84.** Prima tranche nel sorgente: 188 alimenti Ciqual e icone per famiglia, Calendario mensile e Dashboard, pulsanti Categorie di Attività in Liquid Glass, contrasto e tastiera del pannello Nutrizione, bordi e padding di Salute. [Verifica simulatore](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42493721112) in corso su `b7bb685`. La [proposta per agenda e dati nutrizionali](CALENDAR-NUTRITION-NEXT.md) dettaglia i passaggi aperti.
 
-**Build 84 (0.10.22), rilascio autorizzato.** Include il calendario a tutta larghezza in Nutrizione. Pubblicazione su GitHub Releases dopo suite completa, quattro avvii Release e verifica del pacchetto. [Collaudo e pubblicazione](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42491009239) in corso sul commit `d31c640`.
+**Build 84 (0.10.22).** Suite completa, quattro avvii Release e pacchetto verificati sul commit `d31c640`. La creazione della release GitHub ha restituito HTTP 403. [Artefatto Actions con IPA e checksum](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42491009239/artifacts/13624595609).
 
 **NUTRITION-DATE-CLIP-01, 8 novembre 2026.** Il calendario era tagliato su iPhone, anche nel flusso con «Cerca alimento». La correzione approvata apre Data in un foglio a tutta larghezza con Fine e Annulla e conserva i nutrienti inseriti. Registrata la [regola UX-DATE-PICKER-01](USER-DECISIONS.md#ux-date-picker-01--active-8-novembre-2026). [Verifica al simulatore](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42481363683) superata sul commit `c2c7e8b`, con testo standard e grande. Prova su iPhone ancora aperta.
 
