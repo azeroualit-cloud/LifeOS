@@ -8,7 +8,7 @@
   "source_of_truth": "native-next overlay assembled through .github/actions/native-compat76/action.yml",
   "native_source_fingerprint": {
     "algorithm": "SHA-256 over sorted tracked native-next paths, NUL, file bytes, NUL",
-    "sha256": "0c7a83b66d53d3fdd9207ce0798d4f8e3f1de1986f3c67803b9562b046a185ff"
+    "sha256": "2109bf2369a58f9a2d93538ea407f84fff1b48014f8f22fdd8568cb44670f980"
   },
   "latest_distributed_build": {
     "version": "0.10.21",
@@ -130,6 +130,12 @@
     "release_tag": "ios-0.10.25-build87",
     "validation": "375 prove superate, 3 fallite in Nutrizione con testo accessibile. Quattro avvii Release superati. Packaging saltato.",
     "published": false
+  },
+  "nutrition_keyboard_preflight": {
+    "source_commit": "b64edfa0a140027afef646968e1a1ccd90a76939",
+    "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42509002706",
+    "validation": "Anteprima mirata in corso per il foglio Nutrizione con tastiera e testo accessibile.",
+    "new_ipa": false
   },
   "backend": {
     "last_documented_utilities_deploy_run": "41630715615",
