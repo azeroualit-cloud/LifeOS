@@ -106,7 +106,7 @@
     "source_commit": "646e708c8d156ce2843a4ab51095041099dac3e4",
     "release_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42496148533",
     "release_tag": "ios-0.10.23-build85",
-    "validation": "Suite completa, quattro avvii Release e verifica IPA prima della pubblicazione",
+    "validation": "372 prove superate, 3 fallite in Nutrizione con testo accessibile. Quattro avvii Release superati. Packaging saltato.",
     "published": false
   },
   "production_candidate_86": {
@@ -117,7 +117,7 @@
     "source_commit": "d3f94e97b8709d99a42f3ee5cf072b35bd7f66ef",
     "release_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42498975363",
     "release_tag": "ios-0.10.24-build86",
-    "validation": "In corso. Suite completa e quattro avvii Release prima di confezionare e verificare l’IPA.",
+    "validation": "375 prove superate, 3 fallite in Nutrizione con testo accessibile. Quattro avvii Release superati. Packaging saltato.",
     "published": false
   },
   "production_candidate_87": {
@@ -128,7 +128,7 @@
     "source_commit": "42d083dfba331205d6943a584fb8b1d92226b22a",
     "release_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42501436059",
     "release_tag": "ios-0.10.25-build87",
-    "validation": "Collaudo avviato. Suite completa, quattro avvii Release e verifica IPA prima della pubblicazione.",
+    "validation": "375 prove superate, 3 fallite in Nutrizione con testo accessibile. Quattro avvii Release superati. Packaging saltato.",
     "published": false
   },
   "backend": {

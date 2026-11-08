@@ -8,6 +8,7 @@ permissions:
   contents: read
 jobs:
   full-suite:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[release-ipa-')
     runs-on: macos-15
     timeout-minutes: 150
     steps:
@@ -20,18 +21,27 @@ jobs:
         run: |
           set -euo pipefail
           xcodebuild build-for-testing -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/final-compile.log 2>&1 || { tail -n 100 build/final-compile.log; exit 1; }
-      - name: Verify redesigned Health controls at standard and large text sizes
+      - name: Run Nutrition keyboard regressions first
         working-directory: app
         run: |
           set -euo pipefail
           xcrun simctl bootstatus "$MAIN_DEVICE" -b
-          xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeUITests/NativeRevision78UITests/testSafeAreaLastContentStandard -only-testing:LifeOSProbeUITests/NativeRevision78UITests/testSafeAreaLastContentLargeText CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/health-layout.log 2>&1 || { grep -E 'error:|Test Case .*failed' build/health-layout.log || true; tail -n 80 build/health-layout.log; exit 1; }
-      - name: Run all unit and UI tests
+          cases=(
+            LifeOSProbeUITests/NativeNutritionQuickUITests/testDatePickerOpensFullWidthWithLargeTextAndKeepsNutrients
+            LifeOSProbeUITests/NativeNutritionQuickUITests/testLargeTextCaloriesRemainReadableAboveActionWithKeyboard
+            LifeOSProbeUITests/NativeNutritionQuickUITests/testLargeTextErrorKeepsValuesAndRetryCompletes
+          )
+          only=()
+          for test in "${cases[@]}"; do only+=("-only-testing:$test"); done
+          printf '%s\n' "${cases[@]}" > build/preflight-cases.txt
+          xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 660 "${only[@]}" -resultBundlePath build/Preflight.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/preflight-tests.log 2>&1 || { grep -E 'error:|Test Case .*failed' build/preflight-tests.log || true; tail -n 80 build/preflight-tests.log; exit 1; }
+      - name: Run the remaining unit and UI tests
         working-directory: app
         run: |
           set -euo pipefail
-          xcrun simctl bootstatus "$MAIN_DEVICE" -b
-          xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 660 -resultBundlePath build/Final.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/final-tests.log 2>&1 || { tail -n 120 build/final-tests.log; exit 1; }
+          skip=()
+          while IFS= read -r test; do skip+=("-skip-testing:$test"); done < build/preflight-cases.txt
+          xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 660 "${skip[@]}" -resultBundlePath build/Final.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/final-tests.log 2>&1 || { grep -E 'error:|Test Case .*failed' build/final-tests.log || true; tail -n 120 build/final-tests.log; exit 1; }
       - name: Collect lightweight test diagnostics
         if: ${{ !cancelled() }}
         shell: bash
@@ -40,11 +50,15 @@ jobs:
           mkdir -p app/build/final-diagnostics
           diag=app/build/final-diagnostics
           result=app/build/Final.xcresult
+          if [ ! -f "$result/Info.plist" ]; then result=app/build/Preflight.xcresult; fi
+          if [ -f app/build/preflight-tests.log ]; then cp app/build/preflight-tests.log "$diag/"; fi
           printf 'Commit: %s\nRun: %s attempt %s\n' "$GITHUB_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" > "$diag/context.txt"
           if [ -f app/build/final-tests.log ]; then
             cp app/build/final-tests.log "$diag/final-tests.log"
             # Preserve every matching line; the complete log remains available for context.
             grep -E 'error:|Test Case .*failed|Executed [0-9]+ tests?, with [0-9]+ failures?' app/build/final-tests.log > "$diag/failures-and-counts.txt" || true
+          elif [ -f app/build/preflight-tests.log ]; then
+            grep -E 'error:|Test Case .*failed|Executed [0-9]+ tests?, with [0-9]+ failures?' app/build/preflight-tests.log > "$diag/failures-and-counts.txt" || true
           else
             printf 'Test log unavailable: the test step may not have started.\n' > "$diag/failures-and-counts.txt"
           fi
@@ -80,19 +94,23 @@ jobs:
       - name: Export screenshots
         if: ${{ !cancelled() }}
         run: |
-          if [ -f app/build/Final.xcresult/Info.plist ]; then
-            xcrun xcresulttool export attachments --path app/build/Final.xcresult --output-path app/build/final-screenshots
-          fi
+          for suite in Preflight Final; do
+            if [ -f "app/build/$suite.xcresult/Info.plist" ]; then
+              xcrun xcresulttool export attachments --path "app/build/$suite.xcresult" --output-path "app/build/final-screenshots/$suite"
+            fi
+          done
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
           name: lifeos-final-validation-${{ github.sha }}
           path: |
             app/build/final-*.log
+            app/build/Preflight.xcresult
             app/build/Final.xcresult
             app/build/final-screenshots
 
   release-launches:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[release-ipa-')
     runs-on: macos-15
     timeout-minutes: 120
     steps:

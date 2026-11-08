@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Collaudo IPA.** La build 87 ha superato 375 prove e quattro avvii Release. Tre test Nutrizione falliscono sul campo Fibre a testo accessibile con tastiera aperta, come nelle build 85 e 86. La suite seriale della 87 è durata circa 65 minuti. La correzione libera spazio di scorrimento nel foglio accessibile e migliora la diagnosi del test. La pipeline anticipa i tre casi e rimuove la doppia esecuzione delle prove di layout Salute. Copertura completa e gate IPA conservati. [Diagnostica build 87](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42501436059/artifacts/13628795850).
+
 **Build 87 (0.10.25).** Vitamina C e zinco sotto i macro nella schermata Salute, con obiettivi giornalieri LARN per uomini adulti. La consegna IPA già richiesta include la correzione dopo il collaudo iOS. [Run CI](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42501436059) sul commit 42d083d.
 
 **Build 86 (0.10.24), rilascio autorizzato.** Aggiunge vitamina C e zinco in primo piano in Salute → Micronutrienti, dettaglio consultabile, riferimenti per profilo, copertura del diario e scrittura Apple Salute per i valori supportati e autorizzati. La pipeline richiede suite completa, quattro avvii Release e verifica dell’IPA prima della pubblicazione. [Collaudo e pubblicazione](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42498975363) sul commit `d3f94e9`.

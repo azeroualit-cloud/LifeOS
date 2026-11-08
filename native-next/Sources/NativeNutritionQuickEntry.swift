@@ -92,11 +92,14 @@ struct NativeNutritionQuickSheet: View {
                         .background(NativeDesign.nutritionInput, in: Circle())
                 }.buttonStyle(.plain).disabled(nutrition.busy).accessibilityLabel("Chiudi").accessibilityIdentifier("quick-nutrition-close")
             }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.top, typeSize.isAccessibilitySize ? NativeDesign.Space.small : NativeDesign.Space.large)
-            catalogButton
-                .padding(.horizontal, NativeDesign.Layout.screenInset)
-                .padding(.top, NativeDesign.Space.small)
+            if !typeSize.isAccessibilitySize {
+                catalogButton
+                    .padding(.horizontal, NativeDesign.Layout.screenInset)
+                    .padding(.top, NativeDesign.Space.small)
+            }
             ScrollView {
                 VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
+                    if typeSize.isAccessibilitySize { catalogButton }
                     if let selectedFood {
                         VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
                             Text(selectedFood.name).font(.headline)

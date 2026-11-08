@@ -27,29 +27,38 @@ final class NativeNutritionQuickUITests: XCTestCase {
     private func capture(_ name: String, _ app: XCUIApplication) {
         let screen = XCTAttachment(screenshot: XCUIScreen.main.screenshot()); screen.name = name + " full screen"; screen.lifetime = .keepAlways; add(screen)
     }
-    private func drag(_ scroll: XCUIElement, app: XCUIApplication, up: Bool) {
+    private func drag(_ scroll: XCUIElement, app: XCUIApplication, up: Bool, fraction: CGFloat = 1) {
         let origin = app.coordinate(withNormalizedOffset: .zero)
         let bottom = min(scroll.frame.maxY, app.descendants(matching: .any).matching(identifier: "quick-nutrition-footer").firstMatch.frame.minY) - 12
         let top = scroll.frame.minY + 12
         XCTAssertGreaterThan(bottom, top)
-        origin.withOffset(CGVector(dx: scroll.frame.midX, dy: up ? bottom : top)).press(forDuration: 0.05, thenDragTo: origin.withOffset(CGVector(dx: scroll.frame.midX, dy: up ? top : bottom)))
+        let start = up ? bottom : top
+        let end = start + (up ? -1 : 1) * (bottom - top) * fraction
+        origin.withOffset(CGVector(dx: scroll.frame.midX, dy: start))
+            .press(forDuration: 0.05, thenDragTo: origin.withOffset(CGVector(dx: scroll.frame.midX, dy: end)))
+    }
+    private func visibleRegion(in app: XCUIApplication) -> CGRect {
+        let scroll = app.scrollViews["quick-nutrition-scroll"].frame
+        let footerTop = app.descendants(matching: .any).matching(identifier: "quick-nutrition-footer").firstMatch.frame.minY
+        return CGRect(x: scroll.minX, y: scroll.minY + 1, width: scroll.width, height: max(0, min(scroll.maxY, footerTop) - scroll.minY - 2))
     }
     private func visible(_ element: XCUIElement, in app: XCUIApplication) -> Bool {
         guard element.exists else { return false }
-        let scroll = app.scrollViews["quick-nutrition-scroll"].frame
-        let bottom = min(scroll.maxY, app.descendants(matching: .any).matching(identifier: "quick-nutrition-footer").firstMatch.frame.minY)
+        let region = visibleRegion(in: app)
         let frame = element.frame
-        return frame.minY >= scroll.minY + 1 && frame.maxY <= bottom - 1
+        return frame.minY >= region.minY && frame.maxY <= region.maxY
     }
     private func fill(_ app: XCUIApplication) {
         let scroll = app.scrollViews["quick-nutrition-scroll"]
         for (label, value) in [("Proteine", "25"), ("Carboidrati", "40"), ("Grassi", "10"), ("Fibre", "6")] {
             let field = app.textFields["quick-nutrition-" + label]
-            for _ in 0..<6 {
+            for _ in 0..<8 {
                 if visible(field, in: app) { break }
-                drag(scroll, app: app, up: true)
+                let up = !field.exists || field.frame.midY >= visibleRegion(in: app).midY
+                drag(scroll, app: app, up: up, fraction: 0.5)
             }
-            XCTAssertTrue(visible(field, in: app), "Input must be above the pinned action and keyboard")
+            XCTAssertTrue(visible(field, in: app),
+                          "\(label) must be above the pinned action and keyboard: field \(field.frame), viewport \(visibleRegion(in: app))")
             XCTAssertTrue(field.isHittable); field.tap(); field.typeText(value)
         }
     }
