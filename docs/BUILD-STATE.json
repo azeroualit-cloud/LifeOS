@@ -80,6 +80,7 @@
   "post_build_84_ui_catalog": {
     "status": "implemented_pending_simulator",
     "generic_food_count": 188,
+    "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42493721112",
     "open_scope": ["calendar day redesign", "cocktail recipes and alcohol", "micronutrients", "personal generic foods"],
     "includes_new_ipa": false
   },

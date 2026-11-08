@@ -1,6 +1,6 @@
 # LifeOS — punto di ingresso per qualsiasi IA
 
-**Revisione post build 84.** Prima tranche nel sorgente: 188 alimenti Ciqual e icone per famiglia, Calendario mensile e Dashboard, pulsanti Categorie di Attività in Liquid Glass, contrasto e tastiera del pannello Nutrizione, bordi e padding di Salute. Verifica simulatore da acquisire. La [proposta per agenda e dati nutrizionali](CALENDAR-NUTRITION-NEXT.md) dettaglia i passaggi aperti.
+**Revisione post build 84.** Prima tranche nel sorgente: 188 alimenti Ciqual e icone per famiglia, Calendario mensile e Dashboard, pulsanti Categorie di Attività in Liquid Glass, contrasto e tastiera del pannello Nutrizione, bordi e padding di Salute. [Verifica simulatore](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42493721112) in corso su `b7bb685`. La [proposta per agenda e dati nutrizionali](CALENDAR-NUTRITION-NEXT.md) dettaglia i passaggi aperti.
 
 **Build 84 (0.10.22), rilascio autorizzato.** Include il calendario a tutta larghezza in Nutrizione. Pubblicazione su GitHub Releases dopo suite completa, quattro avvii Release e verifica del pacchetto. [Collaudo e pubblicazione](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42491009239) in corso sul commit `d31c640`.
 
