@@ -278,3 +278,7 @@ In LifeOS Salute, poter scegliere micronutrienti da seguire e confrontare gli ap
 Precisazione utente, 8 novembre 2026: «i micronutrienti non li inserisco dall'aggiunta rapida ma solo dagli alimenti nel database, se mancano dei valori puoi stimarli te e così da vere un database completo, ma siamo sicuri che questi sono i micronutrienti che mi interessano per massimizzare l'attrazione?».
 
 I micronutrienti sono calcolati dalle voci del database e dalle quantità consumate. L’aggiunta rapida manuale conserva i soli campi attuali. Per aumentare la copertura, l’utente autorizza stime motivate con fonte e metodo, marcate come stime. Un valore senza base affidabile resta non disponibile. I preferiti restano da concordare e non sono obiettivi estetici.
+
+Seguito utente, 8 novembre 2026: «ok, e come obiettivo giornaliero puntiamo su una stima in base alla mia età sesso ecc? se non importa andare oltre quell'alimento è anche meglio da un punto di vista. E invece per omega3 e creatina non contano?».
+
+Direzione proposta: riferimento alimentare per fascia di età e sesso ove cambi il valore. Confronto con la media degli apporti registrati. Il raggiungimento non incentiva l’eccesso. Nessun numero personale fissato. Omega-3 e creatina sono oggetto di discussione e restano distinti dai micronutrienti.

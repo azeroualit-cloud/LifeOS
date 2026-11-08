@@ -54,3 +54,11 @@ L’inserimento rapido manuale continua a registrare i valori già previsti. I m
 Per riempire un campo mancante, cercare prima lo stesso alimento e la stessa preparazione in una tabella affidabile. Poi usare un calcolo dagli ingredienti o un alimento comparabile, compatibile per taglio, preparazione e fortificazione. Salvare fonte, unità e stato del dato. Mostrare «Stimato» quando si usa una ricetta o un sostituto. Tracce, limiti di quantificazione, zero e assenza restano distinti. [Linee guida FAO/INFOODS](https://www.fao.org/infoods/infoods/standards-guidelines/en/).
 
 Vitamina C e zinco sono candidati iniziali per la pertinenza a pelle e capelli. Ferro, B12, magnesio e D restano opzioni generali, non preferiti fissi. I riferimenti alimentari sono una guida per l’adeguatezza e non un indice di attrattività. [Vitamina C](https://ods.od.nih.gov/factsheets/VitaminC-HealthProfessional/) · [Zinco](https://ods.od.nih.gov/factsheets/Zinc-HealthProfessional/) · [American Academy of Dermatology](https://www.aad.org/public/diseases/hair-loss/treatment/diagnosis-treat/).
+
+### Riferimenti per profilo, omega-3 e creatina
+
+Selezionare i valori LARN o EFSA dalla fascia di età e dal sesso quando il riferimento varia, con stato fisiologico pertinente su scelta dell’utente. Conservare fonte e tipo di riferimento. Mostrare l’apporto reale e un indicatore di riferimento raggiunto. Un limite superiore di sicurezza è un concetto distinto. [Riferimenti EFSA](https://www.efsa.europa.eu/en/topics/topic/dietary-reference-values).
+
+Possibile estensione **Grassi → Omega-3**, con ALA ed EPA+DHA distinti e media settimanale. EFSA usa 250 mg al giorno di EPA+DHA come assunzione adeguata per gli adulti. [EFSA, tabella 2](https://www.efsa.europa.eu/sites/default/files/2017_09_DRVs_summary_report.pdf).
+
+**Creatina** come abitudine o integrazione facoltativa, indipendente dagli obiettivi di adeguatezza. È pertinente soprattutto a sforzi brevi e intensi ripetuti e all’allenamento di forza. Può aumentare il peso per ritenzione d’acqua. Nessuna dose automatica. [NIH ODS](https://ods.od.nih.gov/factsheets/ExerciseAndAthleticPerformance-HealthProfessional/).

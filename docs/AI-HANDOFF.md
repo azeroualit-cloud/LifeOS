@@ -1,6 +1,6 @@
 # LifeOS — punto di ingresso per qualsiasi IA
 
-**Micronutrienti.** Registrato HEALTH-MICRO-TARGETS-01. Proposta per preferiti, riferimenti e copertura dei giorni registrati in [Calendario e Nutrizione](CALENDAR-NUTRITION-NEXT.md#monitoraggio-micronutrienti--proposta). Audit Ciqual effettuato sul catalogo da 192 voci. L’utente ha confermato che i micronutrienti arrivano dagli alimenti del database, con stime documentate ove possibile. I preferiti restano da concordare. Attuazione in attesa di approvazione DEV-02.
+**Micronutrienti.** Registrato HEALTH-MICRO-TARGETS-01. Proposta per preferiti, riferimenti e copertura dei giorni registrati in [Calendario e Nutrizione](CALENDAR-NUTRITION-NEXT.md#monitoraggio-micronutrienti--proposta). Audit Ciqual effettuato sul catalogo da 192 voci. L’utente ha confermato che i micronutrienti arrivano dagli alimenti del database, con stime documentate ove possibile. Preferiti e riferimenti personali restano da concordare. La proposta distingue riferimenti per profilo, omega-3 e creatina. Attuazione in attesa di approvazione DEV-02.
 
 **Build 85 (0.10.23), rilascio autorizzato.** Include la vista Giorno con ritorno diretto al Mese, il catalogo senza maiale con piatti marocchini, la pesatura con osso e gli aggiornamenti visivi del ramo corrente. Pubblicazione su GitHub Releases dopo suite completa, quattro avvii Release e verifica del pacchetto. [Collaudo e pubblicazione](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42496148533) in corso sul commit `646e708`.
 
