@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "reported_on": "2026-11-06",
+  "reported_on": "2026-11-08",
   "project": "LifeOS",
   "default_branch": "main",
   "working_branch": "codex/revision77",
@@ -8,7 +8,7 @@
   "source_of_truth": "native-next overlay assembled through .github/actions/native-compat76/action.yml",
   "native_source_fingerprint": {
     "algorithm": "SHA-256 over sorted tracked native-next paths, NUL, file bytes, NUL",
-    "sha256": "9f018c8ea7d0f69110923563055fa7644227d3872354df80fff123df8bd9c529"
+    "sha256": "2dc6d69896110056358a0d8b25dcdf9b2bbdadf1d02c74ff903ffc2edcf2d8f2"
   },
   "latest_distributed_build": {
     "version": "0.10.21",
@@ -74,7 +74,8 @@
     "source_commit": "d31c640940a0de6130a01c9b584f8d5fb231965a",
     "release_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42491009239",
     "release_tag": "ios-0.10.22-build84",
-    "validation": "Suite completa, quattro avvii Release e verifica IPA prima della pubblicazione",
+    "validation": "Suite completa, quattro avvii Release e pacchetto verificati. GitHub Releases ha restituito HTTP 403.",
+    "artifact": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42491009239/artifacts/13624595609",
     "published": false
   },
   "post_build_84_ui_catalog": {
@@ -106,6 +107,17 @@
     "release_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42496148533",
     "release_tag": "ios-0.10.23-build85",
     "validation": "Suite completa, quattro avvii Release e verifica IPA prima della pubblicazione",
+    "published": false
+  },
+  "production_candidate_86": {
+    "version": "0.10.24",
+    "build": 86,
+    "authorization": "HEALTH-MICRO-TARGETS-01",
+    "candidate_ref": "codex/revision77",
+    "source_commit": "d3f94e97b8709d99a42f3ee5cf072b35bd7f66ef",
+    "release_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42498975363",
+    "release_tag": "ios-0.10.24-build86",
+    "validation": "In corso. Suite completa e quattro avvii Release prima di confezionare e verificare l’IPA.",
     "published": false
   },
   "backend": {

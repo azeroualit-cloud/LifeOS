@@ -1,5 +1,9 @@
 # LifeOS — correzioni e difetti aperti
 
+**Build 86.** Collaudo iOS in corso sul sorgente `d3f94e9`. Verifica fisica della scrittura Apple Salute dopo firma e installazione. [Run CI](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42498975363).
+
+**Build 84.** IPA verificata. La pubblicazione su GitHub Releases ha restituito HTTP 403. [Artefatto Actions](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42491009239/artifacts/13624595609).
+
 **Agenda Giorno.** L’utente ha scelto la lista compatta e richiesto il ritorno diretto al Mese. Implementati apertura da mese o striscia Dashboard, frecce, turno, sezioni dell’agenda e Aggiungi evento in basso. Mese resta alla posizione originaria. [Collaudo iOS](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42495836333) sul commit `444f31d`.
 
 **Catalogo halal e marocchino.** Escluse nove voci di maiale o con carne non identificata. Aggiunte tredici voci, comprese varianti di couscous, tajine e pastilla. Sette voci supportano il peso con osso con stima edibile. [Verifica iOS](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42494307645) sul commit `20ea12b`. L’utente ha respinto il foglio proposto per l’agenda del giorno.
