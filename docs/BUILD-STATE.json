@@ -102,6 +102,8 @@
     "build": 85,
     "authorization": "IPA-DELIVERY-DAY-85",
     "candidate_ref": "codex/revision77",
+    "source_commit": "646e708c8d156ce2843a4ab51095041099dac3e4",
+    "release_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42496148533",
     "release_tag": "ios-0.10.23-build85",
     "validation": "Suite completa, quattro avvii Release e verifica IPA prima della pubblicazione",
     "published": false
