@@ -34,8 +34,11 @@ final class NativeNutritionQuickUITests: XCTestCase {
         XCTAssertGreaterThan(bottom, top)
         let start = up ? bottom : top
         let end = start + (up ? -1 : 1) * (bottom - top) * fraction
-        origin.withOffset(CGVector(dx: scroll.frame.midX, dy: start))
-            .press(forDuration: 0.05, thenDragTo: origin.withOffset(CGVector(dx: scroll.frame.midX, dy: end)))
+        // Start in the scroll view's gutter so a text field cannot consume the gesture.
+        let gutter = scroll.frame.minX + 8
+        origin.withOffset(CGVector(dx: gutter, dy: start))
+            .press(forDuration: 0.05, thenDragTo: origin.withOffset(CGVector(dx: gutter, dy: end)),
+                   withVelocity: .slow, thenHoldForDuration: 0.05)
     }
     private func visibleRegion(in app: XCUIApplication) -> CGRect {
         let scroll = app.scrollViews["quick-nutrition-scroll"].frame
@@ -57,6 +60,7 @@ final class NativeNutritionQuickUITests: XCTestCase {
                 let up = !field.exists || field.frame.midY >= visibleRegion(in: app).midY
                 drag(scroll, app: app, up: up, fraction: 0.5)
             }
+            if !visible(field, in: app) { capture("Nutrition keyboard: \(label) not fully visible", app) }
             XCTAssertTrue(visible(field, in: app),
                           "\(label) must be above the pinned action and keyboard: field \(field.frame), viewport \(visibleRegion(in: app))")
             XCTAssertTrue(field.isHittable); field.tap(); field.typeText(value)

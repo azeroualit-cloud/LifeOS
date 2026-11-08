@@ -134,7 +134,7 @@
   "nutrition_keyboard_preflight": {
     "source_commit": "b64edfa0a140027afef646968e1a1ccd90a76939",
     "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42509002706",
-    "validation": "Anteprima mirata in corso per il foglio Nutrizione con tastiera e testo accessibile.",
+    "validation": "Compilazione passata; tre test con Carboidrati da 1 a 4 punti oltre il limite dopo lo scroll. Modificato il punto di partenza del gesto e aggiunta cattura al fallimento; nuova verifica mirata avviata.",
     "new_ipa": false
   },
   "backend": {
