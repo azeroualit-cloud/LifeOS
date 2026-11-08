@@ -282,3 +282,5 @@ I micronutrienti sono calcolati dalle voci del database e dalle quantità consum
 Seguito utente, 8 novembre 2026: «ok, e come obiettivo giornaliero puntiamo su una stima in base alla mia età sesso ecc? se non importa andare oltre quell'alimento è anche meglio da un punto di vista. E invece per omega3 e creatina non contano?».
 
 Direzione proposta: riferimento alimentare per fascia di età e sesso ove cambi il valore. Confronto con la media degli apporti registrati. Il raggiungimento non incentiva l’eccesso. Nessun numero personale fissato. Omega-3 e creatina sono oggetto di discussione e restano distinti dai micronutrienti.
+
+Riscontro utente, 8 novembre 2026: «ok, valido, e tutti gli altri micronutrienti pensi che per i miei obiettivi fa realmente differenza seguirli?». Validato l’approccio dei riferimenti per profilo. La selezione dei preferiti e il layout restano da concordare.

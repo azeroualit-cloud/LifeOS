@@ -62,3 +62,5 @@ Selezionare i valori LARN o EFSA dalla fascia di età e dal sesso quando il rife
 Possibile estensione **Grassi → Omega-3**, con ALA ed EPA+DHA distinti e media settimanale. EFSA usa 250 mg al giorno di EPA+DHA come assunzione adeguata per gli adulti. [EFSA, tabella 2](https://www.efsa.europa.eu/sites/default/files/2017_09_DRVs_summary_report.pdf).
 
 **Creatina** come abitudine o integrazione facoltativa, indipendente dagli obiettivi di adeguatezza. È pertinente soprattutto a sforzi brevi e intensi ripetuti e all’allenamento di forza. Può aumentare il peso per ritenzione d’acqua. Nessuna dose automatica. [NIH ODS](https://ods.od.nih.gov/factsheets/ExerciseAndAthleticPerformance-HealthProfessional/).
+
+L’utente ha validato l’approccio dei riferimenti per profilo. Proposta per la gerarchia: due preferiti iniziali (C e zinco), con il resto sotto «Tutti i micronutrienti». Rendere promuovibili quelli pertinenti alla dieta, senza avvisi per un singolo giorno. Priorità condizionate: B12 se poche fonti animali o fortificate, calcio se poche fonti abituali, ferro se rischio specifico o apporto ripetutamente basso. Nessun obiettivo estetico per gli altri micronutrienti.
