@@ -288,3 +288,7 @@ Riscontro utente, 8 novembre 2026: «ok, valido, e tutti gli altri micronutrient
 Conferma utente, 8 novembre 2026: «allora teniamo gli altri micronutrienti nascosti ma consultabili, e diamo priorità a quelli che mi interessano, procedi con il codice e subito dopo con l'ipa». Vitamina C e zinco in primo piano, altri micronutrienti in una vista consultabile e preferiti modificabili. L’utente autorizza il codice e la consegna della build 86 (0.10.24) dopo suite completa, quattro avvii Release e verifica del pacchetto.
 
 Precisazione utente, 8 novembre 2026: «no scegli te l'obiettivo e mettile nella schermata principale  salute stile progress bar e sotto i macro.». Vitamina C e zinco compaiono subito sotto i macro in Salute con una barra giornaliera. Riferimenti scelti per uomini adulti dalle tabelle LARN, 105 mg di vitamina C e 12 mg di zinco. Gli altri nutrienti restano consultabili nel dettaglio. La build corretta sostituisce la candidata precedente per la consegna IPA già richiesta.
+
+## CI-IPA-LATENCY-01 — obiettivo, 8 novembre 2026
+
+Fonte utente: «ma in questo modo risparmieremmo tempo solo se fallisce uno di quei test, io volevo un risparmio di tempo sistemico». Ridurre i tempi anche a test verdi. La separazione tra IPA di prova e IPA di produzione e l’eventuale riuso di verifiche sono proposte di attuazione, non regole attive.

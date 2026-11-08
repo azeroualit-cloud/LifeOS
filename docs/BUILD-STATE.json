@@ -136,7 +136,7 @@
     "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42509002706",
     "followup_commit": "1c29ddaff8e352897e761a690e849343230e3d06",
     "followup_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42510268817",
-    "validation": "Compilazione passata; tre test con Carboidrati da 1 a 4 punti oltre il limite dopo lo scroll. Modificato il punto di partenza del gesto e aggiunta cattura al fallimento; nuova verifica mirata avviata.",
+    "validation": "Compilazione passata; tre test con Carboidrati da 1 a 4 punti oltre il limite dopo lo scroll. La seconda verifica mirata è passata, inclusi i tre casi di Nutrizione. Nessun collaudo completo o pacchetto per il sorgente corretto.",
     "new_ipa": false
   },
   "backend": {

@@ -1041,5 +1041,6 @@
     "recorded_on": "2026-11-06",
     "source": "Richiesta diretta utente",
     "scope": "Redesign Dashboard, Salute e Nutrizione. Consegna artifact IPA e link Actions."
-  }
+  },
+  "ci_ipa_latency_request": {"id": "CI-IPA-LATENCY-01", "status": "REQUESTED", "recorded_on": "2026-11-08", "scope": "LifeOS CI e tempi IPA", "provenance": "Richiesta diretta utente", "original_quote": "ma in questo modo risparmieremmo tempo solo se fallisce uno di quei test, io volevo un risparmio di tempo sistemico", "objective": "Ridurre sistematicamente i tempi della pipeline anche quando i test passano.", "implementation": "Proposta, senza modifica dei gate attivi: IPA di prova con verifica per impatto e IPA di produzione con suite completa."}
 }
