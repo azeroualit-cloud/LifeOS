@@ -88,6 +88,7 @@
     "status": "implemented_pending_simulator",
     "generic_food_count": 192,
     "bone_in_food_count": 7,
+    "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42494307645",
     "includes_new_ipa": false
   },
   "backend": {
