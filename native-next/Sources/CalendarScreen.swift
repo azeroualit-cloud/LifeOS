@@ -318,7 +318,7 @@ struct CalendarScreen: View {
                 guard let grid = monthDays[cachedMonth] else { continue }
                 monthDays[cachedMonth] = grid.map { item in
                     guard item.day == day else { return item }
-                    return CalendarDayPresentation(day: item.day, label: item.label, shift: raw == "erase" ? nil : ShiftKind(rawValue: raw), hasEvents: item.hasEvents, isToday: item.isToday, isWeekend: item.isWeekend, isCurrentMonth: item.isCurrentMonth)
+                    return CalendarDayPresentation(day: item.day, label: item.label, shift: raw == "erase" ? nil : ShiftKind(rawValue: raw), eventCount: item.eventCount, isToday: item.isToday, isWeekend: item.isWeekend, isCurrentMonth: item.isCurrentMonth)
                 }
             }
             if var data = monthData[month] {
@@ -392,7 +392,7 @@ struct CalendarScreen: View {
             grids[month] = CivilDate.gridDates(month).map { date in
                 let day = CivilDate.day(date)
                 let weekday = CivilDate.calendar.component(.weekday, from: date)
-                return CalendarDayPresentation(day: day, label: CivilDate.label(date), shift: allShifts[day].flatMap(ShiftKind.init(rawValue:)), hasEvents: !(eventsByDay[day] ?? []).isEmpty || !(tasksByDay[day] ?? []).isEmpty, isToday: day == today, isWeekend: weekday == 1 || weekday == 7, isCurrentMonth: day.hasPrefix(month))
+                return CalendarDayPresentation(day: day, label: CivilDate.label(date), shift: allShifts[day].flatMap(ShiftKind.init(rawValue:)), eventCount: eventsByDay[day]?.count ?? 0, isToday: day == today, isWeekend: weekday == 1 || weekday == 7, isCurrentMonth: day.hasPrefix(month))
             }
         }
         monthDays = grids
@@ -434,10 +434,10 @@ struct CalendarScreen: View {
                     }.padding(.top, NativeDesign.Space.medium).padding(.bottom, NativeDesign.Space.small)
                     Divider()
                 }
-                HStack(spacing: NativeDesign.Space.xs) {
+                HStack(alignment: .top, spacing: NativeDesign.Space.xs) {
                     ForEach(0..<7, id: \.self) { index in
                         let item = days[week * 7 + index]
-                        let displayed = CalendarDayPresentation(day: item.day, label: item.label, shift: item.shift, hasEvents: item.hasEvents, isToday: item.isToday, isWeekend: item.isWeekend, isCurrentMonth: true)
+                        let displayed = CalendarDayPresentation(day: item.day, label: item.label, shift: item.shift, eventCount: item.eventCount, isToday: item.isToday, isWeekend: item.isWeekend, isCurrentMonth: true)
                             Button {
                                 if !store.busy { store.calendarMonth = String(item.day.prefix(7)) }
                                 selected = item.day
@@ -454,10 +454,16 @@ struct CalendarScreen: View {
                                         } catch { store.error = error.localizedDescription }
                                     }
                                 }
-                            } label: { CalendarDayCell(item: displayed, active: item.day == selected).equatable().frame(minHeight: NativeDesign.Layout.calendarMonthDayHeight) }
+                            } label: {
+                                CalendarDayCell(item: displayed, active: item.day == selected)
+                                    .equatable()
+                                    .padding(.vertical, (NativeDesign.Layout.calendarMonthDayHeight - NativeDesign.Layout.calendarDayHeight) / 2)
+                                    .contentShape(Rectangle())
+                            }
                                 .buttonStyle(NativePressStyle()).disabled(painting && (store.busy || (!store.isDemo && monthData[month] == nil)))
                                 .id(item.day).accessibilityIdentifier("calendar-day-" + item.day)
                                 .accessibilityLabel(item.label + ", " + (item.shift?.title ?? "nessun turno"))
+                                .accessibilityValue(item.eventCount == 1 ? "1 evento" : "\(item.eventCount) eventi")
                                 .accessibilityAddTraits(item.day == selected ? .isSelected : [])
 
                     }
@@ -515,7 +521,7 @@ struct CalendarDayPresentation: Equatable {
     let day: String
     let label: String
     let shift: ShiftKind?
-    let hasEvents: Bool
+    let eventCount: Int
     let isToday: Bool
     let isWeekend: Bool
     let isCurrentMonth: Bool
@@ -559,13 +565,30 @@ struct CalendarDayCell: View, Equatable {
                         .accessibilityHidden(true)
                 }
             }
-            Circle().fill(item.hasEvents ? (item.shift?.color ?? NativeDesign.secondary) : Color.clear)
-                .frame(width: NativeDesign.Space.xs, height: NativeDesign.Space.xs)
-        }.frame(maxWidth: .infinity).frame(minHeight: NativeDesign.Layout.calendarDayHeight)
+            eventDots
+        }.frame(maxWidth: .infinity)
+            .frame(minHeight: NativeDesign.Layout.calendarDayHeight, alignment: appearance == .month ? .top : .center)
             .contentShape(Rectangle()).opacity(appearance != .month || item.isCurrentMonth ? 1 : 0.38)
             .animation(reduceMotion ? nil : .easeOut(duration: NativeDesign.Motion.selectionDuration), value: active)
             .animation(reduceMotion ? nil : .easeOut(duration: NativeDesign.Motion.selectionDuration), value: item.shift)
             .accessibilityAddTraits(active ? .isSelected : [])
+    }
+
+    private var eventDots: some View {
+        let count = appearance == .month ? item.eventCount : min(item.eventCount, 1)
+        let color = item.shift?.color ?? NativeDesign.secondary
+        let dotsPerRow = 3
+        return VStack(spacing: NativeDesign.Space.xxs) {
+            ForEach(0..<((count + dotsPerRow - 1) / dotsPerRow), id: \.self) { row in
+                HStack(spacing: NativeDesign.Space.xxs) {
+                    ForEach(0..<min(dotsPerRow, count - row * dotsPerRow), id: \.self) { _ in
+                        Circle().fill(color).frame(width: NativeDesign.Space.xs, height: NativeDesign.Space.xs)
+                    }
+                }
+            }
+        }
+        .frame(minHeight: NativeDesign.Space.xs)
+        .accessibilityHidden(true)
     }
 }
 extension ShiftKind {

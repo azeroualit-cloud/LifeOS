@@ -8,7 +8,7 @@ on:
       mode:
         description: Preview, focused regression, or trial checks
         type: choice
-        options: [preview, focused, trial, nutrition-render]
+        options: [preview, focused, trial, nutrition-render, calendar-render]
         default: preview
       package_trial:
         description: Explicitly request an unsigned trial IPA in Actions artifacts (trial mode only)
@@ -42,7 +42,7 @@ jobs:
           variant: ${{ inputs.device || 'primary' }}
       - name: Select bounded checks
         env:
-          MODE: ${{ inputs.mode || (contains(github.event.head_commit.message, '[nutrition-render]') && 'nutrition-render') || 'preview' }}
+          MODE: ${{ inputs.mode || (contains(github.event.head_commit.message, '[nutrition-render]') && 'nutrition-render') || (contains(github.event.head_commit.message, '[calendar-render]') && 'calendar-render') || 'preview' }}
           AREA: ${{ inputs.area || 'auto' }}
           BASE: ${{ github.event.before }}
         run: |

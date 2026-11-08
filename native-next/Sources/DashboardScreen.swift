@@ -56,7 +56,7 @@ struct DashboardScreen: View {
                     let current = day == today, shift = store.shift(day)
                     let weekday = CivilDate.calendar.component(.weekday, from: CivilDate.date(day))
                     let item = CalendarDayPresentation(day: day, label: CivilDate.label(day), shift: shift,
-                        hasEvents: marked.contains(day), isToday: current,
+                        eventCount: marked.contains(day) ? 1 : 0, isToday: current,
                         isWeekend: weekday == 1 || weekday == 7,
                         isCurrentMonth: day.hasPrefix(String(today.prefix(7))))
                     Button { openCalendar(day, opensDay: true) } label: {

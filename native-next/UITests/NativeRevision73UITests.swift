@@ -23,6 +23,8 @@ final class NativeRevision73UITests: XCTestCase {
         XCTAssertTrue(month.waitForExistence(timeout: 10))
         for _ in 0..<12 { if today.isHittable { break }; month.swipeUp(velocity: .slow) }
         XCTAssertTrue(today.isHittable)
+        XCTAssertEqual(today.value as? String, "5 eventi")
+        capture("calendar-month-event-dots")
         let origin = today.frame.midY
         today.tap()
 

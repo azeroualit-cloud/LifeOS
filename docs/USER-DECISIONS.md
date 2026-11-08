@@ -298,3 +298,7 @@ Conferma utente: «va bene vediamo se risparmiamo tempo, intanto le modifiche ch
 ## NUTRITION-CATALOG-RENDER-01 — ACTIVE, 8 novembre 2026
 
 Fonte utente: «per la creatina non facciamo nulla, il resto devi tutto implementarlo, mostrarmi il render grafico reale, e dopo di dirò se produrre l'ipa o meno (giusto? puoi avere i render senza la produzione di ipa?)». Autorizzati cocktail e unità alcoliche, alimenti personali, ampliamento delle varianti di carne e copertura dei micronutrienti compatibili con dati e HealthKit. Esclusa la creatina. Consegnare schermate reali dal simulatore. L’IPA richiede una nuova richiesta dopo la revisione.
+
+## CALENDAR-MONTH-EVENT-DOTS-01 — ACTIVE, 8 novembre 2026
+
+Fonte utente: «facciamo invece nella vista mese, che gli n eventi corrispondono a n puntini, fino a un max di 3 per riga,». Un puntino per evento di calendario nella cella del Mese, tre per riga e righe aggiuntive per gli altri. Il conteggio è disponibile a VoiceOver. L’utente chiede una nuova proposta visiva per Giorno, da valutare prima di modificare la vista.
