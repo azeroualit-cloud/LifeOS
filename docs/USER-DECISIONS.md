@@ -306,3 +306,7 @@ Fonte utente: «facciamo invece nella vista mese, che gli n eventi corrispondono
 ### CALENDAR-DAY-REDESIGN-01 — render nativo richiesto
 
 Fonte utente: «ok mi mostri quindi il render del giorno aggiornato?». Preparare la vista Giorno nel simulatore con data a sinistra, turno in badge, agenda unica con accenti sugli impegni e azione Liquid Glass in basso. La richiesta autorizza il render per revisione.
+
+## IPA-DELIVERY-88 — rilascio autorizzato, 8 novembre 2026
+
+Fonte utente: «ok, manda in produzione l'ipa e dammi il link per monitorarlo». Autorizzata l’IPA 0.10.26 build 88 dal ramo di lavoro, con Calendario Giorno e Mese, Nutrizione e Salute. Il percorso di produzione richiede suite completa, quattro avvii Release e verifica dell’IPA. Consegnare il link Actions per monitoraggio.
