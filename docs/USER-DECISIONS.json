@@ -19,6 +19,51 @@
   },
   "active_rules": [
     {
+      "id": "NUTRITION-EVERYDAY-01",
+      "status": "ACTIVE",
+      "scope": "Catalogo generico, integrazione Apple Salute",
+      "recorded_on": "2026-11-08",
+      "provenance": "Richiesta diretta utente con cinque immagini di riferimento. Parafrasi.",
+      "rule": "Ampliare le famiglie comuni, con icona generica per voce. Coprire formaggi anche a fette e spalmabili, confetture, oli e burri comuni, carni con preparazione e parte edibile esplicite, frattaglie principali. Aggiungere cocktail da discoteca, sincronizzare fibre, micronutrienti e alcol e consentire la creazione di alimenti generici personali. Olio di cocco fuori dal catalogo standard.",
+      "implementation": "Prima tranche: 188 alimenti e icone implementati. Cocktail, alimenti personali e scrittura estesa in progettazione."
+    },
+    {
+      "id": "CALENDAR-MONTH-STYLE-01",
+      "status": "ACTIVE",
+      "scope": "Calendario mese e scheda Dashboard",
+      "recorded_on": "2026-11-08",
+      "provenance": "Richiesta diretta utente con cinque immagini di riferimento. Parafrasi.",
+      "rule": "Calendario scuro con contrasto maggiore, weekend meno luminosi, numero nel cerchio del colore del turno per la data evidenziata e barra sottile senza lettere. Scheda Dashboard con icona e titolo colorato e freccia di apertura.",
+      "implementation": "Implementato nel sorgente, verifica simulatore pendente."
+    },
+    {
+      "id": "HEALTH-QUICK-POLISH-01",
+      "status": "ACTIVE",
+      "scope": "Riepilogo Salute e pannello Nutrizione",
+      "recorded_on": "2026-11-08",
+      "provenance": "Richiesta diretta utente con cinque immagini di riferimento. Parafrasi.",
+      "rule": "Uniformare raggi delle schede, ridurre il padding superiore del Diario, eliminare la sovrapposizione della tastiera con Aggiungi, mantenere intera la ricerca e aumentare il contrasto del pannello e della lista alimenti.",
+      "implementation": "Implementato nel sorgente: campi toccabili direttamente e tastiera richiudibile scorrendo o toccando il titolo."
+    },
+    {
+      "id": "ACTIVITY-CATEGORY-GLASS-01",
+      "status": "ACTIVE",
+      "scope": "Pulsanti Categorie di Attività",
+      "recorded_on": "2026-11-08",
+      "provenance": "Richiesta diretta utente con cinque immagini di riferimento. Parafrasi.",
+      "rule": "Usare Liquid Glass nelle categorie evidenziate nella foto di Attività, con stato selezionato riconoscibile.",
+      "implementation": "Implementato nel sorgente, verifica simulatore pendente."
+    },
+    {
+      "id": "CALENDAR-DAY-REDESIGN-01",
+      "status": "ACTIVE",
+      "scope": "Agenda del giorno nel Calendario",
+      "recorded_on": "2026-11-08",
+      "provenance": "Richiesta diretta utente con cinque immagini di riferimento. Parafrasi.",
+      "rule": "Ripensare apertura, gerarchia, contrasto, separazione visiva, transizione e accesso alla creazione di eventi del giorno.",
+      "implementation": "Proposta concreta in CALENDAR-NUTRITION-NEXT.md, in attesa di approvazione DEV-02."
+    },
+    {
       "id": "UX-DATE-PICKER-01",
       "status": "ACTIVE",
       "scope": "Selettori grafici della data nell’app iPhone LifeOS",

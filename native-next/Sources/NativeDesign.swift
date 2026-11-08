@@ -22,8 +22,21 @@ enum NativeDesign {
     static let nutritionTitle = Color(uiColor: UIColor { trait in
         trait.userInterfaceStyle == .dark ? UIColor(red: 0.55, green: 0.88, blue: 0.71, alpha: 1) : UIColor(red: 0.08, green: 0.40, blue: 0.28, alpha: 1)
     })
+    static let nutritionCanvas = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark ? UIColor(white: 0.09, alpha: 1) : .systemGroupedBackground
+    })
+    static let nutritionInput = Color(uiColor: UIColor { traits in
+        guard traits.userInterfaceStyle == .dark else { return .secondarySystemGroupedBackground }
+        return UIColor(white: traits.accessibilityContrast == .high ? 0.23 : 0.16, alpha: 1)
+    })
+    static let calendarCanvas = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark ? UIColor(white: 0.018, alpha: 1) : .systemGroupedBackground
+    })
+    static let calendarTitle = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark ? UIColor(red: 0.95, green: 0.73, blue: 0.53, alpha: 1) : .systemBrown
+    })
     static let calendarAccent = Color(uiColor: .systemBlue)
-    static func calendarNumber(size: CGFloat) -> Font { .system(size: size, weight: .regular, design: .default) }
+    static func calendarNumber(size: CGFloat) -> Font { .system(size: size, weight: .medium, design: .default) }
     static let healthCanvas = Color(uiColor: .systemGroupedBackground)
     static let healthSurface = Color(uiColor: .secondarySystemGroupedBackground)
     // Measured from the populated Apple Health dark reference; adapt in light mode.
@@ -80,7 +93,6 @@ enum NativeDesign {
         static let nutritionGlyphStroke: CGFloat = 1.6
         static let healthSummaryRow: CGFloat = 132
         static let healthSummaryGap: CGFloat = 10
-        static let healthSummaryRadius: CGFloat = 28
         static let healthSummaryChartWidth: CGFloat = 80
         static let healthSummaryChartHeight: CGFloat = 50
         static let healthOverviewChart: CGFloat = 88

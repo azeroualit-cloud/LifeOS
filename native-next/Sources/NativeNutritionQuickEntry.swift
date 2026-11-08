@@ -68,7 +68,7 @@ struct NativeNutritionQuickSheet: View {
     @State private var selectedFood: NativeGenericFood?
     @State private var portionGrams = "100"
     @FocusState private var focus: Field?
-    private enum Field: Int, CaseIterable { case protein, carbohydrate, fat, fibre, portion }
+    private enum Field: Hashable { case protein, carbohydrate, fat, fibre, portion }
     private var pending: NativeNutritionEntry? { nutrition.entries.first { $0.id == id && !$0.confirmed } }
     private var blocked: Bool { nutrition.entries.contains { ($0.id != id && !$0.confirmed) || $0.deletionPending == true } }
     private var draft: NativeNutritionEntry? {
@@ -83,27 +83,19 @@ struct NativeNutritionQuickSheet: View {
         VStack(spacing: NativeDesign.Space.none) {
             HStack(alignment: typeSize.isAccessibilitySize ? .top : .center) {
                 Text("Aggiungi nutrienti").font(.title2.bold()).accessibilityAddTraits(.isHeader)
+                    .onTapGesture { focus = nil }
+                    .accessibilityAction(named: Text("Nascondi tastiera")) { focus = nil }
                 Spacer(minLength: NativeDesign.Space.small)
                 Button { dismiss() } label: {
                     Image(systemName: "xmark").frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget)
-                        .background(NativeDesign.actionSurface, in: Circle())
+                        .background(NativeDesign.nutritionInput, in: Circle())
                 }.buttonStyle(.plain).disabled(nutrition.busy).accessibilityLabel("Chiudi").accessibilityIdentifier("quick-nutrition-close")
             }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.top, typeSize.isAccessibilitySize ? NativeDesign.Space.small : NativeDesign.Space.large)
+            catalogButton
+                .padding(.horizontal, NativeDesign.Layout.screenInset)
+                .padding(.top, NativeDesign.Space.small)
             ScrollView {
                 VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
-                    Button {
-                        focus = nil
-                        showingCatalog = true
-                    } label: {
-                        Label("Cerca alimento", systemImage: "magnifyingglass")
-                            .foregroundStyle(NativeDesign.secondary)
-                            .padding(.horizontal, NativeDesign.Space.medium)
-                            .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
-                            .background(NativeDesign.actionSurface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(nutrition.busy || pending != nil)
-                    .accessibilityIdentifier("quick-nutrition-catalog")
                     if let selectedFood {
                         VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
                             Text(selectedFood.name).font(.headline)
@@ -149,7 +141,7 @@ struct NativeNutritionQuickSheet: View {
                         } label: {
                             Label(Calendar.current.isDateInToday(date) ? "Oggi" : date.formatted(date: .abbreviated, time: .omitted), systemImage: "calendar")
                                 .padding(.horizontal, NativeDesign.Space.medium).frame(minHeight: NativeDesign.Layout.touchTarget)
-                                .background(NativeDesign.actionSurface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
+                                .background(NativeDesign.nutritionInput, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
                         }.buttonStyle(.plain).disabled(nutrition.busy || pending != nil)
                             .accessibilityLabel("Data").accessibilityValue(date.formatted(date: .abbreviated, time: .omitted))
                             .accessibilityIdentifier("quick-nutrition-date")
@@ -162,7 +154,7 @@ struct NativeNutritionQuickSheet: View {
             }.clipped().scrollDismissesKeyboard(.interactively).accessibilityIdentifier("quick-nutrition-scroll")
         }
         .toolbar(.hidden, for: .navigationBar)
-        .background(NativeDesign.healthCanvas)
+        .background(NativeDesign.nutritionCanvas)
         .safeAreaInset(edge: .bottom, spacing: NativeDesign.Space.none) {
             VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
                 if let error = nutrition.error {
@@ -178,17 +170,8 @@ struct NativeNutritionQuickSheet: View {
                     .accessibilityIdentifier("quick-nutrition-save")
             }
             .padding(.horizontal, NativeDesign.Layout.screenInset).padding(.vertical, NativeDesign.Space.small)
-            .background(NativeDesign.healthCanvas)
+            .background(NativeDesign.nutritionCanvas)
             .accessibilityElement(children: .contain).accessibilityIdentifier("quick-nutrition-footer")
-        }
-        .toolbar {
-            ToolbarItemGroup(placement: .keyboard) {
-                if let focus {
-                    if focus.rawValue < Field.fibre.rawValue { Button("Avanti") { self.focus = Field(rawValue: focus.rawValue + 1) } }
-                    Spacer()
-                    Button("Fine") { self.focus = nil }.accessibilityIdentifier("quick-nutrition-keyboard-done")
-                }
-            }
         }
         .sheet(isPresented: $showingDate) {
             dateSheet
@@ -207,6 +190,22 @@ struct NativeNutritionQuickSheet: View {
         .presentationContentInteraction(.scrolls)
         .interactiveDismissDisabled(nutrition.busy || pending != nil)
     }
+    private var catalogButton: some View {
+        Button {
+            focus = nil
+            showingCatalog = true
+        } label: {
+            Label("Cerca alimento", systemImage: "magnifyingglass")
+                .foregroundStyle(Color.primary)
+                .padding(.horizontal, NativeDesign.Space.medium)
+                .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
+                .background(NativeDesign.nutritionInput, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
+        }
+        .buttonStyle(.plain)
+        .disabled(nutrition.busy || pending != nil)
+        .accessibilityIdentifier("quick-nutrition-catalog")
+    }
+
     private var dateSheet: some View {
         NavigationStack {
             ScrollView {
@@ -248,7 +247,7 @@ struct NativeNutritionQuickSheet: View {
                 Text("g").foregroundStyle(.secondary)
             }
         }.padding(NativeDesign.Space.small).frame(minHeight: NativeDesign.Layout.nutritionFieldHeight)
-            .background(NativeDesign.actionSurface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
+            .background(NativeDesign.nutritionInput, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
             .contentShape(Rectangle()).onTapGesture { focus = field }
     }
     private func save() {

@@ -53,8 +53,8 @@ struct CalendarScreen: View {
                     }
                 }
             }
-        }.background(NativeDesign.canvas)
-        .toolbar(.hidden, for: .navigationBar).tint(NativeDesign.calendarAccent)
+        }.background(NativeDesign.calendarCanvas)
+        .toolbar(.hidden, for: .navigationBar).tint(NativeDesign.accent)
         .animation(reduceMotion ? nil : .smooth(duration: NativeDesign.Motion.navigationResponse), value: showingPreview)
         .sensoryFeedback(.selection, trigger: selected)
         .onAppear {
@@ -201,7 +201,7 @@ struct CalendarScreen: View {
                 Button { withAnimation(reduceMotion ? nil : .smooth(duration: NativeDesign.Motion.navigationResponse)) { showingDay = false; jumpMonth = String(selected.prefix(7)) } } label: {
                     Label(NativeCalendarWindow.monthLabel(String(selected.prefix(7))), systemImage: "chevron.left")
                         .font(.subheadline).frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle())
-                }.foregroundStyle(NativeDesign.calendarAccent).accessibilityIdentifier("calendar-back-month")
+                }.foregroundStyle(Color.primary).accessibilityIdentifier("calendar-back-month")
                 Spacer(minLength: NativeDesign.Space.xs)
                 Button(action: goToToday) {
                     Text(CivilDate.label(selected).capitalized).font(.headline).lineLimit(1).minimumScaleFactor(0.75)
@@ -441,7 +441,7 @@ struct CalendarScreen: View {
                             let day = days[week * 7 + index].day
                             Text(day.hasSuffix("-01") ? NativeCalendarWindow.monthLabel(String(day.prefix(7))) : "")
                                 .font(.title3.weight(.semibold))
-                                .foregroundStyle(day.hasPrefix(CivilDate.month()) ? NativeDesign.calendarAccent : NativeDesign.secondary)
+                                .foregroundStyle(day.hasPrefix(CivilDate.month()) ? Color.primary : NativeDesign.secondary)
                                 .frame(maxWidth: .infinity)
                         }
                     }.padding(.top, NativeDesign.Space.medium).padding(.bottom, NativeDesign.Space.small)
@@ -551,12 +551,25 @@ struct CalendarDayCell: View, Equatable {
                     .overlay(Circle().stroke(item.isToday && !active ? color : .clear, lineWidth: NativeDesign.Space.hairline))
             } else {
                 Text(String(Int(item.day.suffix(2)) ?? 0)).font(NativeDesign.calendarNumber(size: calendarNumberSize))
-                    .foregroundStyle(active || item.isToday ? NativeDesign.calendarAccent : item.isWeekend ? NativeDesign.secondary : Color.primary)
-                    .minimumScaleFactor(0.8).lineLimit(1).frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.calendarDateLine)
+                    .foregroundStyle(active ? (item.shift == nil ? NativeDesign.onAccent : Color.black) : item.isWeekend ? NativeDesign.secondary : Color.primary)
+                    .minimumScaleFactor(0.8).lineLimit(1)
+                    .frame(width: NativeDesign.Layout.calendarDateLine, height: NativeDesign.Layout.calendarDateLine)
+                    .background(active ? color : .clear, in: Circle())
+                    .overlay(Circle().strokeBorder(item.isToday && !active ? color : .clear))
                     .modifier(NativeCalendarVisualMotion(namespace: motionNamespace, id: item.day + "-number"))
             }
-            NativeShiftBadge(shift: item.shift)
-                .modifier(NativeCalendarVisualMotion(namespace: motionNamespace, id: item.day + "-shift"))
+            Group {
+                if appearance == .week {
+                    NativeShiftBadge(shift: item.shift)
+                } else {
+                    Capsule()
+                        .fill(item.shift.map { $0.color.opacity(item.isWeekend ? 0.76 : 1) } ?? .clear)
+                        .frame(height: NativeDesign.Space.xs)
+                        .padding(.horizontal, NativeDesign.Space.xxs)
+                        .padding(.vertical, NativeDesign.Space.xs)
+                        .accessibilityHidden(true)
+                }
+            }.modifier(NativeCalendarVisualMotion(namespace: motionNamespace, id: item.day + "-shift"))
             Circle().fill(item.hasEvents ? (item.shift?.color ?? NativeDesign.secondary) : Color.clear)
                 .frame(width: NativeDesign.Space.xs, height: NativeDesign.Space.xs)
         }.frame(maxWidth: .infinity).frame(minHeight: NativeDesign.Layout.calendarDayHeight)

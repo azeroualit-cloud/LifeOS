@@ -80,12 +80,13 @@ struct NativeIcon: View {
     }
 }
 struct NativeListAppearance: ViewModifier {
+    var background: Color = NativeDesign.canvas
     func body(content: Content) -> some View {
         content.listStyle(.insetGrouped).listSectionSpacing(NativeDesign.gap)
             .font(NativeDesign.body).environment(\.defaultMinListRowHeight, NativeDesign.Layout.rowHeight)
             .contentMargins(.horizontal, NativeDesign.Layout.screenInset, for: .scrollContent)
             .listRowSpacing(0).contentMargins(.top, NativeDesign.Space.small, for: .scrollContent).contentMargins(.bottom, NativeDesign.Layout.scrollClearance, for: .scrollContent).scrollBounceBehavior(.basedOnSize)
-            .scrollContentBackground(.hidden).background(NativeDesign.canvas)
+            .scrollContentBackground(.hidden).background(background)
     }
 }
 struct NativeGlass: ViewModifier {
@@ -252,23 +253,6 @@ struct NativeStatusBadge: View {
             .accessibilityElement(children: .combine)
     }
 }
-struct NativeSelectionSurface: ViewModifier {
-    @Environment(\.nativeReduceMotion) private var reduceMotion
-    let selected: Bool
-    var tint: Color = NativeDesign.accent
-    var outlined = false
-    func body(content: Content) -> some View {
-        content.background {
-            RoundedRectangle(cornerRadius: NativeDesign.controlRadius, style: .continuous)
-                .fill(selected ? tint.opacity(0.18) : NativeDesign.inset)
-                .animation(reduceMotion ? nil : .default, value: selected)
-        }.overlay {
-            RoundedRectangle(cornerRadius: NativeDesign.controlRadius, style: .continuous)
-                .stroke(selected && outlined ? tint : .clear, lineWidth: 1.5)
-                .animation(reduceMotion ? nil : .default, value: selected)
-        }
-    }
-}
 struct NativeCategoryChip: View {
     @State private var touchFeedback = 0
     let title: String
@@ -279,7 +263,10 @@ struct NativeCategoryChip: View {
             Text(title).font(.subheadline.weight(selected ? .semibold : .regular))
                 .padding(.horizontal, NativeDesign.Space.medium)
                 .frame(minWidth: NativeDesign.Layout.categoryWidth, minHeight: NativeDesign.Layout.touchTarget)
-                .modifier(NativeSelectionSurface(selected: selected))
+                .modifier(NativeGlass())
+                .overlay {
+                    Capsule().strokeBorder(selected ? NativeDesign.secondary : .clear, lineWidth: NativeDesign.Space.hairline)
+                }
         }.buttonStyle(NativePressStyle()).accessibilityAddTraits(selected ? .isSelected : [])
             .sensoryFeedback(.selection, trigger: touchFeedback)
     }

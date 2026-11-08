@@ -30,7 +30,7 @@ final class NativeRevision74UITests: XCTestCase {
             for _ in 0..<5 where !field.isHittable { scroll.swipeUp() }
             XCTAssertTrue(field.isHittable); field.tap(); field.typeText(value)
         }
-        app.buttons["quick-nutrition-keyboard-done"].tap()
+        app.staticTexts["Aggiungi nutrienti"].tap()
         let total = app.staticTexts["quick-nutrition-calories"]
         XCTAssertTrue(app.buttons["quick-nutrition-save"].isEnabled)
         capture("74-nutrition-calculation")

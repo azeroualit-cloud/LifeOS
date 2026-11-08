@@ -87,7 +87,7 @@ struct NativeHealthDetail: View {
             NativeNutrientValues(health: health, includesFibre: true)
         }.padding(NativeDesign.Layout.compactCardInset)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(NativeDesign.healthSurface, in: RoundedRectangle(cornerRadius: NativeDesign.Layout.healthSummaryRadius))
+            .background(NativeDesign.healthSurface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
     }
     private var nutritionActionBar: some View {
         ViewThatFits(in: .horizontal) {
@@ -139,9 +139,12 @@ struct NativeHealthDetail: View {
                         .font(.subheadline).monospacedDigit()
                 }
             }
-        }.padding(NativeDesign.Layout.compactCardInset)
+        }
+            .padding(.horizontal, NativeDesign.Layout.compactCardInset)
+            .padding(.bottom, NativeDesign.Layout.compactCardInset)
+            .padding(.top, NativeDesign.Space.small)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(NativeDesign.healthSurface, in: RoundedRectangle(cornerRadius: NativeDesign.Layout.healthSummaryRadius))
+            .background(NativeDesign.healthSurface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
     }
 
     private struct DiaryRow: Identifiable {

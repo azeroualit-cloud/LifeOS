@@ -4,6 +4,34 @@ struct NativeGenericFood: Decodable, Identifiable {
     let id: String
     let name: String
     let detail: String?
+    let family: Family
+
+    enum Family: String, Decodable {
+        case bakery, grain, egg, dairy, cheese, fat, legume, fruit, nut, poultry
+        case meat, fish, meal, pantry, drink, sweet, vegetable
+
+        var icon: String {
+            switch self {
+            case .bakery: "🍞"
+            case .grain: "🌾"
+            case .egg: "🥚"
+            case .dairy: "🥛"
+            case .cheese: "🧀"
+            case .fat: "🫗"
+            case .legume: "🫘"
+            case .fruit: "🍎"
+            case .nut: "🥜"
+            case .poultry: "🍗"
+            case .meat: "🥩"
+            case .fish: "🐟"
+            case .meal: "🍽️"
+            case .pantry: "🫙"
+            case .drink: "🥤"
+            case .sweet: "🍫"
+            case .vegetable: "🥦"
+            }
+        }
+    }
     let aliases: [String]?
     let protein: Decimal
     let carbohydrate: Decimal
@@ -70,7 +98,7 @@ struct NativeFoodPicker: View {
             }
             .padding(.horizontal, NativeDesign.Space.medium)
             .frame(minHeight: NativeDesign.Layout.touchTarget)
-            .background(NativeDesign.actionSurface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
+            .background(NativeDesign.nutritionInput, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
             .padding(.horizontal, NativeDesign.Layout.screenInset)
 
             List {
@@ -80,28 +108,33 @@ struct NativeFoodPicker: View {
                             select(food)
                             dismiss()
                         } label: {
-                            VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-                                Text(food.name)
-                                if let detail = food.detail {
-                                    Text(detail).font(.subheadline).foregroundStyle(.secondary)
-                                }
-                                Text("\(NSDecimalNumber(decimal: food.calories)) kcal / 100 g")
-                                    .font(.caption).foregroundStyle(.secondary)
-                            }.frame(minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
+                            HStack(spacing: NativeDesign.Space.medium) {
+                                Text(food.family.icon).font(.title3).accessibilityHidden(true)
+                                VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
+                                    Text(food.name)
+                                    if let detail = food.detail {
+                                        Text(detail).font(.subheadline).foregroundStyle(.secondary)
+                                    }
+                                    Text("\(NSDecimalNumber(decimal: food.calories)) kcal / 100 g")
+                                        .font(.caption).foregroundStyle(.secondary)
+                                }.frame(minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
+                            }
                         }.accessibilityIdentifier("generic-food-" + food.id)
+                            .listRowBackground(NativeDesign.nutritionInput)
                     }
                     if matches.isEmpty {
                         Text(NativeGenericFood.catalog.isEmpty ? "Catalogo non disponibile" : "Nessun alimento trovato")
                             .foregroundStyle(.secondary)
+                            .listRowBackground(NativeDesign.nutritionInput)
                     }
                 } footer: {
                     Text("Anses · Ciqual 2025")
                 }
             }
-            .modifier(NativeListAppearance())
+            .modifier(NativeListAppearance(background: NativeDesign.nutritionCanvas))
             .scrollDismissesKeyboard(.interactively)
         }
-        .background(NativeDesign.healthCanvas)
+        .background(NativeDesign.nutritionCanvas)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { DoneButton() }
         .task { searchFocused = true }

@@ -56,13 +56,15 @@ final class NativeRevision77UITests: XCTestCase {
         let protein = app.textFields["quick-nutrition-Proteine"]
         XCTAssertTrue(protein.waitForExistence(timeout: 10))
         protein.tap(); protein.typeText("10")
-        app.buttons["Avanti"].tap()
-        app.textFields["quick-nutrition-Carboidrati"].typeText("0,2")
-        app.buttons["Avanti"].tap()
-        app.textFields["quick-nutrition-Grassi"].typeText("5")
-        app.buttons["Avanti"].tap()
-        app.textFields["quick-nutrition-Fibre"].typeText("8")
-        app.buttons["Fine"].tap()
+        for (name, value) in [("Carboidrati", "0,2"), ("Grassi", "5"), ("Fibre", "8")] {
+            let field = app.textFields["quick-nutrition-" + name]
+            let scroll = app.scrollViews["quick-nutrition-scroll"]
+            for _ in 0..<6 where !field.isHittable { scroll.swipeUp() }
+            XCTAssertTrue(field.isHittable)
+            field.tap()
+            field.typeText(value)
+        }
+        app.staticTexts["Aggiungi nutrienti"].tap()
         XCTAssertEqual(app.staticTexts["quick-nutrition-calories"].label, "101.8 kcal")
         let save = app.buttons["quick-nutrition-save"]
         XCTAssertTrue(save.isEnabled)

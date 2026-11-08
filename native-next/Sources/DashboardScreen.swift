@@ -41,7 +41,16 @@ struct DashboardScreen: View {
     private func rollingCalendar(_ today: String) -> some View {
         let days = NativeHomeSummary.rollingDays(today)
         let marked = Set(store.events.map { $0.text("day") } + store.tasks.map { $0.text("scheduled_date") })
-        return VStack(spacing: NativeDesign.Space.small) {
+        return NativeCard(density: .compact) {
+            Button { openCalendar(today) } label: {
+                HStack {
+                    Label("Calendario", systemImage: "calendar")
+                        .font(.headline).foregroundStyle(NativeDesign.calendarTitle)
+                    Spacer()
+                    NativeDisclosureIndicator()
+                }.frame(minHeight: NativeDesign.Layout.touchTarget)
+                    .contentShape(Rectangle())
+            }.buttonStyle(NativePressStyle()).accessibilityIdentifier("home-calendar")
             HStack(spacing: NativeDesign.Space.xs) {
                 ForEach(days, id: \.self) { day in
                     let current = day == today, shift = store.shift(day)
@@ -60,7 +69,7 @@ struct DashboardScreen: View {
                         .accessibilityAddTraits(current ? .isSelected : [])
                 }
             }.dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-        }.padding(NativeDesign.Space.small).background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
+        }
     }
     private func openCalendar(_ day: String) {
         store.calendarMonth = String(day.prefix(7)); router.showCalendar(day: day, opensDay: false)

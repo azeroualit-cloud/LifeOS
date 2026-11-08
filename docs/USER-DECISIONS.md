@@ -240,3 +240,13 @@ Correzione approvata per NUTRITION-DATE-CLIP-01. Il pulsante Data in Aggiungi nu
 ## IPA-DELIVERY-2026-11-08 — consegna autorizzata, 8 novembre 2026
 
 Fonte utente: «e allora ricrea l'ipa». Autorizzata la build 84 (0.10.22) con il calendario Nutrizione corretto, dopo suite completa, quattro avvii Release e verifica del pacchetto. La verifica su iPhone e l’accettazione restano distinte.
+
+## Revisione Calendario, Salute, Nutrizione e Attività — 8 novembre 2026
+
+Requisiti attivi dalla richiesta diretta dell’utente con cinque immagini di riferimento. Testo seguente parafrasato.
+
+- **NUTRITION-EVERYDAY-01 — ACTIVE.** Ampliare le famiglie comuni, con icona generica per voce. Coprire formaggi anche a fette e spalmabili, confetture, oli e burri comuni, carni con preparazione e parte edibile esplicite, frattaglie principali. Aggiungere cocktail da discoteca, sincronizzare fibre, micronutrienti e alcol e consentire la creazione di alimenti generici personali. Olio di cocco fuori dal catalogo standard. Prima tranche: 188 alimenti e icone implementati. Cocktail, alimenti personali e scrittura estesa in progettazione.
+- **CALENDAR-MONTH-STYLE-01 — ACTIVE.** Calendario scuro con contrasto maggiore, weekend meno luminosi, numero nel cerchio del colore del turno per la data evidenziata e barra sottile senza lettere. Scheda Dashboard con icona e titolo colorato e freccia di apertura. Implementato nel sorgente, verifica simulatore pendente.
+- **HEALTH-QUICK-POLISH-01 — ACTIVE.** Uniformare raggi delle schede, ridurre il padding superiore del Diario, eliminare la sovrapposizione della tastiera con Aggiungi, mantenere intera la ricerca e aumentare il contrasto del pannello e della lista alimenti. Implementato nel sorgente: campi toccabili direttamente e tastiera richiudibile scorrendo o toccando il titolo.
+- **ACTIVITY-CATEGORY-GLASS-01 — ACTIVE.** Usare Liquid Glass nelle categorie evidenziate nella foto di Attività, con stato selezionato riconoscibile. Implementato nel sorgente, verifica simulatore pendente.
+- **CALENDAR-DAY-REDESIGN-01 — ACTIVE.** Ripensare apertura, gerarchia, contrasto, separazione visiva, transizione e accesso alla creazione di eventi del giorno. Proposta concreta in CALENDAR-NUTRITION-NEXT.md, in attesa di approvazione DEV-02.

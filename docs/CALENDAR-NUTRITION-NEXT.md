@@ -1,0 +1,32 @@
+# LifeOS — proposta per l’agenda del giorno e il catalogo Nutrizione
+
+La prima tranche aggiorna i componenti esistenti. Questa proposta descrive le scelte ancora da approvare per i due flussi che cambiano struttura o persistenza.
+
+## Agenda del giorno
+
+Toccando una data nel mese, aprire un foglio con superficie distinta e transizione dal basso. La data e il turno sono nell’intestazione. Seguono le sezioni Tutto il giorno e Agenda, con orario a sinistra e righe degli impegni a destra. In fondo, Aggiungi evento resta raggiungibile con il pollice e apre il modulo precompilato con la data. L’agenda del giorno può espandersi e chiudersi tornando al mese e alla posizione di scorrimento precedente. Riduci movimento usa una dissolvenza o elimina lo spostamento. Il pennello dei turni rimane un gesto di modifica e non apre il foglio.
+
+```text
+  Dom 8 novembre                    Chiudi
+  Riposo
+
+  Tutto il giorno
+  [Evento o attività]
+
+  Agenda
+  09:00  [Impegno]
+  14:30  [Impegno]
+
+           + Aggiungi evento
+```
+
+Verifica: apertura da mese e Dashboard, calendario senza impegni, giorno con eventi e attività, creazione con data corretta, ritorno alla stessa settimana, testo grande e Riduci movimento. La CTA resta separata dalla barra delle schede.
+
+## Catalogo, cocktail e Apple Salute
+
+- Il catalogo standard resta italiano e concentrato sui cibi quotidiani. Le varianti di carne espongono preparazione e pelle. Ciqual misura la parte edibile: il peso dell’osso resta fuori dal calcolo nutrizionale. [Fonte Ciqual](https://zenodo.org/records/17550133)
+- Aggiungi alimento personale dalla ricerca crea una voce riutilizzabile sul dispositivo, con nome, famiglia, kcal e nutrienti per 100 g. I campi non noti restano vuoti. Il diario salva una copia dei valori della porzione.
+- Sezione cocktail con porzione per bicchiere, quantità modificabile e dicitura «Stima». Partire da Gin Tonic, Sex on the Beach, Long Island, Vodka Lemon, Vodka Red Bull, Rum e Cola, Mojito, Moscow Mule, Spritz, Negroni e altri classici reperibili. Calcolare i valori dalle ricette di riferimento, quantità e gradazioni documentate. [Ricette IBA](https://iba-world.com/cocktails/)
+- LifeOS scrive già le fibre per le registrazioni con quel valore. Verificare autorizzazione e presenza del campione per Biscotti nell’app Salute. Estendere la scrittura con vitamine e minerali effettivamente disponibili, mantenendo unità per ogni nutriente e lasciando assenti i dati mancanti. [Tipi nutrizionali HealthKit](https://developer.apple.com/documentation/healthkit/nutrition-type-identifiers)
+- Per i cocktail registrare le bevande standard stimate dalla ricetta. Apple Salute espone un conteggio delle bevande e un tipo separato per l’alcol nel sangue. [Bevande alcoliche in HealthKit](https://developer.apple.com/documentation/healthkit/hkquantitytypeidentifier/numberofalcoholicbeverages)
+- Conservare gli identificativi HealthKit storici per macro, calorie e fibre. Assegnare un identificativo stabile per i campioni aggiuntivi, mantenere retry e cancellazione coerenti e testare i permessi parziali. La mancata autorizzazione di un dato aggiuntivo va resa visibile senza bloccare una registrazione alimentare già consentita.

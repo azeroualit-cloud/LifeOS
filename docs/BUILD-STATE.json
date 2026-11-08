@@ -77,6 +77,12 @@
     "validation": "Suite completa, quattro avvii Release e verifica IPA prima della pubblicazione",
     "published": false
   },
+  "post_build_84_ui_catalog": {
+    "status": "implemented_pending_simulator",
+    "generic_food_count": 188,
+    "open_scope": ["calendar day redesign", "cocktail recipes and alcohol", "micronutrients", "personal generic foods"],
+    "includes_new_ipa": false
+  },
   "backend": {
     "last_documented_utilities_deploy_run": "41630715615",
     "source": "docs/native/REVISIONE-77.md",

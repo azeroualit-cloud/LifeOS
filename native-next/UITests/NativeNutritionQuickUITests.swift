@@ -64,7 +64,7 @@ final class NativeNutritionQuickUITests: XCTestCase {
     private func checkFullWidthDatePicker(large: Bool) {
         let app = open(large: large)
         fill(app)
-        app.buttons["quick-nutrition-keyboard-done"].tap()
+        app.staticTexts["Aggiungi nutrienti"].tap()
         let date = app.buttons["quick-nutrition-date"]
         let scroll = app.scrollViews["quick-nutrition-scroll"]
         for _ in 0..<8 where !visible(date, in: app) { drag(scroll, app: app, up: true) }
@@ -103,10 +103,13 @@ final class NativeNutritionQuickUITests: XCTestCase {
         XCTAssertFalse(app.buttons["quick-nutrition-save"].isEnabled)
         fill(app)
         let save = app.buttons["quick-nutrition-save"]
+        XCTAssertFalse(app.buttons["Avanti"].exists)
+        XCTAssertFalse(app.buttons["quick-nutrition-keyboard-done"].exists)
+        XCTAssertTrue(app.buttons["quick-nutrition-catalog"].isHittable)
         XCTAssertTrue(save.isHittable); XCTAssertGreaterThanOrEqual(save.frame.height, 44)
         XCTAssertLessThanOrEqual(save.frame.maxY, app.keyboards.firstMatch.frame.minY + 1)
         capture("Nutrition approved panel keyboard", app)
-        app.buttons["quick-nutrition-keyboard-done"].tap()
+        app.staticTexts["Aggiungi nutrienti"].tap()
         XCTAssertEqual(app.staticTexts["quick-nutrition-calories"].label, "362 kcal")
         XCTAssertFalse(app.textFields["quick-nutrition-Porzione effettiva"].exists)
         XCTAssertFalse(app.textFields["quick-nutrition-Calorie"].exists)
@@ -146,7 +149,7 @@ final class NativeNutritionQuickUITests: XCTestCase {
         fill(app)
         XCTAssertLessThanOrEqual(app.buttons["quick-nutrition-save"].frame.maxY, app.keyboards.firstMatch.frame.minY + 1)
         capture("Nutrition accessibility keyboard", app)
-        app.buttons["quick-nutrition-keyboard-done"].tap()
+        app.staticTexts["Aggiungi nutrienti"].tap()
         app.buttons["quick-nutrition-save"].tap()
         let error = app.staticTexts["quick-nutrition-error"]
         XCTAssertTrue(error.waitForExistence(timeout: 15))
