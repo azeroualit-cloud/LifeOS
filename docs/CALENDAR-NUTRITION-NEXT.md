@@ -2,7 +2,11 @@
 
 La prima tranche aggiorna i componenti esistenti. Questa proposta descrive le scelte ancora da approvare per i due flussi che cambiano struttura o persistenza.
 
-## Agenda del giorno — proposta respinta, da discutere
+## Agenda del giorno — flusso approvato
+
+Un tocco su una data del mese o della striscia Dashboard apre una schermata Giorno dedicata. Il comando Mese riporta alla posizione e alla data di partenza. Il titolo riporta la data, con frecce per il giorno precedente e successivo e il turno sotto. La lista mostra prima gli impegni di tutto il giorno, poi gli orari e le relative attività. Aggiungi evento resta in basso e usa la data corrente della schermata. Il pennello continua a modificare i turni nel mese. Il passaggio si anima con Riduci movimento disattivato.
+
+## Proposta precedente del foglio — respinta
 
 L’utente non ha approvato il foglio. La descrizione seguente conserva la proposta per la cronologia. Toccando una data nel mese, aprire un foglio con superficie distinta e transizione dal basso. La data e il turno sono nell’intestazione. Seguono le sezioni Tutto il giorno e Agenda, con orario a sinistra e righe degli impegni a destra. In fondo, Aggiungi evento resta raggiungibile con il pollice e apre il modulo precompilato con la data. L’agenda del giorno può espandersi e chiudersi tornando al mese e alla posizione di scorrimento precedente. Riduci movimento usa una dissolvenza o elimina lo spostamento. Il pennello dei turni rimane un gesto di modifica e non apre il foglio.
 

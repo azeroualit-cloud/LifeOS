@@ -26,7 +26,6 @@ final class NativeRevision72UITests: XCTestCase {
             scroll.swipeUp(velocity: .slow)
         }
         XCTAssertTrue(today.isHittable); today.tap()
-        app.buttons["calendar-expand-day"].tap()
         XCTAssertTrue(app.scrollViews["calendar-day-pane"].waitForExistence(timeout: 10))
     }
     func testDatePickerHasSevenFullWidthColumnsAfterTypingAndBothDatesRemainClearable() {
@@ -48,24 +47,20 @@ final class NativeRevision72UITests: XCTestCase {
         XCTAssertFalse(app.buttons["Rimuovi inizio"].exists)
         XCTAssertEqual(title.value as? String, "Data senza tagli")
     }
-    func testDayHasOneHeaderRowAndSevenShiftBadges() {
+    func testDayHasReachableMonthNavigationAndPinnedEventAction() {
         let app = launch(); openDay(app)
-        XCTAssertFalse(app.navigationBars["Calendario"].exists)
-        XCTAssertFalse(app.buttons["Impostazioni"].exists)
-        let back = app.buttons["calendar-back-month"], title = app.buttons["calendar-day-heading"], add = app.buttons["primary-add"]
-        XCTAssertGreaterThanOrEqual(back.frame.height.rounded(), 44)
-        XCTAssertGreaterThanOrEqual(title.frame.height.rounded(), 44)
-        XCTAssertEqual(back.frame.midY, title.frame.midY, accuracy: 4)
-        XCTAssertEqual(back.frame.midY, add.frame.midY, accuracy: 4)
-        let days = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "calendar-week-day-"))
-        XCTAssertEqual(days.count, 7)
-        for index in 0..<7 {
-            XCTAssertFalse(days.element(boundBy: index).label.contains("nessun turno"))
+        let back = app.buttons["calendar-back-month"]
+        let title = app.staticTexts["calendar-day-heading"]
+        let add = app.buttons["calendar-add-event"]
+        XCTAssertTrue(title.isHittable)
+        for button in [back, app.buttons["calendar-previous-day"], app.buttons["calendar-next-day"], add] {
+            XCTAssertTrue(button.isHittable)
+            XCTAssertGreaterThanOrEqual(button.frame.height.rounded(), 44)
         }
-        XCTAssertLessThan(days.firstMatch.frame.minY - back.frame.maxY, 65)
-        capture("72-calendar-compact-header-week-shifts")
+        XCTAssertLessThanOrEqual(add.frame.maxY, app.tabBars.firstMatch.frame.minY)
+        XCTAssertGreaterThan(add.frame.minY, title.frame.maxY)
+        capture("day-navigation-and-event-action")
         back.tap(); XCTAssertTrue(app.scrollViews["calendar-scroll"].waitForExistence(timeout: 10))
-        capture("72-calendar-month-no-circle")
     }
     func testLongEventIsCompactAndContainsItsInnerEventAndDayScrollReachesMidnight() {
         let app = launch(); openDay(app)

@@ -35,6 +35,8 @@ final class NativeRevision77UITests: XCTestCase {
         let day = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "dashboard-day-")).firstMatch
         XCTAssertTrue(day.waitForExistence(timeout: 15))
         day.tap()
+        XCTAssertTrue(app.scrollViews["calendar-day-pane"].waitForExistence(timeout: 10))
+        app.buttons["calendar-back-month"].tap()
         XCTAssertTrue(app.scrollViews["calendar-scroll"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.tabBars.buttons["Dashboard"].isSelected)
         capture("Calendario completo", app)

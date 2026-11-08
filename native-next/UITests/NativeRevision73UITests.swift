@@ -16,46 +16,41 @@ final class NativeRevision73UITests: XCTestCase {
     private func capture(_ name: String) {
         let item = XCTAttachment(screenshot: XCUIScreen.main.screenshot()); item.name = name; item.lifetime = .keepAlways; add(item)
     }
-    func testSelectingDayKeepsMonthVisibleAndExpansionIsExplicit() {
+    func testDayOpensDirectlyAndMonthReturnsToSameWeek() {
         let app = launch()
-        capture("73-dashboard-alignment")
         app.openOtherDestination("Calendario")
         let month = app.scrollViews["calendar-scroll"], today = app.buttons["calendar-day-" + day()]
         XCTAssertTrue(month.waitForExistence(timeout: 10))
         for _ in 0..<12 { if today.isHittable { break }; month.swipeUp(velocity: .slow) }
-        XCTAssertTrue(today.isHittable); today.tap()
+        XCTAssertTrue(today.isHittable)
+        let origin = today.frame.midY
+        today.tap()
+
         let agenda = app.scrollViews["calendar-day-pane"]
         XCTAssertTrue(agenda.waitForExistence(timeout: 10))
-        XCTAssertTrue(month.exists); XCTAssertTrue(month.isHittable)
+        XCTAssertFalse(month.isHittable)
+        capture("calendar-dedicated-day")
+        app.buttons["calendar-back-month"].tap()
+        let restored = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in today.isHittable }, object: today)
+        XCTAssertEqual(XCTWaiter.wait(for: [restored], timeout: 10), .completed)
         XCTAssertTrue(today.isSelected)
-        capture("73-inline-calendar-agenda")
-        print("CALENDAR_DENSE_PREVIEW cell=\(today.frame) viewport=\(month.frame)")
-        expectation(for: NSPredicate { _, _ in today.isHittable }, evaluatedWith: today)
-        waitForExpectations(timeout: 3)
-        XCTAssertTrue(today.isHittable)
-        XCTAssertGreaterThanOrEqual(today.frame.minY, month.frame.minY)
-        XCTAssertLessThanOrEqual(today.frame.maxY, month.frame.maxY)
-        XCTAssertGreaterThan(agenda.frame.height, 100)
-        XCTAssertGreaterThanOrEqual(agenda.frame.minY, month.frame.maxY)
-        XCTAssertFalse(app.buttons["calendar-back-month"].exists)
-        capture("73-inline-calendar-agenda")
-        app.buttons["calendar-close-preview"].tap()
-        XCTAssertFalse(agenda.exists); XCTAssertTrue(month.isHittable)
-        today.tap(); app.buttons["calendar-expand-day"].tap()
-        XCTAssertTrue(app.buttons["calendar-back-month"].waitForExistence(timeout: 10))
-        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "calendar-week-day-")).count, 7)
-        capture("73-expanded-colour-agenda")
+        XCTAssertEqual(today.frame.midY, origin, accuracy: 3)
+        XCTAssertFalse(agenda.isHittable)
     }
-    func testInlineAgendaRemainsUsableWithLargeTextAndReducedMotion() {
+
+    func testDayRemainsUsableWithLargeTextAndReducedMotion() {
         let app = launch(["--large-text", "--reduce-motion"])
         app.openOtherDestination("Calendario")
         let month = app.scrollViews["calendar-scroll"], today = app.buttons["calendar-day-" + day()]
         XCTAssertTrue(month.waitForExistence(timeout: 10))
         for _ in 0..<12 { if today.isHittable { break }; month.swipeUp(velocity: .slow) }
-        today.tap()
-        XCTAssertTrue(app.buttons["calendar-expand-day"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.buttons["calendar-close-preview"].isHittable)
-        XCTAssertGreaterThanOrEqual(app.buttons["calendar-expand-day"].frame.height.rounded(), 44)
-        capture("73-inline-large-text")
+        XCTAssertTrue(today.isHittable); today.tap()
+        let back = app.buttons["calendar-back-month"]
+        XCTAssertTrue(back.waitForExistence(timeout: 10))
+        XCTAssertTrue(back.isHittable)
+        let add = app.buttons["calendar-add-event"]
+        XCTAssertTrue(add.isHittable)
+        XCTAssertGreaterThanOrEqual(add.frame.height.rounded(), 44)
+        capture("calendar-dedicated-day-large-text")
     }
 }

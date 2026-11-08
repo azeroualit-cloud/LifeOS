@@ -47,7 +47,6 @@ enum NativeDesign {
     static let healthGray = Color(uiColor: .systemGray)
     static let healthHistoricalBar = healthGray.opacity(0.28)
     static let healthTrend = Color(uiColor: .label)
-    static let calendarPreviewFraction: CGFloat = 0.46
     static let inset = Color.primary.opacity(0.045)
     // Financial direction only: red = outflow/decline, green = available/inflow/growth.
     static let financialRed = Color(uiColor: UIColor { trait in
@@ -118,7 +117,6 @@ enum NativeDesign {
         static let agendaIndent: CGFloat = 12
         static let calendarDateNumber: CGFloat = 20
         static let calendarDateLine: CGFloat = 32
-        static let calendarSwipeDistance: CGFloat = 44
         static let calendarMonthDayHeight: CGFloat = 88
         static let calendarDayHeight: CGFloat = 54
         static let calendarMarker: CGFloat = 3

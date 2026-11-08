@@ -91,6 +91,11 @@
     "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42494307645",
     "includes_new_ipa": false
   },
+  "calendar_dedicated_day": {
+    "decision": "CALENDAR-DAY-REDESIGN-01",
+    "status": "implemented_pending_simulator",
+    "includes_new_ipa": false
+  },
   "backend": {
     "last_documented_utilities_deploy_run": "41630715615",
     "source": "docs/native/REVISIONE-77.md",

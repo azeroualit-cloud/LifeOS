@@ -71,7 +71,9 @@
       "recorded_on": "2026-11-08",
       "provenance": "Richiesta diretta utente con cinque immagini di riferimento. Parafrasi.",
       "rule": "Ripensare apertura, gerarchia, contrasto, separazione visiva, transizione e accesso alla creazione di eventi del giorno.",
-      "implementation": "Proposta del foglio respinta. Fonte utente: «per la parte calendario non approvo, discutiamone». Redesign del giorno sospeso per discussione."
+      "implementation": "Il foglio dal basso resta respinto. Approvata una vista Giorno dedicata con lista compatta e ritorno al Mese diretto, anche entrando dalla Dashboard.",
+      "confirmation_quote": "oltre alla tua domanda va valutato anche il fatto che calendario non ha il pulsante nela navigation bar, quindi devo poter tornare al calendario senza passare dalla dashboard. Poi per quanto riguarda la tua domanda, io sceglierei quello che hai detto te perché non mi serve sapere quali spazi liberi ho.",
+      "confirmation_date": "2026-11-08"
     },
     {
       "id": "UX-DATE-PICKER-01",

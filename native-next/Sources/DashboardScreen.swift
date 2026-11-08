@@ -59,7 +59,7 @@ struct DashboardScreen: View {
                         hasEvents: marked.contains(day), isToday: current,
                         isWeekend: weekday == 1 || weekday == 7,
                         isCurrentMonth: day.hasPrefix(String(today.prefix(7))))
-                    Button { openCalendar(day) } label: {
+                    Button { openCalendar(day, opensDay: true) } label: {
                         VStack(spacing: NativeDesign.Space.xs) {
                             Text(["D", "L", "M", "M", "G", "V", "S"][weekday - 1]).font(.caption).foregroundStyle(day < today ? NativeDesign.pastCalendarSecondary : NativeDesign.secondary)
                             CalendarDayCell(item: item, active: current, appearance: .week).equatable()
@@ -71,8 +71,8 @@ struct DashboardScreen: View {
             }.dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         }
     }
-    private func openCalendar(_ day: String) {
-        store.calendarMonth = String(day.prefix(7)); router.showCalendar(day: day, opensDay: false)
+    private func openCalendar(_ day: String, opensDay: Bool = false) {
+        store.calendarMonth = String(day.prefix(7)); router.showCalendar(day: day, opensDay: opensDay)
         Task { await store.sync(scope: .life) }
     }
     private func heading(today: String, now: Date) -> some View {

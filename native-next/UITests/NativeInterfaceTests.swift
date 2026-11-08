@@ -844,14 +844,11 @@ final class NativeInterfaceTests: XCTestCase {
             let cell = app.buttons["calendar-day-" + day]
             revealCalendarDay(day, in: app)
             cell.tap()
-            let expand = app.buttons["calendar-expand-day"]
-            XCTAssertTrue(expand.waitForExistence(timeout: 10), "Selecting a date must first show its agenda preview")
             XCTAssertTrue(app.scrollViews["calendar-day-pane"].waitForExistence(timeout: 10))
-            XCTAssertTrue(cell.isSelected, "The month grid must immediately identify the previewed date")
-            XCTAssertTrue(expand.isHittable); expand.tap()
-            let focused = app.buttons["calendar-week-day-" + day]
-            XCTAssertTrue(focused.waitForExistence(timeout: 10)); XCTAssertTrue(focused.isSelected)
+            XCTAssertTrue(app.staticTexts["calendar-day-heading"].isHittable)
             app.buttons["calendar-back-month"].tap()
+            XCTAssertTrue(cell.waitForExistence(timeout: 10))
+            XCTAssertTrue(cell.isSelected)
         }
         capture("calendar-repeated-selection")
     }

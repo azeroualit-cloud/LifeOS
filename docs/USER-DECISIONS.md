@@ -249,7 +249,7 @@ Requisiti attivi dalla richiesta diretta dell’utente con cinque immagini di ri
 - **CALENDAR-MONTH-STYLE-01 — ACTIVE.** Calendario scuro con contrasto maggiore, weekend meno luminosi, numero nel cerchio del colore del turno per la data evidenziata e barra sottile senza lettere. Scheda Dashboard con icona e titolo colorato e freccia di apertura. Implementato nel sorgente, verifica simulatore pendente.
 - **HEALTH-QUICK-POLISH-01 — ACTIVE.** Uniformare raggi delle schede, ridurre il padding superiore del Diario, eliminare la sovrapposizione della tastiera con Aggiungi, mantenere intera la ricerca e aumentare il contrasto del pannello e della lista alimenti. Implementato nel sorgente: campi toccabili direttamente e tastiera richiudibile scorrendo o toccando il titolo.
 - **ACTIVITY-CATEGORY-GLASS-01 — ACTIVE.** Usare Liquid Glass nelle categorie evidenziate nella foto di Attività, con stato selezionato riconoscibile. Implementato nel sorgente, verifica simulatore pendente.
-- **CALENDAR-DAY-REDESIGN-01 — ACTIVE.** Ripensare apertura, gerarchia, contrasto, separazione visiva, transizione e accesso alla creazione di eventi del giorno. Proposta del foglio respinta con «per la parte calendario non approvo, discutiamone». Redesign del giorno sospeso per discussione.
+- **CALENDAR-DAY-REDESIGN-01 — ACTIVE.** Ripensare apertura, gerarchia, contrasto, separazione visiva, transizione e accesso alla creazione di eventi del giorno. Proposta del foglio respinta con «per la parte calendario non approvo, discutiamone». Approvata poi una schermata Giorno dedicata, con lista compatta e ritorno diretto al Mese senza passare dalla Dashboard.
 
 ## NUTRITION-HALAL-MOROCCO-01 — ACTIVE, 8 novembre 2026
 
@@ -258,3 +258,9 @@ Fonte utente: «non voglio il maiale tra le carni, ma solo tutte le carni halal 
 Nel catalogo standard escludere carni di maiale, derivati di maiale e preparazioni di carne con composizione non verificata. Includere carni di specie ammesse, cibi marocchini comuni e pesatura con osso stimata quando documentabile.
 
 La composizione nutrizionale è generica. Per la conformità halal di un prodotto acquistato contano ingredienti e provenienza. La pesatura con osso conserva il peso della bilancia e usa la parte edibile stimata per calcolare i nutrienti.
+
+### CALENDAR-DAY-REDESIGN-01 — conferma del flusso Giorno
+
+Fonte utente: «oltre alla tua domanda va valutato anche il fatto che calendario non ha il pulsante nela navigation bar, quindi devo poter tornare al calendario senza passare dalla dashboard. Poi per quanto riguarda la tua domanda, io sceglierei quello che hai detto te perché non mi serve sapere quali spazi liberi ho.»
+
+Un tocco sulla data apre Giorno. La data e il turno precedono gli impegni di tutto il giorno e la lista con gli orari. Le frecce spostano di un giorno e Aggiungi evento resta in basso. Il pulsante Mese torna direttamente alla settimana e alla data di partenza. Il pennello dei turni resta in Mese.

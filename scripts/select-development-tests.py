@@ -10,7 +10,7 @@ AREAS = {
  "bloom": ["LifeOSProbeUITests/NativeRevision74UITests/testMoreDestinationsAndBloomNotePersistsAcrossNavigation", "LifeOSProbeUITests/NativeBloomGridUITests", "LifeOSProbeTests/NativeBloomStoreTests"],
  "finance": ["LifeOSProbeUITests/NativeRevision75UITests"],
  "activities": ["LifeOSProbeUITests/NativeInterfaceTests/testUnifiedActivityEditorPreservesDescriptionWhenAddingAndRemovingDate", "LifeOSProbeUITests/NativeInterfaceTests/testActivityAgendaShowsOnlyRelevantItemsAndFoldsCompleted", "LifeOSProbeTests/NativeActivityStoreTests"],
- "calendar": ["LifeOSProbeUITests/NativeInterfaceTests/testCalendarRepeatedScrollingKeepsMonthAnchorsAndReturnsToToday", "LifeOSProbeUITests/NativeInterfaceTests/testCalendarSelectionUpdatesImmediatelyAndKeepsEventIndex", "LifeOSProbeTests/NativeCalendarPerformanceTests"],
+ "calendar": ["LifeOSProbeUITests/NativeInterfaceTests/testCalendarRepeatedScrollingKeepsMonthAnchorsAndReturnsToToday", "LifeOSProbeUITests/NativeInterfaceTests/testCalendarSelectionUpdatesImmediatelyAndKeepsEventIndex", "LifeOSProbeTests/NativeCalendarPerformanceTests", "LifeOSProbeUITests/NativeRevision71UITests/testDashboardExplicitDayAndCalendarEntryResumeDefaults", "LifeOSProbeUITests/NativeRevision72UITests/testDayHasReachableMonthNavigationAndPinnedEventAction", "LifeOSProbeUITests/NativeRevision73UITests"],
  "shifts": ["LifeOSProbeUITests/NativeInterfaceTests/testVisibleShiftBrushPaintsAndUndoRestoresDay", "LifeOSProbeUITests/NativeInterfaceTests/testShiftExportRemainsReachableFromSettings", "LifeOSProbeTests/NativeRevision71Tests"],
 }
 def select(mode, area, paths):

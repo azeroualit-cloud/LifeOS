@@ -119,13 +119,9 @@ final class NativeRevision74UITests: XCTestCase {
         for _ in 0..<12 { if cell.isHittable { break }; surface.swipeUp(velocity: .slow) }
         XCTAssertTrue(cell.isHittable); cell.tap()
         XCTAssertTrue(app.scrollViews["calendar-day-pane"].waitForExistence(timeout: 10))
-        capture("74-calendar-preview-diagnostic")
-        print("CALENDAR_PREVIEW_FRAMES cell=\(cell.frame) viewport=\(surface.frame) state=\(surface.value ?? "none")")
-        expectation(for: NSPredicate { _, _ in cell.isHittable }, evaluatedWith: cell)
-        waitForExpectations(timeout: 3)
-        app.buttons["calendar-expand-day"].tap()
-        XCTAssertTrue(app.buttons["calendar-week-day-" + today].waitForExistence(timeout: 10))
-        capture("74-calendar-month-week")
+        XCTAssertTrue(app.staticTexts["calendar-day-heading"].exists)
+        XCTAssertFalse(surface.isHittable)
+        capture("74-calendar-dedicated-day")
         app.buttons["calendar-back-month"].tap()
         XCTAssertTrue(surface.waitForExistence(timeout: 10))
     }

@@ -2,6 +2,7 @@ import SwiftUI
 
 /// A long event stays compact; contained events remain independently tappable.
 struct NativeCalendarAgendaBlock: View {
+    @Environment(\.dynamicTypeSize) private var typeSize
     let node: NativeCalendarAgendaNode
     let onOpen: (NativeCalendarAgendaEntry) -> Void
     var depth = 0
@@ -10,21 +11,34 @@ struct NativeCalendarAgendaBlock: View {
     private var color: Color { shift?.color ?? NativeCalendarEventStyle.color(for: entry) }
     var body: some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-            Text(NativeCalendarTimeline.clock(entry.start)).font(.caption).monospacedDigit().foregroundStyle(color)
-            if entry.source == "shift" {
-                Label(entry.record.text("title"), systemImage: shift?.symbol ?? "calendar")
-                    .font(.subheadline.weight(.medium)).foregroundStyle(color)
-                    .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
-            } else {
-                Button { onOpen(entry) } label: {
-                    HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.small) {
-                        if entry.completed { Image(systemName: "checkmark.circle.fill").foregroundStyle(color) }
-                        Text(entry.record.text("title")).font(.subheadline.weight(.medium))
-                            .foregroundStyle(entry.completed ? NativeDesign.secondary : Color.primary).strikethrough(entry.completed)
-                            .multilineTextAlignment(.leading)
-                    }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading).contentShape(Rectangle())
-                }.buttonStyle(NativePressStyle()).accessibilityIdentifier("calendar-timeline-" + entry.id)
-                    .accessibilityValue(entry.completed ? "Completata" : "Da completare")
+            let layout = typeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(alignment: .leading, spacing: NativeDesign.Space.xxs))
+                : AnyLayout(HStackLayout(alignment: .center, spacing: NativeDesign.Space.medium))
+            layout {
+                VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
+                    Text(NativeCalendarTimeline.clock(entry.start))
+                    if let end = entry.end {
+                        Text(NativeCalendarTimeline.clock(end))
+                            .accessibilityLabel("Fine " + NativeCalendarTimeline.clock(end))
+                    }
+                }
+                .font(.caption).monospacedDigit().foregroundStyle(color)
+                .fixedSize(horizontal: true, vertical: false)
+                if entry.source == "shift" {
+                    Label(entry.record.text("title"), systemImage: shift?.symbol ?? "calendar")
+                        .font(.subheadline.weight(.medium)).foregroundStyle(color)
+                        .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
+                } else {
+                    Button { onOpen(entry) } label: {
+                        HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.small) {
+                            if entry.completed { Image(systemName: "checkmark.circle.fill").foregroundStyle(color) }
+                            Text(entry.record.text("title")).font(.subheadline.weight(.medium))
+                                .foregroundStyle(entry.completed ? NativeDesign.secondary : Color.primary).strikethrough(entry.completed)
+                                .multilineTextAlignment(.leading)
+                        }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading).contentShape(Rectangle())
+                    }.buttonStyle(NativePressStyle()).accessibilityIdentifier("calendar-timeline-" + entry.id)
+                        .accessibilityValue(entry.completed ? "Completata" : "Da completare")
+                }
             }
             if !node.children.isEmpty {
                 VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
@@ -32,10 +46,6 @@ struct NativeCalendarAgendaBlock: View {
                         NativeCalendarAgendaBlock(node: child, onOpen: onOpen, depth: depth + 1)
                     }
                 }.padding(.leading, depth < 3 ? NativeDesign.Layout.agendaIndent : NativeDesign.Space.none)
-            }
-            if let end = entry.end {
-                Text(NativeCalendarTimeline.clock(end)).font(.caption).monospacedDigit().foregroundStyle(color)
-                    .accessibilityLabel("Fine " + NativeCalendarTimeline.clock(end))
             }
         }.padding(NativeDesign.Space.medium)
             .frame(maxWidth: .infinity, alignment: .leading)

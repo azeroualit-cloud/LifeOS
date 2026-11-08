@@ -45,10 +45,9 @@ final class NativeRevision71UITests: XCTestCase {
         XCTAssertFalse(app.buttons["Esporta turni su Apple (facoltativo)"].exists)
         let today = app.buttons["calendar-day-" + day()]
         reveal(today, in: months, app: app); today.tap()
-        app.buttons["calendar-expand-day"].tap()
         XCTAssertTrue(exists(app.scrollViews["calendar-day-pane"], app: app))
-        XCTAssertTrue(app.buttons["calendar-week-day-" + day()].isSelected)
-        XCTAssertFalse(months.exists)
+        XCTAssertTrue(app.staticTexts["calendar-day-heading"].exists)
+        XCTAssertFalse(months.isHittable)
         capture("71-calendar-day-timeline")
         app.buttons["calendar-back-month"].tap()
         XCTAssertTrue(months.waitForExistence(timeout: 10))
@@ -61,15 +60,19 @@ final class NativeRevision71UITests: XCTestCase {
     func testDashboardExplicitDayAndCalendarEntryResumeDefaults() {
         let app = launch()
         app.buttons["dashboard-day-" + day(1)].tap()
-        let explicit = app.buttons["calendar-day-" + day(1)]
+        let dayHeading = app.staticTexts["calendar-day-heading"]
+        XCTAssertTrue(exists(dayHeading, app: app))
+        let explicitLabel = dayHeading.label
+        app.buttons["calendar-next-day"].tap()
+        XCTAssertNotEqual(dayHeading.label, explicitLabel)
+        app.buttons["calendar-previous-day"].tap()
+        XCTAssertEqual(dayHeading.label, explicitLabel)
+        app.buttons["calendar-back-month"].tap()
         let monthScroll = app.scrollViews["calendar-scroll"]
         XCTAssertTrue(monthScroll.waitForExistence(timeout: 10))
-        reveal(explicit, in: monthScroll, app: app); explicit.tap()
-        XCTAssertTrue(app.buttons["calendar-expand-day"].waitForExistence(timeout: 10))
+        let explicit = app.buttons["calendar-day-" + day(1)]
+        XCTAssertTrue(explicit.isHittable)
         XCTAssertTrue(explicit.isSelected)
-        app.buttons["calendar-expand-day"].tap()
-        let focused = app.buttons["calendar-week-day-" + day(1)]
-        XCTAssertTrue(exists(focused, app: app)); XCTAssertTrue(focused.isSelected)
         app.openOtherDestination("Finanza"); app.openOtherDestination("Calendario")
         XCTAssertTrue(app.scrollViews["calendar-scroll"].waitForExistence(timeout: 10))
         let today = app.buttons["calendar-day-" + day()]
@@ -85,7 +88,6 @@ final class NativeRevision71UITests: XCTestCase {
         app.openOtherDestination("Calendario")
         let today = app.buttons["calendar-day-" + day()]
         reveal(today, in: app.scrollViews["calendar-scroll"], app: app); today.tap()
-        app.buttons["calendar-expand-day"].tap()
         let allDay = app.scrollViews["calendar-all-day-strip"]
         XCTAssertTrue(exists(allDay, app: app))
         XCTAssertLessThanOrEqual(allDay.frame.height, 60)
@@ -226,7 +228,6 @@ final class NativeRevision71UITests: XCTestCase {
         app.openOtherDestination("Calendario")
         let today = app.buttons["calendar-day-" + day()]
         reveal(today, in: app.scrollViews["calendar-scroll"], app: app); today.tap()
-        app.buttons["calendar-expand-day"].tap()
         let slot = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "calendar-timeline-event:", "Slot completato test")).firstMatch
         XCTAssertTrue(exists(slot, app: app)); XCTAssertEqual(slot.value as? String, "Completata")
         capture("71-completed-timed-activity")
@@ -236,9 +237,8 @@ final class NativeRevision71UITests: XCTestCase {
         app.openOtherDestination("Calendario")
         let today = app.buttons["calendar-day-" + day()]
         reveal(today, in: app.scrollViews["calendar-scroll"], app: app); today.tap()
-        app.buttons["calendar-expand-day"].tap()
         XCTAssertTrue(exists(app.buttons["calendar-back-month"], app: app))
-        app.buttons["primary-add"].tap()
+        app.buttons["calendar-add-event"].tap()
         XCTAssertTrue(app.navigationBars["Nuova attività"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.buttons["activity-date-Inizio"].exists)
         app.buttons["Annulla"].tap()

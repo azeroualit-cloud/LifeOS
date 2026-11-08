@@ -13,7 +13,7 @@ extension XCUIApplication {
             if back.exists && back.isHittable { back.tap() } else { break }
         }
         if name == "Calendario" {
-            let day = buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "dashboard-day-")).firstMatch
+            let day = buttons["home-calendar"]
             for _ in 0..<12 { if day.isHittable { break }; scrollViews["dashboard-scroll"].swipeDown(velocity: .slow) }
             XCTAssertTrue(day.isHittable); day.tap()
         } else {
