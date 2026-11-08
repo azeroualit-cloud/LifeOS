@@ -8,7 +8,7 @@
   "source_of_truth": "native-next overlay assembled through .github/actions/native-compat76/action.yml",
   "native_source_fingerprint": {
     "algorithm": "SHA-256 over sorted tracked native-next paths, NUL, file bytes, NUL",
-    "sha256": "789a04bb2fb8a3bf8c3a9e7535ea80153a694ef343400ad20beae1282f1e701b"
+    "sha256": "5f05918662fcc869c111da75d749989d1be5eddfa35812c674c6e05fed70df1f"
   },
   "latest_distributed_build": {
     "version": "0.10.21",
@@ -137,6 +137,15 @@
     "followup_commit": "1c29ddaff8e352897e761a690e849343230e3d06",
     "followup_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42510268817",
     "validation": "Compilazione passata; tre test con Carboidrati da 1 a 4 punti oltre il limite dopo lo scroll. La seconda verifica mirata è passata, inclusi i tre casi di Nutrizione. Nessun collaudo completo o pacchetto per il sorgente corretto.",
+    "new_ipa": false
+  },
+  "nutrition_catalog_render": {
+    "source_commit": "cc6a24079c1adfd0d9aa79327b12fde50b65e816",
+    "run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42516427060",
+    "screenshots": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42516427060/artifacts/13631976991",
+    "unit_passed": 16,
+    "ui_passed": 3,
+    "validation": "Simulator passed. Apple Salute physical device verification pending.",
     "new_ipa": false
   },
   "backend": {
