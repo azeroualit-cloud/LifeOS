@@ -102,6 +102,7 @@ enum CivilDate {
     }
     private static let civilFormatter = formatter("yyyy-MM-dd", locale: "en_US_POSIX")
     private static let monthFormatter = formatter("MMMM yyyy", locale: "it_IT")
+    private static let agendaTitleFormatter = formatter("EEEE d MMMM", locale: "it_IT")
     private static let labelFormatter = formatter("EEE d MMM", locale: "it_IT")
     private static let shortMonthFormatter = formatter("LLL", locale: "it_IT")
     static func day(_ date: Date = Date()) -> String { civilFormatter.string(from: date) }
@@ -111,6 +112,10 @@ enum CivilDate {
         self.day(calendar.date(byAdding: component, value: count, to: date(day)) ?? date(day))
     }
     static func monthTitle(_ month: String) -> String { monthFormatter.string(from: date(month + "-01")).capitalized }
+    static func agendaTitle(_ day: String) -> String {
+        let text = agendaTitleFormatter.string(from: date(day))
+        return text.prefix(1).uppercased() + String(text.dropFirst())
+    }
     static func label(_ day: String) -> String { label(date(day)) }
     static func label(_ date: Date) -> String { labelFormatter.string(from: date) }
     static func monthAbbreviation(_ month: String) -> String {

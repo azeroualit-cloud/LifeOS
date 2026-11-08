@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Calendario Giorno.** Variante grafica per revisione con data a sinistra, turno in pillola, superficie Agenda unica, colori limitati ai marcatori e azione Liquid Glass sopra la navigazione. Collaudo e catture del simulatore in avvio.
+
 **Calendario Mese.** Implementato un puntino per evento, tre per riga, con conteggio leggibile da VoiceOver. L’utente chiede una proposta grafica per la vista Giorno, da valutare a parte. Due test UI passati su e9fd592, inclusi cinque eventi su due righe e ritorno alla stessa settimana. [Schermate reali](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42520092685/artifacts/13633108552).
 
 **Nutrizione, revisione simulatore.** Sorgente con 30 cocktail, consumo stimato per bicchiere, alimenti personali locali, 209 alimenti generici e 18 opzioni compatibili con pesatura con osso. Apple Salute riceve unità alcoliche (12 g/UA), folati in massa e vitamina K totale quando entrambi i componenti sono disponibili. ALA, EPA e DHA restano in LifeOS. L’utente ha escluso la creatina e ha chiesto schermate reali prima di decidere sull’IPA. Compilazione, 16 test unitari e 3 test UI superati sul commit cc6a240. Sei schermate reali esportate. Verifica Apple Salute su dispositivo ancora aperta. [Collaudo](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42516427060) · [Catture simulatore](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42516427060/artifacts/13631976991).

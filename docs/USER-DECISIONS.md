@@ -302,3 +302,7 @@ Fonte utente: «per la creatina non facciamo nulla, il resto devi tutto implemen
 ## CALENDAR-MONTH-EVENT-DOTS-01 — ACTIVE, 8 novembre 2026
 
 Fonte utente: «facciamo invece nella vista mese, che gli n eventi corrispondono a n puntini, fino a un max di 3 per riga,». Un puntino per evento di calendario nella cella del Mese, tre per riga e righe aggiuntive per gli altri. Il conteggio è disponibile a VoiceOver. L’utente chiede una nuova proposta visiva per Giorno, da valutare prima di modificare la vista.
+
+### CALENDAR-DAY-REDESIGN-01 — render nativo richiesto
+
+Fonte utente: «ok mi mostri quindi il render del giorno aggiornato?». Preparare la vista Giorno nel simulatore con data a sinistra, turno in badge, agenda unica con accenti sugli impegni e azione Liquid Glass in basso. La richiesta autorizza il render per revisione.

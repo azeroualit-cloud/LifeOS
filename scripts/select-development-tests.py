@@ -86,7 +86,12 @@ if __name__ == "__main__":
         areas, tests, paths, reason = trial_selection(a.base)
     elif a.mode == "calendar-render":
         areas = ["calendar"]
-        tests = ["LifeOSProbeUITests/NativeRevision73UITests"]
+        tests = [
+            "LifeOSProbeUITests/NativeRevision73UITests",
+            "LifeOSProbeUITests/NativeRevision72UITests/testDayHasReachableMonthNavigationAndPinnedEventAction",
+            "LifeOSProbeUITests/NativeRevision72UITests/testLongEventIsCompactAndContainsItsInnerEventAndDayScrollReachesMidnight",
+            "LifeOSProbeUITests/NativeRevision71UITests/testAllDayEventsUseCompactChipsWithinTheDayScroll",
+        ]
     elif a.mode == "nutrition-render":
         areas = ["health", "nutrition"]
         tests = [

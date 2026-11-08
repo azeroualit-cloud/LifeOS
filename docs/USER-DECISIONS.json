@@ -89,6 +89,7 @@
     },
     {
       "id": "CALENDAR-DAY-REDESIGN-01",
+      "render_request": {"original_quote": "ok mi mostri quindi il render del giorno aggiornato?", "recorded_on": "2026-11-08", "scope": "Render nativo Giorno per revisione, con data a sinistra, badge turno, superficie agenda unica e azione Liquid Glass."},
       "status": "ACTIVE",
       "scope": "Agenda del giorno nel Calendario",
       "recorded_on": "2026-11-08",

@@ -187,33 +187,35 @@ struct CalendarScreen: View {
     private var dayAgenda: some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.none) {
             VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-                Button(action: returnToMonth) {
-                    Label("Mese", systemImage: "chevron.left")
-                }
-                .buttonStyle(NativeGlassButtonStyle())
-                .accessibilityLabel("Torna al mese")
-                .accessibilityIdentifier("calendar-back-month")
-
                 HStack(spacing: NativeDesign.Space.small) {
+                    Button(action: returnToMonth) {
+                        Label("Mese", systemImage: "chevron.left")
+                    }
+                    .buttonStyle(NativeGlassButtonStyle())
+                    .accessibilityLabel("Torna al mese")
+                    .accessibilityIdentifier("calendar-back-month")
+                    Spacer(minLength: NativeDesign.Space.none)
                     NativeIconButton(symbol: "chevron.left", label: "Giorno precedente") { moveDay(by: -1) }
                         .accessibilityIdentifier("calendar-previous-day")
-                    Text(CivilDate.label(selected).capitalized)
-                        .font(.title3.bold()).frame(maxWidth: .infinity)
-                        .multilineTextAlignment(.center)
-                        .accessibilityAddTraits(.isHeader)
-                        .accessibilityIdentifier("calendar-day-heading")
                     NativeIconButton(symbol: "chevron.right", label: "Giorno successivo") { moveDay(by: 1) }
                         .accessibilityIdentifier("calendar-next-day")
                 }
+                Text(CivilDate.agendaTitle(selected))
+                    .font(.largeTitle.weight(.bold))
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityAddTraits(.isHeader)
+                    .accessibilityIdentifier("calendar-day-heading")
                 if let shift = selectedShift {
                     Label(shift.time.isEmpty ? shift.title : shift.title + " · " + shift.time, systemImage: shift.symbol)
-                        .font(.subheadline.weight(.medium)).foregroundStyle(shift.color)
-                        .frame(maxWidth: .infinity, alignment: .center)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(shift.color)
+                        .padding(.horizontal, NativeDesign.Space.medium)
+                        .padding(.vertical, NativeDesign.Space.xs)
+                        .background(shift.color.opacity(0.12), in: Capsule())
                 }
             }
             .padding(.horizontal, NativeDesign.Layout.screenInset)
             .padding(.vertical, NativeDesign.Space.small)
-            Divider()
             agendaContent
         }
         .safeAreaInset(edge: .bottom, spacing: NativeDesign.Space.none) {
@@ -221,11 +223,11 @@ struct CalendarScreen: View {
                 router.sheet = .event(["day": .string(selected)])
             } label: {
                 Label("Aggiungi evento", systemImage: "plus")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget)
+                    .font(.subheadline.weight(.semibold))
             }
-            .buttonStyle(NativeCompactPrimaryButtonStyle())
+            .buttonStyle(NativeGlassButtonStyle())
             .accessibilityIdentifier("calendar-add-event")
+            .frame(maxWidth: .infinity)
             .padding(.horizontal, NativeDesign.Layout.screenInset)
             .padding(.vertical, NativeDesign.Space.small)
             .background(NativeDesign.calendarCanvas)
@@ -238,15 +240,21 @@ struct CalendarScreen: View {
                 if let loadError {
                     HStack { NativeInlineMessage(text: loadError); Button("Riprova") { reload += 1 } }
                 }
-                if !allDayEntries.isEmpty { allDayStrip }
                 let entries = agenda
-                Text("Agenda").font(.headline).accessibilityAddTraits(.isHeader)
-                if entries.isEmpty && allDayEntries.isEmpty {
-                    Text("Nessun impegno").font(.subheadline).foregroundStyle(NativeDesign.secondary)
-                        .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.rowHeight, alignment: .leading)
-                }
-                ForEach(entries) { node in
-                    NativeCalendarAgendaBlock(node: node, onOpen: openAgendaEntry)
+                let allDay = allDayEntries
+                NativeCard(density: .compact) {
+                    Label("Agenda", systemImage: "calendar")
+                        .font(.headline).foregroundStyle(NativeDesign.calendarTitle)
+                        .accessibilityAddTraits(.isHeader)
+                    if !allDay.isEmpty { allDayStrip(allDay) }
+                    if entries.isEmpty && allDay.isEmpty {
+                        Text("Nessun impegno").font(.subheadline).foregroundStyle(NativeDesign.secondary)
+                            .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.rowHeight, alignment: .leading)
+                    }
+                    ForEach(entries) { node in
+                        if !allDay.isEmpty || node.id != entries.first?.id { Divider() }
+                        NativeCalendarAgendaBlock(node: node, onOpen: openAgendaEntry)
+                    }
                 }
             }
             .padding(.horizontal, NativeDesign.Layout.screenInset)
@@ -292,19 +300,19 @@ struct CalendarScreen: View {
             NativeCalendarAgendaEntry(id: "task:" + String($0.integer("id")), record: $0, source: "task", start: 0, end: nil)
         }
     }
-    private var allDayStrip: some View {
+    private func allDayStrip(_ entries: [NativeCalendarAgendaEntry]) -> some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
             Text("Tutto il giorno").font(.caption).foregroundStyle(NativeDesign.secondary)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: NativeDesign.Space.small) {
-                    ForEach(allDayEntries) { item in
+                    ForEach(entries) { item in
                         Button { openAgendaEntry(item) } label: {
-                            HStack(spacing: NativeDesign.Space.small) {
-                                Image(systemName: item.completed ? "checkmark.circle.fill" : "circle").foregroundStyle(NativeCalendarEventStyle.color(for: item))
-                                Text(item.record.text("title")).font(.subheadline).lineLimit(1).strikethrough(item.completed)
-                                    .frame(maxWidth: NativeDesign.Layout.allDayChipWidth, alignment: .leading)
-                            }.padding(.horizontal, NativeDesign.Space.medium).frame(minHeight: NativeDesign.Layout.touchTarget)
-                                .background(NativeCalendarEventStyle.color(for: item).opacity(0.12), in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
+                            NativeCalendarAgendaTitle(entry: item, color: NativeCalendarEventStyle.color(for: item))
+                                .lineLimit(1)
+                                .frame(maxWidth: NativeDesign.Layout.allDayChipWidth, minHeight: NativeDesign.Layout.touchTarget,
+                                       alignment: .leading)
+                                .padding(.trailing, NativeDesign.Space.small)
+                                .contentShape(Rectangle())
                         }.buttonStyle(.plain).accessibilityLabel(item.record.text("title"))
                     }
                 }
