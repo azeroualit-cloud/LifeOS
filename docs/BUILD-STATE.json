@@ -93,6 +93,7 @@
   },
   "calendar_dedicated_day": {
     "decision": "CALENDAR-DAY-REDESIGN-01",
+    "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42495836333",
     "status": "implemented_pending_simulator",
     "includes_new_ipa": false
   },
