@@ -8,7 +8,7 @@
   "source_of_truth": "native-next overlay assembled through .github/actions/native-compat76/action.yml",
   "native_source_fingerprint": {
     "algorithm": "SHA-256 over sorted tracked native-next paths, NUL, file bytes, NUL",
-    "sha256": "5f05918662fcc869c111da75d749989d1be5eddfa35812c674c6e05fed70df1f"
+    "sha256": "916c20a84130dfc2b2f4f6ddbd464c0ac8b4b94c748d79a317244ab633dd5c00"
   },
   "latest_distributed_build": {
     "version": "0.10.21",
@@ -146,6 +146,13 @@
     "unit_passed": 16,
     "ui_passed": 3,
     "validation": "Simulator passed. Apple Salute physical device verification pending.",
+    "new_ipa": false
+  },
+  "calendar_month_event_dots": {
+    "source_commit": "e9fd592aa66ac6485d6f444cea9b0b80fc182e95",
+    "run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42520092685",
+    "screenshots": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42520092685/artifacts/13633108552",
+    "ui_passed": 2,
     "new_ipa": false
   },
   "backend": {
