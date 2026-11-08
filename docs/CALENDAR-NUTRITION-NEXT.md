@@ -34,3 +34,15 @@ Verifica: apertura da mese e Dashboard, calendario senza impegni, giorno con eve
 - LifeOS scrive già le fibre per le registrazioni con quel valore. Verificare autorizzazione e presenza del campione per Biscotti nell’app Salute. Estendere la scrittura con vitamine e minerali effettivamente disponibili, mantenendo unità per ogni nutriente e lasciando assenti i dati mancanti. [Tipi nutrizionali HealthKit](https://developer.apple.com/documentation/healthkit/nutrition-type-identifiers)
 - Per i cocktail registrare le bevande standard stimate dalla ricetta. Apple Salute espone un conteggio delle bevande e un tipo separato per l’alcol nel sangue. [Bevande alcoliche in HealthKit](https://developer.apple.com/documentation/healthkit/hkquantitytypeidentifier/numberofalcoholicbeverages)
 - Conservare gli identificativi HealthKit storici per macro, calorie e fibre. Assegnare un identificativo stabile per i campioni aggiuntivi, mantenere retry e cancellazione coerenti e testare i permessi parziali. La mancata autorizzazione di un dato aggiuntivo va resa visibile senza bloccare una registrazione alimentare già consentita.
+
+## Monitoraggio micronutrienti — proposta
+
+In Salute, aprire **Micronutrienti** da un collegamento nella scheda Nutrienti. Mostrare prima i preferiti modificabili. Selezione proposta: vitamina C e zinco per l’interesse per pelle e capelli, poi ferro, B12, magnesio e vitamina D per il quadro generale. Offrire il resto dei nutrienti quando la fonte li copre.
+
+Ogni riga mostra apporto registrato oggi, unità, riferimento giornaliero per il gruppo pertinente e media dei giorni registrati negli ultimi 7 giorni, con indicatore visibile di copertura. Un giorno non registrato non entra nella media come zero. Se mancano nutrienti nel diario, mostrare «Dati parziali» o «Dati insufficienti», senza segnalare una carenza. Nel dettaglio, distinguere gli apporti calcolati dal catalogo e le eventuali fonti Apple Salute, senza contare due volte la stessa porzione.
+
+I riferimenti possono partire dai [LARN V revisione](https://sinu.it/wp-content/uploads/2025/07/Tabelle-riassuntive_online.pdf) o dai [DRV EFSA](https://multimedia.efsa.europa.eu/drvs/index.htm). Indicare la fonte, il gruppo e il tipo di valore. Un riferimento alimentare non misura lo stato clinico, non assegna un punteggio estetico e non premia l’eccesso. La vitamina D alimentare non rappresenta lo stato della vitamina D, che dipende anche dall’esposizione solare.
+
+Audit sul dataset Ciqual 2025 per 192 voci LifeOS. Valori numerici disponibili per calcio 181, magnesio 178, zinco 166, ferro 165, B12 152, vitamina C 121, D 104 e vitamina E 17. I valori sotto soglia, le tracce e quelli assenti vanno mantenuti distinti. La copertura del catalogo non implica la copertura del diario dell’utente.
+
+Dipendenze: ampliare le colonne del catalogo, scalare i nutrienti per parte edibile, salvare una copia per porzione, autorizzare le letture e scritture necessarie in HealthKit, rispettare gli identificativi di sincronizzazione e gestire fonti duplicate. L’IPA 85 non contiene questo incremento.

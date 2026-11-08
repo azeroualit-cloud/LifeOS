@@ -268,3 +268,9 @@ Un tocco sulla data apre Giorno. La data e il turno precedono gli impegni di tut
 ## IPA-DELIVERY-DAY-85 — consegna autorizzata, 8 novembre 2026
 
 Fonte utente: «puoi già produrre l'ipa?». Autorizzata la build 85 (0.10.23) sul ramo corrente con agenda Giorno, ritorno diretto al Mese e catalogo aggiornato. Pubblicazione dopo suite completa, quattro avvii Release e verifica del pacchetto.
+
+## HEALTH-MICRO-TARGETS-01 — ACTIVE, 8 novembre 2026
+
+Fonte utente: «dovrei anche riuscire a vedere se raggiungo alcuni valori di micronutrienti che dovrebbero interessare a me per i miei obiettivi (principalmente attrattività, e benessere generale)».
+
+In LifeOS Salute, poter scegliere micronutrienti da seguire e confrontare gli apporti registrati con riferimenti pertinenti per benessere generale e interesse per pelle e capelli. Distinguere copertura del diario, dati assenti e apporti effettivamente registrati. Le soglie personali, la selezione iniziale e il layout sono proposte da confermare secondo DEV-02. [Proposta e limiti dei dati](CALENDAR-NUTRITION-NEXT.md#monitoraggio-micronutrienti--proposta).

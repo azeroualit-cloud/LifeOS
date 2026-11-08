@@ -1,5 +1,7 @@
 # LifeOS — punto di ingresso per qualsiasi IA
 
+**Micronutrienti.** Registrato HEALTH-MICRO-TARGETS-01. Proposta per preferiti, riferimenti e copertura dei giorni registrati in [Calendario e Nutrizione](CALENDAR-NUTRITION-NEXT.md#monitoraggio-micronutrienti--proposta). Audit Ciqual effettuato sul catalogo da 192 voci. Attuazione in attesa di approvazione DEV-02.
+
 **Build 85 (0.10.23), rilascio autorizzato.** Include la vista Giorno con ritorno diretto al Mese, il catalogo senza maiale con piatti marocchini, la pesatura con osso e gli aggiornamenti visivi del ramo corrente. Pubblicazione su GitHub Releases dopo suite completa, quattro avvii Release e verifica del pacchetto. [Collaudo e pubblicazione](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42496148533) in corso sul commit `646e708`.
 
 **Agenda Giorno.** L’utente ha scelto la lista compatta e richiesto il ritorno diretto al Mese. Implementati apertura da mese o striscia Dashboard, frecce, turno, sezioni dell’agenda e Aggiungi evento in basso. Mese resta alla posizione originaria. [Collaudo iOS](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42495836333) sul commit `444f31d`.
