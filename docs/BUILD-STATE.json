@@ -59,6 +59,12 @@
     "validation": "Suite completa, quattro avvii Release e verifica IPA prima della pubblicazione",
     "published": true
   },
+  "nutrition_date_picker_fix": {
+    "issue": "NUTRITION-DATE-CLIP-01",
+    "decision": "UX-DATE-PICKER-01",
+    "status": "implemented_pending_simulator",
+    "included_in_build_83": false
+  },
   "backend": {
     "last_documented_utilities_deploy_run": "41630715615",
     "source": "docs/native/REVISIONE-77.md",

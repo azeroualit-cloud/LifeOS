@@ -228,3 +228,11 @@ La revisione chiede di spostare «Aggiungi peso» e «Aggiungi alimento» fuori 
 ## IPA-DELIVERY-2026-11-07 — consegna autorizzata, 7 novembre 2026
 
 Richiesta diretta: «e manda i produzione lìipa allora». Autorizzata la pubblicazione della build 83 (0.10.21) su GitHub Releases dopo suite completa, quattro avvii Release e verifica del pacchetto. L’IPA è destinata a Signulous. Prova fisica e accettazione utente restano distinte.
+
+## UX-DATE-PICKER-01 — ACTIVE, 8 novembre 2026
+
+Fonte utente: «si, e non é la prima volta che cé sto errore quindi aggiungila come regola».
+
+Su iPhone, aprire i selettori grafici della data in un foglio a tutta larghezza. Tutte e sette le colonne del calendario devono essere visibili e raggiungibili con testo standard e grande. Evitare i popover ancorati su larghezza compatta e preservare i dati del modulo quando si torna dal calendario.
+
+Correzione approvata per NUTRITION-DATE-CLIP-01. Il pulsante Data in Aggiungi nutrienti apre il calendario con Fine e Annulla. Verificare il layout su iPhone a larghezza compatta, anche con testo grande, e controllare che la bozza dei nutrienti sia conservata.

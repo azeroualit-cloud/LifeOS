@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "LifeOS",
-  "updated_on": "2026-11-07",
+  "updated_on": "2026-11-08",
   "policy": {
     "id": "META-01",
     "status": "ACTIVE",
@@ -18,6 +18,18 @@
     "bootstrap": "La richiesta esplicita corrente approva questa nuova procedura: sostituisce il precedente criterio di sostituzione automatica delle regole confliggenti. Non richiedere una seconda conferma per il salvataggio già richiesto."
   },
   "active_rules": [
+    {
+      "id": "UX-DATE-PICKER-01",
+      "status": "ACTIVE",
+      "scope": "Selettori grafici della data nell’app iPhone LifeOS",
+      "recorded_on": "2026-11-08",
+      "provenance": "Approvazione e richiesta esplicita di una regola permanente dopo una seconda foto da iPhone.",
+      "original_quote": "si, e non é la prima volta che cé sto errore quindi aggiungila come regola",
+      "rule": "Su iPhone, aprire i selettori grafici della data in un foglio a tutta larghezza. Tutte e sette le colonne del calendario devono essere visibili e raggiungibili con testo standard e grande. Evitare i popover ancorati su larghezza compatta e preservare i dati del modulo quando si torna dal calendario.",
+      "verification": "Verificare che il calendario rientri nei bordi su iPhone a larghezza compatta con testo standard e grande e che il modulo conservi i valori.",
+      "approved_fix": "NUTRITION-DATE-CLIP-01. Applicare il foglio al selettore Data di Aggiungi nutrienti.",
+      "conflict_check": "Compatibile con F07 e DEV-02. Restano distinti i flussi di selezione dell’ora."
+    },
     {
       "id": "HEALTH-ACTIONS-BOTTOM-01",
       "status": "ACTIVE",

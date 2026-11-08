@@ -53,6 +53,36 @@ final class NativeNutritionQuickUITests: XCTestCase {
             XCTAssertTrue(field.isHittable); field.tap(); field.typeText(value)
         }
     }
+    func testDatePickerOpensFullWidthAndKeepsNutrients() {
+        checkFullWidthDatePicker(large: false)
+    }
+
+    func testDatePickerOpensFullWidthWithLargeTextAndKeepsNutrients() {
+        checkFullWidthDatePicker(large: true)
+    }
+
+    private func checkFullWidthDatePicker(large: Bool) {
+        let app = open(large: large)
+        fill(app)
+        app.buttons["quick-nutrition-keyboard-done"].tap()
+        let date = app.buttons["quick-nutrition-date"]
+        let scroll = app.scrollViews["quick-nutrition-scroll"]
+        for _ in 0..<8 where !visible(date, in: app) { drag(scroll, app: app, up: true) }
+        XCTAssertTrue(visible(date, in: app))
+        date.tap()
+
+        let picker = app.datePickers.firstMatch
+        XCTAssertTrue(picker.waitForExistence(timeout: 10))
+        XCTAssertGreaterThan(picker.frame.width, app.frame.width * 0.8)
+        XCTAssertGreaterThanOrEqual(picker.frame.minX, app.frame.minX)
+        XCTAssertLessThanOrEqual(picker.frame.maxX, app.frame.maxX)
+        capture(large ? "Nutrition full-width date large text" : "Nutrition full-width date", app)
+        app.buttons["quick-nutrition-date-done"].tap()
+        XCTAssertTrue(date.waitForExistence(timeout: 10))
+        XCTAssertEqual(app.staticTexts["quick-nutrition-calories"].label, "362 kcal")
+        XCTAssertTrue(app.buttons["quick-nutrition-save"].isEnabled)
+    }
+
     func testSearchFindsGenericBiscottiAndUsesItsPortion() {
         let app = open()
         app.buttons["quick-nutrition-catalog"].tap()

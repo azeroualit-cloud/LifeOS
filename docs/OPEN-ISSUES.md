@@ -1,6 +1,6 @@
 # LifeOS — correzioni e difetti aperti
 
-**NUTRITION-DATE-CLIP-01, 8 novembre 2026.** Foto utente da iPhone: in Dashboard → Aggiungi nutrienti → Oggi, il calendario appare tagliato in una colonna stretta. Una seconda foto da iPhone mostra «Cerca alimento» con la lente e riproduce lo stesso taglio nel flusso aggiornato. Il numero di build non è visibile. Il sorgente della build 83 usa «Cerca alimento» e forza ancora il popover grafico su schermo compatto. Proposta DEV-02: presentare un foglio a tutta larghezza come in Attività, con sola data, conferma e conservazione dei nutrienti inseriti. Verifica prevista su iPhone compatto e con testo grande.
+**NUTRITION-DATE-CLIP-01, 8 novembre 2026.** Il calendario era tagliato su iPhone, anche nel flusso con «Cerca alimento». La correzione approvata apre Data in un foglio a tutta larghezza con Fine e Annulla e conserva i nutrienti inseriti. Registrata la [regola UX-DATE-PICKER-01](USER-DECISIONS.md#ux-date-picker-01--active-8-novembre-2026). Verifica al simulatore da acquisire.
 
 **Build 83 (0.10.21), IPA pubblicata.** [Download diretto](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.21-build83/LifeOS-83.ipa). Suite completa, quattro avvii Release e verifica pacchetto superati nel [run 42404491236](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42404491236) sul sorgente `75a9af4`. SHA-256 `a7449e22405809d93e01f02298e87addcc6be172f6a8fed3489115d21bd14cd4`. Firma Signulous, prova iPhone e accettazione aperte.
 

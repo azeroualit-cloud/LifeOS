@@ -61,6 +61,7 @@ struct NativeNutritionQuickSheet: View {
     @State private var fat = ""
     @State private var fibre = ""
     @State private var date = Date()
+    @State private var dateSelection = Date()
     @State private var showingHistory = false
     @State private var showingDate = false
     @State private var showingCatalog = false
@@ -141,17 +142,17 @@ struct NativeNutritionQuickSheet: View {
                     HStack {
                         Text("Data")
                         Spacer()
-                        Button { focus = nil; showingDate = true } label: {
+                        Button {
+                            focus = nil
+                            dateSelection = date
+                            showingDate = true
+                        } label: {
                             Label(Calendar.current.isDateInToday(date) ? "Oggi" : date.formatted(date: .abbreviated, time: .omitted), systemImage: "calendar")
                                 .padding(.horizontal, NativeDesign.Space.medium).frame(minHeight: NativeDesign.Layout.touchTarget)
                                 .background(NativeDesign.actionSurface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
                         }.buttonStyle(.plain).disabled(nutrition.busy || pending != nil)
                             .accessibilityLabel("Data").accessibilityValue(date.formatted(date: .abbreviated, time: .omitted))
                             .accessibilityIdentifier("quick-nutrition-date")
-                            .popover(isPresented: $showingDate) {
-                                DatePicker("Data", selection: $date, displayedComponents: .date).datePickerStyle(.graphical).padding()
-                                    .presentationCompactAdaptation(.popover)
-                            }
                     }
                     if blocked {
                         Button("Completa la registrazione in sospeso dalla cronologia") { focus = nil; showingHistory = true }
@@ -189,6 +190,9 @@ struct NativeNutritionQuickSheet: View {
                 }
             }
         }
+        .sheet(isPresented: $showingDate) {
+            dateSheet
+        }
         .sheet(isPresented: $showingCatalog) {
             NavigationStack {
                 NativeFoodPicker { food in
@@ -203,6 +207,34 @@ struct NativeNutritionQuickSheet: View {
         .presentationContentInteraction(.scrolls)
         .interactiveDismissDisabled(nutrition.busy || pending != nil)
     }
+    private var dateSheet: some View {
+        NavigationStack {
+            ScrollView {
+                DatePicker("Data", selection: $dateSelection, displayedComponents: .date)
+                    .datePickerStyle(.graphical)
+                    .labelsHidden()
+                    .frame(maxWidth: .infinity)
+                    .padding(NativeDesign.Space.large)
+            }
+            .navigationTitle("Data")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Annulla") { showingDate = false }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Fine") {
+                        date = dateSelection
+                        showingDate = false
+                    }.accessibilityIdentifier("quick-nutrition-date-done")
+                }
+            }
+        }
+        .tint(NativeDesign.calendarAccent)
+        .presentationDetents(typeSize.isAccessibilitySize ? [.large] : [.height(NativeDesign.Layout.datePickerSheetHeight), .large])
+        .presentationDragIndicator(.visible)
+    }
+
     private var allZero: Bool {
         selectedFood == nil && [protein, carbohydrate, fat, fibre].allSatisfy { NativeNutritionEntry.grams($0) == 0 }
     }
