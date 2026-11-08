@@ -66,6 +66,15 @@
     "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42481363683",
     "included_in_build_83": false
   },
+  "production_candidate_84": {
+    "version": "0.10.22",
+    "build": 84,
+    "authorization": "IPA-DELIVERY-2026-11-08",
+    "candidate_ref": "codex/revision77",
+    "release_tag": "ios-0.10.22-build84",
+    "validation": "Suite completa, quattro avvii Release e verifica IPA prima della pubblicazione",
+    "published": false
+  },
   "backend": {
     "last_documented_utilities_deploy_run": "41630715615",
     "source": "docs/native/REVISIONE-77.md",

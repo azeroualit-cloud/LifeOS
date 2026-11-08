@@ -236,3 +236,7 @@ Fonte utente: «si, e non é la prima volta che cé sto errore quindi aggiungila
 Su iPhone, aprire i selettori grafici della data in un foglio a tutta larghezza. Tutte e sette le colonne del calendario devono essere visibili e raggiungibili con testo standard e grande. Evitare i popover ancorati su larghezza compatta e preservare i dati del modulo quando si torna dal calendario.
 
 Correzione approvata per NUTRITION-DATE-CLIP-01. Il pulsante Data in Aggiungi nutrienti apre il calendario con Fine e Annulla. Verificare il layout su iPhone a larghezza compatta, anche con testo grande, e controllare che la bozza dei nutrienti sia conservata.
+
+## IPA-DELIVERY-2026-11-08 — consegna autorizzata, 8 novembre 2026
+
+Fonte utente: «e allora ricrea l'ipa». Autorizzata la build 84 (0.10.22) con il calendario Nutrizione corretto, dopo suite completa, quattro avvii Release e verifica del pacchetto. La verifica su iPhone e l’accettazione restano distinte.

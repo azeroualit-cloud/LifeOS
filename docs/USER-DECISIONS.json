@@ -933,6 +933,14 @@
     "original_quote": "Ti chiedo esplicitamente di produrre e consegnarmi una nuova IPA, ma solo dopo aver completato con successo il collaudo pre-IPA.",
     "scope": "Una sola consegna. Preservare release 78. Nessun deploy backend o cancellazione. Accettazione esplicita dopo prove iPhone."
   },
+  "nutrition_date_ipa_delivery_authorization": {
+    "id": "IPA-DELIVERY-2026-11-08",
+    "status": "AUTHORIZED_AFTER_PRE_IPA_PASS",
+    "recorded_on": "2026-11-08",
+    "source": "Richiesta diretta utente",
+    "original_quote": "e allora ricrea l'ipa",
+    "scope": "Produrre e pubblicare una nuova IPA con NUTRITION-DATE-CLIP-01 su GitHub Releases dopo suite completa, quattro avvii Release e verifica del pacchetto. Build 84, versione 0.10.22."
+  },
   "food_catalog_ipa_delivery_authorization": {
     "id": "IPA-DELIVERY-2026-11-07",
     "status": "AUTHORIZED_AFTER_PRE_IPA_PASS",
