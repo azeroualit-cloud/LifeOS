@@ -8,7 +8,7 @@
   "source_of_truth": "native-next overlay assembled through .github/actions/native-compat76/action.yml",
   "native_source_fingerprint": {
     "algorithm": "SHA-256 over sorted tracked native-next paths, NUL, file bytes, NUL",
-    "sha256": "2dc6d69896110056358a0d8b25dcdf9b2bbdadf1d02c74ff903ffc2edcf2d8f2"
+    "sha256": "0c7a83b66d53d3fdd9207ce0798d4f8e3f1de1986f3c67803b9562b046a185ff"
   },
   "latest_distributed_build": {
     "version": "0.10.21",
@@ -118,6 +118,17 @@
     "release_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42498975363",
     "release_tag": "ios-0.10.24-build86",
     "validation": "In corso. Suite completa e quattro avvii Release prima di confezionare e verificare l’IPA.",
+    "published": false
+  },
+  "production_candidate_87": {
+    "version": "0.10.25",
+    "build": 87,
+    "authorization": "HEALTH-MICRO-TARGETS-01",
+    "candidate_ref": "codex/revision77",
+    "source_commit": "42d083dfba331205d6943a584fb8b1d92226b22a",
+    "release_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42501436059",
+    "release_tag": "ios-0.10.25-build87",
+    "validation": "Collaudo avviato. Suite completa, quattro avvii Release e verifica IPA prima della pubblicazione.",
     "published": false
   },
   "backend": {

@@ -1,6 +1,6 @@
 # LifeOS — stato corrente
 
-**Build 87 (0.10.25).** Vitamina C e zinco sotto i macro nella schermata Salute, con obiettivi giornalieri LARN per uomini adulti. La consegna IPA già richiesta include la correzione dopo il collaudo iOS.
+**Build 87 (0.10.25).** Vitamina C e zinco sotto i macro nella schermata Salute, con obiettivi giornalieri LARN per uomini adulti. La consegna IPA già richiesta include la correzione dopo il collaudo iOS. [Run CI](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42501436059) sul commit 42d083d.
 
 **Build 86 (0.10.24), rilascio autorizzato.** Aggiunge vitamina C e zinco in primo piano in Salute → Micronutrienti, dettaglio consultabile, riferimenti per profilo, copertura del diario e scrittura Apple Salute per i valori supportati e autorizzati. La pipeline richiede suite completa, quattro avvii Release e verifica dell’IPA prima della pubblicazione. [Collaudo e pubblicazione](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42498975363) sul commit `d3f94e9`.
 

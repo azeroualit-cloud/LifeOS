@@ -273,7 +273,7 @@ Fonte utente: «puoi già produrre l'ipa?». Autorizzata la build 85 (0.10.23) s
 
 Fonte utente: «dovrei anche riuscire a vedere se raggiungo alcuni valori di micronutrienti che dovrebbero interessare a me per i miei obiettivi (principalmente attrattività, e benessere generale)».
 
-In LifeOS Salute, poter scegliere micronutrienti da seguire e confrontare gli apporti registrati con riferimenti pertinenti per benessere generale e interesse per pelle e capelli. Distinguere copertura del diario, dati assenti e apporti effettivamente registrati. Le soglie personali, la selezione iniziale e il layout sono proposte da confermare secondo DEV-02. [Proposta e limiti dei dati](CALENDAR-NUTRITION-NEXT.md#monitoraggio-micronutrienti--build-86).
+In LifeOS Salute, poter scegliere micronutrienti da seguire e confrontare gli apporti registrati con riferimenti pertinenti per benessere generale e interesse per pelle e capelli. Distinguere copertura del diario, dati assenti e apporti effettivamente registrati. Le soglie personali, la selezione iniziale e il layout sono proposte da confermare secondo DEV-02. [Proposta e limiti dei dati](CALENDAR-NUTRITION-NEXT.md#monitoraggio-micronutrienti--build-87).
 
 Precisazione utente, 8 novembre 2026: «i micronutrienti non li inserisco dall'aggiunta rapida ma solo dagli alimenti nel database, se mancano dei valori puoi stimarli te e così da vere un database completo, ma siamo sicuri che questi sono i micronutrienti che mi interessano per massimizzare l'attrazione?».
 

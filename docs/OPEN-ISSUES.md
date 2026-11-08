@@ -1,6 +1,6 @@
 # LifeOS — correzioni e difetti aperti
 
-**Build 87 (0.10.25).** Vitamina C e zinco sotto i macro nella schermata Salute, con obiettivi giornalieri LARN per uomini adulti. La consegna IPA già richiesta include la correzione dopo il collaudo iOS.
+**Build 87 (0.10.25).** Vitamina C e zinco sotto i macro nella schermata Salute, con obiettivi giornalieri LARN per uomini adulti. La consegna IPA già richiesta include la correzione dopo il collaudo iOS. [Run CI](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42501436059) sul commit 42d083d.
 
 **Build 86.** Collaudo iOS in corso sul sorgente `d3f94e9`. Verifica fisica della scrittura Apple Salute dopo firma e installazione. [Run CI](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42498975363).
 
