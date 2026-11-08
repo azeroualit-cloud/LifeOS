@@ -1,5 +1,7 @@
 # LifeOS — punto di ingresso per qualsiasi IA
 
+**Build 87 (0.10.25).** Vitamina C e zinco sotto i macro nella schermata Salute, con obiettivi giornalieri LARN per uomini adulti. La consegna IPA già richiesta include la correzione dopo il collaudo iOS.
+
 **Build 86 (0.10.24), rilascio autorizzato.** Aggiunge vitamina C e zinco in primo piano in Salute → Micronutrienti, dettaglio consultabile, riferimenti per profilo, copertura del diario e scrittura Apple Salute per i valori supportati e autorizzati. La pipeline richiede suite completa, quattro avvii Release e verifica dell’IPA prima della pubblicazione. [Collaudo e pubblicazione](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42498975363) sul commit `d3f94e9`.
 
 **Build 85 (0.10.23), rilascio autorizzato.** Include la vista Giorno con ritorno diretto al Mese, il catalogo senza maiale con piatti marocchini, la pesatura con osso e gli aggiornamenti visivi del ramo corrente. Pubblicazione su GitHub Releases dopo suite completa, quattro avvii Release e verifica del pacchetto. [Collaudo e pubblicazione](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42496148533) in corso sul commit `646e708`.

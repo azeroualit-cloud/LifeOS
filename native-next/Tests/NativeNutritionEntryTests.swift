@@ -57,7 +57,9 @@ final class NativeNutritionEntryTests: XCTestCase {
         XCTAssertEqual(week.daysWithEntries, 2)
         XCTAssertTrue(week.partial)
         XCTAssertNil(NativeNutrientPeriod(.zinc, days: [[old], []]).amount)
-        XCTAssertNil(NativeNutrientProfile.unset.reference(for: .zinc))
+        XCTAssertEqual(NativeTrackedNutrient.vitaminC.dailyReference, 105)
+        XCTAssertEqual(NativeTrackedNutrient.zinc.dailyReference, 12)
+        XCTAssertEqual(week.progress(toward: zinc.amount / 2), 1)
         entry.confirmed = true
         XCTAssertEqual(try JSONDecoder().decode(NativeNutritionEntry.self, from: JSONEncoder().encode(entry)), entry)
     }

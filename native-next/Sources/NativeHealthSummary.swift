@@ -82,9 +82,16 @@ struct NativeHealthDetail: View {
             .frame(maxWidth: .infinity)
     }
     private var nutrients: some View {
-        VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+        let today = NativeNutrientPeriod.recordedDays(nutrition.entries, count: 1)
+        return VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
             Text("Nutrienti").font(.headline).foregroundStyle(NativeDesign.nutritionTitle)
             NativeNutrientValues(health: health, includesFibre: true)
+            Divider().padding(.vertical, NativeDesign.Space.xs)
+            ForEach(NativeTrackedNutrient.priorities) { nutrient in
+                if let target = nutrient.dailyReference {
+                    dailyNutrientProgress(nutrient, target: target, period: NativeNutrientPeriod(nutrient, days: today))
+                }
+            }
             NavigationLink {
                 NativeMicronutrientScreen(nutrition: nutrition)
             } label: {
@@ -101,6 +108,35 @@ struct NativeHealthDetail: View {
         }.padding(NativeDesign.Layout.compactCardInset)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(NativeDesign.healthSurface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
+    }
+    private func dailyNutrientProgress(_ nutrient: NativeTrackedNutrient, target: Decimal, period: NativeNutrientPeriod) -> some View {
+        let format = Decimal.FormatStyle().precision(.fractionLength(0...2))
+        let recorded = period.amount.map { (period.estimated ? "≈" : "") + $0.formatted(format) } ?? "—"
+        let amount = Text("\(recorded) / \(target.formatted(format)) \(nutrient.unit)")
+            .monospacedDigit()
+            .foregroundStyle(.secondary)
+        return VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
+            ViewThatFits(in: .horizontal) {
+                HStack {
+                    Text(nutrient.title).fontWeight(.semibold)
+                    Spacer(minLength: NativeDesign.Space.small)
+                    amount
+                }
+                .fixedSize(horizontal: true, vertical: false)
+                VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
+                    Text(nutrient.title).fontWeight(.semibold)
+                    amount
+                }
+            }
+            .font(.subheadline)
+            ProgressView(value: period.progress(toward: target))
+                .tint(NativeDesign.nutritionTitle)
+                .accessibilityHidden(true)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(nutrient.title)
+        .accessibilityValue(period.amount == nil ? "Dati di oggi non disponibili. Obiettivo \(target.formatted(format)) \(nutrient.unit)" : "\(recorded) su \(target.formatted(format)) \(nutrient.unit)")
+        .accessibilityIdentifier("health-progress-" + nutrient.rawValue)
     }
     private var nutritionActionBar: some View {
         ViewThatFits(in: .horizontal) {

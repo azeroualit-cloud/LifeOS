@@ -52,6 +52,16 @@ enum NativeTrackedNutrient: String, CaseIterable, Identifiable {
         default: "mg"
         }
     }
+    // Daily references for adult men (SINU LARN) and EPA + DHA (EFSA).
+    var dailyReference: Decimal? {
+        switch self {
+        case .vitaminC: 105
+        case .zinc: 12
+        case .epaDha: 250
+        default: nil
+        }
+    }
+
     static let priorities: [Self] = [.vitaminC, .zinc]
     static let omega: [Self] = [.epaDha, .ala, .epa, .dha]
     static let micronutrients = allCases.filter { !omega.contains($0) }
@@ -66,38 +76,26 @@ enum NativeTrackedNutrient: String, CaseIterable, Identifiable {
     }
 }
 
-enum NativeNutrientProfile: String, CaseIterable, Identifiable {
-    case unset, adultMale, adultFemale, olderMale, olderFemale
-
-    var id: String { rawValue }
-    var title: String {
-        switch self {
-        case .unset: "Non impostato"
-        case .adultMale: "Uomo, 18–64 anni"
-        case .adultFemale: "Donna, 18–64 anni"
-        case .olderMale: "Uomo, 65+ anni"
-        case .olderFemale: "Donna, 65+ anni"
-        }
-    }
-
-    // SINU LARN, fifth revision, adult PRI for vitamin C and zinc.
-    func reference(for nutrient: NativeTrackedNutrient) -> Decimal? {
-        guard self != .unset else { return nil }
-        switch nutrient {
-        case .vitaminC: return self == .adultMale || self == .olderMale ? 105 : 85
-        case .zinc: return self == .adultMale || self == .olderMale ? 12 : 9
-        case .epaDha: return 250 // EFSA adult adequate intake.
-        default: return nil
-        }
-    }
-}
-
 struct NativeNutrientPeriod {
     let amount: Decimal?
     let daysWithValues: Int
     let daysWithEntries: Int
     let partial: Bool
     let estimated: Bool
+
+    static func recordedDays(_ entries: [NativeNutritionEntry], count: Int, now: Date = .now) -> [[NativeNutritionEntry]] {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: now)
+        let confirmed = entries.filter { $0.confirmed && $0.deletionPending != true }
+        let grouped = Dictionary(grouping: confirmed) { calendar.startOfDay(for: $0.date) }
+        return (0..<count).compactMap { calendar.date(byAdding: .day, value: -$0, to: today) }
+            .map { grouped[$0] ?? [] }
+    }
+
+    func progress(toward reference: Decimal) -> Double {
+        guard let amount else { return 0 }
+        return NSDecimalNumber(decimal: min(amount / reference, 1)).doubleValue
+    }
 
     init(_ nutrient: NativeTrackedNutrient, days: [[NativeNutritionEntry]]) {
         let values = days.map { $0.compactMap { nutrient.value(in: $0) } }
@@ -112,7 +110,6 @@ struct NativeNutrientPeriod {
 
 struct NativeMicronutrientScreen: View {
     @ObservedObject var nutrition: NativeNutritionStore
-    @AppStorage("lifeos-nutrient-reference-profile") private var profile = NativeNutrientProfile.unset
     @AppStorage("lifeos-nutrient-favorites") private var favorites = "vitaminC,zinc"
 
     private var favoriteNutrients: [NativeTrackedNutrient] {
@@ -121,11 +118,7 @@ struct NativeMicronutrientScreen: View {
     }
 
     var body: some View {
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-        let entries = nutrition.entries.filter { $0.confirmed && $0.deletionPending != true }
-        let grouped = Dictionary(grouping: entries) { calendar.startOfDay(for: $0.date) }
-        let days = (0..<7).compactMap { calendar.date(byAdding: .day, value: -$0, to: today) }.map { grouped[$0] ?? [] }
+        let days = NativeNutrientPeriod.recordedDays(nutrition.entries, count: 7)
 
         List {
             Section("In evidenza") {
@@ -162,12 +155,9 @@ struct NativeMicronutrientScreen: View {
                 Text("I valori derivano dagli alimenti del catalogo registrati in LifeOS. I giorni senza valori restano fuori dalla media.")
             }
             Section {
-                Picker("Profilo adulto", selection: $profile) {
-                    ForEach(NativeNutrientProfile.allCases) { Text($0.title).tag($0) }
-                }
                 Link("Riferimenti LARN", destination: URL(string: "https://sinu.it/wp-content/uploads/2025/07/Tabelle-riassuntive_online.pdf")!)
             } footer: {
-                Text("Riferimenti di popolazione. La quantità registrata resta visibile anche quando li raggiungi.")
+                Text("Riferimenti giornalieri LARN per uomini adulti.")
             }
         }
         .modifier(NativeListAppearance())
@@ -178,7 +168,7 @@ struct NativeMicronutrientScreen: View {
     private func nutrientRow(_ nutrient: NativeTrackedNutrient, days: [[NativeNutritionEntry]], canFavorite: Bool = true) -> some View {
         let today = NativeNutrientPeriod(nutrient, days: Array(days.prefix(1)))
         let week = NativeNutrientPeriod(nutrient, days: days)
-        let reference = profile.reference(for: nutrient)
+        let reference = nutrient.dailyReference
         let isFavorite = favoriteNutrients.contains(nutrient)
         return VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
             HStack {
@@ -199,7 +189,7 @@ struct NativeMicronutrientScreen: View {
             }
             Text("Oggi: \(formatted(today.amount, unit: nutrient.unit))")
             if let reference, let value = today.amount {
-                ProgressView(value: NSDecimalNumber(decimal: min(value / reference, 1)).doubleValue)
+                ProgressView(value: today.progress(toward: reference))
                     .tint(NativeDesign.nutritionTitle)
                     .accessibilityLabel("Progresso di oggi")
                 if value >= reference {

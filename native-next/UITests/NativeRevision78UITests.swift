@@ -138,6 +138,8 @@ final class NativeRevision78UITests: XCTestCase {
         let scroll = app.scrollViews["health-detail-scroll"]
         XCTAssertTrue(scroll.waitForExistence(timeout: 10))
         for _ in 0..<8 where !open.isHittable { scroll.swipeUp() }
+        XCTAssertTrue(app.descendants(matching: .any)["health-progress-vitaminC"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["health-progress-zinc"].exists)
         XCTAssertTrue(open.isHittable)
         open.tap()
         XCTAssertTrue(app.navigationBars["Micronutrienti"].waitForExistence(timeout: 10))
