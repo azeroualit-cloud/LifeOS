@@ -8,7 +8,7 @@
   "source_of_truth": "native-next overlay assembled through .github/actions/native-compat76/action.yml",
   "native_source_fingerprint": {
     "algorithm": "SHA-256 over sorted tracked native-next paths, NUL, file bytes, NUL",
-    "sha256": "2109bf2369a58f9a2d93538ea407f84fff1b48014f8f22fdd8568cb44670f980"
+    "sha256": "789a04bb2fb8a3bf8c3a9e7535ea80153a694ef343400ad20beae1282f1e701b"
   },
   "latest_distributed_build": {
     "version": "0.10.21",
@@ -134,6 +134,8 @@
   "nutrition_keyboard_preflight": {
     "source_commit": "b64edfa0a140027afef646968e1a1ccd90a76939",
     "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42509002706",
+    "followup_commit": "1c29ddaff8e352897e761a690e849343230e3d06",
+    "followup_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42510268817",
     "validation": "Compilazione passata; tre test con Carboidrati da 1 a 4 punti oltre il limite dopo lo scroll. Modificato il punto di partenza del gesto e aggiunta cattura al fallimento; nuova verifica mirata avviata.",
     "new_ipa": false
   },
