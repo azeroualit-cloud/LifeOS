@@ -11,20 +11,17 @@
     "sha256": "9f018c8ea7d0f69110923563055fa7644227d3872354df80fff123df8bd9c529"
   },
   "latest_distributed_build": {
-    "version": "0.10.19",
-    "build": 80,
-    "source_commit": "5aba0d5b888471025a45568d6ff567199b5a4fec",
-    "ipa_sha256": "80a4e4759c810e2f2f69ef860a128d8cd020cf133cfa2e223cc4d51edf9f60c0",
-    "release": "https://github.com/azeroualit-cloud/LifeOS/releases/tag/ios-0.10.19-build80",
-    "direct_ipa": "https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.19-build80/LifeOS-80.ipa",
-    "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42224387516",
-    "release_launch_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42224387516",
-    "package_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42235788082",
+    "version": "0.10.21",
+    "build": 83,
+    "source_commit": "75a9af4dc3c86c99993931aaa7643c5b800dd3a8",
+    "ipa_sha256": "a7449e22405809d93e01f02298e87addcc6be172f6a8fed3489115d21bd14cd4",
+    "release": "https://github.com/azeroualit-cloud/LifeOS/releases/tag/ios-0.10.21-build83",
+    "direct_ipa": "https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.21-build83/LifeOS-83.ipa",
+    "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42404491236",
+    "release_launch_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42404491236",
+    "package_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42404491236",
     "technical_checks": "passed",
-    "full_suite_passed": 368,
     "release_launches": 4,
-    "sdk": "26.2",
-    "runtime": "26.2",
     "physical_device_verified_by_agent": false,
     "accepted_for_production": false
   },
@@ -60,7 +57,7 @@
     "release_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42404491236",
     "release_tag": "ios-0.10.21-build83",
     "validation": "Suite completa, quattro avvii Release e verifica IPA prima della pubblicazione",
-    "published": false
+    "published": true
   },
   "backend": {
     "last_documented_utilities_deploy_run": "41630715615",
