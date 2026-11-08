@@ -26,7 +26,14 @@
       "provenance": "Richiesta diretta utente",
       "original_quote": "dovrei anche riuscire a vedere se raggiungo alcuni valori di micronutrienti che dovrebbero interessare a me per i miei obiettivi (principalmente attrattività, e benessere generale)",
       "rule": "In LifeOS Salute, poter scegliere micronutrienti da seguire e confrontare gli apporti registrati con riferimenti pertinenti per benessere generale e interesse per pelle e capelli. Distinguere copertura del diario, dati assenti e apporti effettivamente registrati.",
-      "implementation": "Proposta Salute → Micronutrienti con preferiti, oggi, media dei giorni registrati, fonte e copertura. Attuazione in attesa di approvazione DEV-02. Nessun target personale definito."
+      "implementation": "Proposta Salute → Micronutrienti con preferiti, oggi, media dei giorni registrati, fonte e copertura. Attuazione in attesa di approvazione DEV-02. Nessun target personale definito.",
+      "input_scope": "I micronutrienti LifeOS sono calcolati dagli alimenti del database e dalla porzione. Nessun campo micronutrienti nel percorso manuale rapido.",
+      "estimation_scope": "Completare il catalogo con valori pubblicati, ricette calcolate o stime da alimenti comparabili con fonte, metodo e indicazione di stima. Dove manca una base affidabile, lasciare dato non disponibile.",
+      "followup": {
+        "recorded_on": "2026-11-08",
+        "original_quote": "i micronutrienti non li inserisco dall'aggiunta rapida ma solo dagli alimenti nel database, se mancano dei valori puoi stimarli te e così da vere un database completo, ma siamo sicuri che questi sono i micronutrienti che mi interessano per massimizzare l'attrazione?",
+        "selection_status": "Preferiti e riferimenti personali ancora da concordare. Nessun obiettivo per aumentare l’attrattività è stato fissato."
+      }
     },
     {
       "id": "NUTRITION-HALAL-MOROCCO-01",
