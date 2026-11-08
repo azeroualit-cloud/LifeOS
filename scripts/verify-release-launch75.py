@@ -5,7 +5,11 @@ simulator after the full test suite. Keep these checks optional because older
 compatibility workflows use this script without those separate simulators.
 """
 from pathlib import Path
+import argparse
 import os,subprocess,json,time,shutil,datetime
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--fresh-only', action='store_true')
+args = parser.parse_args()
 out=Path('release-launch');out.mkdir(exist_ok=True)
 device=os.environ['MAIN_DEVICE'];fresh_device=os.environ.get('FRESH_DEVICE',device);bundle='com.nas.lifeos.probe'
 test_device=os.environ.get('FINAL_VALIDATION_TEST_DEVICE')
@@ -14,8 +18,11 @@ if test_device and (device==test_device or fresh_device==test_device or fresh_de
 app=Path('release-build/Build/Products/Release-iphonesimulator/LifeOSProbe.app')
 for target_device in dict.fromkeys((fresh_device,device)):
     subprocess.run(['xcrun','simctl','install',target_device,str(app)],check=True)
-modes=['fresh','synthetic-upgrade','synthetic-populated-upgrade']
-if os.environ.get('LIFEOS_RELEASE_SESSION_FIXTURE')=='1':modes.append('synthetic-session-upgrade')
+modes=['fresh']
+if not args.fresh_only:
+    modes.extend(['synthetic-upgrade', 'synthetic-populated-upgrade'])
+    if os.environ.get('LIFEOS_RELEASE_SESSION_FIXTURE') == '1':
+        modes.append('synthetic-session-upgrade')
 for mode in modes:
     target_device=fresh_device if mode=='fresh' else device
     if mode!='fresh':

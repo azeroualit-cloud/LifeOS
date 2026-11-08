@@ -1,5 +1,5 @@
 """Bounded CI selection. Unknown/shared changes deliberately expand coverage."""
-import argparse,json,subprocess
+import argparse,json,re,subprocess
 from pathlib import Path
 
 SMOKE = "LifeOSProbeUITests/NativeRevision77UITests/testFourTabsAndDirectHealthAndBloom"
@@ -13,6 +13,45 @@ AREAS = {
  "calendar": ["LifeOSProbeUITests/NativeInterfaceTests/testCalendarRepeatedScrollingKeepsMonthAnchorsAndReturnsToToday", "LifeOSProbeUITests/NativeInterfaceTests/testCalendarSelectionUpdatesImmediatelyAndKeepsEventIndex", "LifeOSProbeTests/NativeCalendarPerformanceTests", "LifeOSProbeUITests/NativeRevision71UITests/testDashboardExplicitDayAndCalendarEntryResumeDefaults", "LifeOSProbeUITests/NativeRevision72UITests/testDayHasReachableMonthNavigationAndPinnedEventAction", "LifeOSProbeUITests/NativeRevision73UITests"],
  "shifts": ["LifeOSProbeUITests/NativeInterfaceTests/testVisibleShiftBrushPaintsAndUndoRestoresDay", "LifeOSProbeUITests/NativeInterfaceTests/testShiftExportRemainsReachableFromSettings", "LifeOSProbeTests/NativeRevision71Tests"],
 }
+# Deliberate allowlist for the first trial. An unclassified change runs the whole suite.
+TRIAL_AREAS = {
+    "native-next/Resources/generic-foods.json": ("health", "nutrition"),
+    **{f"native-next/Sources/{name}.swift": ("health", "nutrition") for name in (
+        "NativeFoodPicker", "NativeHealthSummary", "NativeMicronutrients", "NativeNutrition",
+        "NativeNutritionQuickEntry",
+    )},
+    **{f"native-next/Tests/{name}.swift": ("health", "nutrition") for name in (
+        "NativeNutritionEntryTests", "NativeNutritionHealthKitTests", "NativeNutritionStoreTests",
+    )},
+    "native-next/UITests/NativeNutritionQuickUITests.swift": ("health", "nutrition"),
+}
+VERSION_SETTING = re.compile(r"(?m)^([ \t]*(?:MARKETING_VERSION|CURRENT_PROJECT_VERSION):)[^\n]+")
+
+
+def trial_selection(base):
+    all_tests = ["LifeOSProbeTests", "LifeOSProbeUITests"]
+    if not base or not re.fullmatch(r"[0-9a-f]{40}", base):
+        return ["all"], all_tests, [], "Base verificata assente"
+    if subprocess.run(["git", "merge-base", "--is-ancestor", base, "HEAD"], capture_output=True).returncode:
+        return ["all"], all_tests, [], "Base assente dalla cronologia del candidato"
+    result = subprocess.check_output(["git", "diff", "--name-only", "--no-renames", base, "HEAD"], text=True)
+    paths = [path for path in result.splitlines() if not path.startswith("docs/") and path != "README.md"]
+    project = "native-next/project.yml"
+    if project in paths and Path(project).is_file():
+        previous = subprocess.run(["git", "show", f"{base}:{project}"], text=True, capture_output=True)
+        new = Path(project).read_text(encoding="utf-8")
+        if previous.returncode == 0 and VERSION_SETTING.sub(r"\1", previous.stdout) == VERSION_SETTING.sub(r"\1", new):
+            paths.remove(project)
+    unknown = sorted(set(paths) - TRIAL_AREAS.keys())
+    if unknown:
+        return ["all"], all_tests, paths, "File fuori dalla mappa pilota: " + ", ".join(unknown)
+    areas = sorted({area for path in paths for area in TRIAL_AREAS[path]})
+    tests = [SMOKE, "LifeOSProbeTests"]
+    for area in areas:
+        tests.extend(test for test in AREAS[area] if test.startswith("LifeOSProbeUITests/"))
+    return areas, list(dict.fromkeys(tests)), paths, "Base e aree del pilota riconosciute"
+
+
 def select(mode, area, paths):
     if area == "auto":
         selected=set()
@@ -36,14 +75,21 @@ def select(mode, area, paths):
             tests.extend(["LifeOSProbeUITests/NativeRevision78UITests/testBloomCancelClosesFilesAndAllowsRetry", "LifeOSProbeUITests/NativeRevision78UITests/testBloomSystemFilesSelectionReachesPreviewAndPersists", "LifeOSProbeUITests/NativeRevision78UITests/testBloomSectionRespondsAtLowerEdgeOf44PointTouchTarget"])
     return sorted(selected),list(dict.fromkeys(tests))
 if __name__ == "__main__":
-    p=argparse.ArgumentParser();p.add_argument("--mode",choices=["preview","focused"],default="preview");p.add_argument("--area",choices=["auto","all",*AREAS],default="auto");p.add_argument("--base");p.add_argument("--output",default="app/build/development-selection.json");a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument("--mode",choices=["preview","focused","trial"],default="preview");p.add_argument("--area",choices=["auto","all",*AREAS],default="auto");p.add_argument("--base");p.add_argument("--output",default="app/build/development-selection.json");a=p.parse_args()
     paths=[]
-    if a.base and set(a.base) != {"0"}:
+    if a.mode != "trial" and a.base and set(a.base) != {"0"}:
         # No shell interpolation of event inputs. A missing base expands, never narrows.
         result=subprocess.run(["git","diff","--name-only",a.base,"HEAD","--","native-next"],text=True,capture_output=True)
         if result.returncode == 0: paths=result.stdout.splitlines()
-    areas,tests=select(a.mode,a.area,paths)
+    reason = None
+    if a.mode == "trial":
+        areas, tests, paths, reason = trial_selection(a.base)
+    else:
+        areas, tests = select(a.mode, a.area, paths)
     out=Path(a.output);out.parent.mkdir(parents=True,exist_ok=True)
-    out.write_text(json.dumps({"mode":a.mode,"areas":areas,"paths":paths,"tests":tests},indent=2)+"\n")
-    out.with_suffix(".args").write_text("\n".join("-only-testing:"+t for t in tests)+"\n")
-    print(json.dumps({"mode":a.mode,"areas":areas,"test_selectors":len(tests)}))
+    details = {"mode": a.mode, "areas": areas, "paths": paths, "tests": tests}
+    if reason is not None:
+        details.update(base=a.base, reason=reason)
+    out.write_text(json.dumps(details, indent=2) + "\n", encoding="utf-8")
+    out.with_suffix(".args").write_text("\n".join("-only-testing:" + test for test in tests) + "\n", encoding="utf-8")
+    print(json.dumps({"mode": a.mode, "areas": areas, "test_selectors": len(tests), "reason": reason}))

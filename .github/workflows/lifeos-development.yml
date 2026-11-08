@@ -6,10 +6,14 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: Preview or focused regression (never packages an IPA)
+        description: Preview, focused regression, or trial checks
         type: choice
-        options: [preview, focused]
+        options: [preview, focused, trial]
         default: preview
+      package_trial:
+        description: Explicitly request an unsigned trial IPA in Actions artifacts (trial mode only)
+        type: boolean
+        default: false
       area:
         description: Shared changes require all; auto expands unknown paths
         type: choice
@@ -28,7 +32,7 @@ concurrency:
 jobs:
   preview:
     runs-on: macos-15
-    timeout-minutes: 35
+    timeout-minutes: ${{ inputs.mode == 'trial' && 150 || 35 }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -41,7 +45,12 @@ jobs:
           MODE: ${{ inputs.mode || 'preview' }}
           AREA: ${{ inputs.area || 'auto' }}
           BASE: ${{ github.event.before }}
-        run: python3 scripts/select-development-tests.py --mode "$MODE" --area "$AREA" --base "$BASE"
+        run: |
+          set -euo pipefail
+          if [ "$MODE" = trial ]; then
+            BASE="$(python3 -c 'import json; print(json.load(open("docs/BUILD-STATE.json"))["latest_distributed_build"]["source_commit"])')"
+          fi
+          python3 scripts/select-development-tests.py --mode "$MODE" --area "$AREA" --base "$BASE"
       - name: Compile once
         working-directory: app
         run: |
@@ -62,6 +71,40 @@ jobs:
           args=()
           while IFS= read -r arg; do args+=("$arg"); done < build/development-selection.args
           xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 660 "${args[@]}" -resultBundlePath build/Development.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/development-tests.log 2>&1 || { tail -n 120 build/development-tests.log; exit 1; }
+      - name: Verify a fresh Release launch
+        if: inputs.mode == 'trial'
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcrun simctl shutdown "$MAIN_DEVICE"
+          xcrun simctl erase "$MAIN_DEVICE"
+          xcrun simctl bootstatus "$MAIN_DEVICE" -b
+          xcodebuild build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -configuration Release -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -derivedDataPath release-build CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/development-release.log 2>&1 || { tail -n 100 build/development-release.log; exit 1; }
+          python3 -u ../scripts/verify-release-launch75.py --fresh-only
+      - name: Archive and verify the explicitly requested trial IPA
+        if: github.repository == 'azeroualit-cloud/LifeOS' && github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/revision77' && inputs.mode == 'trial' && inputs.package_trial
+        working-directory: app
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          version=$(python3 -c 'import re; from pathlib import Path; print(re.search(r"MARKETING_VERSION: .([0-9.]+).", Path("project.yml").read_text())[1])')
+          build=$(python3 -c 'import re; from pathlib import Path; print(re.search(r"CURRENT_PROJECT_VERSION: .([0-9]+).", Path("project.yml").read_text())[1])')
+          xcodebuild archive -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -configuration Release -destination 'generic/platform=iOS' -archivePath build/Trial.xcarchive CODE_SIGNING_ALLOWED=NO > build/development-archive.log 2>&1 || { tail -n 100 build/development-archive.log; exit 1; }
+          mkdir -p build/Payload trial-download
+          cp -R build/Trial.xcarchive/Products/Applications/LifeOSProbe.app build/Payload/
+          (cd build && zip -qr ../trial-download/LifeOS-Trial.ipa Payload)
+          python3 ../scripts/verify-native-package.py trial-download/LifeOS-Trial.ipa --version "$version" --build "$build"
+          python3 ../scripts/verify-startup-imports.py trial-download/LifeOS-Trial.ipa
+          (cd trial-download && shasum -a 256 LifeOS-Trial.ipa > SHA256.txt)
+          cp build/development-selection.json trial-download/
+          printf '%s\n' "$GITHUB_SHA" > trial-download/SOURCE.txt
+      - uses: actions/upload-artifact@v4
+        if: github.repository == 'azeroualit-cloud/LifeOS' && github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/revision77' && inputs.mode == 'trial' && inputs.package_trial
+        with:
+          name: LifeOS-Trial-${{ github.sha }}
+          path: app/trial-download/
+          if-no-files-found: error
+          retention-days: 7
       - name: Export screenshots even when tests fail
         if: ${{ !cancelled() }}
         run: |
@@ -79,7 +122,7 @@ jobs:
           p=Path('app/build/development-selection.json')
           selection=json.loads(p.read_text()) if p.exists() else {'selection':'not reached'}
           with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f:
-              f.write('# LifeOS development evidence\nCommit: `'+os.environ['GITHUB_SHA']+'`\n\nStatus before export: '+os.environ['CHECK_RESULT']+'\n\n```json\n'+json.dumps(selection,indent=2)+'\n```\n\nScreenshots are simulator evidence, not production acceptance. No IPA, release, REA or backend deploy. Inspect screenshots and record visual findings before delivery.\n')
+              f.write('# LifeOS development evidence\nCommit: `'+os.environ['GITHUB_SHA']+'`\n\nStatus before export: '+os.environ['CHECK_RESULT']+'\n\n```json\n'+json.dumps(selection,indent=2)+'\n```\n\nScreenshots are simulator evidence, not production acceptance. A trial IPA, when explicitly requested, is an Actions artifact for device testing. Inspect screenshots and record visual findings before delivery.\n')
           PY
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
@@ -91,5 +134,6 @@ jobs:
             app/build/development-selection.*
             app/build/development-screenshots
             app/build/Development.xcresult
+            app/release-launch
             app/build/nutrition-simulator.mp4
             app/build/nutrition-recording.log

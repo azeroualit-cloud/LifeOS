@@ -292,3 +292,5 @@ Precisazione utente, 8 novembre 2026: «no scegli te l'obiettivo e mettile nella
 ## CI-IPA-LATENCY-01 — obiettivo, 8 novembre 2026
 
 Fonte utente: «ma in questo modo risparmieremmo tempo solo se fallisce uno di quei test, io volevo un risparmio di tempo sistemico». Ridurre i tempi anche a test verdi. La separazione tra IPA di prova e IPA di produzione e l’eventuale riuso di verifiche sono proposte di attuazione, non regole attive.
+
+Conferma utente: «va bene vediamo se risparmiamo tempo, intanto le modifiche che ti avevo chiesto sono state fatte?». Approvato il pilota IPA di prova con misurazione dei tempi, distinto dal percorso di produzione. L’avvio con confezionamento richiede ancora richiesta esplicita secondo IPA-GATE-01.
