@@ -71,6 +71,8 @@
     "build": 84,
     "authorization": "IPA-DELIVERY-2026-11-08",
     "candidate_ref": "codex/revision77",
+    "source_commit": "d31c640940a0de6130a01c9b584f8d5fb231965a",
+    "release_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42491009239",
     "release_tag": "ios-0.10.22-build84",
     "validation": "Suite completa, quattro avvii Release e verifica IPA prima della pubblicazione",
     "published": false

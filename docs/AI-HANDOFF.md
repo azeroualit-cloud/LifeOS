@@ -1,6 +1,6 @@
 # LifeOS — punto di ingresso per qualsiasi IA
 
-**Build 84 (0.10.22), rilascio autorizzato.** Include il calendario a tutta larghezza in Nutrizione. Pubblicazione su GitHub Releases dopo suite completa, quattro avvii Release e verifica del pacchetto.
+**Build 84 (0.10.22), rilascio autorizzato.** Include il calendario a tutta larghezza in Nutrizione. Pubblicazione su GitHub Releases dopo suite completa, quattro avvii Release e verifica del pacchetto. [Collaudo e pubblicazione](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42491009239) in corso sul commit `d31c640`.
 
 **NUTRITION-DATE-CLIP-01, 8 novembre 2026.** Il calendario era tagliato su iPhone, anche nel flusso con «Cerca alimento». La correzione approvata apre Data in un foglio a tutta larghezza con Fine e Annulla e conserva i nutrienti inseriti. Registrata la [regola UX-DATE-PICKER-01](USER-DECISIONS.md#ux-date-picker-01--active-8-novembre-2026). [Verifica al simulatore](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42481363683) superata sul commit `c2c7e8b`, con testo standard e grande. Prova su iPhone ancora aperta.
 
