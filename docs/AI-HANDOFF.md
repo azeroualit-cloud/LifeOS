@@ -1,6 +1,6 @@
 # LifeOS — punto di ingresso per qualsiasi IA
 
-**Build 88 (0.10.26), produzione IPA autorizzata.** Include Calendario Giorno con nuova agenda, puntini evento nel Mese, Salute e Nutrizione aggiornate. I test di regressione per Nutrizione e Calendario precedono il resto della suite. Quattro avvii Release e verifica pacchetto restano obbligatori. Il workflow produce un artefatto Actions con IPA e checksum prima di tentare la release GitHub.
+**Build 88 (0.10.26), produzione IPA autorizzata.** Include Calendario Giorno con nuova agenda, puntini evento nel Mese, Salute e Nutrizione aggiornate. I test di regressione per Nutrizione e Calendario precedono il resto della suite. Quattro avvii Release e verifica pacchetto restano obbligatori. Il workflow produce un artefatto Actions con IPA e checksum prima di tentare la release GitHub. [Monitoraggio build 88](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42523292569) sul commit 5be4038.
 
 **Calendario Giorno.** Variante grafica per revisione con data a sinistra, turno in pillola, superficie Agenda unica, colori limitati ai marcatori e azione Liquid Glass sopra la navigazione. Catture reali standard e testo grande disponibili. Primo collaudo 4/5, una disuguaglianza sui bordi del test è fallita per circa 0,00001 pt. Aggiunta tolleranza di 0,5 pt al test e rilanciato il collaudo. [Catture e diagnostica](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42521276245/artifacts/13633628333).
 

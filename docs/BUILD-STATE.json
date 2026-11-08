@@ -8,7 +8,7 @@
   "source_of_truth": "native-next overlay assembled through .github/actions/native-compat76/action.yml",
   "native_source_fingerprint": {
     "algorithm": "SHA-256 over sorted tracked native-next paths, NUL, file bytes, NUL",
-    "sha256": "a0094ed4edd271942de6ce5c8147bc10a25a6b46a0ac23dfc5efd41c81f57227"
+    "sha256": "54fd84d4f757ea0b3a42c974fdac9b7f6e4ecc7644bbd0bb2c6b24b00f4d5e3b"
   },
   "latest_distributed_build": {
     "version": "0.10.21",
@@ -163,6 +163,17 @@
     "ui_failed": 1,
     "validation": "Test sul bordo di un evento annidato fallito per circa 0,00001 pt. Corretta la tolleranza del test; verifica in corso.",
     "new_ipa": false
+  },
+  "production_candidate_88": {
+    "version": "0.10.26",
+    "build": 88,
+    "authorization": "IPA-DELIVERY-88",
+    "candidate_ref": "codex/revision77",
+    "source_commit": "5be4038a9de55d9ee19ae1e9adb393272f280d73",
+    "release_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42523292569",
+    "release_tag": "ios-0.10.26-build88",
+    "validation": "In corso. Suite completa, quattro avvii Release e verifica del pacchetto. Artefatto LifeOS-88 prima della pubblicazione GitHub Releases.",
+    "published": false
   },
   "backend": {
     "last_documented_utilities_deploy_run": "41630715615",
