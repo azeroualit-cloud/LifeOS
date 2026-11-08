@@ -8,7 +8,7 @@
   "source_of_truth": "native-next overlay assembled through .github/actions/native-compat76/action.yml",
   "native_source_fingerprint": {
     "algorithm": "SHA-256 over sorted tracked native-next paths, NUL, file bytes, NUL",
-    "sha256": "916c20a84130dfc2b2f4f6ddbd464c0ac8b4b94c748d79a317244ab633dd5c00"
+    "sha256": "a0094ed4edd271942de6ce5c8147bc10a25a6b46a0ac23dfc5efd41c81f57227"
   },
   "latest_distributed_build": {
     "version": "0.10.21",
@@ -153,6 +153,15 @@
     "run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42520092685",
     "screenshots": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42520092685/artifacts/13633108552",
     "ui_passed": 2,
+    "new_ipa": false
+  },
+  "calendar_day_render": {
+    "render_source_commit": "038f74b416caa28b8866c5d2f23e52325843a008",
+    "run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42521276245",
+    "screenshots": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42521276245/artifacts/13633628333",
+    "ui_passed": 4,
+    "ui_failed": 1,
+    "validation": "Test sul bordo di un evento annidato fallito per circa 0,00001 pt. Corretta la tolleranza del test; verifica in corso.",
     "new_ipa": false
   },
   "backend": {

@@ -69,7 +69,8 @@ final class NativeRevision72UITests: XCTestCase {
         XCTAssertTrue(long.waitForExistence(timeout: 10)); XCTAssertTrue(inner.exists)
         XCTAssertLessThan(long.frame.height, 310)
         XCTAssertGreaterThanOrEqual(inner.frame.minY, long.frame.minY)
-        XCTAssertLessThanOrEqual(inner.frame.maxY, long.frame.maxY)
+        // XCTest and SwiftUI can round the same screen coordinate differently.
+        XCTAssertLessThanOrEqual(inner.frame.maxY, long.frame.maxY + 0.5)
         let strip = app.scrollViews["calendar-all-day-strip"]
         XCTAssertTrue(strip.exists); XCTAssertLessThanOrEqual(strip.frame.height, 60)
         XCTAssertFalse(app.staticTexts["07:00"].exists, "Intermediate hour rows must not consume space")

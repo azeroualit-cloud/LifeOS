@@ -1,6 +1,6 @@
 # LifeOS — punto di ingresso per qualsiasi IA
 
-**Calendario Giorno.** Variante grafica per revisione con data a sinistra, turno in pillola, superficie Agenda unica, colori limitati ai marcatori e azione Liquid Glass sopra la navigazione. Collaudo e catture del simulatore in avvio.
+**Calendario Giorno.** Variante grafica per revisione con data a sinistra, turno in pillola, superficie Agenda unica, colori limitati ai marcatori e azione Liquid Glass sopra la navigazione. Catture reali standard e testo grande disponibili. Primo collaudo 4/5, una disuguaglianza sui bordi del test è fallita per circa 0,00001 pt. Aggiunta tolleranza di 0,5 pt al test e rilanciato il collaudo. [Catture e diagnostica](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42521276245/artifacts/13633628333).
 
 **Calendario Mese.** Implementato un puntino per evento, tre per riga, con conteggio leggibile da VoiceOver. L’utente chiede una proposta grafica per la vista Giorno, da valutare a parte. Due test UI passati su e9fd592, inclusi cinque eventi su due righe e ritorno alla stessa settimana. [Schermate reali](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42520092685/artifacts/13633108552).
 
