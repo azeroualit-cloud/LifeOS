@@ -97,6 +97,15 @@
     "status": "implemented_pending_simulator",
     "includes_new_ipa": false
   },
+  "production_candidate_85": {
+    "version": "0.10.23",
+    "build": 85,
+    "authorization": "IPA-DELIVERY-DAY-85",
+    "candidate_ref": "codex/revision77",
+    "release_tag": "ios-0.10.23-build85",
+    "validation": "Suite completa, quattro avvii Release e verifica IPA prima della pubblicazione",
+    "published": false
+  },
   "backend": {
     "last_documented_utilities_deploy_run": "41630715615",
     "source": "docs/native/REVISIONE-77.md",

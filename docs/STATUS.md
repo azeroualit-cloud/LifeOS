@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Build 85 (0.10.23), rilascio autorizzato.** Include la vista Giorno con ritorno diretto al Mese, il catalogo senza maiale con piatti marocchini, la pesatura con osso e gli aggiornamenti visivi del ramo corrente. Pubblicazione su GitHub Releases dopo suite completa, quattro avvii Release e verifica del pacchetto.
+
 **Agenda Giorno.** L’utente ha scelto la lista compatta e richiesto il ritorno diretto al Mese. Implementati apertura da mese o striscia Dashboard, frecce, turno, sezioni dell’agenda e Aggiungi evento in basso. Mese resta alla posizione originaria. [Collaudo iOS](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42495836333) sul commit `444f31d`.
 
 **Catalogo halal e marocchino.** Escluse nove voci di maiale o con carne non identificata. Aggiunte tredici voci, comprese varianti di couscous, tajine e pastilla. Sette voci supportano il peso con osso con stima edibile. [Verifica iOS](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42494307645) sul commit `20ea12b`. L’utente ha respinto il foglio proposto per l’agenda del giorno.

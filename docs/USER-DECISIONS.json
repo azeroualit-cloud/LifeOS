@@ -990,6 +990,14 @@
     "original_quote": "Ti chiedo esplicitamente di produrre e consegnarmi una nuova IPA, ma solo dopo aver completato con successo il collaudo pre-IPA.",
     "scope": "Una sola consegna. Preservare release 78. Nessun deploy backend o cancellazione. Accettazione esplicita dopo prove iPhone."
   },
+  "day_agenda_ipa_delivery_authorization": {
+    "id": "IPA-DELIVERY-DAY-85",
+    "status": "AUTHORIZED_AFTER_PRE_IPA_PASS",
+    "recorded_on": "2026-11-08",
+    "source": "Richiesta diretta utente",
+    "original_quote": "puoi già produrre l'ipa?",
+    "scope": "Nuova IPA LifeOS 0.10.23 build 85 dal ramo corrente, con agenda Giorno e ritorno al Mese, aggiornamenti visivi e catalogo aggiornato. Pubblicazione dopo suite completa, quattro avvii Release e verifica del pacchetto."
+  },
   "nutrition_date_ipa_delivery_authorization": {
     "id": "IPA-DELIVERY-2026-11-08",
     "status": "AUTHORIZED_AFTER_PRE_IPA_PASS",

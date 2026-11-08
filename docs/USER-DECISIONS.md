@@ -264,3 +264,7 @@ La composizione nutrizionale è generica. Per la conformità halal di un prodott
 Fonte utente: «oltre alla tua domanda va valutato anche il fatto che calendario non ha il pulsante nela navigation bar, quindi devo poter tornare al calendario senza passare dalla dashboard. Poi per quanto riguarda la tua domanda, io sceglierei quello che hai detto te perché non mi serve sapere quali spazi liberi ho.»
 
 Un tocco sulla data apre Giorno. La data e il turno precedono gli impegni di tutto il giorno e la lista con gli orari. Le frecce spostano di un giorno e Aggiungi evento resta in basso. Il pulsante Mese torna direttamente alla settimana e alla data di partenza. Il pennello dei turni resta in Mese.
+
+## IPA-DELIVERY-DAY-85 — consegna autorizzata, 8 novembre 2026
+
+Fonte utente: «puoi già produrre l'ipa?». Autorizzata la build 85 (0.10.23) sul ramo corrente con agenda Giorno, ritorno diretto al Mese e catalogo aggiornato. Pubblicazione dopo suite completa, quattro avvii Release e verifica del pacchetto.
