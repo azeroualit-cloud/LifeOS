@@ -63,6 +63,7 @@
     "issue": "NUTRITION-DATE-CLIP-01",
     "decision": "UX-DATE-PICKER-01",
     "status": "implemented_pending_simulator",
+    "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42481363683",
     "included_in_build_83": false
   },
   "backend": {
