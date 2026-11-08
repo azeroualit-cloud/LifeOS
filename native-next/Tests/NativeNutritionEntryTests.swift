@@ -22,6 +22,26 @@ final class NativeNutritionEntryTests: XCTestCase {
         XCTAssertEqual(NativeGenericFood.matches("caffe").first?.name, "Caffè espresso")
         XCTAssertTrue(NativeGenericFood.matches("alimento inesistente").isEmpty)
     }
+    func testBoneInPortionKeepsScaleWeightAndUsesOnlyEdibleGrams() throws {
+        let food = try XCTUnwrap(NativeGenericFood.matches("Coscia di pollo al forno con pelle").first)
+        let entry = try XCTUnwrap(food.portion(id: UUID(), date: Date(), grams: 200, weighedWithBone: true))
+        XCTAssertEqual(entry.boneInWeightGrams, 200)
+        XCTAssertEqual(entry.portionGrams, 142)
+        XCTAssertEqual(entry.calories, Decimal(string: "291.1"))
+        XCTAssertEqual(try JSONDecoder().decode(NativeNutritionEntry.self, from: JSONEncoder().encode(entry)), entry)
+        XCTAssertNil(food.portion(id: UUID(), date: Date(), grams: 0, weighedWithBone: true))
+    }
+
+    func testCatalogExcludesPorkAndSeparatesMoroccanDishes() {
+        for query in ["maiale", "prosciutto", "salame"] {
+            XCTAssertTrue(NativeGenericFood.matches(query).isEmpty)
+        }
+        XCTAssertEqual(NativeGenericFood.matches("couscous").first?.id, "ciqual-9683")
+        XCTAssertEqual(NativeGenericFood.matches("couscous senza carne").first?.id, "ciqual-25150")
+        XCTAssertEqual(NativeGenericFood.matches("couscous con carne").first?.id, "ciqual-25138")
+        XCTAssertEqual(NativeGenericFood.matches("tagine pollo").first?.id, "ciqual-25204")
+    }
+
     func testItalianDecimalsAndFourFourNineCalculation() {
         let entry = NativeNutritionEntry(id: UUID(), revision: 1, date: Date(), protein: 10, carbohydrate: 20, fat: 5, confirmed: false)
         XCTAssertEqual(entry.calories, 165)

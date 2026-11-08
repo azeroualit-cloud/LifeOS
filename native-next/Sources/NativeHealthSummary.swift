@@ -154,9 +154,10 @@ struct NativeHealthDetail: View {
         let source: String
         let calories: Double
         var grams: Decimal? = nil
+        var weighedWithBone = false
         var detail: String {
             let time = date.formatted(.dateTime.hour().minute())
-            let portion = grams.map { NSDecimalNumber(decimal: $0).doubleValue.formatted(.number.precision(.fractionLength(0...1))) + " g" }
+            let portion = grams.map { NSDecimalNumber(decimal: $0).doubleValue.formatted(.number.precision(.fractionLength(0...1))) + (weighedWithBone ? " g con osso" : " g") }
             return [time, portion, source].compactMap { $0 }.joined(separator: " · ")
         }
     }
@@ -173,7 +174,8 @@ struct NativeHealthDetail: View {
         }
         return (imported + local.map {
             DiaryRow(id: $0.id, name: $0.foodName ?? "Energia alimentare", date: $0.date,
-                source: "LifeOS", calories: NSDecimalNumber(decimal: $0.calories).doubleValue, grams: $0.portionGrams)
+                source: "LifeOS", calories: NSDecimalNumber(decimal: $0.calories).doubleValue, grams: $0.boneInWeightGrams ?? $0.portionGrams,
+                weighedWithBone: $0.boneInWeightGrams != nil)
         }).sorted { $0.date > $1.date }
     }
 

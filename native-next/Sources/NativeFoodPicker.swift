@@ -5,6 +5,7 @@ struct NativeGenericFood: Decodable, Identifiable {
     let name: String
     let detail: String?
     let family: Family
+    let boneInEdiblePercent: Int?
 
     enum Family: String, Decodable {
         case bakery, grain, egg, dairy, cheese, fat, legume, fruit, nut, poultry
@@ -39,10 +40,18 @@ struct NativeGenericFood: Decodable, Identifiable {
     let fibre: Decimal
     let calories: Decimal
 
-    func portion(id: UUID, date: Date, grams: Decimal) -> NativeNutritionEntry? {
+    func portion(id: UUID, date: Date, grams: Decimal, weighedWithBone: Bool = false) -> NativeNutritionEntry? {
+        let edibleGrams: Decimal
+        if weighedWithBone {
+            guard let percent = boneInEdiblePercent, (1..<100).contains(percent) else { return nil }
+            edibleGrams = grams * Decimal(percent) / 100
+        } else {
+            edibleGrams = grams
+        }
         guard var entry = NativeNutritionEntry.portion(id: id, date: date, protein: protein,
-            carbohydrate: carbohydrate, fat: fat, fibre: fibre, calories: calories, grams: grams) else { return nil }
+            carbohydrate: carbohydrate, fat: fat, fibre: fibre, calories: calories, grams: edibleGrams) else { return nil }
         entry.foodName = name
+        entry.boneInWeightGrams = weighedWithBone ? grams : nil
         return entry
     }
 

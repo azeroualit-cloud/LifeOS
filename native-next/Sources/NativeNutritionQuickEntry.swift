@@ -67,6 +67,7 @@ struct NativeNutritionQuickSheet: View {
     @State private var showingCatalog = false
     @State private var selectedFood: NativeGenericFood?
     @State private var portionGrams = "100"
+    @State private var weighedWithBone = false
     @FocusState private var focus: Field?
     private enum Field: Hashable { case protein, carbohydrate, fat, fibre, portion }
     private var pending: NativeNutritionEntry? { nutrition.entries.first { $0.id == id && !$0.confirmed } }
@@ -74,7 +75,7 @@ struct NativeNutritionQuickSheet: View {
     private var draft: NativeNutritionEntry? {
         if let selectedFood {
             guard let grams = NativeNutritionEntry.grams(portionGrams), grams <= 9999 else { return nil }
-            return selectedFood.portion(id: id, date: date, grams: grams)
+            return selectedFood.portion(id: id, date: date, grams: grams, weighedWithBone: weighedWithBone)
         }
         guard let p = NativeNutritionEntry.grams(protein), let c = NativeNutritionEntry.grams(carbohydrate), let f = NativeNutritionEntry.grams(fat), let fi = NativeNutritionEntry.grams(fibre) else { return nil }
         return .direct(id: id, date: date, protein: p, carbohydrate: c, fat: f, fibre: fi)
@@ -103,9 +104,21 @@ struct NativeNutritionQuickSheet: View {
                                 Text(detail).font(.subheadline).foregroundStyle(.secondary)
                             }
                         }
+                        if selectedFood.boneInEdiblePercent != nil {
+                            Picker("Pesatura", selection: $weighedWithBone) {
+                                Text("Senza osso").tag(false)
+                                Text("Con osso").tag(true)
+                            }
+                            .pickerStyle(.menu)
+                            .disabled(nutrition.busy || pending != nil)
+                        }
                         grams("Porzione", text: $portionGrams, field: .portion)
                             .disabled(nutrition.busy || pending != nil)
                         if let draft {
+                            if weighedWithBone, let edible = draft.portionGrams {
+                                Text("Parte edibile stimata: \(NSDecimalNumber(decimal: edible).doubleValue.formatted(.number.precision(.fractionLength(0)))) g")
+                                    .font(.caption).foregroundStyle(.secondary)
+                            }
                             Text("P \(NSDecimalNumber(decimal: draft.protein)) · C \(NSDecimalNumber(decimal: draft.carbohydrate)) · G \(NSDecimalNumber(decimal: draft.fat)) · F \(NSDecimalNumber(decimal: draft.fibre ?? 0)) g")
                                 .font(.caption).foregroundStyle(.secondary)
                         }
@@ -181,6 +194,7 @@ struct NativeNutritionQuickSheet: View {
                 NativeFoodPicker { food in
                     selectedFood = food
                     portionGrams = "100"
+                    weighedWithBone = false
                 }
             }
         }

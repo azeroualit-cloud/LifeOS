@@ -15,6 +15,7 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
     var labelCalories: Decimal? = nil
     var portionGrams: Decimal? = nil
     var foodName: String? = nil
+    var boneInWeightGrams: Decimal? = nil
     var calories: Decimal { labelCalories ?? (protein * 4 + carbohydrate * 4 + fat * 9) }
 
     /// Label values are per 100 g; persisted measurements always describe the portion.

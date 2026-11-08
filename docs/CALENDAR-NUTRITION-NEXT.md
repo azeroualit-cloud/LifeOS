@@ -2,9 +2,9 @@
 
 La prima tranche aggiorna i componenti esistenti. Questa proposta descrive le scelte ancora da approvare per i due flussi che cambiano struttura o persistenza.
 
-## Agenda del giorno
+## Agenda del giorno — proposta respinta, da discutere
 
-Toccando una data nel mese, aprire un foglio con superficie distinta e transizione dal basso. La data e il turno sono nell’intestazione. Seguono le sezioni Tutto il giorno e Agenda, con orario a sinistra e righe degli impegni a destra. In fondo, Aggiungi evento resta raggiungibile con il pollice e apre il modulo precompilato con la data. L’agenda del giorno può espandersi e chiudersi tornando al mese e alla posizione di scorrimento precedente. Riduci movimento usa una dissolvenza o elimina lo spostamento. Il pennello dei turni rimane un gesto di modifica e non apre il foglio.
+L’utente non ha approvato il foglio. La descrizione seguente conserva la proposta per la cronologia. Toccando una data nel mese, aprire un foglio con superficie distinta e transizione dal basso. La data e il turno sono nell’intestazione. Seguono le sezioni Tutto il giorno e Agenda, con orario a sinistra e righe degli impegni a destra. In fondo, Aggiungi evento resta raggiungibile con il pollice e apre il modulo precompilato con la data. L’agenda del giorno può espandersi e chiudersi tornando al mese e alla posizione di scorrimento precedente. Riduci movimento usa una dissolvenza o elimina lo spostamento. Il pennello dei turni rimane un gesto di modifica e non apre il foglio.
 
 ```text
   Dom 8 novembre                    Chiudi
@@ -24,7 +24,7 @@ Verifica: apertura da mese e Dashboard, calendario senza impegni, giorno con eve
 
 ## Catalogo, cocktail e Apple Salute
 
-- Il catalogo standard resta italiano e concentrato sui cibi quotidiani. Le varianti di carne espongono preparazione e pelle. Ciqual misura la parte edibile: il peso dell’osso resta fuori dal calcolo nutrizionale. [Fonte Ciqual](https://zenodo.org/records/17550133)
+- Il catalogo standard resta italiano e concentrato sui cibi quotidiani. Le varianti di carne espongono preparazione e pelle. Ciqual misura la parte edibile. Per le cosce compatibili si può inserire il peso con osso. LifeOS conserva il valore inserito e applica una resa stimata per taglio e preparazione. La composizione resta Ciqual. Le rese provengono dalle tabelle USDA ARS per coscia e sovracoscia (codici 241-3221, 241-3222, 241-3321, 241-3322 e 241-5222). Per il crudo, il rapporto fra resa dopo cottura con e senza osso è un’approssimazione. [Riferimento rese](https://www.ars.usda.gov/ARSUserFiles/80400530/pdf/8586/csfii85_4days_codebook.pdf). [Fonte Ciqual](https://zenodo.org/records/17550133)
 - Aggiungi alimento personale dalla ricerca crea una voce riutilizzabile sul dispositivo, con nome, famiglia, kcal e nutrienti per 100 g. I campi non noti restano vuoti. Il diario salva una copia dei valori della porzione.
 - Sezione cocktail con porzione per bicchiere, quantità modificabile e dicitura «Stima». Partire da Gin Tonic, Sex on the Beach, Long Island, Vodka Lemon, Vodka Red Bull, Rum e Cola, Mojito, Moscow Mule, Spritz, Negroni e altri classici reperibili. Calcolare i valori dalle ricette di riferimento, quantità e gradazioni documentate. [Ricette IBA](https://iba-world.com/cocktails/)
 - LifeOS scrive già le fibre per le registrazioni con quel valore. Verificare autorizzazione e presenza del campione per Biscotti nell’app Salute. Estendere la scrittura con vitamine e minerali effettivamente disponibili, mantenendo unità per ogni nutriente e lasciando assenti i dati mancanti. [Tipi nutrizionali HealthKit](https://developer.apple.com/documentation/healthkit/nutrition-type-identifiers)

@@ -19,6 +19,16 @@
   },
   "active_rules": [
     {
+      "id": "NUTRITION-HALAL-MOROCCO-01",
+      "status": "ACTIVE",
+      "scope": "Catalogo LifeOS e pesatura delle porzioni",
+      "recorded_on": "2026-11-08",
+      "provenance": "Richiesta diretta utente",
+      "original_quote": "non voglio il maiale tra le carni, ma solo tutte le carni halal (pollo, manzo, ecc), ci deve essere la possibilità (per tipo le cosce) con la pesatura con osso, e ovviamente non sarà preciso al grammo ma è quello che conviene a me, e ci devono essere anche i principali cibi marocchini, tipo couscous con opzione con o senza carne, ecc.",
+      "rule": "Nel catalogo standard escludere carni di maiale, derivati di maiale e preparazioni di carne con composizione non verificata. Includere carni di specie ammesse, cibi marocchini comuni e pesatura con osso stimata quando documentabile.",
+      "implementation": "Catalogo aggiornato a 192 voci. Ciqual come fonte dei nutrienti e tabella USDA ARS usata per le rese delle cosce. Il catalogo generico non certifica provenienza o macellazione."
+    },
+    {
       "id": "NUTRITION-EVERYDAY-01",
       "status": "ACTIVE",
       "scope": "Catalogo generico, integrazione Apple Salute",
@@ -61,7 +71,7 @@
       "recorded_on": "2026-11-08",
       "provenance": "Richiesta diretta utente con cinque immagini di riferimento. Parafrasi.",
       "rule": "Ripensare apertura, gerarchia, contrasto, separazione visiva, transizione e accesso alla creazione di eventi del giorno.",
-      "implementation": "Proposta concreta in CALENDAR-NUTRITION-NEXT.md, in attesa di approvazione DEV-02."
+      "implementation": "Proposta del foglio respinta. Fonte utente: «per la parte calendario non approvo, discutiamone». Redesign del giorno sospeso per discussione."
     },
     {
       "id": "UX-DATE-PICKER-01",

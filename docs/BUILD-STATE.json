@@ -84,6 +84,12 @@
     "open_scope": ["calendar day redesign", "cocktail recipes and alcohol", "micronutrients", "personal generic foods"],
     "includes_new_ipa": false
   },
+  "halal_moroccan_catalog": {
+    "status": "implemented_pending_simulator",
+    "generic_food_count": 192,
+    "bone_in_food_count": 7,
+    "includes_new_ipa": false
+  },
   "backend": {
     "last_documented_utilities_deploy_run": "41630715615",
     "source": "docs/native/REVISIONE-77.md",

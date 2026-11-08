@@ -1,5 +1,7 @@
 # LifeOS — correzioni e difetti aperti
 
+**Catalogo halal e marocchino.** Escluse nove voci di maiale o con carne non identificata. Aggiunte tredici voci, comprese varianti di couscous, tajine e pastilla. Sette voci supportano il peso con osso con stima edibile. Verifica iOS da acquisire. L’utente ha respinto il foglio proposto per l’agenda del giorno.
+
 **Revisione post build 84.** Prima tranche nel sorgente: 188 alimenti Ciqual e icone per famiglia, Calendario mensile e Dashboard, pulsanti Categorie di Attività in Liquid Glass, contrasto e tastiera del pannello Nutrizione, bordi e padding di Salute. [Verifica simulatore](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42493721112) in corso su `b7bb685`. La [proposta per agenda e dati nutrizionali](CALENDAR-NUTRITION-NEXT.md) dettaglia i passaggi aperti.
 
 **NUTRITION-DATE-CLIP-01, 8 novembre 2026.** Il calendario era tagliato su iPhone, anche nel flusso con «Cerca alimento». La correzione approvata apre Data in un foglio a tutta larghezza con Fine e Annulla e conserva i nutrienti inseriti. Registrata la [regola UX-DATE-PICKER-01](USER-DECISIONS.md#ux-date-picker-01--active-8-novembre-2026). [Verifica al simulatore](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42481363683) superata sul commit `c2c7e8b`, con testo standard e grande. Prova su iPhone ancora aperta.
