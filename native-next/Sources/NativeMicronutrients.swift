@@ -6,7 +6,7 @@ struct NativeNutrientAmount: Codable, Equatable {
 }
 
 enum NativeTrackedNutrient: String, CaseIterable, Identifiable {
-    case vitaminC, zinc, vitaminA, vitaminD, vitaminE, vitaminK1, vitaminK2
+    case vitaminC, zinc, vitaminA, vitaminD, vitaminE, vitaminK, vitaminK1, vitaminK2
     case vitaminB1, vitaminB2, vitaminB3, vitaminB5, vitaminB6, folate, vitaminB12
     case calcium, chloride, copper, iron, iodine, magnesium, manganese
     case phosphorus, potassium, selenium, sodium
@@ -20,6 +20,7 @@ enum NativeTrackedNutrient: String, CaseIterable, Identifiable {
         case .vitaminA: "Vitamina A"
         case .vitaminD: "Vitamina D"
         case .vitaminE: "Vitamina E"
+        case .vitaminK: "Vitamina K"
         case .vitaminK1: "Vitamina K1"
         case .vitaminK2: "Vitamina K2"
         case .vitaminB1: "Vitamina B1"
@@ -41,35 +42,73 @@ enum NativeTrackedNutrient: String, CaseIterable, Identifiable {
         case .selenium: "Selenio"
         case .sodium: "Sodio"
         case .ala: "ALA"
-        case .epaDha: "EPA + DHA"
+        case .epaDha: "Omega-3 (EPA + DHA)"
         case .epa: "EPA"
         case .dha: "DHA"
         }
     }
     var unit: String {
         switch self {
-        case .vitaminA, .vitaminD, .vitaminK1, .vitaminK2, .folate, .vitaminB12, .iodine, .selenium: "µg"
+        case .vitaminA, .vitaminD, .vitaminK, .vitaminK1, .vitaminK2, .folate, .vitaminB12, .iodine, .selenium: "µg"
         default: "mg"
         }
     }
-    // Daily references for adult men (SINU LARN) and EPA + DHA (EFSA).
-    var dailyReference: Decimal? {
+    // SINU LARN V, adult men 18–64. EFSA for potassium and EPA + DHA.
+    // The B1 reference uses the LARN 0.4 mg/1000 kcal at a 2500 kcal baseline.
+    var dailyReference: Decimal {
         switch self {
         case .vitaminC: 105
         case .zinc: 12
-        case .epaDha: 250
+        case .vitaminA: 750
+        case .vitaminD: 15
+        case .vitaminE: 13
+        case .vitaminK, .vitaminK1, .vitaminK2: 135
+        case .vitaminB1: 1
+        case .vitaminB2: 1.6
+        case .vitaminB3: 18
+        case .vitaminB5: 5
+        case .vitaminB6: 1.6
+        case .folate: 330
+        case .vitaminB12: 4
+        case .calcium: 950
+        case .chloride: 2300
+        case .copper: 1.4
+        case .iron: 10
+        case .iodine: 150
+        case .magnesium: 350
+        case .manganese: 2.5
+        case .phosphorus: 550
+        case .potassium: 3500
+        case .selenium: 55
+        case .sodium: 1500
+        case .ala: 1250 // EFSA 0.5% energy, at 2250 kcal / 9 kcal per gram.
+        case .epaDha, .epa, .dha: 250
+        }
+    }
+
+    // LARN average requirements are below the displayed references. A flag
+    // describes recorded intake, never predicts that a symptom will occur.
+    var lowIntakeRule: (threshold: Decimal, function: String)? {
+        switch self {
+        case .vitaminC: (75, "Produzione di collagene")
+        case .zinc: (10, "Funzione immunitaria")
+        case .iron: (7, "Trasporto dell’ossigeno")
         default: nil
         }
     }
 
     static let priorities: [Self] = [.vitaminC, .zinc]
     static let omega: [Self] = [.epaDha, .ala, .epa, .dha]
-    static let micronutrients = allCases.filter { !omega.contains($0) }
+    // The grouped vitamin K row is for tracking; personal food entry retains K1/K2.
+    static let micronutrients = allCases.filter { !omega.contains($0) && $0 != .vitaminK }
+    static let tracked = allCases.filter { ![.vitaminK1, .vitaminK2, .epa, .dha].contains($0) }
 
     func value(in entry: NativeNutritionEntry) -> (amount: Decimal, estimated: Bool)? {
-        if self == .epaDha {
-            guard let epa = Self.epa.value(in: entry), let dha = Self.dha.value(in: entry) else { return nil }
-            return (epa.amount + dha.amount, epa.estimated || dha.estimated)
+        if self == .epaDha || self == .vitaminK {
+            let first: Self = self == .epaDha ? .epa : .vitaminK1
+            let second: Self = self == .epaDha ? .dha : .vitaminK2
+            guard let a = first.value(in: entry), let b = second.value(in: entry) else { return nil }
+            return (a.amount + b.amount, a.estimated || b.estimated)
         }
         let value = entry.nutrientValues?[rawValue] ?? (self == .folate ? entry.nutrientValues?["folateMass"] : nil)
         guard let value else { return nil }
@@ -94,8 +133,14 @@ struct NativeNutrientPeriod {
     }
 
     func progress(toward reference: Decimal) -> Double {
-        guard let amount else { return 0 }
+        guard let amount, reference > 0 else { return 0 }
         return NSDecimalNumber(decimal: min(amount / reference, 1)).doubleValue
+    }
+
+    func lowIntakeWarning(for nutrient: NativeTrackedNutrient) -> String? {
+        guard daysWithValues == 7, !partial, !estimated, let amount,
+              let rule = nutrient.lowIntakeRule, amount < rule.threshold else { return nil }
+        return rule.function
     }
 
     init(_ nutrient: NativeTrackedNutrient, days: [[NativeNutritionEntry]]) {
@@ -109,115 +154,159 @@ struct NativeNutrientPeriod {
     }
 }
 
-struct NativeMicronutrientScreen: View {
-    @ObservedObject var nutrition: NativeNutritionStore
-    @AppStorage("lifeos-nutrient-favorites") private var favorites = "vitaminC,zinc"
+struct NativeNutrientOrdering {
+    static let storageKey = "lifeos-nutrient-favorites"
+    static let defaultFavorites = "vitaminC,zinc"
+    static let orderKey = "lifeos-nutrient-order"
 
-    private var favoriteNutrients: [NativeTrackedNutrient] {
-        let keys = Set(favorites.split(separator: ",").map(String.init))
-        return NativeTrackedNutrient.micronutrients.filter { keys.contains($0.rawValue) }
+    static func keys(_ value: String) -> [NativeTrackedNutrient] {
+        var seen = Set<NativeTrackedNutrient>()
+        return value.split(separator: ",").compactMap { NativeTrackedNutrient(rawValue: String($0)) }
+            .map { [.vitaminK1, .vitaminK2].contains($0) ? .vitaminK : $0 }
+            .filter { NativeTrackedNutrient.tracked.contains($0) && seen.insert($0).inserted }
     }
+
+    static func remaining(favorites: [NativeTrackedNutrient], order: String) -> [NativeTrackedNutrient] {
+        let sorted = keys(order)
+        return (sorted + NativeTrackedNutrient.tracked.filter { !sorted.contains($0) }).filter { !favorites.contains($0) }
+    }
+
+    static func encode(_ nutrients: [NativeTrackedNutrient]) -> String {
+        nutrients.map(\.rawValue).joined(separator: ",")
+    }
+}
+
+struct NativeNutrientProgress: View {
+    let nutrient: NativeTrackedNutrient
+    let period: NativeNutrientPeriod
+    var caption: String? = nil
+    var warning = false
 
     var body: some View {
-        let days = NativeNutrientPeriod.recordedDays(nutrition.entries, count: 7)
+        let target = nutrient.dailyReference
+        let format = Decimal.FormatStyle().precision(.fractionLength(0...2))
+        let current = period.amount.map { (period.estimated ? "≈" : "") + $0.formatted(format) } ?? "—"
+        let value = "\(current) / \(target.formatted(format)) \(nutrient.unit)"
+        VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: NativeDesign.Space.small) {
+                    Text(caption ?? nutrient.title).fontWeight(.semibold)
+                    Spacer(minLength: 0)
+                    Text(value).monospacedDigit().foregroundStyle(.secondary)
+                }.fixedSize(horizontal: true, vertical: false)
+                VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
+                    Text(caption ?? nutrient.title).fontWeight(.semibold)
+                    Text(value).monospacedDigit().foregroundStyle(.secondary)
+                }
+            }.font(.caption)
+            ProgressView(value: period.progress(toward: target))
+                .tint(warning ? NativeDesign.financialRed : NativeDesign.nutritionTitle)
+                .accessibilityHidden(true)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(caption ?? nutrient.title)
+        .accessibilityValue(value)
+    }
+}
 
+struct NativePinnedNutrients: View {
+    @AppStorage(NativeNutrientOrdering.storageKey) private var favorites = NativeNutrientOrdering.defaultFavorites
+    let entries: [NativeNutritionEntry]
+    var date = Date()
+
+    var body: some View {
+        let days = NativeNutrientPeriod.recordedDays(entries, count: 1, now: date)
+        ForEach(NativeNutrientOrdering.keys(favorites)) { nutrient in
+            NativeNutrientProgress(nutrient: nutrient, period: .init(nutrient, days: days))
+                .accessibilityIdentifier("health-progress-" + nutrient.rawValue)
+        }
+    }
+}
+
+struct NativeMicronutrientScreen: View {
+    @ObservedObject var nutrition: NativeNutritionStore
+    var selectedDate = Date()
+    @AppStorage(NativeNutrientOrdering.storageKey) private var favorites = NativeNutrientOrdering.defaultFavorites
+    @AppStorage(NativeNutrientOrdering.orderKey) private var order = ""
+    @State private var editMode: EditMode = .inactive
+
+    var body: some View {
+        let pinned = NativeNutrientOrdering.keys(favorites)
+        let others = NativeNutrientOrdering.remaining(favorites: pinned, order: order)
+        let days = NativeHealthWeek.days(containing: selectedDate)
+        let last = days.last ?? selectedDate
+        let weekly = NativeNutrientPeriod.recordedDays(nutrition.entries, count: 7, now: last)
+        let daily = NativeNutrientPeriod.recordedDays(nutrition.entries, count: 1, now: selectedDate)
         List {
             Section("In evidenza") {
-                if favoriteNutrients.isEmpty {
-                    Text("Scegli i preferiti in Tutti i micronutrienti.").foregroundStyle(.secondary)
-                }
-                ForEach(favoriteNutrients) { nutrient in
-                    nutrientRow(nutrient, days: days)
-                }
+                if pinned.isEmpty { Text("Usa la stella per aggiungere un nutriente.").font(.caption) }
+                ForEach(pinned) { row($0, pinned: true, daily: daily, weekly: weekly) }
+                    .onMove { offsets, destination in
+                        var updated = pinned
+                        updated.move(fromOffsets: offsets, toOffset: destination)
+                        favorites = NativeNutrientOrdering.encode(updated)
+                    }
             }
             Section {
-                NavigationLink("Tutti i micronutrienti") {
-                    List {
-                        ForEach(NativeTrackedNutrient.micronutrients) { nutrient in
-                            nutrientRow(nutrient, days: days)
-                        }
+                ForEach(others) { row($0, pinned: false, daily: daily, weekly: weekly) }
+                    .onMove { offsets, destination in
+                        var updated = others
+                        updated.move(fromOffsets: offsets, toOffset: destination)
+                        order = NativeNutrientOrdering.encode(updated)
                     }
-                    .modifier(NativeListAppearance())
-                    .navigationTitle("Tutti i micronutrienti")
-                    .navigationBarTitleDisplayMode(.inline)
-                }
-                NavigationLink("Omega‑3") {
-                    List {
-                        ForEach(NativeTrackedNutrient.omega) { nutrient in
-                            nutrientRow(nutrient, days: days, canFavorite: false)
-                        }
-                        Link("Riferimenti EFSA", destination: URL(string: "https://www.efsa.europa.eu/en/topics/topic/dietary-reference-values")!)
-                    }
-                    .modifier(NativeListAppearance())
-                    .navigationTitle("Omega‑3")
-                    .navigationBarTitleDisplayMode(.inline)
-                }
+            } header: {
+                Text("Micronutrienti")
             } footer: {
-                Text("I valori derivano dagli alimenti del catalogo registrati in LifeOS. I giorni senza valori restano fuori dalla media.")
-            }
-            Section {
-                Link("Riferimenti LARN", destination: URL(string: "https://sinu.it/wp-content/uploads/2025/07/Tabelle-riassuntive_online.pdf")!)
-            } footer: {
-                Text("Riferimenti giornalieri LARN per uomini adulti.")
+                Text("Riferimenti per uomini adulti. Le medie usano i giorni con dati. Vitamina B1 e ALA usano basi energetiche di 2500 e 2250 kcal rispettivamente.")
             }
         }
-        .modifier(NativeListAppearance())
+        .environment(\.editMode, $editMode)
+        .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
+        .background(NativeDesign.canvas)
+        .environment(\.defaultMinListRowHeight, NativeDesign.Layout.touchTarget)
         .navigationTitle("Micronutrienti")
         .navigationBarTitleDisplayMode(.inline)
-    }
-
-    private func nutrientRow(_ nutrient: NativeTrackedNutrient, days: [[NativeNutritionEntry]], canFavorite: Bool = true) -> some View {
-        let today = NativeNutrientPeriod(nutrient, days: Array(days.prefix(1)))
-        let week = NativeNutrientPeriod(nutrient, days: days)
-        let reference = nutrient.dailyReference
-        let isFavorite = favoriteNutrients.contains(nutrient)
-        return VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-            HStack {
-                Text(nutrient.title).font(.headline)
-                Spacer(minLength: NativeDesign.Space.small)
-                if canFavorite {
-                    Button {
-                        var keys = Set(favoriteNutrients.map(\.rawValue))
-                        if isFavorite { keys.remove(nutrient.rawValue) } else { keys.insert(nutrient.rawValue) }
-                        favorites = keys.sorted().joined(separator: ",")
-                    } label: {
-                        Image(systemName: isFavorite ? "star.fill" : "star")
-                            .frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget)
-                    }
-                    .buttonStyle(.borderless)
-                    .accessibilityLabel(isFavorite ? "Rimuovi \(nutrient.title) dai preferiti" : "Aggiungi \(nutrient.title) ai preferiti")
-                }
-            }
-            Text("Oggi: \(formatted(today.amount, unit: nutrient.unit))")
-            if let reference, let value = today.amount {
-                ProgressView(value: today.progress(toward: reference))
-                    .tint(NativeDesign.nutritionTitle)
-                    .accessibilityLabel("Progresso di oggi")
-                if value >= reference {
-                    Text(today.estimated ? "Raggiunto secondo la stima" : "Raggiunto")
-                        .font(.caption.weight(.semibold))
-                }
-            }
-            if let reference {
-                Text("Riferimento: \(formatted(reference, unit: nutrient.unit)) al giorno").font(.caption)
-            }
-            Text("Media 7 giorni: \(formatted(week.amount, unit: nutrient.unit))")
-                .font(.subheadline)
-            Text("\(week.daysWithValues) di 7 giorni con valori · \(week.daysWithEntries) registrati")
-                .font(.caption).foregroundStyle(.secondary)
-            if week.partial {
-                Text("Dati parziali").font(.caption).foregroundStyle(.secondary)
-            }
-            if week.estimated {
-                Text("Include valori stimati").font(.caption).foregroundStyle(.secondary)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(editMode.isEditing ? "Fine" : "Riordina") {
+                    withAnimation { editMode = editMode.isEditing ? .inactive : .active }
+                }.accessibilityIdentifier("micronutrient-reorder")
             }
         }
-        .padding(.vertical, NativeDesign.Space.xs)
-        .accessibilityIdentifier("micronutrient-" + nutrient.rawValue)
     }
 
-    private func formatted(_ amount: Decimal?, unit: String) -> String {
-        guard let amount else { return "Non disponibile" }
-        return amount.formatted(.number.precision(.fractionLength(0...3))) + " " + unit
+    private func row(_ nutrient: NativeTrackedNutrient, pinned: Bool, daily: [[NativeNutritionEntry]], weekly: [[NativeNutritionEntry]]) -> some View {
+        let day = NativeNutrientPeriod(nutrient, days: daily)
+        let week = NativeNutrientPeriod(nutrient, days: weekly)
+        let warning = week.lowIntakeWarning(for: nutrient)
+        return VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
+            HStack {
+                Text(nutrient.title).font(.subheadline.weight(.semibold))
+                Spacer()
+                Button {
+                    var current = NativeNutrientOrdering.keys(favorites)
+                    if pinned { current.removeAll { $0 == nutrient } }
+                    else { current.append(nutrient) }
+                    favorites = NativeNutrientOrdering.encode(current)
+                } label: {
+                    Image(systemName: pinned ? "star.fill" : "star")
+                        .frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget)
+                }
+                .buttonStyle(.borderless)
+                .disabled(editMode.isEditing)
+                .accessibilityLabel(pinned ? "Rimuovi \(nutrient.title) dai preferiti" : "Metti \(nutrient.title) in evidenza")
+                .accessibilityIdentifier("micronutrient-star-" + nutrient.rawValue)
+            }
+            NativeNutrientProgress(nutrient: nutrient, period: day, caption: "Giorno")
+            NativeNutrientProgress(nutrient: nutrient, period: week, caption: "Media sett.", warning: warning != nil)
+            if let warning {
+                Text("Apporto registrato basso · \(warning)").font(.caption2).foregroundStyle(NativeDesign.financialRed)
+            }
+            Text("\(week.daysWithValues)/7 giorni con dati" + (week.partial ? " · parziali" : "") + (week.estimated ? " · con stime" : ""))
+                .font(.caption2).foregroundStyle(.secondary)
+        }
+        .listRowInsets(EdgeInsets(top: 2, leading: NativeDesign.Space.medium, bottom: 6, trailing: NativeDesign.Space.small))
+        .accessibilityIdentifier("micronutrient-" + nutrient.rawValue)
     }
 }

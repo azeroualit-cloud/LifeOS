@@ -1,6 +1,28 @@
 import XCTest
 @testable import LifeOSProbe
 final class NativeNutritionEntryTests: XCTestCase {
+    func testNutrientWarningsRequireSevenCompleteDaysAndUseAverageRequirement() {
+        var row = NativeNutritionEntry(id: UUID(), revision: 1, date: .now, protein: 20, carbohydrate: 0, fat: 0, confirmed: true)
+        row.nutrientValues = ["vitaminC": .init(amount: 74, estimateSource: nil)]
+        XCTAssertEqual(NativeNutrientPeriod(.vitaminC, days: Array(repeating: [row], count: 7)).lowIntakeWarning(for: .vitaminC), "Produzione di collagene")
+        XCTAssertNil(NativeNutrientPeriod(.vitaminC, days: Array(repeating: [row], count: 6)).lowIntakeWarning(for: .vitaminC))
+        row.nutrientValues = ["vitaminC": .init(amount: 104, estimateSource: nil)]
+        XCTAssertNil(NativeNutrientPeriod(.vitaminC, days: Array(repeating: [row], count: 7)).lowIntakeWarning(for: .vitaminC))
+        XCTAssertEqual(NativeNutrientOrdering.keys("potassium,vitaminC,potassium"), [.potassium, .vitaminC])
+    }
+
+    func testFoodFrequencyUsesConfirmedRecentRowsAndKeepsExactSearchFirst() throws {
+        let foods = try ["Biscotti", "Gin Tonic"].map { try XCTUnwrap(NativeGenericFood.matches($0).first) }
+        let now = Date()
+        var gin = try XCTUnwrap(foods[1].portion(id: UUID(), date: now, grams: 1))
+        gin.confirmed = true
+        var old = try XCTUnwrap(foods[0].portion(id: UUID(), date: now.addingTimeInterval(-40 * 86400), grams: 100))
+        old.confirmed = true
+        let ranked = NativeGenericFood.ranked(foods, entries: [old, gin], now: now)
+        XCTAssertEqual(ranked.map(\.id), [foods[1].id, foods[0].id])
+        XCTAssertEqual(NativeGenericFood.matches("Biscotti", in: ranked).first?.id, foods[0].id)
+    }
+
     func testBundledFoodUsesPortionAndPreservesName() throws {
         let food = try XCTUnwrap(NativeGenericFood.matches("riso bianco cotto").first)
         let entry = try XCTUnwrap(food.portion(id: UUID(), date: Date(), grams: 150))

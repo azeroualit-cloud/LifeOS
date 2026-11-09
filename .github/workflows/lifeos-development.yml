@@ -8,7 +8,7 @@ on:
       mode:
         description: Preview, focused regression, or trial checks
         type: choice
-        options: [preview, focused, trial, nutrition-render, calendar-render]
+        options: [preview, focused, trial, nutrition-render, calendar-render, health-render]
         default: preview
       package_trial:
         description: Explicitly request an unsigned trial IPA in Actions artifacts (trial mode only)
@@ -43,7 +43,7 @@ jobs:
           variant: ${{ inputs.device || 'primary' }}
       - name: Select bounded checks
         env:
-          MODE: ${{ inputs.mode || (contains(github.event.head_commit.message, '[nutrition-render]') && 'nutrition-render') || (contains(github.event.head_commit.message, '[calendar-render]') && 'calendar-render') || 'preview' }}
+          MODE: ${{ inputs.mode || (contains(github.event.head_commit.message, '[nutrition-render]') && 'nutrition-render') || (contains(github.event.head_commit.message, '[calendar-render]') && 'calendar-render') || (contains(github.event.head_commit.message, '[health-render]') && 'health-render') || 'preview' }}
           AREA: ${{ inputs.area || 'auto' }}
           BASE: ${{ github.event.before }}
         run: |
@@ -61,10 +61,11 @@ jobs:
         working-directory: app
         env:
           CHECK_AREA: ${{ inputs.area || 'auto' }}
+          RECORD_REVIEW: ${{ inputs.mode == 'health-render' || contains(github.event.head_commit.message, '[health-render]') }}
         run: |
           set -euo pipefail
           xcrun simctl bootstatus "$MAIN_DEVICE" -b
-          if [ "$CHECK_AREA" = nutrition ]; then
+          if [ "$CHECK_AREA" = nutrition ] || [ "$RECORD_REVIEW" = true ]; then
             xcrun simctl io "$MAIN_DEVICE" recordVideo --codec=h264 build/nutrition-simulator.mp4 > build/nutrition-recording.log 2>&1 &
             VIDEO_PID=$!
             trap 'kill -INT "$VIDEO_PID" 2>/dev/null || true; wait "$VIDEO_PID" 2>/dev/null || true' EXIT

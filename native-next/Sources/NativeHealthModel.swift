@@ -37,6 +37,18 @@ struct HealthEstimate {
 enum NativeHealthMath {
     static let energyPerKG = 7700.0
     static let expenditurePerKG = 22.0
+    static let calibrationDays = 14
+
+    static func recentIntake(_ days: [HealthDay], now: Date = .now, calendar: Calendar = .current) -> Double? {
+        let today = calendar.startOfDay(for: now)
+        guard let start = calendar.date(byAdding: .day, value: -7, to: today) else { return nil }
+        return mean(days.filter { $0.date >= start && $0.date < today }.compactMap(\.calories))
+    }
+
+    static func mean(_ values: [Double]) -> Double? {
+        let valid = values.filter { $0.isFinite && $0 >= 0 }
+        return valid.isEmpty ? nil : valid.reduce(0, +) / Double(valid.count)
+    }
     static func trend(_ days: [HealthDay], calendar: Calendar = .current) -> [HealthPoint] {
         let weights = days.filter { ($0.weight ?? 0) > 0 && ($0.weight?.isFinite ?? false) }.sorted { $0.date < $1.date }
         return weights.map { day in
@@ -50,7 +62,7 @@ enum NativeHealthMath {
     static func estimate(_ days: [HealthDay], now: Date = Date(), calendar: Calendar = .current) -> HealthEstimate? {
         let today = calendar.startOfDay(for: now)
         guard let lastWeightDate = days.filter({ $0.date < today && ($0.weight ?? 0) > 0 && ($0.weight?.isFinite ?? false) }).map(\.date).max() else { return nil }
-        let cutoff = calendar.date(byAdding: .day, value: -30, to: lastWeightDate)!
+        let cutoff = calendar.date(byAdding: .day, value: -calibrationDays, to: today)!
         let history = days.filter { $0.date >= cutoff && $0.date <= lastWeightDate }.sorted { $0.date < $1.date }
         // Work with aligned daily records, not a lagged moving median.
         guard Set(history.map(\.date)).count == history.count else { return nil }
@@ -58,7 +70,7 @@ enum NativeHealthMath {
         guard weights.count >= 10, let first = weights.first, let last = weights.last,
               let age = calendar.dateComponents([.day], from: last.date, to: today).day, age <= 7 else { return nil }
         let span = calendar.dateComponents([.day], from: first.date, to: last.date).day ?? 0
-        guard span >= 28 else { return nil }
+        guard span >= 10 else { return nil }
         let food = history.filter { $0.date >= first.date && $0.date < last.date }
         let logged = food.compactMap(\.calories).filter { $0.isFinite && $0 > 0 }
         let missing = span - logged.count
@@ -83,7 +95,7 @@ enum NativeHealthMath {
         let adjusted = weights.enumerated().map { index, day in
             cumulative[offsets[index]] - energyPerKG * (day.weight! - first.weight!)
         }
-        let minimumPairDays = span >= 84 ? 56 : 21
+        let minimumPairDays = 7
         var slopes: [Double] = [], lowerSlopes: [Double] = [], upperSlopes: [Double] = []
         for j in 1..<weights.count {
             for i in 0..<j {
@@ -97,9 +109,7 @@ enum NativeHealthMath {
         guard slopes.count >= 10 else { return nil }
         let tdee = median(slopes)
         guard tdee.isFinite, (800...6000).contains(tdee) else { return nil }
-        let recentStart = cutoff
-        let recentIntake = history.filter { $0.date >= recentStart && $0.date < last.date }.compactMap(\.calories).filter { $0.isFinite && $0 > 0 }
-        let scenarioIntake = recentIntake.isEmpty ? calibrationIntake : recentIntake.reduce(0, +) / Double(recentIntake.count)
+        guard let scenarioIntake = recentIntake(days, now: now, calendar: calendar) else { return nil }
         var result = HealthEstimate(tdee: tdee, averageIntake: scenarioIntake,
             startWeight: trend(weights, calendar: calendar).last!.value, lastDate: last.date, days: span)
         result.firstDate = first.date; result.weighIns = weights.count
@@ -148,7 +158,7 @@ enum NativeHealthLaunchPolicy {
 }
 
 /// Presentation window only: calendar month before today and calendar month ahead.
-/// The historical TDEE calibration and its assumptions remain unchanged.
+/// The visual range is separate from the TDEE calibration window.
 struct NativeHealthDashboardData {
     let today: Date
     let start: Date

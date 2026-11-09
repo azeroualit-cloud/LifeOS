@@ -310,3 +310,11 @@ Fonte utente: «ok mi mostri quindi il render del giorno aggiornato?». Preparar
 ## IPA-DELIVERY-88 — rilascio autorizzato, 8 novembre 2026
 
 Fonte utente: «ok, manda in produzione l'ipa e dammi il link per monitorarlo». Autorizzata l’IPA 0.10.26 build 88 dal ramo di lavoro, con Calendario Giorno e Mese, Nutrizione e Salute. Il percorso di produzione richiede suite completa, quattro avvii Release e verifica dell’IPA. Consegnare il link Actions per monitoraggio.
+
+## HEALTH-WEEK-REVIEW-01 — ACTIVE, 9 novembre 2026
+
+Fonte utente: «fai tutto, dammi tutti i render delle modifiche prima di produrre qualsiasi ipa. Fai particolare attenzione a parti di condice che potrebbero fallire i test». Confermata la checklist completa. Griglia tre righe per due, medie della settimana selezionata, TDEE 14 giorni, simulazione 7 giorni, data alimento selezionata. Micronutrienti e Omega-3 in due sezioni ordinabili, preferiti condivisi, avvisi con soglie documentate. Catalogo Tutti e Personali e frequenza a 30 giorni. Bloom e animazioni come checklist. La griglia 3×2 sostituisce la 2×2 di HEALTH-GRID-02 nella sola disposizione. Render reali prima dell’IPA.
+
+## UX-PADDING-QA-01 — ACTIVE, 9 novembre 2026
+
+Fonte utente: «aggiungi una regola per verificare il padding una volta finito il design del componente». Controllare spazi interni ed esterni su schermate reali al termine del design, a testo standard e grande. Ridurre in Dashboard lo spazio sopra Calendario, Finanza e Nutrizione.

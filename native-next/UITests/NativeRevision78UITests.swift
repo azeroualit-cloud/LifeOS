@@ -145,13 +145,58 @@ final class NativeRevision78UITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Micronutrienti"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.staticTexts["Vitamina C"].exists)
         XCTAssertTrue(app.staticTexts["Zinco"].exists)
-        XCTAssertFalse(app.staticTexts["Ferro"].exists)
-        let all = app.buttons["Tutti i micronutrienti"]
-        if !all.isHittable { app.collectionViews.firstMatch.swipeUp() }
-        all.tap()
-        XCTAssertTrue(app.navigationBars["Tutti i micronutrienti"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.staticTexts["Vitamina C"].exists)
+        XCTAssertTrue(app.staticTexts["Micronutrienti"].firstMatch.exists)
+        XCTAssertFalse(app.buttons["Tutti i micronutrienti"].exists)
+        XCTAssertTrue(app.buttons["micronutrient-reorder"].exists)
         capture("Micronutrient catalogue detail", app)
+    }
+
+    func testRenderHealthWeekAndDashboardAndBloom() {
+        let app = launch(["--health-week-review"])
+        app.tabBars.buttons["Salute"].tap()
+        let week = app.buttons["health-week-previous"]
+        XCTAssertTrue(week.waitForExistence(timeout: 10))
+        week.tap()
+        XCTAssertTrue(app.buttons["health-week-next"].isEnabled)
+        capture("Review 01 Health weekly grid", app)
+
+        let scroll = app.scrollViews["health-detail-scroll"]
+        let micro = app.buttons["health-micronutrients"]
+        for _ in 0..<5 where !micro.isHittable { scroll.swipeUp(velocity: .slow) }
+        XCTAssertTrue(micro.isHittable)
+        capture("Review 02 Health pinned nutrients and diary", app)
+        micro.tap()
+        XCTAssertTrue(app.navigationBars["Micronutrienti"].waitForExistence(timeout: 10))
+        capture("Review 03 Micronutrients daily and weekly", app)
+        let edit = app.buttons["micronutrient-reorder"]
+        XCTAssertTrue(edit.isHittable)
+        edit.tap()
+        capture("Review 04 Micronutrient ordering", app)
+        edit.tap()
+        app.navigationBars.buttons.firstMatch.tap()
+
+        let add = app.buttons["health-add-nutrition"]
+        XCTAssertTrue(add.isHittable)
+        add.tap()
+        let date = app.buttons["quick-nutrition-date"]
+        XCTAssertTrue(date.waitForExistence(timeout: 10))
+        let form = app.scrollViews["quick-nutrition-scroll"]
+        for _ in 0..<4 where !date.isHittable { form.swipeUp(velocity: .slow) }
+        capture("Review 05 Backdated food entry", app)
+        app.buttons["quick-nutrition-close"].tap()
+
+        app.tabBars.buttons["Dashboard"].tap()
+        let dashboard = app.scrollViews["dashboard-scroll"]
+        XCTAssertTrue(dashboard.waitForExistence(timeout: 10))
+        capture("Review 06 Dashboard calendar and finance", app)
+        for _ in 0..<6 where !app.buttons["quick-nutrition-open"].isHittable { dashboard.swipeUp(velocity: .slow) }
+        XCTAssertTrue(app.buttons["quick-nutrition-open"].isHittable)
+        capture("Review 07 Dashboard pinned nutrition", app)
+        app.tabBars.buttons["Bloom"].tap()
+        XCTAssertTrue(app.buttons["bloom-section-library"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["bloom-section-map"].exists)
+        XCTAssertFalse(app.buttons["bloom-section-rediscovery"].exists)
+        capture("Review 08 Bloom sections", app)
     }
 
     func testSafeAreaLastContentStandard() { checkSafeAreaLastContent(large: false) }
@@ -248,7 +293,7 @@ final class NativeRevision78UITests: XCTestCase {
         app.tabBars.buttons["Bloom"].tap()
         let section = app.buttons["bloom-section-library"]
         XCTAssertTrue(section.waitForExistence(timeout: 10))
-        for (id, label) in [("library", "Libreria"), ("map", "Mappa"), ("rediscovery", "Riscopri")] {
+        for (id, label) in [("library", "Libreria"), ("map", "Mappa")] {
             let matches = app.descendants(matching: .any).matching(identifier: "bloom-section-" + id)
             XCTAssertEqual(matches.count, 1, "Each section must expose exactly one identified accessibility element")
             XCTAssertEqual(matches.element(boundBy: 0).label, label)

@@ -16,7 +16,10 @@ struct NativeHealthFoodEntry: Identifiable {
     @Published private(set) var message: String?
     @Published private(set) var localDays: [HealthDay] = []
     /// HealthKit only: local pending entries remain separate and are never added here.
-    @Published private(set) var nutrientTotals: [HKQuantityTypeIdentifier: Double] = [:]
+    @Published private(set) var nutrientsByDay: [Date: [HKQuantityTypeIdentifier: Double]] = [:]
+    var nutrientTotals: [HKQuantityTypeIdentifier: Double] { nutrients(on: .now) }
+    func nutrients(on date: Date) -> [HKQuantityTypeIdentifier: Double] { nutrientsByDay[calendar.startOfDay(for: date)] ?? [:] }
+    func calories(on date: Date) -> Double? { days.first { calendar.isDate($0.date, inSameDayAs: date) }?.calories }
     @Published private(set) var nutrientMessage: String?
     @Published private(set) var nutrientFailures: Set<HKQuantityTypeIdentifier> = []
     private static let nutrientTypes: [HKQuantityTypeIdentifier] = [.dietaryProtein, .dietaryCarbohydrates, .dietaryFatTotal, .dietaryFiber]
@@ -36,9 +39,11 @@ struct NativeHealthFoodEntry: Identifiable {
         days.first(where: { calendar.isDateInToday($0.date) })?.calories
     }
 
-    var todayFoodEntries: [NativeHealthFoodEntry] {
+    var todayFoodEntries: [NativeHealthFoodEntry] { foodEntries(on: .now) }
+
+    func foodEntries(on date: Date) -> [NativeHealthFoodEntry] {
         food.reversed().compactMap { sample in
-            guard calendar.isDateInToday(sample.startDate) else { return nil }
+            guard calendar.isDate(sample.startDate, inSameDayAs: date) else { return nil }
             let calories = sample.quantity.doubleValue(for: .kilocalorie())
             guard calories.isFinite, calories >= 0 else { return nil }
             let sync = sample.metadata?[HKMetadataKeySyncIdentifier] as? String
@@ -58,6 +63,11 @@ struct NativeHealthFoodEntry: Identifiable {
         if demo {
             #if DEBUG
             if !ProcessInfo.processInfo.arguments.contains("--empty-home") { days = NativeHealthMath.demo() }
+            if ProcessInfo.processInfo.arguments.contains("--health-week-review") {
+                nutrientsByDay = Dictionary(uniqueKeysWithValues: days.enumerated().map { index, day in
+                    (day.date, [.dietaryProtein: Double(115 + index % 7), .dietaryCarbohydrates: 220, .dietaryFatTotal: 65, .dietaryFiber: 25])
+                })
+            }
             #endif
             return
         }
@@ -84,7 +94,7 @@ struct NativeHealthFoodEntry: Identifiable {
             loading = false
             await refresh()
         } catch {
-            days = []; food = []; weights = []; nutrientTotals = [:]; nutrientFailures = []
+            days = []; food = []; weights = []; nutrientsByDay = [:]; nutrientFailures = []
             rebuild()
             loading = false; message = "Accesso a Salute non completato. Verifica i permessi in Impostazioni > Salute."
         }
@@ -103,20 +113,22 @@ struct NativeHealthFoodEntry: Identifiable {
             rebuild()
             // Each read has an independent outcome; one failure must not hide other nutrients.
             // Every readable HealthKit source contributes; the local journal is not added.
-            var totals: [HKQuantityTypeIdentifier: Double] = [:]
+            var totals: [Date: [HKQuantityTypeIdentifier: Double]] = [:]
             var failures: Set<HKQuantityTypeIdentifier> = []
             for type in Self.nutrientTypes {
                 do {
-                    let values = try await samples(type, start: today, end: end)
-                    if let value = Self.nutrientTotal(values) { totals[type] = value }
+                    let values = try await samples(type, start: start, end: end)
+                    for (day, rows) in Dictionary(grouping: values, by: { calendar.startOfDay(for: $0.startDate) }) {
+                        if let value = Self.nutrientTotal(rows) { totals[day, default: [:]][type] = value }
+                    }
                 } catch { failures.insert(type) }
             }
-            nutrientTotals = totals; nutrientFailures = failures
+            nutrientsByDay = totals; nutrientFailures = failures
             nutrientMessage = failures.isEmpty ? nil : "Alcuni nutrienti non sono stati letti. Aggiorna per riprovare."
 
         } catch {
             // Clear old samples rather than continuing to expose stale or revoked data.
-            days = []; food = []; weights = []; nutrientTotals = [:]; nutrientFailures = []
+            days = []; food = []; weights = []; nutrientsByDay = [:]; nutrientFailures = []
             rebuild()
             message = "Lettura Salute non riuscita. Sblocca iPhone e riprova; verifica anche la firma HealthKit dell’app."
         }

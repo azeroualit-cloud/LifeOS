@@ -51,7 +51,7 @@ import UIKit
         #endif
     }
 }
-enum NativeTab: Hashable { case dashboard, tasks, health, bloom }
+enum NativeTab: Int, Hashable { case dashboard, tasks, health, bloom }
 enum NativeDashboardDestination: Hashable { case finance, calendar }
 enum NativeSheet: Identifiable {
     case weight(NativeWeightTransfer?)
@@ -215,13 +215,13 @@ struct NativeRoot: View {
         case .dashboard: router.tab = .dashboard
         }
     }
-    // Native destinations only: no custom capsule, animation or action disguised as a tab.
+    // Keep the native tab bar and the independent navigation stacks.
     private var nativeTabs: some View {
         TabView(selection: $router.tab) {
-            dashboard.tabItem { Label("Dashboard", systemImage: "square.grid.2x2") }.tag(NativeTab.dashboard)
-            tasks.tabItem { Label("Attività", systemImage: "checklist") }.tag(NativeTab.tasks)
-            NavigationStack { NativeHealthDetail(health: health, demo: NativeHealthLaunchPolicy.simulated) }.tabItem { Label("Salute", systemImage: "heart") }.tag(NativeTab.health)
-            NavigationStack { NativeBloomScreen() }.tabItem { Label("Bloom", systemImage: "books.vertical") }.tag(NativeTab.bloom)
+            dashboard.modifier(NativeTabArrival(tab: .dashboard, selection: router.tab)).tabItem { Label("Dashboard", systemImage: "square.grid.2x2") }.tag(NativeTab.dashboard)
+            tasks.modifier(NativeTabArrival(tab: .tasks, selection: router.tab)).tabItem { Label("Attività", systemImage: "checklist") }.tag(NativeTab.tasks)
+            NavigationStack { NativeHealthDetail(health: health, demo: NativeHealthLaunchPolicy.simulated) }.modifier(NativeTabArrival(tab: .health, selection: router.tab)).tabItem { Label("Salute", systemImage: "heart") }.tag(NativeTab.health)
+            NavigationStack { NativeBloomScreen() }.modifier(NativeTabArrival(tab: .bloom, selection: router.tab)).tabItem { Label("Bloom", systemImage: "books.vertical") }.tag(NativeTab.bloom)
         }
     }
     private var dashboard: some View {
@@ -272,6 +272,40 @@ struct NativeRoot: View {
         }
     }
 }
+private struct NativeTabArrival: ViewModifier {
+    @Environment(\.nativeReduceMotion) private var reduceMotion
+    let tab: NativeTab
+    let selection: NativeTab
+    @State private var offset: CGFloat = 0
+    @State private var opacity = 1.0
+
+    func body(content: Content) -> some View {
+        content
+            .offset(x: offset)
+            .opacity(opacity)
+            .onChange(of: selection) { previous, current in
+                guard current == tab else {
+                    offset = 0
+                    opacity = 1
+                    return
+                }
+                var instant = Transaction()
+                instant.disablesAnimations = true
+                withTransaction(instant) {
+                    offset = reduceMotion ? 0 : (current.rawValue > previous.rawValue ? 28 : -28)
+                    opacity = reduceMotion ? 0.75 : 1
+                }
+                Task { @MainActor in
+                    await Task.yield()
+                    withAnimation(.easeOut(duration: NativeDesign.Motion.selectionDuration)) {
+                        offset = 0
+                        opacity = 1
+                    }
+                }
+            }
+    }
+}
+
 struct MoneyText: View {
     let amount: Double
     var large = false

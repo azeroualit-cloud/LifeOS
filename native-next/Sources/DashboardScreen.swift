@@ -41,7 +41,7 @@ struct DashboardScreen: View {
     private func rollingCalendar(_ today: String) -> some View {
         let days = NativeHomeSummary.rollingDays(today)
         let marked = Set(store.events.map { $0.text("day") } + store.tasks.map { $0.text("scheduled_date") })
-        return NativeCard(density: .compact) {
+        return NativeCard(density: .compact, topInset: NativeDesign.Space.xs) {
             Button { openCalendar(today) } label: {
                 HStack {
                     Label("Calendario", systemImage: "calendar")
@@ -173,7 +173,7 @@ struct DashboardScreen: View {
         }
     }
     private var financeOverview: some View {
-        NativeCard(density: .compact) {
+        NativeCard(density: .compact, topInset: NativeDesign.Space.xs) {
             NavigationLink(value: NativeDashboardDestination.finance) {
                 HStack {
                     Label("Finanza", systemImage: "chart.bar").font(.headline).foregroundStyle(NativeDesign.financeTitle)

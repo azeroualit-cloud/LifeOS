@@ -79,6 +79,13 @@ final class NativeHealthTests: XCTestCase {
         XCTAssertEqual(chart.plottedCalories(2500), (chart.weightDomain.lowerBound + chart.weightDomain.upperBound) / 2)
         XCTAssertTrue(chart.weightDomain.contains(83))
     }
+    func testSelectedWeekStartsMondayAndFutureWeekCannotBeSelected() throws {
+        let dates = NativeHealthWeek.days(containing: now)
+        XCTAssertEqual(dates.count, 7)
+        XCTAssertEqual(NativeHealthWeek.calendar.component(.weekday, from: try XCTUnwrap(dates.first)), 2)
+        XCTAssertNil(NativeHealthWeek.moving(now, weeks: 1, now: now))
+        XCTAssertNotNil(NativeHealthWeek.moving(now, weeks: -1, now: now))
+    }
     func testMaintenanceRecoversRecordedIntake() throws {
         let result = try XCTUnwrap(NativeHealthMath.estimate(history(), now: now, calendar: calendar))
         XCTAssertEqual(result.tdee, 2200, accuracy: 0.01)
@@ -90,7 +97,7 @@ final class NativeHealthTests: XCTestCase {
         XCTAssertLessThan(result.tdee, 2550)
     }
     func testSmallCalorieGapIsDisclosedAndNeverBecomesZero() throws {
-        var rows = history(); rows[15].calories = nil
+        var rows = history(); rows[28].calories = nil
         let result = try XCTUnwrap(NativeHealthMath.estimate(rows, now: now, calendar: calendar))
         XCTAssertEqual(result.imputedDays, 1)
         XCTAssertEqual(result.loggedDays, result.days - 1)
@@ -99,26 +106,26 @@ final class NativeHealthTests: XCTestCase {
     }
     func testPoorCalorieCoverageDoesNotProduceTDEE() {
         var rows = history()
-        for i in 10...15 { rows[i].calories = nil }
+        for i in 26...30 { rows[i].calories = nil }
         XCTAssertNil(NativeHealthMath.estimate(rows, now: now, calendar: calendar))
     }
-    func testCalibrationUsesThirtyDaysBeforeLatestCompletedWeight() throws {
+    func testCalibrationUsesFourteenCompletedDaysAndScenarioUsesSeven() throws {
         var rows: [HealthDay] = []
         var weight = 76.0
         for offset in -120...0 {
-            let calories = offset < -55 ? 2400.0 : 3300.0
+            let calories = offset < -14 ? 2400.0 : offset < -7 ? 2900.0 : 3300.0
             rows.append(HealthDay(date: calendar.date(byAdding: .day, value: offset, to: now)!, weight: weight, calories: calories))
             weight += (calories - 2800) / 7700
         }
         let result = try XCTUnwrap(NativeHealthMath.estimate(rows, now: now, calendar: calendar))
-        XCTAssertEqual(result.days, 30)
-        XCTAssertEqual(result.weighIns, 31)
+        XCTAssertEqual(result.days, 13)
+        XCTAssertEqual(result.weighIns, 14)
         XCTAssertEqual(result.tdee, 2800, accuracy: 0.01)
         XCTAssertEqual(result.averageIntake, 3300, accuracy: 0.01)
-        XCTAssertEqual(result.calibrationIntake, result.averageIntake)
+        XCTAssertLessThan(result.calibrationIntake, result.averageIntake)
     }
     func testLongIntervalFitResistsSingleWeightSpikeWithoutLabellingItWater() throws {
-        var rows = history(); rows[22].weight = 86
+        var rows = history(); rows[28].weight = 86
         let result = try XCTUnwrap(NativeHealthMath.estimate(rows, now: now, calendar: calendar))
         XCTAssertEqual(result.tdee, 2200, accuracy: 0.01)
     }

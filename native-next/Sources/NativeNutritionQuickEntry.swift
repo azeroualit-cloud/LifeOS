@@ -7,9 +7,10 @@ struct NativeNutritionQuickEntry: View {
     @State private var showing = false
     @State private var addingWeight = false
     @State private var notice: String?
+    @ObservedObject private var nutrition = NativeNutritionUIFixture.current
 
     var body: some View {
-        NativeCard(density: .compact) {
+        NativeCard(density: .compact, topInset: NativeDesign.Space.xs) {
             Button { router.tab = .health } label: {
                 HStack {
                     Label { Text("Nutrizione") } icon: { NativeSymbol(symbol: NativeHealthMetric.calories.symbol) }
@@ -38,6 +39,7 @@ struct NativeNutritionQuickEntry: View {
                     .accessibilityIdentifier("quick-nutrition-open")
             }.frame(maxWidth: .infinity, alignment: .leading)
             NativeNutrientValues(health: health, includesFibre: false)
+            NativePinnedNutrients(entries: nutrition.entries)
             if let notice { Text(notice).font(.caption).foregroundStyle(.secondary).accessibilityIdentifier("quick-nutrition-notice") }
         }.sheet(isPresented: $showing) {
             NavigationStack { NativeNutritionQuickSheet { notice = "Registrazione salvata in Apple Salute." } }
@@ -60,8 +62,8 @@ struct NativeNutritionQuickSheet: View {
     @State private var carbohydrate = ""
     @State private var fat = ""
     @State private var fibre = ""
-    @State private var date = Date()
-    @State private var dateSelection = Date()
+    @State private var date: Date
+    @State private var dateSelection: Date
     @State private var showingHistory = false
     @State private var showingDate = false
     @State private var showingCatalog = false
@@ -69,6 +71,15 @@ struct NativeNutritionQuickSheet: View {
     @State private var portionGrams = "100"
     @State private var weighedWithBone = false
     @FocusState private var focus: Field?
+    init(initialDate: Date = .now, onSaved: @escaping () -> Void = {}) {
+        let calendar = Calendar.current
+        let now = Date()
+        let date = calendar.isDate(initialDate, inSameDayAs: now) ? now : initialDate
+        self._date = State(initialValue: date)
+        self._dateSelection = State(initialValue: date)
+        self.onSaved = onSaved
+    }
+
     private enum Field: Hashable { case protein, carbohydrate, fat, fibre, portion }
     private var pending: NativeNutritionEntry? { nutrition.entries.first { $0.id == id && !$0.confirmed } }
     private var blocked: Bool { nutrition.entries.contains { ($0.id != id && !$0.confirmed) || $0.deletionPending == true } }

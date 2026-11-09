@@ -31,7 +31,16 @@ struct NativeSurface: ViewModifier {
         }
     }
 }
-typealias NativePressStyle = PlainButtonStyle
+struct NativePressStyle: ButtonStyle {
+    @Environment(\.nativeReduceMotion) private var reduceMotion
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed && !reduceMotion ? NativeDesign.Motion.pressedScale : 1)
+            .opacity(configuration.isPressed ? NativeDesign.Motion.pressedOpacity : 1)
+            .animation(reduceMotion ? nil : .easeOut(duration: NativeDesign.Motion.selectionDuration), value: configuration.isPressed)
+    }
+}
 
 enum NativeCardDensity: Equatable {
     case standard, compact
@@ -42,12 +51,15 @@ struct NativeCard<Content: View>: View {
     let content: Content
     var material: Bool
     var density: NativeCardDensity
-    init(material: Bool = false, density: NativeCardDensity = .standard, @ViewBuilder content: () -> Content) {
-        self.material = material; self.density = density; self.content = content()
+    var topInset: CGFloat?
+    init(material: Bool = false, density: NativeCardDensity = .standard, topInset: CGFloat? = nil, @ViewBuilder content: () -> Content) {
+        self.material = material; self.density = density; self.topInset = topInset; self.content = content()
     }
     var body: some View {
         VStack(alignment: .leading, spacing: density.gap) { content }
-            .frame(maxWidth: .infinity, alignment: .leading).padding(density.inset)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding([.horizontal, .bottom], density.inset)
+            .padding(.top, topInset ?? density.inset)
             .modifier(NativeSurface(material: material))
     }
 }
@@ -99,6 +111,7 @@ struct NativeGlass: ViewModifier {
     }
 }
 struct NativeGlassButtonStyle: ButtonStyle {
+    @Environment(\.nativeReduceMotion) private var reduceMotion
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .foregroundStyle(Color.primary)
@@ -106,7 +119,9 @@ struct NativeGlassButtonStyle: ButtonStyle {
             .frame(minHeight: NativeDesign.Layout.touchTarget)
             .contentShape(Capsule())
             .modifier(NativeGlass())
+            .scaleEffect(configuration.isPressed && !reduceMotion ? NativeDesign.Motion.pressedScale : 1)
             .opacity(configuration.isPressed ? NativeDesign.Motion.pressedOpacity : 1)
+            .animation(reduceMotion ? nil : .easeOut(duration: NativeDesign.Motion.selectionDuration), value: configuration.isPressed)
     }
 }
 struct NativeConnectionBadge: View {

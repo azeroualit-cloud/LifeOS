@@ -79,6 +79,7 @@ struct NativeGenericFood: Codable, Identifiable {
             entry.cocktailServings = grams
             entry.alcoholGrams = cocktail.alcoholGrams * grams
             entry.foodName = name
+            entry.foodID = self.id
             return entry
         }
         let edibleGrams: Decimal
@@ -91,6 +92,7 @@ struct NativeGenericFood: Codable, Identifiable {
         guard var entry = NativeNutritionEntry.portion(id: id, date: date, protein: protein,
             carbohydrate: carbohydrate, fat: fat, fibre: fibre, calories: calories, grams: edibleGrams) else { return nil }
         entry.foodName = name
+        entry.foodID = self.id
         entry.boneInWeightGrams = weighedWithBone ? grams : nil
         entry.nutrientValues = nutrientValues?.mapValues {
             NativeNutrientAmount(amount: $0.amount * edibleGrams / 100, estimateSource: $0.estimateSource)
@@ -104,22 +106,39 @@ struct NativeGenericFood: Codable, Identifiable {
         let words = searchWords(query)
         guard !words.isEmpty else { return Array(foods.prefix(24)) }
 
-        return foods.compactMap { food -> (food: Self, rank: Int)? in
+        return foods.enumerated().compactMap { index, food -> (food: Self, rank: Int, index: Int)? in
             let name = searchWords(food.name)
             let aliases = (food.aliases ?? []).map(searchWords)
-            if words == name { return (food, 0) }
-            if aliases.contains(words) { return (food, 1) }
+            if words == name { return (food, 0, index) }
+            if aliases.contains(words) { return (food, 1, index) }
             let fields = name + searchWords(food.detail ?? "") + aliases.flatMap { $0 } + (food.cocktail == nil ? [] : ["cocktail"])
             guard words.allSatisfy({ word in fields.contains { $0.hasPrefix(word) } }) else { return nil }
             let rank = words.allSatisfy { word in name.contains { $0.hasPrefix(word) } } ? 2 : 3
-            return (food, rank)
-        }.sorted { $0.rank < $1.rank }.map { $0.food }
+            return (food, rank, index)
+        }.sorted { ($0.rank, $0.index) < ($1.rank, $1.index) }.map { $0.food }
     }
 
     private static func searchWords(_ text: String) -> [String] {
         text.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "it"))
             .split { !$0.isLetter && !$0.isNumber }
             .map(String.init)
+    }
+
+    static func ranked(_ foods: [Self], entries: [NativeNutritionEntry], now: Date = .now, calendar: Calendar = .current) -> [Self] {
+        let today = calendar.startOfDay(for: now)
+        guard let start = calendar.date(byAdding: .day, value: -29, to: today),
+              let end = calendar.date(byAdding: .day, value: 1, to: today) else { return foods }
+        let byName = Dictionary(grouping: foods, by: { $0.name })
+        var counts: [String: Int] = [:]
+        for entry in entries where entry.confirmed && entry.deletionPending != true && entry.date >= start && entry.date < end {
+            let names = entry.foodName.flatMap { byName[$0] }
+            let legacyID = names?.count == 1 ? names?.first?.id : nil
+            if let key = entry.foodID ?? legacyID { counts[key, default: 0] += 1 }
+        }
+        return foods.enumerated().sorted {
+            let a = counts[$0.element.id, default: 0], b = counts[$1.element.id, default: 0]
+            return a == b ? $0.offset < $1.offset : a > b
+        }.map(\.element)
     }
 
     static let foods = loadCatalog("generic-foods")
@@ -138,12 +157,13 @@ struct NativeFoodPicker: View {
     @Environment(\.dismiss) private var dismiss
     @State private var query = ""
     @State private var scope: Scope = .all
+    @ObservedObject private var nutrition = NativeNutritionUIFixture.current
     @State private var creating = false
     @State private var storageError = false
     @AppStorage("lifeos-personal-foods-v1") private var personalData = Data()
 
     private enum Scope: String, CaseIterable, Identifiable {
-        case all = "Tutti", cocktails = "Cocktail", personal = "Personali"
+        case all = "Tutti", personal = "Personali"
         var id: Self { self }
     }
 
@@ -153,8 +173,7 @@ struct NativeFoodPicker: View {
 
     private var visibleFoods: [NativeGenericFood] {
         switch scope {
-        case .all: (personalFoods ?? []) + NativeGenericFood.catalog
-        case .cocktails: NativeGenericFood.cocktails
+        case .all: NativeGenericFood.ranked(NativeGenericFood.catalog + (personalFoods ?? []), entries: nutrition.entries)
         case .personal: personalFoods ?? []
         }
     }
@@ -163,7 +182,7 @@ struct NativeFoodPicker: View {
     @FocusState private var searchFocused: Bool
 
     var body: some View {
-        let matches = query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && scope != .all
+        let matches = query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             ? visibleFoods : NativeGenericFood.matches(query, in: visibleFoods)
 
         VStack(spacing: NativeDesign.Space.none) {
@@ -188,17 +207,15 @@ struct NativeFoodPicker: View {
             .padding(.vertical, NativeDesign.Space.small)
 
             List {
-                if scope != .cocktails {
-                    Button {
-                        searchFocused = false
-                        creating = true
-                    } label: {
-                        Label("Crea alimento generico", systemImage: "plus.circle")
-                            .frame(minHeight: NativeDesign.Layout.touchTarget)
-                    }
-                    .accessibilityIdentifier("generic-food-create")
-                    .listRowBackground(NativeDesign.nutritionInput)
+                Button {
+                    searchFocused = false
+                    creating = true
+                } label: {
+                    Label("Crea alimento generico", systemImage: "plus.circle")
+                        .frame(minHeight: NativeDesign.Layout.touchTarget)
                 }
+                .accessibilityIdentifier("generic-food-create")
+                .listRowBackground(NativeDesign.nutritionInput)
                 Section {
                     ForEach(matches) { food in
                         Button {
@@ -237,10 +254,8 @@ struct NativeFoodPicker: View {
                             .listRowBackground(NativeDesign.nutritionInput)
                     }
                 } footer: {
-                    if scope == .cocktails {
-                        Text("Ricette di riferimento · quantità e gradazioni stimate")
-                    } else if scope == .all {
-                        Text("Alimenti generici · Anses Ciqual 2025")
+                    if scope == .all {
+                        Text("Alimenti generici · Anses Ciqual 2025 · Cocktail con valori stimati")
                     }
                 }
             }

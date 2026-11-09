@@ -1,32 +1,57 @@
 import SwiftUI
 import HealthKit
 
+enum NativeHealthWeek {
+    static var calendar: Calendar {
+        var calendar = Calendar.current
+        calendar.firstWeekday = 2
+        return calendar
+    }
+
+    static func days(containing date: Date) -> [Date] {
+        let calendar = calendar
+        guard let start = calendar.dateInterval(of: .weekOfYear, for: date)?.start else { return [] }
+        return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: start) }
+    }
+
+    static func moving(_ date: Date, weeks: Int, now: Date = .now) -> Date? {
+        let calendar = calendar
+        let today = calendar.startOfDay(for: now)
+        guard let next = calendar.date(byAdding: .day, value: weeks * 7, to: date),
+              let monday = days(containing: next).first, monday <= today else { return nil }
+        return min(next, today)
+    }
+}
+
 enum NativeHealthMetric: String, CaseIterable, Identifiable {
-    case tdee, simulation, weight, calories
+    case tdee, simulation, weight, calories, weeklyCalories, weeklyProtein
     var id: String { rawValue }
     var title: String {
-        switch self { case .tdee: return "TDEE"; case .weight: return "Peso"; case .calories: return "Calorie"; case .simulation: return "Peso previsto" }
+        switch self { case .tdee: return "TDEE"; case .weight: return "Peso"; case .calories: return "Calorie"; case .simulation: return "Peso previsto"; case .weeklyCalories: return "Media calorie"; case .weeklyProtein: return "Media proteine" }
     }
     var symbol: String {
         switch self {
         case .tdee: return "flame.fill"
         case .weight: return "figure"
         case .calories: return Self.nutritionSymbol
-        case .simulation: return "chart.xyaxis.line"
+        case .simulation, .weeklyCalories, .weeklyProtein: return "chart.xyaxis.line"
         }
     }
     private static let nutritionSymbol = "lifeos.nutrition.apple"
     var color: Color {
-        switch self { case .tdee: return .orange; case .weight: return NativeDesign.healthWeight; case .calories: return .green; case .simulation: return .blue }
+        switch self { case .tdee: return .orange; case .weight: return NativeDesign.healthWeight; case .calories: return .green; case .simulation: return .blue; case .weeklyCalories: return .green; case .weeklyProtein: return NativeDesign.nutritionTitle }
     }
     var unit: String {
-        switch self { case .weight, .simulation: return "kg"; case .tdee: return "kcal/giorno"; case .calories: return "kcal" }
+        switch self { case .weight, .simulation: return "kg"; case .tdee: return "kcal/giorno"; case .calories: return "kcal"; case .weeklyCalories: return "kcal/giorno"; case .weeklyProtein: return "g/giorno" }
     }
 }
 
 struct NativeHealthDetail: View {
     @Environment(\.scenePhase) private var scenePhase
     @ObservedObject var health: NativeHealthStore
+    @EnvironmentObject private var store: NativeStore
+    @Environment(\.nativeReduceMotion) private var reduceMotion
+    @State private var selectedDate = Calendar.current.startOfDay(for: .now)
     let demo: Bool
     @State private var addingWeight = false
     @State private var showingNutrition = false
@@ -36,6 +61,7 @@ struct NativeHealthDetail: View {
     var body: some View {
         ScrollView {
             VStack(spacing: NativeDesign.Space.medium) {
+                weekPicker
                 if demo { Text("Dati illustrativi").font(.caption).foregroundStyle(.secondary) }
                 if typeSize.isAccessibilitySize {
                     VStack(spacing: NativeDesign.Space.medium) {
@@ -45,6 +71,7 @@ struct NativeHealthDetail: View {
                     VStack(spacing: NativeDesign.Space.medium) {
                         HStack(alignment: .top, spacing: NativeDesign.Space.medium) { metricLink(.tdee); metricLink(.simulation) }
                         HStack(alignment: .top, spacing: NativeDesign.Space.medium) { metricLink(.weight); metricLink(.calories) }
+                        HStack(alignment: .top, spacing: NativeDesign.Space.medium) { metricLink(.weeklyCalories); metricLink(.weeklyProtein) }
                     }
                 }
                 nutrients
@@ -59,6 +86,7 @@ struct NativeHealthDetail: View {
             }.padding(.horizontal, NativeDesign.Layout.listInset).padding(.vertical, NativeDesign.Space.large)
         }
             .accessibilityIdentifier("health-detail-scroll")
+            .task { await NativeNutritionUIFixture.prepareReview() }
             .refreshable { await health.refresh() }
             .safeAreaInset(edge: .bottom, spacing: NativeDesign.Space.none) {
                 nutritionActionBar
@@ -67,33 +95,87 @@ struct NativeHealthDetail: View {
             .navigationTitle("Salute")
             .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $addingWeight) { NativeAddWeightSheet(health: health) }
-            .sheet(isPresented: $showingNutrition) { NavigationStack { NativeNutritionQuickSheet() }.environmentObject(health) }
+            .sheet(isPresented: $showingNutrition) { NavigationStack { NativeNutritionQuickSheet(initialDate: selectedDate) }.environmentObject(health) }
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active { Task { await health.refresh() } }
             }
 
     }
-    private func metricLink(_ metric: NativeHealthMetric) -> some View {
-        NavigationLink {
-            NativeHealthMetricDetail(metric: metric, health: health, demo: demo)
-        } label: {
-            NativeHealthSummaryRow(metric: metric, value: value(metric), contextLabel: context(metric))
-        }.buttonStyle(NativePressStyle()).accessibilityIdentifier("health-summary-" + metric.rawValue)
-            .frame(maxWidth: .infinity)
+    @ViewBuilder private func metricLink(_ metric: NativeHealthMetric) -> some View {
+        let row = NativeHealthSummaryRow(metric: metric, value: value(metric), contextLabel: context(metric))
+        if metric == .weeklyCalories || metric == .weeklyProtein {
+            row.accessibilityIdentifier("health-summary-" + metric.rawValue)
+        } else {
+            NavigationLink {
+                NativeHealthMetricDetail(metric: metric, health: health, demo: demo)
+            } label: { row }
+                .buttonStyle(NativePressStyle()).accessibilityIdentifier("health-summary-" + metric.rawValue)
+                .frame(maxWidth: .infinity)
+        }
     }
-    private var nutrients: some View {
-        let today = NativeNutrientPeriod.recordedDays(nutrition.entries, count: 1)
-        return VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-            Text("Nutrienti").font(.headline).foregroundStyle(NativeDesign.nutritionTitle)
-            NativeNutrientValues(health: health, includesFibre: true)
-            Divider().padding(.vertical, NativeDesign.Space.xs)
-            ForEach(NativeTrackedNutrient.priorities) { nutrient in
-                if let target = nutrient.dailyReference {
-                    dailyNutrientProgress(nutrient, target: target, period: NativeNutrientPeriod(nutrient, days: today))
+
+    private var weekPicker: some View {
+        let calendar = NativeHealthWeek.calendar
+        let today = calendar.startOfDay(for: .now)
+        let days = NativeHealthWeek.days(containing: selectedDate)
+        return NativeCard(density: .compact) {
+            HStack {
+                NativeIconButton(symbol: "chevron.left", label: "Settimana precedente") { moveWeek(-1) }
+                    .accessibilityIdentifier("health-week-previous")
+                Spacer()
+                Text(days.first.map { $0.formatted(.dateTime.day().month(.abbreviated)) } ?? "")
+                    + Text(" – ")
+                    + Text(days.last.map { $0.formatted(.dateTime.day().month(.abbreviated)) } ?? "")
+                Spacer()
+                NativeIconButton(symbol: "chevron.right", label: "Settimana successiva") { moveWeek(1) }
+                    .accessibilityIdentifier("health-week-next")
+                    .disabled(days.contains(today))
+            }.font(.subheadline.weight(.semibold))
+            HStack(spacing: NativeDesign.Space.xxs) {
+                ForEach(days, id: \.self) { day in
+                    let current = day == today
+                    let selection = day == selectedDate
+                    let accent = store.shift(CivilDate.day(day))?.color ?? NativeDesign.accent
+                    Button { selectedDate = day } label: {
+                        VStack(spacing: NativeDesign.Space.xxs) {
+                            Text(day.formatted(.dateTime.weekday(.narrow))).font(.caption2)
+                            Text(day.formatted(.dateTime.day())).font(.subheadline.weight(.semibold)).monospacedDigit()
+                                .foregroundStyle(current ? (store.shift(CivilDate.day(day)) == nil ? NativeDesign.onAccent : Color.black) : .primary)
+                                .frame(width: NativeDesign.Layout.calendarDayNumber, height: NativeDesign.Layout.calendarDayNumber)
+                                .background(current ? accent : .clear, in: Circle())
+                                .overlay(Circle().strokeBorder(selection && !current ? NativeDesign.accent : .clear))
+                        }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget)
+                            .contentShape(Rectangle())
+                    }.buttonStyle(NativePressStyle())
+                        .disabled(day > today)
+                        .opacity(day > today ? 0.45 : 1)
+                        .accessibilityLabel(day.formatted(date: .complete, time: .omitted))
+                        .accessibilityIdentifier("health-date-" + CivilDate.day(day))
+                        .accessibilityAddTraits(selection ? .isSelected : [])
                 }
             }
+            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+            .simultaneousGesture(DragGesture(minimumDistance: 30).onEnded { value in
+                let movement = value.translation
+                guard abs(movement.width) > abs(movement.height) * 1.3 else { return }
+                moveWeek(movement.width < 0 ? 1 : -1)
+            })
+        }.accessibilityIdentifier("health-week-picker")
+    }
+
+    private func moveWeek(_ offset: Int) {
+        guard let next = NativeHealthWeek.moving(selectedDate, weeks: offset) else { return }
+        withAnimation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.selectionDuration)) { selectedDate = next }
+    }
+
+    private var nutrients: some View {
+        VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+            Text("Nutrienti").font(.headline).foregroundStyle(NativeDesign.nutritionTitle)
+            NativeNutrientValues(health: health, includesFibre: true, date: selectedDate)
+            Divider().padding(.vertical, NativeDesign.Space.xs)
+            NativePinnedNutrients(entries: nutrition.entries, date: selectedDate)
             NavigationLink {
-                NativeMicronutrientScreen(nutrition: nutrition)
+                NativeMicronutrientScreen(nutrition: nutrition, selectedDate: selectedDate)
             } label: {
                 HStack {
                     Text("Micronutrienti").font(.subheadline.weight(.semibold))
@@ -109,35 +191,6 @@ struct NativeHealthDetail: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(NativeDesign.healthSurface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
     }
-    private func dailyNutrientProgress(_ nutrient: NativeTrackedNutrient, target: Decimal, period: NativeNutrientPeriod) -> some View {
-        let format = Decimal.FormatStyle().precision(.fractionLength(0...2))
-        let recorded = period.amount.map { (period.estimated ? "≈" : "") + $0.formatted(format) } ?? "—"
-        let amount = Text("\(recorded) / \(target.formatted(format)) \(nutrient.unit)")
-            .monospacedDigit()
-            .foregroundStyle(.secondary)
-        return VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-            ViewThatFits(in: .horizontal) {
-                HStack {
-                    Text(nutrient.title).fontWeight(.semibold)
-                    Spacer(minLength: NativeDesign.Space.small)
-                    amount
-                }
-                .fixedSize(horizontal: true, vertical: false)
-                VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
-                    Text(nutrient.title).fontWeight(.semibold)
-                    amount
-                }
-            }
-            .font(.subheadline)
-            ProgressView(value: period.progress(toward: target))
-                .tint(NativeDesign.nutritionTitle)
-                .accessibilityHidden(true)
-        }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(nutrient.title)
-        .accessibilityValue(period.amount == nil ? "Dati di oggi non disponibili. Obiettivo \(target.formatted(format)) \(nutrient.unit)" : "\(recorded) su \(target.formatted(format)) \(nutrient.unit)")
-        .accessibilityIdentifier("health-progress-" + nutrient.rawValue)
-    }
     private var nutritionActionBar: some View {
         ViewThatFits(in: .horizontal) {
             HStack(spacing: NativeDesign.Space.small) { nutritionActions }
@@ -147,7 +200,6 @@ struct NativeHealthDetail: View {
         .frame(maxWidth: .infinity)
         .padding(.horizontal, NativeDesign.Layout.listInset)
         .padding(.vertical, NativeDesign.Space.small)
-        .background(NativeDesign.healthCanvas)
     }
 
     @ViewBuilder private var nutritionActions: some View {
@@ -213,10 +265,10 @@ struct NativeHealthDetail: View {
 
     private var diaryRows: [DiaryRow] {
         let local = nutrition.entries.filter {
-            $0.confirmed && $0.deletionPending != true && Calendar.current.isDateInToday($0.date)
+            $0.confirmed && $0.deletionPending != true && Calendar.current.isDate($0.date, inSameDayAs: selectedDate)
         }
         let localIDs = Set(local.map(\.id))
-        let imported = health.todayFoodEntries.compactMap { sample -> DiaryRow? in
+        let imported = health.foodEntries(on: selectedDate).compactMap { sample -> DiaryRow? in
             if let id = sample.lifeOSID, localIDs.contains(id) { return nil }
             return DiaryRow(id: sample.id, name: sample.name ?? "Energia alimentare", date: sample.date,
                 source: sample.lifeOSID == nil ? "Apple Salute" : "LifeOS", calories: sample.calories)
@@ -230,9 +282,10 @@ struct NativeHealthDetail: View {
 
     private func context(_ metric: NativeHealthMetric) -> String {
         switch metric {
-        case .tdee: return "Stima storica"
+        case .tdee: return "Ultimi 14 giorni"
         case .weight: return health.days.last(where: { $0.weight != nil })?.date.formatted(date: .abbreviated, time: .omitted) ?? "Ultima pesata"
-        case .calories: return "Oggi"
+        case .calories: return selectedDate.formatted(date: .abbreviated, time: .omitted)
+        case .weeklyCalories, .weeklyProtein: return "Settimana selezionata"
         case .simulation:
             return Calendar.current.date(byAdding: .month, value: 1, to: Date())?.formatted(date: .abbreviated, time: .omitted) ?? "Tra un mese"
         }
@@ -242,7 +295,11 @@ struct NativeHealthDetail: View {
         switch metric {
         case .tdee: number = health.estimate.map { ($0.tdee / 50).rounded() * 50 }
         case .weight: number = health.days.last(where: { $0.weight != nil })?.weight
-        case .calories: number = health.days.first(where: { Calendar.current.isDateInToday($0.date) })?.calories
+        case .calories: number = health.calories(on: selectedDate)
+        case .weeklyCalories:
+            number = NativeHealthMath.mean(NativeHealthWeek.days(containing: selectedDate).compactMap { health.calories(on: $0) })
+        case .weeklyProtein:
+            number = NativeHealthMath.mean(NativeHealthWeek.days(containing: selectedDate).compactMap { health.nutrients(on: $0)[.dietaryProtein] })
         case .simulation: number = forecast.last?.value
         }
         return number?.formatted(.number.precision(.fractionLength(metric == .weight || metric == .simulation ? 1 : 0))) ?? "—"
@@ -260,6 +317,7 @@ struct NativeHealthDetail: View {
 struct NativeNutrientValues: View {
     @ObservedObject var health: NativeHealthStore
     let includesFibre: Bool
+    var date = Date()
     @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
@@ -276,7 +334,7 @@ struct NativeNutrientValues: View {
 
     private func nutrient(_ title: String, _ type: HKQuantityTypeIdentifier) -> some View {
         let failed = health.nutrientFailures.contains(type)
-        let value = health.nutrientTotals[type].map { $0.formatted(.number.precision(.fractionLength(0...1))) } ?? "—"
+        let value = health.nutrients(on: date)[type].map { $0.formatted(.number.precision(.fractionLength(0...1))) } ?? "—"
         return VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
             Text(title).font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             Text(value == "—" ? value : value + " g").font(.subheadline.weight(.semibold)).monospacedDigit()

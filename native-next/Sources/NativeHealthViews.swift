@@ -357,6 +357,7 @@ struct NativeHealthMetricDetail: View {
                         NativeHealthCaloriesChart(days: health.days, onScrubbing: { setChartScrubbing("calories", $0) })
                     }
                 case .simulation: scenarioSection
+                case .weeklyCalories, .weeklyProtein: EmptyView()
                 }
                 connectionSections
                 methodSection
@@ -389,7 +390,7 @@ struct NativeHealthMetricDetail: View {
             NativeCard {
                 Text("TDEE stimato").font(NativeDesign.heading)
                 Text("Dati insufficienti").font(.headline)
-                Text("Servono almeno 28 giorni, 10 pesate recenti e calorie registrate in almeno il 90% dei giorni.").font(.caption).foregroundStyle(NativeDesign.secondary)
+                Text("Servono almeno 10 giorni coperti da pesate, 10 pesate nella finestra di 14 giorni e calorie registrate in almeno il 90% del periodo.").font(.caption).foregroundStyle(NativeDesign.secondary)
             }
         }
     }
@@ -403,7 +404,7 @@ struct NativeHealthMetricDetail: View {
                         .textFieldStyle(.roundedBorder).accessibilityLabel("Calorie dello scenario").accessibilityIdentifier("health-intake")
                     Text("kcal/giorno").font(.subheadline)
                 }
-                Button("Usa media recente: " + estimate.averageIntake.formatted(.number.precision(.fractionLength(0))) + " kcal") {
+                Button("Usa media ultimi 7 giorni: " + estimate.averageIntake.formatted(.number.precision(.fractionLength(0))) + " kcal") {
                     intakeText = String(Int(estimate.averageIntake.rounded())); editing = false
                 }.frame(minHeight: NativeDesign.Layout.touchTarget)
                 if forecast.isEmpty { Text("Inserisci un valore fra 800 e 6.000 kcal/giorno. Questo intervallo è tecnico, non una raccomandazione alimentare.").font(.caption).foregroundStyle(NativeDesign.secondary) }
@@ -444,7 +445,7 @@ struct NativeHealthMetricDetail: View {
         Text("Life OS " + (Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—") + " · build " + (Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "—"))
             .font(.caption2).foregroundStyle(NativeDesign.secondary).accessibilityIdentifier("health-build-version")
         DisclosureGroup("Metodo e limiti") {
-            Text("La calibrazione usa i 30 giorni precedenti l’ultima pesata antecedente a oggi e confronta calorie cumulative e pesate originali dello stesso periodo. La mediana delle pendenze su intervalli lunghi riduce l’influenza di singole pesate anomale; la mediana mobile di 7 giorni è usata solo per disegnare il trend. Le variazioni di peso richiedono ancora una conversione energetica approssimata, 7.700 kcal/kg: acqua, glicogeno e tessuti non sono separabili esattamente da questi dati. I giorni calorici mancanti, al massimo il 10%, sono stimati dalla media e indicati esplicitamente; giorni registrati solo in parte non sono riconoscibili automaticamente. Non è una misura diretta del TDEE attuale né il modello NIH completo. La previsione mantiene il modello dinamico approssimato e presume attività futura simile a quella che il TDEE storico rappresenta. Nessuna fascia di confidenza non calibrata. I dati Salute restano in memoria sul dispositivo e non vengono inviati al server.")
+            Text("La calibrazione usa le pesate e il diario degli ultimi 14 giorni conclusi e confronta calorie cumulative e pesate originali dello stesso periodo. La mediana delle pendenze su intervalli lunghi riduce l’influenza di singole pesate anomale; la mediana mobile di 7 giorni è usata solo per disegnare il trend. Le variazioni di peso richiedono ancora una conversione energetica approssimata, 7.700 kcal/kg: acqua, glicogeno e tessuti non sono separabili esattamente da questi dati. I giorni calorici mancanti, al massimo il 10%, sono stimati dalla media e indicati esplicitamente; giorni registrati solo in parte non sono riconoscibili automaticamente. Non è una misura diretta del TDEE attuale né il modello NIH completo. La previsione mantiene il modello dinamico approssimato e presume attività futura simile a quella che il TDEE storico rappresenta. Nessuna fascia di confidenza non calibrata. I dati Salute restano in memoria sul dispositivo e non vengono inviati al server.")
                 .font(.footnote).foregroundStyle(NativeDesign.secondary)
             Link("Studio di riferimento", destination: URL(string: "https://pmc.ncbi.nlm.nih.gov/articles/PMC3880593/")!)
         }.accessibilityIdentifier("health-method-disclosure")

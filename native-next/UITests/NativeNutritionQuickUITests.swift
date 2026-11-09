@@ -69,9 +69,12 @@ final class NativeNutritionQuickUITests: XCTestCase {
     func testRenderCocktailAndBoneInPortions() {
         let app = open()
         app.buttons["quick-nutrition-catalog"].tap()
-        let cocktails = app.buttons["Cocktail"]
-        XCTAssertTrue(cocktails.waitForExistence(timeout: 10))
-        cocktails.tap()
+        XCTAssertFalse(app.buttons["Cocktail"].exists)
+        XCTAssertTrue(app.buttons["Personali"].exists)
+        let initialSearch = app.textFields["generic-food-search"]
+        XCTAssertTrue(initialSearch.waitForExistence(timeout: 10))
+        initialSearch.tap()
+        initialSearch.typeText("Gin Tonic")
         let gin = app.buttons["generic-food-cocktail-gin-tonic"]
         XCTAssertTrue(gin.waitForExistence(timeout: 5))
         capture("01 Cocktail catalog", app)

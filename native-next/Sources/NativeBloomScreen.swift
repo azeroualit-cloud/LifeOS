@@ -58,9 +58,8 @@ struct NativeBloomScreen: View {
         VStack {
             let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: NativeDesign.Space.small)) : AnyLayout(HStackLayout(spacing: NativeDesign.Space.small))
             layout {
-                NativeBloomSectionButton(title: "Libreria", symbol: "books.vertical", id: "library", selection: $section)
-                NativeBloomSectionButton(title: "Mappa", symbol: "map", id: "map", selection: $section)
-                NativeBloomSectionButton(title: "Riscopri", symbol: "sparkles", id: "rediscovery", selection: $section)
+                NativeBloomSectionButton(title: "Libreria", id: "library", selection: $section)
+                NativeBloomSectionButton(title: "Mappa", id: "map", selection: $section)
             }.padding(.horizontal, NativeDesign.Layout.screenInset)
             if store.archive.items.isEmpty && section == "Libreria" {
                 VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
@@ -308,13 +307,12 @@ struct NativeBloomScreen: View {
 
 private struct NativeBloomSectionButton: View {
     let title: String
-    let symbol: String
     let id: String
     @Binding var selection: String
     private var selected: Bool { selection == title }
     private var control: some View {
         Button { selection = title } label: {
-            Label(title, systemImage: symbol).labelStyle(.titleAndIcon).font(.subheadline)
+            Text(title).font(.subheadline)
                 .foregroundStyle(selected ? NativeDesign.onAccent : Color.primary)
                 .lineLimit(1).minimumScaleFactor(0.8)
                 .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget)
@@ -331,10 +329,10 @@ private struct NativeBloomSectionButton: View {
     }
     @ViewBuilder private var styledControl: some View {
         if #available(iOS 26.0, *) {
-            control.buttonStyle(.plain)
+            control.buttonStyle(NativePressStyle())
                 .glassEffect(.regular.tint(selected ? NativeDesign.accent : .clear).interactive(), in: Capsule())
         } else {
-            control.buttonStyle(.plain)
+            control.buttonStyle(NativePressStyle())
                 .background(selected ? NativeDesign.accent : NativeDesign.surface, in: Capsule())
         }
     }
