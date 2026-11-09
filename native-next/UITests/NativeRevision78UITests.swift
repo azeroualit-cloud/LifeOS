@@ -445,51 +445,47 @@ final class NativeAppleHealthReferenceUITests: XCTestCase {
         if notificationTile.exists && notificationTile.isHittable { notificationTile.tap() }
         capture("summary-before-favorites", health)
         let edit = health.buttons["UIA.Health.Inevidenza.Detail"]
-        XCTAssertTrue(edit.waitForExistence(timeout: 15)); edit.tap()
-        capture("favorites-editor", health)
         let identifiers = ["HKQuantityTypeIdentifierDietaryEnergyConsumed", "HKQuantityTypeIdentifierBodyMass"]
+        let feed = health.collectionViews["UIA.Health.SummaryFeedViewController.CollectionView"]
         let editor = health.collectionViews["UIA.Health.EditFavoritesCollectionViewController.CollectionView"]
-        let prefix = "UIA.Health.FavoritesEdit."
-        let firstMetric = editor.cells.matching(NSPredicate(format: "identifier BEGINSWITH %@", prefix)).firstMatch
-        guard firstMetric.waitForExistence(timeout: 45) else {
-            capture("favorites-editor-empty", health)
-            XCTFail("The Apple Health favorites list did not load")
-            return
-        }
-        var remaining = Set(identifiers)
-        for _ in 0..<32 {
-            for identifier in identifiers where remaining.contains(identifier) {
-                let row = editor.cells[prefix + identifier]
-                guard row.exists && row.isHittable else { continue }
-                if !row.isSelected {
-                    let toggle = row.images["UIA.Health.Toggle"]
-                    guard toggle.isHittable else { continue }
-                    toggle.tap()
-                    let selected = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in row.isSelected }, object: nil)
-                    guard XCTWaiter.wait(for: [selected], timeout: 3) == .completed else {
-                        capture("favorite-toggle-diagnostic-" + identifier, health)
-                        XCTFail("Favorite metric must be selected: " + identifier)
-                        return
-                    }
-                }
-                remaining.remove(identifier)
-                capture("favorite-" + identifier, health)
-            }
-            if remaining.isEmpty { break }
-            let start = editor.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.73))
-            let end = editor.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.40))
-            start.press(forDuration: 0.05, thenDragTo: end)
-        }
-        guard remaining.isEmpty else {
-            capture("favorites-editor-missing-metrics", health)
-            XCTFail("Favorite metrics not found: " + remaining.sorted().joined(separator: ", "))
-            return
-        }
         let done = health.buttons.matching(NSPredicate(format: "label IN %@", ["Fine", "Done"])).firstMatch
-        if done.exists && done.isHittable { done.tap() }
+        let prefix = "UIA.Health.FavoritesEdit."
+        for identifier in identifiers {
+            let summaryMetric = feed.cells["UIA.Health.Snippet." + identifier]
+            if summaryMetric.exists { continue }
+            guard edit.waitForExistence(timeout: 15), edit.isHittable else {
+                capture("favorites-entry-unavailable", health)
+                XCTFail("The Apple Health favorites editor could not be opened")
+                return
+            }
+            edit.tap()
+            let firstMetric = editor.cells.matching(NSPredicate(format: "identifier BEGINSWITH %@", prefix)).firstMatch
+            guard firstMetric.waitForExistence(timeout: 45) else {
+                capture("favorites-editor-empty", health)
+                XCTFail("The Apple Health favorites list did not load")
+                return
+            }
+            capture("favorites-editor", health)
+            let row = editor.cells[prefix + identifier]
+            let toggle = row.images["UIA.Health.Toggle"]
+            for _ in 0..<24 where !toggle.isHittable {
+                let start = editor.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.73))
+                let end = editor.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.40))
+                start.press(forDuration: 0.05, thenDragTo: end)
+            }
+            guard toggle.isHittable else {
+                capture("favorite-not-found-" + identifier, health)
+                XCTFail("Favorite metric not found: " + identifier)
+                return
+            }
+            // Apple Health can move the selected row out of the editor viewport.
+            // Verify the saved values in the summary after closing the editor.
+            if !row.isSelected { toggle.tap() }
+            capture("favorite-" + identifier, health)
+            if done.exists && done.isHittable { done.tap() }
+        }
         let summary = health.tabBars.buttons["Riepilogo"]
         if summary.exists && summary.isHittable { summary.tap() }
-        let feed = health.collectionViews["UIA.Health.SummaryFeedViewController.CollectionView"]
         XCTAssertTrue(feed.waitForExistence(timeout: 15))
         var found: [String: String] = [:]
         for _ in 0..<13 {
