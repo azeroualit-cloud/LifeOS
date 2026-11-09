@@ -160,7 +160,7 @@ struct NativeHealthDetail: View {
                 guard abs(movement.width) > abs(movement.height) * 1.3 else { return }
                 moveWeek(movement.width < 0 ? 1 : -1)
             })
-        }.accessibilityIdentifier("health-week-picker")
+        }
     }
 
     private func moveWeek(_ offset: Int) {
@@ -364,7 +364,7 @@ private struct NativeHealthSummaryRow: View {
             .contentShape(Rectangle())
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(metric.title + ", " + value + " " + metric.unit + ", " + contextLabel)
-            .accessibilityHint("Apre il dettaglio")
+            .accessibilityHint(metric == .weeklyCalories || metric == .weeklyProtein ? "" : "Apre il dettaglio")
     }
     private var amountText: some View {
         Text(value).font(.title2.weight(.bold)).foregroundStyle(.primary).monospacedDigit()

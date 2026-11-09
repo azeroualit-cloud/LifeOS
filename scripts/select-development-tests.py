@@ -94,6 +94,7 @@ if __name__ == "__main__":
             "LifeOSProbeUITests/NativeRevision78UITests/testMicronutrientPrioritiesOpenWithOtherNutrientsInDetail",
             "LifeOSProbeUITests/NativeRevision78UITests/testHealthUniformRowsAndCompactActions",
             "LifeOSProbeUITests/NativeRevision78UITests/testHealthAccessibleRowsRemainEqualAndActionsStayCompact",
+            "LifeOSProbeUITests/NativeInterfaceTests/testHealthScenarioCanBeEditedWithoutAddingNavigationTab",
             "LifeOSProbeUITests/NativeNutritionQuickUITests/testRenderCocktailAndBoneInPortions",
             "LifeOSProbeUITests/NativeNutritionQuickUITests/testRenderPersonalFoodEditorAndSave",
             "LifeOSProbeUITests/NativeNutritionQuickUITests/testLargeTextCaloriesRemainReadableAboveActionWithKeyboard",

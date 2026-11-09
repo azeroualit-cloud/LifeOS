@@ -6,6 +6,13 @@ final class NativeNutritionEntryTests: XCTestCase {
         row.nutrientValues = ["vitaminC": .init(amount: 74, estimateSource: nil)]
         XCTAssertEqual(NativeNutrientPeriod(.vitaminC, days: Array(repeating: [row], count: 7)).lowIntakeWarning(for: .vitaminC), "Produzione di collagene")
         XCTAssertNil(NativeNutrientPeriod(.vitaminC, days: Array(repeating: [row], count: 6)).lowIntakeWarning(for: .vitaminC))
+        let missing = row
+        row.nutrientValues = ["vitaminC": .init(amount: 74, estimateSource: "fixture")]
+        XCTAssertNil(NativeNutrientPeriod(.vitaminC, days: Array(repeating: [row], count: 7)).lowIntakeWarning(for: .vitaminC))
+        row.nutrientValues = ["vitaminC": .init(amount: 74, estimateSource: nil)]
+        var partial = missing
+        partial.nutrientValues = nil
+        XCTAssertNil(NativeNutrientPeriod(.vitaminC, days: Array(repeating: [row, partial], count: 7)).lowIntakeWarning(for: .vitaminC))
         row.nutrientValues = ["vitaminC": .init(amount: 104, estimateSource: nil)]
         XCTAssertNil(NativeNutrientPeriod(.vitaminC, days: Array(repeating: [row], count: 7)).lowIntakeWarning(for: .vitaminC))
         XCTAssertEqual(NativeNutrientOrdering.keys("potassium,vitaminC,potassium"), [.potassium, .vitaminC])

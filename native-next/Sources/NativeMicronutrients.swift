@@ -93,6 +93,9 @@ enum NativeTrackedNutrient: String, CaseIterable, Identifiable {
         case .vitaminC: (75, "Produzione di collagene")
         case .zinc: (10, "Funzione immunitaria")
         case .iron: (7, "Trasporto dell’ossigeno")
+        case .calcium: (750, "Mineralizzazione delle ossa")
+        case .vitaminB2: (1.3, "Produzione di energia")
+        case .vitaminB6: (1.4, "Metabolismo delle proteine")
         default: nil
         }
     }
@@ -235,12 +238,13 @@ struct NativeMicronutrientScreen: View {
         let others = NativeNutrientOrdering.remaining(favorites: pinned, order: order)
         let days = NativeHealthWeek.days(containing: selectedDate)
         let last = days.last ?? selectedDate
+        let weekHasEnded = last < Calendar.current.startOfDay(for: .now)
         let weekly = NativeNutrientPeriod.recordedDays(nutrition.entries, count: 7, now: last)
         let daily = NativeNutrientPeriod.recordedDays(nutrition.entries, count: 1, now: selectedDate)
         List {
             Section("In evidenza") {
                 if pinned.isEmpty { Text("Usa la stella per aggiungere un nutriente.").font(.caption) }
-                ForEach(pinned) { row($0, pinned: true, daily: daily, weekly: weekly) }
+                ForEach(pinned) { row($0, pinned: true, daily: daily, weekly: weekly, weekHasEnded: weekHasEnded) }
                     .onMove { offsets, destination in
                         var updated = pinned
                         updated.move(fromOffsets: offsets, toOffset: destination)
@@ -248,7 +252,7 @@ struct NativeMicronutrientScreen: View {
                     }
             }
             Section {
-                ForEach(others) { row($0, pinned: false, daily: daily, weekly: weekly) }
+                ForEach(others) { row($0, pinned: false, daily: daily, weekly: weekly, weekHasEnded: weekHasEnded) }
                     .onMove { offsets, destination in
                         var updated = others
                         updated.move(fromOffsets: offsets, toOffset: destination)
@@ -276,10 +280,10 @@ struct NativeMicronutrientScreen: View {
         }
     }
 
-    private func row(_ nutrient: NativeTrackedNutrient, pinned: Bool, daily: [[NativeNutritionEntry]], weekly: [[NativeNutritionEntry]]) -> some View {
+    private func row(_ nutrient: NativeTrackedNutrient, pinned: Bool, daily: [[NativeNutritionEntry]], weekly: [[NativeNutritionEntry]], weekHasEnded: Bool) -> some View {
         let day = NativeNutrientPeriod(nutrient, days: daily)
         let week = NativeNutrientPeriod(nutrient, days: weekly)
-        let warning = week.lowIntakeWarning(for: nutrient)
+        let warning = weekHasEnded ? week.lowIntakeWarning(for: nutrient) : nil
         return VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
             HStack {
                 Text(nutrient.title).font(.subheadline.weight(.semibold))

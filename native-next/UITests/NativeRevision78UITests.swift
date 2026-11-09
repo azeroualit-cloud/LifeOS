@@ -58,7 +58,7 @@ final class NativeRevision78UITests: XCTestCase {
         app.tabBars.buttons["Salute"].tap()
         let rows = ["tdee", "weight", "calories", "simulation"].map { app.buttons["health-summary-" + $0] }
         for row in rows { XCTAssertTrue(row.waitForExistence(timeout: 10)) }
-        XCTAssertTrue(rows[0].label.contains("TDEE")); XCTAssertTrue(rows[0].label.contains("Stima storica"))
+        XCTAssertTrue(rows[0].label.contains("TDEE")); XCTAssertTrue(rows[0].label.contains("Ultimi 14 giorni"))
         XCTAssertTrue(rows[3].label.contains("Peso previsto"))
         XCTAssertTrue(rows[1].label.contains("Peso"))
         XCTAssertNotNil(rows[3].label.components(separatedBy: ", ").last?.range(of: "[0-9]", options: .regularExpression), "The forecast date remains in the accessible summary")
@@ -156,6 +156,7 @@ final class NativeRevision78UITests: XCTestCase {
         app.tabBars.buttons["Salute"].tap()
         let week = app.buttons["health-week-previous"]
         XCTAssertTrue(week.waitForExistence(timeout: 10))
+        capture("Review 00 Health today and shift accent", app)
         week.tap()
         XCTAssertTrue(app.buttons["health-week-next"].isEnabled)
         capture("Review 01 Health weekly grid", app)
@@ -167,6 +168,7 @@ final class NativeRevision78UITests: XCTestCase {
         capture("Review 02 Health pinned nutrients and diary", app)
         micro.tap()
         XCTAssertTrue(app.navigationBars["Micronutrienti"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["Apporto registrato basso · Produzione di collagene"].waitForExistence(timeout: 5))
         capture("Review 03 Micronutrients daily and weekly", app)
         let edit = app.buttons["micronutrient-reorder"]
         XCTAssertTrue(edit.isHittable)
@@ -180,6 +182,9 @@ final class NativeRevision78UITests: XCTestCase {
         add.tap()
         let date = app.buttons["quick-nutrition-date"]
         XCTAssertTrue(date.waitForExistence(timeout: 10))
+        let previousWeekDay = Calendar.current.date(byAdding: .day, value: -7, to: Date())
+        let format = Date.FormatStyle(date: .abbreviated, time: .omitted, locale: Locale(identifier: "it_IT"))
+        XCTAssertEqual(date.value as? String, previousWeekDay?.formatted(format))
         let form = app.scrollViews["quick-nutrition-scroll"]
         for _ in 0..<4 where !date.isHittable { form.swipeUp(velocity: .slow) }
         capture("Review 05 Backdated food entry", app)
