@@ -306,7 +306,7 @@ struct NativeMicronutrientScreen: View {
             Text("\(week.daysWithValues)/7 giorni con dati" + (week.partial ? " · parziali" : "") + (week.estimated ? " · con stime" : ""))
                 .font(.caption2).foregroundStyle(.secondary)
         }
-        .listRowInsets(EdgeInsets(top: 2, leading: NativeDesign.Space.medium, bottom: 6, trailing: NativeDesign.Space.small))
+        .listRowInsets(EdgeInsets(top: NativeDesign.Space.xxs, leading: NativeDesign.Space.medium, bottom: NativeDesign.Space.xs, trailing: NativeDesign.Space.small))
         .accessibilityIdentifier("micronutrient-" + nutrient.rawValue)
     }
 }
