@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "reported_on": "2026-11-08",
+  "reported_on": "2026-11-09",
   "project": "LifeOS",
   "default_branch": "main",
   "working_branch": "codex/revision77",
@@ -338,5 +338,5 @@
     "release_launch_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42189948045",
     "release_launches_passed": 4
   },
-  "production_89": {"version": "0.10.27", "build": 89, "status": "authorized", "authorization": "IPA-DELIVERY-89", "reviewed_render_commit": "a922361a840def0b832666f628c83e0ab66fdf31", "gates": ["full-suite", "release-launches", "package verification"]}
+  "production_89": {"version": "0.10.27", "build": 89, "status": "running", "authorization": "IPA-DELIVERY-89", "reviewed_render_commit": "a922361a840def0b832666f628c83e0ab66fdf31", "gates": ["full-suite", "release-launches", "package verification"], "source_commit": "61bd3976dc7da3f842828abf1cfbd372a52ced63", "workflow": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42578884079"}
 }

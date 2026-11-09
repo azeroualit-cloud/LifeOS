@@ -1,6 +1,6 @@
 # LifeOS — correzioni e difetti aperti
 
-**Build 89 (0.10.27) autorizzata.** Il workflow di produzione esegue suite completa, quattro avvii Release e verifica del pacchetto prima della pubblicazione su GitHub Releases.
+**Build 89 (0.10.27) in produzione.** L’utente ha autorizzato questa consegna dopo i render. Il [workflow di rilascio](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42578884079) verifica il sorgente `61bd397` con suite completa e quattro avvii Release prima del confezionamento e della pubblicazione.
 
 **Salute, Dashboard, catalogo e Bloom.** Checklist 9 novembre implementata su `codex/revision77`. Compilazione e 38 test unitari più 9 UI superati al simulatore iPhone 15 Pro sul commit `78578ab` ([collaudo](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42573602745), [catture e filmato](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42573602745/artifacts/13654668637)). Il commit `a922361` aggiunge solo fixture DEBUG, selezione CI e un test UI passato per Diario storico, classifica alimenti e omega-3 ([catture aggiuntive](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42575533916/artifacts/13656015393)). Verificati a vista anche testo grande e scorrimento in entrambe le direzioni. L’utente ha autorizzato la pubblicazione della build 89 dopo aver ricevuto i render. La prova su iPhone resta aperta.
 
