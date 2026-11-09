@@ -432,27 +432,32 @@ final class NativeAppleHealthReferenceUITests: XCTestCase {
         let edit = health.buttons["UIA.Health.Inevidenza.Detail"]
         XCTAssertTrue(edit.waitForExistence(timeout: 15)); edit.tap()
         capture("favorites-editor", health)
-        // Health's metric dictionary may finish loading after the editor opens.
-        // Its display names can be Italian or English independently of the chrome.
-        let anyMetric = health.cells.matching(NSPredicate(format: "identifier BEGINSWITH %@", "UIA.Health.FavoritesEdit.HKQuantityTypeIdentifier")).firstMatch
-        _ = anyMetric.waitForExistence(timeout: 45)
-        for (titles, identifier) in [(["Energia alimentare", "Energia introdotta", "Calorie", "Dietary Energy"], "HKQuantityTypeIdentifierDietaryEnergyConsumed"), (["Peso", "Weight"], "HKQuantityTypeIdentifierBodyMass")] {
-            let row = health.cells["UIA.Health.FavoritesEdit." + identifier]
-            var found = false
-            for title in titles {
-                let search = health.searchFields.firstMatch
-                XCTAssertTrue(search.waitForExistence(timeout: 10) && search.isHittable)
-                search.tap()
-                let clear = search.buttons.matching(NSPredicate(format: "label IN %@", ["Cancella testo", "Clear text"])).firstMatch
-                if clear.exists { clear.tap() }
-                search.typeText(title)
-                let keyboardNotice = health.buttons["Continue"]
-                if keyboardNotice.exists && keyboardNotice.isHittable { keyboardNotice.tap() }
-                if row.waitForExistence(timeout: 10) && row.isHittable { found = true; break }
+        let identifiers = ["HKQuantityTypeIdentifierDietaryEnergyConsumed", "HKQuantityTypeIdentifierBodyMass"]
+        let editor = health.collectionViews["UIA.Health.EditFavoritesCollectionViewController.CollectionView"]
+        let prefix = "UIA.Health.FavoritesEdit."
+        let firstMetric = editor.cells.matching(NSPredicate(format: "identifier BEGINSWITH %@", prefix)).firstMatch
+        guard firstMetric.waitForExistence(timeout: 45) else {
+            capture("favorites-editor-empty", health)
+            XCTFail("The Apple Health favorites list did not load")
+            return
+        }
+        var remaining = Set(identifiers)
+        for _ in 0..<32 {
+            for identifier in identifiers where remaining.contains(identifier) {
+                let row = editor.cells[prefix + identifier]
+                guard row.exists && row.isHittable else { continue }
+                if !row.isSelected { row.tap() }
+                XCTAssertTrue(row.isSelected, "Favorite metric must be selected: " + identifier)
+                remaining.remove(identifier)
+                capture("favorite-" + identifier, health)
             }
-            if found { row.tap() }
-            else { capture("favorite-not-found-" + identifier, health); XCTFail("Favorite metric not found: " + identifier) }
-            capture("favorite-" + identifier, health)
+            if remaining.isEmpty { break }
+            editor.swipeUp(velocity: .slow)
+        }
+        guard remaining.isEmpty else {
+            capture("favorites-editor-missing-metrics", health)
+            XCTFail("Favorite metrics not found: " + remaining.sorted().joined(separator: ", "))
+            return
         }
         let done = health.buttons.matching(NSPredicate(format: "label IN %@", ["Fine", "Done"])).firstMatch
         if done.exists && done.isHittable { done.tap() }
@@ -460,7 +465,6 @@ final class NativeAppleHealthReferenceUITests: XCTestCase {
         if summary.exists && summary.isHittable { summary.tap() }
         let feed = health.collectionViews["UIA.Health.SummaryFeedViewController.CollectionView"]
         XCTAssertTrue(feed.waitForExistence(timeout: 15))
-        let identifiers = ["HKQuantityTypeIdentifierDietaryEnergyConsumed", "HKQuantityTypeIdentifierBodyMass"]
         var found: [String: String] = [:]
         for _ in 0..<13 {
             for identifier in identifiers where found[identifier] == nil {
