@@ -102,7 +102,8 @@ final class NativeRevision74UITests: XCTestCase {
         app.buttons["Salva"].tap()
         let second = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label == %@", "bloom-note-", String(secondName))).firstMatch
         XCTAssertTrue(second.waitForExistence(timeout: 10)); XCTAssertTrue(note.exists)
-        for name in ["map", "rediscovery", "library"] {
+        XCTAssertFalse(app.buttons["bloom-section-rediscovery"].exists)
+        for name in ["map", "library"] {
             let section = app.buttons["bloom-section-" + name]
             XCTAssertTrue(section.waitForExistence(timeout: 10)); section.tap()
             XCTAssertTrue(section.isSelected)
