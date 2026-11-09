@@ -432,7 +432,7 @@ final class NativeAppleHealthReferenceUITests: XCTestCase {
             XCTFail("Apple Health reference data was not saved")
             return
         }
-        seed.terminate()
+        // Launching Health backgrounds the fixture app after its save has completed.
         let health = XCUIApplication(bundleIdentifier: "com.apple.Health")
         health.launchArguments = ["-AppleLanguages", "(it)", "-AppleLocale", "it_IT"]
         health.launch()
