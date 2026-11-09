@@ -27,6 +27,13 @@ import Foundation
             ]
             _ = await fixture.save(item)
         }
+        if ProcessInfo.processInfo.arguments.contains("--health-catalog-review") {
+            for name in ["Gin Tonic", "Gin Tonic", "Biscotti"] {
+                guard let food = NativeGenericFood.matches(name).first,
+                      let item = food.portion(id: UUID(), date: today, grams: food.cocktail == nil ? 100 : 1) else { continue }
+                _ = await fixture.save(item)
+            }
+        }
         #endif
     }
     #if DEBUG

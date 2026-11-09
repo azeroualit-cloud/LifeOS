@@ -204,6 +204,40 @@ final class NativeRevision78UITests: XCTestCase {
         capture("Review 08 Bloom sections", app)
     }
 
+    func testRenderHealthDiaryOmegaAndRankedCatalog() {
+        let app = launch(["--health-week-review", "--health-catalog-review"])
+        app.tabBars.buttons["Salute"].tap()
+        let previous = app.buttons["health-week-previous"]
+        XCTAssertTrue(previous.waitForExistence(timeout: 10))
+        previous.tap()
+
+        let scroll = app.scrollViews["health-detail-scroll"]
+        let meal = app.staticTexts["Pasto di prova"]
+        for _ in 0..<5 where !meal.isHittable { scroll.swipeUp() }
+        XCTAssertTrue(meal.isHittable)
+        capture("Review 09 Health past diary", app)
+
+        app.buttons["health-add-nutrition"].tap()
+        app.buttons["quick-nutrition-catalog"].tap()
+        let gin = app.buttons["generic-food-cocktail-gin-tonic"]
+        let biscuits = app.buttons["generic-food-ciqual-24001"]
+        XCTAssertTrue(gin.waitForExistence(timeout: 10))
+        XCTAssertTrue(biscuits.isHittable)
+        XCTAssertLessThan(gin.frame.minY, biscuits.frame.minY)
+        capture("Review 10 Foods ranked by 30 day frequency", app)
+        app.buttons["Fine"].tap()
+        app.buttons["quick-nutrition-close"].tap()
+
+        let micronutrients = app.buttons["health-micronutrients"]
+        for _ in 0..<5 where !micronutrients.isHittable { scroll.swipeDown(velocity: .slow) }
+        micronutrients.tap()
+        XCTAssertTrue(app.navigationBars["Micronutrienti"].waitForExistence(timeout: 10))
+        let omega = app.staticTexts["Omega-3 (EPA + DHA)"]
+        for _ in 0..<12 where !omega.isHittable { app.swipeUp() }
+        XCTAssertTrue(omega.isHittable)
+        capture("Review 11 Omega-3 in Micronutrients", app)
+    }
+
     func testSafeAreaLastContentStandard() { checkSafeAreaLastContent(large: false) }
     func testSafeAreaLastContentLargeText() { checkSafeAreaLastContent(large: true) }
     private func checkSafeAreaLastContent(large: Bool) {
