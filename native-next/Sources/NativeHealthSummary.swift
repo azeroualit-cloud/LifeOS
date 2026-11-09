@@ -140,6 +140,8 @@ struct NativeHealthDetail: View {
                         VStack(spacing: NativeDesign.Space.xxs) {
                             Text(day.formatted(.dateTime.weekday(.narrow))).font(.caption2)
                             Text(day.formatted(.dateTime.day())).font(.subheadline.weight(.semibold)).monospacedDigit()
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.55)
                                 .foregroundStyle(current ? (store.shift(CivilDate.day(day)) == nil ? NativeDesign.onAccent : Color.black) : .primary)
                                 .frame(width: NativeDesign.Layout.calendarDayNumber, height: NativeDesign.Layout.calendarDayNumber)
                                 .background(current ? accent : .clear, in: Circle())
