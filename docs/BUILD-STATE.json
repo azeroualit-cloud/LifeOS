@@ -11,15 +11,15 @@
     "sha256": "54fd84d4f757ea0b3a42c974fdac9b7f6e4ecc7644bbd0bb2c6b24b00f4d5e3b"
   },
   "latest_distributed_build": {
-    "version": "0.10.21",
-    "build": 83,
-    "source_commit": "75a9af4dc3c86c99993931aaa7643c5b800dd3a8",
-    "ipa_sha256": "a7449e22405809d93e01f02298e87addcc6be172f6a8fed3489115d21bd14cd4",
-    "release": "https://github.com/azeroualit-cloud/LifeOS/releases/tag/ios-0.10.21-build83",
-    "direct_ipa": "https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.21-build83/LifeOS-83.ipa",
-    "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42404491236",
-    "release_launch_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42404491236",
-    "package_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42404491236",
+    "version": "0.10.26",
+    "build": 88,
+    "source_commit": "5be4038a9de55d9ee19ae1e9adb393272f280d73",
+    "ipa_sha256": "4052773218de0fd2d5e6d9af7cde2c7505e9f073f9b58c399c8ae75e10d40611",
+    "release": "https://github.com/azeroualit-cloud/LifeOS/releases/tag/ios-0.10.26-build88",
+    "direct_ipa": "https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.26-build88/LifeOS-88.ipa",
+    "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42523292569",
+    "release_launch_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42523292569",
+    "package_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42523292569",
     "technical_checks": "passed",
     "release_launches": 4,
     "physical_device_verified_by_agent": false,
@@ -161,8 +161,9 @@
     "screenshots": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42521276245/artifacts/13633628333",
     "ui_passed": 4,
     "ui_failed": 1,
-    "validation": "Test sul bordo di un evento annidato fallito per circa 0,00001 pt. Corretta la tolleranza del test; verifica in corso.",
-    "new_ipa": false
+    "validation": "Primo run 4/5 per arrotondamento di circa 0,00001 pt. Tolleranza corretta e collaudo mirato successivo riuscito.",
+    "new_ipa": false,
+    "followup_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42522498757"
   },
   "production_candidate_88": {
     "version": "0.10.26",
@@ -172,8 +173,10 @@
     "source_commit": "5be4038a9de55d9ee19ae1e9adb393272f280d73",
     "release_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42523292569",
     "release_tag": "ios-0.10.26-build88",
-    "validation": "In corso. Suite completa, quattro avvii Release e verifica del pacchetto. Artefatto LifeOS-88 prima della pubblicazione GitHub Releases.",
-    "published": false
+    "validation": "Suite completa, quattro avvii Release, pacchetto e checksum verificati. IPA pubblicata e download diretto verificato.",
+    "published": true,
+    "release": "https://github.com/azeroualit-cloud/LifeOS/releases/tag/ios-0.10.26-build88",
+    "ipa_sha256": "4052773218de0fd2d5e6d9af7cde2c7505e9f073f9b58c399c8ae75e10d40611"
   },
   "backend": {
     "last_documented_utilities_deploy_run": "41630715615",
