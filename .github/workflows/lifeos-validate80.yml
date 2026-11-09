@@ -173,12 +173,12 @@ jobs:
             app/build/final-*.log
             app/build/FinalSession.xcresult
             app/release-launch
-  package88:
+  package89:
     if: >-
       github.repository == 'azeroualit-cloud/LifeOS' &&
       github.event_name == 'push' &&
       github.ref == 'refs/heads/codex/revision77' &&
-      contains(github.event.head_commit.message, '[release-ipa-88]')
+      contains(github.event.head_commit.message, '[release-ipa-89]')
     needs: [full-suite, release-launches]
     runs-on: macos-15
     timeout-minutes: 65
@@ -193,17 +193,17 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          xcodebuild archive -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -configuration Release -destination 'generic/platform=iOS' -archivePath build/LifeOS.xcarchive CODE_SIGNING_ALLOWED=NO MARKETING_VERSION=0.10.26 CURRENT_PROJECT_VERSION=88 > build/archive88.log 2>&1 || { tail -n 100 build/archive88.log; exit 1; }
+          xcodebuild archive -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -configuration Release -destination 'generic/platform=iOS' -archivePath build/LifeOS.xcarchive CODE_SIGNING_ALLOWED=NO MARKETING_VERSION=0.10.27 CURRENT_PROJECT_VERSION=89 > build/archive89.log 2>&1 || { tail -n 100 build/archive89.log; exit 1; }
           mkdir -p build/Payload download
           cp -R build/LifeOS.xcarchive/Products/Applications/LifeOSProbe.app build/Payload/
-          (cd build && zip -qr ../download/LifeOS-88.ipa Payload)
-          python3 ../scripts/verify-native-package.py download/LifeOS-88.ipa --version 0.10.26 --build 88
-          python3 ../scripts/verify-startup-imports.py download/LifeOS-88.ipa
+          (cd build && zip -qr ../download/LifeOS-89.ipa Payload)
+          python3 ../scripts/verify-native-package.py download/LifeOS-89.ipa --version 0.10.27 --build 89
+          python3 ../scripts/verify-startup-imports.py download/LifeOS-89.ipa
           python3 - <<'PY'
           import json
           from zipfile import ZipFile
 
-          with ZipFile('download/LifeOS-88.ipa') as ipa:
+          with ZipFile('download/LifeOS-89.ipa') as ipa:
               catalogs = [name for name in ipa.namelist() if name.endswith('.app/generic-foods.json')]
               assert len(catalogs) == 1, catalogs
               foods = {food['id']: food for food in json.loads(ipa.read(catalogs[0]))}
@@ -219,20 +219,20 @@ jobs:
               assert {'cocktail-gin-tonic', 'cocktail-sex-on-the-beach', 'cocktail-long-island'} <= cocktails.keys()
               assert all(food['cocktail']['alcoholGrams'] > 0 for food in cocktails.values())
           PY
-          (cd download && shasum -a 256 LifeOS-88.ipa > SHA256.txt)
+          (cd download && shasum -a 256 LifeOS-89.ipa > SHA256.txt)
       - uses: actions/upload-artifact@v4
         with:
-          name: LifeOS-88
+          name: LifeOS-89
           path: app/download/
           if-no-files-found: error
 
-  publish88:
+  publish89:
     if: >-
       github.repository == 'azeroualit-cloud/LifeOS' &&
       github.event_name == 'push' &&
       github.ref == 'refs/heads/codex/revision77' &&
-      contains(github.event.head_commit.message, '[release-ipa-88]')
-    needs: package88
+      contains(github.event.head_commit.message, '[release-ipa-89]')
+    needs: package89
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -240,7 +240,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: LifeOS-88
+          name: LifeOS-89
       - name: Verify checksum and publish the IPA
         env:
           GH_TOKEN: ${{ github.token }}
@@ -248,6 +248,6 @@ jobs:
         run: |
           set -euo pipefail
           sha256sum --check SHA256.txt
-          gh release create ios-0.10.26-build88 LifeOS-88.ipa SHA256.txt \
-            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "LifeOS 0.10.26 build 88" --latest \
-            --notes "Calendario Mese con puntini per evento e nuova agenda Giorno. Salute con barre vitamina C e zinco. Nutrizione con cocktail, alimenti personali, pesatura con osso e campioni Apple Salute per unità alcoliche e nutrienti supportati. IPA da firmare con Signulous. Sorgente: $GITHUB_SHA. Collaudo pre-IPA: https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID. Verifica su iPhone e accettazione ancora aperte."
+          gh release create ios-0.10.27-build89 LifeOS-89.ipa SHA256.txt \
+            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "LifeOS 0.10.27 build 89" --latest \
+            --notes "Salute con calendario settimanale, griglia 3×2, diario storico e aggiunta alimento con data selezionata. TDEE su 14 giorni, simulazione sugli ultimi 7 giorni conclusi e micronutrienti riordinabili con omega-3. Preferiti condivisi con Dashboard, catalogo ordinato per frequenza, Bloom semplificato e transizioni tra schede. IPA da firmare con Signulous. Sorgente: $GITHUB_SHA. Collaudo pre-IPA: https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID. Verifica su iPhone e accettazione ancora aperte."

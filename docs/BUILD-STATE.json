@@ -337,5 +337,6 @@
     },
     "release_launch_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42189948045",
     "release_launches_passed": 4
-  }
+  },
+  "production_89": {"version": "0.10.27", "build": 89, "status": "authorized", "authorization": "IPA-DELIVERY-89", "reviewed_render_commit": "a922361a840def0b832666f628c83e0ab66fdf31", "gates": ["full-suite", "release-launches", "package verification"]}
 }

@@ -318,3 +318,7 @@ Fonte utente: «fai tutto, dammi tutti i render delle modifiche prima di produrr
 ## UX-PADDING-QA-01 — ACTIVE, 9 novembre 2026
 
 Fonte utente: «aggiungi una regola per verificare il padding una volta finito il design del componente». Controllare spazi interni ed esterni su schermate reali al termine del design, a testo standard e grande. Ridurre in Dashboard lo spazio sopra Calendario, Finanza e Nutrizione.
+
+## IPA-DELIVERY-89 — autorizzazione puntuale, 9 novembre 2026
+
+Fonte utente: «manda in produzione l'ipa». Dopo la consegna dei render è autorizzata la pubblicazione della build 89 (0.10.27), con suite completa, quattro avvii Release e verifica del pacchetto.
