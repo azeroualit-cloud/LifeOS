@@ -403,20 +403,35 @@ final class NativeAppleHealthReferenceUITests: XCTestCase {
         }, object: nil)
         XCTAssertEqual(XCTWaiter.wait(for: [authorization], timeout: 20), .completed)
         if seed.switches.firstMatch.exists {
-                for toggle in seed.switches.allElementsBoundByIndex where toggle.isHittable && (toggle.value as? String) == "0" { toggle.tap() }
-                // iOS 27 exposes the footer action as StaticText in a scrollable
-                // authorization sheet; it is initially below the viewport.
-                let allow = seed.staticTexts.matching(NSPredicate(format: "label IN %@", ["Consenti", "Allow"])).firstMatch
-                for _ in 0..<6 {
-                    if allow.exists && allow.isHittable { break }
-                    seed.swipeUp()
+            let toggles = ["DietaryEnergy", "Weight"].map { seed.switches["UIA.Health." + $0 + ".SwitchCell.Switch"] }
+            for toggle in toggles {
+                for _ in 0..<5 where !toggle.isHittable { seed.swipeUp(velocity: .slow) }
+                for _ in 0..<3 where (toggle.value as? String) != "1" && toggle.isHittable {
+                    toggle.tap()
+                    let enabled = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value == %@", "1"), object: toggle)
+                    if XCTWaiter.wait(for: [enabled], timeout: 2) == .completed { break }
                 }
-                XCTAssertTrue(allow.isHittable); allow.tap()
+                guard (toggle.value as? String) == "1" else {
+                    capture("seed-toggle-off", seed)
+                    XCTFail("Write permission switch is off: " + toggle.identifier)
+                    return
+                }
+            }
+            let allow = seed.staticTexts.matching(NSPredicate(format: "label IN %@", ["Consenti", "Allow"])).firstMatch
+            for _ in 0..<6 where !allow.isHittable { seed.swipeUp(velocity: .slow) }
+            guard allow.isHittable else {
+                capture("seed-allow-unavailable", seed)
+                XCTFail("The Health permission confirmation is unavailable")
+                return
+            }
+            allow.tap()
         }
         let prepared = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label == %@", "Dati pronti"), object: status)
-        let preparation = XCTWaiter.wait(for: [prepared], timeout: 30)
-        if preparation != .completed { capture("seed-permission-diagnostic", seed) }
-        XCTAssertEqual(preparation, .completed)
+        guard XCTWaiter.wait(for: [prepared], timeout: 30) == .completed else {
+            capture("seed-permission-diagnostic", seed)
+            XCTFail("Apple Health reference data was not saved")
+            return
+        }
         seed.terminate()
         let health = XCUIApplication(bundleIdentifier: "com.apple.Health")
         health.launchArguments = ["-AppleLanguages", "(it)", "-AppleLocale", "it_IT"]
@@ -446,13 +461,24 @@ final class NativeAppleHealthReferenceUITests: XCTestCase {
             for identifier in identifiers where remaining.contains(identifier) {
                 let row = editor.cells[prefix + identifier]
                 guard row.exists && row.isHittable else { continue }
-                if !row.isSelected { row.tap() }
-                XCTAssertTrue(row.isSelected, "Favorite metric must be selected: " + identifier)
+                if !row.isSelected {
+                    let toggle = row.images["UIA.Health.Toggle"]
+                    guard toggle.isHittable else { continue }
+                    toggle.tap()
+                    let selected = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in row.isSelected }, object: nil)
+                    guard XCTWaiter.wait(for: [selected], timeout: 3) == .completed else {
+                        capture("favorite-toggle-diagnostic-" + identifier, health)
+                        XCTFail("Favorite metric must be selected: " + identifier)
+                        return
+                    }
+                }
                 remaining.remove(identifier)
                 capture("favorite-" + identifier, health)
             }
             if remaining.isEmpty { break }
-            editor.swipeUp(velocity: .slow)
+            let start = editor.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.73))
+            let end = editor.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.40))
+            start.press(forDuration: 0.05, thenDragTo: end)
         }
         guard remaining.isEmpty else {
             capture("favorites-editor-missing-metrics", health)
