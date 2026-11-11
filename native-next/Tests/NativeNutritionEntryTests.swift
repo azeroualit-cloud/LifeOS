@@ -1,6 +1,20 @@
 import XCTest
 @testable import LifeOSProbe
 final class NativeNutritionEntryTests: XCTestCase {
+    func testSupermarketCatalogueAndSupplementDoseRoundTrip() throws {
+        for name in ["Crescenza", "Provolone", "Patatine in busta", "Cola zero", "Gelato", "Caramelle gommose"] {
+            XCTAssertEqual(NativeGenericFood.matches(name).first?.name, name)
+        }
+        let supplement = NativeGenericFood(id: "personal-test", name: "Vitamina C di prova",
+            detail: "Personale", family: .supplement, boneInEdiblePercent: nil,
+            nutrientValues: ["vitaminC": .init(amount: 50000, estimateSource: nil)],
+            aliases: nil, protein: 0, carbohydrate: 0, fat: 0, fibre: 0, calories: 0)
+        let restored = try JSONDecoder().decode(NativeGenericFood.self, from: JSONEncoder().encode(supplement))
+        let entry = try XCTUnwrap(restored.portion(id: UUID(), date: .now, grams: 2))
+        XCTAssertEqual(entry.nutrientValues?["vitaminC"]?.amount, 1000)
+        XCTAssertEqual(entry.calories, 0)
+        XCTAssertNil(entry.portionGrams)
+    }
     func testNutrientWarningsRequireSevenCompleteDaysAndUseAverageRequirement() {
         var row = NativeNutritionEntry(id: UUID(), revision: 1, date: .now, protein: 20, carbohydrate: 0, fat: 0, confirmed: true)
         row.nutrientValues = ["vitaminC": .init(amount: 74, estimateSource: nil)]

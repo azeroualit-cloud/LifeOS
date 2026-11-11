@@ -124,6 +124,44 @@ final class NativeNutritionQuickUITests: XCTestCase {
         capture("05 Saved personal foods", app)
     }
 
+    func testSupermarketFoodsAndSupplementEditor() {
+        let app = open()
+        app.buttons["quick-nutrition-catalog"].tap()
+        let search = app.textFields["generic-food-search"]
+        XCTAssertTrue(search.waitForExistence(timeout: 10))
+        for name in ["Crescenza", "Provolone", "Patatine", "Gelato"] {
+            search.tap()
+            let value = search.value as? String ?? ""
+            if value != "Cerca alimento" {
+                search.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: value.count))
+            }
+            search.typeText(name)
+            capture("Supermercato " + name, app)
+        }
+        app.buttons["generic-food-create"].tap()
+        let family = app.buttons["personal-food-family"]
+        XCTAssertTrue(family.waitForExistence(timeout: 10))
+        family.tap()
+        app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Integratori")).firstMatch.tap()
+        XCTAssertTrue(app.staticTexts["Valori per dose"].exists)
+        for (id, value) in [("name", "Integratore di prova"), ("energy", "0"), ("protein", "0"), ("carbs", "0"), ("fat", "0")] {
+            let field = app.textFields["personal-food-" + id]
+            for _ in 0..<3 where !field.isHittable { app.swipeUp() }
+            field.tap()
+            field.typeText(value)
+        }
+        capture("Integratore per dose", app)
+        app.buttons["personal-food-save"].tap()
+        let item = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "generic-food-personal-", "Integratore di prova")).firstMatch
+        XCTAssertTrue(item.waitForExistence(timeout: 10))
+        item.tap()
+        XCTAssertTrue(app.staticTexts["Dosi"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["quick-nutrition-save"].isEnabled)
+        capture("Aggiunta integratore senza calorie", app)
+        app.buttons["quick-nutrition-save"].tap()
+        XCTAssertTrue(app.buttons["quick-nutrition-open"].waitForExistence(timeout: 10))
+    }
+
     func testDatePickerOpensFullWidthAndKeepsNutrients() {
         checkFullWidthDatePicker(large: false)
     }

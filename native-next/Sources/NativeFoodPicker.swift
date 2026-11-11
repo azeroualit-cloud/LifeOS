@@ -17,7 +17,7 @@ struct NativeGenericFood: Codable, Identifiable {
 
     enum Family: String, Codable, CaseIterable, Identifiable {
         case bakery, grain, egg, dairy, cheese, fat, legume, fruit, nut, poultry
-        case meat, fish, meal, pantry, drink, sweet, vegetable
+        case meat, fish, meal, pantry, drink, sweet, vegetable, supplement
 
         var id: String { rawValue }
         var title: String {
@@ -27,6 +27,7 @@ struct NativeGenericFood: Codable, Identifiable {
             case .egg: "Uova"
             case .dairy: "Latte e yogurt"
             case .cheese: "Formaggi"
+            case .supplement: "Integratori"
             case .fat: "Oli e burri"
             case .legume: "Legumi"
             case .fruit: "Frutta"
@@ -48,6 +49,7 @@ struct NativeGenericFood: Codable, Identifiable {
             case .egg: "🥚"
             case .dairy: "🥛"
             case .cheese: "🧀"
+            case .supplement: "💊"
             case .fat: "🫗"
             case .legume: "🫘"
             case .fruit: "🍎"
@@ -92,6 +94,7 @@ struct NativeGenericFood: Codable, Identifiable {
         guard var entry = NativeNutritionEntry.portion(id: id, date: date, protein: protein,
             carbohydrate: carbohydrate, fat: fat, fibre: fibre, calories: calories, grams: edibleGrams) else { return nil }
         entry.foodName = name
+        if family == .supplement { entry.portionGrams = nil }
         entry.foodID = self.id
         entry.boneInWeightGrams = weighedWithBone ? grams : nil
         entry.nutrientValues = nutrientValues?.mapValues {
@@ -233,7 +236,7 @@ struct NativeFoodPicker: View {
                                         Text("≈ \(NSDecimalNumber(decimal: food.calories)) kcal · \(cocktail.volumeML) ml / bicchiere")
                                             .font(.caption).foregroundStyle(.secondary)
                                     } else {
-                                        Text("\(NSDecimalNumber(decimal: food.calories)) kcal / 100 g")
+                                        Text("\(NSDecimalNumber(decimal: food.family == .supplement ? food.calories / 100 : food.calories)) kcal / \(food.family == .supplement ? "dose" : "100 g")")
                                             .font(.caption).foregroundStyle(.secondary)
                                     }
                                 }.frame(minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
@@ -314,8 +317,9 @@ private struct NativePersonalFoodEditor: View {
                         Text(family.icon + " " + family.title).tag(family)
                     }
                 }
+                .accessibilityIdentifier("personal-food-family")
             }
-            Section("Valori per 100 g") {
+            Section(family == .supplement ? "Valori per dose" : "Valori per 100 g") {
                 amount("Calorie (kcal)", text: $energy).accessibilityIdentifier("personal-food-energy")
                 amount("Proteine (g)", text: $protein).accessibilityIdentifier("personal-food-protein")
                 amount("Carboidrati (g)", text: $carbs).accessibilityIdentifier("personal-food-carbs")
@@ -359,7 +363,7 @@ private struct NativePersonalFoodEditor: View {
     private var food: NativeGenericFood? {
         let title = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !title.isEmpty, title.count <= 120,
-              let calories = NativeNutritionEntry.grams(energy), calories > 0, calories <= 1000,
+              let calories = NativeNutritionEntry.grams(energy), calories >= 0, calories <= 1000,
               !protein.isEmpty, let protein = NativeNutritionEntry.grams(protein),
               !carbs.isEmpty, let carbs = NativeNutritionEntry.grams(carbs),
               !fat.isEmpty, let fat = NativeNutritionEntry.grams(fat),
@@ -369,11 +373,12 @@ private struct NativePersonalFoodEditor: View {
         for (nutrient, raw) in micronutrients where !raw.isEmpty {
             guard let value = NativeNutritionEntry.grams(raw), value <= 100_000_000 else { return nil }
             let key = nutrient == .folate ? "folateMass" : nutrient.rawValue
-            nutrients[key] = .init(amount: value, estimateSource: nil)
+            nutrients[key] = .init(amount: value * (family == .supplement ? 100 : 1), estimateSource: nil)
         }
+        let factor: Decimal = family == .supplement ? 100 : 1
         return .init(id: "personal-" + UUID().uuidString, name: title, detail: "Personale", family: family,
                      boneInEdiblePercent: nil, nutrientValues: nutrients.isEmpty ? nil : nutrients,
-                     aliases: nil, protein: protein, carbohydrate: carbs, fat: fat,
-                     fibre: fibre.isEmpty ? nil : fibreValue, calories: calories)
+                     aliases: nil, protein: protein * factor, carbohydrate: carbs * factor, fat: fat * factor,
+                     fibre: fibre.isEmpty ? nil : fibreValue * factor, calories: calories * factor)
     }
 }

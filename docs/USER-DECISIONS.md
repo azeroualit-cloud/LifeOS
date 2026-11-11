@@ -322,3 +322,7 @@ Fonte utente: «aggiungi una regola per verificare il padding una volta finito i
 ## IPA-DELIVERY-89 — autorizzazione puntuale, 9 novembre 2026
 
 Fonte utente: «manda in produzione l'ipa». Dopo la consegna dei render è autorizzata la pubblicazione della build 89 (0.10.27), con suite completa, quattro avvii Release e verifica del pacchetto.
+
+## FOOD-SUPERMARKET-01 — ACTIVE, 11 novembre 2026
+
+Richiesta diretta di ampliare gli alimenti generici tipici del supermercato senza marche, con integratori e storico giornaliero di calorie e macro. Mantiene le esclusioni di maiale e creatina. Implementazione e verifica prima della produzione.

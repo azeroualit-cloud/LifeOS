@@ -29,7 +29,7 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
                         fat: Decimal, fibre: Decimal?, calories: Decimal, grams: Decimal) -> Self? {
         let values = [protein, carbohydrate, fat, fibre ?? 0, calories, grams]
         guard values.allSatisfy({ !$0.isNaN && $0 >= 0 && NSDecimalNumber(decimal: $0).doubleValue.isFinite }),
-              grams > 0, calories > 0 else { return nil }
+              grams > 0 else { return nil }
         let factor = grams / 100
         return .init(id: id, revision: 0, date: date, protein: protein * factor,
                      carbohydrate: carbohydrate * factor, fat: fat * factor, confirmed: false,
@@ -228,7 +228,7 @@ extension NativeNutritionWriting {
         }
         let amounts = [value.protein, value.carbohydrate, value.fat, value.fibre ?? 0, value.calories]
         guard amounts.allSatisfy({ !$0.isNaN && $0 >= 0 && NSDecimalNumber(decimal: $0).doubleValue.isFinite }),
-              value.calories > 0 else { return false }
+              value.calories > 0 || value.foodID != nil else { return false }
         busy = true; defer { busy = false }
         error = nil
         do {

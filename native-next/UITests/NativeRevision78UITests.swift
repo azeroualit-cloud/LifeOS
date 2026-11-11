@@ -390,7 +390,9 @@ final class NativeAppleHealthReferenceUITests: XCTestCase {
     private func capture(_ name: String, _ app: XCUIApplication) {
         let image = XCTAttachment(screenshot: app.screenshot())
         image.name = name; image.lifetime = .keepAlways; add(image)
-        print("APPLE_HEALTH_REFERENCE_TREE_" + name + " " + app.debugDescription)
+        if name.contains("diagnostic") || name.contains("unavailable") || name.contains("empty") || name.contains("not-found") {
+            print("APPLE_HEALTH_REFERENCE_TREE_" + name + " " + app.debugDescription)
+        }
     }
     func testCaptureAppleHealthReference() {
         executionTimeAllowance = 300
@@ -401,7 +403,11 @@ final class NativeAppleHealthReferenceUITests: XCTestCase {
         let authorization = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
             (status.exists && status.label == "Dati pronti") || seed.switches.firstMatch.exists
         }, object: nil)
-        XCTAssertEqual(XCTWaiter.wait(for: [authorization], timeout: 20), .completed)
+        guard XCTWaiter.wait(for: [authorization], timeout: 60) == .completed else {
+            capture("seed-permission-diagnostic", seed)
+            XCTFail("The Health authorization dialog did not become ready")
+            return
+        }
         if seed.switches.firstMatch.exists {
             let toggles = ["DietaryEnergy", "Weight"].map { seed.switches["UIA.Health." + $0 + ".SwitchCell.Switch"] }
             for toggle in toggles {

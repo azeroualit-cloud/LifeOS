@@ -131,6 +131,12 @@ struct NativeHealthDetail: View {
                     .accessibilityIdentifier("health-week-next")
                     .disabled(days.contains(today))
             }.font(.subheadline.weight(.semibold))
+            if selectedDate != today {
+                Button("Oggi") { selectedDate = today }
+                    .buttonStyle(NativePressStyle())
+                    .frame(minHeight: NativeDesign.Layout.touchTarget)
+                    .accessibilityIdentifier("health-week-today")
+            }
             HStack(spacing: NativeDesign.Space.xxs) {
                 ForEach(days, id: \.self) { day in
                     let current = day == today

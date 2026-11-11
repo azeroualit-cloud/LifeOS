@@ -127,8 +127,8 @@ struct NativeNutritionQuickSheet: View {
                             .accessibilityIdentifier("quick-nutrition-weighing")
                             .disabled(nutrition.busy || pending != nil)
                         }
-                        grams(selectedFood.cocktail == nil ? "Porzione" : "Bicchieri", text: $portionGrams,
-                              field: .portion, unit: selectedFood.cocktail == nil ? "g" : nil)
+                        grams(selectedFood.family == .supplement ? "Dosi" : selectedFood.cocktail == nil ? "Porzione" : "Bicchieri", text: $portionGrams,
+                              field: .portion, unit: selectedFood.cocktail == nil && selectedFood.family != .supplement ? "g" : nil)
                             .disabled(nutrition.busy || pending != nil)
                         if let draft {
                             if let recipe = selectedFood.cocktail, let alcohol = draft.alcoholGrams, let units = draft.standardDrinks {
@@ -218,7 +218,7 @@ struct NativeNutritionQuickSheet: View {
             NavigationStack {
                 NativeFoodPicker { food in
                     selectedFood = food
-                    portionGrams = food.cocktail == nil ? "100" : "1"
+                    portionGrams = food.cocktail == nil && food.family != .supplement ? "100" : "1"
                     weighedWithBone = false
                 }
             }

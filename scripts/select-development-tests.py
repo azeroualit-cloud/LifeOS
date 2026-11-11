@@ -93,6 +93,9 @@ if __name__ == "__main__":
     elif a.mode == "health-render":
         areas = ["health", "nutrition", "dashboard", "bloom"]
         tests = [
+            "LifeOSProbeUITests/NativeAppleHealthReferenceUITests/testCaptureAppleHealthReference",
+            "LifeOSProbeUITests/NativeNutritionQuickUITests/testSupermarketFoodsAndSupplementEditor",
+            "LifeOSProbeUITests/NativeRevision78UITests/testRenderHealthDiaryOmegaAndRankedCatalog",
             "LifeOSProbeTests/NativeHealthTests",
             "LifeOSProbeTests/NativeNutritionEntryTests",
             "LifeOSProbeTests/NativeNutritionHealthKitTests",
