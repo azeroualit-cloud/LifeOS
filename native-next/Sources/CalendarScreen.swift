@@ -5,6 +5,7 @@ struct CalendarScreen: View {
     @EnvironmentObject var router: NativeRouter
     @Environment(\.dismiss) private var dismiss
     @Environment(\.nativeReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var typeSize
     @State private var showingDay = false
     @State private var monthReturnDay: String?
     private var selected: String {
@@ -487,7 +488,7 @@ struct CalendarScreen: View {
                     Text("Oggi").frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle())
                 }
                     .accessibilityIdentifier("calendar-today").disabled(store.busy)
-                Button { withAnimation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration)) { painting.toggle(); brush = painting ? "morning" : "consult" } } label: { Label(painting ? "Fine" : "Dipingi turni", systemImage: "paintbrush.pointed").labelStyle(.iconOnly).frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle()) }.accessibilityIdentifier("toggle-shift-paint")
+                Button { withAnimation(reduceMotion || typeSize.isAccessibilitySize ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration)) { painting.toggle(); brush = painting ? "morning" : "consult" } } label: { Label(painting ? "Fine" : "Dipingi turni", systemImage: "paintbrush.pointed").labelStyle(.iconOnly).frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle()) }.accessibilityIdentifier("toggle-shift-paint")
                 Spacer()
                 if let lastShift { Button("Annulla") { Task { await store.run("paintShift", ["day": .string(lastShift.0), "kind": .string(lastShift.1)]); if store.error == nil { self.lastShift = nil } } }.disabled(store.busy) }
                 NativeIconButton(symbol: "chevron.left", label: "Mese precedente") { jumpMonth = NativeCalendarWindow.offset(focusMonth, by: -1) }.disabled(store.busy)
@@ -495,7 +496,7 @@ struct CalendarScreen: View {
             }.font(.subheadline).frame(minHeight: NativeDesign.Layout.touchTarget)
             if painting {
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: NativeDesign.Space.small),
-                                         count: 2),
+                                         count: typeSize.isAccessibilitySize ? 1 : 2),
                           spacing: NativeDesign.Space.small) {
                     ForEach(ShiftKind.allCases) { kind in
                         NativeShiftBrushOption(kind: kind, brush: $brush)
@@ -515,11 +516,9 @@ private struct NativeShiftBrushOption: View {
                 Label(kind.title, systemImage: kind.symbol)
                     .font(.caption.weight(.semibold))
                     .lineLimit(1)
-                    .minimumScaleFactor(0.7)
                 if !kind.time.isEmpty {
                     Text(kind.time).font(.caption2).foregroundStyle(.secondary)
                         .lineLimit(1)
-                        .minimumScaleFactor(0.7)
                 }
             }
                 .padding(.horizontal, NativeDesign.Space.small)
