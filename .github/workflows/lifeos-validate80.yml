@@ -28,6 +28,7 @@ jobs:
           xcrun simctl bootstatus "$MAIN_DEVICE" -b
           cases=(
             LifeOSProbeUITests/NativeAppleHealthReferenceUITests/testCaptureAppleHealthReference
+            LifeOSProbeUITests/NativeNutritionQuickUITests/testSupermarketFoodsAndSupplementEditor
             LifeOSProbeUITests/NativeRevision74UITests/testMoreDestinationsAndBloomNotePersistsAcrossNavigation
             LifeOSProbeUITests/NativeNutritionQuickUITests/testDatePickerOpensFullWidthWithLargeTextAndKeepsNutrients
             LifeOSProbeUITests/NativeNutritionQuickUITests/testLargeTextCaloriesRemainReadableAboveActionWithKeyboard
@@ -209,6 +210,9 @@ jobs:
               catalogs = [name for name in ipa.namelist() if name.endswith('.app/generic-foods.json')]
               assert len(catalogs) == 1, catalogs
               foods = {food['id']: food for food in json.loads(ipa.read(catalogs[0]))}
+              assert len(foods) >= 280
+              assert foods['crea-160890']['name'] == 'Crescenza'
+              assert foods['ciqual-12716']['name'] == 'Provolone'
               assert foods['ciqual-24001']['name'] == 'Biscotti'
               assert foods['ciqual-24001']['detail'] == 'Generic'
               assert foods['ciqual-36017']['name'] == 'Petto di pollo'
