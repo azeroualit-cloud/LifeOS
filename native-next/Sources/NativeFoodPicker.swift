@@ -357,7 +357,12 @@ private struct NativePersonalFoodEditor: View {
     }
 
     private func amount(_ label: String, text: Binding<String>) -> some View {
-        TextField(label, text: text).keyboardType(.decimalPad)
+        LabeledContent(label) {
+            TextField("0", text: text)
+                .keyboardType(.decimalPad)
+                .multilineTextAlignment(.trailing)
+                .accessibilityLabel(label)
+        }
     }
 
     private var food: NativeGenericFood? {

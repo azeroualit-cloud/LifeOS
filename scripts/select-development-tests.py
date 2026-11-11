@@ -89,6 +89,7 @@ if __name__ == "__main__":
         tests = [
             "LifeOSProbeTests/NativeNutritionEntryTests",
             "LifeOSProbeUITests/NativeAppleHealthReferenceUITests/testCaptureAppleHealthReference",
+            "LifeOSProbeUITests/NativeNutritionQuickUITests/testSupermarketFoodsAndSupplementEditor",
         ]
     elif a.mode == "health-detail-render":
         areas = ["health", "nutrition"]
