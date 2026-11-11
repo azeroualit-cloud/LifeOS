@@ -5,7 +5,6 @@ struct CalendarScreen: View {
     @EnvironmentObject var router: NativeRouter
     @Environment(\.dismiss) private var dismiss
     @Environment(\.nativeReduceMotion) private var reduceMotion
-    @Environment(\.dynamicTypeSize) private var typeSize
     @State private var showingDay = false
     @State private var monthReturnDay: String?
     private var selected: String {
@@ -496,7 +495,7 @@ struct CalendarScreen: View {
             }.font(.subheadline).frame(minHeight: NativeDesign.Layout.touchTarget)
             if painting {
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: NativeDesign.Space.small),
-                                         count: typeSize.isAccessibilitySize ? 2 : 3),
+                                         count: 2),
                           spacing: NativeDesign.Space.small) {
                     ForEach(ShiftKind.allCases) { kind in
                         NativeShiftBrushOption(kind: kind, brush: $brush)
@@ -515,19 +514,21 @@ private struct NativeShiftBrushOption: View {
             VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
                 Label(kind.title, systemImage: kind.symbol)
                     .font(.caption.weight(.semibold))
-                    .fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
                 if !kind.time.isEmpty {
                     Text(kind.time).font(.caption2).foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
                 }
             }
                 .padding(.horizontal, NativeDesign.Space.small)
                 .padding(.vertical, NativeDesign.Space.xs)
                 .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.shiftBrushHeight, alignment: .leading)
-                .overlay(RoundedRectangle(cornerRadius: NativeDesign.controlRadius)
-                    .strokeBorder(brush == kind.rawValue ? kind.color : .clear, lineWidth: NativeDesign.Layout.selectionLine))
                 .contentShape(Rectangle())
         }.modifier(NativeRoutineAppearance()).tint(brush == kind.rawValue ? kind.color : .primary)
+            .overlay(RoundedRectangle(cornerRadius: NativeDesign.controlRadius)
+                .strokeBorder(brush == kind.rawValue ? kind.color : .clear, lineWidth: NativeDesign.Layout.selectionLine))
             .accessibilityLabel(kind.title + (kind.time.isEmpty ? "" : ", " + kind.time))
             .accessibilityHint("Tocca i giorni per applicare questo turno")
             .accessibilityIdentifier("shift-brush-" + kind.rawValue).accessibilityAddTraits(brush == kind.rawValue ? .isSelected : [])
