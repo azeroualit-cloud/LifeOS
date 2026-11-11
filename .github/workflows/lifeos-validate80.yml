@@ -27,8 +27,11 @@ jobs:
           set -euo pipefail
           xcrun simctl bootstatus "$MAIN_DEVICE" -b
           cases=(
+            LifeOSProbeTests
             LifeOSProbeUITests/NativeAppleHealthReferenceUITests/testCaptureAppleHealthReference
             LifeOSProbeUITests/NativeNutritionQuickUITests/testSupermarketFoodsAndSupplementEditor
+            LifeOSProbeUITests/NativeRevision71UITests/testPaintingHasGlassPaletteAndRapidEditsPreserveLastIntentAndUndo
+            LifeOSProbeUITests/NativeRevision71UITests/testPaintingPaletteFullNamesWithLargeText
             LifeOSProbeUITests/NativeRevision74UITests/testMoreDestinationsAndBloomNotePersistsAcrossNavigation
             LifeOSProbeUITests/NativeNutritionQuickUITests/testDatePickerOpensFullWidthWithLargeTextAndKeepsNutrients
             LifeOSProbeUITests/NativeNutritionQuickUITests/testLargeTextCaloriesRemainReadableAboveActionWithKeyboard
