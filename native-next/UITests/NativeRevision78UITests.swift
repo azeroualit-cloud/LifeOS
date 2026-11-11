@@ -472,6 +472,8 @@ final class NativeAppleHealthReferenceUITests: XCTestCase {
                 return
             }
             capture("favorites-editor", health)
+            // Health restores the previous editor position when it is reopened.
+            for _ in 0..<8 { editor.swipeDown(velocity: .fast) }
             let row = editor.cells[prefix + identifier]
             let toggle = row.images["UIA.Health.Toggle"]
             for _ in 0..<24 where !toggle.isHittable {

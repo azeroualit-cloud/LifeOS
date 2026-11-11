@@ -86,7 +86,10 @@ if __name__ == "__main__":
         areas, tests, paths, reason = trial_selection(a.base)
     elif a.mode == "health-reference":
         areas = ["health"]
-        tests = ["LifeOSProbeUITests/NativeAppleHealthReferenceUITests/testCaptureAppleHealthReference"]
+        tests = [
+            "LifeOSProbeTests/NativeNutritionEntryTests",
+            "LifeOSProbeUITests/NativeAppleHealthReferenceUITests/testCaptureAppleHealthReference",
+        ]
     elif a.mode == "health-detail-render":
         areas = ["health", "nutrition"]
         tests = ["LifeOSProbeUITests/NativeRevision78UITests/testRenderHealthDiaryOmegaAndRankedCatalog"]
