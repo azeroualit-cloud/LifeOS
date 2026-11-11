@@ -456,6 +456,7 @@ final class NativeAppleHealthReferenceUITests: XCTestCase {
         let editor = health.collectionViews["UIA.Health.EditFavoritesCollectionViewController.CollectionView"]
         let done = health.buttons.matching(NSPredicate(format: "label IN %@", ["Fine", "Done"])).firstMatch
         let prefix = "UIA.Health.FavoritesEdit."
+        var firstMetricIdentifier: String?
         for identifier in identifiers {
             let summaryMetric = feed.cells["UIA.Health.Snippet." + identifier]
             if summaryMetric.exists { continue }
@@ -472,8 +473,16 @@ final class NativeAppleHealthReferenceUITests: XCTestCase {
                 return
             }
             capture("favorites-editor", health)
-            // Health restores the previous editor position when it is reopened.
-            for _ in 0..<8 { editor.swipeDown(velocity: .fast) }
+            if firstMetricIdentifier == nil { firstMetricIdentifier = firstMetric.identifier }
+            if let identifier = firstMetricIdentifier {
+                let topMetric = editor.cells[identifier]
+                // Stop at the first row so a pull past the top cannot dismiss the sheet.
+                for _ in 0..<12 where !topMetric.isHittable {
+                    let start = editor.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.40))
+                    let end = editor.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.65))
+                    start.press(forDuration: 0.05, thenDragTo: end)
+                }
+            }
             let row = editor.cells[prefix + identifier]
             let toggle = row.images["UIA.Health.Toggle"]
             for _ in 0..<24 where !toggle.isHittable {
