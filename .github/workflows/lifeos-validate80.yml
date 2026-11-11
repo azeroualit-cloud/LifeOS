@@ -169,9 +169,21 @@ jobs:
           echo 'Release build finished; starting four launch checks'
           python3 -u ../scripts/verify-release-launch75.py
       - uses: actions/upload-artifact@v4
+        id: release-evidence
+        continue-on-error: true
         if: always()
         with:
           name: lifeos-final-release-launches
+          path: |
+            app/build/final-*.log
+            app/build/FinalSession.xcresult
+            app/release-launch
+      - name: Retry Release evidence upload
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() && steps.release-evidence.outcome == 'failure' }}
+        with:
+          name: lifeos-final-release-launches
+          overwrite: true
           path: |
             app/build/final-*.log
             app/build/FinalSession.xcresult

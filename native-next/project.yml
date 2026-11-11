@@ -21,6 +21,8 @@ targets:
       - path: Resources/generic-foods.json
       - path: Resources/cocktails.json
         buildPhase: resources
+      - path: Resources/supplements.json
+        buildPhase: resources
     info:
       path: GeneratedInfo.plist
       properties:

@@ -175,6 +175,19 @@ final class NativeRevision71UITests: XCTestCase {
         expectation(for: NSPredicate(format: "label CONTAINS %@", "Pomeriggio"), evaluatedWith: today); waitForExpectations(timeout: 5)
         capture("71-supershift-glass-painting")
     }
+    func testPaintingPaletteFullNamesWithLargeText() {
+        let app = launch(["--large-text"])
+        app.openOtherDestination("Calendario")
+        app.buttons["toggle-shift-paint"].tap()
+        for kind in ["morning", "afternoon", "night", "rest", "holiday", "erase"] {
+            let option = app.buttons["shift-brush-" + kind]
+            XCTAssertTrue(option.isHittable, kind)
+            XCTAssertGreaterThanOrEqual(option.frame.width.rounded(), 44)
+            XCTAssertGreaterThanOrEqual(option.frame.height.rounded(), 44)
+        }
+        XCTAssertTrue(app.buttons["shift-brush-afternoon"].label.contains("Pomeriggio"))
+        capture("Turni nomi completi testo grande")
+    }
     func testFinanceMatchesOpenLayoutAndKeepsBudgetAnalysisAndExpense() {
         let app = launch()
         app.openOtherDestination("Finanza")

@@ -90,6 +90,8 @@ if __name__ == "__main__":
             "LifeOSProbeTests/NativeNutritionEntryTests",
             "LifeOSProbeUITests/NativeAppleHealthReferenceUITests/testCaptureAppleHealthReference",
             "LifeOSProbeUITests/NativeNutritionQuickUITests/testSupermarketFoodsAndSupplementEditor",
+            "LifeOSProbeUITests/NativeRevision71UITests/testPaintingHasGlassPaletteAndRapidEditsPreserveLastIntentAndUndo",
+            "LifeOSProbeUITests/NativeRevision71UITests/testPaintingPaletteFullNamesWithLargeText",
         ]
     elif a.mode == "health-detail-render":
         areas = ["health", "nutrition"]

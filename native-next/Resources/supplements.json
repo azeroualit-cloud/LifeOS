@@ -1,0 +1,210 @@
+[
+  {
+    "id": "supplement-whey",
+    "name": "Proteine whey",
+    "detail": "30 g per dose · stima",
+    "family": "supplement",
+    "aliases": [
+      "proteine in polvere",
+      "whey concentrate"
+    ],
+    "calories": 12200,
+    "protein": 2400,
+    "carbohydrate": 200,
+    "fat": 200,
+    "fibre": 0,
+    "nutrientValues": {}
+  },
+  {
+    "id": "supplement-whey-isolate",
+    "name": "Proteine whey isolate",
+    "detail": "30 g per dose · stima",
+    "family": "supplement",
+    "aliases": [
+      "whey isolate"
+    ],
+    "calories": 11400,
+    "protein": 2700,
+    "carbohydrate": 100,
+    "fat": 30.0,
+    "fibre": 0,
+    "nutrientValues": {}
+  },
+  {
+    "id": "supplement-collagen",
+    "name": "Collagene",
+    "detail": "10 g per dose · stima",
+    "family": "supplement",
+    "aliases": [
+      "collagene idrolizzato"
+    ],
+    "calories": 3600,
+    "protein": 900,
+    "carbohydrate": 0,
+    "fat": 0,
+    "fibre": 0,
+    "nutrientValues": {}
+  },
+  {
+    "id": "supplement-psyllium",
+    "name": "Fibre di psillio",
+    "detail": "5 g per dose · stima",
+    "family": "supplement",
+    "aliases": [
+      "psillio",
+      "psyllium"
+    ],
+    "calories": 800,
+    "protein": 0,
+    "carbohydrate": 0,
+    "fat": 0,
+    "fibre": 400,
+    "nutrientValues": {}
+  },
+  {
+    "id": "supplement-omega3",
+    "name": "Omega-3 (180 mg EPA + 120 mg DHA)",
+    "detail": "1 g di olio per dose",
+    "family": "supplement",
+    "aliases": [
+      "omega 3",
+      "olio di pesce"
+    ],
+    "calories": 900,
+    "protein": 0,
+    "carbohydrate": 0,
+    "fat": 100,
+    "fibre": 0,
+    "nutrientValues": {
+      "epa": {
+        "amount": 18000,
+        "estimateSource": "Composizione indicativa della dose generica"
+      },
+      "dha": {
+        "amount": 12000,
+        "estimateSource": "Composizione indicativa della dose generica"
+      }
+    }
+  },
+  {
+    "id": "supplement-vitamin-c",
+    "name": "Vitamina C (500 mg)",
+    "detail": "500 mg per dose",
+    "family": "supplement",
+    "aliases": [
+      "acido ascorbico"
+    ],
+    "calories": 0,
+    "protein": 0,
+    "carbohydrate": 0,
+    "fat": 0,
+    "fibre": 0,
+    "nutrientValues": {
+      "vitaminC": {
+        "amount": 50000,
+        "estimateSource": "Composizione indicativa della dose generica"
+      }
+    }
+  },
+  {
+    "id": "supplement-vitamin-d",
+    "name": "Vitamina D3 (25 µg)",
+    "detail": "25 µg = 1000 UI per dose",
+    "family": "supplement",
+    "aliases": [
+      "vitamina d",
+      "d3"
+    ],
+    "calories": 0,
+    "protein": 0,
+    "carbohydrate": 0,
+    "fat": 0,
+    "fibre": 0,
+    "nutrientValues": {
+      "vitaminD": {
+        "amount": 2500,
+        "estimateSource": "Composizione indicativa della dose generica"
+      }
+    }
+  },
+  {
+    "id": "supplement-vitamin-b12",
+    "name": "Vitamina B12 (2,5 µg)",
+    "detail": "2,5 µg per dose",
+    "family": "supplement",
+    "aliases": [
+      "b12"
+    ],
+    "calories": 0,
+    "protein": 0,
+    "carbohydrate": 0,
+    "fat": 0,
+    "fibre": 0,
+    "nutrientValues": {
+      "vitaminB12": {
+        "amount": 250.0,
+        "estimateSource": "Composizione indicativa della dose generica"
+      }
+    }
+  },
+  {
+    "id": "supplement-magnesium",
+    "name": "Magnesio (200 mg)",
+    "detail": "200 mg di magnesio elementare per dose",
+    "family": "supplement",
+    "aliases": [
+      "magnesio"
+    ],
+    "calories": 0,
+    "protein": 0,
+    "carbohydrate": 0,
+    "fat": 0,
+    "fibre": 0,
+    "nutrientValues": {
+      "magnesium": {
+        "amount": 20000,
+        "estimateSource": "Composizione indicativa della dose generica"
+      }
+    }
+  },
+  {
+    "id": "supplement-zinc",
+    "name": "Zinco (10 mg)",
+    "detail": "10 mg di zinco elementare per dose",
+    "family": "supplement",
+    "aliases": [
+      "zinco"
+    ],
+    "calories": 0,
+    "protein": 0,
+    "carbohydrate": 0,
+    "fat": 0,
+    "fibre": 0,
+    "nutrientValues": {
+      "zinc": {
+        "amount": 1000,
+        "estimateSource": "Composizione indicativa della dose generica"
+      }
+    }
+  },
+  {
+    "id": "supplement-calcium",
+    "name": "Calcio (500 mg)",
+    "detail": "500 mg di calcio elementare per dose",
+    "family": "supplement",
+    "aliases": [
+      "calcio"
+    ],
+    "calories": 0,
+    "protein": 0,
+    "carbohydrate": 0,
+    "fat": 0,
+    "fibre": 0,
+    "nutrientValues": {
+      "calcium": {
+        "amount": 50000,
+        "estimateSource": "Composizione indicativa della dose generica"
+      }
+    }
+  }
+]

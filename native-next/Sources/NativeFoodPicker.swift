@@ -146,7 +146,8 @@ struct NativeGenericFood: Codable, Identifiable {
 
     static let foods = loadCatalog("generic-foods")
     static let cocktails = loadCatalog("cocktails")
-    static let catalog = foods + cocktails
+    static let catalog = foods + cocktails + supplements
+    static let supplements = loadCatalog("supplements")
 
     private static func loadCatalog(_ name: String) -> [Self] {
         guard let url = Bundle.main.url(forResource: name, withExtension: "json"),

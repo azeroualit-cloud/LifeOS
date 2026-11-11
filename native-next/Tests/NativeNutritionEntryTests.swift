@@ -15,6 +15,15 @@ final class NativeNutritionEntryTests: XCTestCase {
         XCTAssertEqual(entry.calories, 0)
         XCTAssertNil(entry.portionGrams)
     }
+    func testGenericSupplementsAreInAllFoodsWithExplicitDoseAmounts() throws {
+        let vitamin = try XCTUnwrap(NativeGenericFood.catalog.first { $0.id == "supplement-vitamin-c" })
+        let entry = try XCTUnwrap(vitamin.portion(id: UUID(), date: .now, grams: 0.5))
+        XCTAssertEqual(entry.nutrientValues?["vitaminC"]?.amount, 250)
+        XCTAssertEqual(entry.calories, 0)
+        XCTAssertNil(entry.portionGrams)
+        XCTAssertTrue(NativeGenericFood.matches("proteine whey").contains { $0.id == "supplement-whey" })
+        XCTAssertEqual(NativeGenericFood.supplements.count, 11)
+    }
     func testNutrientWarningsRequireSevenCompleteDaysAndUseAverageRequirement() {
         var row = NativeNutritionEntry(id: UUID(), revision: 1, date: .now, protein: 20, carbohydrate: 0, fat: 0, confirmed: true)
         row.nutrientValues = ["vitaminC": .init(amount: 74, estimateSource: nil)]

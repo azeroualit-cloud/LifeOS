@@ -129,7 +129,7 @@ final class NativeNutritionQuickUITests: XCTestCase {
         app.buttons["quick-nutrition-catalog"].tap()
         let search = app.textFields["generic-food-search"]
         XCTAssertTrue(search.waitForExistence(timeout: 10))
-        for name in ["Crescenza", "Provolone", "Patatine", "Gelato"] {
+        for name in ["Crescenza", "Provolone", "Patatine", "Gelato", "Vitamina C"] {
             search.tap()
             let value = search.value as? String ?? ""
             if value != "Cerca alimento" {
@@ -138,6 +138,13 @@ final class NativeNutritionQuickUITests: XCTestCase {
             search.typeText(name)
             capture("Supermercato " + name, app)
         }
+        XCTAssertFalse(app.buttons["Integratori"].exists)
+        let vitamin = app.buttons["generic-food-supplement-vitamin-c"]
+        XCTAssertTrue(vitamin.isHittable)
+        vitamin.tap()
+        XCTAssertTrue(app.staticTexts["Dosi"].waitForExistence(timeout: 10))
+        capture("Integratore generico da Tutti", app)
+        app.buttons["quick-nutrition-catalog"].tap()
         app.buttons["generic-food-create"].tap()
         let family = app.buttons["personal-food-family"]
         XCTAssertTrue(family.waitForExistence(timeout: 10))

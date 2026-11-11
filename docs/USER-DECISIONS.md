@@ -326,3 +326,7 @@ Fonte utente: «manda in produzione l'ipa». Dopo la consegna dei render è auto
 ## FOOD-SUPERMARKET-01 — ACTIVE, 11 novembre 2026
 
 Richiesta diretta di ampliare gli alimenti generici tipici del supermercato senza marche, con integratori e storico giornaliero di calorie e macro. Mantiene le esclusioni di maiale e creatina. Implementazione e verifica prima della produzione.
+
+## SUPPLEMENTS-ALL-SHIFT-PALETTE-01 — ACTIVE, 11 novembre 2026
+
+Integratori generici in Tutti, con Personali separato. Correggere la palette dei turni mostrata nella foto e verificare prima i flussi fragili. Fonte diretta utente.

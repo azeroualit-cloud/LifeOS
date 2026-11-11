@@ -5,6 +5,7 @@ struct CalendarScreen: View {
     @EnvironmentObject var router: NativeRouter
     @Environment(\.dismiss) private var dismiss
     @Environment(\.nativeReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var typeSize
     @State private var showingDay = false
     @State private var monthReturnDay: String?
     private var selected: String {
@@ -494,10 +495,12 @@ struct CalendarScreen: View {
                 NativeIconButton(symbol: "chevron.right", label: "Mese successivo") { jumpMonth = NativeCalendarWindow.offset(focusMonth, by: 1) }.disabled(store.busy)
             }.font(.subheadline).frame(minHeight: NativeDesign.Layout.touchTarget)
             if painting {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: NativeDesign.Space.small) { ForEach(ShiftKind.allCases) { kind in
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: NativeDesign.Space.small),
+                                         count: typeSize.isAccessibilitySize ? 2 : 3),
+                          spacing: NativeDesign.Space.small) {
+                    ForEach(ShiftKind.allCases) { kind in
                         NativeShiftBrushOption(kind: kind, brush: $brush)
-                    } }
+                    }
                 }
             }
         }.buttonStyle(NativePressStyle())
@@ -507,18 +510,24 @@ struct CalendarScreen: View {
 private struct NativeShiftBrushOption: View {
     let kind: ShiftKind
     @Binding var brush: String
-    @ScaledMetric(relativeTo: .caption) private var width = NativeDesign.Layout.shiftBrushWidth
-    @ScaledMetric(relativeTo: .caption) private var height = NativeDesign.Layout.shiftBrushHeight
     var body: some View {
         Button { brush = kind.rawValue } label: {
-            VStack(spacing: NativeDesign.Space.xs) {
-                Label { Text(String(kind.title.prefix(1))).foregroundStyle(Color.primary) } icon: { Image(systemName: kind.symbol).foregroundStyle(kind.color) }.font(.caption.weight(.semibold))
-                Text(kind.time.isEmpty ? " " : kind.time.replacingOccurrences(of: ":00", with: "")).font(.caption2).foregroundStyle(NativeDesign.secondary).lineLimit(1)
-            }.frame(width: width, height: height)
-                .modifier(NativeGlass())
-                .overlay(Capsule().stroke(brush == kind.rawValue ? kind.color : Color.clear, lineWidth: NativeDesign.Layout.selectionLine))
+            VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
+                Label(kind.title, systemImage: kind.symbol)
+                    .font(.caption.weight(.semibold))
+                    .fixedSize(horizontal: false, vertical: true)
+                if !kind.time.isEmpty {
+                    Text(kind.time).font(.caption2).foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+                .padding(.horizontal, NativeDesign.Space.small)
+                .padding(.vertical, NativeDesign.Space.xs)
+                .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.shiftBrushHeight, alignment: .leading)
+                .overlay(RoundedRectangle(cornerRadius: NativeDesign.controlRadius)
+                    .strokeBorder(brush == kind.rawValue ? kind.color : .clear, lineWidth: NativeDesign.Layout.selectionLine))
                 .contentShape(Rectangle())
-        }.buttonStyle(NativePressStyle()).foregroundStyle(kind.color)
+        }.modifier(NativeRoutineAppearance()).tint(brush == kind.rawValue ? kind.color : .primary)
             .accessibilityLabel(kind.title + (kind.time.isEmpty ? "" : ", " + kind.time))
             .accessibilityHint("Tocca i giorni per applicare questo turno")
             .accessibilityIdentifier("shift-brush-" + kind.rawValue).accessibilityAddTraits(brush == kind.rawValue ? .isSelected : [])
