@@ -603,7 +603,7 @@
       "outputs": "Gate suite completa, screenshot e quattro avvii senza IPA",
       "checks": "Suite completa, screenshot esaminati e quattro avvii Release; nessuna IPA; registrare risultati e limiti.",
       "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta.",
-      "status": "blocked_health_reference_then_full_suite_and_four_release_launches_without_packaging",
+      "status": "complete_gate_running",
       "inputs": [
         "docs/USER-DECISIONS.json",
         "docs/PROJECT-RELEASE-PLAN.md",
@@ -760,9 +760,9 @@
   "current_audit": {
     "recorded_on": "2026-11-12",
     "working_branch": "codex/revision77",
-    "candidate_source_commit": "082a238449be7612842ea303ce1f34db5d8734f8",
-    "focused_run": 43225787669,
-    "status": "focused_corrections_running",
+    "candidate_source_commit": "8ac2d4f5725d624f8a89f8458cf7c03dc2242bc9",
+    "focused_run": 43229809175,
+    "status": "complete_no_package_gate_running",
     "complete_catalog": {
       "source_products": 5323,
       "food_entries": 2893,
@@ -781,6 +781,8 @@
     "physical_device_verified": false,
     "accepted_for_production": false,
     "packaging_authorized": false,
-    "backend_deploy_authorized": false
+    "backend_deploy_authorized": false,
+    "focused_result": "1 unit + 2 UI passed; screenshots inspected",
+    "final_run": 43232065358
   }
 }

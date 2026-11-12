@@ -1,5 +1,9 @@
 # LifeOS — correzioni e difetti aperti
 
+## Stato prevalente — tre casi mirati passati, gate finale in corso
+
+La prova 43229809175 (ff2a894) ha superato i tre casi rimasti: esclusioni generiche, eliminazione/annullamento e cronologia per giorno, Spesotti in ml. Catture ispezionate. Il run completo 43232065358 sul sorgente 8ac2d4f è in corso senza IPA; nessuna dichiarazione di accettazione o prova fisica. Le note successive conservano la diagnosi precedente.
+
 ## Stato prevalente — catalogo completo, verifica mirata in corso
 
 [43225787669](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43225787669) su `082a238`: correzione identificatori del diario, sostituzione numerica nel test editor, contratto porzione in modifica manuale, regressione palette e prova latte Spesotti in ml. Catalogo ufficiale: 2.893 alimenti, acquisizione conclusa e verificata localmente. Nessuna IPA autorizzata.

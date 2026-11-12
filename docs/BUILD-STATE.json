@@ -8,8 +8,8 @@
   "source_of_truth": "native-next overlay assembled through .github/actions/native-compat76/action.yml",
   "native_source_fingerprint": {
     "algorithm": "SHA-256 over sorted tracked native-next paths, NUL, canonical Git blob bytes, NUL",
-    "sha256": "58a9f44fd0babe07d0873dbc233f6b8e286226e5fb2f3a5d4df6d9d92ab82de5",
-    "source_commit": "082a238449be7612842ea303ce1f34db5d8734f8"
+    "sha256": "ab6014c12402a81db0deb278d0b1e93eb2a618a89f21a63ba96c7f906e5bbd87",
+    "source_commit": "8ac2d4f5725d624f8a89f8458cf7c03dc2242bc9"
   },
   "latest_distributed_build": {
     "version": "0.10.26",
@@ -441,7 +441,7 @@
     "final_workflow_event": "workflow_dispatch"
   },
   "catalog_increment_2026_11_12": {
-    "status": "ready_for_complete_no_package_gate",
+    "status": "complete_no_package_gate_running",
     "decision": "CATALOG-BRANDS-UNITS-HISTORY-2026-11-12",
     "public_inventory_count": 5323,
     "branded_foods_complete": true,
@@ -494,7 +494,11 @@
       "Coop Spesotti brand",
       "250 ml milk equals 117.5 kcal",
       "day-grouped history after selected-day deletion"
-    ]
+    ],
+    "final_source_commit": "8ac2d4f5725d624f8a89f8458cf7c03dc2242bc9",
+    "final_run": 43232065358,
+    "package_status": "not_authorized_in_current_chat",
+    "published": false
   },
   "historical_increment_states": {
     "current_increment": {
@@ -544,10 +548,10 @@
     "type": "Coop/Spesotti, integratori per unità, modifica personale, cronologia e palette compatta",
     "candidate_version": "0.10.27",
     "candidate_build": 89,
-    "source_commit": "082a238449be7612842ea303ce1f34db5d8734f8",
+    "source_commit": "8ac2d4f5725d624f8a89f8458cf7c03dc2242bc9",
     "new_ipa": false,
-    "validation_run": 43225787669,
-    "validation": "focused corrections in progress; complete final gate still required",
+    "validation_run": 43232065358,
+    "validation": "Complete no-package gate running after focused checks",
     "accepted_for_production": false
   }
 }
