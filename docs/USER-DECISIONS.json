@@ -918,6 +918,16 @@
       "provenance": "Richiesta diretta utente dopo consegna candidato verificato",
       "original_quote": "puoi mandare in produzione l'ipa?",
       "rule": "Autorizzati confezionamento, verifica e pubblicazione IPA del candidato finale verificato. Soddisfa IPA-GATE-01 e il divieto fino a richiesta esplicita; non autorizza deploy backend né dichiara accettazione fisica. Riutilizzare test già conclusi sul medesimo prodotto."
+    },
+    {
+      "id": "TDEE-LAST-WEIGH-IN-2026-11-12",
+      "status": "ACTIVE",
+      "scope": "Calibrazione TDEE LifeOS",
+      "recorded_on": "2026-11-12",
+      "provenance": "Richiesta diretta utente dopo screenshot TDEE build 89",
+      "original_quote": "facciamo il calcolo sulle ultime 2 settimane dall'ultima pesata ma senza limiti minimi di numero di pesate",
+      "rule": "Finestra di 14 giorni a ritroso dall’ultima pesata disponibile, inclusa. Rimuovere i minimi arbitrari di numero pesate, durata e numero/distanza dei confronti. Due date distinte sono necessarie per misurare una variazione. Conservare il requisito esistente di copertura calorica 90%, non oggetto della richiesta. Nessuna nuova IPA o deploy autorizzati.",
+      "relationship": "Precisa HEALTH-WEEK-REVIEW-01, che approva 14 giorni senza ancoraggio o soglie esplicite. Nessun conflitto con una regola utente attiva."
     }
   ],
   "pending_confirmations": [

@@ -354,3 +354,7 @@ Ripresa una tantum, richiesta diretta del 12 novembre 2026: analizzare prima il 
 ## IPA-DELIVERY-2026-11-12 — ACTIVE
 
 Fonte diretta: «puoi mandare in produzione l'ipa?». Autorizzata una IPA 0.10.27 build 89 del candidato finale verificato, con verifica pacchetto e pubblicazione. La richiesta soddisfa IPA-GATE-01 e il precedente limite fino a richiesta esplicita: nessun conflitto da riconfermare. Nessun deploy backend; accettazione fisica distinta. Riutilizzare le prove concluse sul medesimo prodotto.
+
+## TDEE-LAST-WEIGH-IN-2026-11-12 — ACTIVE
+
+Fonte diretta: «facciamo il calcolo sulle ultime 2 settimane dall'ultima pesata ma senza limiti minimi di numero di pesate». Finestra di 14 giorni a ritroso dall’ultima pesata, inclusa anche se odierna. Rimossi i minimi arbitrari di pesate, durata e confronti; due date distinte restano necessarie per misurare una variazione. Copertura calorica 90% conservata, non oggetto della richiesta. Precisa HEALTH-WEEK-REVIEW-01 senza conflitto con una regola utente esplicita. Nessuna nuova IPA/deploy.

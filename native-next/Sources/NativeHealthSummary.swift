@@ -327,7 +327,7 @@ struct NativeHealthDetail: View {
 
     private func context(_ metric: NativeHealthMetric) -> String {
         switch metric {
-        case .tdee: return "Ultimi 14 giorni"
+        case .tdee: return "14 giorni dall’ultima pesata"
         case .weight: return health.days.last(where: { $0.weight != nil })?.date.formatted(date: .abbreviated, time: .omitted) ?? "Ultima pesata"
         case .calories: return selectedDate.formatted(date: .abbreviated, time: .omitted)
         case .weeklyCalories, .weeklyProtein: return "Settimana selezionata"

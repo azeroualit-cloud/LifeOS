@@ -616,5 +616,16 @@
     "release_launches": 4,
     "physical_device_verified_by_agent": false,
     "accepted_for_production": false
+  },
+  "tdee_last_weigh_in_2026_11_12": {
+    "status": "implemented_pending_focused_verification",
+    "decision": "TDEE-LAST-WEIGH-IN-2026-11-12",
+    "calibration_days": 14,
+    "anchor": "latest_valid_weigh_in_including_today",
+    "arbitrary_weigh_in_minimum": false,
+    "minimum_distinct_dates_for_change": 2,
+    "calorie_coverage": 0.9,
+    "new_ipa": false,
+    "backend_deploy": false
   }
 }

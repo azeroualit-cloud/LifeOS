@@ -61,16 +61,15 @@ enum NativeHealthMath {
     }
     static func estimate(_ days: [HealthDay], now: Date = Date(), calendar: Calendar = .current) -> HealthEstimate? {
         let today = calendar.startOfDay(for: now)
-        guard let lastWeightDate = days.filter({ $0.date < today && ($0.weight ?? 0) > 0 && ($0.weight?.isFinite ?? false) }).map(\.date).max() else { return nil }
-        let cutoff = calendar.date(byAdding: .day, value: -calibrationDays, to: today)!
+        guard let lastWeightDate = days.filter({ $0.date <= today && ($0.weight ?? 0) > 0 && ($0.weight?.isFinite ?? false) }).map(\.date).max() else { return nil }
+        let cutoff = calendar.date(byAdding: .day, value: -calibrationDays, to: lastWeightDate)!
         let history = days.filter { $0.date >= cutoff && $0.date <= lastWeightDate }.sorted { $0.date < $1.date }
         // Work with aligned daily records, not a lagged moving median.
         guard Set(history.map(\.date)).count == history.count else { return nil }
         let weights = history.filter { ($0.weight ?? 0) > 0 && ($0.weight?.isFinite ?? false) }
-        guard weights.count >= 10, let first = weights.first, let last = weights.last,
-              let age = calendar.dateComponents([.day], from: last.date, to: today).day, age <= 7 else { return nil }
+        guard let first = weights.first, let last = weights.last else { return nil }
         let span = calendar.dateComponents([.day], from: first.date, to: last.date).day ?? 0
-        guard span >= 10 else { return nil }
+        guard span > 0 else { return nil }
         let food = history.filter { $0.date >= first.date && $0.date < last.date }
         let logged = food.compactMap(\.calories).filter { $0.isFinite && $0 > 0 }
         let missing = span - logged.count
@@ -95,21 +94,20 @@ enum NativeHealthMath {
         let adjusted = weights.enumerated().map { index, day in
             cumulative[offsets[index]] - energyPerKG * (day.weight! - first.weight!)
         }
-        let minimumPairDays = 7
         var slopes: [Double] = [], lowerSlopes: [Double] = [], upperSlopes: [Double] = []
         for j in 1..<weights.count {
             for i in 0..<j {
                 let interval = offsets[j] - offsets[i]
-                guard interval >= minimumPairDays else { continue }
+                guard interval > 0 else { continue }
                 let value = (adjusted[j] - adjusted[i]) / Double(interval)
                 let gapImpact = 500.0 * Double(missingPrefix[offsets[j]] - missingPrefix[offsets[i]]) / Double(interval)
                 slopes.append(value); lowerSlopes.append(value - gapImpact); upperSlopes.append(value + gapImpact)
             }
         }
-        guard slopes.count >= 10 else { return nil }
+        guard !slopes.isEmpty else { return nil }
         let tdee = median(slopes)
         guard tdee.isFinite, (800...6000).contains(tdee) else { return nil }
-        guard let scenarioIntake = recentIntake(days, now: now, calendar: calendar) else { return nil }
+        let scenarioIntake = recentIntake(days, now: now, calendar: calendar) ?? calibrationIntake
         var result = HealthEstimate(tdee: tdee, averageIntake: scenarioIntake,
             startWeight: trend(weights, calendar: calendar).last!.value, lastDate: last.date, days: span)
         result.firstDate = first.date; result.weighIns = weights.count

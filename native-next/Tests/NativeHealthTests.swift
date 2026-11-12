@@ -109,7 +109,7 @@ final class NativeHealthTests: XCTestCase {
         for i in 26...30 { rows[i].calories = nil }
         XCTAssertNil(NativeHealthMath.estimate(rows, now: now, calendar: calendar))
     }
-    func testCalibrationUsesFourteenCompletedDaysAndScenarioUsesSeven() throws {
+    func testCalibrationUsesFourteenDaysThroughLastWeighInAndScenarioUsesSeven() throws {
         var rows: [HealthDay] = []
         var weight = 76.0
         for offset in -120...0 {
@@ -118,8 +118,8 @@ final class NativeHealthTests: XCTestCase {
             weight += (calories - 2800) / 7700
         }
         let result = try XCTUnwrap(NativeHealthMath.estimate(rows, now: now, calendar: calendar))
-        XCTAssertEqual(result.days, 13)
-        XCTAssertEqual(result.weighIns, 14)
+        XCTAssertEqual(result.days, 14)
+        XCTAssertEqual(result.weighIns, 15)
         XCTAssertEqual(result.tdee, 2800, accuracy: 0.01)
         XCTAssertEqual(result.averageIntake, 3300, accuracy: 0.01)
         XCTAssertLessThan(result.calibrationIntake, result.averageIntake)
@@ -135,15 +135,41 @@ final class NativeHealthTests: XCTestCase {
         let result = try XCTUnwrap(NativeHealthMath.estimate(rows, now: now, calendar: calendar))
         XCTAssertEqual(result.tdee, 2700, accuracy: 0.01)
     }
-    func testTodayDoesNotDistortEstimate() throws {
-        var rows = history(); rows[35].calories = 100; rows[35].weight = 90
+    func testFutureRecordsDoNotDistortEstimate() throws {
+        var rows = history()
+        rows.append(HealthDay(date: calendar.date(byAdding: .day, value: 1, to: now)!, weight: 90, calories: 100))
         let result = try XCTUnwrap(NativeHealthMath.estimate(rows, now: now, calendar: calendar))
         XCTAssertEqual(result.tdee, 2200, accuracy: 0.01)
-        XCTAssertEqual(result.startWeight, 80)
+        XCTAssertEqual(result.lastDate, now)
     }
-    func testInsufficientOrStaleHistoryDoesNotProduceTDEE() {
-        XCTAssertNil(NativeHealthMath.estimate(Array(history().suffix(10)), now: now, calendar: calendar))
-        XCTAssertNil(NativeHealthMath.estimate(Array(history().prefix(25)), now: now, calendar: calendar))
+    func testTwoWeighInsOneDayApartCanProduceEstimate() throws {
+        let yesterday = calendar.date(byAdding: .day, value: -1, to: now)!
+        let rows = [HealthDay(date: yesterday, weight: 80, calories: 2200), HealthDay(date: now, weight: 80, calories: nil)]
+        let result = try XCTUnwrap(NativeHealthMath.estimate(rows, now: now, calendar: calendar))
+        XCTAssertEqual(result.tdee, 2200, accuracy: 0.01)
+        XCTAssertEqual(result.weighIns, 2)
+        XCTAssertEqual(result.days, 1)
+    }
+    func testWindowAnchorsToOldLastWeighInWithoutRequiringRecentIntake() throws {
+        let last = calendar.date(byAdding: .day, value: -20, to: now)!
+        let rows = (-15...0).map { offset in
+            HealthDay(date: calendar.date(byAdding: .day, value: offset, to: last)!,
+                      weight: offset == -15 ? 120 : (offset == -14 || offset == 0 ? 80 : nil), calories: offset == 0 ? nil : 2200)
+        }
+        let result = try XCTUnwrap(NativeHealthMath.estimate(rows, now: now, calendar: calendar))
+        XCTAssertEqual(result.firstDate, calendar.date(byAdding: .day, value: -14, to: last))
+        XCTAssertEqual(result.lastDate, last)
+        XCTAssertEqual(result.days, 14)
+        XCTAssertEqual(result.weighIns, 2)
+        XCTAssertEqual(result.tdee, 2200, accuracy: 0.01)
+        XCTAssertEqual(result.averageIntake, 2200)
+    }
+    func testSingleWeighInOrSameDayDuplicatesCannotMeasureChange() {
+        XCTAssertNil(NativeHealthMath.estimate([HealthDay(date: now, weight: 80, calories: 2200)], now: now, calendar: calendar))
+        XCTAssertNil(NativeHealthMath.estimate([HealthDay(date: now, weight: 80, calories: 2200), HealthDay(date: now, weight: 81, calories: 2200)], now: now, calendar: calendar))
+    }
+    func testPartialShortHistoryIsAllowed() throws {
+        XCTAssertNotNil(NativeHealthMath.estimate(Array(history().suffix(4)), now: now, calendar: calendar))
     }
     func testMedianSuppressesSingleWaterSpike() {
         var rows = history(); rows[20].weight = 85
