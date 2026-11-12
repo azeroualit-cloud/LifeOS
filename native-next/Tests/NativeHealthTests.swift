@@ -122,6 +122,7 @@ final class NativeHealthTests: XCTestCase {
         XCTAssertEqual(result.weighIns, 15)
         XCTAssertEqual(result.tdee, 2800, accuracy: 0.01)
         XCTAssertEqual(result.averageIntake, 3300, accuracy: 0.01)
+        XCTAssertFalse(result.scenarioUsesCalibrationIntake)
         XCTAssertLessThan(result.calibrationIntake, result.averageIntake)
     }
     func testLongIntervalFitResistsSingleWeightSpikeWithoutLabellingItWater() throws {
@@ -163,6 +164,7 @@ final class NativeHealthTests: XCTestCase {
         XCTAssertEqual(result.weighIns, 2)
         XCTAssertEqual(result.tdee, 2200, accuracy: 0.01)
         XCTAssertEqual(result.averageIntake, 2200)
+        XCTAssertTrue(result.scenarioUsesCalibrationIntake)
     }
     func testSingleWeighInOrSameDayDuplicatesCannotMeasureChange() {
         XCTAssertNil(NativeHealthMath.estimate([HealthDay(date: now, weight: 80, calories: 2200)], now: now, calendar: calendar))

@@ -22,6 +22,7 @@ struct HealthEstimate {
     var weighIns: Int = 0
     var loggedDays: Int = 0
     var imputedDays: Int = 0
+    var scenarioUsesCalibrationIntake: Bool = false
     var calibrationIntake: Double = 0
     /// Sensitivity to filling missing days 500 kcal higher/lower; not a confidence interval.
     var missingDaySensitivity: Double = 0
@@ -107,9 +108,11 @@ enum NativeHealthMath {
         guard !slopes.isEmpty else { return nil }
         let tdee = median(slopes)
         guard tdee.isFinite, (800...6000).contains(tdee) else { return nil }
-        let scenarioIntake = recentIntake(days, now: now, calendar: calendar) ?? calibrationIntake
+        let recentScenarioIntake = recentIntake(days, now: now, calendar: calendar)
+        let scenarioIntake = recentScenarioIntake ?? calibrationIntake
         var result = HealthEstimate(tdee: tdee, averageIntake: scenarioIntake,
             startWeight: trend(weights, calendar: calendar).last!.value, lastDate: last.date, days: span)
+        result.scenarioUsesCalibrationIntake = recentScenarioIntake == nil
         result.firstDate = first.date; result.weighIns = weights.count
         result.loggedDays = logged.count; result.imputedDays = missing; result.calibrationIntake = calibrationIntake
         result.missingDaySensitivity = max(tdee - median(lowerSlopes), median(upperSlopes) - tdee)

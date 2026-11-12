@@ -404,7 +404,7 @@ struct NativeHealthMetricDetail: View {
                         .textFieldStyle(.roundedBorder).accessibilityLabel("Calorie dello scenario").accessibilityIdentifier("health-intake")
                     Text("kcal/giorno").font(.subheadline)
                 }
-                Button("Usa media ultimi 7 giorni: " + estimate.averageIntake.formatted(.number.precision(.fractionLength(0))) + " kcal") {
+                Button((estimate.scenarioUsesCalibrationIntake ? "Usa media del periodo di calibrazione: " : "Usa media ultimi 7 giorni: ") + estimate.averageIntake.formatted(.number.precision(.fractionLength(0))) + " kcal") {
                     intakeText = String(Int(estimate.averageIntake.rounded())); editing = false
                 }.frame(minHeight: NativeDesign.Layout.touchTarget)
                 if forecast.isEmpty { Text("Inserisci un valore fra 800 e 6.000 kcal/giorno. Questo intervallo è tecnico, non una raccomandazione alimentare.").font(.caption).foregroundStyle(NativeDesign.secondary) }
