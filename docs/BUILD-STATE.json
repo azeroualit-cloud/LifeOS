@@ -457,6 +457,15 @@
       "skipped": 0,
       "release_launches_passed": 4
     },
-    "diagnosis": "Authorization sheet visible in screenshot but absent from host accessibility tree; test queries remote permission processes. Requires focused verification."
+    "diagnosis": "Authorization sheet visible in screenshot but absent from host accessibility tree; test queries remote permission processes. Requires focused verification.",
+    "focused_run": 43176199615,
+    "focused_source_commit": "d91aa380d821498cb7722639c0489a2d3318c59c",
+    "local_checks": {
+      "selection": 8,
+      "finance_utilities": 36,
+      "worker_transform": 3,
+      "activity_integration": "passed",
+      "backend_deployed": false
+    }
   }
 }

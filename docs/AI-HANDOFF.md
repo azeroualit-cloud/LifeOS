@@ -1,5 +1,8 @@
 # LifeOS — punto di ingresso per qualsiasi IA
 
+
+**Checkpoint 12 novembre — collaudo senza IPA.** [Prova mirata 43176199615](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43176199615) sul commit `d91aa380d821498cb7722639c0489a2d3318c59c`, in corso. Verifica locale: 8 test selettore, 36 test sintetici Finanza/Utenze, 3 test trasformazione Worker e integrazione Attività passati. Gli iniziali errori locali erano dovuti al Worker storico predefinito e alla codifica Windows: con Worker75 rigenerato e UTF-8 i controlli passano. Nessun dato personale interrogato e nessun deploy.
+
 ## Candidato finale — nuova chat del 12 novembre 2026
 
 Questa sezione prevale sulla cronologia. Nessuna IPA autorizzata in questa chat e nessun deploy backend. Registro: FINAL-CANDIDATE-2026-11-12. Audit per tutte le aree in [checklist](PROJECT-CHECKLIST.md) e [piano](PROJECT-RELEASE-PLAN.md).
