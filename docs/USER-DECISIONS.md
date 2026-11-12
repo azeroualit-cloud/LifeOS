@@ -350,3 +350,7 @@ Precisazione integratori, stessa data: «no, cerca di non sbagliare e al massimo
 ## FINAL-RECOVERY-2026-11-12 — ACTIVE
 
 Ripresa una tantum, richiesta diretta del 12 novembre 2026: analizzare prima il run 43232065358, recuperare i soli casi falliti senza ripetere test conclusi, proseguire al candidato finale. Nessuna IPA e nessun deploy backend. Compatibile con FINAL-CANDIDATE-2026-11-12, IPA-GATE-01 e DEV-02. Testo originale nel registro JSON.
+
+## IPA-DELIVERY-2026-11-12 — ACTIVE
+
+Fonte diretta: «puoi mandare in produzione l'ipa?». Autorizzata una IPA 0.10.27 build 89 del candidato finale verificato, con verifica pacchetto e pubblicazione. La richiesta soddisfa IPA-GATE-01 e il precedente limite fino a richiesta esplicita: nessun conflitto da riconfermare. Nessun deploy backend; accettazione fisica distinta. Riutilizzare le prove concluse sul medesimo prodotto.

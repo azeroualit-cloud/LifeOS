@@ -578,5 +578,19 @@
     "aggregate_cases_verified": 405,
     "aggregate_is_not_single_run": true,
     "screenshots_reviewed": true
+  },
+  "ipa_delivery_2026_11_12": {
+    "status": "packaging_authorized_prepared",
+    "decision": "IPA-DELIVERY-2026-11-12",
+    "version": "0.10.27",
+    "build": 89,
+    "product_source_commit": "8ac2d4f5725d624f8a89f8458cf7c03dc2242bc9",
+    "validation_runs": [
+      43232065358,
+      43249620310
+    ],
+    "repeated_tests": false,
+    "backend_deploy": false,
+    "accepted_for_production": false
   }
 }

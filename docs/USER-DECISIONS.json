@@ -909,6 +909,15 @@
       "provenance": "Richiesta diretta utente nella sessione di ripresa",
       "original_quote": "Riprendi LifeOS leggendo AGENTS.md e docs/HANDOFF-2026-11-12.md. Analizza prima l’esito del run 43232065358, senza ripetere i test già conclusi. Continua fino al candidato finale. Nessuna IPA e nessun deploy backend. é fallito",
       "rule": "Analizzare prima il run indicato; recuperare solo i casi falliti senza ripetere prove concluse. Proseguire fino al candidato finale senza IPA né deploy backend. DEV-02 conservata per nuovi difetti di prodotto."
+    },
+    {
+      "id": "IPA-DELIVERY-2026-11-12",
+      "status": "ACTIVE",
+      "scope": "Una IPA del candidato finale LifeOS 0.10.27 build 89",
+      "recorded_on": "2026-11-12",
+      "provenance": "Richiesta diretta utente dopo consegna candidato verificato",
+      "original_quote": "puoi mandare in produzione l'ipa?",
+      "rule": "Autorizzati confezionamento, verifica e pubblicazione IPA del candidato finale verificato. Soddisfa IPA-GATE-01 e il divieto fino a richiesta esplicita; non autorizza deploy backend né dichiara accettazione fisica. Riutilizzare test già conclusi sul medesimo prodotto."
     }
   ],
   "pending_confirmations": [

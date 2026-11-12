@@ -1,5 +1,8 @@
 # LifeOS — stato corrente
 
+**IPA richiesta esplicitamente il 12 novembre 2026:** autorizzati confezionamento, verifica e pubblicazione della 0.10.27 build 89 sul candidato verificato, senza ripetere test già conclusi. Workflow manuale lifeos-package-final89 con controllo identità prodotto e prove precedenti. Nessun deploy backend. Le precedenti note “nessuna IPA” descrivono lo stato prima della richiesta.
+
+
 **Candidato finale verificato senza IPA — 12 novembre 2026.** Prodotto `8ac2d4f`; sorgente dei test corretti `f901529`. Il run 43232065358 ha completato 405 test: 403 passati e due errori UI. Il [recupero mirato 43249620310](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43249620310) ha superato entrambi i casi, senza ripetere i 403 test passati né i quattro avvii Release già verdi. Copertura aggregata: **405/405 casi verificati**, non una nuova suite monolitica. Modificati soltanto test e selezione CI; codice/risorse/configurazione dell’app invariati. Catture finali ispezionate. **Nessuna IPA e nessun deploy backend.** Restano revisione utente, prove fisiche, parità dei dati personali e accettazione. Dettagli: [FINAL-CANDIDATE-2026-11-12.md](FINAL-CANDIDATE-2026-11-12.md). Le note sottostanti sono cronologia.
 
 
