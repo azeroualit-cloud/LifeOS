@@ -2,8 +2,7 @@
 
 ## Stato corrente — 12 novembre 2026
 
-Il candidato finale prosegue su **codex/revision77**: [report corrente](https://github.com/azeroualit-cloud/LifeOS/blob/codex/revision77/docs/AI-HANDOFF.md), [checklist di tutte le aree](https://github.com/azeroualit-cloud/LifeOS/blob/codex/revision77/docs/PROJECT-CHECKLIST.md). Verifica mirata Apple Salute prima della suite completa e quattro avvii Release. **Nessuna IPA né deploy backend autorizzati nella nuova chat.** Le note successive sono cronologia; test e build non equivalgono ad accettazione.
-
+Nuovo incremento autorizzato su **codex/revision77**: cataloghi Coop/Spesotti con marca, integratori per capsula/compressa/grammo, modifica personale, cronologia per giorno e palette turni compatta Liquid Glass. [Report corrente](https://github.com/azeroualit-cloud/LifeOS/blob/codex/revision77/docs/AI-HANDOFF.md) · [checklist](https://github.com/azeroualit-cloud/LifeOS/blob/codex/revision77/docs/PROJECT-CHECKLIST.md) · [verifica mirata](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43189039938). Importazione catalogo ancora in acquisizione; candidato finale non chiuso. **Nessuna IPA né deploy backend autorizzati nella nuova chat.** Le note successive sono cronologia.
 
 **LifeOS 0.10.19 build 80 consegnata.** [IPA](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.19-build80/LifeOS-80.ipa), SHA-256 80a4e4759c810e2f2f69ef860a128d8cd020cf133cfa2e223cc4d51edf9f60c0. Sorgente 5aba0d5b888471025a45568d6ff567199b5a4fec. [Suite 368/368](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42224387516), [avvii Release 4/4](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42224387516), [confezionamento verificato](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42235788082). Restano firma Signulous, aggiornamento sul telefono, parità dei dati personali, verifiche fisiche e accettazione esplicita.
 
