@@ -498,7 +498,8 @@
     "final_source_commit": "8ac2d4f5725d624f8a89f8458cf7c03dc2242bc9",
     "final_run": 43232065358,
     "package_status": "not_authorized_in_current_chat",
-    "published": false
+    "published": false,
+    "monitoring": "stopped_by_user; CI left running; final outcome to acquire in next chat"
   },
   "historical_increment_states": {
     "current_increment": {
