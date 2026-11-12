@@ -9,7 +9,9 @@
     "IPA-GATE-01",
     "No deploy backend",
     "No catalogo o nuovi editor non inclusi nel piano",
-    "G08/G09/G12/G13 attive fino a conferma"
+    "G08/G09/G12/G13 attive fino a conferma",
+    "2026-11-12: no new IPA creation, packaging or distribution until explicit request in this chat",
+    "G08/G09/G12/G13 historical constraint has scoped exceptions in HEALTH-GRID-02 and subsequent recorded decisions; consult current register"
   ],
   "tasks": [
     {
@@ -35,7 +37,7 @@
       "outputs": "Registro, copertura e manifesto",
       "checks": "Confrontare tutti i 238 ID e regole/QA, verificare JSON, provenienza, classificazione, conflitti, diff e SHA remoto.",
       "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta.",
-      "status": "completed_local_pending_sync",
+      "status": "audit_in_progress_pending_final_remote_sha",
       "inputs": [
         "docs/USER-DECISIONS.json",
         "docs/PROJECT-RELEASE-PLAN.md",
@@ -71,7 +73,8 @@
         "git diff --check",
         "git fetch origin codex/revision77; confrontare SHA remoto"
       ],
-      "approval_gates": []
+      "approval_gates": [],
+      "historical_plan_status": "completed_local_pending_sync"
     },
     {
       "id": "T01",
@@ -91,7 +94,7 @@
       "outputs": "CI senza packaging, aree attività/calendario/turni, suite completa e quattro avvii Release",
       "checks": "Test selettore e lint workflow; verificare suite completa e quattro avvii Release separati dal packaging su macOS quando disponibile.",
       "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta.",
-      "status": "pending",
+      "status": "pipeline_available_final_candidate_validation_pending",
       "inputs": [
         "docs/USER-DECISIONS.json",
         "docs/PROJECT-RELEASE-PLAN.md",
@@ -118,7 +121,8 @@
         "actionlint sul workflow modificato",
         "workflow manuale finale senza packaging: suite completa e quattro avvii Release"
       ],
-      "approval_gates": []
+      "approval_gates": [],
+      "historical_plan_status": "pending"
     },
     {
       "id": "T02",
@@ -137,7 +141,7 @@
       "outputs": "Retry quick add accessibile, valori e identità, riavvio e storico",
       "checks": "Errore e retry con valori/ID/revisione conservati, riavvio e storico; unitari e UI accessibilità su simulatore.",
       "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta.",
-      "status": "pending",
+      "status": "simulator_evidence_available_final_regression_and_device_pending",
       "inputs": [
         "docs/USER-DECISIONS.json",
         "docs/PROJECT-RELEASE-PLAN.md",
@@ -164,7 +168,8 @@
         "workflow focused area nutrition sul commit esatto",
         "ispezione xcresult, retry, riavvio e storico"
       ],
-      "approval_gates": []
+      "approval_gates": [],
+      "historical_plan_status": "pending"
     },
     {
       "id": "T03",
@@ -182,7 +187,7 @@
       "outputs": "Dashboard: oggi e due date, preghiera, budget, navigazione e turni",
       "checks": "Finestra oggi + due date civili, ordine, preghiera, budget, navigazione, turni e accessibilità; prove mirate e screenshot.",
       "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta.",
-      "status": "pending",
+      "status": "simulator_evidence_available_final_regression_and_user_review_pending",
       "inputs": [
         "docs/USER-DECISIONS.json",
         "docs/PROJECT-RELEASE-PLAN.md",
@@ -208,7 +213,8 @@
         "workflow focused area dashboard sul commit esatto",
         "esame screenshot e navigazione"
       ],
-      "approval_gates": []
+      "approval_gates": [],
+      "historical_plan_status": "pending"
     },
     {
       "id": "T04",
@@ -227,7 +233,7 @@
       "outputs": "Bloom: parità privata ID, contenuti, allegati, hash e funzioni; preservare griglia",
       "checks": "Parità privata per ID, contenuti, allegati e hash, persistenza e funzioni esistenti; preservare griglia accettata e non pubblicare dati personali.",
       "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta.",
-      "status": "pending",
+      "status": "synthetic_import_verified_private_parity_and_device_pending",
       "inputs": [
         "docs/USER-DECISIONS.json",
         "docs/PROJECT-RELEASE-PLAN.md",
@@ -254,7 +260,8 @@
         "workflow focused area bloom sul commit esatto",
         "confronto privato ID/contenuti/hash senza pubblicare i dati"
       ],
-      "approval_gates": []
+      "approval_gates": [],
+      "historical_plan_status": "pending"
     },
     {
       "id": "T05",
@@ -275,7 +282,7 @@
       "outputs": "Editor attività, calendario, turni e sveglie: coda e identità",
       "checks": "Editor, completamento, coda, identité, offline/retry, calendrier, turni e sveglie; prova riavvio e regressione mirata.",
       "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta.",
-      "status": "pending",
+      "status": "targeted_simulator_checks_passed_final_regression_and_device_pending",
       "inputs": [
         "docs/USER-DECISIONS.json",
         "docs/PROJECT-RELEASE-PLAN.md",
@@ -304,7 +311,8 @@
         "workflow focused area activities/calendar/turni sul commit esatto",
         "test UI editor, retry e riavvio"
       ],
-      "approval_gates": []
+      "approval_gates": [],
+      "historical_plan_status": "pending"
     },
     {
       "id": "T06",
@@ -323,7 +331,7 @@
       "outputs": "Finanza audit live in lettura e test sintetici, limite E10",
       "checks": "Audit live non mutante; test sintetico 221.79/3=73.93, unico movimento, capability e retry; E10 personale non dimostrabile da sintetici.",
       "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta.",
-      "status": "pending",
+      "status": "synthetic_and_readonly_audit_evidence_available_personal_E10_pending",
       "inputs": [
         "docs/USER-DECISIONS.json",
         "docs/PROJECT-RELEASE-PLAN.md",
@@ -350,7 +358,8 @@
         "node --test backend/utilities/tests/competence.test.mjs",
         "audit live in sola lettura e prove routing/capability mirate"
       ],
-      "approval_gates": []
+      "approval_gates": [],
+      "historical_plan_status": "pending"
     },
     {
       "id": "T07",
@@ -368,7 +377,7 @@
       "outputs": "Anteprima Salute standard, compatta e accessibile, contratto e conferma conflitti",
       "checks": "Anteprime standard, compatta e accessibile e contratto; presentare conflitti G08/G09/G12/G13, attendere conferma prima della modifica.",
       "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta.",
-      "status": "pending",
+      "status": "scoped_layout_approval_recorded",
       "inputs": [
         "docs/USER-DECISIONS.json",
         "docs/PROJECT-RELEASE-PLAN.md",
@@ -394,7 +403,12 @@
         "ispezione anteprime standard, compatta e accessibile",
         "richiedere conferma esplicita prima di modifiche in conflitto"
       ],
-      "approval_gates": []
+      "approval_gates": [],
+      "historical_plan_status": "pending",
+      "current_approval_evidence": [
+        "HEALTH-GRID-02 scoped exception approved 2026-11-04",
+        "Checklist 2026-11-09 changes layout to 3x2; do not repeat same-scope approval"
+      ]
     },
     {
       "id": "T08",
@@ -414,7 +428,7 @@
       "outputs": "Macro HealthKit tutte le app, fonti e deduplicazione",
       "checks": "Verificare valori, presenza, fonte, periodo ed esito; tutte le app, nessuna doppia somma locale/HealthKit, mantenendo tutte le fonti G03, dati mancanti e date civili.",
       "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta.",
-      "status": "pending",
+      "status": "synthetic_evidence_available_health_reference_preflight_blocked_device_pending",
       "inputs": [
         "docs/USER-DECISIONS.json",
         "docs/PROJECT-RELEASE-PLAN.md",
@@ -429,7 +443,7 @@
       "model": "gpt-6.1-terra",
       "reasoning": "high",
       "gate": {
-        "status": "pending",
+        "status": "verification_pending_scoped_layout_approval_already_recorded",
         "requires": [
           "T02",
           "T07"
@@ -438,7 +452,8 @@
         "stop_on_failure": true,
         "approval_gates": [
           "HEALTH-GRID-CONFLICT-01"
-        ]
+        ],
+        "historical_status": "pending"
       },
       "verification_commands_or_actions": [
         "test NativeNutritionHealthKitTests e NativeHealthTests",
@@ -448,9 +463,10 @@
         {
           "id": "HEALTH-GRID-CONFLICT-01",
           "requirement": "Conferma specifica del contratto e dei conflitti pertinenti dopo anteprima T07",
-          "status": "pending"
+          "status": "satisfied_by_HEALTH-GRID-02_and_subsequent_scoped_decisions"
         }
-      ]
+      ],
+      "historical_plan_status": "pending"
     },
     {
       "id": "T09",
@@ -469,7 +485,7 @@
       "outputs": "Griglia Salute dopo conferma e letture verificate",
       "checks": "Solo dopo conferma T07 e verifica T08; screenshot standard/compatto/Dynamic Type, navigazione e semantica.",
       "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta.",
-      "status": "pending",
+      "status": "implemented_targeted_simulator_evidence_available_final_review_pending",
       "inputs": [
         "docs/USER-DECISIONS.json",
         "docs/PROJECT-RELEASE-PLAN.md",
@@ -483,7 +499,7 @@
       "model": "gpt-6.1-terra",
       "reasoning": "high",
       "gate": {
-        "status": "pending",
+        "status": "verification_pending_scoped_layout_approval_already_recorded",
         "requires": [
           "T08",
           "T07"
@@ -492,7 +508,8 @@
         "stop_on_failure": true,
         "approval_gates": [
           "HEALTH-GRID-CONFLICT-01"
-        ]
+        ],
+        "historical_status": "pending"
       },
       "verification_commands_or_actions": [
         "test mirati Salute e ispezione screenshot a dimensioni standard, compatte e Dynamic Type"
@@ -501,9 +518,10 @@
         {
           "id": "HEALTH-GRID-CONFLICT-01",
           "requirement": "Conferma specifica del contratto e dei conflitti pertinenti dopo anteprima T07",
-          "status": "pending"
+          "status": "satisfied_by_HEALTH-GRID-02_and_subsequent_scoped_decisions"
         }
-      ]
+      ],
+      "historical_plan_status": "pending"
     },
     {
       "id": "T10",
@@ -526,7 +544,7 @@
       "outputs": "UI condivisa, persistenza e widget",
       "checks": "UI condivisa, persistenza, App Group e widget; verificare dipendenze e riavvio senza perdere dati.",
       "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta.",
-      "status": "pending",
+      "status": "simulator_accessibility_evidence_available_physical_widget_appgroup_pending",
       "inputs": [
         "docs/USER-DECISIONS.json",
         "docs/PROJECT-RELEASE-PLAN.md",
@@ -557,7 +575,8 @@
         "test widget/persistenza e UI trasversale su simulatore",
         "verificare App Group, riavvio e accessibilità"
       ],
-      "approval_gates": []
+      "approval_gates": [],
+      "historical_plan_status": "pending"
     },
     {
       "id": "T11",
@@ -584,7 +603,7 @@
       "outputs": "Gate suite completa, screenshot e quattro avvii senza IPA",
       "checks": "Suite completa, screenshot esaminati e quattro avvii Release; nessuna IPA; registrare risultati e limiti.",
       "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta.",
-      "status": "pending",
+      "status": "blocked_health_reference_then_full_suite_and_four_release_launches_without_packaging",
       "inputs": [
         "docs/USER-DECISIONS.json",
         "docs/PROJECT-RELEASE-PLAN.md",
@@ -598,7 +617,7 @@
       "model": "gpt-6.1-terra",
       "reasoning": "high",
       "gate": {
-        "status": "pending",
+        "status": "open_latest_preflight_failed_full_suite_pending",
         "requires": [
           "T01",
           "T02",
@@ -620,7 +639,8 @@
         "scripts/verify-release-launch75.py con LIFEOS_RELEASE_SESSION_FIXTURE=1 su simulatore",
         "ispezione screenshot e xcresult"
       ],
-      "approval_gates": []
+      "approval_gates": [],
+      "historical_plan_status": "pending"
     },
     {
       "id": "T12",
@@ -640,7 +660,7 @@
       "outputs": "Solo su richiesta IPA separata: packaging e prove fisiche",
       "checks": "Solo richiesta IPA separata dopo T11; verificare pacchetto e versione, aggiornamento, prove fisiche e accettazione.",
       "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta. Nessuna IPA senza richiesta esplicita.",
-      "status": "pending",
+      "status": "blocked_explicit_new_chat_ipa_request_required",
       "inputs": [
         "docs/USER-DECISIONS.json",
         "docs/PROJECT-RELEASE-PLAN.md",
@@ -654,7 +674,7 @@
       "model": "gpt-6.1-terra",
       "reasoning": "high",
       "gate": {
-        "status": "pending",
+        "status": "blocked_explicit_new_chat_ipa_request_required",
         "requires": [
           "T11"
         ],
@@ -674,7 +694,8 @@
           "requirement": "Richiesta esplicita nuova IPA dopo T11",
           "status": "pending"
         }
-      ]
+      ],
+      "historical_plan_status": "pending"
     },
     {
       "id": "F01",
@@ -687,7 +708,7 @@
       "outputs": "Studio futuro alimenti; non prerequisito release",
       "checks": "Studio futuro fonti/licenze e alimenti; nessuna implementazione o dipendenza release.",
       "stop": "Conflitto decisionale pertinente, dati necessari non disponibili o prova bloccante non risolta.",
-      "status": "pending",
+      "status": "future_study_not_release_prerequisite",
       "inputs": [
         "docs/USER-DECISIONS.json",
         "docs/PROJECT-RELEASE-PLAN.md",
@@ -707,12 +728,33 @@
       "verification_commands_or_actions": [
         "valutazione fonti e licenze, nessun test di release"
       ],
-      "approval_gates": []
+      "approval_gates": [],
+      "historical_plan_status": "pending"
     }
   ],
   "reviewer": {
     "model": "gpt-6-luna",
     "reasoning": "medium",
     "scope": "audit in sola lettura, nessuna modifica concorrente"
+  },
+  "current_audit": {
+    "reported_on": "2026-11-12",
+    "scope": "Continue approved work to final candidate; no IPA creation, packaging or distribution until explicit new-chat request; no backend deploy",
+    "observed_working_branch_head": "6a8826d",
+    "observed_main_head": "1b80e58",
+    "tested_source_commit": "db6d6f5e03e4d5cd5bf1dca850372d50063345b6",
+    "latest_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43113799496",
+    "latest_preflight_results": {
+      "total": 299,
+      "passed": 298,
+      "failed": 1,
+      "skipped": 0,
+      "full_suite_completed": false
+    },
+    "release_launches_passed": 4,
+    "blocking_evidence": "The Health authorization dialog did not become ready",
+    "history_note": "base_commit and original task contracts below are historical planning inputs; current_audit and task status describe the present audit. Historical evidence does not certify the current candidate.",
+    "physical_device_verified": false,
+    "accepted_for_production": false
   }
 }

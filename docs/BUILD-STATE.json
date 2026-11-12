@@ -441,5 +441,22 @@
     "handoff": "docs/HANDOFF-2026-11-12.md",
     "package_status": "skipped",
     "publish_status": "skipped"
+  },
+  "final_candidate_2026_11_12": {
+    "status": "focused_verification_pending",
+    "base_commit": "6a8826d4e1334935798dc9e909449621c013984e",
+    "product_source_commit": "db6d6f5e03e4d5cd5bf1dca850372d50063345b6",
+    "packaging_authorized": false,
+    "backend_deploy_authorized": false,
+    "accepted_for_production": false,
+    "prior_preflight": {
+      "run": 43113799496,
+      "total": 299,
+      "passed": 298,
+      "failed": 1,
+      "skipped": 0,
+      "release_launches_passed": 4
+    },
+    "diagnosis": "Authorization sheet visible in screenshot but absent from host accessibility tree; test queries remote permission processes. Requires focused verification."
   }
 }

@@ -1,5 +1,13 @@
 # LifeOS — registro persistente delle decisioni utente
 
+## FINAL-CANDIDATE-2026-11-12 — ACTIVE
+
+Ambito: questa nuova chat, candidato finale. Fonte: richiesta esplicita utente del 12 novembre 2026.
+
+> IMPORTANTE: non creare, confezionare o distribuire un’IPA finché non te lo chiedo esplicitamente in questa nuova chat. L’autorizzazione a fare il check finale non è una richiesta di IPA.
+
+Audit dell’intero progetto, prove mirate e correzioni già autorizzate, poi suite completa e quattro avvii Release senza packaging. DEV-02 resta applicabile ai nuovi difetti di prodotto. Nessun deploy backend. Compatibile con IPA-GATE-01: le autorizzazioni IPA delle chat precedenti non si trasferiscono a questa chat. Prove fisiche e accettazione rimangono separate.
+
 Registrato il 4 novembre 2026. Ambito: solo progetto LifeOS.
 
 ## META-01 — salva le decisioni; chiedi conferma sui conflitti

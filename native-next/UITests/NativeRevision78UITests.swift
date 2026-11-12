@@ -400,31 +400,40 @@ final class NativeAppleHealthReferenceUITests: XCTestCase {
         seed.launchArguments = ["--visual-test", "--apple-health-reference-seed", "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"]
         seed.launch()
         let status = seed.staticTexts["apple-health-reference-seed-status"]
+        // Health's remote authorization sheet may be visible without belonging to
+        // the host app's accessibility tree (see run 43113799496).
+        let permissionApps = [seed, XCUIApplication(bundleIdentifier: "com.apple.HealthPrivacyService"), XCUIApplication(bundleIdentifier: "com.apple.springboard")]
+        func permissionApp() -> XCUIApplication? {
+            permissionApps.first { $0.switches["UIA.Health.DietaryEnergy.SwitchCell.Switch"].exists }
+        }
         let authorization = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
-            (status.exists && status.label == "Dati pronti") || seed.switches.firstMatch.exists
+            (status.exists && status.label == "Dati pronti") || permissionApp() != nil
         }, object: nil)
         guard XCTWaiter.wait(for: [authorization], timeout: 60) == .completed else {
             capture("seed-permission-diagnostic", seed)
+            for app in permissionApps.dropFirst() where app.state != .notRunning {
+                capture("seed-permission-process-diagnostic", app)
+            }
             XCTFail("The Health authorization dialog did not become ready")
             return
         }
-        if seed.switches.firstMatch.exists {
-            let toggles = ["DietaryEnergy", "Weight"].map { seed.switches["UIA.Health." + $0 + ".SwitchCell.Switch"] }
+        if let permission = permissionApp() {
+            let toggles = ["DietaryEnergy", "Weight"].map { permission.switches["UIA.Health." + $0 + ".SwitchCell.Switch"] }
             for toggle in toggles {
-                for _ in 0..<5 where !toggle.isHittable { seed.swipeUp(velocity: .slow) }
+                for _ in 0..<5 where !toggle.isHittable { permission.swipeUp(velocity: .slow) }
                 for _ in 0..<3 where (toggle.value as? String) != "1" && toggle.isHittable {
                     toggle.tap()
                     let enabled = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value == %@", "1"), object: toggle)
                     if XCTWaiter.wait(for: [enabled], timeout: 2) == .completed { break }
                 }
                 guard (toggle.value as? String) == "1" else {
-                    capture("seed-toggle-off", seed)
+                    capture("seed-toggle-off", permission)
                     XCTFail("Write permission switch is off: " + toggle.identifier)
                     return
                 }
             }
-            let allow = seed.staticTexts.matching(NSPredicate(format: "label IN %@", ["Consenti", "Allow"])).firstMatch
-            for _ in 0..<6 where !allow.isHittable { seed.swipeUp(velocity: .slow) }
+            let allow = permission.staticTexts.matching(NSPredicate(format: "label IN %@", ["Consenti", "Allow"])).firstMatch
+            for _ in 0..<6 where !allow.isHittable { permission.swipeUp(velocity: .slow) }
             guard allow.isHittable else {
                 capture("seed-allow-unavailable", seed)
                 XCTFail("The Health permission confirmation is unavailable")

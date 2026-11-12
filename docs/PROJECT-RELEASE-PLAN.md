@@ -1,5 +1,33 @@
 # Piano operativo LifeOS
 
+## Stato corrente — audit del 12 novembre 2026
+
+Questa sezione prevale sulle note cronologiche successive. La nuova chat autorizza il proseguimento e il collaudo finale completo, compresi quattro avvii Release, **senza creare, confezionare o distribuire IPA** e senza deploy backend. Occorre una nuova richiesta IPA esplicita in questa chat. DEV-02 resta applicabile ai nuovi difetti di prodotto; non ripetere approvazioni già registrate per lo stesso ambito.
+
+Checkpoint osservato: `codex/revision77` remoto a `6a8826d`, `main` a `1b80e58`; il checkpoint `2d33d8a` è storico. Sorgente dell'ultimo tentativo: `db6d6f5e03e4d5cd5bf1dca850372d50063345b6`. Il [run 43113799496](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43113799496) ha eseguito 299 prove: 298 passate, 1 fallita, zero saltate. Il preflight si è fermato su `The Health authorization dialog did not become ready`; la restante suite non è stata completata. Quattro avvii Release passati; packaging e pubblicazione saltati. Questi 299 risultati non equivalgono a una suite completa verde.
+
+| Task | Evidenza ricostruita | Stato e lavoro residuo |
+| --- | --- | --- |
+| T00 | Registro, copertura e manifesto disponibili; copertura con 238 voci storiche più 30 aggiuntive | Audit e riallineamento documenti in corso; verificare sincronizzazione SHA al checkpoint finale |
+| T01 | Suite e quattro avvii passati nel run 43094447884, precedente agli ultimi incrementi; quattro avvii passati anche nel 43113799496 | Pipeline disponibile; collaudo completo del candidato attuale ancora aperto |
+| T02 | Retry accessibile 41894390397; QA-012 testo grande e tastiera 41944119975; regressioni nutrizione successive | Verifiche sintetiche disponibili; revisione finale e HealthKit fisico aperti |
+| T03 | Dashboard e QA-004 standard/grande 42044400960, compatto 42056808149; incremento 42573602745 | Verifiche simulatore disponibili; regressione finale e revisione utente aperte |
+| T04 | Bloom 42005224764: frame 44 pt, bordo, importazione e persistenza sintetica; sezioni aggiornate nei collaudi successivi | Parità privata di note, allegati e hash e verifica iPhone non dimostrate |
+| T05 | Calendario GMT/riapertura 42116279080; 19 test sintetici Attività; palette standard/grande 43111876770 | Regressioni simulate disponibili; sveglie, AlarmKit e suono fisici aperti |
+| T06 | 35 test sintetici Finanza; audit non mutante 41949645412 con tre test trasformazione | Importi personali/E10 e parità integrale Worker non dimostrati; nessun deploy autorizzato |
+| T07 | HEALTH-GRID-02 conferma la deroga; checklist 9 novembre aggiorna la sola disposizione a 3×2 | Approvazioni già registrate: non riaprire il vecchio conflitto per lo stesso ambito |
+| T08 | Letture macro/fonti e deduplica coperte da prove sintetiche precedenti | Blocco corrente della fixture Apple Salute da diagnosticare; HealthKit fisico aperto |
+| T09 | Griglia, storico, medie e Dashboard: 42573602745; diario storico e omega-3: 42575533916 | Implementazione e prove mirate disponibili; regressione finale e revisione utente aperte |
+| T10 | QA-004 su simulatore principale e compatto, standard e testo grande; persistenza sintetica | App Group, widget e continuità dati sul dispositivo non verificati |
+| T11 | Ultima suite verde 43094447884 precede palette e integratori finali | **Aperto**: risolvere prima il blocco mirato, poi una sola suite completa e quattro avvii Release senza IPA sul candidato pronto |
+| T12 | Nessuna nuova autorizzazione IPA in questa chat | Sospeso fino alla richiesta esplicita; firma/installazione, prove fisiche e accettazione separate |
+
+Ordine delle attività dell'utente al termine del lavoro autonomo: revisione delle schermate correnti ed eventuali sole nuove approvazioni DEV-02; richiesta esplicita IPA quando T11 è superato; dopo produzione, firma e installazione conservando i dati; verifica parità Bloom/Finanza e prove HealthKit, App Group/widget, AlarmKit/suono; accettazione esplicita. Le prove automatiche non sostituiscono nessuno di questi esiti.
+
+## Cronologia fino al precedente checkpoint
+
+Le autorizzazioni IPA e gli stati “corrente”, “da avviare” o “in corso” sotto sono storici. Per questa chat usare il perimetro e la matrice sopra; il backlog storico non autorizza nuove funzioni.
+
 **LifeOS 0.10.19 build 80 consegnata.** [IPA](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.19-build80/LifeOS-80.ipa), SHA-256 80a4e4759c810e2f2f69ef860a128d8cd020cf133cfa2e223cc4d51edf9f60c0. Sorgente 5aba0d5b888471025a45568d6ff567199b5a4fec. [Suite 368/368](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42224387516), [avvii Release 4/4](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42224387516), [confezionamento verificato](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42235788082). Restano firma Signulous, aggiornamento sul telefono, parità dei dati personali, verifiche fisiche e accettazione esplicita.
 
 **Collaudo pre-IPA superato.** Sorgente 5aba0d5b888471025a45568d6ff567199b5a4fec. [Suite completa](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42224387516): 368/368, zero falliti e zero saltati. [Avvii Release](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42224387516): 4/4 sullo stesso sorgente in un job separato. Confezionamento della build 80 autorizzato.

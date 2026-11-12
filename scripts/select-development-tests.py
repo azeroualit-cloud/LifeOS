@@ -93,7 +93,7 @@ if __name__ == "__main__":
     elif a.mode == "health-reference":
         areas = ["health"]
         tests = [
-            "LifeOSProbeTests/NativeNutritionEntryTests",
+            "LifeOSProbeTests",
             "LifeOSProbeUITests/NativeAppleHealthReferenceUITests/testCaptureAppleHealthReference",
             "LifeOSProbeUITests/NativeNutritionQuickUITests/testSupermarketFoodsAndSupplementEditor",
             "LifeOSProbeUITests/NativeRevision71UITests/testPaintingHasGlassPaletteAndRapidEditsPreserveLastIntentAndUndo",
