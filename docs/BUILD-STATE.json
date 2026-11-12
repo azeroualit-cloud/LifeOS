@@ -491,6 +491,8 @@
     "backend_deploy_authorized": false,
     "accepted_for_production": false,
     "prior_candidate_source": "7087d91a2f8386281c157c4a80133ece0c105584",
-    "prior_candidate_run": 43178362187
+    "prior_candidate_run": 43178362187,
+    "first_queued_run": 43189039938,
+    "first_queued_source": "ae9d286920e7b2c39bf8695d27b59051f86715eb"
   }
 }

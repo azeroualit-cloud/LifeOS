@@ -67,6 +67,21 @@ import HealthKit
         let deleted = await restored.delete(entry.id)
         XCTAssertTrue(deleted)
         XCTAssertTrue(restored.entries.isEmpty)
+        XCTAssertEqual(writer.macroRequests, 0, "Removing an entry with no macro samples must not demand macro permission")
+    }
+
+    func testManualCorrectionKeepsCapsuleAndMillilitreQuantities() throws {
+        let capsule = try XCTUnwrap(NativeGenericFood.brandedSupplements.first { $0.id == "brand-weightworld-omega3" })
+        let old = try XCTUnwrap(capsule.portion(id: UUID(), date: .now, grams: 2))
+        let updated = try XCTUnwrap(NativeNutritionEntry.direct(id: old.id, date: old.date, protein: 0,
+            carbohydrate: 0, fat: 3, fibre: 0, preserving: old))
+        XCTAssertEqual(updated.supplementQuantity, 2)
+        XCTAssertEqual(updated.supplementUnit, NativeSupplementUnit.capsule.rawValue)
+        var liquid = old
+        liquid.supplementQuantity = nil; liquid.supplementUnit = nil; liquid.portionMillilitres = 250
+        let changed = try XCTUnwrap(NativeNutritionEntry.direct(id: liquid.id, date: liquid.date, protein: 1,
+            carbohydrate: 25, fat: 0, fibre: 0, preserving: liquid))
+        XCTAssertEqual(changed.portionMillilitres, 250)
     }
 
     func testPersonalCopyPreservesCompositionWithoutRewritingLoggedEntries() throws {

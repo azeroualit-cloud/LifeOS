@@ -72,7 +72,7 @@ struct NativePersonalFoodEditor: View {
                     }
                 }
             }
-            Section(family == .supplement ? "Valori per " + unit.basisTitle : "Valori per " + (original?.measurementBasis == "ml" ? "100 ml" : "100 g")) {
+            Section(family == .supplement ? "Valori per " + unit.basisTitle : "Valori per " + (original?.cocktail != nil ? "bicchiere" : original?.measurementBasis == "ml" ? "100 ml" : "100 g")) {
                 if nutritionNotDeclared {
                     Text("Energia e macro non disponibili: non verranno inviati ad Apple Salute.").font(.caption).foregroundStyle(.secondary)
                 } else {
@@ -143,7 +143,7 @@ struct NativePersonalFoodEditor: View {
         let editableKeys = Set((NativeTrackedNutrient.micronutrients + [.ala, .epa, .dha]).map { $0 == .folate ? "folateMass" : $0.rawValue })
         var nutrients = (original?.nutrientValues ?? [:]).filter { !editableKeys.contains($0.key) }
         let factor: Decimal = family == .supplement && unit != .gram ? 100 : 1
-        nutrients.removeValue(forKey: "caffeine")
+        if family == .supplement { nutrients.removeValue(forKey: "caffeine") }
         if family == .supplement, !caffeine.isEmpty {
             guard let value = NativeNutritionEntry.grams(caffeine), value <= 10000 else { return nil }
             nutrients["caffeine"] = .init(amount: value * factor, estimateSource: nil)
@@ -151,17 +151,26 @@ struct NativePersonalFoodEditor: View {
         for (nutrient, raw) in micronutrients where !raw.isEmpty {
             guard let value = NativeNutritionEntry.grams(raw), value <= 100_000_000 else { return nil }
             let key = nutrient == .folate ? "folateMass" : nutrient.rawValue
-            nutrients[key] = .init(amount: value * factor, estimateSource: nil)
+            let amount = value * factor
+            let previous = original?.nutrientValues?[key]
+            nutrients[key] = .init(amount: amount, estimateSource: previous?.amount == amount ? previous?.estimateSource : nil)
+        }
+        var bounds = original?.estimatedMacroBounds
+        if let original {
+            let values: [(String, Decimal, Decimal)] = [("calories", calories * factor, original.calories),
+                ("protein", protein * factor, original.protein), ("carbohydrate", carbs * factor, original.carbohydrate),
+                ("fat", fat * factor, original.fat), ("fibre", fibreValue * factor, original.fibre ?? 0)]
+            for (key, value, previous) in values where value != previous { bounds?.removeValue(forKey: key) }
         }
         return .init(id: identifier, name: title, detail: "Personale", family: family,
-                     boneInEdiblePercent: nil, nutrientValues: nutrients.isEmpty ? nil : nutrients,
-                     aliases: nil, protein: protein * factor, carbohydrate: carbs * factor, fat: fat * factor,
+                     boneInEdiblePercent: original?.family == family ? original?.boneInEdiblePercent : nil, nutrientValues: nutrients.isEmpty ? nil : nutrients,
+                     cocktail: original?.family == family ? original?.cocktail : nil, aliases: original?.aliases, protein: protein * factor, carbohydrate: carbs * factor, fat: fat * factor,
                      fibre: fibre.isEmpty ? nil : fibreValue * factor, calories: calories * factor,
-                     dataNote: original?.dataNote, nutritionNotDeclared: nutritionNotDeclared ? true : nil,
+                     estimatedMacroBounds: bounds?.isEmpty == false ? bounds : nil, dataNote: original?.dataNote, nutritionNotDeclared: nutritionNotDeclared ? true : nil,
                      measurementBasis: original?.measurementBasis,
                      brand: brand.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : brand.trimmingCharacters(in: .whitespacesAndNewlines),
                      sourceURL: original?.sourceURL, barcode: original?.barcode,
                      supplementUnit: family == .supplement ? unit : nil,
-                     defaultQuantity: original?.defaultQuantity)
+                     defaultQuantity: original?.family == family && (family != .supplement || original?.quantityUnit == unit) ? original?.defaultQuantity : nil)
     }
 }

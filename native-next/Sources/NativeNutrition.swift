@@ -62,7 +62,7 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
         }
         let energy = protein * 4 + carbohydrate * 4 + fat * 9 + fibre * 2
         guard !energy.isNaN, energy > 0, NSDecimalNumber(decimal: energy).doubleValue.isFinite else { return nil }
-        return .init(id: id, revision: 0, date: date, protein: protein, carbohydrate: carbohydrate, fat: fat, confirmed: false, fibre: fibre, labelCalories: energy, foodName: old?.foodName, foodID: old?.foodID, nutrientValues: old?.nutrientValues, sharedNutrientKeys: old?.sharedNutrientKeys, cocktailServings: old?.cocktailServings, alcoholGrams: old?.alcoholGrams)
+        return .init(id: id, revision: 0, date: date, protein: protein, carbohydrate: carbohydrate, fat: fat, confirmed: false, fibre: fibre, labelCalories: energy, portionGrams: old?.portionGrams, portionMillilitres: old?.portionMillilitres, foodName: old?.foodName, foodID: old?.foodID, nutrientValues: old?.nutrientValues, sharedNutrientKeys: old?.sharedNutrientKeys, supplementQuantity: old?.supplementQuantity, supplementUnit: old?.supplementUnit, cocktailServings: old?.cocktailServings, alcoholGrams: old?.alcoholGrams)
     }
     static func grams(_ text: String) -> Decimal? {
         let value = text.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -284,7 +284,7 @@ extension NativeNutritionWriting {
             // until every type has acknowledged deletion and the index is saved.
             entry.deletionPending = true
             try persist(entries.map { $0.id == id ? entry : $0 })
-            try await writer.authorize(includeFibre: entry.fibre != nil)
+            if entry.nutritionNotDeclared != true { try await writer.authorize(includeFibre: entry.fibre != nil) }
             try await writer.delete(entry)
             try persist(entries.filter { $0.id != id })
             return true
