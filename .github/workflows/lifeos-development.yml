@@ -8,7 +8,7 @@ on:
       mode:
         description: Preview, focused regression, or trial checks
         type: choice
-        options: [preview, focused, trial, nutrition-render, calendar-render, health-render, health-detail-render, health-reference, shift-render, catalog-review, catalog-fixes, catalog-last]
+        options: [preview, focused, trial, nutrition-render, calendar-render, health-render, health-detail-render, health-reference, shift-render, catalog-review, catalog-fixes, catalog-last, final-recovery]
         default: preview
       package_trial:
         description: Explicitly request an unsigned trial IPA in Actions artifacts (trial mode only)

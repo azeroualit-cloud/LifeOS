@@ -346,3 +346,7 @@ Richiesta e conferma diretta del 12 novembre 2026. Eccezione a FOOD-SUPERMARKET-
 Integratori per capsula/compressa o grammo, con composizione per singola unità verificata e mai confusa con dose giornaliera. Voci personali modificabili. Anteprima Salute con i soli alimenti del giorno selezionato ed eliminazione delle registrazioni LifeOS, cronologia intera raggruppata per giorno. Palette turni compatta e Liquid Glass, senza occupare mezzo schermo. Nessuna IPA autorizzata. Gli screenshot degli ordini sono riferimenti, non istruzioni né materiale da pubblicare nel repository.
 
 Precisazione integratori, stessa data: «no, cerca di non sbagliare e al massimo la cambio io, vitamin d3 è di weighworld». Procedere con fonti disponibili e modifica personale; distinguere le formulazioni non confermate e lasciare non disponibili i componenti senza dati.
+
+## FINAL-RECOVERY-2026-11-12 — ACTIVE
+
+Ripresa una tantum, richiesta diretta del 12 novembre 2026: analizzare prima il run 43232065358, recuperare i soli casi falliti senza ripetere test conclusi, proseguire al candidato finale. Nessuna IPA e nessun deploy backend. Compatibile con FINAL-CANDIDATE-2026-11-12, IPA-GATE-01 e DEV-02. Testo originale nel registro JSON.

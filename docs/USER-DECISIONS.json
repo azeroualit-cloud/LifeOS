@@ -18,11 +18,43 @@
     "bootstrap": "La richiesta esplicita corrente approva questa nuova procedura: sostituisce il precedente criterio di sostituzione automatica delle regole confliggenti. Non richiedere una seconda conferma per il salvataggio già richiesto."
   },
   "active_rules": [
-    {"id": "HEALTH-WEEK-REVIEW-01", "status": "ACTIVE", "recorded_on": "2026-11-09", "scope": "Salute, Dashboard, catalogo e Bloom LifeOS", "provenance": "Checklist esposta e confermata dall’utente", "original_quote": "fai tutto, dammi tutti i render delle modifiche prima di produrre qualsiasi ipa. Fai particolare attenzione a parti di condice che potrebbero fallire i test", "rule": "Griglia Salute tre righe e due colonne, medie della settimana selezionata, TDEE 14 giorni, simulazione media 7 giorni. Calendario settimanale con data alimento precompilata. Micronutrienti unificati, ordinabili, preferiti condivisi, barre giornaliere e settimanali con soglie documentate. Catalogo Tutti e Personali per frequenza a 30 giorni; Bloom con Libreria e Mappa testuali, Riscopri nascosto. Feedback alla pressione e transizioni direzionali. Catture reali prima di qualsiasi IPA.", "supersedes": "HEALTH-GRID-02 limitatamente al numero di righe; conferma della checklist 3×2 esposta prima dell’implementazione."},
-    {"id": "UX-PADDING-QA-01", "status": "ACTIVE", "recorded_on": "2026-11-09", "scope": "Componenti LifeOS", "provenance": "Richiesta diretta e conferma utente", "original_quote": "aggiungi una regola per verificare il padding una volta finito il design del componente", "rule": "Dopo il design verificare padding interno ed esterno su schermate reali con testo standard e grande. Ridurre il padding superiore di Calendario, Finanza e Nutrizione in Dashboard."},
-
-    {"id": "CALENDAR-MONTH-EVENT-DOTS-01", "status": "ACTIVE", "recorded_on": "2026-11-08", "scope": "LifeOS, vista Mese del Calendario", "provenance": "Richiesta diretta utente", "original_quote": "facciamo invece nella vista mese, che gli n eventi corrispondono a n puntini, fino a un max di 3 per riga,", "rule": "Mostrare un puntino per evento, con al massimo tre puntini su ogni riga e righe aggiuntive."},
-    {"id": "NUTRITION-CATALOG-RENDER-01", "status": "ACTIVE", "recorded_on": "2026-11-08", "scope": "LifeOS Nutrizione, Salute e revisione su simulatore", "original_quote": "per la creatina non facciamo nulla, il resto devi tutto implementarlo, mostrarmi il render grafico reale, e dopo di dirò se produrre l'ipa o meno (giusto? puoi avere i render senza la produzione di ipa?)", "provenance": "Richiesta diretta utente", "rule": "Implementare il catalogo restante, esclusa la creatina, e mostrare schermate reali del simulatore. Attendono nuova richiesta packaging e distribuzione IPA."},
+    {
+      "id": "HEALTH-WEEK-REVIEW-01",
+      "status": "ACTIVE",
+      "recorded_on": "2026-11-09",
+      "scope": "Salute, Dashboard, catalogo e Bloom LifeOS",
+      "provenance": "Checklist esposta e confermata dall’utente",
+      "original_quote": "fai tutto, dammi tutti i render delle modifiche prima di produrre qualsiasi ipa. Fai particolare attenzione a parti di condice che potrebbero fallire i test",
+      "rule": "Griglia Salute tre righe e due colonne, medie della settimana selezionata, TDEE 14 giorni, simulazione media 7 giorni. Calendario settimanale con data alimento precompilata. Micronutrienti unificati, ordinabili, preferiti condivisi, barre giornaliere e settimanali con soglie documentate. Catalogo Tutti e Personali per frequenza a 30 giorni; Bloom con Libreria e Mappa testuali, Riscopri nascosto. Feedback alla pressione e transizioni direzionali. Catture reali prima di qualsiasi IPA.",
+      "supersedes": "HEALTH-GRID-02 limitatamente al numero di righe; conferma della checklist 3×2 esposta prima dell’implementazione."
+    },
+    {
+      "id": "UX-PADDING-QA-01",
+      "status": "ACTIVE",
+      "recorded_on": "2026-11-09",
+      "scope": "Componenti LifeOS",
+      "provenance": "Richiesta diretta e conferma utente",
+      "original_quote": "aggiungi una regola per verificare il padding una volta finito il design del componente",
+      "rule": "Dopo il design verificare padding interno ed esterno su schermate reali con testo standard e grande. Ridurre il padding superiore di Calendario, Finanza e Nutrizione in Dashboard."
+    },
+    {
+      "id": "CALENDAR-MONTH-EVENT-DOTS-01",
+      "status": "ACTIVE",
+      "recorded_on": "2026-11-08",
+      "scope": "LifeOS, vista Mese del Calendario",
+      "provenance": "Richiesta diretta utente",
+      "original_quote": "facciamo invece nella vista mese, che gli n eventi corrispondono a n puntini, fino a un max di 3 per riga,",
+      "rule": "Mostrare un puntino per evento, con al massimo tre puntini su ogni riga e righe aggiuntive."
+    },
+    {
+      "id": "NUTRITION-CATALOG-RENDER-01",
+      "status": "ACTIVE",
+      "recorded_on": "2026-11-08",
+      "scope": "LifeOS Nutrizione, Salute e revisione su simulatore",
+      "original_quote": "per la creatina non facciamo nulla, il resto devi tutto implementarlo, mostrarmi il render grafico reale, e dopo di dirò se produrre l'ipa o meno (giusto? puoi avere i render senza la produzione di ipa?)",
+      "provenance": "Richiesta diretta utente",
+      "rule": "Implementare il catalogo restante, esclusa la creatina, e mostrare schermate reali del simulatore. Attendono nuova richiesta packaging e distribuzione IPA."
+    },
     {
       "id": "HEALTH-MICRO-TARGETS-01",
       "status": "ACTIVE",
@@ -32,10 +64,26 @@
       "original_quote": "dovrei anche riuscire a vedere se raggiungo alcuni valori di micronutrienti che dovrebbero interessare a me per i miei obiettivi (principalmente attrattività, e benessere generale)",
       "rule": "In LifeOS Salute, poter scegliere micronutrienti da seguire e confrontare gli apporti registrati con riferimenti pertinenti per benessere generale e interesse per pelle e capelli. Distinguere copertura del diario, dati assenti e apporti effettivamente registrati.",
       "implementation": "Salute mostra sotto i macro le barre di vitamina C (105 mg) e zinco (12 mg) con riferimenti LARN per uomini adulti. Il dettaglio conserva gli altri nutrienti, la media, la fonte e la copertura. Collaudo iOS da eseguire.",
-      "reference_followup": {"recorded_on": "2026-11-08", "original_quote": "ok, e come obiettivo giornaliero puntiamo su una stima in base alla mia età sesso ecc? se non importa andare oltre quell'alimento è anche meglio da un punto di vista. E invece per omega3 e creatina non contano?", "interpretation": "Riferimenti alimentari per fascia di età e sesso dove pertinenti. Riferimento raggiunto senza incentivare il superamento. Omega-3 e creatina discussi come sezioni separate."},
-      "reference_validation": {"recorded_on": "2026-11-08", "original_quote": "ok, valido, e tutti gli altri micronutrienti pensi che per i miei obiettivi fa realmente differenza seguirli?", "interpretation": "Validato l’approccio dei riferimenti per profilo. La domanda sulla priorità degli altri micronutrienti resta una valutazione, non una selezione o approvazione del layout."},
-      "priority_approval": {"recorded_on": "2026-11-08", "original_quote": "allora teniamo gli altri micronutrienti nascosti ma consultabili, e diamo priorità a quelli che mi interessano, procedi con il codice e subito dopo con l'ipa", "interpretation": "Preferiti iniziali vitamina C e zinco. Altri micronutrienti consultabili su richiesta. Autorizzati sviluppo e consegna IPA build 86 dopo i controlli."},
-      "summary_progress_approval": {"recorded_on": "2026-11-08", "original_quote": "no scegli te l'obiettivo e mettile nella schermata principale  salute stile progress bar e sotto i macro.", "interpretation": "Vitamina C e zinco direttamente sotto i macro in Salute, con barre giornaliere. Riferimenti scelti dall’assistente con PRI LARN per uomini adulti: vitamina C 105 mg, zinco 12 mg. Altri valori nel dettaglio. La consegna IPA già richiesta include questa correzione."},
+      "reference_followup": {
+        "recorded_on": "2026-11-08",
+        "original_quote": "ok, e come obiettivo giornaliero puntiamo su una stima in base alla mia età sesso ecc? se non importa andare oltre quell'alimento è anche meglio da un punto di vista. E invece per omega3 e creatina non contano?",
+        "interpretation": "Riferimenti alimentari per fascia di età e sesso dove pertinenti. Riferimento raggiunto senza incentivare il superamento. Omega-3 e creatina discussi come sezioni separate."
+      },
+      "reference_validation": {
+        "recorded_on": "2026-11-08",
+        "original_quote": "ok, valido, e tutti gli altri micronutrienti pensi che per i miei obiettivi fa realmente differenza seguirli?",
+        "interpretation": "Validato l’approccio dei riferimenti per profilo. La domanda sulla priorità degli altri micronutrienti resta una valutazione, non una selezione o approvazione del layout."
+      },
+      "priority_approval": {
+        "recorded_on": "2026-11-08",
+        "original_quote": "allora teniamo gli altri micronutrienti nascosti ma consultabili, e diamo priorità a quelli che mi interessano, procedi con il codice e subito dopo con l'ipa",
+        "interpretation": "Preferiti iniziali vitamina C e zinco. Altri micronutrienti consultabili su richiesta. Autorizzati sviluppo e consegna IPA build 86 dopo i controlli."
+      },
+      "summary_progress_approval": {
+        "recorded_on": "2026-11-08",
+        "original_quote": "no scegli te l'obiettivo e mettile nella schermata principale  salute stile progress bar e sotto i macro.",
+        "interpretation": "Vitamina C e zinco direttamente sotto i macro in Salute, con barre giornaliere. Riferimenti scelti dall’assistente con PRI LARN per uomini adulti: vitamina C 105 mg, zinco 12 mg. Altri valori nel dettaglio. La consegna IPA già richiesta include questa correzione."
+      },
       "input_scope": "I micronutrienti LifeOS sono calcolati dagli alimenti del database e dalla porzione. Nessun campo micronutrienti nel percorso manuale rapido.",
       "estimation_scope": "Completare il catalogo con valori pubblicati, ricette calcolate o stime da alimenti comparabili con fonte, metodo e indicazione di stima. Dove manca una base affidabile, lasciare dato non disponibile.",
       "followup": {
@@ -92,7 +140,11 @@
     },
     {
       "id": "CALENDAR-DAY-REDESIGN-01",
-      "render_request": {"original_quote": "ok mi mostri quindi il render del giorno aggiornato?", "recorded_on": "2026-11-08", "scope": "Render nativo Giorno per revisione, con data a sinistra, badge turno, superficie agenda unica e azione Liquid Glass."},
+      "render_request": {
+        "original_quote": "ok mi mostri quindi il render del giorno aggiornato?",
+        "recorded_on": "2026-11-08",
+        "scope": "Render nativo Giorno per revisione, con data a sinistra, badge turno, superficie agenda unica e azione Liquid Glass."
+      },
       "status": "ACTIVE",
       "scope": "Agenda del giorno nel Calendario",
       "recorded_on": "2026-11-08",
@@ -153,8 +205,27 @@
         "source_quote": "invece di \"Semplici\" usa \"Generic\", e poi deve essereci una lente con una barra di ricerca al posto di \"Alimenti Generici\" scritto in quel modo, e i 2 tasti aggiungi peso e aggiungi alimento sostali sopra la barra di navigazioni e guori dalla scheda nutrienti"
       }
     },
-    {"id": "UTILITY-CURRENT-BUDGET-01", "status": "ACTIVE", "scope": "Budget utenze LifeOS", "rule": "Ricalcolare la stima di budget del mese corrente quando si corregge il periodo di competenza di una bolletta collegata a un piano stimato.", "recorded_on": "2026-11-07", "provenance": "Conferma esplicita «si» alla proposta nel thread LifeOS.", "deployment_authorized": ["lifeos", "lifeos-native-test"]},
-    {"id":"UX-REACH-01","status":"ACTIVE","scope":"Interfaccia LifeOS","rule":"I pulsanti che nel normale utilizzo previsto possono essere premuti molte volte al giorno non devono mai trovarsi in alto a destra. Collocarli dove il pollice li raggiunge comodamente.","recorded_on":"2026-11-06","provenance":"Richiesta esplicita utente durante la revisione della bozza Nutrizione","source_message_date":"2026-11-06"},
+    {
+      "id": "UTILITY-CURRENT-BUDGET-01",
+      "status": "ACTIVE",
+      "scope": "Budget utenze LifeOS",
+      "rule": "Ricalcolare la stima di budget del mese corrente quando si corregge il periodo di competenza di una bolletta collegata a un piano stimato.",
+      "recorded_on": "2026-11-07",
+      "provenance": "Conferma esplicita «si» alla proposta nel thread LifeOS.",
+      "deployment_authorized": [
+        "lifeos",
+        "lifeos-native-test"
+      ]
+    },
+    {
+      "id": "UX-REACH-01",
+      "status": "ACTIVE",
+      "scope": "Interfaccia LifeOS",
+      "rule": "I pulsanti che nel normale utilizzo previsto possono essere premuti molte volte al giorno non devono mai trovarsi in alto a destra. Collocarli dove il pollice li raggiunge comodamente.",
+      "recorded_on": "2026-11-06",
+      "provenance": "Richiesta esplicita utente durante la revisione della bozza Nutrizione",
+      "source_message_date": "2026-11-06"
+    },
     {
       "id": "A01",
       "status": "ACTIVE",
@@ -829,6 +900,15 @@
         "confirmation_quote": "si",
         "confirmation_date": "2026-11-07"
       }
+    },
+    {
+      "id": "FINAL-RECOVERY-2026-11-12",
+      "status": "ACTIVE",
+      "scope": "Ripresa una tantum candidato finale LifeOS",
+      "recorded_on": "2026-11-12",
+      "provenance": "Richiesta diretta utente nella sessione di ripresa",
+      "original_quote": "Riprendi LifeOS leggendo AGENTS.md e docs/HANDOFF-2026-11-12.md. Analizza prima l’esito del run 43232065358, senza ripetere i test già conclusi. Continua fino al candidato finale. Nessuna IPA e nessun deploy backend. é fallito",
+      "rule": "Analizzare prima il run indicato; recuperare solo i casi falliti senza ripetere prove concluse. Proseguire fino al candidato finale senza IPA né deploy backend. DEV-02 conservata per nuovi difetti di prodotto."
     }
   ],
   "pending_confirmations": [
@@ -1048,11 +1128,53 @@
     "source": "Richiesta diretta utente",
     "scope": "Redesign Dashboard, Salute e Nutrizione. Consegna artifact IPA e link Actions."
   },
-  "ci_ipa_latency_request": {"id": "CI-IPA-LATENCY-01", "status": "ACTIVE", "recorded_on": "2026-11-08", "scope": "LifeOS CI e tempi IPA", "provenance": "Richiesta diretta utente", "original_quote": "ma in questo modo risparmieremmo tempo solo se fallisce uno di quei test, io volevo un risparmio di tempo sistemico", "objective": "Ridurre sistematicamente i tempi della pipeline anche quando i test passano.", "implementation": "Pilota IPA di prova con collaudo per impatto in Salute/Nutrizione, fallback a suite completa, avvio Release pulito e verifica del pacchetto. Il percorso produzione mantiene i gate completi. Il packaging del pilota richiede autorizzazione esplicita.", "approval_quote": "va bene vediamo se risparmiamo tempo, intanto le modifiche che ti avevo chiesto sono state fatte?"},
-  "ipa_delivery_88": {"id": "IPA-DELIVERY-88", "status": "AUTHORIZED", "recorded_on": "2026-11-08", "scope": "Confezionamento e distribuzione IPA iOS 0.10.26 build 88", "provenance": "Richiesta diretta utente", "original_quote": "ok, manda in produzione l'ipa e dammi il link per monitorarlo", "gate": "Suite completa, quattro avvii Release e verifica IPA prima di pubblicare."},
-  "ipa_delivery_89": {"id": "IPA-DELIVERY-89", "status": "AUTHORIZED", "recorded_on": "2026-11-09", "scope": "Confezionamento e distribuzione IPA iOS 0.10.27 build 89 dopo la consegna dei render", "provenance": "Richiesta diretta utente", "original_quote": "manda in produzione l'ipa", "gate": "Suite completa, quattro avvii Release e verifica IPA prima di pubblicare."},
-  "supermarket_foods": {"id": "FOOD-SUPERMARKET-01", "status": "ACTIVE", "recorded_on": "2026-11-11", "scope": "Catalogo generico, integratori e storico Salute", "provenance": "Richiesta diretta utente nella chat LifeOS", "original_quote": "Ci devono essere tutti i cibi tipici in un supermercato ma con le stime generiche senza distinguerli con marca", "rule": "Ampliare formaggi, snack, bevande, gelati e dolci. Consentire integratori personali per dose e giorni passati con macro e calorie. Correggere il blocco CI prima della produzione. Conservare le esclusioni precedenti di maiale e creatina."},
-  "supplement_catalog_shift_palette": {"id": "SUPPLEMENTS-ALL-SHIFT-PALETTE-01", "status": "ACTIVE", "recorded_on": "2026-11-11", "scope": "Catalogo, palette turni e CI LifeOS", "provenance": "Richiesta diretta nella chat LifeOS", "original_quote": "integratori should be insieme a tutti, e personali (own section), e i bottoni del calendario non sono visivamente accettabili", "rule": "Integratori generici dentro Tutti e Personali mantenuto separato. Ridisegnare i pulsanti dei turni indicati nella foto. Verificare prima le parti fragili e i flussi modificati."},
+  "ci_ipa_latency_request": {
+    "id": "CI-IPA-LATENCY-01",
+    "status": "ACTIVE",
+    "recorded_on": "2026-11-08",
+    "scope": "LifeOS CI e tempi IPA",
+    "provenance": "Richiesta diretta utente",
+    "original_quote": "ma in questo modo risparmieremmo tempo solo se fallisce uno di quei test, io volevo un risparmio di tempo sistemico",
+    "objective": "Ridurre sistematicamente i tempi della pipeline anche quando i test passano.",
+    "implementation": "Pilota IPA di prova con collaudo per impatto in Salute/Nutrizione, fallback a suite completa, avvio Release pulito e verifica del pacchetto. Il percorso produzione mantiene i gate completi. Il packaging del pilota richiede autorizzazione esplicita.",
+    "approval_quote": "va bene vediamo se risparmiamo tempo, intanto le modifiche che ti avevo chiesto sono state fatte?"
+  },
+  "ipa_delivery_88": {
+    "id": "IPA-DELIVERY-88",
+    "status": "AUTHORIZED",
+    "recorded_on": "2026-11-08",
+    "scope": "Confezionamento e distribuzione IPA iOS 0.10.26 build 88",
+    "provenance": "Richiesta diretta utente",
+    "original_quote": "ok, manda in produzione l'ipa e dammi il link per monitorarlo",
+    "gate": "Suite completa, quattro avvii Release e verifica IPA prima di pubblicare."
+  },
+  "ipa_delivery_89": {
+    "id": "IPA-DELIVERY-89",
+    "status": "AUTHORIZED",
+    "recorded_on": "2026-11-09",
+    "scope": "Confezionamento e distribuzione IPA iOS 0.10.27 build 89 dopo la consegna dei render",
+    "provenance": "Richiesta diretta utente",
+    "original_quote": "manda in produzione l'ipa",
+    "gate": "Suite completa, quattro avvii Release e verifica IPA prima di pubblicare."
+  },
+  "supermarket_foods": {
+    "id": "FOOD-SUPERMARKET-01",
+    "status": "ACTIVE",
+    "recorded_on": "2026-11-11",
+    "scope": "Catalogo generico, integratori e storico Salute",
+    "provenance": "Richiesta diretta utente nella chat LifeOS",
+    "original_quote": "Ci devono essere tutti i cibi tipici in un supermercato ma con le stime generiche senza distinguerli con marca",
+    "rule": "Ampliare formaggi, snack, bevande, gelati e dolci. Consentire integratori personali per dose e giorni passati con macro e calorie. Correggere il blocco CI prima della produzione. Conservare le esclusioni precedenti di maiale e creatina."
+  },
+  "supplement_catalog_shift_palette": {
+    "id": "SUPPLEMENTS-ALL-SHIFT-PALETTE-01",
+    "status": "ACTIVE",
+    "recorded_on": "2026-11-11",
+    "scope": "Catalogo, palette turni e CI LifeOS",
+    "provenance": "Richiesta diretta nella chat LifeOS",
+    "original_quote": "integratori should be insieme a tutti, e personali (own section), e i bottoni del calendario non sono visivamente accettabili",
+    "rule": "Integratori generici dentro Tutti e Personali mantenuto separato. Ridisegnare i pulsanti dei turni indicati nella foto. Verificare prima le parti fragili e i flussi modificati."
+  },
   "final_candidate_2026_11_12": {
     "id": "FINAL-CANDIDATE-2026-11-12",
     "status": "ACTIVE",

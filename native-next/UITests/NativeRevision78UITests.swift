@@ -320,11 +320,26 @@ final class NativeRevision78UITests: XCTestCase {
         app.tabBars.buttons["Bloom"].tap()
         app.buttons["bloom-archive-menu"].tap(); app.buttons.matching(NSPredicate(format: "label == %@ AND identifier != %@", "Importa backup Bloom", "bloom.importBackup")).firstMatch.tap()
         let cancel = app.buttons["Annulla"]
-        XCTAssertTrue(cancel.waitForExistence(timeout: 15)); cancel.tap()
-        XCTAssertTrue(app.buttons["bloom-section-library"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.buttons["bloom-section-library"].isHittable)
+        let library = app.buttons["bloom-section-library"]
+        func cancelPickerAndWaitForLibrary() {
+            XCTAssertTrue(cancel.waitForExistence(timeout: 15))
+            cancel.tap()
+            // The underlying section exists while UIKit is still dismissing Files.
+            // Wait for the actual interaction contract, not mere tree presence.
+            let ready = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == true AND hittable == true"), object: library)
+            let result = XCTWaiter.wait(for: [ready], timeout: 15)
+            if result != .completed {
+                capture("78-bloom-cancel-not-ready", app)
+                let tree = XCTAttachment(string: app.debugDescription)
+                tree.name = "78-bloom-cancel-not-ready hierarchy"
+                tree.lifetime = .keepAlways
+                add(tree)
+            }
+            XCTAssertEqual(result, .completed, "Cancelling Files must restore an interactive Bloom library")
+        }
+        cancelPickerAndWaitForLibrary()
         app.buttons["bloom-archive-menu"].tap(); app.buttons.matching(NSPredicate(format: "label == %@ AND identifier != %@", "Importa backup Bloom", "bloom.importBackup")).firstMatch.tap()
-        XCTAssertTrue(cancel.waitForExistence(timeout: 15)); cancel.tap()
+        cancelPickerAndWaitForLibrary()
         capture("78-bloom-picker-cancel", app)
     }
     func testBloomSystemFilesSelectionReachesPreviewAndPersists() {

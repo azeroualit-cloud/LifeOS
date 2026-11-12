@@ -67,7 +67,7 @@ final class NativeRevision77UITests: XCTestCase {
             field.typeText(value)
         }
         app.staticTexts["Aggiungi nutrienti"].tap()
-        XCTAssertEqual(app.staticTexts["quick-nutrition-calories"].label, "101.8 kcal")
+        XCTAssertEqual(app.staticTexts["quick-nutrition-calories"].label, "101,8 kcal")
         let save = app.buttons["quick-nutrition-save"]
         XCTAssertTrue(save.isEnabled)
         XCTAssertGreaterThanOrEqual(save.frame.height, 44)

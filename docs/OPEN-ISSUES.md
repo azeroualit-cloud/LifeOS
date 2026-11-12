@@ -1,5 +1,8 @@
 # LifeOS — correzioni e difetti aperti
 
+**Ripresa 12 novembre — run 43232065358 analizzato:** 299 unitari + 11 UI preflight passati; restante suite 93/95 UI passati, 2 falliti, zero saltati. Totale 403/405. Quattro avvii Release passati. Fallimenti: aspettativa decimale inglese in test italiano (101.8 contro 101,8 kcal); Bloom verifica isHittable immediata dopo annullamento File mentre la sezione sottostante esiste già. Correzioni limitate ai test: aspettativa italiana e attesa condizionata della raggiungibilità con diagnostica, senza cambiare prodotto. Verifica final-recovery dei soli due casi da avviare; niente nuova suite né avvii Release. Nessuna IPA/deploy.
+
+
 ## Stato prevalente — tre casi mirati passati, gate finale in corso
 
 La prova 43229809175 (ff2a894) ha superato i tre casi rimasti: esclusioni generiche, eliminazione/annullamento e cronologia per giorno, Spesotti in ml. Catture ispezionate. Il run completo 43232065358 sul sorgente 8ac2d4f è in corso senza IPA; nessuna dichiarazione di accettazione o prova fisica. Le note successive conservano la diagnosi precedente.

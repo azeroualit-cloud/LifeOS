@@ -1,5 +1,8 @@
 # LifeOS — stato corrente
 
+**Ripresa 12 novembre — run 43232065358 analizzato:** 299 unitari + 11 UI preflight passati; restante suite 93/95 UI passati, 2 falliti, zero saltati. Totale 403/405. Quattro avvii Release passati. Fallimenti: aspettativa decimale inglese in test italiano (101.8 contro 101,8 kcal); Bloom verifica isHittable immediata dopo annullamento File mentre la sezione sottostante esiste già. Correzioni limitate ai test: aspettativa italiana e attesa condizionata della raggiungibilità con diagnostica, senza cambiare prodotto. Verifica final-recovery dei soli due casi da avviare; niente nuova suite né avvii Release. Nessuna IPA/deploy.
+
+
 **Passaggio di consegne su richiesta utente:** monitoraggio interrotto, CI non cancellata. Riprendere da [HANDOFF-2026-11-12.md](HANDOFF-2026-11-12.md) e acquisire l’esito del run 43232065358 prima di qualunque rilancio. Ultimo stato: preflight passato, suite restante e verifiche Release in corso. Nessuna IPA autorizzata.
 
 **Gate finale attuale:** [run 43232065358](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43232065358) sul commit `8ac2d4f5725d624f8a89f8458cf7c03dc2242bc9`, avviato manualmente dopo le verifiche mirate. Suite completa e quattro avvii Release in job separati; package e publish esclusi dall’evento workflow_dispatch. In attesa dell’esito effettivo.

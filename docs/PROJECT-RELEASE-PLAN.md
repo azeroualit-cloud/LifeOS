@@ -1,5 +1,8 @@
 # Piano operativo LifeOS
 
+**Ripresa 12 novembre — run 43232065358 analizzato:** 299 unitari + 11 UI preflight passati; restante suite 93/95 UI passati, 2 falliti, zero saltati. Totale 403/405. Quattro avvii Release passati. Fallimenti: aspettativa decimale inglese in test italiano (101.8 contro 101,8 kcal); Bloom verifica isHittable immediata dopo annullamento File mentre la sezione sottostante esiste già. Correzioni limitate ai test: aspettativa italiana e attesa condizionata della raggiungibilità con diagnostica, senza cambiare prodotto. Verifica final-recovery dei soli due casi da avviare; niente nuova suite né avvii Release. Nessuna IPA/deploy.
+
+
 **Gate finale attuale:** [run 43232065358](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43232065358) sul commit `8ac2d4f5725d624f8a89f8458cf7c03dc2242bc9`, avviato manualmente dopo le verifiche mirate. Suite completa e quattro avvii Release in job separati; package e publish esclusi dall’evento workflow_dispatch. In attesa dell’esito effettivo.
 
 **Candidato pronto per il gate completo senza IPA:** [prova mirata 43229809175](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43229809175), sorgente ff2a894, passata (1 unitario e 2 UI). Ispezionate catture reali di marca Spesotti, 250 ml = 117,5 kcal, cronologia per giorno ed eliminazione del solo giorno selezionato. Le precedenti prove mirate coprono capsule/polveri, identità personale e palette standard/grande. Nel riepilogo storico le fibre non dichiarate restano “—”. La nuova suite completa e i quattro avvii Release sono il prossimo gate; non c’è autorizzazione IPA.

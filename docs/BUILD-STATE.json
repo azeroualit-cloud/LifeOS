@@ -402,7 +402,7 @@
     "publish_status": "skipped"
   },
   "final_candidate_2026_11_12": {
-    "status": "final_automated_validation_running",
+    "status": "two_ui_recovery_pending",
     "base_commit": "6a8826d4e1334935798dc9e909449621c013984e",
     "product_source_commit": "db6d6f5e03e4d5cd5bf1dca850372d50063345b6",
     "packaging_authorized": false,
@@ -441,7 +441,7 @@
     "final_workflow_event": "workflow_dispatch"
   },
   "catalog_increment_2026_11_12": {
-    "status": "complete_no_package_gate_running",
+    "status": "two_ui_recovery_pending",
     "decision": "CATALOG-BRANDS-UNITS-HISTORY-2026-11-12",
     "public_inventory_count": 5323,
     "branded_foods_complete": true,
@@ -499,7 +499,7 @@
     "final_run": 43232065358,
     "package_status": "not_authorized_in_current_chat",
     "published": false,
-    "monitoring": "stopped_by_user; CI left running; final outcome to acquire in next chat"
+    "monitoring": "resumed; final run failed with two UI assertions"
   },
   "historical_increment_states": {
     "current_increment": {
@@ -553,6 +553,19 @@
     "new_ipa": false,
     "validation_run": 43232065358,
     "validation": "Complete no-package gate running after focused checks",
+    "accepted_for_production": false
+  },
+  "final_recovery_2026_11_12": {
+    "status": "two_ui_recovery_prepared",
+    "source_run": 43232065358,
+    "product_source_commit": "8ac2d4f5725d624f8a89f8458cf7c03dc2242bc9",
+    "unit_passed": 299,
+    "preflight_ui_passed": 11,
+    "remaining_ui_passed": 93,
+    "remaining_ui_failed": 2,
+    "release_launches_passed": 4,
+    "packaging_authorized": false,
+    "backend_deploy_authorized": false,
     "accepted_for_production": false
   }
 }
