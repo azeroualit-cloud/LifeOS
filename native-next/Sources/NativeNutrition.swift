@@ -39,7 +39,7 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
     }
     var nutritionSummary: String {
         if nutritionNotDeclared == true { return "Energia e macro non dichiarati" }
-        return (macroEstimateSource == nil ? "" : "≈ ") + "P \(NSDecimalNumber(decimal: protein)) · C \(NSDecimalNumber(decimal: carbohydrate)) · G \(NSDecimalNumber(decimal: fat)) · F \(NSDecimalNumber(decimal: fibre ?? 0)) g — \(NSDecimalNumber(decimal: calories)) kcal"
+        return (macroEstimateSource == nil ? "" : "≈ ") + "P \(NSDecimalNumber(decimal: protein)) · C \(NSDecimalNumber(decimal: carbohydrate)) · G \(NSDecimalNumber(decimal: fat)) · F \(fibre.map { NSDecimalNumber(decimal: $0).stringValue } ?? "—") g — \(NSDecimalNumber(decimal: calories)) kcal"
     }
 
     /// Label values are per 100 g; persisted measurements always describe the portion.

@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Candidato pronto per il gate completo senza IPA:** [prova mirata 43229809175](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43229809175), sorgente ff2a894, passata (1 unitario e 2 UI). Ispezionate catture reali di marca Spesotti, 250 ml = 117,5 kcal, cronologia per giorno ed eliminazione del solo giorno selezionato. Le precedenti prove mirate coprono capsule/polveri, identità personale e palette standard/grande. Nel riepilogo storico le fibre non dichiarate restano “—”. La nuova suite completa e i quattro avvii Release sono il prossimo gate; non c’è autorizzazione IPA.
+
 **Verifica attuale:** [43225787669](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43225787669), sorgente `082a238449be7612842ea303ce1f34db5d8734f8`, in corso senza IPA.
 
 **Checkpoint catalogo completo e diagnosi, 12 novembre:** inventario ufficiale 5.323/5.323 URL, 222/222 pagine, ora **2.893 alimenti** dopo verifica di tre esclusioni errate (un vegetale e due prodotti di pollo/tacchino senza suino); **208 Gli Spesotti**, 305 tabelle non disponibili, 5 limiti di etichetta espliciti, un EAN duplicato coerente unificato. Coverage e manifesto in COOP-CATALOG-COVERAGE.json / COOP-CATALOG-MANIFEST.json. Voci locali senza macro non inviano zeri in HealthKit.

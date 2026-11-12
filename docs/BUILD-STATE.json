@@ -441,7 +441,7 @@
     "final_workflow_event": "workflow_dispatch"
   },
   "catalog_increment_2026_11_12": {
-    "status": "catalog_import_complete_focused_corrections_pending",
+    "status": "ready_for_complete_no_package_gate",
     "decision": "CATALOG-BRANDS-UNITS-HISTORY-2026-11-12",
     "public_inventory_count": 5323,
     "branded_foods_complete": true,
@@ -482,7 +482,19 @@
       "ui_passed": 2,
       "ui_failed": 2,
       "details": "Generic exclusion test searched all branded names including a vegetarian product; history cancel is native popover dismissal; search text read before input completion. Personal editing and compact palette passed."
-    }
+    },
+    "last_focused_run": 43229809175,
+    "last_focused_source": "ff2a8945d72215e4290fe9a994787b91c0fd84f6",
+    "last_focused_result": {
+      "passed_unit": 1,
+      "passed_ui": 2,
+      "failed": 0
+    },
+    "screenshots_reviewed": [
+      "Coop Spesotti brand",
+      "250 ml milk equals 117.5 kcal",
+      "day-grouped history after selected-day deletion"
+    ]
   },
   "historical_increment_states": {
     "current_increment": {

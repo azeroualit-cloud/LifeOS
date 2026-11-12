@@ -37,6 +37,7 @@ import HealthKit
         XCTAssertEqual(entry.portionMillilitres, 250)
         XCTAssertNil(entry.portionGrams)
         XCTAssertEqual(entry.quantityDescription, "250 ml")
+        XCTAssertTrue(entry.nutritionSummary.contains("F —"), "Missing fibre must remain unavailable in history")
         XCTAssertEqual(NativeGenericFood.matches("succo spesotti", in: [juice]).map(\.id), [juice.id])
     }
 
