@@ -1,5 +1,11 @@
 # LifeOS — correzioni e difetti aperti
 
+## Stato prevalente — catalogo completo, verifica mirata in corso
+
+[43225787669](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43225787669) su `082a238`: correzione identificatori del diario, sostituzione numerica nel test editor, contratto porzione in modifica manuale, regressione palette e prova latte Spesotti in ml. Catalogo ufficiale: 2.893 alimenti, acquisizione conclusa e verificata localmente. Nessuna IPA autorizzata.
+
+Il precedente problema del dialogo Apple Salute è passato sia nella prova mirata 43176199615 sia nel preflight completo 43178362187. Quel run ha poi fallito un solo vecchio vincolo di larghezza palette (389/390); quattro avvii Release passati. Il nuovo candidato resta da verificare e i controlli fisici restano aperti. Le note successive sono cronologia.
+
 ## CI-HEALTH-PERMISSION-2026-11-12 — verifica mirata passata, regressione finale in corso
 
 Run 43113799496, sorgente db6d6f5: dialogo Health visibile nella cattura ma assente dall’albero del processo LifeOS. Corretta la ricerca nel solo test, includendo HealthPrivacyService e SpringBoard. Permessi e 2.200 kcal/80 kg restano obbligatori. Nessun difetto del prodotto dimostrato da questo timeout. Prova mirata 43176199615 passata (288 unitari e 4 UI); catture ispezionate. Suite finale 43178362187 in corso sul commit 7087d91 con filtro dei processi attivi. Nessuna IPA autorizzata in questa chat.

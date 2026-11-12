@@ -7,8 +7,9 @@
   "repository_head": "Use git rev-parse HEAD or the GitHub commit currently being read; documentation commits do not create a new IPA.",
   "source_of_truth": "native-next overlay assembled through .github/actions/native-compat76/action.yml",
   "native_source_fingerprint": {
-    "algorithm": "SHA-256 over sorted tracked native-next paths, NUL, file bytes, NUL",
-    "sha256": "54fd84d4f757ea0b3a42c974fdac9b7f6e4ecc7644bbd0bb2c6b24b00f4d5e3b"
+    "algorithm": "SHA-256 over sorted tracked native-next paths, NUL, canonical Git blob bytes, NUL",
+    "sha256": "58a9f44fd0babe07d0873dbc233f6b8e286226e5fb2f3a5d4df6d9d92ab82de5",
+    "source_commit": "082a238449be7612842ea303ce1f34db5d8734f8"
   },
   "latest_distributed_build": {
     "version": "0.10.26",
@@ -24,15 +25,6 @@
     "release_launches": 4,
     "physical_device_verified_by_agent": false,
     "accepted_for_production": false
-  },
-  "current_increment": {
-    "type": "Redesign Dashboard, Salute e Nutrizione",
-    "candidate_version": "0.10.20",
-    "candidate_build": 82,
-    "new_ipa": false,
-    "application_source_changed_since_verified_build": true,
-    "validation": "GitHub Actions pre-IPA; artifact only after both validation jobs pass",
-    "previous_attempt": "42258943717: compilation failed; corrected NativeDesign.Layout.healthSummaryRadius reference"
   },
   "post_candidate_native_change": {
     "scope": "Catalogo italiano e barra di ricerca alimenti",
@@ -242,39 +234,6 @@
     "device": "iPhone 15 Pro simulator, iOS 27.0",
     "physical_device_verified": false,
     "compact_device_verified": false
-  },
-  "current_nutrition_change": {
-    "rule": "NUTRITION-DIRECT-01",
-    "render_approval": "ok approvo",
-    "status": "implemented; final recovery verification unconfirmed; alternate Mac runs ended without runner acquisition",
-    "historical_entries": "not migrated or recalculated; date-only legacy edits preserve energy",
-    "calculation": "4P + 4C + 9G + 2 fibre; new entries only",
-    "distributed": false,
-    "source_commit": "cad0a7b5",
-    "current_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/41871989512",
-    "previous_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/41853040353",
-    "previous_result": {
-      "unit_passed": 271,
-      "ui_passed": 4,
-      "ui_failed": 1
-    },
-    "visual_evidence": "Native video shows pending panel open, all four values preserved, error and Retry visible. Automatic test currently fails to locate disabled protein input; broader accessibility query under verification.",
-    "user_visual_acceptance": "approved render; implementation not yet accepted",
-    "physical_healthkit_verified": false,
-    "compact_device_verified": false,
-    "runner_failure": {
-      "run": "41856609394",
-      "tests_executed": false,
-      "message": "The job was not acquired by Runner of type hosted even after multiple attempts"
-    },
-    "runner_label": "macos-26",
-    "toolchain_policy": "Existing selector: prefer Xcode 27.0, otherwise 26.x; reject SDK 27.2. Actual runtime pending.",
-    "runner_acquisition_failures": [
-      "41856609394",
-      "41859714562",
-      "41871989512",
-      "41873100610"
-    ]
   },
   "ipa_production_gate": {
     "rule": "IPA-GATE-01",
@@ -511,6 +470,62 @@
       "passed": 389,
       "failed": 1,
       "release_launches": 4
+    },
+    "focused_corrections_run": 43225787669,
+    "focused_corrections_source_commit": "082a238449be7612842ea303ce1f34db5d8734f8"
+  },
+  "historical_increment_states": {
+    "current_increment": {
+      "type": "Redesign Dashboard, Salute e Nutrizione",
+      "candidate_version": "0.10.20",
+      "candidate_build": 82,
+      "new_ipa": false,
+      "application_source_changed_since_verified_build": true,
+      "validation": "GitHub Actions pre-IPA; artifact only after both validation jobs pass",
+      "previous_attempt": "42258943717: compilation failed; corrected NativeDesign.Layout.healthSummaryRadius reference"
+    },
+    "current_nutrition_change": {
+      "rule": "NUTRITION-DIRECT-01",
+      "render_approval": "ok approvo",
+      "status": "implemented; final recovery verification unconfirmed; alternate Mac runs ended without runner acquisition",
+      "historical_entries": "not migrated or recalculated; date-only legacy edits preserve energy",
+      "calculation": "4P + 4C + 9G + 2 fibre; new entries only",
+      "distributed": false,
+      "source_commit": "cad0a7b5",
+      "current_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/41871989512",
+      "previous_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/41853040353",
+      "previous_result": {
+        "unit_passed": 271,
+        "ui_passed": 4,
+        "ui_failed": 1
+      },
+      "visual_evidence": "Native video shows pending panel open, all four values preserved, error and Retry visible. Automatic test currently fails to locate disabled protein input; broader accessibility query under verification.",
+      "user_visual_acceptance": "approved render; implementation not yet accepted",
+      "physical_healthkit_verified": false,
+      "compact_device_verified": false,
+      "runner_failure": {
+        "run": "41856609394",
+        "tests_executed": false,
+        "message": "The job was not acquired by Runner of type hosted even after multiple attempts"
+      },
+      "runner_label": "macos-26",
+      "toolchain_policy": "Existing selector: prefer Xcode 27.0, otherwise 26.x; reject SDK 27.2. Actual runtime pending.",
+      "runner_acquisition_failures": [
+        "41856609394",
+        "41859714562",
+        "41871989512",
+        "41873100610"
+      ]
     }
+  },
+  "current_increment": {
+    "type": "Coop/Spesotti, integratori per unità, modifica personale, cronologia e palette compatta",
+    "candidate_version": "0.10.27",
+    "candidate_build": 89,
+    "source_commit": "082a238449be7612842ea303ce1f34db5d8734f8",
+    "new_ipa": false,
+    "validation_run": 43225787669,
+    "validation": "focused corrections in progress; complete final gate still required",
+    "accepted_for_production": false
   }
 }

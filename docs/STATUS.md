@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Verifica attuale:** [43225787669](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43225787669), sorgente `082a238449be7612842ea303ce1f34db5d8734f8`, in corso senza IPA.
+
 **Checkpoint catalogo completo e diagnosi, 12 novembre:** inventario ufficiale 5.323/5.323 URL, 222/222 pagine, ora **2.893 alimenti** dopo verifica di tre esclusioni errate (un vegetale e due prodotti di pollo/tacchino senza suino); **208 Gli Spesotti**, 305 tabelle non disponibili, 5 limiti di etichetta espliciti, un EAN duplicato coerente unificato. Coverage e manifesto in COOP-CATALOG-COVERAGE.json / COOP-CATALOG-MANIFEST.json. Voci locali senza macro non inviano zeri in HealthKit.
 
 Il collaudo completo precedente 43178362187 sul commit 7087d91 ha completato 390 test: 389 passati, un fallimento nel vecchio vincolo di larghezza 60 pt della palette. Quattro avvii Release passati; IPA esclusa. La verifica 43189745646 sul commit 5e05fa3 ha compilato e rilevato un’aspettativa unitaria sulla rimozione della porzione in modifica manuale e due errori UI: propagazione dell’identificatore del diario sul pulsante e helper test che scriveva 300200 invece di sostituire 200 con 300. Correzioni preparate; nessuna nuova suite completa finché non passa la verifica mirata dei soli casi interessati e del latte Spesotti in ml. Non sono esiti verdi del nuovo candidato.

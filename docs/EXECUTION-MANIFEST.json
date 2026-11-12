@@ -737,7 +737,7 @@
     "reasoning": "medium",
     "scope": "audit in sola lettura, nessuna modifica concorrente"
   },
-  "current_audit": {
+  "historical_audit_2026_11_12_start": {
     "reported_on": "2026-11-12",
     "scope": "Continue approved work to final candidate; no IPA creation, packaging or distribution until explicit new-chat request; no backend deploy",
     "observed_working_branch_head": "6a8826d",
@@ -756,5 +756,31 @@
     "history_note": "base_commit and original task contracts below are historical planning inputs; current_audit and task status describe the present audit. Historical evidence does not certify the current candidate.",
     "physical_device_verified": false,
     "accepted_for_production": false
+  },
+  "current_audit": {
+    "recorded_on": "2026-11-12",
+    "working_branch": "codex/revision77",
+    "candidate_source_commit": "082a238449be7612842ea303ce1f34db5d8734f8",
+    "focused_run": 43225787669,
+    "status": "focused_corrections_running",
+    "complete_catalog": {
+      "source_products": 5323,
+      "food_entries": 2893,
+      "spesotti": 208,
+      "unavailable_nutrition": 305,
+      "bounded_labels": 5
+    },
+    "prior_complete_run": 43178362187,
+    "prior_complete_result": {
+      "source_commit": "7087d91a2f8386281c157c4a80133ece0c105584",
+      "passed": 389,
+      "failed": 1,
+      "release_launches_passed": 4,
+      "failure": "historical 60-point palette width assertion"
+    },
+    "physical_device_verified": false,
+    "accepted_for_production": false,
+    "packaging_authorized": false,
+    "backend_deploy_authorized": false
   }
 }
