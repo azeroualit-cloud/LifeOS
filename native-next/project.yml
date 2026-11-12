@@ -23,6 +23,10 @@ targets:
         buildPhase: resources
       - path: Resources/supplements.json
         buildPhase: resources
+      - path: Resources/branded-foods.json
+        buildPhase: resources
+      - path: Resources/branded-supplements.json
+        buildPhase: resources
     info:
       path: GeneratedInfo.plist
       properties:

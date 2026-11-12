@@ -2,69 +2,77 @@
   {
     "id": "supplement-whey",
     "name": "Proteine whey",
-    "detail": "30 g per dose · stima",
+    "detail": "30 g abituali · stima per grammo",
     "family": "supplement",
     "aliases": [
       "proteine in polvere",
       "whey concentrate"
     ],
-    "calories": 12200,
-    "protein": 2400,
-    "carbohydrate": 200,
-    "fat": 200,
-    "fibre": 0,
-    "nutrientValues": {}
+    "calories": 406.6666666666667,
+    "protein": 80.0,
+    "carbohydrate": 6.666666666666667,
+    "fat": 6.666666666666667,
+    "fibre": 0.0,
+    "nutrientValues": {},
+    "supplementUnit": "gram",
+    "defaultQuantity": 30
   },
   {
     "id": "supplement-whey-isolate",
     "name": "Proteine whey isolate",
-    "detail": "30 g per dose · stima",
+    "detail": "30 g abituali · stima per grammo",
     "family": "supplement",
     "aliases": [
       "whey isolate"
     ],
-    "calories": 11400,
-    "protein": 2700,
-    "carbohydrate": 100,
-    "fat": 30.0,
-    "fibre": 0,
-    "nutrientValues": {}
+    "calories": 380.0,
+    "protein": 90.0,
+    "carbohydrate": 3.3333333333333335,
+    "fat": 1.0,
+    "fibre": 0.0,
+    "nutrientValues": {},
+    "supplementUnit": "gram",
+    "defaultQuantity": 30
   },
   {
     "id": "supplement-collagen",
     "name": "Collagene",
-    "detail": "10 g per dose · stima",
+    "detail": "10 g abituali · stima per grammo",
     "family": "supplement",
     "aliases": [
       "collagene idrolizzato"
     ],
-    "calories": 3600,
-    "protein": 900,
-    "carbohydrate": 0,
-    "fat": 0,
-    "fibre": 0,
-    "nutrientValues": {}
+    "calories": 360.0,
+    "protein": 90.0,
+    "carbohydrate": 0.0,
+    "fat": 0.0,
+    "fibre": 0.0,
+    "nutrientValues": {},
+    "supplementUnit": "gram",
+    "defaultQuantity": 10
   },
   {
     "id": "supplement-psyllium",
     "name": "Fibre di psillio",
-    "detail": "5 g per dose · stima",
+    "detail": "5 g abituali · stima per grammo",
     "family": "supplement",
     "aliases": [
       "psillio",
       "psyllium"
     ],
-    "calories": 800,
-    "protein": 0,
-    "carbohydrate": 0,
-    "fat": 0,
-    "fibre": 400,
-    "nutrientValues": {}
+    "calories": 160.0,
+    "protein": 0.0,
+    "carbohydrate": 0.0,
+    "fat": 0.0,
+    "fibre": 80.0,
+    "nutrientValues": {},
+    "supplementUnit": "gram",
+    "defaultQuantity": 5
   },
   {
     "id": "supplement-omega3",
     "name": "Omega-3 (180 mg EPA + 120 mg DHA)",
-    "detail": "1 g di olio per dose",
+    "detail": "1 g di olio per capsula",
     "family": "supplement",
     "aliases": [
       "omega 3",
@@ -84,12 +92,14 @@
         "amount": 12000,
         "estimateSource": "Composizione indicativa della dose generica"
       }
-    }
+    },
+    "supplementUnit": "capsule",
+    "defaultQuantity": 1
   },
   {
     "id": "supplement-vitamin-c",
     "name": "Vitamina C (500 mg)",
-    "detail": "500 mg per dose",
+    "detail": "500 mg per compressa",
     "family": "supplement",
     "aliases": [
       "acido ascorbico"
@@ -104,12 +114,14 @@
         "amount": 50000,
         "estimateSource": "Composizione indicativa della dose generica"
       }
-    }
+    },
+    "supplementUnit": "tablet",
+    "defaultQuantity": 1
   },
   {
     "id": "supplement-vitamin-d",
     "name": "Vitamina D3 (25 µg)",
-    "detail": "25 µg = 1000 UI per dose",
+    "detail": "25 µg = 1000 UI per compressa",
     "family": "supplement",
     "aliases": [
       "vitamina d",
@@ -125,12 +137,14 @@
         "amount": 2500,
         "estimateSource": "Composizione indicativa della dose generica"
       }
-    }
+    },
+    "supplementUnit": "tablet",
+    "defaultQuantity": 1
   },
   {
     "id": "supplement-vitamin-b12",
     "name": "Vitamina B12 (2,5 µg)",
-    "detail": "2,5 µg per dose",
+    "detail": "2,5 µg per compressa",
     "family": "supplement",
     "aliases": [
       "b12"
@@ -145,12 +159,14 @@
         "amount": 250.0,
         "estimateSource": "Composizione indicativa della dose generica"
       }
-    }
+    },
+    "supplementUnit": "tablet",
+    "defaultQuantity": 1
   },
   {
     "id": "supplement-magnesium",
     "name": "Magnesio (200 mg)",
-    "detail": "200 mg di magnesio elementare per dose",
+    "detail": "200 mg di magnesio elementare per compressa",
     "family": "supplement",
     "aliases": [
       "magnesio"
@@ -165,12 +181,14 @@
         "amount": 20000,
         "estimateSource": "Composizione indicativa della dose generica"
       }
-    }
+    },
+    "supplementUnit": "tablet",
+    "defaultQuantity": 1
   },
   {
     "id": "supplement-zinc",
     "name": "Zinco (10 mg)",
-    "detail": "10 mg di zinco elementare per dose",
+    "detail": "10 mg di zinco elementare per compressa",
     "family": "supplement",
     "aliases": [
       "zinco"
@@ -185,12 +203,14 @@
         "amount": 1000,
         "estimateSource": "Composizione indicativa della dose generica"
       }
-    }
+    },
+    "supplementUnit": "tablet",
+    "defaultQuantity": 1
   },
   {
     "id": "supplement-calcium",
     "name": "Calcio (500 mg)",
-    "detail": "500 mg di calcio elementare per dose",
+    "detail": "500 mg di calcio elementare per compressa",
     "family": "supplement",
     "aliases": [
       "calcio"
@@ -205,6 +225,8 @@
         "amount": 50000,
         "estimateSource": "Composizione indicativa della dose generica"
       }
-    }
+    },
+    "supplementUnit": "tablet",
+    "defaultQuantity": 1
   }
 ]

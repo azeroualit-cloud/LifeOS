@@ -35,6 +35,19 @@ final class NativeRevision71UITests: XCTestCase {
         }
         XCTAssertTrue(element.isHittable, "Control must remain reachable: \(element.identifier)")
     }
+    private func revealBrush(_ kind: String, app: XCUIApplication) -> XCUIElement {
+        let option = app.buttons["shift-brush-" + kind]
+        let palette = app.scrollViews["shift-brush-scroll"]
+        XCTAssertTrue(palette.waitForExistence(timeout: 10))
+        for _ in 0..<16 {
+            if option.exists && option.isHittable && option.frame.minX >= palette.frame.minX - 1 && option.frame.maxX <= palette.frame.maxX + 1 { return option }
+            let towardStart = option.exists && option.frame.minX < palette.frame.minX
+            let start = palette.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            start.press(forDuration: 0.05, thenDragTo: start.withOffset(CGVector(dx: towardStart ? 90 : -90, dy: 0)), withVelocity: .slow, thenHoldForDuration: 0.1)
+        }
+        XCTAssertTrue(option.isHittable, "Shift option must remain reachable: " + kind)
+        return option
+    }
     func testMonthUsesScreenAndTapOpensDayThenReturns() {
         let app = launch()
         app.openOtherDestination("Calendario")
@@ -157,6 +170,9 @@ final class NativeRevision71UITests: XCTestCase {
     func testPaintingHasGlassPaletteAndRapidEditsPreserveLastIntentAndUndo() {
         let app = launch()
         app.openOtherDestination("Calendario"); app.buttons["toggle-shift-paint"].tap()
+        let palette = app.scrollViews["shift-brush-scroll"]
+        XCTAssertTrue(palette.waitForExistence(timeout: 10))
+        XCTAssertLessThan(palette.frame.height, app.frame.height * 0.2, "Painting controls must leave room for the calendar")
         for kind in ["morning", "afternoon", "night", "rest", "holiday", "erase"] {
             let brush = app.buttons["shift-brush-" + kind]
             XCTAssertTrue(brush.exists); XCTAssertGreaterThanOrEqual(brush.frame.width.rounded(), 44)
@@ -167,7 +183,7 @@ final class NativeRevision71UITests: XCTestCase {
         surface.swipeUp(velocity: .slow); surface.swipeDown(velocity: .slow)
         reveal(today, in: surface, app: app)
         for (kind, label) in [("morning", "Mattina"), ("afternoon", "Pomeriggio"), ("rest", "Riposo")] {
-            app.buttons["shift-brush-" + kind].tap(); today.tap()
+            revealBrush(kind, app: app).tap(); today.tap()
             expectation(for: NSPredicate(format: "label CONTAINS %@", label), evaluatedWith: today); waitForExpectations(timeout: 5)
         }
         XCTAssertFalse(app.scrollViews["calendar-day-pane"].exists)
@@ -179,13 +195,17 @@ final class NativeRevision71UITests: XCTestCase {
         let app = launch(["--large-text"])
         app.openOtherDestination("Calendario")
         app.buttons["toggle-shift-paint"].tap()
+        let palette = app.scrollViews["shift-brush-scroll"]
+        XCTAssertTrue(palette.waitForExistence(timeout: 10))
+        XCTAssertLessThan(palette.frame.height, app.frame.height * 0.25, "Accessible painting controls must remain a single compact row")
         for kind in ["morning", "afternoon", "night", "rest", "holiday", "erase"] {
-            let option = app.buttons["shift-brush-" + kind]
+            let option = revealBrush(kind, app: app)
             XCTAssertTrue(option.isHittable, kind)
             XCTAssertGreaterThanOrEqual(option.frame.width.rounded(), 44)
             XCTAssertGreaterThanOrEqual(option.frame.height.rounded(), 44)
         }
         XCTAssertTrue(app.buttons["shift-brush-afternoon"].label.contains("Pomeriggio"))
+        revealBrush("afternoon", app: app).tap()
         capture("Turni nomi completi testo grande")
     }
     func testFinanceMatchesOpenLayoutAndKeepsBudgetAnalysisAndExpense() {

@@ -495,13 +495,16 @@ struct CalendarScreen: View {
                 NativeIconButton(symbol: "chevron.right", label: "Mese successivo") { jumpMonth = NativeCalendarWindow.offset(focusMonth, by: 1) }.disabled(store.busy)
             }.font(.subheadline).frame(minHeight: NativeDesign.Layout.touchTarget)
             if painting {
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: NativeDesign.Space.small),
-                                         count: typeSize.isAccessibilitySize ? 1 : 2),
-                          spacing: NativeDesign.Space.small) {
-                    ForEach(ShiftKind.allCases) { kind in
-                        NativeShiftBrushOption(kind: kind, brush: $brush)
+                ScrollView(.horizontal) {
+                    HStack(spacing: NativeDesign.Space.small) {
+                        ForEach(ShiftKind.allCases) { kind in
+                            NativeShiftBrushOption(kind: kind, brush: $brush)
+                        }
                     }
+                    .padding(.vertical, NativeDesign.Space.xs)
                 }
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("shift-brush-scroll")
             }
         }.buttonStyle(NativePressStyle())
     }
@@ -523,10 +526,11 @@ private struct NativeShiftBrushOption: View {
             }
                 .padding(.horizontal, NativeDesign.Space.small)
                 .padding(.vertical, NativeDesign.Space.xs)
-                .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.shiftBrushHeight, alignment: .leading)
+                .frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
+                .fixedSize(horizontal: true, vertical: false)
                 .contentShape(Rectangle())
-        }.modifier(NativeRoutineAppearance()).tint(brush == kind.rawValue ? kind.color : .primary)
-            .overlay(RoundedRectangle(cornerRadius: NativeDesign.controlRadius)
+        }.buttonStyle(NativeGlassButtonStyle())
+            .overlay(Capsule()
                 .strokeBorder(brush == kind.rawValue ? kind.color : .clear, lineWidth: NativeDesign.Layout.selectionLine))
             .accessibilityLabel(kind.title + (kind.time.isEmpty ? "" : ", " + kind.time))
             .accessibilityHint("Tocca i giorni per applicare questo turno")

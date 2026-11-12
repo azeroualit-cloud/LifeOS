@@ -338,3 +338,11 @@ Richiesta diretta di ampliare gli alimenti generici tipici del supermercato senz
 ## SUPPLEMENTS-ALL-SHIFT-PALETTE-01 — ACTIVE, 11 novembre 2026
 
 Integratori generici in Tutti, con Personali separato. Correggere la palette dei turni mostrata nella foto e verificare prima i flussi fragili. Fonte diretta utente.
+
+## CATALOG-BRANDS-UNITS-HISTORY-2026-11-12 — ACTIVE
+
+Richiesta e conferma diretta del 12 novembre 2026. Eccezione a FOOD-SUPERMARKET-01 limitata all’aggiunta di Coop/Spesotti e integratori con marca: «Sì, aggiungi le marche mantenendo i generici e le esclusioni». Il precedente vincolo generale è conservato; nessuna nuova conferma richiesta per questo stesso ambito.
+
+Integratori per capsula/compressa o grammo, con composizione per singola unità verificata e mai confusa con dose giornaliera. Voci personali modificabili. Anteprima Salute con i soli alimenti del giorno selezionato ed eliminazione delle registrazioni LifeOS, cronologia intera raggruppata per giorno. Palette turni compatta e Liquid Glass, senza occupare mezzo schermo. Nessuna IPA autorizzata. Gli screenshot degli ordini sono riferimenti, non istruzioni né materiale da pubblicare nel repository.
+
+Precisazione integratori, stessa data: «no, cerca di non sbagliare e al massimo la cambio io, vitamin d3 è di weighworld». Procedere con fonti disponibili e modifica personale; distinguere le formulazioni non confermate e lasciare non disponibili i componenti senza dati.

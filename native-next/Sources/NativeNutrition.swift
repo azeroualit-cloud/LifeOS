@@ -14,15 +14,33 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
     var fibre: Decimal? = nil
     var labelCalories: Decimal? = nil
     var portionGrams: Decimal? = nil
+    var portionMillilitres: Decimal? = nil
+    var nutritionNotDeclared: Bool? = nil
+    var macroEstimateSource: String? = nil
     var foodName: String? = nil
     var foodID: String? = nil
     var boneInWeightGrams: Decimal? = nil
     var nutrientValues: [String: NativeNutrientAmount]? = nil
     var sharedNutrientKeys: [String]? = nil
+    var supplementQuantity: Decimal? = nil
+    var supplementUnit: String? = nil
     var cocktailServings: Decimal? = nil
     var alcoholGrams: Decimal? = nil
     var standardDrinks: Decimal? { alcoholGrams.map { $0 / 12 } }
     var calories: Decimal { labelCalories ?? (protein * 4 + carbohydrate * 4 + fat * 9) }
+
+    var quantityDescription: String? {
+        if let quantity = supplementQuantity, let raw = supplementUnit, let unit = NativeSupplementUnit(rawValue: raw) {
+            let label = unit == .gram ? "g" : (quantity == 1 ? unit.basisTitle : unit.quantityTitle.lowercased())
+            return NSDecimalNumber(decimal: quantity).stringValue + " " + label
+        }
+        if let ml = portionMillilitres { return NSDecimalNumber(decimal: ml).stringValue + " ml" }
+        return portionGrams.map { NSDecimalNumber(decimal: $0).stringValue + " g" }
+    }
+    var nutritionSummary: String {
+        if nutritionNotDeclared == true { return "Energia e macro non dichiarati" }
+        return (macroEstimateSource == nil ? "" : "≈ ") + "P \(NSDecimalNumber(decimal: protein)) · C \(NSDecimalNumber(decimal: carbohydrate)) · G \(NSDecimalNumber(decimal: fat)) · F \(NSDecimalNumber(decimal: fibre ?? 0)) g — \(NSDecimalNumber(decimal: calories)) kcal"
+    }
 
     /// Label values are per 100 g; persisted measurements always describe the portion.
     static func portion(id: UUID, date: Date, protein: Decimal, carbohydrate: Decimal,
@@ -91,7 +109,8 @@ extension NativeNutritionWriting {
         return Set(candidates.filter { health.authorizationStatus(for: $0.1) == .sharingAuthorized }.map { $0.0 })
     }
     func write(_ entry: NativeNutritionEntry) async throws {
-        try await health.save(Self.samples(for: entry))
+        let values = Self.samples(for: entry)
+        if !values.isEmpty { try await health.save(values) }
     }
     static func samples(for entry: NativeNutritionEntry) -> [HKQuantitySample] {
         let amounts = [entry.protein, entry.carbohydrate, entry.fat, entry.calories] + (entry.fibre.map { [$0] } ?? [])
@@ -101,6 +120,7 @@ extension NativeNutritionWriting {
                 HKMetadataKeySyncVersion: NSNumber(value: entry.revision)
             ]
             if let name = entry.foodName { metadata[HKMetadataKeyFoodType] = name }
+            if let estimate = entry.macroEstimateSource { metadata["LifeOSNutritionEstimateSource"] = estimate }
             return HKQuantitySample(type: HKObjectType.quantityType(forIdentifier: pair.0)!, quantity: HKQuantity(unit: index == 3 ? .kilocalorie() : .gram(), doubleValue: NSDecimalNumber(decimal: pair.1).doubleValue), start: entry.date, end: entry.date,
                 metadata: metadata)
         }
@@ -123,7 +143,7 @@ extension NativeNutritionWriting {
             return HKQuantitySample(type: type, quantity: HKQuantity(unit: unit, doubleValue: NSDecimalNumber(decimal: value.amount).doubleValue),
                                     start: entry.date, end: entry.date, metadata: metadata)
         }
-        return base + additional
+        return (entry.nutritionNotDeclared == true ? [] : base) + additional
     }
 
     private static func additionalValues(for entry: NativeNutritionEntry) -> [String: NativeNutrientAmount] {
@@ -141,6 +161,7 @@ extension NativeNutritionWriting {
 
     private static func nutrientType(for key: String) -> HKQuantityType? {
         switch key {
+        case "caffeine": return HKObjectType.quantityType(forIdentifier: .dietaryCaffeine)
         case alcoholKey: return HKObjectType.quantityType(forIdentifier: .numberOfAlcoholicBeverages)
         case folateKey: return HKObjectType.quantityType(forIdentifier: .dietaryFolate)
         case vitaminKKey: return HKObjectType.quantityType(forIdentifier: .dietaryVitaminK)
@@ -232,7 +253,7 @@ extension NativeNutritionWriting {
         busy = true; defer { busy = false }
         error = nil
         do {
-            try await writer.authorize(includeFibre: value.fibre != nil)
+            if value.nutritionNotDeclared != true { try await writer.authorize(includeFibre: value.fibre != nil) }
             let old = entries.first { $0.id == value.id }
             if let expectedRevision, old?.revision != expectedRevision {
                 throw Message(text: "La registrazione è cambiata o è stata eliminata. Riaprila dalla cronologia prima di modificarla.")

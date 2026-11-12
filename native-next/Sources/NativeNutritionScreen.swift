@@ -46,33 +46,39 @@ struct NativeNutritionScreen: View {
                 if let notice { Text(notice).foregroundStyle(.secondary) }
                 if let error = nutrition.error { Text(error).foregroundStyle(.red) }
             }
-            Section("Registrazioni LifeOS") {
-                ForEach(nutrition.entries.sorted { $0.date > $1.date }) { entry in
-                    if entry.deletionPending == true {
-                        VStack(alignment: .leading) {
-                            Text("Eliminazione da completare")
-                            Text(entry.date.formatted(date: .abbreviated, time: .omitted)).font(.caption)
-                            Button("Riprova eliminazione") { remove(entry.id) }.disabled(nutrition.busy)
-                        }
-                    } else if entry.confirmed {
-                        Button { load(entry) } label: {
+            ForEach(NativeNutritionHistory.days(nutrition.entries)) { day in
+                Section {
+                    ForEach(day.entries) { entry in
+                        if entry.deletionPending == true {
                             VStack(alignment: .leading) {
-                                if let name = entry.foodName { Text(name) }
-                                Text(entry.date.formatted(date: .abbreviated, time: .omitted))
-                                Text("P \(NSDecimalNumber(decimal: entry.protein)) · C \(NSDecimalNumber(decimal: entry.carbohydrate)) · G \(NSDecimalNumber(decimal: entry.fat)) · F \(NSDecimalNumber(decimal: entry.fibre ?? 0)) g — \(NSDecimalNumber(decimal: entry.calories)) kcal").font(.caption).foregroundStyle(.secondary)
+                                Text("Eliminazione da completare")
+                                Text(entry.date.formatted(date: .abbreviated, time: .omitted)).font(.caption)
+                                Button("Riprova eliminazione") { remove(entry.id) }.disabled(nutrition.busy)
+                            }
+                        } else if entry.confirmed {
+                            Button { load(entry) } label: {
+                                VStack(alignment: .leading) {
+                                    if let name = entry.foodName { Text(name) }
+                                    Text(entry.date.formatted(date: .abbreviated, time: .omitted))
+                                    if let quantity = entry.quantityDescription { Text(quantity).font(.caption).foregroundStyle(.secondary) }
+                                    Text(entry.nutritionSummary).font(.caption).foregroundStyle(.secondary)
+                                }
+                            }
+                            .swipeActions { Button("Elimina", role: .destructive) { deleting = entry.id }.disabled(nutrition.busy) }
+                            .contextMenu { Button("Elimina registrazione", role: .destructive) { deleting = entry.id }.disabled(nutrition.busy) }
+                        } else {
+                            VStack(alignment: .leading) {
+                                Text("Registrazione da completare")
+                                Button("Riprova") { Task { if await nutrition.save(entry, retry: true) { if editing == entry.id { clear() }; await health.refresh() } } }.disabled(nutrition.busy)
+                                Button("Modifica e riprova") {
+                                    load(entry)
+                                }.disabled(nutrition.busy)
                             }
                         }
-                        .swipeActions { Button("Elimina", role: .destructive) { deleting = entry.id }.disabled(nutrition.busy) }
-                        .contextMenu { Button("Elimina registrazione", role: .destructive) { deleting = entry.id }.disabled(nutrition.busy) }
-                    } else {
-                        VStack(alignment: .leading) {
-                            Text("Registrazione da completare")
-                            Button("Riprova") { Task { if await nutrition.save(entry, retry: true) { if editing == entry.id { clear() }; await health.refresh() } } }.disabled(nutrition.busy)
-                            Button("Modifica e riprova") {
-                                load(entry)
-                            }.disabled(nutrition.busy)
-                        }
                     }
+                } header: {
+                    Text(day.date.formatted(date: .complete, time: .omitted))
+                        .accessibilityIdentifier("nutrition-history-day-" + CivilDate.day(day.date))
                 }
             }
         }.navigationTitle("Nutrizione")

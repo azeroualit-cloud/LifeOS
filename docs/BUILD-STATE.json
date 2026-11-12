@@ -480,5 +480,17 @@
     "final_run": 43178362187,
     "final_source_commit": "7087d91a2f8386281c157c4a80133ece0c105584",
     "final_workflow_event": "workflow_dispatch"
+  },
+  "catalog_increment_2026_11_12": {
+    "status": "implemented_pending_focused_checks_and_catalog_import",
+    "decision": "CATALOG-BRANDS-UNITS-HISTORY-2026-11-12",
+    "public_inventory_count": 5323,
+    "branded_foods_complete": false,
+    "supplement_count": 7,
+    "packaging_authorized": false,
+    "backend_deploy_authorized": false,
+    "accepted_for_production": false,
+    "prior_candidate_source": "7087d91a2f8386281c157c4a80133ece0c105584",
+    "prior_candidate_run": 43178362187
   }
 }

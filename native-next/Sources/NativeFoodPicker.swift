@@ -71,6 +71,19 @@ struct NativeGenericFood: Codable, Identifiable {
     let fat: Decimal
     let fibre: Decimal?
     let calories: Decimal
+    var estimatedMacroBounds: [String: String]? = nil
+    var dataNote: String? = nil
+    var nutritionNotDeclared: Bool? = nil
+    var measurementBasis: String? = nil
+    var brand: String? = nil
+    var sourceURL: String? = nil
+    var barcode: String? = nil
+    var supplementUnit: NativeSupplementUnit? = nil
+    var defaultQuantity: Decimal? = nil
+
+    var quantityUnit: NativeSupplementUnit { family == .supplement ? (supplementUnit ?? .legacyServing) : (measurementBasis == "ml" ? .millilitre : .gram) }
+    var basisDivisor: Decimal { family == .supplement && quantityUnit != .gram ? 100 : 1 }
+    var displayDetail: String? { brand.map { $0 + (id.hasPrefix("personal-") ? " · Personale" : "") } ?? detail }
 
     func portion(id: UUID, date: Date, grams: Decimal, weighedWithBone: Bool = false) -> NativeNutritionEntry? {
         if let cocktail {
@@ -84,6 +97,7 @@ struct NativeGenericFood: Codable, Identifiable {
             entry.foodID = self.id
             return entry
         }
+        if family == .supplement && quantityUnit != .gram && grams > 100 { return nil }
         let edibleGrams: Decimal
         if weighedWithBone {
             guard let percent = boneInEdiblePercent, (1..<100).contains(percent) else { return nil }
@@ -94,13 +108,30 @@ struct NativeGenericFood: Codable, Identifiable {
         guard var entry = NativeNutritionEntry.portion(id: id, date: date, protein: protein,
             carbohydrate: carbohydrate, fat: fat, fibre: fibre, calories: calories, grams: edibleGrams) else { return nil }
         entry.foodName = name
-        if family == .supplement { entry.portionGrams = nil }
+        entry.nutritionNotDeclared = nutritionNotDeclared
+        entry.macroEstimateSource = estimatedMacroBounds.map { bounds in "Etichetta, limiti superiori: " + bounds.keys.sorted().map { $0 + " " + (bounds[$0] ?? "") }.joined(separator: "; ") }
+        if family == .supplement {
+            entry.portionGrams = quantityUnit == .gram ? grams : nil
+            entry.supplementQuantity = grams
+            entry.supplementUnit = quantityUnit.rawValue
+        }
+        if quantityUnit == .millilitre {
+            entry.portionGrams = nil
+            entry.portionMillilitres = grams
+        }
         entry.foodID = self.id
         entry.boneInWeightGrams = weighedWithBone ? grams : nil
         entry.nutrientValues = nutrientValues?.mapValues {
             NativeNutrientAmount(amount: $0.amount * edibleGrams / 100, estimateSource: $0.estimateSource)
         }
         return entry
+    }
+
+    func personalCopy() -> Self {
+        .init(id: "personal-" + UUID().uuidString, name: name, detail: "Personale", family: family,
+              boneInEdiblePercent: boneInEdiblePercent, nutrientValues: nutrientValues, cocktail: cocktail,
+              aliases: aliases, protein: protein, carbohydrate: carbohydrate, fat: fat, fibre: fibre, calories: calories,
+              estimatedMacroBounds: estimatedMacroBounds, dataNote: dataNote, nutritionNotDeclared: nutritionNotDeclared, measurementBasis: measurementBasis, brand: brand, sourceURL: sourceURL, barcode: barcode, supplementUnit: supplementUnit, defaultQuantity: defaultQuantity)
     }
 
     // Anses. 2025. Ciqual French food composition table. Values per 100 g.
@@ -114,7 +145,7 @@ struct NativeGenericFood: Codable, Identifiable {
             let aliases = (food.aliases ?? []).map(searchWords)
             if words == name { return (food, 0, index) }
             if aliases.contains(words) { return (food, 1, index) }
-            let fields = name + searchWords(food.detail ?? "") + aliases.flatMap { $0 } + (food.cocktail == nil ? [] : ["cocktail"])
+            let fields = name + searchWords(food.displayDetail ?? "") + aliases.flatMap { $0 } + (food.cocktail == nil ? [] : ["cocktail"])
             guard words.allSatisfy({ word in fields.contains { $0.hasPrefix(word) } }) else { return nil }
             let rank = words.allSatisfy { word in name.contains { $0.hasPrefix(word) } } ? 2 : 3
             return (food, rank, index)
@@ -146,7 +177,9 @@ struct NativeGenericFood: Codable, Identifiable {
 
     static let foods = loadCatalog("generic-foods")
     static let cocktails = loadCatalog("cocktails")
-    static let catalog = foods + cocktails + supplements
+    static let catalog = foods + cocktails + supplements + brandedFoods + brandedSupplements
+    static let brandedFoods = loadCatalog("branded-foods")
+    static let brandedSupplements = loadCatalog("branded-supplements")
     static let supplements = loadCatalog("supplements")
 
     private static func loadCatalog(_ name: String) -> [Self] {
@@ -163,6 +196,8 @@ struct NativeFoodPicker: View {
     @State private var scope: Scope = .all
     @ObservedObject private var nutrition = NativeNutritionUIFixture.current
     @State private var creating = false
+    @State private var editingFood: NativeGenericFood?
+    @State private var copyingFood = false
     @State private var storageError = false
     @AppStorage("lifeos-personal-foods-v1") private var personalData = Data()
 
@@ -230,14 +265,14 @@ struct NativeFoodPicker: View {
                                 Text(food.cocktail == nil ? food.family.icon : "🍸").font(.title3).accessibilityHidden(true)
                                 VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
                                     Text(food.name)
-                                    if let detail = food.detail {
+                                    if let detail = food.displayDetail {
                                         Text(detail).font(.subheadline).foregroundStyle(.secondary)
                                     }
                                     if let cocktail = food.cocktail {
                                         Text("≈ \(NSDecimalNumber(decimal: food.calories)) kcal · \(cocktail.volumeML) ml / bicchiere")
                                             .font(.caption).foregroundStyle(.secondary)
                                     } else {
-                                        Text("\(NSDecimalNumber(decimal: food.family == .supplement ? food.calories / 100 : food.calories)) kcal / \(food.family == .supplement ? "dose" : "100 g")")
+                                        Text(food.nutritionNotDeclared == true ? "Energia e macro non dichiarati" : "\(NSDecimalNumber(decimal: food.calories / food.basisDivisor).doubleValue.formatted(.number.precision(.fractionLength(0...1)))) kcal / \(food.quantityUnit.basisTitle)")
                                             .font(.caption).foregroundStyle(.secondary)
                                     }
                                 }.frame(minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
@@ -245,10 +280,13 @@ struct NativeFoodPicker: View {
                         }.accessibilityIdentifier("generic-food-" + food.id)
                             .listRowBackground(NativeDesign.nutritionInput)
                             .swipeActions {
-                                if scope == .personal {
+                                if personalFoods?.contains(where: { $0.id == food.id }) == true {
+                                    Button("Modifica") { copyingFood = false; editingFood = food }.tint(.blue)
                                     Button("Elimina", role: .destructive) {
                                         if let foods = personalFoods { persist(foods.filter { $0.id != food.id }) }
                                     }
+                                } else {
+                                    Button("Personalizza") { copyingFood = true; editingFood = food }.tint(.blue)
                                 }
                             }
                     }
@@ -282,6 +320,21 @@ struct NativeFoodPicker: View {
                 }
             }
         }
+        .sheet(item: $editingFood) { original in
+            NavigationStack {
+                NativePersonalFoodEditor(original: original) { food in
+                    guard let foods = personalFoods else { storageError = true; return }
+                    var updated = foods
+                    if copyingFood {
+                        updated.append(food.personalCopy())
+                    } else {
+                        guard let index = foods.firstIndex(where: { $0.id == original.id }) else { storageError = true; return }
+                        updated[index] = food
+                    }
+                    if persist(updated) { editingFood = nil; scope = .personal; query = "" }
+                }
+            }
+        }
         .alert("Archivio alimenti personali non disponibile", isPresented: $storageError) {
             Button("OK", role: .cancel) {}
         }
@@ -294,97 +347,5 @@ struct NativeFoodPicker: View {
         }
         personalData = data
         return true
-    }
-}
-
-private struct NativePersonalFoodEditor: View {
-    @Environment(\.dismiss) private var dismiss
-    @State private var name = ""
-    @State private var family: NativeGenericFood.Family = .meal
-    @State private var energy = ""
-    @State private var protein = ""
-    @State private var carbs = ""
-    @State private var fat = ""
-    @State private var fibre = ""
-    @State private var micronutrients: [NativeTrackedNutrient: String] = [:]
-    let save: (NativeGenericFood) -> Void
-
-    var body: some View {
-        Form {
-            Section("Alimento") {
-                TextField("Nome", text: $name).accessibilityIdentifier("personal-food-name")
-                Picker("Famiglia", selection: $family) {
-                    ForEach(NativeGenericFood.Family.allCases) { family in
-                        Text(family.icon + " " + family.title).tag(family)
-                    }
-                }
-                .accessibilityIdentifier("personal-food-family")
-            }
-            Section(family == .supplement ? "Valori per dose" : "Valori per 100 g") {
-                amount("Calorie (kcal)", text: $energy).accessibilityIdentifier("personal-food-energy")
-                amount("Proteine (g)", text: $protein).accessibilityIdentifier("personal-food-protein")
-                amount("Carboidrati (g)", text: $carbs).accessibilityIdentifier("personal-food-carbs")
-                amount("Grassi (g)", text: $fat).accessibilityIdentifier("personal-food-fat")
-                amount("Fibre (g), facoltative", text: $fibre)
-            }
-            Section {
-                DisclosureGroup("Micronutrienti e omega-3, facoltativi") {
-                    ForEach(NativeTrackedNutrient.micronutrients + [.ala, .epa, .dha]) { nutrient in
-                        amount(nutrient.title + " (" + nutrient.unit + ")", text: Binding(
-                            get: { micronutrients[nutrient] ?? "" },
-                            set: { micronutrients[nutrient] = $0 }
-                        ))
-                    }
-                }
-            } footer: {
-                Text("I valori facoltativi vuoti restano non disponibili.")
-            }
-        }
-        .scrollContentBackground(.hidden)
-        .scrollDismissesKeyboard(.interactively)
-        .background(NativeDesign.nutritionCanvas)
-        .navigationTitle("Nuovo alimento")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button("Annulla") { dismiss() }
-            }
-            ToolbarItem(placement: .confirmationAction) {
-                Button("Salva") { if let food { save(food) } }
-                    .disabled(food == nil)
-                    .accessibilityIdentifier("personal-food-save")
-            }
-        }
-    }
-
-    private func amount(_ label: String, text: Binding<String>) -> some View {
-        LabeledContent(label) {
-            TextField("0", text: text)
-                .keyboardType(.decimalPad)
-                .multilineTextAlignment(.trailing)
-                .accessibilityLabel(label)
-        }
-    }
-
-    private var food: NativeGenericFood? {
-        let title = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !title.isEmpty, title.count <= 120,
-              let calories = NativeNutritionEntry.grams(energy), calories >= 0, calories <= 1000,
-              !protein.isEmpty, let protein = NativeNutritionEntry.grams(protein),
-              !carbs.isEmpty, let carbs = NativeNutritionEntry.grams(carbs),
-              !fat.isEmpty, let fat = NativeNutritionEntry.grams(fat),
-              protein <= 100, carbs <= 100, fat <= 100,
-              let fibreValue = NativeNutritionEntry.grams(fibre), fibreValue <= 100 else { return nil }
-        var nutrients: [String: NativeNutrientAmount] = [:]
-        for (nutrient, raw) in micronutrients where !raw.isEmpty {
-            guard let value = NativeNutritionEntry.grams(raw), value <= 100_000_000 else { return nil }
-            let key = nutrient == .folate ? "folateMass" : nutrient.rawValue
-            nutrients[key] = .init(amount: value * (family == .supplement ? 100 : 1), estimateSource: nil)
-        }
-        let factor: Decimal = family == .supplement ? 100 : 1
-        return .init(id: "personal-" + UUID().uuidString, name: title, detail: "Personale", family: family,
-                     boneInEdiblePercent: nil, nutrientValues: nutrients.isEmpty ? nil : nutrients,
-                     aliases: nil, protein: protein * factor, carbohydrate: carbs * factor, fat: fat * factor,
-                     fibre: fibre.isEmpty ? nil : fibreValue * factor, calories: calories * factor)
     }
 }

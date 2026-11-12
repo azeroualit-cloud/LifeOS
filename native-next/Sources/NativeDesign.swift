@@ -106,7 +106,6 @@ enum NativeDesign {
         static let pastDayOpacity = 0.80
         static let activityDescriptionHeight: CGFloat = 90
         static let shiftBrushWidth: CGFloat = 44
-        static let shiftBrushHeight: CGFloat = 60
         static let shiftProgressWidth: CGFloat = 144
         static let shiftProgressHeight: CGFloat = 8
         static let healthBarRadius: CGFloat = 2

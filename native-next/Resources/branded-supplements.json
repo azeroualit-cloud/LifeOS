@@ -1,0 +1,175 @@
+[
+  {
+    "id": "brand-natural-elements-vitamin-c",
+    "name": "Vitamina C tamponata 500 mg",
+    "detail": "500 mg per capsula",
+    "brand": "natural elements",
+    "family": "supplement",
+    "supplementUnit": "capsule",
+    "defaultQuantity": 1,
+    "sourceURL": "https://my-ne.it/products/vitamina-c-tamponata-capsule",
+    "aliases": [],
+    "calories": 0,
+    "protein": 0,
+    "carbohydrate": 0,
+    "fat": 0,
+    "fibre": null,
+    "nutrientValues": {
+      "vitaminC": {
+        "amount": 50000,
+        "estimateSource": null
+      }
+    },
+    "nutritionNotDeclared": true
+  },
+  {
+    "id": "brand-vit4ever-magnesium-citrate",
+    "name": "Magnesio citrato 120 mg",
+    "detail": "120 mg di magnesio elementare per capsula",
+    "brand": "vit4ever",
+    "family": "supplement",
+    "supplementUnit": "capsule",
+    "defaultQuantity": 1,
+    "sourceURL": "https://vitaminversand24.com/products/vit4_tri_magnesiumdicitrat_kapseln",
+    "aliases": [],
+    "calories": 0,
+    "protein": 0,
+    "carbohydrate": 0,
+    "fat": 0,
+    "fibre": null,
+    "nutrientValues": {
+      "magnesium": {
+        "amount": 12000,
+        "estimateSource": null
+      }
+    },
+    "nutritionNotDeclared": true,
+    "dataNote": "Tabella: 360 mg di magnesio in 3 capsule. 750 mg di citrato per capsula, non 750 mg di magnesio."
+  },
+  {
+    "id": "brand-true-nature-potassium",
+    "name": "Potassio citrato 400 mg",
+    "detail": "400 mg di potassio elementare per capsula",
+    "brand": "TRUE NATURE",
+    "family": "supplement",
+    "supplementUnit": "capsule",
+    "defaultQuantity": 1,
+    "sourceURL": "https://www.true-nature.de/products/kalium-kapseln-kaliumcitrat",
+    "aliases": [],
+    "calories": 0,
+    "protein": 0,
+    "carbohydrate": 0,
+    "fat": 0,
+    "fibre": null,
+    "nutrientValues": {
+      "potassium": {
+        "amount": 40000,
+        "estimateSource": null
+      }
+    },
+    "nutritionNotDeclared": true,
+    "dataNote": "Una capsula: 1111 mg di citrato, di cui 400 mg di potassio. Il titolo 2222 mg si riferisce a 2 capsule di citrato."
+  },
+  {
+    "id": "brand-pharmazen-magnesium-b6",
+    "name": "Magnesio bisglicinato + B6",
+    "detail": "Composizione da verificare",
+    "brand": "PharmaZen · da verificare",
+    "family": "supplement",
+    "supplementUnit": "capsule",
+    "defaultQuantity": 1,
+    "sourceURL": "https://www.amazon.it/Magnesio-Bisglicinato-1500-Vitamina-Integratore/dp/B0G3CZ9XQM",
+    "aliases": [],
+    "calories": 0,
+    "protein": 0,
+    "carbohydrate": 0,
+    "fat": 0,
+    "fibre": null,
+    "nutrientValues": {
+      "magnesium": {
+        "amount": 15000,
+        "estimateSource": "Corrispondenza al titolo commerciale; 300 mg in 2 capsule; confezione non verificata"
+      }
+    },
+    "nutritionNotDeclared": true,
+    "dataNote": "Corrispondenza dal titolo: 300 mg di magnesio in 2 capsule. Marca e formulazione della confezione non confermate. B6 non disponibile: modifica con la tua etichetta."
+  },
+  {
+    "id": "brand-weightworld-d3-k2",
+    "name": "Vitamina D3 2000 UI + K2",
+    "detail": "50 µg D3 e 200 µg K2 per compressa",
+    "brand": "WeightWorld",
+    "family": "supplement",
+    "supplementUnit": "tablet",
+    "defaultQuantity": 1,
+    "sourceURL": "https://www.weightworld.it/products/vitamina-d3-k2-2000-ui",
+    "aliases": [],
+    "calories": 0,
+    "protein": 0,
+    "carbohydrate": 0,
+    "fat": 0,
+    "fibre": null,
+    "nutrientValues": {
+      "vitaminD": {
+        "amount": 5000,
+        "estimateSource": null
+      },
+      "vitaminK2": {
+        "amount": 20000,
+        "estimateSource": "Tabella ufficiale attuale 200 µg; lotto confezione non verificato e testo pagina discordante"
+      }
+    },
+    "nutritionNotDeclared": true,
+    "dataNote": "Valori dalla tabella ufficiale attuale per 1 compressa. Il testo della pagina riporta anche 250 µg K2 e il formato è cambiato: verifica la tua confezione e modifica K2 se diverso."
+  },
+  {
+    "id": "brand-vit4ever-caffeine",
+    "name": "Caffeina 200 mg",
+    "detail": "200 mg per compressa",
+    "brand": "vit4ever",
+    "family": "supplement",
+    "supplementUnit": "tablet",
+    "defaultQuantity": 1,
+    "sourceURL": "https://vitaminversand24.com/Koffein_500",
+    "aliases": [],
+    "calories": 0,
+    "protein": 0,
+    "carbohydrate": 0,
+    "fat": 0,
+    "fibre": null,
+    "nutrientValues": {
+      "caffeine": {
+        "amount": 20000,
+        "estimateSource": null
+      }
+    },
+    "nutritionNotDeclared": true
+  },
+  {
+    "id": "brand-weightworld-omega3",
+    "name": "Omega-3 330 mg EPA + 220 mg DHA",
+    "detail": "1000 mg olio di pesce per softgel",
+    "brand": "WeightWorld",
+    "family": "supplement",
+    "supplementUnit": "capsule",
+    "defaultQuantity": 1,
+    "sourceURL": "https://www.weightworld.it/products/olio-di-pesce-omega-3",
+    "aliases": [],
+    "calories": 900,
+    "protein": 0,
+    "carbohydrate": 0,
+    "fat": 100,
+    "fibre": null,
+    "nutrientValues": {
+      "epa": {
+        "amount": 33000,
+        "estimateSource": null
+      },
+      "dha": {
+        "amount": 22000,
+        "estimateSource": null
+      }
+    },
+    "dataNote": "Valori per 1 softgel: metà della dose indicata di 2. Energia stimata dal grammo di olio (9 kcal); involucro non incluso."
+  }
+]

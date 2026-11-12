@@ -142,7 +142,7 @@ final class NativeNutritionQuickUITests: XCTestCase {
         let vitamin = app.buttons["generic-food-supplement-vitamin-c"]
         XCTAssertTrue(vitamin.isHittable)
         vitamin.tap()
-        XCTAssertTrue(app.staticTexts["Dosi"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["Compresse"].waitForExistence(timeout: 10))
         capture("Integratore generico da Tutti", app)
         app.buttons["quick-nutrition-catalog"].tap()
         app.buttons["generic-food-create"].tap()
@@ -150,19 +150,19 @@ final class NativeNutritionQuickUITests: XCTestCase {
         XCTAssertTrue(family.waitForExistence(timeout: 10))
         family.tap()
         app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Integratori")).firstMatch.tap()
-        XCTAssertTrue(app.staticTexts["Valori per dose"].exists)
+        XCTAssertTrue(app.staticTexts["Valori per capsula"].exists)
         for (id, value) in [("name", "Integratore di prova"), ("energy", "0"), ("protein", "0"), ("carbs", "0"), ("fat", "0")] {
             let field = app.textFields["personal-food-" + id]
             for _ in 0..<3 where !field.isHittable { app.swipeUp() }
             field.tap()
             field.typeText(value)
         }
-        capture("Integratore per dose", app)
+        capture("Integratore per capsula", app)
         app.buttons["personal-food-save"].tap()
         let item = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "generic-food-personal-", "Integratore di prova")).firstMatch
         XCTAssertTrue(item.waitForExistence(timeout: 10))
         item.tap()
-        XCTAssertTrue(app.staticTexts["Dosi"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["Capsule"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.buttons["quick-nutrition-save"].isEnabled)
         capture("Aggiunta integratore senza calorie", app)
         app.buttons["quick-nutrition-save"].tap()

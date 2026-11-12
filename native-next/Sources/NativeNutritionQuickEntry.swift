@@ -42,7 +42,7 @@ struct NativeNutritionQuickEntry: View {
             NativePinnedNutrients(entries: nutrition.entries)
             if let notice { Text(notice).font(.caption).foregroundStyle(.secondary).accessibilityIdentifier("quick-nutrition-notice") }
         }.sheet(isPresented: $showing) {
-            NavigationStack { NativeNutritionQuickSheet { notice = "Registrazione salvata in Apple Salute." } }
+            NavigationStack { NativeNutritionQuickSheet { notice = "Registrazione salvata." } }
                 .modifier(NativeVisualTestSize()).modifier(NativeVisualTestMotion())
         }.sheet(isPresented: $addingWeight) {
             NativeAddWeightSheet(health: health)
@@ -114,8 +114,12 @@ struct NativeNutritionQuickSheet: View {
                     if let selectedFood {
                         VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
                             Text(selectedFood.name).font(.headline)
-                            if let detail = selectedFood.detail {
+                            if let detail = selectedFood.displayDetail {
                                 Text(detail).font(.subheadline).foregroundStyle(.secondary)
+                            }
+                            if let note = selectedFood.dataNote { Text(note).font(.caption).foregroundStyle(.secondary) }
+                            if let source = selectedFood.sourceURL, let url = URL(string: source), url.scheme == "https" {
+                                Link("Scheda prodotto", destination: url).font(.caption)
                             }
                         }
                         if selectedFood.boneInEdiblePercent != nil {
@@ -127,8 +131,8 @@ struct NativeNutritionQuickSheet: View {
                             .accessibilityIdentifier("quick-nutrition-weighing")
                             .disabled(nutrition.busy || pending != nil)
                         }
-                        grams(selectedFood.family == .supplement ? "Dosi" : selectedFood.cocktail == nil ? "Porzione" : "Bicchieri", text: $portionGrams,
-                              field: .portion, unit: selectedFood.cocktail == nil && selectedFood.family != .supplement ? "g" : nil)
+                        grams(selectedFood.family == .supplement ? selectedFood.quantityUnit.quantityTitle : selectedFood.cocktail == nil ? "Porzione" : "Bicchieri", text: $portionGrams,
+                              field: .portion, unit: selectedFood.cocktail == nil && (selectedFood.family != .supplement || selectedFood.quantityUnit == .gram) ? (selectedFood.quantityUnit == .millilitre ? "ml" : "g") : nil)
                             .disabled(nutrition.busy || pending != nil)
                         if let draft {
                             if let recipe = selectedFood.cocktail, let alcohol = draft.alcoholGrams, let units = draft.standardDrinks {
@@ -143,8 +147,12 @@ struct NativeNutritionQuickSheet: View {
                                 Text("Parte edibile stimata: \(NSDecimalNumber(decimal: edible).doubleValue.formatted(.number.precision(.fractionLength(0)))) g")
                                     .font(.caption).foregroundStyle(.secondary)
                             }
+                            activeNutrients(draft)
+                            if let caffeine = draft.nutrientValues?["caffeine"]?.amount {
+                                Text("Caffeina: \(NSDecimalNumber(decimal: caffeine)) mg").font(.subheadline)
+                            }
                             let fibreText = draft.fibre.map { NSDecimalNumber(decimal: $0).stringValue } ?? "—"
-                            Text("P \(NSDecimalNumber(decimal: draft.protein)) · C \(NSDecimalNumber(decimal: draft.carbohydrate)) · G \(NSDecimalNumber(decimal: draft.fat)) · F \(fibreText) g")
+                            Text(draft.nutritionNotDeclared == true ? "Energia e macronutrienti non dichiarati: non inviati ad Apple Salute" : "P \(NSDecimalNumber(decimal: draft.protein)) · C \(NSDecimalNumber(decimal: draft.carbohydrate)) · G \(NSDecimalNumber(decimal: draft.fat)) · F \(fibreText) g")
                                 .font(.caption).foregroundStyle(.secondary)
                         }
                         Button("Inserisci nutrienti a mano") { self.selectedFood = nil; focus = nil }
@@ -165,7 +173,7 @@ struct NativeNutritionQuickSheet: View {
                             Text("Calcolate automaticamente").font(.caption).foregroundStyle(.secondary)
                         }
                         Spacer(minLength: NativeDesign.Space.small)
-                        Text(draft.map { NSDecimalNumber(decimal: $0.calories).stringValue + " kcal" } ?? (allZero ? "0 kcal" : "Valori non validi"))
+                        Text(draft.map { $0.nutritionNotDeclared == true ? "Non dichiarate" : NSDecimalNumber(decimal: $0.calories).doubleValue.formatted(.number.precision(.fractionLength(0...1))) + " kcal" } ?? (allZero ? "0 kcal" : "Valori non validi"))
                             .font(.title2.bold()).monospacedDigit().accessibilityIdentifier("quick-nutrition-calories")
                     }.accessibilityElement(children: .contain).accessibilityIdentifier("quick-nutrition-calorie-summary")
                     Divider()
@@ -218,7 +226,7 @@ struct NativeNutritionQuickSheet: View {
             NavigationStack {
                 NativeFoodPicker { food in
                     selectedFood = food
-                    portionGrams = food.cocktail == nil && food.family != .supplement ? "100" : "1"
+                    portionGrams = food.defaultQuantity.map { NSDecimalNumber(decimal: $0).stringValue } ?? (food.cocktail == nil && food.family != .supplement ? "100" : "1")
                     weighedWithBone = false
                 }
             }
@@ -276,13 +284,26 @@ struct NativeNutritionQuickSheet: View {
     private var allZero: Bool {
         selectedFood == nil && [protein, carbohydrate, fat, fibre].allSatisfy { NativeNutritionEntry.grams($0) == 0 }
     }
+    private func activeNutrients(_ entry: NativeNutritionEntry) -> some View {
+        VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
+            ForEach(NativeTrackedNutrient.micronutrients + [.ala, .epa, .dha]) { nutrient in
+                let key = nutrient == .folate ? "folateMass" : nutrient.rawValue
+                if let value = entry.nutrientValues?[key] {
+                    Text(nutrient.title + ": " + NSDecimalNumber(decimal: value.amount).doubleValue.formatted(.number.precision(.fractionLength(0...2))) + " " + nutrient.unit)
+                        .font(.caption).foregroundStyle(.secondary)
+                        .accessibilityIdentifier("quick-nutrition-nutrient-" + nutrient.rawValue)
+                }
+            }
+        }
+    }
+
     private func grams(_ title: String, text: Binding<String>, field: Field, unit: String? = "g") -> some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
             Text(title).font(.caption).foregroundStyle(.secondary)
             HStack {
                 TextField("0", text: text, prompt: typeSize.isAccessibilitySize ? nil : Text("0").foregroundStyle(NativeDesign.secondary)).keyboardType(.decimalPad).focused($focus, equals: field)
                     .font(.title2.weight(.semibold)).frame(minHeight: NativeDesign.Layout.nutritionInputLine)
-                    .accessibilityLabel(unit == nil ? title : title + " in grammi").accessibilityIdentifier("quick-nutrition-" + title)
+                    .accessibilityLabel(unit == nil ? title : title + (unit == "ml" ? " in millilitri" : " in grammi")).accessibilityIdentifier("quick-nutrition-" + title)
                 if let unit { Text(unit).foregroundStyle(.secondary) }
             }
         }.padding(NativeDesign.Space.small).frame(minHeight: NativeDesign.Layout.nutritionFieldHeight)

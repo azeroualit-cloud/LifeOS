@@ -1062,5 +1062,23 @@
     "original_quote": "IMPORTANTE: non creare, confezionare o distribuire un’IPA finché non te lo chiedo esplicitamente in questa nuova chat. L’autorizzazione a fare il check finale non è una richiesta di IPA.",
     "rule": "Audit intero progetto, verifiche mirate prima della suite finale e quattro avvii Release senza packaging. DEV-02 per nuovi difetti di prodotto; nessuna ripetizione delle approvazioni già registrate. Prove fisiche e accettazione restano separate.",
     "conflict_check": "Applicazione di IPA-GATE-01 al nuovo task; le autorizzazioni IPA delle chat precedenti non sono trasferite a questa chat. Nessuna modifica a regole di prodotto."
+  },
+  "catalog_brands_units_history_2026_11_12": {
+    "id": "CATALOG-BRANDS-UNITS-HISTORY-2026-11-12",
+    "status": "ACTIVE",
+    "recorded_on": "2026-11-12",
+    "scope": "Catalogo, integratori, cronologia e palette turni LifeOS",
+    "provenance": "Richiesta diretta utente e conferma META-01 nella nuova chat",
+    "original_quote": "aggiungi anche tutto il catalogo dei prodotti coop, prodotti spesotti (con sotto al posto di scritto generic, la marca). E gli integratori devono essere trattati non comecibi normali, ma come capsule/pillole o grammi. I cibi devono essere poter eliminata dall’anteprima della cronologia su salute, devono essere poi raggruppati per giorno sulla cronologia intera, e sulla cronologia anteprima solo i cibi di quel giorno. I tasti dipingi turno non possono occupare mezzo schermo, e rendi i tasti liquid glass. Ci deve essere la possibilità di editare un cibo custom o un integratopre",
+    "rule": "Aggiungere catalogo alimentare Coop/Spesotti e integratori indicati con marca visibile. Preservare generici ed esclusioni. Quantità integratori per capsula, compressa o grammo; valori dei prodotti per singola unità verificata, non per dose giornaliera. Consentire modifica voci personali. Preview alimenti del solo giorno selezionato con eliminazione delle registrazioni LifeOS; cronologia intera per giorno. Palette turni compatta Liquid Glass. Render reali prima di eventuale IPA, che resta non autorizzata.",
+    "confirmation_quote": "Sì, aggiungi le marche mantenendo i generici e le esclusioni",
+    "confirmation_source": "Risposta alla domanda META-01 del 12 novembre 2026",
+    "exception_to": "FOOD-SUPERMARKET-01 soltanto per aggiunta cataloghi con marca; regola generale generici conservata",
+    "historical_status": "PENDING_CONFIRMATION per marche, confermato nello stesso turno prima dell’implementazione catalogo",
+    "supplement_uncertainty_followup": {
+      "original_quote": "no, cerca di non sbagliare e al massimo la cambio io, vitamin d3 è di weighworld",
+      "provenance": "Risposta diretta utente del 12 novembre alla richiesta etichette",
+      "rule": "Procedere con le fonti disponibili e rendere i valori modificabili; D3 è WeightWorld. Segnalare formulazioni non confermate e non inventare componenti mancanti."
+    }
   }
 }

@@ -55,6 +55,8 @@ struct NativeHealthDetail: View {
     let demo: Bool
     @State private var addingWeight = false
     @State private var showingNutrition = false
+    @State private var deletingFood: UUID?
+    @State private var diaryNotice: String?
     @Environment(\.dynamicTypeSize) private var typeSize
     @ObservedObject private var nutrition = NativeNutritionUIFixture.current
 
@@ -96,6 +98,13 @@ struct NativeHealthDetail: View {
             .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $addingWeight) { NativeAddWeightSheet(health: health) }
             .sheet(isPresented: $showingNutrition) { NavigationStack { NativeNutritionQuickSheet(initialDate: selectedDate) }.environmentObject(health) }
+            .confirmationDialog("Eliminare questa registrazione e i suoi campioni LifeOS da Apple Salute?", isPresented: Binding(get: { deletingFood != nil }, set: { if !$0 { deletingFood = nil } })) {
+                Button("Elimina da LifeOS e Apple Salute", role: .destructive) {
+                    if let id = deletingFood { removeFood(id) }
+                    deletingFood = nil
+                }
+                Button("Annulla", role: .cancel) { deletingFood = nil }
+            }
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active { Task { await health.refresh() } }
             }
@@ -234,7 +243,7 @@ struct NativeHealthDetail: View {
             }
             let rows = diaryRows
             if rows.isEmpty {
-                Text("Nessuna registrazione disponibile").font(.subheadline).foregroundStyle(.secondary)
+                Text("Nessun alimento registrato per questo giorno").font(.subheadline).foregroundStyle(.secondary)
             }
             ForEach(rows) { row in
                 Divider()
@@ -242,12 +251,27 @@ struct NativeHealthDetail: View {
                     VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
                         Text(row.name).font(.subheadline.weight(.semibold))
                         Text(row.detail).font(.caption).foregroundStyle(.secondary)
+                        if row.deletionPending {
+                            Text("Eliminazione da completare").font(.caption).foregroundStyle(.secondary)
+                        }
                     }
                     Spacer(minLength: NativeDesign.Space.small)
-                    Text("\(row.calories, format: .number.precision(.fractionLength(0))) kcal")
+                    Text(row.calories.map { $0.formatted(.number.precision(.fractionLength(0))) + " kcal" } ?? "— kcal")
                         .font(.subheadline).monospacedDigit()
+                    if let localID = row.localID {
+                        NativeIconButton(symbol: row.deletionPending ? "arrow.clockwise" : "trash", label: row.deletionPending ? "Riprova eliminazione di " + row.name : "Elimina " + row.name) {
+                            if row.deletionPending { removeFood(localID) }
+                            else { deletingFood = localID }
+                        }
+                        .disabled(nutrition.busy)
+                        .accessibilityIdentifier("health-diary-delete-" + localID.uuidString)
+                    }
                 }
+                .accessibilityIdentifier("health-diary-entry-" + row.id.uuidString)
             }
+            if nutrition.busy { ProgressView("Aggiornamento diario") }
+            if let diaryNotice { Text(diaryNotice).font(.caption).foregroundStyle(.secondary) }
+            if let error = nutrition.error { Text(error).font(.caption).foregroundStyle(.red) }
         }
             .padding(.horizontal, NativeDesign.Layout.compactCardInset)
             .padding(.bottom, NativeDesign.Layout.compactCardInset)
@@ -261,31 +285,43 @@ struct NativeHealthDetail: View {
         let name: String
         let date: Date
         let source: String
-        let calories: Double
+        let calories: Double?
         var grams: Decimal? = nil
         var weighedWithBone = false
+        var quantity: String? = nil
+        var localID: UUID? = nil
+        var deletionPending = false
         var detail: String {
             let time = date.formatted(.dateTime.hour().minute())
             let portion = grams.map { NSDecimalNumber(decimal: $0).doubleValue.formatted(.number.precision(.fractionLength(0...1))) + (weighedWithBone ? " g con osso" : " g") }
-            return [time, portion, source].compactMap { $0 }.joined(separator: " · ")
+            return [time, quantity ?? portion, source].compactMap { $0 }.joined(separator: " · ")
         }
     }
 
     private var diaryRows: [DiaryRow] {
-        let local = nutrition.entries.filter {
-            $0.confirmed && $0.deletionPending != true && Calendar.current.isDate($0.date, inSameDayAs: selectedDate)
-        }
+        let local = NativeNutritionHistory.foods(on: selectedDate, entries: nutrition.entries)
         let localIDs = Set(local.map(\.id))
         let imported = health.foodEntries(on: selectedDate).compactMap { sample -> DiaryRow? in
             if let id = sample.lifeOSID, localIDs.contains(id) { return nil }
-            return DiaryRow(id: sample.id, name: sample.name ?? "Energia alimentare", date: sample.date,
+            guard let name = sample.name?.trimmingCharacters(in: .whitespacesAndNewlines), !name.isEmpty else { return nil }
+            return DiaryRow(id: sample.id, name: name, date: sample.date,
                 source: sample.lifeOSID == nil ? "Apple Salute" : "LifeOS", calories: sample.calories)
         }
         return (imported + local.map {
             DiaryRow(id: $0.id, name: $0.foodName ?? "Energia alimentare", date: $0.date,
-                source: "LifeOS", calories: NSDecimalNumber(decimal: $0.calories).doubleValue, grams: $0.boneInWeightGrams ?? $0.portionGrams,
-                weighedWithBone: $0.boneInWeightGrams != nil)
+                source: "LifeOS", calories: $0.nutritionNotDeclared == true ? nil : NSDecimalNumber(decimal: $0.calories).doubleValue, grams: $0.boneInWeightGrams ?? $0.portionGrams,
+                weighedWithBone: $0.boneInWeightGrams != nil, quantity: $0.boneInWeightGrams == nil ? $0.quantityDescription : nil, localID: $0.id, deletionPending: $0.deletionPending == true)
         }).sorted { $0.date > $1.date }
+    }
+
+    private func removeFood(_ id: UUID) {
+        diaryNotice = nil
+        Task {
+            if await nutrition.delete(id) {
+                diaryNotice = "Registrazione eliminata da LifeOS e Apple Salute."
+                await health.refresh()
+            }
+        }
     }
 
     private func context(_ metric: NativeHealthMetric) -> String {
