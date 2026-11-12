@@ -1,5 +1,8 @@
 # LifeOS — stato corrente
 
+**Verifica mirata avviata:** [43249620310](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43249620310), sorgente test `f901529`, solo macro decimali e annullamento File Bloom. Prodotto invariato rispetto a `8ac2d4f`; 403 test già passati e quattro avvii Release non ripetuti. Video originale: File cambia cartella e posizione del controllo Annulla mentre XCTest lo risolve. Attesa della Libreria interattiva da verificare, non ancora dimostrata.
+
+
 **Ripresa 12 novembre — run 43232065358 analizzato:** 299 unitari + 11 UI preflight passati; restante suite 93/95 UI passati, 2 falliti, zero saltati. Totale 403/405. Quattro avvii Release passati. Fallimenti: aspettativa decimale inglese in test italiano (101.8 contro 101,8 kcal); Bloom verifica isHittable immediata dopo annullamento File mentre la sezione sottostante esiste già. Correzioni limitate ai test: aspettativa italiana e attesa condizionata della raggiungibilità con diagnostica, senza cambiare prodotto. Verifica final-recovery dei soli due casi da avviare; niente nuova suite né avvii Release. Nessuna IPA/deploy.
 
 

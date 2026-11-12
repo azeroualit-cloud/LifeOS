@@ -1,5 +1,8 @@
 # LifeOS
 
+**Verifica mirata avviata:** [43249620310](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43249620310), sorgente test `f901529`, solo macro decimali e annullamento File Bloom. Prodotto invariato rispetto a `8ac2d4f`; 403 test già passati e quattro avvii Release non ripetuti. Video originale: File cambia cartella e posizione del controllo Annulla mentre XCTest lo risolve. Attesa della Libreria interattiva da verificare, non ancora dimostrata.
+
+
 ## Stato corrente — 12 novembre 2026
 
 Candidato su **codex/revision77** con **2.893 alimenti Coop, inclusi 208 Spesotti**, sette integratori con marca, unità capsule/compresse/grammi, modifica personale, cronologia per giorno e palette Liquid Glass compatta. [Gate finale senza IPA](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43232065358) sul sorgente `8ac2d4f`, dopo verifiche mirate e catture ispezionate. [Report corrente](https://github.com/azeroualit-cloud/LifeOS/blob/codex/revision77/docs/AI-HANDOFF.md) · [copertura catalogo](https://github.com/azeroualit-cloud/LifeOS/blob/codex/revision77/docs/COOP-CATALOG-COVERAGE.json). **Nessuna IPA né deploy backend autorizzati nella nuova chat.** Prove fisiche e accettazione restano aperte. Le note successive sono cronologia.
