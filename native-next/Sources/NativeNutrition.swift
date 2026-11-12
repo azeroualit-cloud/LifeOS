@@ -44,10 +44,10 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
 
     /// Label values are per 100 g; persisted measurements always describe the portion.
     static func portion(id: UUID, date: Date, protein: Decimal, carbohydrate: Decimal,
-                        fat: Decimal, fibre: Decimal?, calories: Decimal, grams: Decimal) -> Self? {
+                        fat: Decimal, fibre: Decimal?, calories: Decimal, grams: Decimal, allowZeroLabelEnergy: Bool = false) -> Self? {
         let values = [protein, carbohydrate, fat, fibre ?? 0, calories, grams]
         guard values.allSatisfy({ !$0.isNaN && $0 >= 0 && NSDecimalNumber(decimal: $0).doubleValue.isFinite }),
-              grams > 0, calories > 0 || (protein == 0 && carbohydrate == 0 && fat == 0 && (fibre ?? 0) == 0) else { return nil }
+              grams > 0, allowZeroLabelEnergy || calories > 0 || (protein == 0 && carbohydrate == 0 && fat == 0 && (fibre ?? 0) == 0) else { return nil }
         let factor = grams / 100
         return .init(id: id, revision: 0, date: date, protein: protein * factor,
                      carbohydrate: carbohydrate * factor, fat: fat * factor, confirmed: false,
@@ -62,7 +62,7 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
         }
         let energy = protein * 4 + carbohydrate * 4 + fat * 9 + fibre * 2
         guard !energy.isNaN, energy > 0, NSDecimalNumber(decimal: energy).doubleValue.isFinite else { return nil }
-        return .init(id: id, revision: 0, date: date, protein: protein, carbohydrate: carbohydrate, fat: fat, confirmed: false, fibre: fibre, labelCalories: energy, portionGrams: old?.portionGrams, portionMillilitres: old?.portionMillilitres, foodName: old?.foodName, foodID: old?.foodID, nutrientValues: old?.nutrientValues, sharedNutrientKeys: old?.sharedNutrientKeys, supplementQuantity: old?.supplementQuantity, supplementUnit: old?.supplementUnit, cocktailServings: old?.cocktailServings, alcoholGrams: old?.alcoholGrams)
+        return .init(id: id, revision: 0, date: date, protein: protein, carbohydrate: carbohydrate, fat: fat, confirmed: false, fibre: fibre, labelCalories: energy, foodName: old?.foodName, foodID: old?.foodID, nutrientValues: old?.nutrientValues, sharedNutrientKeys: old?.sharedNutrientKeys, cocktailServings: old?.cocktailServings, alcoholGrams: old?.alcoholGrams)
     }
     static func grams(_ text: String) -> Decimal? {
         let value = text.trimmingCharacters(in: .whitespacesAndNewlines)

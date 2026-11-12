@@ -170,7 +170,7 @@ struct NativeNutritionQuickSheet: View {
                     HStack(alignment: .firstTextBaseline) {
                         VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
                             Text("Calorie").font(.headline)
-                            Text("Calcolate automaticamente").font(.caption).foregroundStyle(.secondary)
+                            Text(selectedFood == nil ? "Calcolate automaticamente" : "Dalla porzione selezionata").font(.caption).foregroundStyle(.secondary)
                         }
                         Spacer(minLength: NativeDesign.Space.small)
                         Text(draft.map { $0.nutritionNotDeclared == true ? "Non dichiarate" : NSDecimalNumber(decimal: $0.calories).doubleValue.formatted(.number.precision(.fractionLength(0...1))) + " kcal" } ?? (allZero ? "0 kcal" : "Valori non validi"))

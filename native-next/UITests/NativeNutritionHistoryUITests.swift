@@ -17,7 +17,14 @@ final class NativeNutritionHistoryUITests: XCTestCase {
         XCTAssertTrue(meal.isHittable)
         XCTAssertEqual(app.staticTexts.matching(identifier: "Pasto di prova").count, 1, "Preview must show only the selected day's food")
         let remove = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "health-diary-delete-")).firstMatch
-        XCTAssertTrue(remove.isHittable)
+        guard remove.waitForExistence(timeout: 10), remove.isHittable else {
+            let hierarchy = XCTAttachment(string: app.debugDescription)
+            hierarchy.name = "Diary delete control diagnostic"; hierarchy.lifetime = .keepAlways; add(hierarchy)
+            let frame = XCTAttachment(screenshot: app.screenshot())
+            frame.name = "Diary delete control unavailable"; frame.lifetime = .keepAlways; add(frame)
+            XCTFail("The selected LifeOS food must expose its delete button")
+            return
+        }
         remove.tap()
         let confirmation = app.buttons["Elimina da LifeOS e Apple Salute"]
         XCTAssertTrue(confirmation.waitForExistence(timeout: 5))

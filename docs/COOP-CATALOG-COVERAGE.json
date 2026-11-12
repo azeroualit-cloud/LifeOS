@@ -1,0 +1,32 @@
+{
+  "source": "https://www.coop.it/prodotti-coop/catalogo-prodotti",
+  "retrievedOn": "2026-11-12",
+  "reportedCatalogProducts": 5323,
+  "reportedCountsObserved": [
+    5323
+  ],
+  "inventoryPages": 222,
+  "expectedPages": 222,
+  "inventoryUniqueProducts": 5323,
+  "inventoryErrors": [],
+  "perURLStatusCounts": {
+    "bounded": 5,
+    "excluded": 2429,
+    "label_exact": 2584,
+    "nutrition_not_declared": 305
+  },
+  "catalogEntries": 2893,
+  "entriesNutritionNotDeclared": 305,
+  "entriesBounded": 5,
+  "gramBasis": 2399,
+  "millilitreBasis": 494,
+  "barcodeDuplicateRows": [
+    {
+      "id": "coop-ean-8001120924513",
+      "firstURL": "https://www.coop.it/il-prodotto-coop/fior-fiore/formaggi/alimenti-freschi/formaggi-freschi-libero-servizio/squacquerone",
+      "secondURL": "https://www.coop.it/il-prodotto-coop/fior-fiore/formaggi/alimenti-freschi/formaggi-freschi-libero-servizio-0"
+    }
+  ],
+  "barcodeConflicts": [],
+  "retrievalComplete": true
+}

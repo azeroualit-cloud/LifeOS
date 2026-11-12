@@ -139,7 +139,9 @@ struct NativePersonalFoodEditor: View {
               (unknown || !fat.isEmpty), let fat = NativeNutritionEntry.grams(fat),
               protein <= 100, carbs <= 100, fat <= 100,
               let fibreValue = NativeNutritionEntry.grams(fibre), fibreValue <= 100 else { return nil }
-        guard unknown || calories > 0 || (protein == 0 && carbs == 0 && fat == 0 && fibreValue == 0) else { return nil }
+        let verifiedZero = original?.zeroEnergyLabelVerified == true && original?.calories == calories * (family == .supplement && unit != .gram ? 100 : 1)
+            && original?.protein == protein && original?.carbohydrate == carbs && original?.fat == fat
+        guard unknown || verifiedZero || calories > 0 || (protein == 0 && carbs == 0 && fat == 0 && fibreValue == 0) else { return nil }
         let editableKeys = Set((NativeTrackedNutrient.micronutrients + [.ala, .epa, .dha]).map { $0 == .folate ? "folateMass" : $0.rawValue })
         var nutrients = (original?.nutrientValues ?? [:]).filter { !editableKeys.contains($0.key) }
         let factor: Decimal = family == .supplement && unit != .gram ? 100 : 1
@@ -166,7 +168,7 @@ struct NativePersonalFoodEditor: View {
                      boneInEdiblePercent: original?.family == family ? original?.boneInEdiblePercent : nil, nutrientValues: nutrients.isEmpty ? nil : nutrients,
                      cocktail: original?.family == family ? original?.cocktail : nil, aliases: original?.aliases, protein: protein * factor, carbohydrate: carbs * factor, fat: fat * factor,
                      fibre: fibre.isEmpty ? nil : fibreValue * factor, calories: calories * factor,
-                     estimatedMacroBounds: bounds?.isEmpty == false ? bounds : nil, dataNote: original?.dataNote, nutritionNotDeclared: nutritionNotDeclared ? true : nil,
+                     zeroEnergyLabelVerified: verifiedZero ? true : nil, estimatedMacroBounds: bounds?.isEmpty == false ? bounds : nil, dataNote: original?.dataNote, nutritionNotDeclared: nutritionNotDeclared ? true : nil,
                      measurementBasis: original?.measurementBasis,
                      brand: brand.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : brand.trimmingCharacters(in: .whitespacesAndNewlines),
                      sourceURL: original?.sourceURL, barcode: original?.barcode,

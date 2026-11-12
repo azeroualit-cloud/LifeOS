@@ -71,6 +71,7 @@ struct NativeGenericFood: Codable, Identifiable {
     let fat: Decimal
     let fibre: Decimal?
     let calories: Decimal
+    var zeroEnergyLabelVerified: Bool? = nil
     var estimatedMacroBounds: [String: String]? = nil
     var dataNote: String? = nil
     var nutritionNotDeclared: Bool? = nil
@@ -106,7 +107,7 @@ struct NativeGenericFood: Codable, Identifiable {
             edibleGrams = grams
         }
         guard var entry = NativeNutritionEntry.portion(id: id, date: date, protein: protein,
-            carbohydrate: carbohydrate, fat: fat, fibre: fibre, calories: calories, grams: edibleGrams) else { return nil }
+            carbohydrate: carbohydrate, fat: fat, fibre: fibre, calories: calories, grams: edibleGrams, allowZeroLabelEnergy: zeroEnergyLabelVerified == true) else { return nil }
         entry.foodName = name
         entry.nutritionNotDeclared = nutritionNotDeclared
         entry.macroEstimateSource = estimatedMacroBounds.map { bounds in "Etichetta, limiti superiori: " + bounds.keys.sorted().map { $0 + " " + (bounds[$0] ?? "") }.joined(separator: "; ") }
@@ -131,7 +132,7 @@ struct NativeGenericFood: Codable, Identifiable {
         .init(id: "personal-" + UUID().uuidString, name: name, detail: "Personale", family: family,
               boneInEdiblePercent: boneInEdiblePercent, nutrientValues: nutrientValues, cocktail: cocktail,
               aliases: aliases, protein: protein, carbohydrate: carbohydrate, fat: fat, fibre: fibre, calories: calories,
-              estimatedMacroBounds: estimatedMacroBounds, dataNote: dataNote, nutritionNotDeclared: nutritionNotDeclared, measurementBasis: measurementBasis, brand: brand, sourceURL: sourceURL, barcode: barcode, supplementUnit: supplementUnit, defaultQuantity: defaultQuantity)
+              zeroEnergyLabelVerified: zeroEnergyLabelVerified, estimatedMacroBounds: estimatedMacroBounds, dataNote: dataNote, nutritionNotDeclared: nutritionNotDeclared, measurementBasis: measurementBasis, brand: brand, sourceURL: sourceURL, barcode: barcode, supplementUnit: supplementUnit, defaultQuantity: defaultQuantity)
     }
 
     // Anses. 2025. Ciqual French food composition table. Values per 100 g.

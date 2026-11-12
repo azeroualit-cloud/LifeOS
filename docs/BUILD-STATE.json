@@ -482,10 +482,10 @@
     "final_workflow_event": "workflow_dispatch"
   },
   "catalog_increment_2026_11_12": {
-    "status": "implemented_pending_focused_checks_and_catalog_import",
+    "status": "catalog_import_complete_focused_corrections_pending",
     "decision": "CATALOG-BRANDS-UNITS-HISTORY-2026-11-12",
     "public_inventory_count": 5323,
-    "branded_foods_complete": false,
+    "branded_foods_complete": true,
     "supplement_count": 7,
     "packaging_authorized": false,
     "backend_deploy_authorized": false,
@@ -493,6 +493,24 @@
     "prior_candidate_source": "7087d91a2f8386281c157c4a80133ece0c105584",
     "prior_candidate_run": 43178362187,
     "first_queued_run": 43189039938,
-    "first_queued_source": "ae9d286920e7b2c39bf8695d27b59051f86715eb"
+    "first_queued_source": "ae9d286920e7b2c39bf8695d27b59051f86715eb",
+    "branded_foods_count": 2893,
+    "spesotti_foods_count": 208,
+    "nutrition_unavailable_count": 305,
+    "bounded_labels_count": 5,
+    "focused_run": 43189745646,
+    "focused_source_commit": "5e05fa367dc2666b00e441e2082d933c24e31c90",
+    "focused_result": {
+      "unit_total": 30,
+      "unit_failed": 1,
+      "ui_total": 6,
+      "ui_failed": 2
+    },
+    "prior_complete_result": {
+      "total": 390,
+      "passed": 389,
+      "failed": 1,
+      "release_launches": 4
+    }
   }
 }

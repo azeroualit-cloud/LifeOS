@@ -27,9 +27,18 @@ final class NativePersonalFoodUITests: XCTestCase {
         field.tap()
         let previous = field.value as? String ?? ""
         if previous != field.placeholderValue && !previous.isEmpty {
+            // A tap may place the caret before an existing numeric value.
+            field.press(forDuration: 1.1)
+            let selectAll = app.descendants(matching: .any).matching(NSPredicate(format: "label IN %@", ["Seleziona tutto", "Select All"])).firstMatch
+            if selectAll.waitForExistence(timeout: 2) { selectAll.tap() }
+            else {
+                let end = field.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5))
+                end.tap()
+            }
             field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: previous.count))
         }
         field.typeText(text)
+        XCTAssertEqual(field.value as? String, text, "Replacement must finish before checking Save")
     }
 
     private func capture(_ name: String) {
@@ -125,4 +134,23 @@ final class NativePersonalFoodUITests: XCTestCase {
         XCTAssertFalse(app.textFields["quick-nutrition-Capsule"].exists)
         capture("Integratore in polvere pesato in grammi")
     }
+    func testCoopSpesottiMilkUsesMillilitresAndBrand() {
+        let app = openCatalog()
+        replace(app.textFields["generic-food-search"], with: "Spesotti latte", app: app)
+        let milk = app.buttons["generic-food-coop-ean-8001120653314"]
+        XCTAssertTrue(milk.waitForExistence(timeout: 10))
+        XCTAssertTrue(milk.label.contains("Gli Spesotti"))
+        XCTAssertFalse(milk.label.contains("Generic"))
+        capture("Catalogo Spesotti con marca e valori per 100 ml")
+        milk.tap()
+        let portion = app.textFields["quick-nutrition-Porzione"]
+        XCTAssertTrue(portion.waitForExistence(timeout: 10))
+        XCTAssertTrue(portion.label.contains("millilitri"))
+        let energy = app.staticTexts["quick-nutrition-calories"]
+        XCTAssertEqual(energy.label, "47 kcal")
+        replace(portion, with: "250", app: app)
+        XCTAssertEqual(energy.label.replacingOccurrences(of: ",", with: "."), "117.5 kcal")
+        capture("Latte Spesotti porzione 250 ml")
+    }
+
 }

@@ -178,7 +178,11 @@ final class NativeInterfaceTests: XCTestCase {
         app.buttons["toggle-shift-paint"].tap()
         let first = app.buttons["shift-brush-morning"]
         XCTAssertTrue(first.waitForExistence(timeout: 10))
-        XCTAssertLessThanOrEqual(first.frame.width, 60)
+        let palette = app.scrollViews["shift-brush-scroll"]
+        XCTAssertTrue(palette.exists)
+        XCTAssertLessThan(palette.frame.height, app.frame.height * 0.2)
+        XCTAssertGreaterThanOrEqual(first.frame.height.rounded(), 44)
+        XCTAssertTrue(first.label.contains("Mattina"))
         capture("compact-shift-palette-dark")
     }
     func testActivityAgendaShowsOnlyRelevantItemsAndFoldsCompleted() {

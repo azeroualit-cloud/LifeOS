@@ -267,6 +267,7 @@ struct NativeHealthDetail: View {
                         .accessibilityIdentifier("health-diary-delete-" + localID.uuidString)
                     }
                 }
+                .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("health-diary-entry-" + row.id.uuidString)
             }
             if nutrition.busy { ProgressView("Aggiornamento diario") }
