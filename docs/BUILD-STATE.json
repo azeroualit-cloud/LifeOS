@@ -580,7 +580,7 @@
     "screenshots_reviewed": true
   },
   "ipa_delivery_2026_11_12": {
-    "status": "packaging_authorized_prepared",
+    "status": "packaging_running",
     "decision": "IPA-DELIVERY-2026-11-12",
     "version": "0.10.27",
     "build": 89,
@@ -591,6 +591,8 @@
     ],
     "repeated_tests": false,
     "backend_deploy": false,
-    "accepted_for_production": false
+    "accepted_for_production": false,
+    "run": 43252634146,
+    "source_commit": "62533a1afb3295d70aad305339eacfd5d0554ec1"
   }
 }

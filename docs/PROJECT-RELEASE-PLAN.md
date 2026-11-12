@@ -1,5 +1,8 @@
 # Piano operativo LifeOS
 
+**Produzione IPA avviata — 12 novembre 2026:** [run 43252634146](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43252634146), sorgente `62533a1`, versione 0.10.27 build 89. Richiesta IPA-DELIVERY-2026-11-12. Controllo identità candidato e prove concluse, archivio iPhone, verifica pacchetto e pubblicazione; nessun test ripetuto, nessun deploy backend. Pubblicazione ancora da verificare.
+
+
 **Candidato finale verificato senza IPA — 12 novembre 2026.** Prodotto `8ac2d4f`; sorgente dei test corretti `f901529`. Il run 43232065358 ha completato 405 test: 403 passati e due errori UI. Il [recupero mirato 43249620310](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43249620310) ha superato entrambi i casi, senza ripetere i 403 test passati né i quattro avvii Release già verdi. Copertura aggregata: **405/405 casi verificati**, non una nuova suite monolitica. Modificati soltanto test e selezione CI; codice/risorse/configurazione dell’app invariati. Catture finali ispezionate. **Nessuna IPA e nessun deploy backend.** Restano revisione utente, prove fisiche, parità dei dati personali e accettazione. Dettagli: [FINAL-CANDIDATE-2026-11-12.md](FINAL-CANDIDATE-2026-11-12.md). Le note sottostanti sono cronologia.
 
 

@@ -1,5 +1,8 @@
 # LifeOS — punto di ingresso per qualsiasi IA
 
+**Produzione IPA avviata — 12 novembre 2026:** [run 43252634146](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43252634146), sorgente `62533a1`, versione 0.10.27 build 89. Richiesta IPA-DELIVERY-2026-11-12. Controllo identità candidato e prove concluse, archivio iPhone, verifica pacchetto e pubblicazione; nessun test ripetuto, nessun deploy backend. Pubblicazione ancora da verificare.
+
+
 **IPA richiesta esplicitamente il 12 novembre 2026:** autorizzati confezionamento, verifica e pubblicazione della 0.10.27 build 89 sul candidato verificato, senza ripetere test già conclusi. Workflow manuale lifeos-package-final89 con controllo identità prodotto e prove precedenti. Nessun deploy backend. Le precedenti note “nessuna IPA” descrivono lo stato prima della richiesta.
 
 
