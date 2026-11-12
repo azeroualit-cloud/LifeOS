@@ -1,5 +1,8 @@
 # LifeOS — correzioni e difetti aperti
 
+**IPA 0.10.27 build 89 pubblicata e verificata — 12 novembre 2026.** [Scarica IPA](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.27-build89/LifeOS-89.ipa) · [Produzione riuscita](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43252634146). Sorgente `62533a1afb3295d70aad305339eacfd5d0554ec1`. Scaricato il file pubblico e verificati checksum `3932dda37cc8d65a0dfb4d21a084ae6a626861487f41a25e870b86fca52a4974`, versione/build di app e widget iPhone arm64, compatibilità import di avvio e presenza di 2.893 alimenti Coop e sette integratori con marca. Riutilizzate le 405 prove aggregate e i quattro avvii Release sul medesimo prodotto; nessun test ripetuto. Nessun deploy backend. IPA da firmare con Signulous; installazione conservando dati, prove fisiche e accettazione restano aperte. Le note sottostanti sono cronologia.
+
+
 **Candidato finale verificato senza IPA — 12 novembre 2026.** Prodotto `8ac2d4f`; sorgente dei test corretti `f901529`. Il run 43232065358 ha completato 405 test: 403 passati e due errori UI. Il [recupero mirato 43249620310](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43249620310) ha superato entrambi i casi, senza ripetere i 403 test passati né i quattro avvii Release già verdi. Copertura aggregata: **405/405 casi verificati**, non una nuova suite monolitica. Modificati soltanto test e selezione CI; codice/risorse/configurazione dell’app invariati. Catture finali ispezionate. **Nessuna IPA e nessun deploy backend.** Restano revisione utente, prove fisiche, parità dei dati personali e accettazione. Dettagli: [FINAL-CANDIDATE-2026-11-12.md](FINAL-CANDIDATE-2026-11-12.md). Le note sottostanti sono cronologia.
 
 

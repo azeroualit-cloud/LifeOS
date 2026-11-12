@@ -794,5 +794,15 @@
     "release_launches": 4,
     "new_ipa": false,
     "backend_deploy": false
+  },
+  "ipa_delivery_2026_11_12": {
+    "status": "published_downloaded_verified",
+    "run": 43252634146,
+    "source_commit": "62533a1afb3295d70aad305339eacfd5d0554ec1",
+    "version": "0.10.27",
+    "build": 89,
+    "ipa_sha256": "3932dda37cc8d65a0dfb4d21a084ae6a626861487f41a25e870b86fca52a4974",
+    "backend_deploy": false,
+    "physical_acceptance": false
   }
 }
