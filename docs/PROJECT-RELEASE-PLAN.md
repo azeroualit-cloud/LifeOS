@@ -1,5 +1,8 @@
 # Piano operativo LifeOS
 
+**TDEE aggiornato e verificato — 12 novembre 2026.** [Run 43257504280](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43257504280), sorgente `b513c95`: compilazione, **23 unitari e 2 UI passati**, zero fallimenti/saltati. Verificate due sole pesate a un giorno di distanza, storico corto, ancoraggio a ultima pesata vecchia, esclusione dati oltre la finestra/futuri, copertura calorie e resistenza a una singola pesata anomala. Catture Salute e scenario ispezionate. Finestra: 14 giorni prima dell’ultima pesata, inclusa anche se oggi; nessun minimo arbitrario di numero/durata/confronti. Due date distinte necessarie per misurare variazione; copertura calorie 90% conservata. Modifica nel codice, **non nell’IPA 89 installata**; nuova IPA non richiesta. Nessun deploy.
+
+
 **IPA 0.10.27 build 89 pubblicata e verificata — 12 novembre 2026.** [Scarica IPA](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.27-build89/LifeOS-89.ipa) · [Produzione riuscita](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43252634146). Sorgente `62533a1afb3295d70aad305339eacfd5d0554ec1`. Scaricato il file pubblico e verificati checksum `3932dda37cc8d65a0dfb4d21a084ae6a626861487f41a25e870b86fca52a4974`, versione/build di app e widget iPhone arm64, compatibilità import di avvio e presenza di 2.893 alimenti Coop e sette integratori con marca. Riutilizzate le 405 prove aggregate e i quattro avvii Release sul medesimo prodotto; nessun test ripetuto. Nessun deploy backend. IPA da firmare con Signulous; installazione conservando dati, prove fisiche e accettazione restano aperte. Le note sottostanti sono cronologia.
 
 

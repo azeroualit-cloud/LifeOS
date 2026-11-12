@@ -8,8 +8,8 @@
   "source_of_truth": "native-next overlay assembled through .github/actions/native-compat76/action.yml",
   "native_source_fingerprint": {
     "algorithm": "SHA-256 over sorted tracked native-next paths, NUL, canonical Git blob bytes, NUL",
-    "sha256": "ed389bd3ed96bfa51022679ca36d94f4acc89536c5d14f7e59f5eabb6c1c1436",
-    "source_commit": "f9015294e7b37a6ae7be416fffdd298062e263bc"
+    "sha256": "3a3cc91c193e3e0a8a6fdd12e2e368e686b35ccafb572a70e923cced96d43d73",
+    "source_commit": "b513c956b3203c610cff7e85f8df3bd800eb892d"
   },
   "latest_distributed_build": {
     "version": "0.10.27",
@@ -549,17 +549,13 @@
     }
   },
   "current_increment": {
-    "type": "Coop/Spesotti, integratori per unità, modifica personale, cronologia e palette compatta",
-    "candidate_version": "0.10.27",
-    "candidate_build": 89,
-    "source_commit": "8ac2d4f5725d624f8a89f8458cf7c03dc2242bc9",
-    "new_ipa": true,
-    "validation_run": 43232065358,
-    "validation": "405 cases verified across original 403 passed + 2 recovered; four Release launches passed; screenshots reviewed. No IPA/backend deploy.",
-    "accepted_for_production": false,
-    "recovery_run": 43249620310,
-    "package_run": 43252634146,
-    "published": true
+    "type": "TDEE anchored to latest weigh-in; arbitrary weigh-in minimums removed",
+    "source_commit": "b513c956b3203c610cff7e85f8df3bd800eb892d",
+    "validation_run": 43257504280,
+    "validation": "23 unit + 2 UI passed; screenshots reviewed. Not a full release gate.",
+    "new_ipa": false,
+    "backend_deploy": false,
+    "accepted_for_production": false
   },
   "final_recovery_2026_11_12": {
     "status": "passed_technical_candidate_user_review_pending",
@@ -618,7 +614,7 @@
     "accepted_for_production": false
   },
   "tdee_last_weigh_in_2026_11_12": {
-    "status": "focused_queued",
+    "status": "simulator_verified_not_distributed",
     "decision": "TDEE-LAST-WEIGH-IN-2026-11-12",
     "calibration_days": 14,
     "anchor": "latest_valid_weigh_in_including_today",
@@ -629,6 +625,13 @@
     "backend_deploy": false,
     "run": 43257504280,
     "source_commit": "b513c956b3203c610cff7e85f8df3bd800eb892d",
-    "superseded_run": 43257386480
+    "superseded_run": 43257386480,
+    "unit_passed": 23,
+    "ui_passed": 2,
+    "failed": 0,
+    "skipped": 0,
+    "screenshots_reviewed": true,
+    "artifact": 13963472627,
+    "subsequent_change": "Only another UI test assertion aligned to new descriptive label; not selected in focused run. Product unchanged since b513c95."
   }
 }
