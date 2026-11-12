@@ -58,7 +58,7 @@ final class NativeRevision78UITests: XCTestCase {
         app.tabBars.buttons["Salute"].tap()
         let rows = ["tdee", "weight", "calories", "simulation"].map { app.buttons["health-summary-" + $0] }
         for row in rows { XCTAssertTrue(row.waitForExistence(timeout: 10)) }
-        XCTAssertTrue(rows[0].label.contains("TDEE")); XCTAssertTrue(rows[0].label.contains("Ultimi 14 giorni"))
+        XCTAssertTrue(rows[0].label.contains("TDEE")); XCTAssertTrue(rows[0].label.contains("14 giorni dall’ultima pesata"))
         XCTAssertTrue(rows[3].label.contains("Peso previsto"))
         XCTAssertTrue(rows[1].label.contains("Peso"))
         XCTAssertNotNil(rows[3].label.components(separatedBy: ", ").last?.range(of: "[0-9]", options: .regularExpression), "The forecast date remains in the accessible summary")

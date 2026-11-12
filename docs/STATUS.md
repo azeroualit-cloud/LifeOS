@@ -1,5 +1,8 @@
 # LifeOS — stato corrente
 
+**Verifica TDEE:** [run 43257504280](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43257504280), sorgente `b513c95`, unitari NativeHealthTests e due flussi UI Salute/Dashboard. Il tentativo 43257386480 è stato cancellato prima di acquisire risultati, sostituito per rendere esplicita la provenienza della media scenario quando manca quella recente. Nessuna nuova IPA/deploy.
+
+
 **Modifica TDEE richiesta il 12 novembre:** finestra di 14 giorni a ritroso dall’ultima pesata, inclusa anche se odierna; rimossi minimi arbitrari di pesate, durata e confronti. Due date distinte necessarie per misurare variazione; copertura calorie 90% conservata. Nessun blocco TDEE per pesata vecchia o assenza di introito nella settimana corrente: per lo scenario si usa la media di calibrazione se manca quella recente; la protezione esistente sulle proiezioni da baseline vecchia resta. Implementazione e test preparati; verifica mirata tdee-review da eseguire. IPA 89 pubblicata invariata, nessuna nuova IPA/deploy autorizzati.
 
 

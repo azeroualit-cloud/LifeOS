@@ -618,7 +618,7 @@
     "accepted_for_production": false
   },
   "tdee_last_weigh_in_2026_11_12": {
-    "status": "implemented_pending_focused_verification",
+    "status": "focused_queued",
     "decision": "TDEE-LAST-WEIGH-IN-2026-11-12",
     "calibration_days": 14,
     "anchor": "latest_valid_weigh_in_including_today",
@@ -626,6 +626,9 @@
     "minimum_distinct_dates_for_change": 2,
     "calorie_coverage": 0.9,
     "new_ipa": false,
-    "backend_deploy": false
+    "backend_deploy": false,
+    "run": 43257504280,
+    "source_commit": "b513c956b3203c610cff7e85f8df3bd800eb892d",
+    "superseded_run": 43257386480
   }
 }
