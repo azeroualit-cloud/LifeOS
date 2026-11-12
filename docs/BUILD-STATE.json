@@ -472,7 +472,17 @@
       "release_launches": 4
     },
     "focused_corrections_run": 43225787669,
-    "focused_corrections_source_commit": "082a238449be7612842ea303ce1f34db5d8734f8"
+    "focused_corrections_source_commit": "082a238449be7612842ea303ce1f34db5d8734f8",
+    "focused_corrections_result": {
+      "run": 43225787669,
+      "unit_total": 22,
+      "unit_passed": 21,
+      "unit_failed": 1,
+      "ui_total": 4,
+      "ui_passed": 2,
+      "ui_failed": 2,
+      "details": "Generic exclusion test searched all branded names including a vegetarian product; history cancel is native popover dismissal; search text read before input completion. Personal editing and compact palette passed."
+    }
   },
   "historical_increment_states": {
     "current_increment": {

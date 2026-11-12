@@ -86,7 +86,7 @@ final class NativeNutritionEntryTests: XCTestCase {
 
     func testCatalogExcludesPorkAndSeparatesMoroccanDishes() {
         for query in ["maiale", "prosciutto", "salame"] {
-            XCTAssertTrue(NativeGenericFood.matches(query).isEmpty)
+            XCTAssertTrue(NativeGenericFood.matches(query, in: NativeGenericFood.foods).isEmpty)
         }
         XCTAssertEqual(NativeGenericFood.matches("couscous").first?.id, "ciqual-9683")
         XCTAssertEqual(NativeGenericFood.matches("couscous senza carne").first?.id, "ciqual-25150")

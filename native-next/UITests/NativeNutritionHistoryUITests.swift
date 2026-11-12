@@ -28,7 +28,13 @@ final class NativeNutritionHistoryUITests: XCTestCase {
         remove.tap()
         let confirmation = app.buttons["Elimina da LifeOS e Apple Salute"]
         XCTAssertTrue(confirmation.waitForExistence(timeout: 5))
-        app.buttons["Annulla"].tap()
+        let cancel = app.buttons["Annulla"]
+        if cancel.exists { cancel.tap() }
+        else {
+            let outside = app.otherElements["PopoverDismissRegion"]
+            XCTAssertTrue(outside.waitForExistence(timeout: 5))
+            outside.tap()
+        }
         XCTAssertTrue(meal.exists)
         remove.tap()
         XCTAssertTrue(confirmation.waitForExistence(timeout: 5))

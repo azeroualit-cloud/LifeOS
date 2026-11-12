@@ -38,7 +38,13 @@ final class NativePersonalFoodUITests: XCTestCase {
             field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: previous.count))
         }
         field.typeText(text)
-        XCTAssertEqual(field.value as? String, text, "Replacement must finish before checking Save")
+        let entered = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value == %@", text), object: field)
+        let complete = XCTWaiter.wait(for: [entered], timeout: 10) == .completed
+        if !complete {
+            capture("Incomplete text input diagnostic")
+            print("INCOMPLETE_INPUT_TREE " + app.debugDescription)
+        }
+        XCTAssertTrue(complete, "Replacement must finish before checking Save: " + (field.value as? String ?? "nil"))
     }
 
     private func capture(_ name: String) {
