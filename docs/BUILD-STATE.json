@@ -141,7 +141,7 @@
     "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42509002706",
     "followup_commit": "1c29ddaff8e352897e761a690e849343230e3d06",
     "followup_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/42510268817",
-    "validation": "Compilazione passata; tre test con Carboidrati da 1 a 4 punti oltre il limite dopo lo scroll. La seconda verifica mirata è passata, inclusi i tre casi di Nutrizione. Nessun collaudo completo o pacchetto per il sorgente corretto.",
+    "validation": "Compilazione passata; tre test con Carboidrati da 1 a 4 punti oltre il limite dopo lo scroll. La seconda verifica mirata Ã¨ passata, inclusi i tre casi di Nutrizione. Nessun collaudo completo o pacchetto per il sorgente corretto.",
     "new_ipa": false
   },
   "nutrition_catalog_render": {
@@ -279,7 +279,7 @@
   "ipa_production_gate": {
     "rule": "IPA-GATE-01",
     "status": "blocked until explicit user request",
-    "user_quote": "ok ma non produciamo ipa finché non te lo dico io",
+    "user_quote": "ok ma non produciamo ipa finchÃ© non te lo dico io",
     "simulator_checks_allowed": true
   },
   "health_planning": {
@@ -443,7 +443,7 @@
     "publish_status": "skipped"
   },
   "final_candidate_2026_11_12": {
-    "status": "focused_verification_pending",
+    "status": "ready_for_final_automated_validation",
     "base_commit": "6a8826d4e1334935798dc9e909449621c013984e",
     "product_source_commit": "db6d6f5e03e4d5cd5bf1dca850372d50063345b6",
     "packaging_authorized": false,
@@ -466,6 +466,16 @@
       "worker_transform": 3,
       "activity_integration": "passed",
       "backend_deployed": false
+    },
+    "focused_result": {
+      "passed_unit": 288,
+      "passed_ui": 4,
+      "failed": 0,
+      "screenshots_reviewed": [
+        "Apple Health values",
+        "shift palette standard",
+        "shift palette accessibility"
+      ]
     }
   }
 }

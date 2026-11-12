@@ -1,5 +1,7 @@
 # LifeOS — checklist operativa unificata
 
+**Prova mirata conclusa:** [43176199615](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43176199615), sorgente `d91aa380d821498cb7722639c0489a2d3318c59c`: 288 unitari e 4 UI passati, zero fallimenti. Ispezionate catture del riferimento Apple Salute (2.200 kcal, 80 kg) e palette standard/grande. Il candidato aggiunge soltanto una protezione alla ricerca dei processi non avviati e salta tale ricerca se la fixture è già pronta; nessun sorgente prodotto modificato. Prossimo gate: singolo workflow manuale lifeos-validate80 con suite completa e quattro avvii Release. Su workflow_dispatch package89/publish89 sono esclusi dalle condizioni evento push.
+
 ## Stato corrente — audit del 12 novembre 2026
 
 Questa sezione prevale sulle note cronologiche successive. La nuova chat autorizza il proseguimento e il collaudo finale completo, compresi quattro avvii Release, **senza creare, confezionare o distribuire IPA** e senza deploy backend. Occorre una nuova richiesta IPA esplicita in questa chat. DEV-02 resta applicabile ai nuovi difetti di prodotto; non ripetere approvazioni già registrate per lo stesso ambito.

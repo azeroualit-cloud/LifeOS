@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Prova mirata conclusa:** [43176199615](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43176199615), sorgente `d91aa380d821498cb7722639c0489a2d3318c59c`: 288 unitari e 4 UI passati, zero fallimenti. Ispezionate catture del riferimento Apple Salute (2.200 kcal, 80 kg) e palette standard/grande. Il candidato aggiunge soltanto una protezione alla ricerca dei processi non avviati e salta tale ricerca se la fixture è già pronta; nessun sorgente prodotto modificato. Prossimo gate: singolo workflow manuale lifeos-validate80 con suite completa e quattro avvii Release. Su workflow_dispatch package89/publish89 sono esclusi dalle condizioni evento push.
+
 
 **Checkpoint 12 novembre — collaudo senza IPA.** [Prova mirata 43176199615](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43176199615) sul commit `d91aa380d821498cb7722639c0489a2d3318c59c`, in corso. Verifica locale: 8 test selettore, 36 test sintetici Finanza/Utenze, 3 test trasformazione Worker e integrazione Attività passati. Gli iniziali errori locali erano dovuti al Worker storico predefinito e alla codifica Windows: con Worker75 rigenerato e UTF-8 i controlli passano. Nessun dato personale interrogato e nessun deploy.
 

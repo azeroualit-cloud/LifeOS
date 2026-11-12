@@ -404,7 +404,10 @@ final class NativeAppleHealthReferenceUITests: XCTestCase {
         // the host app's accessibility tree (see run 43113799496).
         let permissionApps = [seed, XCUIApplication(bundleIdentifier: "com.apple.HealthPrivacyService"), XCUIApplication(bundleIdentifier: "com.apple.springboard")]
         func permissionApp() -> XCUIApplication? {
-            permissionApps.first { $0.switches["UIA.Health.DietaryEnergy.SwitchCell.Switch"].exists }
+            permissionApps.first {
+                $0.state != .notRunning && $0.state != .unknown &&
+                $0.switches["UIA.Health.DietaryEnergy.SwitchCell.Switch"].exists
+            }
         }
         let authorization = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
             (status.exists && status.label == "Dati pronti") || permissionApp() != nil
@@ -417,7 +420,7 @@ final class NativeAppleHealthReferenceUITests: XCTestCase {
             XCTFail("The Health authorization dialog did not become ready")
             return
         }
-        if let permission = permissionApp() {
+        if status.label != "Dati pronti", let permission = permissionApp() {
             let toggles = ["DietaryEnergy", "Weight"].map { permission.switches["UIA.Health." + $0 + ".SwitchCell.Switch"] }
             for toggle in toggles {
                 for _ in 0..<5 where !toggle.isHittable { permission.swipeUp(velocity: .slow) }
