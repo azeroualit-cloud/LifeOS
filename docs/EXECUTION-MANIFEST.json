@@ -784,5 +784,15 @@
     "backend_deploy_authorized": false,
     "focused_result": "1 unit + 2 UI passed; screenshots inspected",
     "final_run": 43232065358
+  },
+  "final_recovery_2026_11_12": {
+    "status": "technical_candidate_verified_user_review_pending",
+    "report": "docs/FINAL-CANDIDATE-2026-11-12.md",
+    "original_run": 43232065358,
+    "recovery_run": 43249620310,
+    "aggregate_verified": 405,
+    "release_launches": 4,
+    "new_ipa": false,
+    "backend_deploy": false
   }
 }
