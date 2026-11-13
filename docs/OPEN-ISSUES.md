@@ -1,5 +1,8 @@
 # LifeOS — correzioni e difetti aperti
 
+**Accesso — 13 novembre 2026:** problema dopo cambio password dichiarato risolto dall’utente. Individuato nel codice il requisito APP_PASSWORD di almeno 24 caratteri; nessuna modifica server o codice eseguita dall’assistente. Ripristino della sincronizzazione non confermato separatamente.
+
+
 **TDEE aggiornato e verificato — 12 novembre 2026.** [Run 43257504280](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43257504280), sorgente `b513c95`: compilazione, **23 unitari e 2 UI passati**, zero fallimenti/saltati. Verificate due sole pesate a un giorno di distanza, storico corto, ancoraggio a ultima pesata vecchia, esclusione dati oltre la finestra/futuri, copertura calorie e resistenza a una singola pesata anomala. Catture Salute e scenario ispezionate. Finestra: 14 giorni prima dell’ultima pesata, inclusa anche se oggi; nessun minimo arbitrario di numero/durata/confronti. Due date distinte necessarie per misurare variazione; copertura calorie 90% conservata. Modifica nel codice, **non nell’IPA 89 installata**; nuova IPA non richiesta. Nessun deploy.
 
 
