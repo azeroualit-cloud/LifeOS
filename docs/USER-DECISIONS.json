@@ -1262,13 +1262,15 @@
   },
   "six_tabs_keyboard_repair_proposal": {
     "id": "SIX-TABS-KEYBOARD-REPAIR-2026-11-13",
-    "status": "PENDING_APPROVAL",
+    "status": "ACTIVE",
     "recorded_on": "2026-11-13",
     "provenance": "Proposta assistente dopo fallimento CI e riproduzione nella fixture,non nuova decisione utente",
     "observed": "Catalogo si chiude quando compare tastiera dopo tap ricerca",
     "proposal": "Radici UIHostingController stabili;contenuto/ambiente aggiornati tramite modello osservabile;design e6destinazioni invariati",
     "approval_requested_under": "DEV-02",
-    "product_fix_applied": false
+    "product_fix_applied": true,
+    "confirmation_quote": "confermo",
+    "confirmation_source": "Risposta utente successiva alla richiesta approvazioneDEV02 e IPA,13novembre2026"
   },
   "ipa_delivery_2026_11_13": {
     "id": "IPA-DELIVERY-2026-11-13",
@@ -1277,6 +1279,6 @@
     "provenance": "Richiesta diretta utente",
     "original_quote": "produci l'ipa",
     "rule": "Autorizzata nuova produzione IPA delle modifiche correnti;non richiedere di nuovo autorizzazione packaging. Non è conferma esplicita della proposta prodotto SIX-TABS-KEYBOARD-REPAIR-2026-11-13,ancora PENDING_APPROVAL secondoDEV02. Nessun deploy backend.",
-    "readiness": "Ultima prova sei-glass fallita con regressione catalogo riprodotta;workflowfinal89 è vincolato al vecchio prodotto e non può essere riusato per le modifiche correnti. Preparare nuova produzione sul candidato corretto/verificato dopo approvazione correzione."
+    "readiness": "Correzione approvata e implementata;preparare nuovaIPA0.10.28build90 dopo gate mirato iniziale,suite restante e4avviiRelease sullo stessoSHA;nessun nuovo consenso IPA richiesto."
   }
 }

@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import Combine
 
 /// Six destinations remain visible even on compact iPhones; no More controller.
 struct NativeSixTabBar: View {
@@ -73,15 +74,50 @@ struct NativeTabContainer: UIViewControllerRepresentable {
     func updateUIViewController(_ controller: NativeTabContainerController, context: Context) {
         // Hosting controllers start a separate SwiftUI root. Forward the complete
         // inherited environment, including Dynamic Type, locale and accessibility.
-        let inherited = context.environment
-        controller.show(selection) { tab in
-            AnyView(content(tab).environment(\.self, inherited))
+        controller.show(selection, environment: context.environment, content: content)
+    }
+}
+
+private struct NativeTabPresentationSnapshot {
+    let content: AnyView
+    let environment: EnvironmentValues
+}
+
+/// Updating observable content preserves SwiftUI's presentation identity. The
+/// hosting controller's root is installed only once, including while typing.
+@MainActor private final class NativeTabPresentationModel: ObservableObject {
+    @Published private(set) var snapshot: NativeTabPresentationSnapshot
+    private var generation: UInt = 0
+
+    init(snapshot: NativeTabPresentationSnapshot) { self.snapshot = snapshot }
+
+    func update(_ next: NativeTabPresentationSnapshot) {
+        generation &+= 1
+        let requestedGeneration = generation
+        // Representable updates occur inside a SwiftUI render. Publish on the
+        // next main turn, coalescing superseded environment/content snapshots.
+        DispatchQueue.main.async { [weak self] in
+            guard let self, self.generation == requestedGeneration else { return }
+            self.snapshot = next
         }
     }
 }
 
+@MainActor private struct NativeStableTabRoot: View {
+    @ObservedObject var presentation: NativeTabPresentationModel
+
+    var body: some View {
+        presentation.snapshot.content
+            .environment(\.self, presentation.snapshot.environment)
+    }
+}
+
 final class NativeTabContainerController: UIViewController {
-    private var hosts: [NativeTab: UIHostingController<AnyView>] = [:]
+    private struct Host {
+        let controller: UIHostingController<NativeStableTabRoot>
+        let presentation: NativeTabPresentationModel
+    }
+    private var hosts: [NativeTab: Host] = [:]
     private var selected: NativeTab?
 
     override func loadView() {
@@ -89,24 +125,27 @@ final class NativeTabContainerController: UIViewController {
         view.backgroundColor = .clear
     }
 
-    func show(_ tab: NativeTab, content: (NativeTab) -> AnyView) {
+    func show(_ tab: NativeTab, environment: EnvironmentValues, content: (NativeTab) -> AnyView) {
         loadViewIfNeeded()
-        for (key, host) in hosts { host.rootView = content(key) }
+        for (key, host) in hosts {
+            host.presentation.update(NativeTabPresentationSnapshot(content: content(key), environment: environment))
+        }
         guard selected != tab else { return }
         let forwardsAppearance = view.window != nil
-        let old = selected.flatMap { hosts[$0] }
+        let old = selected.flatMap { hosts[$0]?.controller }
         if let old {
             if forwardsAppearance { old.beginAppearanceTransition(false, animated: false) }
             old.willMove(toParent: nil)
             old.view.removeFromSuperview()
             old.removeFromParent()
         }
-        let host: UIHostingController<AnyView>
-        if let existing = hosts[tab] { host = existing }
+        let host: UIHostingController<NativeStableTabRoot>
+        if let existing = hosts[tab] { host = existing.controller }
         else {
-            host = UIHostingController(rootView: content(tab))
+            let presentation = NativeTabPresentationModel(snapshot: NativeTabPresentationSnapshot(content: content(tab), environment: environment))
+            host = UIHostingController(rootView: NativeStableTabRoot(presentation: presentation))
             host.view.backgroundColor = .clear
-            hosts[tab] = host
+            hosts[tab] = Host(controller: host, presentation: presentation)
         }
         selected = tab
         addChild(host)
@@ -126,4 +165,3 @@ final class NativeTabContainerController: UIViewController {
         }
     }
 }
-

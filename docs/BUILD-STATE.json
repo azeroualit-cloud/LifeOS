@@ -683,7 +683,7 @@
     "failed": 0
   },
   "six_tab_glass_revision": {
-    "status": "failed_product_catalog_keyboard_regression_pending_DEV02_approval",
+    "status": "approved_stable_host_fix_implemented_pending_validation",
     "order": [
       "Dashboard",
       "Attività",
@@ -696,7 +696,7 @@
     "supermarket_items_hidden": 128,
     "nightclub_cocktails_kept": 30,
     "history_preserved": true,
-    "ipa_authorized": false,
+    "ipa_authorized": true,
     "source_commit": "8e17d1cc34ac38be13b02d1ce70603912692c6e7",
     "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43474910142",
     "selected_unit_tests": 3,
@@ -709,14 +709,16 @@
       "compile": "passed"
     },
     "diagnostics_artifact": 14064376228,
-    "product_fix_applied": false,
+    "product_fix_applied": true,
     "next_run": null
   },
   "next_ipa_request": {
     "authorized": true,
     "decision": "IPA-DELIVERY-2026-11-13",
-    "status": "not_started_pending_product_fix_approval_and_candidate_validation",
-    "packaging_workflow_current90": "not_prepared",
-    "existing_package89": "pinned_to_previous_candidate_not_reusable"
+    "status": "authorized_candidate90_pipeline_ready",
+    "packaging_workflow_current90": ".github/workflows/lifeos-candidate90.yml",
+    "existing_package89": "pinned_to_previous_candidate_not_reusable",
+    "version": "0.10.28",
+    "build": 90
   }
 }

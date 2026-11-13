@@ -380,3 +380,7 @@ Conferma NAVIGATION-SIX-GLASS-2026-11-13: «si» alla domanda esplicita Dashboar
 ## IPA-DELIVERY-2026-11-13 — ACTIVE
 
 Richiesta diretta: «produci l’ipa». Autorizzata nuova produzione delle modifiche correnti,senza ripetere richiesta packaging. La precedente proposta correzione catalogo/tastiera resta in attesa di approvazioneDEV02:nessuna conferma esplicita nel messaggioIPA. Nessun deploy backend. Ultima prova sei-voci fallita;workflowfinal89 vincolato a precedente candidato,non riutilizzabile per le nuove modifiche.
+
+## SIX-TABS-KEYBOARD-REPAIR-2026-11-13 — ACTIVE
+
+Utente: «confermo» alla richiesta approvazione della correzione radici stabili e verifica prima dell’IPA già autorizzata. Autorizzata implementazione della proposta descritta e successive prove/confezionamento0.10.28build90. Non chiedere nuovamente conferma correzione oIPA per questo stesso ambito. Nessun deploybackend;installazione/accettazione separate.

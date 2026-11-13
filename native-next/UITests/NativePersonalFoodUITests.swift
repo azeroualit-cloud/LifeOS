@@ -24,7 +24,13 @@ final class NativePersonalFoodUITests: XCTestCase {
     private func replace(_ field: XCUIElement, with text: String, app: XCUIApplication) {
         for _ in 0..<6 where !field.isHittable { app.swipeUp(velocity: .slow) }
         XCTAssertTrue(field.isHittable)
+        let catalogSearch = field.identifier == "generic-food-search"
         field.tap()
+        if catalogSearch {
+            XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 10))
+            XCTAssertTrue(field.waitForExistence(timeout: 10), "Opening the keyboard must keep the catalog search sheet presented")
+            XCTAssertTrue(field.isHittable)
+        }
         let previous = field.value as? String ?? ""
         if previous != field.placeholderValue && !previous.isEmpty {
             // A tap may place the caret before an existing numeric value.
