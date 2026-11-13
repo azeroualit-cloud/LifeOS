@@ -9,7 +9,7 @@ final class NativePersonalFoodUITests: XCTestCase {
         let open = app.buttons["quick-nutrition-open"]
         let dashboard = app.scrollViews["dashboard-scroll"]
         for _ in 0..<8 {
-            if open.isHittable && open.frame.maxY <= app.tabBars.firstMatch.frame.minY { break }
+            if open.isHittable && open.frame.maxY <= app.mainTabBar.frame.minY { break }
             dashboard.swipeUp(velocity: .slow)
         }
         XCTAssertTrue(open.isHittable)

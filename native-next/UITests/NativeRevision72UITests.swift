@@ -6,7 +6,7 @@ final class NativeRevision72UITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["--visual-test", "--dark", "--compact-calendar", "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"] + extra
         app.launch()
-        XCTAssertTrue(app.tabBars.buttons["Dashboard"].waitForExistence(timeout: 30))
+        XCTAssertTrue(app.mainTabBar.buttons["Dashboard"].waitForExistence(timeout: 30))
         return app
     }
     private func day() -> String {
@@ -57,7 +57,7 @@ final class NativeRevision72UITests: XCTestCase {
             XCTAssertTrue(button.isHittable)
             XCTAssertGreaterThanOrEqual(button.frame.height.rounded(), 44)
         }
-        XCTAssertLessThanOrEqual(add.frame.maxY, app.tabBars.firstMatch.frame.minY)
+        XCTAssertLessThanOrEqual(add.frame.maxY, app.mainTabBar.frame.minY)
         XCTAssertGreaterThan(add.frame.minY, title.frame.maxY)
         capture("day-navigation-and-event-action")
         back.tap(); XCTAssertTrue(app.scrollViews["calendar-scroll"].waitForExistence(timeout: 10))

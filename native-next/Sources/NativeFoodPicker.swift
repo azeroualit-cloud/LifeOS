@@ -196,7 +196,7 @@ struct NativeGenericFood: Codable, Identifiable {
 
     static let foods = loadCatalog("generic-foods")
     static let cocktails = loadCatalog("cocktails")
-    static let catalog = foods + cocktails + supplements + brandedFoods + brandedSupplements + italianBrands + communityFoods
+    static let catalog = (foods + cocktails + supplements + brandedFoods + brandedSupplements + italianBrands + communityFoods).filter(NativeFoodCatalogPolicy.includes)
     static let communityFoods = loadCatalog("open-food-facts-italy")
     static let italianBrands = loadCatalog("italian-brands")
     static let brandedFoods = loadCatalog("branded-foods")

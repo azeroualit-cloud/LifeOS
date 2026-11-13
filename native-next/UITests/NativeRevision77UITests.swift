@@ -6,17 +6,17 @@ final class NativeRevision77UITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["--visual-test", "--busy-home"]
         app.launch()
-        for name in ["Dashboard", "Calendario", "Finanza", "Salute"] {
-            XCTAssertTrue(app.tabBars.buttons[name].waitForExistence(timeout: 15))
+        for name in ["Dashboard", "Attività", "Salute", "Bloom", "Finanza", "Calendario"] {
+            XCTAssertTrue(app.mainTabBar.buttons[name].waitForExistence(timeout: 15))
         }
-        XCTAssertTrue(app.tabBars.buttons["Altro"].exists || app.tabBars.buttons["More"].exists)
-        app.tabBars.buttons["Salute"].tap()
+        XCTAssertFalse(app.mainTabBar.buttons["Altro"].exists); XCTAssertFalse(app.mainTabBar.buttons["More"].exists)
+        app.mainTabBar.buttons["Salute"].tap()
         XCTAssertTrue(app.scrollViews["health-detail-scroll"].waitForExistence(timeout: 10))
         capture("Salute diretta", app)
         app.openMainTab("Bloom")
         XCTAssertTrue(app.navigationBars["Bloom"].waitForExistence(timeout: 10))
         capture("Bloom", app)
-        app.tabBars.buttons["Dashboard"].tap()
+        app.mainTabBar.buttons["Dashboard"].tap()
         capture("Dashboard", app)
     }
     func testLargeTextDashboardAndHealth() {
@@ -25,7 +25,7 @@ final class NativeRevision77UITests: XCTestCase {
         app.launch()
         XCTAssertTrue(app.scrollViews["dashboard-scroll"].waitForExistence(timeout: 15))
         capture("Dashboard testo grande", app)
-        app.tabBars.buttons["Salute"].tap()
+        app.mainTabBar.buttons["Salute"].tap()
         XCTAssertTrue(app.scrollViews["health-detail-scroll"].waitForExistence(timeout: 10))
         capture("Salute testo grande", app)
     }
@@ -39,7 +39,7 @@ final class NativeRevision77UITests: XCTestCase {
         XCTAssertTrue(app.scrollViews["calendar-day-pane"].waitForExistence(timeout: 10))
         app.buttons["calendar-back-month"].tap()
         XCTAssertTrue(app.scrollViews["calendar-scroll"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.tabBars.buttons["Dashboard"].isSelected)
+        XCTAssertTrue(app.mainTabBar.buttons["Dashboard"].isSelected)
         capture("Calendario completo", app)
         app.buttons["other-back"].tap()
         let finance = app.buttons["home-finance"]

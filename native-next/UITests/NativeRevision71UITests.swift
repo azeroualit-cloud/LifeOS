@@ -7,7 +7,7 @@ final class NativeRevision71UITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["--visual-test", "--dark", "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"] + arguments
         app.launch()
-        XCTAssertTrue(app.tabBars.buttons["Dashboard"].waitForExistence(timeout: 30))
+        XCTAssertTrue(app.mainTabBar.buttons["Dashboard"].waitForExistence(timeout: 30))
         return app
     }
     private func capture(_ name: String) {
@@ -27,7 +27,7 @@ final class NativeRevision71UITests: XCTestCase {
     private func reveal(_ element: XCUIElement, in surface: XCUIElement, app: XCUIApplication) {
         for _ in 0..<24 {
             let top = max(surface.frame.minY, app.navigationBars.firstMatch.exists ? app.navigationBars.firstMatch.frame.maxY : surface.frame.minY)
-            let bottom = min(surface.frame.maxY, app.tabBars.firstMatch.exists ? app.tabBars.firstMatch.frame.minY : app.frame.maxY)
+            let bottom = min(surface.frame.maxY, app.mainTabBar.exists ? app.mainTabBar.frame.minY : app.frame.maxY)
             if element.exists && element.isHittable && element.frame.minY >= top && element.frame.maxY <= bottom { return }
             let above = element.exists && element.frame.minY < top
             let start = surface.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
@@ -162,7 +162,7 @@ final class NativeRevision71UITests: XCTestCase {
         let edited = title.value as? String
         app.buttons["Salva"].tap()
         XCTAssertTrue(app.navigationBars["Modifica attività"].waitForNonExistence(timeout: 10))
-        app.tabBars.buttons["Dashboard"].tap(); app.openMainTab("Attività")
+        app.mainTabBar.buttons["Dashboard"].tap(); app.openMainTab("Attività")
         app.buttons["task-open-1"].tap()
         XCTAssertTrue(title.waitForExistence(timeout: 10)); XCTAssertEqual(title.value as? String, edited)
         app.buttons["Annulla"].tap()
@@ -239,7 +239,7 @@ final class NativeRevision71UITests: XCTestCase {
         XCTAssertFalse(app.staticTexts["home-greeting"].exists)
         XCTAssertFalse(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "A Empoli,")).firstMatch.exists)
         XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "dashboard-day-")).count, 7)
-        app.tabBars.buttons["Salute"].tap()
+        app.mainTabBar.buttons["Salute"].tap()
         let health = app.buttons["health-summary-weight"]
         XCTAssertTrue(health.waitForExistence(timeout: 10)); XCTAssertTrue(health.isHittable)
         capture("71-health-weight-summary")

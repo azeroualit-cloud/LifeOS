@@ -669,14 +669,33 @@
     "license": "ODbL1.0 separate dataset",
     "mass_records": 916,
     "volume_records": 84,
-    "status": "focused_ios_dispatched_user_monitors",
-    "legacy_alcohol_removal": "pending_META01_confirmation",
+    "status": "focused_ios_passed",
+    "legacy_alcohol_removal": "confirmed_supermarket_only_nightclub_cocktails_kept",
     "ipa_authorized": false,
     "backend_deploy": false,
     "source_commit": "20f604a0accaca626a8699aaece37ceb50d9da5d",
     "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43448734353",
     "local_importer_tests_passed": 7,
     "local_selector_tests_passed": 8,
-    "screenshots": "pending_new_run_artifacts"
+    "screenshots": "downloaded_and_inspected_43448734353",
+    "unit_tests_passed": 2,
+    "ui_tests_passed": 1,
+    "failed": 0
+  },
+  "six_tab_glass_revision": {
+    "status": "implemented_pending_compact_focused_ci",
+    "order": [
+      "Dashboard",
+      "Attività",
+      "Salute",
+      "Bloom",
+      "Finanza",
+      "Calendario"
+    ],
+    "overflow": false,
+    "supermarket_items_hidden": 128,
+    "nightclub_cocktails_kept": 30,
+    "history_preserved": true,
+    "ipa_authorized": false
   }
 }

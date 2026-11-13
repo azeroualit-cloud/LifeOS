@@ -7,7 +7,7 @@ final class NativeNutritionQuickUITests: XCTestCase {
         app.launchArguments = ["--visual-test", "--empty-home", "--dark", "--nutrition-ui-fixture", "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"] + (large ? ["--large-text"] : []) + (failure ? ["--nutrition-write-failure"] : [])
         app.launch()
         let button = app.buttons["quick-nutrition-open"]
-        let tabBar = app.tabBars.firstMatch
+        let tabBar = app.mainTabBar
         for _ in 0..<8 {
             if button.isHittable && button.frame.maxY <= tabBar.frame.minY { break }
             app.scrollViews["dashboard-scroll"].swipeUp(velocity: .slow)

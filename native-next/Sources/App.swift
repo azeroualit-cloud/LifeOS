@@ -51,7 +51,30 @@ import UIKit
         #endif
     }
 }
-enum NativeTab: Int, Hashable { case dashboard, calendar, finance, health, tasks, bloom }
+enum NativeTab: Int, CaseIterable, Hashable, Identifiable {
+    case dashboard, tasks, health, bloom, finance, calendar
+    var id: Self { self }
+    var title: String {
+        switch self {
+        case .dashboard: return "Dashboard"
+        case .tasks: return "Attività"
+        case .health: return "Salute"
+        case .bloom: return "Bloom"
+        case .finance: return "Finanza"
+        case .calendar: return "Calendario"
+        }
+    }
+    var symbol: String {
+        switch self {
+        case .dashboard: return "square.grid.2x2"
+        case .tasks: return "checklist"
+        case .health: return "heart"
+        case .bloom: return "books.vertical"
+        case .finance: return "chart.pie"
+        case .calendar: return "calendar"
+        }
+    }
+}
 enum NativeDashboardDestination: Hashable { case finance, calendar }
 enum NativeSheet: Identifiable {
     case weight(NativeWeightTransfer?)
@@ -106,7 +129,6 @@ struct NativeRoot: View {
     @AppStorage("native-reminders-enabled") private var remindersEnabled = false
     var body: some View {
         nativeTabs
-        .modifier(NativeTabBarAppearance())
         .symbolVariant(.none).symbolRenderingMode(.monochrome)
         .font(NativeDesign.body)
         .environment(\.defaultMinListRowHeight, NativeDesign.Layout.touchTarget)
@@ -215,16 +237,42 @@ struct NativeRoot: View {
         case .dashboard: router.tab = .dashboard
         }
     }
-    // Keep the native tab bar and the independent navigation stacks.
+    @State private var keyboardVisible = false
     private var nativeTabs: some View {
-        TabView(selection: $router.tab) {
-            dashboard.modifier(NativeTabArrival(tab: .dashboard, selection: router.tab)).tabItem { Label("Dashboard", systemImage: "square.grid.2x2") }.tag(NativeTab.dashboard)
-            NavigationStack { CalendarScreen() }.modifier(NativeTabArrival(tab: .calendar, selection: router.tab)).tabItem { Label("Calendario", systemImage: "calendar") }.tag(NativeTab.calendar)
-            NavigationStack { FinanceScreen() }.modifier(NativeTabArrival(tab: .finance, selection: router.tab)).tabItem { Label("Finanza", systemImage: "chart.pie") }.tag(NativeTab.finance)
-            NavigationStack { NativeHealthDetail(health: health, demo: NativeHealthLaunchPolicy.simulated) }.modifier(NativeTabArrival(tab: .health, selection: router.tab)).tabItem { Label("Salute", systemImage: "heart") }.tag(NativeTab.health)
-            tasks.modifier(NativeTabArrival(tab: .tasks, selection: router.tab)).tabItem { Label("Attività", systemImage: "checklist") }.tag(NativeTab.tasks)
-            NavigationStack { NativeBloomScreen() }.modifier(NativeTabArrival(tab: .bloom, selection: router.tab)).tabItem { Label("Bloom", systemImage: "books.vertical") }.tag(NativeTab.bloom)
+        NativeTabContainer(selection: router.tab) { tab in
+            AnyView(tabContent(tab)
+                .environmentObject(store).environmentObject(router).environmentObject(health)
+                .environment(\.calendar, CivilDate.calendar)
+                .environment(\.timeZone, CivilDate.calendar.timeZone)
+                .environment(\.defaultMinListRowHeight, NativeDesign.Layout.touchTarget)
+                .font(NativeDesign.body).tint(NativeDesign.accent)
+                .symbolVariant(.none).symbolRenderingMode(.monochrome)
+                .preferredColorScheme(theme == "dark" ? .dark : theme == "light" ? .light : nil)
+                .modifier(NativeVisualTestSize()).modifier(NativeVisualTestMotion()))
         }
+        .background(NativeDesign.canvas)
+        .safeAreaInset(edge: .bottom, spacing: NativeDesign.Space.none) {
+            if !keyboardVisible {
+                NativeSixTabBar(selection: $router.tab) {
+                    if router.tab == .dashboard { router.dashboardPath = [] }
+                }
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in keyboardVisible = true }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in keyboardVisible = false }
+    }
+    @ViewBuilder private func tabContent(_ tab: NativeTab) -> some View {
+        Group {
+            switch tab {
+            case .dashboard: dashboard
+            case .tasks: tasks
+            case .health: NavigationStack { NativeHealthDetail(health: health, demo: NativeHealthLaunchPolicy.simulated) }
+            case .bloom: NavigationStack { NativeBloomScreen() }
+            case .finance: NavigationStack { FinanceScreen() }
+            case .calendar: NavigationStack { CalendarScreen() }
+            }
+        }
+        .modifier(NativeTabArrival(tab: tab, selection: router.tab))
     }
     private var dashboard: some View {
         NavigationStack(path: $router.dashboardPath) {

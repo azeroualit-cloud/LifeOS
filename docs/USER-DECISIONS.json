@@ -1246,16 +1246,18 @@
     "original_quote": "fallito, comunque io proporrei un migliaio di prodotti e non 200 di marche famose, (non elencare prodotti chiaramente haram tipo alcol vino o maiale)",
     "status": "ACTIVE",
     "active_scope": "Puntare a circa1000 formulazioni di marche note vendute in Italia, non duplicati di confezioni. Nuove voci senza alcolici/vino/maiale; non certificare halal sulla sola categoria. Creatina esclusa come prima. Diagnosi run fallito prima di ripetere controlli.",
-    "pending_scope": "Resolved by direct user clarification: retain nightclub cocktails, exclude supermarket alcoholic products; preserve history.",
+    "pending_scope": "Resolved: retain nightclub cocktails, exclude supermarket alcoholic products, preserve history.",
     "confirmation_quote": "nongli alcolici gli voglio tenere, ma solo quelli da disco non quello da supermercato",
     "rule": "Conservare cocktail da discoteca già approvati; escludere alcolici da supermercato dal catalogo pubblico. Conservare storico e voci personali. Obiettivo circa1000 marche note, maiale e creatina esclusi."
   },
   "navigation_six_glass_clarification_2026_11_13": {
     "id": "NAVIGATION-SIX-GLASS-2026-11-13",
-    "status": "PENDING_CLARIFICATION",
+    "status": "ACTIVE",
     "recorded_on": "2026-11-13",
     "provenance": "Messaggio diretto utente",
     "original_quote": "la barra di navigazione deve essere liquid glass ... dashboard, attività, salute e bloom ... aggiungere anche finanza e salute, per un totale di sei",
-    "rule": "Preservare quattro destinazioni originali e Liquid Glass; sei destinazioni richieste. Chiarire duplicazione Salute rispetto al precedente Calendario e Finanza e se tutte sei devono restare visibili senza Altro."
+    "rule": "Barra Liquid Glass con tutte sei destinazioni direttamente visibili, senza Altro: Dashboard,Attività,Salute,Bloom,Finanza,Calendario. Preservare stati e percorsi; verificare compatto e testo grande.",
+    "confirmation_quote": "si",
+    "confirmation_source": "Risposta alla domanda esplicita sei voci e nessun Altro,13novembre2026"
   }
 }

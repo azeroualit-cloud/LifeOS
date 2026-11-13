@@ -6,8 +6,8 @@ final class NativeNutritionHistoryUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["--visual-test", "--busy-home", "--dark", "--health-week-review", "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"]
         app.launch()
-        XCTAssertTrue(app.tabBars.buttons["Salute"].waitForExistence(timeout: 20))
-        app.tabBars.buttons["Salute"].tap()
+        XCTAssertTrue(app.mainTabBar.buttons["Salute"].waitForExistence(timeout: 20))
+        app.mainTabBar.buttons["Salute"].tap()
         let previous = app.buttons["health-week-previous"]
         XCTAssertTrue(previous.waitForExistence(timeout: 10))
         previous.tap()

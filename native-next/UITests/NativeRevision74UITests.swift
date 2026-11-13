@@ -6,7 +6,7 @@ final class NativeRevision74UITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["--visual-test", "--dark", "--compact-calendar", "--active-shift", "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"]
         app.launch()
-        XCTAssertTrue(app.tabBars.buttons["Dashboard"].waitForExistence(timeout: 30))
+        XCTAssertTrue(app.mainTabBar.buttons["Dashboard"].waitForExistence(timeout: 30))
         return app
     }
     private func capture(_ name: String) {
@@ -14,9 +14,9 @@ final class NativeRevision74UITests: XCTestCase {
     }
     func testFourTabsAndNutritionCalculation() {
         let app = launch()
-        for name in ["Dashboard", "Calendario", "Finanza", "Salute"] { XCTAssertTrue(app.tabBars.buttons[name].exists) }
-        XCTAssertTrue(app.tabBars.buttons["Altro"].exists || app.tabBars.buttons["More"].exists)
-        app.tabBars.buttons["Salute"].tap()
+        for name in ["Dashboard", "Attività", "Salute", "Bloom", "Finanza", "Calendario"] { XCTAssertTrue(app.mainTabBar.buttons[name].exists) }
+        XCTAssertFalse(app.mainTabBar.buttons["Altro"].exists); XCTAssertFalse(app.mainTabBar.buttons["More"].exists)
+        app.mainTabBar.buttons["Salute"].tap()
         let add = app.buttons["health-add-nutrition"]
         XCTAssertTrue(add.waitForExistence(timeout: 10))
         for _ in 0..<6 where !add.isHittable { app.scrollViews["health-detail-scroll"].swipeUp() }
@@ -41,7 +41,7 @@ final class NativeRevision74UITests: XCTestCase {
     }
     func testHealthChartsAllowVerticalScrollAndNativeSelection() {
         let app = launch()
-        app.tabBars.buttons["Salute"].tap()
+        app.mainTabBar.buttons["Salute"].tap()
         XCTAssertTrue(app.navigationBars["Salute"].waitForExistence(timeout: 10))
         app.buttons["health-summary-weight"].tap()
         // The compact metric detail fits on screen. Expand its real method
@@ -52,14 +52,14 @@ final class NativeRevision74UITests: XCTestCase {
         let surface = app.scrollViews["health-detail-scroll"]
         for _ in 0..<10 {
             let top = app.navigationBars.firstMatch.frame.maxY + 8
-            let bottom = app.tabBars.firstMatch.frame.minY - 8
+            let bottom = app.mainTabBar.frame.minY - 8
             if chart.exists && chart.frame.minY >= top && chart.frame.maxY + 64 <= bottom { break }
             let above = chart.exists && chart.frame.minY < top
             surface.coordinate(withNormalizedOffset: CGVector(dx: 0.02, dy: above ? 0.3 : 0.75))
                 .press(forDuration: 0.05, thenDragTo: surface.coordinate(withNormalizedOffset: CGVector(dx: 0.02, dy: above ? 0.65 : 0.4)))
         }
         XCTAssertTrue(chart.waitForExistence(timeout: 10)); XCTAssertTrue(chart.isHittable)
-        XCTAssertLessThanOrEqual(chart.frame.maxY, app.tabBars.firstMatch.frame.minY)
+        XCTAssertLessThanOrEqual(chart.frame.maxY, app.mainTabBar.frame.minY)
         let caption = app.staticTexts["health-weight-selection"]
         XCTAssertTrue(caption.waitForExistence(timeout: 10))
         let before = caption.frame.height
@@ -110,7 +110,7 @@ final class NativeRevision74UITests: XCTestCase {
         }
         XCTAssertTrue(note.waitForExistence(timeout: 10)); XCTAssertTrue(second.exists)
         capture("74-bloom-library")
-        app.tabBars.buttons["Dashboard"].tap(); app.openMainTab("Bloom")
+        app.mainTabBar.buttons["Dashboard"].tap(); app.openMainTab("Bloom")
         XCTAssertTrue(note.waitForExistence(timeout: 10))
         app.openOtherDestination("Calendario")
         let formatter = DateFormatter(); formatter.timeZone = TimeZone(identifier: "Europe/Rome"); formatter.dateFormat = "yyyy-MM-dd"

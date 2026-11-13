@@ -1,15 +1,38 @@
 import XCTest
 
 final class NativeNavigationUITests: XCTestCase {
-    func testCalendarFinanceAndOverflowRemainReachable() {
+    private let destinations = ["Dashboard", "Attività", "Salute", "Bloom", "Finanza", "Calendario"]
+
+    private func launch(large: Bool = false) -> XCUIApplication {
         continueAfterFailure = false
         let app = XCUIApplication()
-        app.launchArguments = ["--visual-test", "--busy-home", "--dark", "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"]
+        app.launchArguments = ["--visual-test", "--busy-home", "--dark", "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"] + (large ? ["--large-text"] : [])
         app.launch()
-        for name in ["Dashboard", "Calendario", "Finanza", "Salute"] {
-            XCTAssertTrue(app.tabBars.buttons[name].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.mainTabBar.waitForExistence(timeout: 15))
+        return app
+    }
+
+    private func assertSixVisibleTargets(_ app: XCUIApplication, file: StaticString = #filePath, line: UInt = #line) {
+        XCTAssertEqual(app.mainTabBar.buttons.count, 6, file: file, line: line)
+        XCTAssertFalse(app.mainTabBar.buttons["Altro"].exists, file: file, line: line)
+        XCTAssertFalse(app.mainTabBar.buttons["More"].exists, file: file, line: line)
+        var previousX = -CGFloat.infinity
+        for title in destinations {
+            let button = app.mainTabButton(title)
+            XCTAssertTrue(button.exists && button.isHittable, title, file: file, line: line)
+            XCTAssertGreaterThanOrEqual(button.frame.width.rounded(), 44, title, file: file, line: line)
+            XCTAssertGreaterThanOrEqual(button.frame.height.rounded(), 44, title, file: file, line: line)
+            XCTAssertGreaterThan(button.frame.midX, previousX, title, file: file, line: line)
+            XCTAssertGreaterThanOrEqual(button.frame.minX, app.frame.minX, title, file: file, line: line)
+            XCTAssertLessThanOrEqual(button.frame.maxX, app.frame.maxX, title, file: file, line: line)
+            previousX = button.frame.midX
         }
-        capture("Barra con Calendario e Finanza")
+    }
+
+    func testSixVisibleTabsPreserveCalendarFinanceAndDashboardStacks() {
+        let app = launch()
+        assertSixVisibleTargets(app)
+        capture("Sei destinazioni Liquid Glass senza Altro")
 
         app.openMainTab("Calendario")
         XCTAssertTrue(app.scrollViews["calendar-scroll"].waitForExistence(timeout: 15))
@@ -20,27 +43,69 @@ final class NativeNavigationUITests: XCTestCase {
         XCTAssertTrue(app.scrollViews["shift-brush-scroll"].waitForExistence(timeout: 10))
         XCTAssertEqual(paint.label, "Fine")
         capture("Calendario e nuova icona turni")
+        app.openMainTab("Salute")
+        XCTAssertTrue(app.scrollViews["health-detail-scroll"].waitForExistence(timeout: 10))
+        app.openMainTab("Calendario")
+        XCTAssertTrue(app.scrollViews["shift-brush-scroll"].waitForExistence(timeout: 10), "Switching tabs preserves the calendar editing state")
         paint.tap()
         app.buttons["other-back"].tap()
-        XCTAssertTrue(app.tabBars.buttons["Dashboard"].isSelected)
+        XCTAssertTrue(app.isMainTabSelected("Dashboard"))
 
         app.openMainTab("Finanza")
         XCTAssertTrue(app.scrollViews["finance-scroll"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.buttons["primary-add"].isHittable)
+        let month = app.staticTexts["finance-month"]
+        let original = month.label
+        app.buttons["Mese successivo"].tap()
+        let changed = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label != %@", original), object: month)
+        XCTAssertEqual(XCTWaiter.wait(for: [changed], timeout: 10), .completed)
+        let nextMonth = month.label
         capture("Finanza dalla barra inferiore")
+        app.openMainTab("Bloom")
+        XCTAssertTrue(app.navigationBars["Bloom"].waitForExistence(timeout: 10))
+        app.openMainTab("Finanza")
+        XCTAssertEqual(month.label, nextMonth, "Switching tabs preserves the finance month")
         app.buttons["other-back"].tap()
-        XCTAssertTrue(app.tabBars.buttons["Dashboard"].isSelected)
+        XCTAssertTrue(app.isMainTabSelected("Dashboard"))
 
+        let calendar = app.buttons["home-calendar"]
+        XCTAssertTrue(calendar.waitForExistence(timeout: 10))
+        calendar.tap()
+        XCTAssertTrue(app.scrollViews["calendar-scroll"].waitForExistence(timeout: 10))
         app.openMainTab("Attività")
         XCTAssertTrue(app.navigationBars["Attività"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.buttons["primary-add"].isHittable)
-        app.openMainTab("Bloom")
-        XCTAssertTrue(app.navigationBars["Bloom"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.isMainTabSelected("Bloom"))
-        capture("Bloom raggiungibile da Altro")
+        app.openMainTab("Dashboard")
+        XCTAssertTrue(app.scrollViews["calendar-scroll"].waitForExistence(timeout: 10), "The dashboard stack survives a tab switch")
+        app.openMainTab("Dashboard")
+        XCTAssertTrue(app.scrollViews["dashboard-scroll"].waitForExistence(timeout: 10), "Reselecting Dashboard returns to its root")
+        assertSixVisibleTargets(app)
+    }
 
-        app.openMainTab("Salute")
-        XCTAssertTrue(app.scrollViews["health-detail-scroll"].waitForExistence(timeout: 10))
+    func testSixVisibleTabsWithLargeTextAndKeyboard() {
+        let app = launch(large: true)
+        assertSixVisibleTargets(app)
+        capture("Sei destinazioni con testo grande")
+        for title in ["Attività", "Salute", "Bloom", "Finanza", "Calendario", "Dashboard"] {
+            app.openMainTab(title)
+            XCTAssertTrue(app.isMainTabSelected(title))
+            assertSixVisibleTargets(app)
+        }
+        app.openMainTab("Bloom")
+        let search = app.searchFields.firstMatch
+        XCTAssertTrue(search.waitForExistence(timeout: 10))
+        for _ in 0..<4 where !search.isHittable { app.scrollViews["bloom-library-scroll"].swipeDown(velocity: .slow) }
+        XCTAssertTrue(search.isHittable)
+        search.tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 10))
+        let hidden = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"), object: app.mainTabBar)
+        XCTAssertEqual(XCTWaiter.wait(for: [hidden], timeout: 10), .completed, "The navigation bar should not cover the keyboard")
+        capture("Ricerca Bloom e tastiera senza barra sovrapposta")
+        let cancel = app.buttons.matching(NSPredicate(format: "label IN %@", ["Annulla", "Cancel"])).firstMatch
+        XCTAssertTrue(cancel.waitForExistence(timeout: 10))
+        cancel.tap()
+        XCTAssertTrue(app.mainTabBar.waitForExistence(timeout: 10))
+        assertSixVisibleTargets(app)
+        capture("Barra ripristinata dopo la tastiera")
     }
 
     private func capture(_ name: String) {

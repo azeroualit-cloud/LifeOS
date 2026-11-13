@@ -75,7 +75,7 @@ def select(mode, area, paths):
             tests.extend(["LifeOSProbeUITests/NativeRevision78UITests/testBloomCancelClosesFilesAndAllowsRetry", "LifeOSProbeUITests/NativeRevision78UITests/testBloomSystemFilesSelectionReachesPreviewAndPersists", "LifeOSProbeUITests/NativeRevision78UITests/testBloomSectionRespondsAtLowerEdgeOf44PointTouchTarget"])
     return sorted(selected),list(dict.fromkeys(tests))
 if __name__ == "__main__":
-    p=argparse.ArgumentParser();p.add_argument("--mode",choices=["preview","focused","trial","nutrition-render","calendar-render","health-render","health-detail-render","health-reference","shift-render","catalog-review","catalog-fixes","catalog-last","final-recovery","tdee-review","catalog-navigation","catalog-recovery","catalog-expansion"],default="preview");p.add_argument("--area",choices=["auto","all",*AREAS],default="auto");p.add_argument("--base");p.add_argument("--output",default="app/build/development-selection.json");a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument("--mode",choices=["preview","focused","trial","nutrition-render","calendar-render","health-render","health-detail-render","health-reference","shift-render","catalog-review","catalog-fixes","catalog-last","final-recovery","tdee-review","catalog-navigation","catalog-recovery","catalog-expansion","six-glass"],default="preview");p.add_argument("--area",choices=["auto","all",*AREAS],default="auto");p.add_argument("--base");p.add_argument("--output",default="app/build/development-selection.json");a=p.parse_args()
     paths=[]
     if a.mode != "trial" and a.base and set(a.base) != {"0"}:
         # No shell interpolation of event inputs. A missing base expands, never narrows.
@@ -84,6 +84,14 @@ if __name__ == "__main__":
     reason = None
     if a.mode == "trial":
         areas, tests, paths, reason = trial_selection(a.base)
+    elif a.mode == "six-glass":
+        areas = ["dashboard", "nutrition", "calendar", "finance", "activities", "bloom", "health"]
+        tests = [
+            "LifeOSProbeTests/NativeFoodCatalogPolicyTests",
+            "LifeOSProbeUITests/NativeNavigationUITests/testSixVisibleTabsPreserveCalendarFinanceAndDashboardStacks",
+            "LifeOSProbeUITests/NativeNavigationUITests/testSixVisibleTabsWithLargeTextAndKeyboard",
+            "LifeOSProbeUITests/NativePersonalFoodUITests/testSupplementTabSeparatesFoodsAndSearchesKnownBrands",
+        ]
     elif a.mode == "catalog-expansion":
         areas = ["nutrition"]
         tests = [

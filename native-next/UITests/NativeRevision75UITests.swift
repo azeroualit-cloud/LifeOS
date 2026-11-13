@@ -24,7 +24,7 @@ final class NativeRevision75UITests: XCTestCase {
         continueAfterFailure = false; executionTimeAllowance = 180
         let app = XCUIApplication()
         app.launchArguments = ["--visual-test", "--dark", "--expense-routing", "--large-text", "--reduce-motion", "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"]
-        app.launch(); XCTAssertTrue(app.tabBars.buttons["Dashboard"].waitForExistence(timeout: 30))
+        app.launch(); XCTAssertTrue(app.mainTabBar.buttons["Dashboard"].waitForExistence(timeout: 30))
         app.buttons["primary-add"].tap()
         selectMenu(app.buttons["movement-category"], title: "Acqua", app: app)
         for title in ["Mese iniziale", "Mese finale"] {
@@ -44,7 +44,7 @@ final class NativeRevision75UITests: XCTestCase {
         continueAfterFailure = false; executionTimeAllowance = 300
         let app = XCUIApplication()
         app.launchArguments = ["--visual-test", "--dark", "--expense-routing", "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"]
-        app.launch(); XCTAssertTrue(app.tabBars.buttons["Dashboard"].waitForExistence(timeout: 30))
+        app.launch(); XCTAssertTrue(app.mainTabBar.buttons["Dashboard"].waitForExistence(timeout: 30))
         app.buttons["primary-add"].tap()
         let amount = app.textFields["movement-amount"]
         XCTAssertTrue(amount.waitForExistence(timeout: 10)); amount.tap(); amount.typeText("221,79")

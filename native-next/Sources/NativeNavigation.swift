@@ -1,13 +1,5 @@
 import SwiftUI
 
-/// Keep native tab geometry and Liquid Glass interaction under system control.
-struct NativeTabBarAppearance: ViewModifier {
-    @ViewBuilder func body(content: Content) -> some View {
-        if #available(iOS 26.0, *) { content.tabBarMinimizeBehavior(.never) }
-        else { content }
-    }
-}
-
 /// Use an explicit hit region and Apple's interactive material. The enclosing
 /// ToolbarItem opts out of the shared bar-item capsule, which can clip touches.
 struct NativeToolbarButton: View {

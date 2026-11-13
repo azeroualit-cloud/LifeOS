@@ -6,7 +6,7 @@ final class NativeRevision73UITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["--visual-test", "--dark", "--compact-calendar", "--active-shift", "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"] + extra
         app.launch()
-        XCTAssertTrue(app.tabBars.buttons["Dashboard"].waitForExistence(timeout: 30))
+        XCTAssertTrue(app.mainTabBar.buttons["Dashboard"].waitForExistence(timeout: 30))
         return app
     }
     private func day() -> String {

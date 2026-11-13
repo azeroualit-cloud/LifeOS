@@ -374,3 +374,5 @@ Fonte diretta: «fallito, comunque io proporrei un migliaio di prodotti e non 20
 Conferma diretta: «nongli alcolici gli voglio tenere, ma solo quelli da disco non quello da supermercato». Risolto il conflitto CATALOG-SCALE-EXCLUSIONS-2026-11-13: conservare cocktail da discoteca già approvati, escludere alcolici da supermercato, preservare storico/personali. Nessuna rimozione cocktail autorizzata.
 
 NAVIGATION-SIX-GLASS-2026-11-13: Liquid Glass e quattro destinazioni originali Dashboard/Attività/Salute/Bloom più due, totale sei. Ultimo testo ripete Salute tra le aggiunte, precedente richiesta Calendario/Finanza: chiarimento pendente; verificare inoltre se tutte sei devono essere visibili anziché overflow Altro. Nessuna modifica prodotto in questo checkpoint.
+
+Conferma NAVIGATION-SIX-GLASS-2026-11-13: «si» alla domanda esplicita Dashboard/Attività/Salute/Bloom/Finanza/Calendario, tutte sei direttamente visibili senza Altro. Stato ACTIVE; sostituisce la precedente implementazione con overflow, che non era decisione utente. Liquid Glass, stati e percorsi conservati; target accessibili e verifica compatto/testo grande. Nessuna IPA/deploy.

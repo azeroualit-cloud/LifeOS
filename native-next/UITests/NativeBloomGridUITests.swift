@@ -34,7 +34,7 @@ final class NativeBloomGridUITests: XCTestCase {
             let attachment = XCTAttachment(screenshot: app.screenshot())
             attachment.name = "Bloom mixed grid \(large ? "large" : "standard") page \(page)"
             attachment.lifetime = .keepAlways; add(attachment)
-            let bottom = min(scroll.frame.maxY, app.tabBars.firstMatch.frame.minY) - 24
+            let bottom = min(scroll.frame.maxY, app.mainTabBar.frame.minY) - 24
             let top = scroll.frame.minY + 24
             XCTAssertGreaterThan(bottom - top, 44, "Insufficient reachable scroll area")
             let origin = app.coordinate(withNormalizedOffset: .zero)

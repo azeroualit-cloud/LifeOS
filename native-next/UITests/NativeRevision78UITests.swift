@@ -7,7 +7,7 @@ final class NativeRevision78UITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["--visual-test", "--busy-home", "--dark", "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"] + extra
         app.launch()
-        XCTAssertTrue(app.tabBars.buttons["Dashboard"].waitForExistence(timeout: 20))
+        XCTAssertTrue(app.mainTabBar.buttons["Dashboard"].waitForExistence(timeout: 20))
         return app
     }
     private func capture(_ name: String, _ app: XCUIApplication) {
@@ -55,7 +55,7 @@ final class NativeRevision78UITests: XCTestCase {
     }
     func testHealthUniformRowsAndCompactActions() {
         let app = launch()
-        app.tabBars.buttons["Salute"].tap()
+        app.mainTabBar.buttons["Salute"].tap()
         let rows = ["tdee", "weight", "calories", "simulation"].map { app.buttons["health-summary-" + $0] }
         for row in rows { XCTAssertTrue(row.waitForExistence(timeout: 10)) }
         XCTAssertTrue(rows[0].label.contains("TDEE")); XCTAssertTrue(rows[0].label.contains("14 giorni dall’ultima pesata"))
@@ -77,7 +77,7 @@ final class NativeRevision78UITests: XCTestCase {
             XCTAssertTrue(button.isHittable)
             XCTAssertGreaterThanOrEqual(button.frame.width, 44 - 0.001)
             XCTAssertGreaterThanOrEqual(button.frame.height, 44 - 0.001)
-            XCTAssertLessThanOrEqual(button.frame.maxY, app.tabBars.firstMatch.frame.minY)
+            XCTAssertLessThanOrEqual(button.frame.maxY, app.mainTabBar.frame.minY)
         }
         XCTAssertFalse(app.buttons["health-connect"].exists)
         XCTAssertFalse(app.staticTexts["Fonte delle calorie"].exists)
@@ -96,7 +96,7 @@ final class NativeRevision78UITests: XCTestCase {
     }
     func testHealthAccessibleRowsRemainEqualAndActionsStayCompact() {
         let app = launch(["--large-text"])
-        app.tabBars.buttons["Salute"].tap()
+        app.mainTabBar.buttons["Salute"].tap()
         let rows = ["tdee", "weight", "calories", "simulation"].map { app.buttons["health-summary-" + $0] }
         for row in rows { XCTAssertTrue(row.waitForExistence(timeout: 10)) }
         let ordered = [rows[0], rows[3], rows[1], rows[2]]
@@ -108,7 +108,7 @@ final class NativeRevision78UITests: XCTestCase {
             XCTAssertTrue(button.isHittable)
             XCTAssertGreaterThanOrEqual(button.frame.width, 44 - 0.001)
             XCTAssertGreaterThanOrEqual(button.frame.height, 44 - 0.001)
-            XCTAssertLessThanOrEqual(button.frame.maxY, app.tabBars.firstMatch.frame.minY)
+            XCTAssertLessThanOrEqual(button.frame.maxY, app.mainTabBar.frame.minY)
         }
         let fibre = app.descendants(matching: .any)["health-nutrient-HKQuantityTypeIdentifierDietaryFiber"]
         let surface = app.scrollViews["health-detail-scroll"]
@@ -117,7 +117,7 @@ final class NativeRevision78UITests: XCTestCase {
     }
     func testHealthNutritionQuickAddAndHistoryAreReachable() {
         let app = launch()
-        app.tabBars.buttons["Salute"].tap()
+        app.mainTabBar.buttons["Salute"].tap()
         let add = app.buttons["health-add-nutrition"]
         XCTAssertTrue(add.waitForExistence(timeout: 10))
         XCTAssertTrue(add.isHittable); add.tap()
@@ -133,7 +133,7 @@ final class NativeRevision78UITests: XCTestCase {
     }
     func testMicronutrientPrioritiesOpenWithOtherNutrientsInDetail() {
         let app = launch()
-        app.tabBars.buttons["Salute"].tap()
+        app.mainTabBar.buttons["Salute"].tap()
         let open = app.buttons["health-micronutrients"]
         let scroll = app.scrollViews["health-detail-scroll"]
         XCTAssertTrue(scroll.waitForExistence(timeout: 10))
@@ -153,7 +153,7 @@ final class NativeRevision78UITests: XCTestCase {
 
     func testRenderHealthWeekAndDashboardAndBloom() {
         let app = launch(["--health-week-review"])
-        app.tabBars.buttons["Salute"].tap()
+        app.mainTabBar.buttons["Salute"].tap()
         let week = app.buttons["health-week-previous"]
         XCTAssertTrue(week.waitForExistence(timeout: 10))
         capture("Review 00 Health today and shift accent", app)
@@ -190,7 +190,7 @@ final class NativeRevision78UITests: XCTestCase {
         capture("Review 05 Backdated food entry", app)
         app.buttons["quick-nutrition-close"].tap()
 
-        app.tabBars.buttons["Dashboard"].tap()
+        app.mainTabBar.buttons["Dashboard"].tap()
         let dashboard = app.scrollViews["dashboard-scroll"]
         XCTAssertTrue(dashboard.waitForExistence(timeout: 10))
         capture("Review 06 Dashboard calendar and finance", app)
@@ -206,7 +206,7 @@ final class NativeRevision78UITests: XCTestCase {
 
     func testRenderHealthDiaryOmegaAndRankedCatalog() {
         let app = launch(["--health-week-review", "--health-catalog-review"])
-        app.tabBars.buttons["Salute"].tap()
+        app.mainTabBar.buttons["Salute"].tap()
         let previous = app.buttons["health-week-previous"]
         XCTAssertTrue(previous.waitForExistence(timeout: 10))
         previous.tap()
@@ -243,7 +243,7 @@ final class NativeRevision78UITests: XCTestCase {
     private func checkSafeAreaLastContent(large: Bool) {
         executionTimeAllowance = 600
         let app = launch(["--bloom-grid-fixture"] + (large ? ["--large-text"] : []))
-        let tabBar = app.tabBars.firstMatch
+        let tabBar = app.mainTabBar
         let dashboard = app.scrollViews["dashboard-scroll"]
         let quick = app.buttons["quick-nutrition-open"]
         let status = dashboard.staticTexts.matching(NSPredicate(format: "label IN %@", ["Demo", "Salvataggio", "Sincronizzazione", "Da aggiornare", "Condiviso con il sito", "Sul dispositivo", "Collegato"])).firstMatch
@@ -257,7 +257,7 @@ final class NativeRevision78UITests: XCTestCase {
         XCTAssertLessThanOrEqual(status.frame.maxY, tabBar.frame.minY)
         capture(large ? "safe-area-dashboard-large" : "safe-area-dashboard-standard", app)
 
-        app.tabBars.buttons["Salute"].tap()
+        app.mainTabBar.buttons["Salute"].tap()
         let health = app.scrollViews["health-detail-scroll"]
         let history = app.buttons["health-nutrition-history"]
         let weight = app.buttons["health-add-weight"], food = app.buttons["health-add-nutrition"]
