@@ -147,6 +147,7 @@ final class NativePersonalFoodUITests: XCTestCase {
         XCTAssertTrue(app.buttons["quick-nutrition-save"].isEnabled)
         capture("Integratore di marca per singola capsula")
         app.buttons["quick-nutrition-catalog"].tap()
+        app.segmentedControls.buttons["Integratori"].tap()
         replace(search, with: "Proteine whey isolate", app: app)
         let powder = app.buttons["generic-food-supplement-whey-isolate"]
         XCTAssertTrue(powder.waitForExistence(timeout: 10))

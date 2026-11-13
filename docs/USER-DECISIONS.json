@@ -1238,5 +1238,14 @@
     "confirmation_source": "Messaggio diretto del 13 novembre 2026",
     "rule": "Scheda Integratori nel catalogo separata da Tutti; Personali conservato. Estendere marche/prodotti conosciuti in Italia, valutare dimensione e ricerca. Aggiungere Calendario e Finanza alla navigazione. Cambiare icona Dipingi turni. Implementare e testare in modo mirato, screenshot finali, nessuna nuova IPA. Se CI in attesa lasciare link all’utente. Indagare setup sveglia/widget 2x2 senza assumere difetto.",
     "supersedes": "SUPPLEMENTS-ALL-SHIFT-PALETTE-01 solo collocazione integratori; estende eccezione FOOD-SUPERMARKET-01 a marche note mantenendo generici/esclusioni"
+  },
+  "catalog_scale_exclusions_2026_11_13": {
+    "id": "CATALOG-SCALE-EXCLUSIONS-2026-11-13",
+    "recorded_on": "2026-11-13",
+    "provenance": "Richiesta diretta utente",
+    "original_quote": "fallito, comunque io proporrei un migliaio di prodotti e non 200 di marche famose, (non elencare prodotti chiaramente haram tipo alcol vino o maiale)",
+    "status": "ACTIVE_WITH_PENDING_CONFLICT",
+    "active_scope": "Puntare a circa1000 formulazioni di marche note vendute in Italia, non duplicati di confezioni. Nuove voci senza alcolici/vino/maiale; non certificare halal sulla sola categoria. Creatina esclusa come prima. Diagnosi run fallito prima di ripetere controlli.",
+    "pending_scope": "Conferma META-01 richiesta per rimuovere dal catalogo esistente cocktail/alcolici approvati da NUTRITION-EVERYDAY-01 e NUTRITION-CATALOG-RENDER-01; storico da conservare."
   }
 }

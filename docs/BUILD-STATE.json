@@ -635,7 +635,7 @@
     "subsequent_change": "Only another UI test assertion aligned to new descriptive label; not selected in focused run. Product unchanged since b513c95."
   },
   "catalog_navigation_increment": {
-    "status": "focused_ios_dispatched_user_monitors",
+    "status": "focused_failed_test_fixture_and_scope_recovery_prepared",
     "source_commit": "e16e83c77a7d2477f9550cf37e9428d8f24573f5",
     "new_branded_formulations": 23,
     "brands": 5,
@@ -644,6 +644,14 @@
     "backend_deploy": false,
     "physical_widget_alarm": "pending_user_evidence",
     "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43440966964",
-    "screenshots": "pending_run_artifacts"
+    "screenshots": "downloaded_and_inspected_from_43440966964",
+    "unit_tests": {
+      "passed": 17,
+      "failed": 1
+    },
+    "ui_tests": {
+      "passed": 4,
+      "failed": 1
+    }
   }
 }

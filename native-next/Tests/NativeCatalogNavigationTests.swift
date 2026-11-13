@@ -16,7 +16,7 @@ import XCTest
     func testSearchSupportsBrandTokensAccentsAndExactBarcode() throws {
         let milk = try XCTUnwrap(NativeGenericFood.brandedFoods.first { $0.barcode != nil })
         XCTAssertEqual(NativeGenericFood.matches(try XCTUnwrap(milk.barcode)).first?.id, milk.id)
-        let custom = NativeGenericFood(id: "personal-search", name: "CaffÃ¨ freddo", detail: nil,
+        let custom = NativeGenericFood(id: "personal-search", name: "Caffè freddo", detail: nil,
             family: .drink, boneInEdiblePercent: nil, nutrientValues: nil, aliases: ["Espresso ghiacciato"],
             protein: 0, carbohydrate: 0, fat: 0, fibre: nil, calories: 0, brand: "Marca Prova")
         XCTAssertEqual(NativeGenericFood.matches("CAFFE prova", in: [custom]).first?.id, custom.id)
