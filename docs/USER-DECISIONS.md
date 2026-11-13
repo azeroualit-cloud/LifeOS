@@ -368,3 +368,9 @@ Conferma esplicita successiva del 13 novembre: scheda Integratori affiancata a T
 ## CATALOG-SCALE-EXCLUSIONS-2026-11-13 — ACTIVE, conflitto storico parziale pendente
 
 Fonte diretta: «fallito, comunque io proporrei un migliaio di prodotti e non 200 di marche famose, (non elencare prodotti chiaramente haram tipo alcol vino o maiale)». Obiettivo circa1000 formulazioni riconoscibili, non formati duplicati; nuove voci senza alcolici/vino/maiale, esclusione creatina conservata. Il target100–200 era proposta assistente, non regola. Conferma META-01 chiesta sulla rimozione anche dei cocktail/alcolici già approvati da NUTRITION-EVERYDAY-01 e successiva implementazione: questa sola parte resta PENDING_CONFIRMATION. Non certificare halal sulla sola specie/categoria, conservare storico.
+
+## Precisazione alcolici e navigazione — 13 novembre 2026
+
+Conferma diretta: «nongli alcolici gli voglio tenere, ma solo quelli da disco non quello da supermercato». Risolto il conflitto CATALOG-SCALE-EXCLUSIONS-2026-11-13: conservare cocktail da discoteca già approvati, escludere alcolici da supermercato, preservare storico/personali. Nessuna rimozione cocktail autorizzata.
+
+NAVIGATION-SIX-GLASS-2026-11-13: Liquid Glass e quattro destinazioni originali Dashboard/Attività/Salute/Bloom più due, totale sei. Ultimo testo ripete Salute tra le aggiunte, precedente richiesta Calendario/Finanza: chiarimento pendente; verificare inoltre se tutte sei devono essere visibili anziché overflow Altro. Nessuna modifica prodotto in questo checkpoint.
