@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "LifeOS",
-  "updated_on": "2026-11-12",
+  "updated_on": "2026-11-13",
   "policy": {
     "id": "META-01",
     "status": "ACTIVE",
@@ -1221,5 +1221,19 @@
       "provenance": "Risposta diretta utente del 12 novembre alla richiesta etichette",
       "rule": "Procedere con le fonti disponibili e rendere i valori modificabili; D3 è WeightWorld. Segnalare formulazioni non confermate e non inventare componenti mancanti."
     }
+  },
+  "catalog_navigation_request_2026_11_13": {
+    "id": "CATALOG-NAVIGATION-2026-11-13",
+    "status": "PENDING_CONFIRMATION",
+    "recorded_on": "2026-11-13",
+    "scope": "LifeOS catalogo e navigazione",
+    "provenance": "Messaggio diretto utente",
+    "original_quote": "i said integratori should be on their own section, also, is it possibile to add the main products of big marche in italy to the database? tipo main products milka, pepsi, ecc ecc. E also is it possible to add more items on the navigation bar?",
+    "request": "Separare integratori dagli alimenti; valutare principali prodotti di grandi marche vendute in Italia e ulteriori voci nella barra di navigazione.",
+    "conflicts": [
+      "SUPPLEMENTS-ALL-SHIFT-PALETTE-01 prevede integratori in Tutti",
+      "FOOD-SUPERMARKET-01: eccezione marche confermata finora limitata a Coop/Spesotti e integratori"
+    ],
+    "pending": "Confermare sostituzione della collocazione integratori ed estensione eccezione marche; chiarire quali destinazioni aggiungere alla barra. Nessuna modifica prodotto, nuova IPA o deploy autorizzati da questa registrazione."
   }
 }
