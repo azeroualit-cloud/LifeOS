@@ -71,6 +71,7 @@ def family(item):
     # Use the immediate category and product slug, not broad mixed departments
     # such as "latticini-e-bevande-vegetali-yogurt-e-uova".
     path='/'.join(item['url'].lower().rstrip('/').split('/')[-2:])
+    if '/integratori/' in item['url'].lower(): return 'supplement'
     groups=[('fish',['pesce','ittic','tonno','salmone','frutti-di-mare']),('poultry',['pollame','pollo','tacchino','carni-bianche']),('meat',['carne','carni-','bresaola','scottona','manzo','vitello','bovin']),('dairy',['latte','yogurt','latticini']),('cheese',['formagg']),('bakery',['pane','biscott','forno','cracker']),('grain',['pasta','riso','cereal','farin']),('nut',['frutta-secca','mandorl','pistacch','anacard','arachid','noci']),('fruit',['frutta','marmellat','confettur']),('vegetable',['verdure','ortaggi','sottoli','sottaceti']),('drink',['bevande','succhi','acqua','caffe','infusi','birr','vini']),('sweet',['dolci','gelati','cioccolat','pasticc']),('fat',['olio','burro']),('legume',['legumi']),('egg',['uova']),('meal',['preparati','piatti'])]
     return next((key for key,words in groups if any(word in path for word in words)),'pantry')
 
@@ -250,6 +251,9 @@ def finalize():
             status='nutrition_not_declared'
         candidates.append(food)
         manifest.append({'sourceURL':item['url'],'status':status,'id':food['id'],'name':name,'reason':parsed.get('reason'),'barcode':food.get('barcode')})
+    for food in candidates:
+        if food['family']=='supplement':
+            food.update(supplementUnit='millilitre' if food.get('measurementBasis')=='ml' else 'gram',defaultQuantity=1)
     by_id={};duplicates=[];conflicts=[]
     fields=['calories','protein','carbohydrate','fat','fibre','measurementBasis','nutritionNotDeclared','estimatedMacroBounds']
     for food in candidates:

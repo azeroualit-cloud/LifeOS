@@ -132,7 +132,7 @@ struct NativeNutritionQuickSheet: View {
                             .disabled(nutrition.busy || pending != nil)
                         }
                         grams(selectedFood.family == .supplement ? selectedFood.quantityUnit.quantityTitle : selectedFood.cocktail == nil ? "Porzione" : "Bicchieri", text: $portionGrams,
-                              field: .portion, unit: selectedFood.cocktail == nil && (selectedFood.family != .supplement || selectedFood.quantityUnit == .gram) ? (selectedFood.quantityUnit == .millilitre ? "ml" : "g") : nil)
+                              field: .portion, unit: selectedFood.cocktail == nil && (selectedFood.family != .supplement || selectedFood.quantityUnit.isMassOrVolume) ? (selectedFood.quantityUnit == .millilitre ? "ml" : "g") : nil)
                             .disabled(nutrition.busy || pending != nil)
                         if let draft {
                             if let recipe = selectedFood.cocktail, let alcohol = draft.alcoholGrams, let units = draft.standardDrinks {

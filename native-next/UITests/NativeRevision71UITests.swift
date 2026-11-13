@@ -111,7 +111,7 @@ final class NativeRevision71UITests: XCTestCase {
     }
     func testTaskAndEventOpenTheSameBottomEditorWithoutInlineChips() {
         let app = launch(["--activity-agenda"])
-        app.tabBars.buttons["Attività"].tap()
+        app.openMainTab("Attività")
         app.buttons["Evento oggi"].tap()
         XCTAssertTrue(app.navigationBars["Modifica attività"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.textFields["activity-title"].exists)
@@ -131,7 +131,7 @@ final class NativeRevision71UITests: XCTestCase {
     }
     func testDatesEnableInOneTapClearAndKeepTimeBeforeCategory() {
         let app = launch()
-        app.tabBars.buttons["Attività"].tap(); app.buttons["primary-add"].tap()
+        app.openMainTab("Attività"); app.buttons["primary-add"].tap()
         let start = app.buttons["activity-date-Inizio"], due = app.buttons["activity-date-Scadenza"]
         XCTAssertTrue(start.waitForExistence(timeout: 10))
         XCTAssertEqual(start.frame.midY, due.frame.midY, accuracy: 2)
@@ -156,13 +156,13 @@ final class NativeRevision71UITests: XCTestCase {
     }
     func testSheetSavesTitleAndDescriptionAcrossReopen() {
         let app = launch()
-        app.tabBars.buttons["Attività"].tap(); app.buttons["task-open-1"].tap()
+        app.openMainTab("Attività"); app.buttons["task-open-1"].tap()
         let title = app.textFields["activity-title"]
         XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText(" prova")
         let edited = title.value as? String
         app.buttons["Salva"].tap()
         XCTAssertTrue(app.navigationBars["Modifica attività"].waitForNonExistence(timeout: 10))
-        app.tabBars.buttons["Dashboard"].tap(); app.tabBars.buttons["Attività"].tap()
+        app.tabBars.buttons["Dashboard"].tap(); app.openMainTab("Attività")
         app.buttons["task-open-1"].tap()
         XCTAssertTrue(title.waitForExistence(timeout: 10)); XCTAssertEqual(title.value as? String, edited)
         app.buttons["Annulla"].tap()
@@ -247,7 +247,7 @@ final class NativeRevision71UITests: XCTestCase {
     }
     func testCompletedTimedActivityKeepsItsStateInTheDayTimeline() {
         let app = launch()
-        app.tabBars.buttons["Attività"].tap(); app.buttons["primary-add"].tap()
+        app.openMainTab("Attività"); app.buttons["primary-add"].tap()
         let title = app.textFields["activity-title"]
         XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText("Slot completato test")
         app.buttons["activity-date-Inizio"].tap(); app.buttons["Fine"].tap()

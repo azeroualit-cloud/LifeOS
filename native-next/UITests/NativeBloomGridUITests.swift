@@ -12,8 +12,7 @@ final class NativeBloomGridUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["--visual-test", "--bloom-grid-fixture", "--dark", "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"] + (large ? ["--large-text"] : [])
         app.launch()
-        XCTAssertTrue(app.tabBars.buttons["Bloom"].waitForExistence(timeout: 20))
-        app.tabBars.buttons["Bloom"].tap()
+        app.openMainTab("Bloom")
         let first = app.buttons["bloom-note-BA000000-0000-4000-8000-000000000000"]
         XCTAssertTrue(first.waitForExistence(timeout: 20))
         let preview = app.images["bloom-link-image"].firstMatch
@@ -45,7 +44,7 @@ final class NativeBloomGridUITests: XCTestCase {
             let previousY = tracked.frame.minY
             start.press(forDuration: 0.05, thenDragTo: end)
             XCTAssertTrue(!tracked.exists || tracked.frame.minY < previousY - 1, "The library must actually scroll")
-            XCTAssertTrue(app.tabBars.buttons["Bloom"].isSelected, "Scroll must not hit the tab bar")
+            XCTAssertTrue(app.isMainTabSelected("Bloom"), "Scroll must not hit the tab bar")
         }
     }
 }

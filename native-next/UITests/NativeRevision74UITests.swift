@@ -14,8 +14,8 @@ final class NativeRevision74UITests: XCTestCase {
     }
     func testFourTabsAndNutritionCalculation() {
         let app = launch()
-        for name in ["Dashboard", "Attività", "Salute", "Bloom"] { XCTAssertTrue(app.tabBars.buttons[name].exists) }
-        XCTAssertFalse(app.tabBars.buttons["Finanza"].exists); XCTAssertFalse(app.tabBars.buttons["Calendario"].exists)
+        for name in ["Dashboard", "Calendario", "Finanza", "Salute"] { XCTAssertTrue(app.tabBars.buttons[name].exists) }
+        XCTAssertTrue(app.tabBars.buttons["Altro"].exists || app.tabBars.buttons["More"].exists)
         app.tabBars.buttons["Salute"].tap()
         let add = app.buttons["health-add-nutrition"]
         XCTAssertTrue(add.waitForExistence(timeout: 10))
@@ -80,7 +80,7 @@ final class NativeRevision74UITests: XCTestCase {
         XCTAssertLessThan(chart.frame.minY, y - 20)
     }
     func testMoreDestinationsAndBloomNotePersistsAcrossNavigation() {
-        let app = launch(); app.tabBars.buttons["Bloom"].tap()
+        let app = launch(); app.openMainTab("Bloom")
         capture("74-bloom-entry")
         let add = app.buttons["Nuova nota"]
         let ready = add.waitForExistence(timeout: 10)
@@ -110,7 +110,7 @@ final class NativeRevision74UITests: XCTestCase {
         }
         XCTAssertTrue(note.waitForExistence(timeout: 10)); XCTAssertTrue(second.exists)
         capture("74-bloom-library")
-        app.tabBars.buttons["Dashboard"].tap(); app.tabBars.buttons["Bloom"].tap()
+        app.tabBars.buttons["Dashboard"].tap(); app.openMainTab("Bloom")
         XCTAssertTrue(note.waitForExistence(timeout: 10))
         app.openOtherDestination("Calendario")
         let formatter = DateFormatter(); formatter.timeZone = TimeZone(identifier: "Europe/Rome"); formatter.dateFormat = "yyyy-MM-dd"

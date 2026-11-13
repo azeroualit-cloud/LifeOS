@@ -1,9 +1,37 @@
 import XCTest
 
 extension XCUIApplication {
+    /// Native iPhone tab bars place destinations after the fourth in More.
+    func openMainTab(_ name: String) {
+        let direct = tabBars.buttons[name]
+        if direct.exists && direct.isHittable { direct.tap(); return }
+        let more = tabBars.buttons.matching(NSPredicate(format: "label IN %@", ["Altro", "More"])).firstMatch
+        XCTAssertTrue(more.waitForExistence(timeout: 10), "Missing native overflow tab for " + name)
+        more.tap()
+        let destination = tables.staticTexts[name].firstMatch
+        if !destination.waitForExistence(timeout: 3) {
+            let back = navigationBars.buttons.matching(NSPredicate(format: "label IN %@", ["Altro", "More"])).firstMatch
+            if back.exists && back.isHittable { back.tap() }
+        }
+        XCTAssertTrue(destination.waitForExistence(timeout: 10), "Missing overflow destination " + name)
+        destination.tap()
+    }
+
+    func mainTabButton(_ name: String) -> XCUIElement {
+        let direct = tabBars.buttons[name]
+        if direct.exists { return direct }
+        return tabBars.buttons.matching(NSPredicate(format: "label IN %@", ["Altro", "More"])).firstMatch
+    }
+
+    func isMainTabSelected(_ name: String) -> Bool {
+        if tabBars.buttons[name].exists && tabBars.buttons[name].isSelected { return true }
+        let more = tabBars.buttons.matching(NSPredicate(format: "label IN %@", ["Altro", "More"])).firstMatch
+        return more.exists && more.isSelected && navigationBars[name].exists
+    }
+
     // Historical helper name retained for existing behavioral regressions.
     func openOtherDestination(_ name: String) {
-        if name == "Bloom" { tabBars.buttons["Bloom"].tap(); return }
+        if name == "Bloom" { openMainTab("Bloom"); return }
         tabBars.buttons["Dashboard"].tap()
         for _ in 0..<8 {
             if scrollViews["dashboard-scroll"].exists { break }

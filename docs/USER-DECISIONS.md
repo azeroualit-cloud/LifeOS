@@ -359,6 +359,8 @@ Fonte diretta: «puoi mandare in produzione l'ipa?». Autorizzata una IPA 0.10.2
 
 Fonte diretta: «facciamo il calcolo sulle ultime 2 settimane dall'ultima pesata ma senza limiti minimi di numero di pesate». Finestra di 14 giorni a ritroso dall’ultima pesata, inclusa anche se odierna. Rimossi i minimi arbitrari di pesate, durata e confronti; due date distinte restano necessarie per misurare una variazione. Copertura calorica 90% conservata, non oggetto della richiesta. Precisa HEALTH-WEEK-REVIEW-01 senza conflitto con una regola utente esplicita. Nessuna nuova IPA/deploy.
 
-## CATALOG-NAVIGATION-2026-11-13 — PENDING_CONFIRMATION
+## CATALOG-NAVIGATION-2026-11-13 — ACTIVE
 
 Richiesta diretta del 13 novembre: integratori in sezione propria; domanda su principali prodotti di grandi marche vendute in Italia (Milka, Pepsi ecc.) e ulteriori voci nella barra di navigazione. Conflitto da confermare con SUPPLEMENTS-ALL-SHIFT-PALETTE-01 (integratori in Tutti) e ampliamento dell’eccezione a FOOD-SUPERMARKET-01, finora limitata a Coop/Spesotti e integratori. Destinazioni della barra ancora da specificare. Nessuna modifica prodotto in questo checkpoint. Testo originale nel JSON.
+
+Conferma esplicita successiva del 13 novembre: scheda Integratori affiancata a Tutti/Personali; marche e prodotti più conosciuti in Italia, valutazione dimensione catalogo e ricerca; Calendario e Finanza nella barra; nuova icona Dipingi turni. Sostituisce la collocazione in Tutti di SUPPLEMENTS-ALL-SHIFT-PALETTE-01 e amplia l’eccezione marche di FOOD-SUPERMARKET-01, mantenendo generici ed esclusioni. Implementazione e prove mirate autorizzate; screenshot al termine, link CI se in attesa, nessuna nuova IPA. TDEE attende prossima IPA insieme al resto. Setup sveglia e widget da indagare, non difetti già diagnosticati.

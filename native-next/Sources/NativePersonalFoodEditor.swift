@@ -18,9 +18,10 @@ struct NativePersonalFoodEditor: View {
     let original: NativeGenericFood?
     let save: (NativeGenericFood) -> Void
 
-    init(original: NativeGenericFood? = nil, save: @escaping (NativeGenericFood) -> Void) {
+    init(original: NativeGenericFood? = nil, initialFamily: NativeGenericFood.Family = .meal, save: @escaping (NativeGenericFood) -> Void) {
         self.original = original
         self.save = save
+        _family = State(initialValue: initialFamily)
         guard let original else { return }
         _identifier = State(initialValue: original.id)
         _name = State(initialValue: original.name)
@@ -139,12 +140,12 @@ struct NativePersonalFoodEditor: View {
               (unknown || !fat.isEmpty), let fat = NativeNutritionEntry.grams(fat),
               protein <= 100, carbs <= 100, fat <= 100,
               let fibreValue = NativeNutritionEntry.grams(fibre), fibreValue <= 100 else { return nil }
-        let verifiedZero = original?.zeroEnergyLabelVerified == true && original?.calories == calories * (family == .supplement && unit != .gram ? 100 : 1)
+        let verifiedZero = original?.zeroEnergyLabelVerified == true && original?.calories == calories * (family == .supplement && !unit.isMassOrVolume ? 100 : 1)
             && original?.protein == protein && original?.carbohydrate == carbs && original?.fat == fat
         guard unknown || verifiedZero || calories > 0 || (protein == 0 && carbs == 0 && fat == 0 && fibreValue == 0) else { return nil }
         let editableKeys = Set((NativeTrackedNutrient.micronutrients + [.ala, .epa, .dha]).map { $0 == .folate ? "folateMass" : $0.rawValue })
         var nutrients = (original?.nutrientValues ?? [:]).filter { !editableKeys.contains($0.key) }
-        let factor: Decimal = family == .supplement && unit != .gram ? 100 : 1
+        let factor: Decimal = family == .supplement && !unit.isMassOrVolume ? 100 : 1
         if family == .supplement { nutrients.removeValue(forKey: "caffeine") }
         if family == .supplement, !caffeine.isEmpty {
             guard let value = NativeNutritionEntry.grams(caffeine), value <= 10000 else { return nil }

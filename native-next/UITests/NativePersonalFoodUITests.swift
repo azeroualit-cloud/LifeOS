@@ -103,9 +103,30 @@ final class NativePersonalFoodUITests: XCTestCase {
         capture("Porzione del personale modificato")
     }
 
+    func testSupplementTabSeparatesFoodsAndSearchesKnownBrands() {
+        let app = openCatalog()
+        let search = app.textFields["generic-food-search"]
+        replace(search, with: "vit4ever", app: app)
+        XCTAssertFalse(app.buttons["generic-food-brand-vit4ever-magnesium-citrate"].exists)
+        app.segmentedControls.buttons["Integratori"].tap()
+        let magnesium = app.buttons["generic-food-brand-vit4ever-magnesium-citrate"]
+        XCTAssertTrue(magnesium.waitForExistence(timeout: 10))
+        capture("Scheda Integratori separata dagli alimenti")
+        app.segmentedControls.buttons["Tutti"].tap()
+        replace(search, with: "Milka", app: app)
+        let milka = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS[c] %@", "generic-food-", "Milka")).firstMatch
+        XCTAssertTrue(milka.waitForExistence(timeout: 10))
+        capture("Ricerca prodotti Milka nel catalogo ampliato")
+        replace(search, with: "Pepsi", app: app)
+        let pepsi = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS[c] %@", "generic-food-", "Pepsi")).firstMatch
+        XCTAssertTrue(pepsi.waitForExistence(timeout: 10))
+        capture("Ricerca prodotti Pepsi con marca e unità")
+    }
+
     func testBrandedCapsulesAndPowderUseTheirOwnUnits() {
         let app = openCatalog()
         let search = app.textFields["generic-food-search"]
+        app.segmentedControls.buttons["Integratori"].tap()
         replace(search, with: "vit4ever", app: app)
         let magnesium = app.buttons["generic-food-brand-vit4ever-magnesium-citrate"]
         XCTAssertTrue(magnesium.waitForExistence(timeout: 10))

@@ -23,6 +23,8 @@ targets:
         buildPhase: resources
       - path: Resources/supplements.json
         buildPhase: resources
+      - path: Resources/italian-brands.json
+        buildPhase: resources
       - path: Resources/branded-foods.json
         buildPhase: resources
       - path: Resources/branded-supplements.json

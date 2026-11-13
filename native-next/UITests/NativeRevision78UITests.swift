@@ -197,7 +197,7 @@ final class NativeRevision78UITests: XCTestCase {
         for _ in 0..<6 where !app.buttons["quick-nutrition-open"].isHittable { dashboard.swipeUp(velocity: .slow) }
         XCTAssertTrue(app.buttons["quick-nutrition-open"].isHittable)
         capture("Review 07 Dashboard pinned nutrition", app)
-        app.tabBars.buttons["Bloom"].tap()
+        app.openMainTab("Bloom")
         XCTAssertTrue(app.buttons["bloom-section-library"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.buttons["bloom-section-map"].exists)
         XCTAssertFalse(app.buttons["bloom-section-rediscovery"].exists)
@@ -272,7 +272,7 @@ final class NativeRevision78UITests: XCTestCase {
         XCTAssertLessThanOrEqual(max(weight.frame.maxY, food.frame.maxY), tabBar.frame.minY)
         capture(large ? "safe-area-health-large" : "safe-area-health-standard", app)
 
-        app.tabBars.buttons["Bloom"].tap()
+        app.openMainTab("Bloom")
         let bloom = app.scrollViews["bloom-library-scroll"]
         XCTAssertTrue(bloom.waitForExistence(timeout: 20))
         let last = app.buttons["bloom-note-BA000000-0000-4000-8000-000000000121"]
@@ -304,7 +304,7 @@ final class NativeRevision78UITests: XCTestCase {
             let end = origin.withOffset(CGVector(dx: scrollFrame.midX, dy: max(top, bottom - 200)))
             start.press(forDuration: 0.05, thenDragTo: end)
             gestures += 1
-            XCTAssertTrue(app.tabBars.buttons["Bloom"].isSelected, "Scrolling the library must not select another tab")
+            XCTAssertTrue(app.isMainTabSelected("Bloom"), "Scrolling the library must not select another tab")
         }
         XCTAssertTrue(bloom.exists, "The identified Bloom library scroll must remain present")
         recordBloomProgress(gestures)
@@ -317,7 +317,7 @@ final class NativeRevision78UITests: XCTestCase {
     }
     func testBloomCancelClosesFilesAndAllowsRetry() {
         let app = launch(["--bloom-import-fixture"])
-        app.tabBars.buttons["Bloom"].tap()
+        app.openMainTab("Bloom")
         app.buttons["bloom-archive-menu"].tap(); app.buttons.matching(NSPredicate(format: "label == %@ AND identifier != %@", "Importa backup Bloom", "bloom.importBackup")).firstMatch.tap()
         let cancel = app.buttons["Annulla"]
         let library = app.buttons["bloom-section-library"]
@@ -344,7 +344,7 @@ final class NativeRevision78UITests: XCTestCase {
     }
     func testBloomSystemFilesSelectionReachesPreviewAndPersists() {
         let app = launch(["--bloom-import-fixture"])
-        app.tabBars.buttons["Bloom"].tap()
+        app.openMainTab("Bloom")
         let section = app.buttons["bloom-section-library"]
         XCTAssertTrue(section.waitForExistence(timeout: 10))
         for (id, label) in [("library", "Libreria"), ("map", "Mappa")] {
@@ -379,13 +379,13 @@ final class NativeRevision78UITests: XCTestCase {
         app.buttons["Importa"].tap()
         let note = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "bloom-note-", "Bloom import UI fixture")).firstMatch
         XCTAssertTrue(note.waitForExistence(timeout: 20))
-        app.terminate(); app.launch(); app.tabBars.buttons["Bloom"].tap()
+        app.terminate(); app.launch(); app.openMainTab("Bloom")
         XCTAssertTrue(note.waitForExistence(timeout: 20))
         capture("78-bloom-import-persisted", app)
     }
     func testBloomSectionRespondsAtLowerEdgeOf44PointTouchTarget() {
         let app = launch()
-        app.tabBars.buttons["Bloom"].tap()
+        app.openMainTab("Bloom")
         let section = app.buttons["bloom-section-map"]
         XCTAssertTrue(section.waitForExistence(timeout: 10))
         XCTAssertFalse(section.isSelected)

@@ -31,7 +31,7 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
 
     var quantityDescription: String? {
         if let quantity = supplementQuantity, let raw = supplementUnit, let unit = NativeSupplementUnit(rawValue: raw) {
-            let label = unit == .gram ? "g" : (quantity == 1 ? unit.basisTitle : unit.quantityTitle.lowercased())
+            let label = unit == .gram ? "g" : unit == .millilitre ? "ml" : (quantity == 1 ? unit.basisTitle : unit.quantityTitle.lowercased())
             return NSDecimalNumber(decimal: quantity).stringValue + " " + label
         }
         if let ml = portionMillilitres { return NSDecimalNumber(decimal: ml).stringValue + " ml" }

@@ -1224,7 +1224,7 @@
   },
   "catalog_navigation_request_2026_11_13": {
     "id": "CATALOG-NAVIGATION-2026-11-13",
-    "status": "PENDING_CONFIRMATION",
+    "status": "ACTIVE",
     "recorded_on": "2026-11-13",
     "scope": "LifeOS catalogo e navigazione",
     "provenance": "Messaggio diretto utente",
@@ -1234,6 +1234,9 @@
       "SUPPLEMENTS-ALL-SHIFT-PALETTE-01 prevede integratori in Tutti",
       "FOOD-SUPERMARKET-01: eccezione marche confermata finora limitata a Coop/Spesotti e integratori"
     ],
-    "pending": "Confermare sostituzione della collocazione integratori ed estensione eccezione marche; chiarire quali destinazioni aggiungere alla barra. Nessuna modifica prodotto, nuova IPA o deploy autorizzati da questa registrazione."
+    "confirmation_quote": "per gli integratori voglio la scheda nel catalogo come personali e tutti, come altre marche puntiamo alle marche e prodotti più conosciuti ... nella barra di navigazione voglio aggiungere calendario e finanza",
+    "confirmation_source": "Messaggio diretto del 13 novembre 2026",
+    "rule": "Scheda Integratori nel catalogo separata da Tutti; Personali conservato. Estendere marche/prodotti conosciuti in Italia, valutare dimensione e ricerca. Aggiungere Calendario e Finanza alla navigazione. Cambiare icona Dipingi turni. Implementare e testare in modo mirato, screenshot finali, nessuna nuova IPA. Se CI in attesa lasciare link all’utente. Indagare setup sveglia/widget 2x2 senza assumere difetto.",
+    "supersedes": "SUPPLEMENTS-ALL-SHIFT-PALETTE-01 solo collocazione integratori; estende eccezione FOOD-SUPERMARKET-01 a marche note mantenendo generici/esclusioni"
   }
 }

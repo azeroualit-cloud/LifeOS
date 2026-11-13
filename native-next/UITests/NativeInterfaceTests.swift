@@ -105,7 +105,7 @@ final class NativeInterfaceTests: XCTestCase {
     }
     func testUnifiedActivityEditorPreservesDescriptionWhenAddingAndRemovingDate() {
         let app = launch(["--dark"])
-        app.tabBars.buttons["Attività"].tap()
+        app.openMainTab("Attività")
         app.buttons["primary-add"].tap()
         let title = app.textFields["activity-title"]
         XCTAssertTrue(title.waitForExistence(timeout: 10))
@@ -127,7 +127,7 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertTrue(app.textViews["Descrizione"].waitForExistence(timeout: 10))
         XCTAssertEqual(app.textViews["Descrizione"].value as? String, "Descrizione persistente")
         app.buttons["Rimuovi inizio"].tap(); app.buttons["Salva"].tap()
-        app.tabBars.buttons["Attività"].tap()
+        app.openMainTab("Attività")
         let restored = app.buttons["Cambia completamento Attività unificata test"]
         revealChecklistButton(restored, in: app)
         XCTAssertEqual(app.buttons.matching(identifier: "Cambia completamento Attività unificata test").count, 1)
@@ -187,7 +187,7 @@ final class NativeInterfaceTests: XCTestCase {
     }
     func testActivityAgendaShowsOnlyRelevantItemsAndFoldsCompleted() {
         let app = launch(["--dark", "--activity-agenda"])
-        app.tabBars.buttons["Attività"].tap()
+        app.openMainTab("Attività")
         XCTAssertTrue(app.staticTexts["Evento oggi"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.staticTexts["Evento domani"].exists)
         XCTAssertLessThan(app.staticTexts["Evento oggi"].frame.minY, app.staticTexts["Evento domani"].frame.minY)
@@ -233,8 +233,8 @@ final class NativeInterfaceTests: XCTestCase {
         let app = launch(["--dark"])
         for _ in 0..<3 {
             for name in ["Dashboard", "Attività", "Salute", "Bloom"] {
-                let tab = app.tabBars.buttons[name]
-                tab.tap(); XCTAssertTrue(tab.isSelected)
+                app.openMainTab(name)
+                XCTAssertTrue(app.isMainTabSelected(name))
                 if name == "Salute" { XCTAssertTrue(app.buttons["health-summary-tdee"].waitForExistence(timeout: 10)) }
                 if name == "Dashboard" || name == "Attività" { XCTAssertTrue(app.buttons["primary-add"].isHittable) }
             }
@@ -346,7 +346,7 @@ final class NativeInterfaceTests: XCTestCase {
         executionTimeAllowance = 300
         let app = launch(dark ? ["--dark"] : [])
         for name in ["Dashboard", "Attività", "Salute", "Bloom"] {
-            let tab = app.tabBars.buttons[name]; tab.tap(); XCTAssertTrue(tab.isSelected)
+            app.openMainTab(name); XCTAssertTrue(app.isMainTabSelected(name))
             if name == "Salute" {
                 XCTAssertTrue(app.buttons["health-summary-tdee"].waitForExistence(timeout: 10))
                 capture((dark ? "dark-" : "light-") + "Salute")
@@ -358,7 +358,7 @@ final class NativeInterfaceTests: XCTestCase {
         }
         for page in ["Dashboard", "Attività", "Calendario", "Finanza"] {
             if page == "Calendario" || page == "Finanza" { app.openOtherDestination(page) }
-            else { app.tabBars.buttons[page].tap() }
+            else { app.openMainTab(page) }
             let add = app.buttons["primary-add"]
             XCTAssertTrue(add.waitForExistence(timeout: 10)); XCTAssertTrue(add.isHittable)
             assertMinimumTouchTarget(add); add.tap()
@@ -366,7 +366,7 @@ final class NativeInterfaceTests: XCTestCase {
             XCTAssertTrue(app.navigationBars[editor].waitForExistence(timeout: 10))
             app.buttons["Annulla"].tap()
             let host = page == "Calendario" || page == "Finanza" ? "Dashboard" : page
-            XCTAssertTrue(app.tabBars.buttons[host].isSelected)
+            XCTAssertTrue(app.isMainTabSelected(host))
             XCTAssertTrue(app.buttons["primary-add"].isHittable)
             XCTAssertTrue(app.tabBars.firstMatch.exists)
             if page == "Finanza" { XCTAssertTrue(app.staticTexts["finance-budget-value"].exists) }
@@ -412,7 +412,7 @@ final class NativeInterfaceTests: XCTestCase {
             if title == "Finanza" || title == "Calendario" { app.openOtherDestination(title) }
             else {
                 let reselectingDashboard = title == "Dashboard" && app.tabBars.buttons["Dashboard"].isSelected
-                app.tabBars.buttons[title].tap()
+                app.openMainTab(title)
                 if title == "Dashboard" && !reselectingDashboard {
                     // Returning from another tab retains Dashboard's calendar stack.
                     XCTAssertTrue(app.scrollViews["calendar-scroll"].waitForExistence(timeout: 10))
@@ -424,10 +424,10 @@ final class NativeInterfaceTests: XCTestCase {
             let destination = title == "Finanza" ? app.staticTexts["finance-heading"] : (title == "Calendario" ? app.scrollViews["calendar-scroll"] : app.navigationBars[title])
             XCTAssertTrue(destination.waitForExistence(timeout: 10))
             let host = title == "Finanza" || title == "Calendario" ? "Dashboard" : title
-            XCTAssertTrue(app.tabBars.buttons[host].isSelected)
-            assertMinimumTouchTarget(app.tabBars.buttons[host])
+            XCTAssertTrue(app.isMainTabSelected(host))
+            assertMinimumTouchTarget(app.mainTabButton(host))
             for other in ["Dashboard", "Attività", "Salute", "Bloom"] where other != host {
-                XCTAssertFalse(app.tabBars.buttons[other].isSelected)
+                XCTAssertFalse(app.isMainTabSelected(other))
             }
             let frame = app.tabBars.buttons["Dashboard"].frame
             XCTAssertEqual(frame.minY, initial.minY, accuracy: 1)
@@ -572,7 +572,7 @@ final class NativeInterfaceTests: XCTestCase {
         app.tabBars.buttons["Salute"].tap()
         XCTAssertTrue(app.buttons["health-summary-tdee"].waitForExistence(timeout: 10))
         XCTAssertFalse(app.buttons["health-connect"].exists)
-        app.tabBars.buttons["Attività"].tap()
+        app.openMainTab("Attività")
         XCTAssertTrue(app.navigationBars["Attività"].waitForExistence(timeout: 10))
         app.tabBars.buttons["Dashboard"].tap()
         capture("home-empty")
@@ -722,7 +722,7 @@ final class NativeInterfaceTests: XCTestCase {
         let app = launch(["--dark"])
         for (tab, title) in [("Dashboard", "Nuovo movimento"), ("Attività", "Nuova attività"), ("Calendario", "Nuova attività"), ("Finanza", "Nuovo movimento")] {
             if tab == "Calendario" || tab == "Finanza" { app.openOtherDestination(tab) }
-            else { app.tabBars.buttons[tab].tap() }
+            else { app.openMainTab(tab) }
             addButton(app).tap()
             XCTAssertTrue((title == "Finanza" ? app.staticTexts["finance-heading"] : app.navigationBars[title]).waitForExistence(timeout: 10))
             app.buttons["Annulla"].tap()
@@ -741,7 +741,7 @@ final class NativeInterfaceTests: XCTestCase {
     }
     func testSharedRowsAndCategoryChoicesKeepAccessibleTargets() {
         let app = launch(["--dark"])
-        app.tabBars.buttons["Attività"].tap()
+        app.openMainTab("Attività")
         let wishes = app.buttons["task-category-wish"], actions = app.buttons["task-category-action"]
         XCTAssertTrue(wishes.waitForExistence(timeout: 10)); wishes.tap()
         XCTAssertTrue(wishes.isSelected)
@@ -774,13 +774,13 @@ final class NativeInterfaceTests: XCTestCase {
         let app = launch(["--stress-content", "--dark"])
         for page in ["Dashboard", "Attività", "Calendario", "Finanza"] {
             if page == "Calendario" || page == "Finanza" { app.openOtherDestination(page) }
-            else { app.tabBars.buttons[page].tap() }
+            else { app.openMainTab(page) }
             let tabs = app.tabBars.buttons["Dashboard"], before = app.tabBars.buttons["Dashboard"].frame
             let surface = page == "Attività" ? app.collectionViews.firstMatch : app.scrollViews[page == "Dashboard" ? "dashboard-scroll" : page == "Finanza" ? "finance-scroll" : "calendar-scroll"]
             XCTAssertTrue(surface.waitForExistence(timeout: 10))
             for _ in 0..<7 { surface.swipeUp(velocity: .fast) }
             for _ in 0..<7 { surface.swipeDown(velocity: .fast) }
-            XCTAssertTrue(tabs.isHittable); XCTAssertTrue(app.tabBars.buttons["Bloom"].isHittable)
+            XCTAssertTrue(tabs.isHittable); XCTAssertTrue(app.tabBars.buttons["Altro"].isHittable || app.tabBars.buttons["More"].isHittable)
             XCTAssertEqual(before.height, tabs.frame.height, accuracy: 2)
             capture("boundary-" + page)
         }
@@ -1188,7 +1188,7 @@ final class NativeInterfaceTests: XCTestCase {
 
     func testReducedMotionKeepsChecklistAndFinanceActionsFunctional() {
         let app = launch(["--dark", "--reduce-motion"])
-        app.tabBars.buttons["Attività"].tap()
+        app.openMainTab("Attività")
         let wishes = app.buttons["task-category-wish"], actions = app.buttons["task-category-action"]
         wishes.tap(); XCTAssertTrue(wishes.isSelected)
         actions.tap(); XCTAssertTrue(actions.isSelected)

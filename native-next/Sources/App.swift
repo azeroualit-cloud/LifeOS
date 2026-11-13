@@ -51,7 +51,7 @@ import UIKit
         #endif
     }
 }
-enum NativeTab: Int, Hashable { case dashboard, tasks, health, bloom }
+enum NativeTab: Int, Hashable { case dashboard, calendar, finance, health, tasks, bloom }
 enum NativeDashboardDestination: Hashable { case finance, calendar }
 enum NativeSheet: Identifiable {
     case weight(NativeWeightTransfer?)
@@ -219,8 +219,10 @@ struct NativeRoot: View {
     private var nativeTabs: some View {
         TabView(selection: $router.tab) {
             dashboard.modifier(NativeTabArrival(tab: .dashboard, selection: router.tab)).tabItem { Label("Dashboard", systemImage: "square.grid.2x2") }.tag(NativeTab.dashboard)
-            tasks.modifier(NativeTabArrival(tab: .tasks, selection: router.tab)).tabItem { Label("Attività", systemImage: "checklist") }.tag(NativeTab.tasks)
+            NavigationStack { CalendarScreen() }.modifier(NativeTabArrival(tab: .calendar, selection: router.tab)).tabItem { Label("Calendario", systemImage: "calendar") }.tag(NativeTab.calendar)
+            NavigationStack { FinanceScreen() }.modifier(NativeTabArrival(tab: .finance, selection: router.tab)).tabItem { Label("Finanza", systemImage: "chart.pie") }.tag(NativeTab.finance)
             NavigationStack { NativeHealthDetail(health: health, demo: NativeHealthLaunchPolicy.simulated) }.modifier(NativeTabArrival(tab: .health, selection: router.tab)).tabItem { Label("Salute", systemImage: "heart") }.tag(NativeTab.health)
+            tasks.modifier(NativeTabArrival(tab: .tasks, selection: router.tab)).tabItem { Label("Attività", systemImage: "checklist") }.tag(NativeTab.tasks)
             NavigationStack { NativeBloomScreen() }.modifier(NativeTabArrival(tab: .bloom, selection: router.tab)).tabItem { Label("Bloom", systemImage: "books.vertical") }.tag(NativeTab.bloom)
         }
     }
@@ -257,7 +259,8 @@ struct NativeRoot: View {
     }
     private func addItem() {
         switch router.tab {
-        case .dashboard: router.sheet = .movement([:])
+        case .dashboard, .finance: router.sheet = .movement([:])
+        case .calendar: router.sheet = .event(["day": .string(router.calendarDay)])
         case .health: break
         case .bloom: break
         case .tasks: router.sheet = .task(["list_kind": .string(router.taskCategory)])
@@ -265,7 +268,8 @@ struct NativeRoot: View {
     }
     private var addLabel: String {
         switch router.tab {
-        case .dashboard: return "Aggiungi spesa"
+        case .dashboard, .finance: return "Aggiungi spesa"
+        case .calendar: return "Aggiungi evento"
         case .health: return "Aggiungi nutrienti"
         case .bloom: return "Nuova nota"
         case .tasks: return "Aggiungi attività"

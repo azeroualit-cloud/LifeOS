@@ -4,7 +4,8 @@ import Foundation
 enum NativeSupplementUnit: String, Codable, CaseIterable, Identifiable {
     case capsule, tablet, gram, millilitre, legacyServing
     var id: String { rawValue }
-    static var editable: [Self] { [.capsule, .tablet, .gram] }
+    static var editable: [Self] { [.capsule, .tablet, .gram, .millilitre] }
+    var isMassOrVolume: Bool { self == .gram || self == .millilitre }
     var quantityTitle: String {
         switch self {
         case .capsule: "Capsule"

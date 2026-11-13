@@ -30,7 +30,7 @@ final class NativeRevision72UITests: XCTestCase {
     }
     func testDatePickerHasSevenFullWidthColumnsAfterTypingAndBothDatesRemainClearable() {
         let app = launch()
-        app.tabBars.buttons["Attività"].tap(); app.buttons["primary-add"].tap()
+        app.openMainTab("Attività"); app.buttons["primary-add"].tap()
         let title = app.textFields["activity-title"]
         XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText("Data senza tagli")
         for identifier in ["Inizio", "Scadenza"] {

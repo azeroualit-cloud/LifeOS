@@ -12,7 +12,7 @@ struct FinanceScreen: View {
     var body: some View {
         VStack(spacing: NativeDesign.Space.none) {
             HStack {
-                Button { dismiss() } label: { Image(systemName: "chevron.left").frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget) }.accessibilityLabel("Torna alla Dashboard").accessibilityIdentifier("other-back")
+                Button { if router.tab == .finance { router.tab = .dashboard } else { dismiss() } } label: { Image(systemName: "chevron.left").frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget) }.accessibilityLabel("Torna alla Dashboard").accessibilityIdentifier("other-back")
                 Text("Finanza").font(.largeTitle.bold()).lineLimit(1).minimumScaleFactor(0.75).accessibilityAddTraits(.isHeader).accessibilityIdentifier("finance-heading")
                 Spacer()
                 NativeToolbarButton(symbol: "gearshape", label: "Impostazioni") { router.sheet = .settings }

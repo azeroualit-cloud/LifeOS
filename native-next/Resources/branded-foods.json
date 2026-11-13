@@ -82,7 +82,7 @@
     "id": "coop-01d7a8ccbe3895311047",
     "name": "Magnesio in polvere stanchezza e affaticamento 150 g",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/magnesio",
     "measurementBasis": "g",
     "calories": 0,
@@ -91,7 +91,9 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "gram",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-03a191de652c2dfaaf5f",
@@ -278,7 +280,7 @@
     "id": "coop-09eb456ecbdec1278605",
     "name": "Integratore alimentare multi vitaminico minerale 9 vitamine+5 minerali compresse effervescenti 20x4g",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/integratore-9",
     "measurementBasis": "g",
     "calories": 0,
@@ -287,13 +289,15 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "gram",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-0ae410a6b44abc31bb5f",
     "name": "Integratore alimentare melatonina retard compresse 60 x 0,085 g",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/integratore-8",
     "measurementBasis": "g",
     "calories": 0,
@@ -302,7 +306,9 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "gram",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-0c9341fd386cef1d42be",
@@ -553,7 +559,7 @@
     "id": "coop-165359a4f8af9c7ce862",
     "name": "Integratore alimentare digestive help stick 10 x 10 ml",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/integratore",
     "measurementBasis": "ml",
     "calories": 0,
@@ -562,7 +568,9 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "millilitre",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-174bf9680d899ec4677a",
@@ -1008,7 +1016,7 @@
     "id": "coop-33da2f08ee990b146a00",
     "name": "Integratore alimentare multi vitaminico +50 anni 13 vitamine + 11 minerali compresse 30 x 1,31 g",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/integratore-17",
     "measurementBasis": "g",
     "calories": 0,
@@ -1017,7 +1025,9 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "gram",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-340a1bbbf7273afe7a1e",
@@ -1098,7 +1108,7 @@
     "id": "coop-3d2ef34cfc5d9251e0ed",
     "name": "Soluzione drenante 500 ml",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/soluzione-0",
     "measurementBasis": "ml",
     "calories": 0,
@@ -1107,7 +1117,9 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "millilitre",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-3d5c41e7eabb0ded9c34",
@@ -1235,7 +1247,7 @@
     "id": "coop-42bfc003326014259b3d",
     "name": "Integratore alimentare propoli ed erisimo compresse 30 x 0,75 g",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/integratore-15",
     "measurementBasis": "g",
     "calories": 0,
@@ -1244,7 +1256,9 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "gram",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-4347ab5df3d80c71ddc5",
@@ -1340,7 +1354,7 @@
     "id": "coop-45690de768325bc2000e",
     "name": "Integratore alimentare olio di pesce omega 3 (epa e dha) funzione cardiaca perle 30 x 0,735 g",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/integratore-14",
     "measurementBasis": "g",
     "calories": 0,
@@ -1349,7 +1363,9 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "gram",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-45c0711f73708de150c9",
@@ -1416,7 +1432,7 @@
     "id": "coop-47b3e9f0d4241cc2f663",
     "name": "Isoflavoni di soia compresse 60 x 0,9 g",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/isoflavoni-di",
     "measurementBasis": "g",
     "calories": 0,
@@ -1425,7 +1441,9 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "gram",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-47d03853e76e2b12e8fd",
@@ -1643,7 +1661,7 @@
     "id": "coop-571e2cba1a25d5a43254",
     "name": "Integratore alimentare carbone vegetale gonfiore, gas intestinali compresse 60 x 0,504 g",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/integratore-12",
     "measurementBasis": "g",
     "calories": 0,
@@ -1652,7 +1670,9 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "gram",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-57390bd78d7e531c9d69",
@@ -1733,7 +1753,7 @@
     "id": "coop-58fe8a312c10a2f06469",
     "name": "Vitamina c difese immunitarie compresse effervescenti 20 x 4 g",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/vitamina-c",
     "measurementBasis": "g",
     "calories": 0,
@@ -1742,13 +1762,15 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "gram",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-59086a6583884f58b9e2",
     "name": "Integratore alimentare le erbe del transito regolarità intestinale 100 compresse 50 g",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/integratore-13",
     "measurementBasis": "g",
     "calories": 0,
@@ -1757,7 +1779,9 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "gram",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-597fcd69e7454eeff788",
@@ -1980,7 +2004,7 @@
     "id": "coop-613de8f526034162fe81",
     "name": "Integratore alimentare supporto unghie e capelli compresse 30 x 0,9 g",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/integratore-7",
     "measurementBasis": "g",
     "calories": 0,
@@ -1989,7 +2013,9 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "gram",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-61dd08b0f8d3e01d17e9",
@@ -2327,7 +2353,7 @@
     "id": "coop-72318fa80a2d8c52ffc8",
     "name": "Valeriana compresse 60 x 0,52 g",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/valeriana",
     "measurementBasis": "g",
     "calories": 0,
@@ -2336,7 +2362,9 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "gram",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-72cbddccf7397e755f6f",
@@ -2493,7 +2521,7 @@
     "id": "coop-7ac4fa1dfcadffd9623c",
     "name": "Gummy dolce riposo caramelle 30 pz",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/gummy-dolce",
     "measurementBasis": "g",
     "calories": 0,
@@ -2502,7 +2530,9 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "gram",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-7cbeb30b33a52fc68975",
@@ -3156,7 +3186,7 @@
     "id": "coop-944d7eedb4ec7ed71d79",
     "name": "Integratore alimentare multi vitaminico minerale 13 vitamine + 11 minerali compresse 30 x 1,325 g",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/integratore-16",
     "measurementBasis": "g",
     "calories": 0,
@@ -3165,7 +3195,9 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "gram",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-9508fb2eaa22ec81c0c5",
@@ -3186,7 +3218,7 @@
     "id": "coop-9728dc649967094ac245",
     "name": "Integratore alimentare uro- prosta capsule 30 x 0,69 g",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/integratore-1",
     "measurementBasis": "g",
     "calories": 0,
@@ -3195,7 +3227,9 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "gram",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-98b04464538c22aab383",
@@ -3352,7 +3386,7 @@
     "id": "coop-a290cf188a3b6fe38b02",
     "name": "Integratore alimentare con edulcorante fermenti lattici stick 10 x 1,6 g",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/integratore-19",
     "measurementBasis": "g",
     "calories": 0,
@@ -3361,13 +3395,15 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "gram",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-a4c39085e00c48c3ab45",
     "name": "Integratore alimentare con edulcorante reflu-stick 10 x 15 ml",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/integratore-6",
     "measurementBasis": "ml",
     "calories": 0,
@@ -3376,7 +3412,9 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "millilitre",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-a514173a1a29a4e95d72",
@@ -3472,7 +3510,7 @@
     "id": "coop-aae3b516e95bc2d26a24",
     "name": "Integratore alimentare con edulcoranti vitamine d+k stick 20 x 1 g",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/integratore-3",
     "measurementBasis": "g",
     "calories": 0,
@@ -3481,7 +3519,9 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "gram",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-aaea3793a7bd9b5dcd81",
@@ -3502,7 +3542,7 @@
     "id": "coop-aaf926ac74978bf807cb",
     "name": "Propoli ed erisimo spray 20 ml",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/propoli-ed",
     "measurementBasis": "ml",
     "calories": 0,
@@ -3511,13 +3551,15 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "millilitre",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-ab2cab3922b9539b39b2",
     "name": "Sostegno benessere mentale 50 ml",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/sostegno",
     "measurementBasis": "ml",
     "calories": 0,
@@ -3526,7 +3568,9 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "millilitre",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-ab959e34365ad914fd74",
@@ -3562,7 +3606,7 @@
     "id": "coop-ae6666d80a786d06af52",
     "name": "Soluzione depurativa depura l'organismo 200 ml",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/soluzione",
     "measurementBasis": "ml",
     "calories": 0,
@@ -3571,7 +3615,9 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "millilitre",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-afc4b4013324020df800",
@@ -3788,7 +3834,7 @@
     "id": "coop-b83e6a2390a75c31700f",
     "name": "Melatonina e passiflora compresse 60 x 0,52 g",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/melatonina-e",
     "measurementBasis": "g",
     "calories": 0,
@@ -3797,13 +3843,15 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "gram",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-b8889e266f222a2782c0",
     "name": "Integratore alimentare aloe vera 1000 ml",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/integratore-5",
     "measurementBasis": "ml",
     "calories": 0,
@@ -3812,13 +3860,15 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "millilitre",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-bb4520cb0e945ab87127",
     "name": "Integratore alimentare con edulcorante tonico recharge stick 10 x 1 g",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/integratore-4",
     "measurementBasis": "g",
     "calories": 0,
@@ -3827,7 +3877,9 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "gram",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-bb9a7364efa0f70dc5c2",
@@ -4136,7 +4188,7 @@
     "id": "coop-cd221840f759b71f34c1",
     "name": "Integratore alimentare energy mente stick 14 x 1,1 g",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/integratore-18",
     "measurementBasis": "g",
     "calories": 0,
@@ -4145,7 +4197,9 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "gram",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-cdd4c9b837bff1641888",
@@ -4378,7 +4432,7 @@
     "id": "coop-d8a27b6a4ebeea286774",
     "name": "Integratore alimentare colesterolo compresse 20 x 1,1 g",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/integratore-2",
     "measurementBasis": "g",
     "calories": 0,
@@ -4387,7 +4441,9 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "gram",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-da0eb812c968d35bc146",
@@ -12638,7 +12694,7 @@
     "id": "coop-ean-8001120656575",
     "name": "Lecitina di soia granulare 250 g",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/lecitina-di",
     "calories": 851.0,
     "protein": 0.0,
@@ -12649,7 +12705,9 @@
     "labelBasis": "Valori nutrizionali per 100 g",
     "labelUnit": "g",
     "measurementBasis": "g",
-    "detail": "Etichetta Coop · per 100 g"
+    "detail": "Etichetta Coop · per 100 g",
+    "supplementUnit": "gram",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-ean-8001120656612",
@@ -31655,7 +31713,7 @@
     "id": "coop-ean-8001120735874",
     "name": "Integratore alimentare magnesio e potassio zero zuccheri stick 20 x 4 g",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/integratore-10",
     "calories": 18.0,
     "protein": 0.0,
@@ -31666,7 +31724,9 @@
     "labelBasis": "Valori nutrizionali per 100 g",
     "labelUnit": "g",
     "measurementBasis": "g",
-    "detail": "Etichetta Coop · per 100 g"
+    "detail": "Etichetta Coop · per 100 g",
+    "supplementUnit": "gram",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-ean-8001120736109",
@@ -48105,7 +48165,7 @@
     "id": "coop-ebcefb6c54cae380d89d",
     "name": "D-mannosio e cranberry benessere donna vie urinarie bustine 10 x 2 g",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/d-mannosio-e",
     "measurementBasis": "g",
     "calories": 0,
@@ -48114,7 +48174,9 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "gram",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-ec3a8e061aef316ca138",
@@ -48436,7 +48498,7 @@
     "id": "coop-fdbf8818248f7d3182f5",
     "name": "Integratore alimentare multi-b compresse 24 x 0,41 g",
     "brand": "Coop",
-    "family": "pantry",
+    "family": "supplement",
     "sourceURL": "https://www.coop.it/il-prodotto-coop/coop/integratori-e-salutistici/alimentari-confezionati/integratori/integratore-11",
     "measurementBasis": "g",
     "calories": 0,
@@ -48445,7 +48507,9 @@
     "fat": 0,
     "nutritionNotDeclared": true,
     "dataNote": "Tabella nutrizionale non disponibile nella scheda ufficiale",
-    "detail": "Valori nutrizionali non dichiarati"
+    "detail": "Valori nutrizionali non dichiarati",
+    "supplementUnit": "gram",
+    "defaultQuantity": 1
   },
   {
     "id": "coop-fdd08cc3be821427629f",

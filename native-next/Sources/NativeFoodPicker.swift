@@ -83,7 +83,7 @@ struct NativeGenericFood: Codable, Identifiable {
     var defaultQuantity: Decimal? = nil
 
     var quantityUnit: NativeSupplementUnit { family == .supplement ? (supplementUnit ?? .legacyServing) : (measurementBasis == "ml" ? .millilitre : .gram) }
-    var basisDivisor: Decimal { family == .supplement && quantityUnit != .gram ? 100 : 1 }
+    var basisDivisor: Decimal { family == .supplement && !quantityUnit.isMassOrVolume ? 100 : 1 }
     var displayDetail: String? { brand.map { $0 + (id.hasPrefix("personal-") ? " · Personale" : "") } ?? detail }
 
     func portion(id: UUID, date: Date, grams: Decimal, weighedWithBone: Bool = false) -> NativeNutritionEntry? {
@@ -98,7 +98,7 @@ struct NativeGenericFood: Codable, Identifiable {
             entry.foodID = self.id
             return entry
         }
-        if family == .supplement && quantityUnit != .gram && grams > 100 { return nil }
+        if family == .supplement && !quantityUnit.isMassOrVolume && grams > 100 { return nil }
         let edibleGrams: Decimal
         if weighedWithBone {
             guard let percent = boneInEdiblePercent, (1..<100).contains(percent) else { return nil }
@@ -135,21 +135,35 @@ struct NativeGenericFood: Codable, Identifiable {
               zeroEnergyLabelVerified: zeroEnergyLabelVerified, estimatedMacroBounds: estimatedMacroBounds, dataNote: dataNote, nutritionNotDeclared: nutritionNotDeclared, measurementBasis: measurementBasis, brand: brand, sourceURL: sourceURL, barcode: barcode, supplementUnit: supplementUnit, defaultQuantity: defaultQuantity)
     }
 
-    // Anses. 2025. Ciqual French food composition table. Values per 100 g.
+    // Cache public catalog tokenization; personal edits are indexed from their current values.
+    private struct SearchDocument {
+        let name: [String]
+        let aliases: [[String]]
+        let fields: [String]
+        init(_ food: NativeGenericFood) {
+            name = NativeGenericFood.searchWords(food.name)
+            aliases = (food.aliases ?? []).map(NativeGenericFood.searchWords)
+            fields = name + NativeGenericFood.searchWords(food.displayDetail ?? "") + aliases.flatMap { $0 } + (food.cocktail == nil ? [] : ["cocktail"])
+        }
+
+    }
+    private static let searchIndex: [String: SearchDocument] = Dictionary(
+        catalog.map { ($0.id, SearchDocument($0)) }, uniquingKeysWith: { first, _ in first })
+
     static func matches(_ query: String, in foods: [Self]? = nil) -> [Self] {
         let foods = foods ?? catalog
         let words = searchWords(query)
         guard !words.isEmpty else { return Array(foods.prefix(24)) }
-
+        let barcodeQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
         return foods.enumerated().compactMap { index, food -> (food: Self, rank: Int, index: Int)? in
-            let name = searchWords(food.name)
-            let aliases = (food.aliases ?? []).map(searchWords)
-            if words == name { return (food, 0, index) }
-            if aliases.contains(words) { return (food, 1, index) }
-            let fields = name + searchWords(food.displayDetail ?? "") + aliases.flatMap { $0 } + (food.cocktail == nil ? [] : ["cocktail"])
-            guard words.allSatisfy({ word in fields.contains { $0.hasPrefix(word) } }) else { return nil }
-            let rank = words.allSatisfy { word in name.contains { $0.hasPrefix(word) } } ? 2 : 3
-            return (food, rank, index)
+            if food.barcode == barcodeQuery { return (food, 0, index) }
+            let document = food.id.hasPrefix("personal-") ? SearchDocument(food) : (searchIndex[food.id] ?? SearchDocument(food))
+            if words == document.name { return (food, 1, index) }
+            if document.aliases.contains(words) { return (food, 2, index) }
+            guard words.allSatisfy({ word in document.fields.contains { $0.hasPrefix(word) } }) else { return nil }
+            let nameMatch = words.allSatisfy { word in document.name.contains { $0.hasPrefix(word) } }
+            let startsName = document.name.starts(with: words)
+            return (food, startsName ? 3 : (nameMatch ? 4 : 5), index)
         }.sorted { ($0.rank, $0.index) < ($1.rank, $1.index) }.map { $0.food }
     }
 
@@ -178,7 +192,8 @@ struct NativeGenericFood: Codable, Identifiable {
 
     static let foods = loadCatalog("generic-foods")
     static let cocktails = loadCatalog("cocktails")
-    static let catalog = foods + cocktails + supplements + brandedFoods + brandedSupplements
+    static let catalog = foods + cocktails + supplements + brandedFoods + brandedSupplements + italianBrands
+    static let italianBrands = loadCatalog("italian-brands")
     static let brandedFoods = loadCatalog("branded-foods")
     static let brandedSupplements = loadCatalog("branded-supplements")
     static let supplements = loadCatalog("supplements")
@@ -202,8 +217,8 @@ struct NativeFoodPicker: View {
     @State private var storageError = false
     @AppStorage("lifeos-personal-foods-v1") private var personalData = Data()
 
-    private enum Scope: String, CaseIterable, Identifiable {
-        case all = "Tutti", personal = "Personali"
+    enum Scope: String, CaseIterable, Identifiable {
+        case all = "Tutti", personal = "Personali", supplements = "Integratori"
         var id: Self { self }
     }
 
@@ -213,8 +228,16 @@ struct NativeFoodPicker: View {
 
     private var visibleFoods: [NativeGenericFood] {
         switch scope {
-        case .all: NativeGenericFood.ranked(NativeGenericFood.catalog + (personalFoods ?? []), entries: nutrition.entries)
+        case .all: NativeGenericFood.ranked(Self.items(in: .all, personal: personalFoods ?? []), entries: nutrition.entries)
+        case .supplements: NativeGenericFood.ranked(Self.items(in: .supplements, personal: personalFoods ?? []), entries: nutrition.entries)
         case .personal: personalFoods ?? []
+        }
+    }
+    static func items(in scope: Scope, personal: [NativeGenericFood]) -> [NativeGenericFood] {
+        switch scope {
+        case .all: (NativeGenericFood.catalog + personal).filter { $0.family != .supplement }
+        case .personal: personal
+        case .supplements: (NativeGenericFood.catalog + personal).filter { $0.family == .supplement }
         }
     }
     let select: (NativeGenericFood) -> Void
@@ -228,7 +251,7 @@ struct NativeFoodPicker: View {
         VStack(spacing: NativeDesign.Space.none) {
             HStack(spacing: NativeDesign.Space.small) {
                 Image(systemName: "magnifyingglass").foregroundStyle(.secondary).accessibilityHidden(true)
-                TextField("Cerca alimento", text: $query)
+                TextField(scope == .supplements ? "Cerca integratore o marca" : "Cerca alimento, marca o codice a barre", text: $query)
                     .focused($searchFocused)
                     .submitLabel(.search)
                     .onSubmit { searchFocused = false }
@@ -251,7 +274,7 @@ struct NativeFoodPicker: View {
                     searchFocused = false
                     creating = true
                 } label: {
-                    Label("Crea alimento generico", systemImage: "plus.circle")
+                    Label(scope == .supplements ? "Crea integratore" : "Crea alimento personale", systemImage: "plus.circle")
                         .frame(minHeight: NativeDesign.Layout.touchTarget)
                 }
                 .accessibilityIdentifier("generic-food-create")
@@ -298,7 +321,7 @@ struct NativeFoodPicker: View {
                     }
                 } footer: {
                     if scope == .all {
-                        Text("Alimenti generici · Anses Ciqual 2025 · Cocktail con valori stimati")
+                        Text("Alimenti generici e di marca · Cerca anche per marca o codice a barre · Cocktail con valori stimati")
                     }
                 }
             }
@@ -310,7 +333,7 @@ struct NativeFoodPicker: View {
         .toolbar { DoneButton() }
         .sheet(isPresented: $creating) {
             NavigationStack {
-                NativePersonalFoodEditor { food in
+                NativePersonalFoodEditor(initialFamily: scope == .supplements ? .supplement : .meal) { food in
                     guard let foods = personalFoods, persist(foods + [food]) else {
                         storageError = true
                         return

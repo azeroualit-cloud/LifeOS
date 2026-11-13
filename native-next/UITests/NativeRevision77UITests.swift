@@ -1,18 +1,19 @@
 import XCTest
 
 final class NativeRevision77UITests: XCTestCase {
+    // Historical selector retained for existing CI smoke routing.
     func testFourTabsAndDirectHealthAndBloom() {
         let app = XCUIApplication()
         app.launchArguments = ["--visual-test", "--busy-home"]
         app.launch()
-        for name in ["Dashboard", "Attività", "Salute", "Bloom"] {
+        for name in ["Dashboard", "Calendario", "Finanza", "Salute"] {
             XCTAssertTrue(app.tabBars.buttons[name].waitForExistence(timeout: 15))
         }
-        XCTAssertFalse(app.tabBars.buttons["Altro"].exists)
+        XCTAssertTrue(app.tabBars.buttons["Altro"].exists || app.tabBars.buttons["More"].exists)
         app.tabBars.buttons["Salute"].tap()
         XCTAssertTrue(app.scrollViews["health-detail-scroll"].waitForExistence(timeout: 10))
         capture("Salute diretta", app)
-        app.tabBars.buttons["Bloom"].tap()
+        app.openMainTab("Bloom")
         XCTAssertTrue(app.navigationBars["Bloom"].waitForExistence(timeout: 10))
         capture("Bloom", app)
         app.tabBars.buttons["Dashboard"].tap()

@@ -132,18 +132,18 @@ final class NativeNutritionQuickUITests: XCTestCase {
         for name in ["Crescenza", "Provolone", "Patatine", "Gelato", "Vitamina C"] {
             search.tap()
             let value = search.value as? String ?? ""
-            if value != "Cerca alimento" {
+            if value != search.placeholderValue {
                 search.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: value.count))
             }
             search.typeText(name)
             capture("Supermercato " + name, app)
         }
-        XCTAssertFalse(app.buttons["Integratori"].exists)
+        app.segmentedControls.buttons["Integratori"].tap()
         let vitamin = app.buttons["generic-food-supplement-vitamin-c"]
         XCTAssertTrue(vitamin.isHittable)
         vitamin.tap()
         XCTAssertTrue(app.staticTexts["Compresse"].waitForExistence(timeout: 10))
-        capture("Integratore generico da Tutti", app)
+        capture("Integratore generico nella scheda Integratori", app)
         app.buttons["quick-nutrition-catalog"].tap()
         app.buttons["generic-food-create"].tap()
         let family = app.buttons["personal-food-family"]

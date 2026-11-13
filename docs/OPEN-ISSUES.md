@@ -1,5 +1,7 @@
 # LifeOS — correzioni e difetti aperti
 
+**Incremento 13 novembre 2026 — implementato, verifica iOS da avviare.** Scheda Integratori separata da Tutti/Personali (incluse 32 voci Coop riclassificate con base g/ml conservata); 23 formulazioni ufficiali italiane Milka/Pepsi/Mulino Bianco/Kinder/Nutella; ricerca indicizzata per nome/marca/alias e codice a barre esatto. Calendario e Finanza nella barra nativa: Dashboard, Calendario, Finanza, Salute, Altro → Attività/Bloom. Icona turni calendar.badge.clock. Validazioni locali cataloghi e 8 test selettore passati; compilazione/UI e catture ancora da verificare. Nessuna nuova IPA/deploy. Widget: diagnosi installazione in attesa del messaggio di stato; AlarmKit fisico non provato. Dettagli: [INCREMENT-2026-11-13.md](INCREMENT-2026-11-13.md).
+
 **Accesso — 13 novembre 2026:** problema dopo cambio password dichiarato risolto dall’utente. Individuato nel codice il requisito APP_PASSWORD di almeno 24 caratteri; nessuna modifica server o codice eseguita dall’assistente. Ripristino della sincronizzazione non confermato separatamente.
 
 
