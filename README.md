@@ -1,10 +1,6 @@
 # LifeOS
 
-## Stato corrente — 12 novembre 2026
-
-**TDEE aggiornato e verificato — 12 novembre 2026.** [Run 43257504280](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43257504280), sorgente `b513c95`: compilazione, **23 unitari e 2 UI passati**, zero fallimenti/saltati. Verificate due sole pesate a un giorno di distanza, storico corto, ancoraggio a ultima pesata vecchia, esclusione dati oltre la finestra/futuri, copertura calorie e resistenza a una singola pesata anomala. Catture Salute e scenario ispezionate. Finestra: 14 giorni prima dell’ultima pesata, inclusa anche se oggi; nessun minimo arbitrario di numero/durata/confronti. Due date distinte necessarie per misurare variazione; copertura calorie 90% conservata. Modifica nel codice, **non nell’IPA 89 installata**; nuova IPA non richiesta. Nessun deploy.
-
-[Report corrente sul ramo codex/revision77](https://github.com/azeroualit-cloud/LifeOS/blob/codex/revision77/docs/AI-HANDOFF.md). Ultima IPA pubblicata: 0.10.27 build 89.
+**13 novembre 2026 — incremento in verifica mirata, nessuna nuova IPA.** Scheda Integratori, 23 prodotti di cinque marchi italiani, ricerca, Calendario/Finanza e icona turni implementati su `codex/revision77`. [Stato corrente](https://github.com/azeroualit-cloud/LifeOS/blob/codex/revision77/docs/INCREMENT-2026-11-13.md) · [Test e catture in corso](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43440966964), sorgente `e16e83c`. Ultima IPA distribuita89; TDEE e nuovo incremento non inclusi. Prove fisiche widget/AlarmKit e accettazione ancora aperte. Nessun deploy backend.
 
 **LifeOS 0.10.19 build 80 consegnata.** [IPA](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.19-build80/LifeOS-80.ipa), SHA-256 80a4e4759c810e2f2f69ef860a128d8cd020cf133cfa2e223cc4d51edf9f60c0. Sorgente 5aba0d5b888471025a45568d6ff567199b5a4fec. [Suite 368/368](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42224387516), [avvii Release 4/4](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42224387516), [confezionamento verificato](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42235788082). Restano firma Signulous, aggiornamento sul telefono, parità dei dati personali, verifiche fisiche e accettazione esplicita.
 
