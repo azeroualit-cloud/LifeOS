@@ -376,3 +376,7 @@ Conferma diretta: «nongli alcolici gli voglio tenere, ma solo quelli da disco n
 NAVIGATION-SIX-GLASS-2026-11-13: Liquid Glass e quattro destinazioni originali Dashboard/Attività/Salute/Bloom più due, totale sei. Ultimo testo ripete Salute tra le aggiunte, precedente richiesta Calendario/Finanza: chiarimento pendente; verificare inoltre se tutte sei devono essere visibili anziché overflow Altro. Nessuna modifica prodotto in questo checkpoint.
 
 Conferma NAVIGATION-SIX-GLASS-2026-11-13: «si» alla domanda esplicita Dashboard/Attività/Salute/Bloom/Finanza/Calendario, tutte sei direttamente visibili senza Altro. Stato ACTIVE; sostituisce la precedente implementazione con overflow, che non era decisione utente. Liquid Glass, stati e percorsi conservati; target accessibili e verifica compatto/testo grande. Nessuna IPA/deploy.
+
+## IPA-DELIVERY-2026-11-13 — ACTIVE
+
+Richiesta diretta: «produci l’ipa». Autorizzata nuova produzione delle modifiche correnti,senza ripetere richiesta packaging. La precedente proposta correzione catalogo/tastiera resta in attesa di approvazioneDEV02:nessuna conferma esplicita nel messaggioIPA. Nessun deploy backend. Ultima prova sei-voci fallita;workflowfinal89 vincolato a precedente candidato,non riutilizzabile per le nuove modifiche.

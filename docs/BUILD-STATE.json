@@ -711,5 +711,12 @@
     "diagnostics_artifact": 14064376228,
     "product_fix_applied": false,
     "next_run": null
+  },
+  "next_ipa_request": {
+    "authorized": true,
+    "decision": "IPA-DELIVERY-2026-11-13",
+    "status": "not_started_pending_product_fix_approval_and_candidate_validation",
+    "packaging_workflow_current90": "not_prepared",
+    "existing_package89": "pinned_to_previous_candidate_not_reusable"
   }
 }
