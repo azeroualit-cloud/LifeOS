@@ -1,5 +1,7 @@
 # Piano operativo LifeOS
 
+**Checkpoint 13 novembre 2026:** recupero43446654736 su57a23af passato (1unitario+1UI, zero fallimenti), conservati21casi del run precedente. Catalogo aggiuntivo1000prodotti/39marchi implementato su20f604a, controlli locali7importer+8selettore e validatori passati. [Nuova verifica mirata catalog-expansion](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43448734353) avviata:2unitari+1UI selezionati, esito/catture ancora da acquisire. Nessuna attesa attiva CI: monitoraggio all’utente. Nessuna IPA/deploy. Esclusione nuovi import applicata; rimozione alcolici preesistenti pendente confermaMETA01. Ultima IPA89 non include TDEE aggiornato né questi incrementi.
+
 **TDEE aggiornato e verificato — 12 novembre 2026.** [Run 43257504280](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43257504280), sorgente `b513c95`: compilazione, **23 unitari e 2 UI passati**, zero fallimenti/saltati. Verificate due sole pesate a un giorno di distanza, storico corto, ancoraggio a ultima pesata vecchia, esclusione dati oltre la finestra/futuri, copertura calorie e resistenza a una singola pesata anomala. Catture Salute e scenario ispezionate. Finestra: 14 giorni prima dell’ultima pesata, inclusa anche se oggi; nessun minimo arbitrario di numero/durata/confronti. Due date distinte necessarie per misurare variazione; copertura calorie 90% conservata. Modifica nel codice, **non nell’IPA 89 installata**; nuova IPA non richiesta. Nessun deploy.
 
 

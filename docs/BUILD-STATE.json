@@ -8,8 +8,8 @@
   "source_of_truth": "native-next overlay assembled through .github/actions/native-compat76/action.yml",
   "native_source_fingerprint": {
     "algorithm": "SHA-256 over sorted tracked native-next paths, NUL, canonical Git blob bytes, NUL",
-    "sha256": "b109e68f6dbc0bf421a2d8d6ac1192b4b83e57782811c0c7a0aee0cce5002351",
-    "source_commit": "e16e83c77a7d2477f9550cf37e9428d8f24573f5"
+    "sha256": "73897d5eef9e3e360c67dd60cdcea85e88c54bfdc405c721123e90be178f4064",
+    "source_commit": "20f604a0accaca626a8699aaece37ceb50d9da5d"
   },
   "latest_distributed_build": {
     "version": "0.10.27",
@@ -635,7 +635,7 @@
     "subsequent_change": "Only another UI test assertion aligned to new descriptive label; not selected in focused run. Product unchanged since b513c95."
   },
   "catalog_navigation_increment": {
-    "status": "focused_failed_test_fixture_and_scope_recovery_prepared",
+    "status": "23_cases_covered_across_initial_and_targeted_recovery",
     "source_commit": "e16e83c77a7d2477f9550cf37e9428d8f24573f5",
     "new_branded_formulations": 23,
     "brands": 5,
@@ -654,7 +654,12 @@
       "failed": 1
     },
     "recovery_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43446654736",
-    "recovery_source": "57a23afa7bcb0554f1a2c012eeb5c1199806ae02"
+    "recovery_source": "57a23afa7bcb0554f1a2c012eeb5c1199806ae02",
+    "recovery_result": {
+      "unit_passed": 1,
+      "ui_passed": 1,
+      "failed": 0
+    }
   },
   "community_catalog_expansion": {
     "records": 1000,
@@ -664,9 +669,14 @@
     "license": "ODbL1.0 separate dataset",
     "mass_records": 916,
     "volume_records": 84,
-    "status": "local_checks_passed_ios_prepared",
+    "status": "focused_ios_dispatched_user_monitors",
     "legacy_alcohol_removal": "pending_META01_confirmation",
     "ipa_authorized": false,
-    "backend_deploy": false
+    "backend_deploy": false,
+    "source_commit": "20f604a0accaca626a8699aaece37ceb50d9da5d",
+    "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43448734353",
+    "local_importer_tests_passed": 7,
+    "local_selector_tests_passed": 8,
+    "screenshots": "pending_new_run_artifacts"
   }
 }
