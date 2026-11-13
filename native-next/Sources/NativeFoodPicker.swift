@@ -82,6 +82,10 @@ struct NativeGenericFood: Codable, Identifiable {
     var supplementUnit: NativeSupplementUnit? = nil
     var defaultQuantity: Decimal? = nil
 
+    var isCommunitySourced: Bool {
+        guard let sourceURL, let host = URL(string: sourceURL)?.host?.lowercased() else { return false }
+        return host == "openfoodfacts.org" || host.hasSuffix(".openfoodfacts.org")
+    }
     var quantityUnit: NativeSupplementUnit { family == .supplement ? (supplementUnit ?? .legacyServing) : (measurementBasis == "ml" ? .millilitre : .gram) }
     var basisDivisor: Decimal { family == .supplement && !quantityUnit.isMassOrVolume ? 100 : 1 }
     var displayDetail: String? { brand.map { $0 + (id.hasPrefix("personal-") ? " · Personale" : "") } ?? detail }
@@ -192,7 +196,8 @@ struct NativeGenericFood: Codable, Identifiable {
 
     static let foods = loadCatalog("generic-foods")
     static let cocktails = loadCatalog("cocktails")
-    static let catalog = foods + cocktails + supplements + brandedFoods + brandedSupplements + italianBrands
+    static let catalog = foods + cocktails + supplements + brandedFoods + brandedSupplements + italianBrands + communityFoods
+    static let communityFoods = loadCatalog("open-food-facts-italy")
     static let italianBrands = loadCatalog("italian-brands")
     static let brandedFoods = loadCatalog("branded-foods")
     static let brandedSupplements = loadCatalog("branded-supplements")
@@ -291,6 +296,9 @@ struct NativeFoodPicker: View {
                                     Text(food.name)
                                     if let detail = food.displayDetail {
                                         Text(detail).font(.subheadline).foregroundStyle(.secondary)
+                                    }
+                                    if food.isCommunitySourced {
+                                        Text("Open Food Facts · dati collaborativi").font(.caption).foregroundStyle(.secondary)
                                     }
                                     if let cocktail = food.cocktail {
                                         Text("≈ \(NSDecimalNumber(decimal: food.calories)) kcal · \(cocktail.volumeML) ml / bicchiere")

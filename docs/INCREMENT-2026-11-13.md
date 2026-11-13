@@ -26,3 +26,8 @@ Widget: aprire/sincronizzare LifeOS → Impostazioni → Notifiche e Siri → Ag
 
 https://github.com/azeroualit-cloud/LifeOS/actions/runs/43440966964
 Sorgente e16e83c77a7d2477f9550cf37e9428d8f24573f5. Workflow manuale catalog-navigation, package_trial=false. Nessun risultato iOS ancora acquisito; l’utente monitora il run. Alla ripresa leggere esito e catture prima di avviare altri run.
+
+## Ampliamento successivo allo stesso giorno
+
+**Catalogo ampliato — 13 novembre 2026:** 1000 formulazioni aggiuntive di39marchi da Open Food Facts, separate dalle23schede ufficiali italiane. Dati collaborativi dichiarati nell’interfaccia, fonte prodotto e licenzaODbL visibili. Screening ingredienti/categorie esclude nuove voci alcol/vino/maiale, carne o gelatina di origine incerta e creatina; non certifica halal. Nessun duplicato di barcode con i cataloghi ufficiali;916basi g e84ml. Validazioni locali passate, nuova verifica iOS catalog-expansion da avviare. Recupero soli2test precedenti:43446654736,57a23af;21casi precedenti già passati, esito recupero non acquisito. Nessuna IPA/deploy. Rimozione anche degli alcolici esistenti: conferma META01 pendente.
+Dettagli e provenienza: ITALIAN-BRANDS-2026-11-13.md; diagnosi precedente: CATALOG-RECOVERY-2026-11-13.md. La proposta100–200 nelle sezioni iniziali è superata dall’obiettivo utente circa1000, ora implementato con fonte collaborativa esplicita.

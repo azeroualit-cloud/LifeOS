@@ -119,7 +119,10 @@ struct NativeNutritionQuickSheet: View {
                             }
                             if let note = selectedFood.dataNote { Text(note).font(.caption).foregroundStyle(.secondary) }
                             if let source = selectedFood.sourceURL, let url = URL(string: source), url.scheme == "https" {
-                                Link("Scheda prodotto", destination: url).font(.caption)
+                                Link(selectedFood.isCommunitySourced ? "Open Food Facts · scheda prodotto" : "Scheda prodotto", destination: url).font(.caption).accessibilityIdentifier("nutrition-product-source")
+                            }
+                            if selectedFood.isCommunitySourced, let license = URL(string: "https://opendatacommons.org/licenses/odbl/1.0/") {
+                                Link("Database Open Food Facts · licenza ODbL", destination: license).font(.caption).accessibilityIdentifier("nutrition-source-license")
                             }
                         }
                         if selectedFood.boneInEdiblePercent != nil {

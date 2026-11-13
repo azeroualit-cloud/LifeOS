@@ -1,5 +1,7 @@
 # LifeOS — checklist operativa unificata
 
+**Catalogo ampliato — 13 novembre 2026:** 1000 formulazioni aggiuntive di39marchi da Open Food Facts, separate dalle23schede ufficiali italiane. Dati collaborativi dichiarati nell’interfaccia, fonte prodotto e licenzaODbL visibili. Screening ingredienti/categorie esclude nuove voci alcol/vino/maiale, carne o gelatina di origine incerta e creatina; non certifica halal. Nessun duplicato di barcode con i cataloghi ufficiali;916basi g e84ml. Validazioni locali passate, nuova verifica iOS catalog-expansion da avviare. Recupero soli2test precedenti:43446654736,57a23af;21casi precedenti già passati, esito recupero non acquisito. Nessuna IPA/deploy. Rimozione anche degli alcolici esistenti: conferma META01 pendente.
+
 **TDEE aggiornato e verificato — 12 novembre 2026.** [Run 43257504280](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43257504280), sorgente `b513c95`: compilazione, **23 unitari e 2 UI passati**, zero fallimenti/saltati. Verificate due sole pesate a un giorno di distanza, storico corto, ancoraggio a ultima pesata vecchia, esclusione dati oltre la finestra/futuri, copertura calorie e resistenza a una singola pesata anomala. Catture Salute e scenario ispezionate. Finestra: 14 giorni prima dell’ultima pesata, inclusa anche se oggi; nessun minimo arbitrario di numero/durata/confronti. Due date distinte necessarie per misurare variazione; copertura calorie 90% conservata. Modifica nel codice, **non nell’IPA 89 installata**; nuova IPA non richiesta. Nessun deploy.
 
 

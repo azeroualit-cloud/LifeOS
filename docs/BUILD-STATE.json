@@ -652,6 +652,21 @@
     "ui_tests": {
       "passed": 4,
       "failed": 1
-    }
+    },
+    "recovery_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43446654736",
+    "recovery_source": "57a23afa7bcb0554f1a2c012eeb5c1199806ae02"
+  },
+  "community_catalog_expansion": {
+    "records": 1000,
+    "brands": 39,
+    "source": "Open Food Facts, collaborative packaging/manufacturer records",
+    "source_label_visible": true,
+    "license": "ODbL1.0 separate dataset",
+    "mass_records": 916,
+    "volume_records": 84,
+    "status": "local_checks_passed_ios_prepared",
+    "legacy_alcohol_removal": "pending_META01_confirmation",
+    "ipa_authorized": false,
+    "backend_deploy": false
   }
 }

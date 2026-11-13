@@ -103,6 +103,22 @@ final class NativePersonalFoodUITests: XCTestCase {
         capture("Porzione del personale modificato")
     }
 
+    func testCommunityBrandSearchShowsSourceAndPortion() {
+        let app = openCatalog()
+        replace(app.textFields["generic-food-search"], with: "Barilla", app: app)
+        let product = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS[c] %@ AND label CONTAINS[c] %@", "generic-food-", "Barilla", "Open Food Facts")).firstMatch
+        XCTAssertTrue(product.waitForExistence(timeout: 15))
+        capture("Ricerca marca nota con provenienza collaborativa")
+        product.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["nutrition-product-source"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.descendants(matching: .any)["nutrition-source-license"].exists)
+        let portion = app.textFields["quick-nutrition-Porzione"]
+        XCTAssertTrue(portion.waitForExistence(timeout: 10))
+        replace(portion, with: "150", app: app)
+        XCTAssertTrue(app.buttons["quick-nutrition-save"].isEnabled)
+        capture("Prodotto di marca con fonte licenza e porzione")
+    }
+
     func testSupplementTabSeparatesFoodsAndSearchesKnownBrands() {
         let app = openCatalog()
         let search = app.textFields["generic-food-search"]
