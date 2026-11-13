@@ -1,0 +1,325 @@
+name: LifeOS candidate 90 validation and authorized IPA
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: lifeos-candidate90
+  cancel-in-progress: false
+jobs:
+  full-suite:
+    if: github.event_name == 'workflow_dispatch' && github.repository == 'azeroualit-cloud/LifeOS' && github.ref == 'refs/heads/codex/revision77'
+    runs-on: macos-15
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+      - name: Verify authorized candidate and unoccupied release tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 scripts/verify-candidate90.py authorize
+          python3 - <<'PY'
+          import os, urllib.request, urllib.error
+          request=urllib.request.Request('https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']+'/releases/tags/ios-0.10.28-build90',headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})
+          try:
+              with urllib.request.urlopen(request,timeout=30) as response:
+                  raise RuntimeError('Build 90 release already exists; do not overwrite or repeat packaging')
+          except urllib.error.HTTPError as error:
+              if error.code != 404: raise
+          print('BUILD90_RELEASE_TAG_AVAILABLE')
+          PY
+      - uses: ./.github/actions/native-compat76
+        with:
+          variant: primary
+      - name: Compile app and full test suite
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcodebuild build-for-testing -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/final-compile.log 2>&1 || { tail -n 100 build/final-compile.log; exit 1; }
+      - name: Prepare compact preflight simulator from the same runtime
+        run: |
+          set -euo pipefail
+          xcrun simctl shutdown "$MAIN_DEVICE"
+          python3 - <<'PY'
+          import json,os,subprocess
+          runtime='com.apple.CoreSimulator.SimRuntime.iOS-'+os.environ['COMPAT_RUNTIME'].replace('.','-')
+          kind='com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation'
+          runtimes=json.loads(subprocess.check_output(['xcrun','simctl','list','runtimes','-j']))['runtimes']
+          assert any(r['identifier']==runtime and r.get('isAvailable') and any(d['identifier']==kind for d in r.get('supportedDeviceTypes',[])) for r in runtimes), 'Selected runtime does not support the compact device'
+          device=subprocess.check_output(['xcrun','simctl','create','LifeOS 90 compact preflight',kind,runtime],text=True).strip()
+          with open(os.environ['GITHUB_ENV'],'a') as env: env.write('COMPACT_DEVICE='+device+'\n')
+          subprocess.run(['xcrun','simctl','boot',device],check=True)
+          print('CANDIDATE90_COMPACT_PREFLIGHT',device,runtime)
+          PY
+      - name: Run three navigation and catalog regressions first on compact iPhone
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcrun simctl bootstatus "$COMPACT_DEVICE" -b
+          cases=(
+            LifeOSProbeUITests/NativeNavigationUITests/testSixVisibleTabsPreserveCalendarFinanceAndDashboardStacks
+            LifeOSProbeUITests/NativeNavigationUITests/testSixVisibleTabsWithLargeTextAndKeyboard
+            LifeOSProbeUITests/NativePersonalFoodUITests/testSupplementTabSeparatesFoodsAndSearchesKnownBrands
+          )
+          only=()
+          for test in "${cases[@]}"; do only+=("-only-testing:$test"); done
+          printf '%s\n' "${cases[@]}" > build/preflight-cases.txt
+          xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT_DEVICE" -parallel-testing-enabled NO -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 660 "${only[@]}" -resultBundlePath build/Preflight.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/preflight-tests.log 2>&1 || { grep -E 'error:|Test Case .*failed' build/preflight-tests.log || true; tail -n 80 build/preflight-tests.log; exit 1; }
+      - name: Require all three compact cases passed before the full regression
+        run: python3 scripts/verify-candidate90.py preflight
+      - name: Resume primary simulator for the remaining suite
+        run: |
+          set -euo pipefail
+          xcrun simctl shutdown "$COMPACT_DEVICE"
+          xcrun simctl boot "$MAIN_DEVICE"
+          xcrun simctl bootstatus "$MAIN_DEVICE" -b
+      - name: Run the remaining unit and UI tests
+        working-directory: app
+        run: |
+          set -euo pipefail
+          skip=()
+          while IFS= read -r test; do skip+=("-skip-testing:$test"); done < build/preflight-cases.txt
+          xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 660 "${skip[@]}" -resultBundlePath build/Final.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/final-tests.log 2>&1 || { grep -E 'error:|Test Case .*failed' build/final-tests.log || true; tail -n 120 build/final-tests.log; exit 1; }
+      - name: Verify unique passing cases and retain exact SHA evidence
+        run: python3 scripts/verify-candidate90.py tests
+      - name: Collect lightweight test diagnostics
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -u
+          mkdir -p app/build/candidate90-diagnostics
+          diag=app/build/candidate90-diagnostics
+          result=app/build/Final.xcresult
+          if [ ! -f "$result/Info.plist" ]; then result=app/build/Preflight.xcresult; fi
+          if [ -f app/build/preflight-tests.log ]; then cp app/build/preflight-tests.log "$diag/"; fi
+          printf 'Commit: %s\nRun: %s attempt %s\n' "$GITHUB_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" > "$diag/context.txt"
+          if [ -f app/build/final-tests.log ]; then
+            cp app/build/final-tests.log "$diag/final-tests.log"
+            # Preserve every matching line; the complete log remains available for context.
+            grep -E 'error:|Test Case .*failed|Executed [0-9]+ tests?, with [0-9]+ failures?' app/build/final-tests.log > "$diag/failures-and-counts.txt" || true
+          elif [ -f app/build/preflight-tests.log ]; then
+            grep -E 'error:|Test Case .*failed|Executed [0-9]+ tests?, with [0-9]+ failures?' app/build/preflight-tests.log > "$diag/failures-and-counts.txt" || true
+          else
+            printf 'Test log unavailable: the test step may not have started.\n' > "$diag/failures-and-counts.txt"
+          fi
+          if [ -f "$result/Info.plist" ]; then
+            for kind in summary tests; do
+              if xcrun xcresulttool get test-results "$kind" --path "$result" > "$diag/$kind.json.tmp" 2> "$diag/$kind-error.txt"; then
+                mv "$diag/$kind.json.tmp" "$diag/$kind.json"
+                rm "$diag/$kind-error.txt"
+              else
+                rm -f "$diag/$kind.json.tmp"
+                printf '%s extraction failed; see %s-error.txt.\n' "$kind" "$kind" >> "$diag/context.txt"
+              fi
+            done
+          else
+            printf 'Result bundle unavailable or incomplete; structured extraction not attempted.\n' >> "$diag/context.txt"
+          fi
+          {
+            printf '## LifeOS final test diagnostics\n\n'
+            printf 'Commit: `%s` · Run: `%s`, attempt `%s`\n\n' "$GITHUB_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT"
+            printf 'Lightweight artifact: `lifeos-candidate90-diagnostics-%s-%s`.\n\n' "$GITHUB_SHA" "$GITHUB_RUN_ATTEMPT"
+            printf 'First 100 failure/count lines (complete list and log in artifact):\n\n```text\n'
+            head -n 100 "$diag/failures-and-counts.txt"
+            printf '\n```\n\n'
+            cat "$diag/context.txt"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload lightweight test diagnostics
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: lifeos-candidate90-diagnostics-${{ github.sha }}-${{ github.run_attempt }}
+          if-no-files-found: warn
+          path: app/build/candidate90-diagnostics
+      - name: Export screenshots
+        if: ${{ !cancelled() }}
+        run: |
+          for suite in Preflight Final; do
+            if [ -f "app/build/$suite.xcresult/Info.plist" ]; then
+              xcrun xcresulttool export attachments --path "app/build/$suite.xcresult" --output-path "app/build/final-screenshots/$suite"
+            fi
+          done
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: lifeos-candidate90-validation-${{ github.sha }}-${{ github.run_attempt }}
+          path: |
+            app/build/final-*.log
+            app/build/Preflight.xcresult
+            app/build/Final.xcresult
+            app/build/final-screenshots
+
+  release-launches:
+    needs: full-suite
+    runs-on: macos-15
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+      - uses: ./.github/actions/native-compat76
+        with:
+          variant: primary
+      - name: Compile app and synthetic session test
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcodebuild build-for-testing -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/final-compile.log 2>&1 || { tail -n 100 build/final-compile.log; exit 1; }
+      - name: Create isolated simulators for Release startup checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os,subprocess
+          test_device=os.environ['MAIN_DEVICE']
+          subprocess.run(['xcrun','simctl','shutdown',test_device],check=True,timeout=120)
+          runtime=os.environ['COMPAT_RUNTIME']
+          device_type='com.apple.CoreSimulator.SimDeviceType.iPhone-15-Pro'
+          runtime_id='com.apple.CoreSimulator.SimRuntime.iOS-'+runtime.replace('.','-')
+          available=json.loads(subprocess.check_output(['xcrun','simctl','list','runtimes','-j']))['runtimes']
+          assert any(r['identifier']==runtime_id and r.get('isAvailable') for r in available),f'Compatible simulator runtime unavailable: {runtime_id}'
+          fresh_device=subprocess.check_output(['xcrun','simctl','create','LifeOS final fresh startup',device_type,runtime_id],text=True).strip()
+          fixture_device=subprocess.check_output(['xcrun','simctl','create','LifeOS final fixture startup',device_type,runtime_id],text=True).strip()
+          assert fresh_device and fixture_device and len({test_device,fresh_device,fixture_device})==3
+          for device in (fresh_device,fixture_device):
+              subprocess.run(['xcrun','simctl','boot',device],check=True)
+              subprocess.run(['xcrun','simctl','bootstatus',device,'-b'],check=True)
+          with open(os.environ['GITHUB_ENV'],'a') as env:
+              env.write('FINAL_VALIDATION_TEST_DEVICE='+test_device+'\n')
+              env.write('MAIN_DEVICE='+fixture_device+'\n')
+              env.write('FRESH_DEVICE='+fresh_device+'\n')
+          print('FINAL_STARTUP_SIMULATORS fresh='+fresh_device,'fixture='+fixture_device,'TYPE',device_type,'RUNTIME',runtime_id)
+          PY
+      - name: Prepare synthetic saved session
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -only-testing:LifeOSProbeTests/NativeSessionVaultTests/testPrepareSyntheticSavedSessionForReleaseStartup -resultBundlePath build/FinalSession.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/final-session.log 2>&1 || { tail -n 100 build/final-session.log; exit 1; }
+      - name: Build Release and verify four launches
+        working-directory: app
+        env:
+          LIFEOS_RELEASE_SESSION_FIXTURE: '1'
+        run: |
+          set -euo pipefail
+          xcodebuild build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -configuration Release -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -derivedDataPath release-build CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/final-release.log 2>&1 || { tail -n 100 build/final-release.log; exit 1; }
+          echo 'Release build finished; starting four launch checks'
+          python3 -u ../scripts/verify-release-launch75.py 2>&1 | tee build/release-launch-checks.log
+      - name: Verify four Release launches and retain SHA evidence
+        run: python3 scripts/verify-candidate90.py release
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: lifeos-candidate90-release-proof-${{ github.sha }}-${{ github.run_attempt }}
+          if-no-files-found: warn
+          path: app/build/candidate90-release
+      - uses: actions/upload-artifact@v4
+        id: release-evidence
+        continue-on-error: true
+        if: always()
+        with:
+          name: lifeos-candidate90-release-launches-${{ github.sha }}-${{ github.run_attempt }}
+          path: |
+            app/build/final-*.log
+            app/build/FinalSession.xcresult
+            app/release-launch
+            app/build/release-launch-checks.log
+      - name: Retry Release evidence upload
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() && steps.release-evidence.outcome == 'failure' }}
+        with:
+          name: lifeos-candidate90-release-launches-${{ github.sha }}-${{ github.run_attempt }}
+          overwrite: true
+          path: |
+            app/build/final-*.log
+            app/build/FinalSession.xcresult
+            app/release-launch
+            app/build/release-launch-checks.log
+  package90:
+    needs: [full-suite, release-launches]
+    runs-on: macos-15
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: lifeos-candidate90-diagnostics-${{ github.sha }}-${{ github.run_attempt }}
+          path: candidate90-evidence/tests
+      - uses: actions/download-artifact@v4
+        with:
+          name: lifeos-candidate90-release-proof-${{ github.sha }}-${{ github.run_attempt }}
+          path: candidate90-evidence/release
+      - name: Require passing gates from this exact commit and run attempt
+        run: |
+          set -euo pipefail
+          python3 scripts/verify-candidate90.py authorize
+          python3 scripts/verify-candidate90.py package-inputs
+      - uses: ./.github/actions/native-compat76
+        with:
+          variant: package
+      - name: Archive and verify iPhone IPA and all catalog resources
+        working-directory: app
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          xcodebuild archive -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -configuration Release -destination 'generic/platform=iOS' -archivePath build/LifeOS.xcarchive CODE_SIGNING_ALLOWED=NO MARKETING_VERSION=0.10.28 CURRENT_PROJECT_VERSION=90 > build/archive90.log 2>&1 || { tail -n 100 build/archive90.log; exit 1; }
+          mkdir -p build/Payload download
+          cp -R build/LifeOS.xcarchive/Products/Applications/LifeOSProbe.app build/Payload/
+          (cd build && zip -qr ../download/LifeOS-90.ipa Payload)
+          python3 ../scripts/verify-native-package.py download/LifeOS-90.ipa --version 0.10.28 --build 90
+          python3 ../scripts/verify-startup-imports.py download/LifeOS-90.ipa
+          (cd .. && python3 scripts/verify-candidate90.py ipa --ipa app/download/LifeOS-90.ipa)
+          cp ../candidate90-evidence/BUILD-PROVENANCE.json download/
+          (cd download && shasum -a 256 LifeOS-90.ipa BUILD-PROVENANCE.json > SHA256.txt)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LifeOS-90-${{ github.sha }}-${{ github.run_attempt }}
+          if-no-files-found: error
+          path: app/download/
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: lifeos-candidate90-package-log-${{ github.sha }}-${{ github.run_attempt }}
+          if-no-files-found: warn
+          path: app/build/archive90.log
+
+  publish90:
+    needs: package90
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: LifeOS-90-${{ github.sha }}-${{ github.run_attempt }}
+      - name: Verify this run provenance and publish without replacing a release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          sha256sum --check SHA256.txt
+          python3 - <<'PY'
+          import json,os
+          proof=json.load(open('BUILD-PROVENANCE.json'))
+          for key,env in [('sourceCommit','GITHUB_SHA'),('runID','GITHUB_RUN_ID'),('runAttempt','GITHUB_RUN_ATTEMPT')]:
+              assert proof[key]==os.environ[env], (key,proof)
+          assert proof['version']=='0.10.28' and proof['build']==90
+          assert proof['testsPassed']>=405 and proof['releaseLaunchesPassed']==4
+          assert proof['backendDeployment'] is False and proof['physicalAcceptance'] is False
+          PY
+          cat > RELEASE-NOTES.md <<EOF
+          Sei destinazioni direttamente visibili in Liquid Glass; Integratori separati nel catalogo; ricerca con marche, alias e barcode; 1000 formulazioni Open Food Facts con attribuzione e 23 schede ufficiali. Conservati i cocktail da discoteca, esclusi gli alcolici da supermercato dal catalogo pubblico. Aggiornamento TDEE e tastiera senza barra sovrapposta.
+
+          Sorgente: $GITHUB_SHA. Collaudo mirato compatto, restante suite e quattro avvii Release: https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID.
+
+          IPA da firmare con Signulous mantenendo widget e App Groups. Prove fisiche su iPhone e accettazione ancora aperte. Nessun deploy backend. Dati Open Food Facts e contributori, ODbL 1.0: https://openfoodfacts.org e https://opendatacommons.org/licenses/odbl/1.0/.
+          EOF
+          gh release create ios-0.10.28-build90 LifeOS-90.ipa SHA256.txt BUILD-PROVENANCE.json \
+            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "LifeOS 0.10.28 build 90" --latest \
+            --notes-file RELEASE-NOTES.md
