@@ -8,8 +8,8 @@
   "source_of_truth": "native-next overlay assembled through .github/actions/native-compat76/action.yml",
   "native_source_fingerprint": {
     "algorithm": "SHA-256 over sorted tracked native-next paths, NUL, canonical Git blob bytes, NUL",
-    "sha256": "04e4c0d9d5f8a9b738a203ed0e136b61d928f0b318026f00006155a83566ae5a",
-    "source_commit": "aa3fb83ec452a5bca32bbfdf0cb6c9781508f3ac"
+    "sha256": "e88d7cada5e71fb07e1e043eccb0fc9c2b3fa3c29be7356130d769907b8636f9",
+    "source_commit": "47cc00e4a89c3b73b95292f79e0c2bbabbe08377"
   },
   "latest_distributed_build": {
     "version": "0.10.27",
@@ -683,7 +683,7 @@
     "failed": 0
   },
   "six_tab_glass_revision": {
-    "status": "product_fix_passed_two_targeted_cases_remaining_test_selector_repair",
+    "status": "product_fix_verified_two_cases_retained_remaining_test_recovery_running",
     "order": [
       "Dashboard",
       "Attività",
@@ -697,7 +697,7 @@
     "nightclub_cocktails_kept": 30,
     "history_preserved": true,
     "ipa_authorized": true,
-    "source_commit": "aa3fb83ec452a5bca32bbfdf0cb6c9781508f3ac",
+    "source_commit": "47cc00e4a89c3b73b95292f79e0c2bbabbe08377",
     "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43474910142",
     "selected_unit_tests": 3,
     "selected_ui_tests": 3,
@@ -714,18 +714,18 @@
     },
     "diagnostics_artifact": 14077666871,
     "product_fix_applied": true,
-    "next_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43506535087"
+    "next_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43522275345"
   },
   "next_ipa_request": {
     "authorized": true,
     "decision": "IPA-DELIVERY-2026-11-13",
-    "status": "single_ui_recovery_with_two_verified_prior_passes_ready",
+    "status": "single_ui_recovery_and_conditional_ipa_dispatched_user_monitors",
     "packaging_workflow_current90": ".github/workflows/lifeos-candidate90.yml",
     "existing_package89": "pinned_to_previous_candidate_not_reusable",
     "version": "0.10.28",
     "build": 90,
-    "source_commit": "aa3fb83ec452a5bca32bbfdf0cb6c9781508f3ac",
-    "run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43506535087",
+    "source_commit": "47cc00e4a89c3b73b95292f79e0c2bbabbe08377",
+    "run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43522275345",
     "default_workflow_registration_commit": "672fcad9f9233b7ffe75223ce422368fc781637e",
     "reused_preflight": {
       "run": "43506535087",

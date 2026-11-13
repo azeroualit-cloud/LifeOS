@@ -45,3 +45,8 @@ Riuso rigoroso proposto:2casi passati dal43506535087,sourceaa3fb83,artifactdiagn
 **Recupero del solo test rimasto — 13 novembre 2026.** Il run 43506535087 su `aa3fb83` ha superato compilazione, navigazione/stati e ricerca catalogo con tastiera. Rimaneva solo il selettore Bloom: la X «chiudi» è un ramo fratello del campo. Corretto il test a livello app, senza modificare il prodotto. Il nuovo gate conserva i due risultati validi dopo confronto rigoroso di prodotto, assemblaggio e test; esegue un solo UI compatto, poi le prove restanti saltando tutti e tre i casi coperti. Provenienza distinta: due conservati e uno nuovo. Sei test locali del gate e verifica delle evidenze reali passati. Nessuna IPA 90 ancora prodotta; nessun deploy backend.
 
 La partizione viene verificata contro l’artefatto 14077666871 del run 43506535087: due casi passati, un fallito, nessuno saltato. Tutto il prodotto e l’assemblaggio devono essere identici; l’intero file del test di navigazione deve essere identico fuori dal solo metodo riparato e gli altri file UI devono essere immutati. Il riepilogo xcresult corrente resta di un solo test; la copertura aggregata separata e BUILD-PROVENANCE.json indicano le due fonti. Se il prodotto o i test validi cambiano, il riuso è rifiutato.
+
+## Run corrente: recupero singolo
+
+https://github.com/azeroualit-cloud/LifeOS/actions/runs/43522275345
+Sorgente `47cc00e4a89c3b73b95292f79e0c2bbabbe08377`. Non rilanciare senza analizzare questo risultato. Conservare la distinzione tra 2 casi UI riutilizzati dal run 43506535087 e il caso riparato eseguito qui; tutte le prove restanti e Release sono nuove sul candidato corrente. Autorizzazioni correzione e IPA già registrate.
