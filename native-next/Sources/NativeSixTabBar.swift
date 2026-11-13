@@ -72,15 +72,35 @@ struct NativeTabContainer: UIViewControllerRepresentable {
         NativeTabContainerController()
     }
     func updateUIViewController(_ controller: NativeTabContainerController, context: Context) {
-        // Hosting controllers start a separate SwiftUI root. Forward the complete
-        // inherited environment, including Dynamic Type, locale and accessibility.
+        // Hosting roots inherit public display preferences, not the parent's
+        // private presentation/dismiss context. Each host owns its own sheets.
         controller.show(selection, environment: context.environment, content: content)
+    }
+}
+
+private struct NativeTabInheritedEnvironment {
+    let dynamicTypeSize: DynamicTypeSize
+    let locale: Locale
+    let layoutDirection: LayoutDirection
+    let colorScheme: ColorScheme
+    let calendar: Calendar
+    let timeZone: TimeZone
+    let forceReduceMotion: Bool
+
+    init(_ environment: EnvironmentValues) {
+        dynamicTypeSize = environment.dynamicTypeSize
+        locale = environment.locale
+        layoutDirection = environment.layoutDirection
+        colorScheme = environment.colorScheme
+        calendar = environment.calendar
+        timeZone = environment.timeZone
+        forceReduceMotion = environment.nativeForceReduceMotion
     }
 }
 
 private struct NativeTabPresentationSnapshot {
     let content: AnyView
-    let environment: EnvironmentValues
+    let environment: NativeTabInheritedEnvironment
 }
 
 /// Updating observable content preserves SwiftUI's presentation identity. The
@@ -107,8 +127,17 @@ private struct NativeTabPresentationSnapshot {
     @ObservedObject var presentation: NativeTabPresentationModel
 
     var body: some View {
+        // Never copy EnvironmentValues.self across hosting roots: it also
+        // carries SwiftUI's private presentation/focus state. System read-only
+        // accessibility preferences are resolved by each host from UIKit.
         presentation.snapshot.content
-            .environment(\.self, presentation.snapshot.environment)
+            .environment(\.dynamicTypeSize, presentation.snapshot.environment.dynamicTypeSize)
+            .environment(\.locale, presentation.snapshot.environment.locale)
+            .environment(\.layoutDirection, presentation.snapshot.environment.layoutDirection)
+            .environment(\.colorScheme, presentation.snapshot.environment.colorScheme)
+            .environment(\.calendar, presentation.snapshot.environment.calendar)
+            .environment(\.timeZone, presentation.snapshot.environment.timeZone)
+            .environment(\.nativeForceReduceMotion, presentation.snapshot.environment.forceReduceMotion)
     }
 }
 
@@ -127,8 +156,9 @@ final class NativeTabContainerController: UIViewController {
 
     func show(_ tab: NativeTab, environment: EnvironmentValues, content: (NativeTab) -> AnyView) {
         loadViewIfNeeded()
+        let inherited = NativeTabInheritedEnvironment(environment)
         for (key, host) in hosts {
-            host.presentation.update(NativeTabPresentationSnapshot(content: content(key), environment: environment))
+            host.presentation.update(NativeTabPresentationSnapshot(content: content(key), environment: inherited))
         }
         guard selected != tab else { return }
         let forwardsAppearance = view.window != nil
@@ -142,7 +172,7 @@ final class NativeTabContainerController: UIViewController {
         let host: UIHostingController<NativeStableTabRoot>
         if let existing = hosts[tab] { host = existing.controller }
         else {
-            let presentation = NativeTabPresentationModel(snapshot: NativeTabPresentationSnapshot(content: content(tab), environment: environment))
+            let presentation = NativeTabPresentationModel(snapshot: NativeTabPresentationSnapshot(content: content(tab), environment: inherited))
             host = UIHostingController(rootView: NativeStableTabRoot(presentation: presentation))
             host.view.backgroundColor = .clear
             hosts[tab] = Host(controller: host, presentation: presentation)

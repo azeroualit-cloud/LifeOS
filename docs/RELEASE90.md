@@ -20,3 +20,9 @@ Acquisire esiti reali,conteggi,quattro avvii e artefatti;scaricareIPA pubblicata
 
 https://github.com/azeroualit-cloud/LifeOS/actions/runs/43499809697
 Sorgente1a71b9556b28187dd3f23b59c38c38018f346602. Workflow registrato su main alcommit672fcad9f9233b7ffe75223ce422368fc781637e dopo404API,poiavviato su codex/revision77;nessunjobautorizzato su main. Tutte le fasi usano loSHAevento,nonilramomobile. Nessuna attesaattiva richiesta:utente comunica esito. Nonriavviareautomaticamente suiteintera dopo fallimento;analizzare loge conservare prove valide.
+
+## Diagnosi dopo il primo tentativo
+
+**Diagnosi43499809697,sorgente1a71b95:** compilazione passata;preflight compatto1/3UIpassati,2falliti;restante suite,Release eIPA non eseguiti. TestBloom aveva selezionatoCategorie:gerarchia delrun43474910142dimostraX nativa label«chiudi» dentroSearchField;ora query precisa,nessun selettore geometrico. Catalogo ancora si chiude:video mostra caret nelcampo poi dismiss,escluso tapfuori. Correzione giàautorizzata raffinata con un solo cambiamento discriminante:eliminata copia integraleEnvironmentValues tra host,trasferite solo preferenze pubbliche esplicite;wrapperstabile e observer tastiera invariati. Verifica runtime ancora necessaria. NessunaIPAprodotta,nessundeploy.
+
+Non richiedere nuovamente approvazioneDEV02:è la stessa regressione catalogo già approvata. PubblicazioneIPA ancora autorizzata. Poiché il contenitore cambia,il singoloUIstati passato va rieseguito come regressione pertinente;nessunasuite lunga è stata eseguita nel primo tentativo. Nuovo preflightgli stessi3casi,restante suite solo se passano. Preferenze esplicite:dynamicTypeSize,locale,layoutDirection,colorScheme,calendar,timeZone,nativeForceReduceMotion. Preferenze readonlyaccessibilità risolte daUIKit inognihost;non copiare contesti di presentazione privati.

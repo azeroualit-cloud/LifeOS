@@ -683,7 +683,7 @@
     "failed": 0
   },
   "six_tab_glass_revision": {
-    "status": "approved_stable_host_fix_in_candidate90_validation",
+    "status": "public_environment_only_refinement_pending_validation",
     "order": [
       "Dashboard",
       "Attività",
@@ -703,10 +703,14 @@
     "selected_ui_tests": 3,
     "screenshots": "pending_run_artifacts",
     "result": {
-      "unit_passed": 3,
-      "ui_passed": 1,
-      "ui_failed": 2,
-      "compile": "passed"
+      "run": "43499809697",
+      "source_commit": "1a71b9556b28187dd3f23b59c38c38018f346602",
+      "compile": "passed",
+      "targeted_ui_passed": 1,
+      "targeted_ui_failed": 2,
+      "remaining_suite": "not_run",
+      "release_launches": "not_run",
+      "ipa": "not_created"
     },
     "diagnostics_artifact": 14064376228,
     "product_fix_applied": true,
@@ -715,7 +719,7 @@
   "next_ipa_request": {
     "authorized": true,
     "decision": "IPA-DELIVERY-2026-11-13",
-    "status": "validation_and_conditional_packaging_dispatched_user_monitors",
+    "status": "first_preflight_failed_same_approved_fix_refined_pending_new_run",
     "packaging_workflow_current90": ".github/workflows/lifeos-candidate90.yml",
     "existing_package89": "pinned_to_previous_candidate_not_reusable",
     "version": "0.10.28",
