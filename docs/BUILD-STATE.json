@@ -683,7 +683,7 @@
     "failed": 0
   },
   "six_tab_glass_revision": {
-    "status": "focused_compact_ios_dispatched_user_monitors",
+    "status": "failed_product_catalog_keyboard_regression_pending_DEV02_approval",
     "order": [
       "Dashboard",
       "Attività",
@@ -701,6 +701,15 @@
     "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43474910142",
     "selected_unit_tests": 3,
     "selected_ui_tests": 3,
-    "screenshots": "pending_run_artifacts"
+    "screenshots": "pending_run_artifacts",
+    "result": {
+      "unit_passed": 3,
+      "ui_passed": 1,
+      "ui_failed": 2,
+      "compile": "passed"
+    },
+    "diagnostics_artifact": 14064376228,
+    "product_fix_applied": false,
+    "next_run": null
   }
 }

@@ -100,9 +100,20 @@ final class NativeNavigationUITests: XCTestCase {
         let hidden = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"), object: app.mainTabBar)
         XCTAssertEqual(XCTWaiter.wait(for: [hidden], timeout: 10), .completed, "The navigation bar should not cover the keyboard")
         capture("Ricerca Bloom e tastiera senza barra sovrapposta")
-        let cancel = app.buttons.matching(NSPredicate(format: "label IN %@", ["Annulla", "Cancel"])).firstMatch
-        XCTAssertTrue(cancel.waitForExistence(timeout: 10))
-        cancel.tap()
+        // On this iOS runtime the native search dismissal is an X beside the
+        // field, rather than a text button named Cancel. Select that visible
+        // control by its observed relationship to the active search field.
+        let searchFrame = search.frame
+        let close = app.buttons.allElementsBoundByIndex.filter {
+            $0.isHittable && $0.frame.midX > searchFrame.maxX &&
+            abs($0.frame.midY - searchFrame.midY) < max(searchFrame.height, 44) / 2
+        }.min { $0.frame.minX < $1.frame.minX }
+        guard let close else {
+            XCTFail("Missing native dismissal control beside the search field: " + app.debugDescription)
+            return
+        }
+        print("NATIVE_SEARCH_DISMISS_LABEL " + close.label)
+        close.tap()
         XCTAssertTrue(app.mainTabBar.waitForExistence(timeout: 10))
         assertSixVisibleTargets(app)
         capture("Barra ripristinata dopo la tastiera")

@@ -1259,5 +1259,15 @@
     "rule": "Barra Liquid Glass con tutte sei destinazioni direttamente visibili, senza Altro: Dashboard,Attività,Salute,Bloom,Finanza,Calendario. Preservare stati e percorsi; verificare compatto e testo grande.",
     "confirmation_quote": "si",
     "confirmation_source": "Risposta alla domanda esplicita sei voci e nessun Altro,13novembre2026"
+  },
+  "six_tabs_keyboard_repair_proposal": {
+    "id": "SIX-TABS-KEYBOARD-REPAIR-2026-11-13",
+    "status": "PENDING_APPROVAL",
+    "recorded_on": "2026-11-13",
+    "provenance": "Proposta assistente dopo fallimento CI e riproduzione nella fixture,non nuova decisione utente",
+    "observed": "Catalogo si chiude quando compare tastiera dopo tap ricerca",
+    "proposal": "Radici UIHostingController stabili;contenuto/ambiente aggiornati tramite modello osservabile;design e6destinazioni invariati",
+    "approval_requested_under": "DEV-02",
+    "product_fix_applied": false
   }
 }

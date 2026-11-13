@@ -24,3 +24,11 @@ Catalogo1000già provato su20f604a,run43448734353:2unitari e1UI passati,catture 
 
 https://github.com/azeroualit-cloud/LifeOS/actions/runs/43474910142
 Commit8e17d1cc34ac38be13b02d1ce70603912692c6e7,modalitàsix-glass,devicecompact,package_trial=false. Esito e screenshot da acquisire;nessun monitoraggio attivo.
+
+## Esito e proposta DEV02
+
+**Run43474910142 fallito,sorgente8e17d1c:** compilazione e3unitari policy passati;UIstati/navigazione passata,2UI fallite(totale4/6). Bloom cerca Annulla ma il runtime mostraX: adattato solo test al controllo visibile accanto al campo. Regressione prodotto riprodotta: tap ricerca catalogo → tastiera → foglio catalogo scompare,restano campi quickentry. Correlazione forte con riassegnazione host.rootView su aggiornamento keyboardVisible. Proposta concreta:radici hosting stabili,aggiornamenti tramite modello SwiftUIosservabile senza riassegnare rootView;ambiente/tema/stati conservati. Approvazione DEV02 richiesta,in attesa;nessuna modifica prodotto per questo difetto ancora applicata,nessun nuovo run. Nessuna IPA/deploy.
+
+Evidenza: NativePersonalFoodUITests:29,log t20.76 tap generic-food-search;t23.42 campo sparito;t26.46 solo quick-nutrition-Proteine/Carboidrati/Grassi/Fibre. Nessuna selezione prodotto o dismiss intenzionale intermedio. NativeTabContainerController.show riassegna rootView di tutti gli host prima di verificare se il tab è cambiato; keyboardVisible in NativeRoot provoca questo percorso. Causa sostenuta da codice+sequenza,da discriminare nella verifica mirata,non dichiarata già risolta.
+
+Soluzione proposta,non applicata:per ogni tab UIHostingController<NativeStableTabRoot> creato una volta;root osserva modello per snapshot contenuto+EnvironmentValues;aggiornamenti coalescenti e generation-check sul mainactor successivo,evitando pubblicazione durante updateUIViewController;nessuna riassegnazione controller.rootView. Caching e lifecycle restano. Regressioni:ricerca catalogo resta aperta e utilizzabile,tastiera Bloom chiude correttamente,barra ritorna,stati dei sei stack conservati. Rerun UIstati giustificato dal cambio del contenitore;non ripetere3unitari policy già passati né catalogo1000 invariato.
