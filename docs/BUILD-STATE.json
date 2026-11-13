@@ -8,8 +8,8 @@
   "source_of_truth": "native-next overlay assembled through .github/actions/native-compat76/action.yml",
   "native_source_fingerprint": {
     "algorithm": "SHA-256 over sorted tracked native-next paths, NUL, canonical Git blob bytes, NUL",
-    "sha256": "3a3cc91c193e3e0a8a6fdd12e2e368e686b35ccafb572a70e923cced96d43d73",
-    "source_commit": "b513c956b3203c610cff7e85f8df3bd800eb892d"
+    "sha256": "b109e68f6dbc0bf421a2d8d6ac1192b4b83e57782811c0c7a0aee0cce5002351",
+    "source_commit": "e16e83c77a7d2477f9550cf37e9428d8f24573f5"
   },
   "latest_distributed_build": {
     "version": "0.10.27",
@@ -635,13 +635,15 @@
     "subsequent_change": "Only another UI test assertion aligned to new descriptive label; not selected in focused run. Product unchanged since b513c95."
   },
   "catalog_navigation_increment": {
-    "status": "implemented_pending_focused_ios",
-    "source_commit": "to record after commit",
+    "status": "focused_ios_dispatched_user_monitors",
+    "source_commit": "e16e83c77a7d2477f9550cf37e9428d8f24573f5",
     "new_branded_formulations": 23,
     "brands": 5,
     "coop_supplements_reclassified": 32,
     "packaging_authorized": false,
     "backend_deploy": false,
-    "physical_widget_alarm": "pending_user_evidence"
+    "physical_widget_alarm": "pending_user_evidence",
+    "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43440966964",
+    "screenshots": "pending_run_artifacts"
   }
 }

@@ -21,3 +21,8 @@ Validazioni locali: verify-branded-catalog completo2893 e verify-italian-brands2
 Sveglia: iOS26+, modalità reale, evento non ricorrente con inizio2–3minuti futuro → Avviso evento → Sveglia urgente → salva e autorizza. Bloccare iPhone, controllare suono/avviso/Ferma. È locale all’iPhone, distinta da Promemoria locali. Conservare eventuale messaggio Sveglia non aggiornata. Prova fisica ancora aperta.
 
 Widget: aprire/sincronizzare LifeOS → Impostazioni → Notifiche e Siri → Aggiorna widget2×2; leggere stato. Galleria Home: Life OS · Oggi, formato piccolo. Assente: verificare estensione conservata nella firma; vuoto con avviso App Groups: stessa group.com.nas.lifeos per app/estensione. Non attribuire a firma o prodotto senza sintomo. L’utente deve ancora comunicare se assente/vuoto/vecchio e messaggio. Nessuna reinstallazione/cancellazione prescritta.
+
+## Run corrente
+
+https://github.com/azeroualit-cloud/LifeOS/actions/runs/43440966964
+Sorgente e16e83c77a7d2477f9550cf37e9428d8f24573f5. Workflow manuale catalog-navigation, package_trial=false. Nessun risultato iOS ancora acquisito; l’utente monitora il run. Alla ripresa leggere esito e catture prima di avviare altri run.
