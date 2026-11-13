@@ -19,3 +19,8 @@ Non eliminare per sottostringhe:aceti,lievito di birra,acqua e bibite non sono a
 Validazioni locali cataloghi e8test selettore passati;conteggio128esclusioni riprodotto sulla fonte. CI six-glass preparata su simulatore compatto:3unitari policy e3UI(navigazione/stati,testo grande/tastiera,catalogo integratori). Compilazione,esito e nuove catture da acquisire dal run. Non dichiarare il comportamento fisico o l’accettazione sulla sola compilazione.
 
 Catalogo1000già provato su20f604a,run43448734353:2unitari e1UI passati,catture fonte/licenza/porzione ispezionate. Non ripetere quelle prove senza cambiamenti rilevanti. Il recupero precedente43446654736ha superato1unitario+1UI;21casi del precedente run conservati.
+
+## Run da analizzare alla ripresa
+
+https://github.com/azeroualit-cloud/LifeOS/actions/runs/43474910142
+Commit8e17d1cc34ac38be13b02d1ce70603912692c6e7,modalitàsix-glass,devicecompact,package_trial=false. Esito e screenshot da acquisire;nessun monitoraggio attivo.

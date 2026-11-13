@@ -8,8 +8,8 @@
   "source_of_truth": "native-next overlay assembled through .github/actions/native-compat76/action.yml",
   "native_source_fingerprint": {
     "algorithm": "SHA-256 over sorted tracked native-next paths, NUL, canonical Git blob bytes, NUL",
-    "sha256": "73897d5eef9e3e360c67dd60cdcea85e88c54bfdc405c721123e90be178f4064",
-    "source_commit": "20f604a0accaca626a8699aaece37ceb50d9da5d"
+    "sha256": "fd29dd112bb68defea31c65c3c6d83775f54a83b147f6e2271c9590582a892de",
+    "source_commit": "8e17d1cc34ac38be13b02d1ce70603912692c6e7"
   },
   "latest_distributed_build": {
     "version": "0.10.27",
@@ -683,7 +683,7 @@
     "failed": 0
   },
   "six_tab_glass_revision": {
-    "status": "implemented_pending_compact_focused_ci",
+    "status": "focused_compact_ios_dispatched_user_monitors",
     "order": [
       "Dashboard",
       "Attività",
@@ -696,6 +696,11 @@
     "supermarket_items_hidden": 128,
     "nightclub_cocktails_kept": 30,
     "history_preserved": true,
-    "ipa_authorized": false
+    "ipa_authorized": false,
+    "source_commit": "8e17d1cc34ac38be13b02d1ce70603912692c6e7",
+    "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43474910142",
+    "selected_unit_tests": 3,
+    "selected_ui_tests": 3,
+    "screenshots": "pending_run_artifacts"
   }
 }
