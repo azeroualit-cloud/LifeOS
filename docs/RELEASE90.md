@@ -1,4 +1,4 @@
-# Candidato0.10.28build90
+# Candidato 0.10.28 build 90
 
 Richiesta utente13novembre2026«produci l’ipa»,poi«confermo» sulla correzione catalogo/tastiera. Autorizzati correzione,verifica,confezionamento e consegna. Non richiedere nuovamente queste autorizzazioni per lo stesso ambito. Nessun deploybackend,cancellazione dati o accettazione fisica implicita.
 
@@ -31,3 +31,17 @@ Non richiedere nuovamente approvazioneDEV02:è la stessa regressione catalogo gi
 
 https://github.com/azeroualit-cloud/LifeOS/actions/runs/43506535087
 Sorgenteaa3fb83ec452a5bca32bbfdf0cb6c9781508f3ac. Non rilanciare altri tentativi prima di analizzarne esito/log. Il primo tentativo non ha eseguito restante suite,Release oIPA. Nessuna nuova approvazione necessaria per questa stessa correzione/produzione.
+
+## Esito secondo tentativo:solo test residuo
+
+**Run43506535087,sorgenteaa3fb83:catalogo corretto.** Compilazione e2/3UI mirati passati(navigazione/stati,catalogo con tastiera/ricerca),unico errore neltestBloom:querycercavaX chiudi dentroSearchField,ma gerarchia9C90D51B mostra ramo fratello. Corretto solo iltest a queryesatta«chiudi» nell’app con attesa barra interattiva. Codiceapp/risorse/configurazione invariati rispettoaa3fb83. Preparato riuso dei2casi passati,recupero delsoloUIrimasto,poi restante suite/Release/IPA gated. Nessunasuite lunga è stataeseguita nei2tentativi90;nessunaIPA90prodotta,nessundeploybackend.
+
+Evidenza:a11yfinal-screenshots/Preflight/9C90D51B-32AF-4B87-9755-0079F8567336.txt righe54–66 mostra SearchField eX come rami fratelli,labelchiudi. La querynelcampo era errata. Non modificare prodotto né richiedere nuove approvazioni per correggere quel selettore. Catture catalogo ebarra6voci ispezionate;catalogo riaperto e ricerca completata neltestpassato.
+
+Riuso rigoroso proposto:2casi passati dal43506535087,sourceaa3fb83,artifactdiagnostico14077666871;confronto immutabilità prodotto/assembly e testpassati,poi unUIrecupero sulnuovoSHA. Distinguere prove aggregate da casi eseguiti nelnuovorun;restante suite saltatutti3casi coperti. Confezionamento deve preservare provenienza di entrambiirun.
+
+## Recupero senza ripetere i due casi validi
+
+**Recupero del solo test rimasto — 13 novembre 2026.** Il run 43506535087 su `aa3fb83` ha superato compilazione, navigazione/stati e ricerca catalogo con tastiera. Rimaneva solo il selettore Bloom: la X «chiudi» è un ramo fratello del campo. Corretto il test a livello app, senza modificare il prodotto. Il nuovo gate conserva i due risultati validi dopo confronto rigoroso di prodotto, assemblaggio e test; esegue un solo UI compatto, poi le prove restanti saltando tutti e tre i casi coperti. Provenienza distinta: due conservati e uno nuovo. Sei test locali del gate e verifica delle evidenze reali passati. Nessuna IPA 90 ancora prodotta; nessun deploy backend.
+
+La partizione viene verificata contro l’artefatto 14077666871 del run 43506535087: due casi passati, un fallito, nessuno saltato. Tutto il prodotto e l’assemblaggio devono essere identici; l’intero file del test di navigazione deve essere identico fuori dal solo metodo riparato e gli altri file UI devono essere immutati. Il riepilogo xcresult corrente resta di un solo test; la copertura aggregata separata e BUILD-PROVENANCE.json indicano le due fonti. Se il prodotto o i test validi cambiano, il riuso è rifiutato.

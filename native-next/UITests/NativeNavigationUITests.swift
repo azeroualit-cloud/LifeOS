@@ -100,13 +100,15 @@ final class NativeNavigationUITests: XCTestCase {
         let hidden = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"), object: app.mainTabBar)
         XCTAssertEqual(XCTWaiter.wait(for: [hidden], timeout: 10), .completed, "The navigation bar should not cover the keyboard")
         capture("Ricerca Bloom e tastiera senza barra sovrapposta")
-        // Captured accessibility hierarchy: the native X is a button labeled
-        // "chiudi" inside the active SearchField, not the category folder below.
-        let close = search.buttons.matching(NSPredicate(format: "label IN %@", ["chiudi", "Chiudi", "Close"])).firstMatch
+        // The captured hierarchy puts the native "chiudi" button in a sibling
+        // branch beside the SearchField. Match its exact label at app scope.
+        let close = app.buttons.matching(NSPredicate(format: "label IN %@", ["chiudi", "Chiudi", "Close"])).firstMatch
         XCTAssertTrue(close.waitForExistence(timeout: 10))
         XCTAssertTrue(close.isHittable)
         close.tap()
         XCTAssertTrue(app.mainTabBar.waitForExistence(timeout: 10))
+        let restored = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == true AND hittable == true"), object: app.mainTabButton("Dashboard"))
+        XCTAssertEqual(XCTWaiter.wait(for: [restored], timeout: 10), .completed, "Closing search must restore an interactive navigation bar")
         assertSixVisibleTargets(app)
         capture("Barra ripristinata dopo la tastiera")
     }

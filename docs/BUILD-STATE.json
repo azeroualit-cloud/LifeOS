@@ -683,7 +683,7 @@
     "failed": 0
   },
   "six_tab_glass_revision": {
-    "status": "public_environment_only_refinement_in_validation",
+    "status": "product_fix_passed_two_targeted_cases_remaining_test_selector_repair",
     "order": [
       "Dashboard",
       "Attività",
@@ -703,29 +703,36 @@
     "selected_ui_tests": 3,
     "screenshots": "pending_run_artifacts",
     "result": {
-      "run": "43499809697",
-      "source_commit": "1a71b9556b28187dd3f23b59c38c38018f346602",
+      "run": "43506535087",
+      "source_commit": "aa3fb83ec452a5bca32bbfdf0cb6c9781508f3ac",
       "compile": "passed",
-      "targeted_ui_passed": 1,
-      "targeted_ui_failed": 2,
+      "targeted_ui_passed": 2,
+      "targeted_ui_failed": 1,
       "remaining_suite": "not_run",
       "release_launches": "not_run",
       "ipa": "not_created"
     },
-    "diagnostics_artifact": 14064376228,
+    "diagnostics_artifact": 14077666871,
     "product_fix_applied": true,
     "next_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43506535087"
   },
   "next_ipa_request": {
     "authorized": true,
     "decision": "IPA-DELIVERY-2026-11-13",
-    "status": "second_preflight_and_conditional_ipa_dispatched_user_monitors",
+    "status": "single_ui_recovery_with_two_verified_prior_passes_ready",
     "packaging_workflow_current90": ".github/workflows/lifeos-candidate90.yml",
     "existing_package89": "pinned_to_previous_candidate_not_reusable",
     "version": "0.10.28",
     "build": 90,
     "source_commit": "aa3fb83ec452a5bca32bbfdf0cb6c9781508f3ac",
     "run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43506535087",
-    "default_workflow_registration_commit": "672fcad9f9233b7ffe75223ce422368fc781637e"
+    "default_workflow_registration_commit": "672fcad9f9233b7ffe75223ce422368fc781637e",
+    "reused_preflight": {
+      "run": "43506535087",
+      "source_commit": "aa3fb83ec452a5bca32bbfdf0cb6c9781508f3ac",
+      "passed_cases": 2,
+      "artifact_id": 14077666871
+    },
+    "current_preflight_cases_to_execute": 1
   }
 }

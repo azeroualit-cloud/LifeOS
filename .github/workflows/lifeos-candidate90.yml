@@ -16,6 +16,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           ref: ${{ github.sha }}
+          fetch-depth: 0
       - name: Verify authorized candidate and unoccupied release tag
         env:
           GH_TOKEN: ${{ github.token }}
@@ -35,6 +36,17 @@ jobs:
       - uses: ./.github/actions/native-compat76
         with:
           variant: primary
+      - name: Download the two already-passing compact cases
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 43506535087
+          name: lifeos-candidate90-diagnostics-aa3fb83ec452a5bca32bbfdf0cb6c9781508f3ac-1
+          path: app/build/candidate90-diagnostics/reused-preflight
+      - name: Verify prior evidence and byte-identical product before reusing two cases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/verify-candidate90.py reuse-prior
       - name: Compile app and full test suite
         working-directory: app
         run: |
@@ -55,7 +67,7 @@ jobs:
           subprocess.run(['xcrun','simctl','boot',device],check=True)
           print('CANDIDATE90_COMPACT_PREFLIGHT',device,runtime)
           PY
-      - name: Run three navigation and catalog regressions first on compact iPhone
+      - name: Run only the repaired large-text navigation case on compact iPhone
         working-directory: app
         run: |
           set -euo pipefail
@@ -66,10 +78,10 @@ jobs:
             LifeOSProbeUITests/NativePersonalFoodUITests/testSupplementTabSeparatesFoodsAndSearchesKnownBrands
           )
           only=()
-          for test in "${cases[@]}"; do only+=("-only-testing:$test"); done
+          only+=("-only-testing:LifeOSProbeUITests/NativeNavigationUITests/testSixVisibleTabsWithLargeTextAndKeyboard")
           printf '%s\n' "${cases[@]}" > build/preflight-cases.txt
           xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT_DEVICE" -parallel-testing-enabled NO -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 660 "${only[@]}" -resultBundlePath build/Preflight.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/preflight-tests.log 2>&1 || { grep -E 'error:|Test Case .*failed' build/preflight-tests.log || true; tail -n 80 build/preflight-tests.log; exit 1; }
-      - name: Require all three compact cases passed before the full regression
+      - name: Require aggregate compact coverage with two retained passes and one repaired pass
         run: python3 scripts/verify-candidate90.py preflight
       - name: Resume primary simulator for the remaining suite
         run: |
@@ -161,6 +173,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           ref: ${{ github.sha }}
+          fetch-depth: 0
       - uses: ./.github/actions/native-compat76
         with:
           variant: primary
@@ -246,6 +259,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           ref: ${{ github.sha }}
+          fetch-depth: 0
       - uses: actions/download-artifact@v4
         with:
           name: lifeos-candidate90-diagnostics-${{ github.sha }}-${{ github.run_attempt }}
@@ -317,6 +331,7 @@ jobs:
           Sei destinazioni direttamente visibili in Liquid Glass; Integratori separati nel catalogo; ricerca con marche, alias e barcode; 1000 formulazioni Open Food Facts con attribuzione e 23 schede ufficiali. Conservati i cocktail da discoteca, esclusi gli alcolici da supermercato dal catalogo pubblico. Aggiornamento TDEE e tastiera senza barra sovrapposta.
 
           Sorgente: $GITHUB_SHA. Collaudo mirato compatto, restante suite e quattro avvii Release: https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID.
+          Copertura aggregata: due casi UI conservati dal run https://github.com/$GITHUB_REPOSITORY/actions/runs/43506535087 sullo stesso codice applicativo verificato; un caso UI recuperato e le prove restanti eseguiti nel run corrente. Provenienza e conteggi distinti in BUILD-PROVENANCE.json.
 
           IPA da firmare con Signulous mantenendo widget e App Groups. Prove fisiche su iPhone e accettazione ancora aperte. Nessun deploy backend. Dati Open Food Facts e contributori, ODbL 1.0: https://openfoodfacts.org e https://opendatacommons.org/licenses/odbl/1.0/.
           EOF

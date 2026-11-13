@@ -15,6 +15,103 @@ TARGETED = [
 ]
 RELEASE_MODES = ["fresh", "synthetic-upgrade", "synthetic-populated-upgrade", "synthetic-session-upgrade"]
 
+PRIOR = {"sourceCommit": "aa3fb83ec452a5bca32bbfdf0cb6c9781508f3ac",
+         "runID": "43506535087", "runAttempt": "1", "artifactID": 14077666871}
+FAILED_PREFLIGHT = TARGETED[1]
+
+def case_results(tree):
+    found = {}
+    def visit(node):
+        if isinstance(node, dict):
+            if node.get("nodeType") == "Test Case":
+                key = node["nodeIdentifierURL"].split("/LifeOSProbe/", 1)[1].rstrip("/").removesuffix("()")
+                assert key not in found, "Duplicate evidence: " + key
+                found[key] = node["result"]
+            for value in node.values():
+                if isinstance(value, (dict, list)): visit(value)
+        elif isinstance(node, list):
+            for value in node: visit(value)
+    visit(tree)
+    return found
+
+def without_repaired_method(source):
+    marker = re.search(r"^    func testSixVisibleTabsWithLargeTextAndKeyboard\s*\(", source, re.M)
+    assert marker, "Failed method missing"
+    opening = source.index("{", marker.end())
+    # Count code braces only; literal/comment braces cannot enlarge the allowed
+    # change to include a helper, property, or another passing test method.
+    tokens = re.compile(r'//[^\n]*|/\*.*?\*/|""".*?"""|"(?:\\.|[^"\\])*"|[{}]', re.S)
+    depth = 0
+    for token in tokens.finditer(source, opening):
+        text = token.group()
+        if text == "{": depth += 1
+        elif text == "}":
+            depth -= 1
+            if depth == 0:
+                return source[:marker.start()] + "<REPAIRED_METHOD>" + source[token.end():]
+    raise AssertionError("Cannot delimit repaired XCTest method")
+
+def unchanged_reused_product():
+    prior = PRIOR["sourceCommit"]
+    changed = subprocess.check_output(["git", "diff", "--name-only", prior, "HEAD"], text=True).splitlines()
+    allowed = lambda p: p.startswith("docs/") or p in (
+        "README.md", "native-next/UITests/NativeNavigationUITests.swift",
+        ".github/workflows/lifeos-candidate90.yml", "scripts/verify-candidate90.py", "scripts/test-candidate90-evidence.py")
+    assert all(allowed(p) for p in changed), ("Product/assembly changed; prior UI evidence cannot be reused", changed)
+    ui_changed = [p for p in changed if p.startswith("native-next/UITests/")]
+    navigation = "native-next/UITests/NativeNavigationUITests.swift"
+    assert all(p == navigation for p in ui_changed), ("Reused UI helpers/test files changed", ui_changed)
+    old = subprocess.check_output(["git", "show", prior + ":" + navigation], text=True)
+    new = subprocess.check_output(["git", "show", "HEAD:" + navigation], text=True)
+    assert without_repaired_method(old) == without_repaired_method(new), "Passing navigation method or shared helpers changed"
+
+def verify_prior_result(summary, tree):
+    assert (summary["totalTestCount"], summary["passedTests"], summary["failedTests"], summary["skippedTests"]) == (3, 2, 1, 0), summary
+    assert summary.get("expectedFailures", 0) == 0 and summary["result"] == "Failed", summary
+    result = case_results(tree)
+    assert set(result) == set(TARGETED), result
+    assert result[FAILED_PREFLIGHT] == "Failed", result
+    passing = [case for case in TARGETED if case != FAILED_PREFLIGHT]
+    assert all(result[case] == "Passed" for case in passing), result
+    return passing
+
+def reuse_prior(directory):
+    import urllib.request
+    unchanged_reused_product()
+    text = (directory / "context.txt").read_text(encoding="utf-8")
+    assert "Commit: " + PRIOR["sourceCommit"] in text
+    assert "Run: " + PRIOR["runID"] + " attempt 1" in text
+    summary = json.loads((directory / "summary.json").read_text(encoding="utf-8"))
+    tree = json.loads((directory / "tests.json").read_text(encoding="utf-8"))
+    passing = verify_prior_result(summary, tree)
+    def api(path):
+        request = urllib.request.Request("https://api.github.com/repos/" + os.environ["GITHUB_REPOSITORY"] + "/" + path,
+            headers={"Authorization": "Bearer " + os.environ["GH_TOKEN"], "Accept": "application/vnd.github+json"})
+        with urllib.request.urlopen(request, timeout=30) as response: return json.load(response)
+    run = api("actions/runs/" + PRIOR["runID"])
+    assert run["head_sha"] == PRIOR["sourceCommit"] and run["status"] == "completed" and run["conclusion"] == "failure", run
+    artifact = api("actions/artifacts/" + str(PRIOR["artifactID"]))
+    assert not artifact["expired"] and artifact["workflow_run"]["id"] == int(PRIOR["runID"])
+    assert artifact["name"] == "lifeos-candidate90-diagnostics-" + PRIOR["sourceCommit"] + "-1", artifact
+    jobs = api("actions/runs/" + PRIOR["runID"] + "/jobs?per_page=100")["jobs"]
+    suite = next(job for job in jobs if job["name"] == "full-suite")
+    assert any(step["name"] == "Compile app and full test suite" and step["conclusion"] == "success" for step in suite["steps"])
+    write(directory / "reuse-proof.json", {**context(), "prior": PRIOR, "passedCases": passing,
+        "failedCaseToRerun": FAILED_PREFLIGHT, "productAndAssemblyUnchanged": True})
+    print("CANDIDATE90_REUSE_VERIFIED", passing, PRIOR)
+
+def combined_preflight(build, current_cases):
+    directory = build / "candidate90-diagnostics" / "reused-preflight"
+    reuse = json.loads((directory / "reuse-proof.json").read_text(encoding="utf-8"))
+    assert all(reuse.get(k) == v for k, v in context().items()), reuse
+    assert reuse["prior"] == PRIOR and reuse["productAndAssemblyUnchanged"] is True
+    assert current_cases == [FAILED_PREFLIGHT], current_cases
+    assert reuse["passedCases"] == [case for case in TARGETED if case != FAILED_PREFLIGHT]
+    # The actual current xcresult still contains one case; this is explicit
+    # aggregate coverage, never a fabricated three-case xcresult summary.
+    return TARGETED[:], {"passedCases": 3, "currentRunPassed": 1, "reusedPassed": 2, "evidenceReuse": reuse}
+
+
 def context():
     sha = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     assert sha == os.environ["GITHUB_SHA"], "Checkout does not match run SHA"
@@ -57,19 +154,23 @@ def verify_test_partition(preflight, remaining):
 
 def preflight(build):
     summary, cases, tree = extract_suite(build / "Preflight.xcresult")
-    assert set(cases) == set(TARGETED) and len(cases) == 3, cases
+    aggregate_cases, aggregate = combined_preflight(build, cases)
+    assert set(aggregate_cases) == set(TARGETED)
+    write(build / "candidate90-diagnostics" / "preflight-aggregate.json", aggregate)
     write(build / "candidate90-diagnostics" / "preflight-summary.json", summary)
     write(build / "candidate90-diagnostics" / "preflight-tests.json", tree)
     print("CANDIDATE90_COMPACT_PREFLIGHT_PASSED", context())
 
 def tests(build):
     proof = context()
-    before, first, first_tree = extract_suite(build / "Preflight.xcresult")
+    before, current_first, first_tree = extract_suite(build / "Preflight.xcresult")
+    first, aggregate = combined_preflight(build, current_first)
     after, rest, rest_tree = extract_suite(build / "Final.xcresult")
     verify_test_partition(first, rest)
-    proof.update({"targetedDevice": "iPhone SE (3rd generation)", "targeted": before,
+    proof.update({"targetedDevice": "iPhone SE (3rd generation)", "targeted": before, "targetedAggregate": aggregate,
                   "remaining": after, "targetedCases": first, "remainingCases": rest,
-                  "totalPassed": len(first) + len(rest), "failed": 0, "skipped": 0})
+                  "totalPassed": len(first) + len(rest), "executedThisRun": len(current_first) + len(rest),
+                  "reusedTestsPassed": 2, "failed": 0, "skipped": 0})
     diagnostics = build / "candidate90-diagnostics"
     write(diagnostics / "preflight-summary.json", before)
     write(diagnostics / "preflight-tests.json", first_tree)
@@ -99,11 +200,19 @@ def package_inputs(directory):
     for name, evidence in [("tests", test), ("release", launch)]:
         assert all(evidence.get(k) == v for k, v in expected.items()), (name, expected, evidence)
     assert test["failed"] == test["skipped"] == 0
+    aggregate = test["targetedAggregate"]
+    assert aggregate["currentRunPassed"] == 1 and aggregate["reusedPassed"] == 2 and aggregate["passedCases"] == 3
+    assert aggregate["evidenceReuse"]["prior"] == PRIOR
+    assert aggregate["evidenceReuse"]["passedCases"] == [case for case in TARGETED if case != FAILED_PREFLIGHT]
+    unchanged_reused_product()
     verify_test_partition(test["targetedCases"], test["remainingCases"])
     assert test["totalPassed"] == len(test["targetedCases"]) + len(test["remainingCases"])
+    assert test["reusedTestsPassed"] == 2 and test["executedThisRun"] + 2 == test["totalPassed"]
     assert launch["launchesPassed"] == 4 and launch["releaseModes"] == RELEASE_MODES
     return {"version": "0.10.28", "build": 90, **expected,
-            "testsPassed": test["totalPassed"], "releaseLaunchesPassed": 4,
+            "testsPassed": test["totalPassed"], "testsExecutedThisRun": test["executedThisRun"],
+            "reusedTestsPassed": test["reusedTestsPassed"], "releaseLaunchesPassed": 4,
+            "preflightCoverage": test["targetedAggregate"],
             "backendDeployment": False, "physicalAcceptance": False}
 
 def ipa(path):
@@ -149,13 +258,15 @@ def authorization():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=["authorize", "preflight", "tests", "release", "package-inputs", "ipa"])
+    parser.add_argument("mode", choices=["authorize", "reuse-prior", "preflight", "tests", "release", "package-inputs", "ipa"])
     parser.add_argument("--build-dir", type=Path, default=Path("app/build"))
     parser.add_argument("--launch-dir", type=Path, default=Path("app/release-launch"))
     parser.add_argument("--evidence-dir", type=Path, default=Path("candidate90-evidence"))
     parser.add_argument("--ipa", type=Path)
+    parser.add_argument("--prior-dir", type=Path, default=Path("app/build/candidate90-diagnostics/reused-preflight"))
     args = parser.parse_args()
     if args.mode == "authorize": authorization()
+    elif args.mode == "reuse-prior": reuse_prior(args.prior_dir)
     elif args.mode == "preflight": preflight(args.build_dir)
     elif args.mode == "tests": tests(args.build_dir)
     elif args.mode == "release": release(args.build_dir, args.launch_dir)
