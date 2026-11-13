@@ -15,3 +15,8 @@ Il run43474910142 su8e17d1c compilava e passava3unitari+1UI;dueUI fallite:selett
 ## Dopo la pubblicazione
 
 Acquisire esiti reali,conteggi,quattro avvii e artefatti;scaricareIPA pubblicata,controllareSHA256/versione/build e contenuto. Aggiornare stato distribuito soltanto dopo verifica. L’utente firma e installa conservando dati ed estensione widget;prove fisiche HealthKit/AppGroup/widget/AlarmKit e parità dati restano aperte. L’IPA non equivale ad accettazione prodotto.
+
+## Run corrente
+
+https://github.com/azeroualit-cloud/LifeOS/actions/runs/43499809697
+Sorgente1a71b9556b28187dd3f23b59c38c38018f346602. Workflow registrato su main alcommit672fcad9f9233b7ffe75223ce422368fc781637e dopo404API,poiavviato su codex/revision77;nessunjobautorizzato su main. Tutte le fasi usano loSHAevento,nonilramomobile. Nessuna attesaattiva richiesta:utente comunica esito. Nonriavviareautomaticamente suiteintera dopo fallimento;analizzare loge conservare prove valide.
