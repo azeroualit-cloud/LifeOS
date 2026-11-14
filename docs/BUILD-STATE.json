@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "reported_on": "2026-11-14",
+  "reported_on": "2026-11-15",
   "project": "LifeOS",
   "default_branch": "main",
   "working_branch": "codex/revision77",
@@ -8,8 +8,8 @@
   "source_of_truth": "native-next overlay assembled through .github/actions/native-compat76/action.yml",
   "native_source_fingerprint": {
     "algorithm": "SHA-256 over sorted tracked native-next paths, NUL, canonical Git blob bytes, NUL",
-    "sha256": "ea0657302f8435b3537e4ec7d18bb71ef04063703ec3f1850504683ad9b271f8",
-    "source_commit": "c64430e7fbc71e80b47d7bd1c5a46d284cd67e59"
+    "sha256": "d519b783b262550eb090f42fc0ff91054aca67e8e8d94ac144f7e5449bf811fc",
+    "source_commit": "64b31355cebe3297cb09df2f48d5bf6a8804a42b"
   },
   "latest_distributed_build": {
     "version": "0.10.27",
@@ -683,7 +683,7 @@
     "failed": 0
   },
   "six_tab_glass_revision": {
-    "status": "navigation_and_hit_regions_passed_large_case_timeout_test_optimized",
+    "status": "test_geometry_optimized_clean_gate_dispatched",
     "order": [
       "Dashboard",
       "Attività",
@@ -697,7 +697,7 @@
     "nightclub_cocktails_kept": 30,
     "history_preserved": true,
     "ipa_authorized": true,
-    "source_commit": "c64430e7fbc71e80b47d7bd1c5a46d284cd67e59",
+    "source_commit": "64b31355cebe3297cb09df2f48d5bf6a8804a42b",
     "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43474910142",
     "selected_unit_tests": 3,
     "selected_ui_tests": 3,
@@ -716,20 +716,20 @@
     },
     "diagnostics_artifact": 14128102976,
     "product_fix_applied": true,
-    "next_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43628175869",
+    "next_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43651934566",
     "validation_artifact": 14127593883,
     "large_text_tap": "All six native tab taps and large hit regions passed in 43628175869; combined geometry/keyboard test exceeded total time budget. No claim that scroll regressions passed."
   },
   "next_ipa_request": {
     "authorized": true,
     "decision": "IPA-DELIVERY-2026-11-13",
-    "status": "test_only_geometry_roundtrip_optimization_pending_fresh_compact_gate",
+    "status": "fresh_gate_dispatched_after_test_only_optimization",
     "packaging_workflow_current90": ".github/workflows/lifeos-candidate90.yml",
     "existing_package89": "pinned_to_previous_candidate_not_reusable",
     "version": "0.10.28",
     "build": 90,
-    "source_commit": "c64430e7fbc71e80b47d7bd1c5a46d284cd67e59",
-    "run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43628175869",
+    "source_commit": "64b31355cebe3297cb09df2f48d5bf6a8804a42b",
+    "run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43651934566",
     "default_workflow_registration_commit": "672fcad9f9233b7ffe75223ce422368fc781637e",
     "reused_preflight": null,
     "current_preflight_cases_to_execute": 19

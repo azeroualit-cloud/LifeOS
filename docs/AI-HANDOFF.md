@@ -1,5 +1,7 @@
 # LifeOS — punto di ingresso per qualsiasi IA
 
+**15 novembre — verifica avviata:** [43651934566](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43651934566), sorgente `64b31355cebe3297cb09df2f48d5bf6a8804a42b`. Solo ottimizzazione del test geometrico: asserzioni e timeout invariati, prodotto invariato rispetto a c64430e. Prima 5 UI compatti puliti dopo timeout/riavvio del runner, poi 14 regressioni, restante suite, 4 Release e IPA90 soltanto a gate verdi. Esito ancora da acquisire. Utente monitora; nessun polling attivo. Nessuna nuova IPA verificata, nessun deploy backend. Il precedente tentativo di push/dispatch era rimasto ineseguito per limite temporaneo del revisore automatico; ripresa ora riuscita.
+
 ## Run 43628175869 analizzato — 14 novembre 2026
 
 Commit provato `c64430e7fbc71e80b47d7bd1c5a46d284cd67e59`. Compilazione passata. Riepilogo xcresult: **4/5 passati, 1 fallito per timeout**; non accettare il successivo messaggio testuale «passed» del caso da 217,7 s: il limite di 180 s è stato superato e il risultato resta fallito. Passati stack Dashboard/Calendario/Finanza e i due controlli hit-region normali/grandi. Il caso grande percorre tutte le sei destinazioni e ripristina la barra dopo tastiera, ma termina oltre il limite. Il catalogo ha una prima terminazione app fallita dopo il timeout e passa dopo riavvio automatico del runner Xcode: non è una nuova asserzione catalogo fallita, né un'esecuzione pulita da presentare senza caveat.
