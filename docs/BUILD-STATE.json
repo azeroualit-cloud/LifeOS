@@ -8,8 +8,8 @@
   "source_of_truth": "native-next overlay assembled through .github/actions/native-compat76/action.yml",
   "native_source_fingerprint": {
     "algorithm": "SHA-256 over sorted tracked native-next paths, NUL, canonical Git blob bytes, NUL",
-    "sha256": "51b5df2199ba367ebe0cb95a446a643beaff833f99900462cca3f8c1e331ec0c",
-    "source_commit": "0de02872e459f4cb3cfe56684ed83d1cd8d66941"
+    "sha256": "ea0657302f8435b3537e4ec7d18bb71ef04063703ec3f1850504683ad9b271f8",
+    "source_commit": "c64430e7fbc71e80b47d7bd1c5a46d284cd67e59"
   },
   "latest_distributed_build": {
     "version": "0.10.27",
@@ -683,7 +683,7 @@
     "failed": 0
   },
   "six_tab_glass_revision": {
-    "status": "dashboard_path_fix_prepared_pending_runtime",
+    "status": "dashboard_path_and_glass_interaction_under_validation",
     "order": [
       "Dashboard",
       "Attività",
@@ -697,7 +697,7 @@
     "nightclub_cocktails_kept": 30,
     "history_preserved": true,
     "ipa_authorized": true,
-    "source_commit": "0de02872e459f4cb3cfe56684ed83d1cd8d66941",
+    "source_commit": "c64430e7fbc71e80b47d7bd1c5a46d284cd67e59",
     "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43474910142",
     "selected_unit_tests": 3,
     "selected_ui_tests": 3,
@@ -714,20 +714,20 @@
     },
     "diagnostics_artifact": 14125792401,
     "product_fix_applied": true,
-    "next_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43623029267",
+    "next_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43628175869",
     "validation_artifact": 14125637973,
     "large_text_tap": "Video ends on Attivita after Salute tap. Removing ancestor glass interaction is an isolated hypothesis; native tap wait remains strict with diagnostics. Runtime verification pending."
   },
   "next_ipa_request": {
     "authorized": true,
     "decision": "IPA-DELIVERY-2026-11-13",
-    "status": "failed_preflight_dashboard_path_and_two_test_assumptions_fix_prepared",
+    "status": "fresh_19_case_gate_and_conditional_ipa_dispatched",
     "packaging_workflow_current90": ".github/workflows/lifeos-candidate90.yml",
     "existing_package89": "pinned_to_previous_candidate_not_reusable",
     "version": "0.10.28",
     "build": 90,
-    "source_commit": "0de02872e459f4cb3cfe56684ed83d1cd8d66941",
-    "run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43623029267",
+    "source_commit": "c64430e7fbc71e80b47d7bd1c5a46d284cd67e59",
+    "run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43628175869",
     "default_workflow_registration_commit": "672fcad9f9233b7ffe75223ce422368fc781637e",
     "reused_preflight": null,
     "current_preflight_cases_to_execute": 19

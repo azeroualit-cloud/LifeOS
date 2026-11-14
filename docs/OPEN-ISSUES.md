@@ -1,5 +1,8 @@
 # LifeOS — correzioni e difetti aperti
 
+**Verifica avviata:** [43628175869](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43628175869), sorgente `c64430e7fbc71e80b47d7bd1c5a46d284cd67e59`. Esito runtime ancora da acquisire. Cinque UI compatti, quattordici regressioni principali, restante suite e quattro Release; IPA90 autorizzata soltanto dopo tutti i gate verdi. Nessun risultato precedente riutilizzato dopo le modifiche. Monitoraggio lasciato all’utente; nessuna attesa CI attiva.
+
+
 ## Diagnosi del run 43623029267 — 14 novembre 2026
 
 Sorgente provato: `0de02872e459f4cb3cfe56684ed83d1cd8d66941`. Compilazione passata, preflight compatto 2/5 UI passati e 3 falliti; quattordici regressioni principali, suite restante, quattro avvii Release e IPA non eseguiti. Artefatti: diagnostica 14125792401, evidenze 14125637973.
