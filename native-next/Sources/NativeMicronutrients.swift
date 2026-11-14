@@ -227,6 +227,7 @@ struct NativePinnedNutrients: View {
 }
 
 struct NativeMicronutrientScreen: View {
+    @Environment(\.nativeReduceMotion) private var reduceMotion
     @ObservedObject var nutrition: NativeNutritionStore
     var selectedDate = Date()
     @AppStorage(NativeNutrientOrdering.storageKey) private var favorites = NativeNutrientOrdering.defaultFavorites
@@ -274,7 +275,7 @@ struct NativeMicronutrientScreen: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button(editMode.isEditing ? "Fine" : "Riordina") {
-                    withAnimation { editMode = editMode.isEditing ? .inactive : .active }
+                    withAnimation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration)) { editMode = editMode.isEditing ? .inactive : .active }
                 }.accessibilityIdentifier("micronutrient-reorder")
             }
         }

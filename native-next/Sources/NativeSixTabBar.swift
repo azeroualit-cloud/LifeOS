@@ -78,7 +78,7 @@ struct NativeTabContainer: UIViewControllerRepresentable {
     }
 }
 
-private struct NativeTabInheritedEnvironment {
+private struct NativeTabInheritedEnvironment: Equatable {
     let dynamicTypeSize: DynamicTypeSize
     let locale: Locale
     let layoutDirection: LayoutDirection
@@ -112,13 +112,14 @@ private struct NativeTabPresentationSnapshot {
     init(snapshot: NativeTabPresentationSnapshot) { self.snapshot = snapshot }
 
     func update(_ next: NativeTabPresentationSnapshot) {
+        guard next.environment != snapshot.environment else { return }
         generation &+= 1
         let requestedGeneration = generation
         // Representable updates occur inside a SwiftUI render. Publish on the
         // next main turn, coalescing superseded environment/content snapshots.
         DispatchQueue.main.async { [weak self] in
             guard let self, self.generation == requestedGeneration else { return }
-            self.snapshot = next
+            self.snapshot = NativeTabPresentationSnapshot(content: self.snapshot.content, environment: next.environment)
         }
     }
 }

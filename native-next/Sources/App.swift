@@ -272,7 +272,7 @@ struct NativeRoot: View {
             case .calendar: NavigationStack { CalendarScreen() }
             }
         }
-        .modifier(NativeTabArrival(tab: tab, selection: router.tab))
+        .modifier(NativeTabArrival(tab: tab))
     }
     private var dashboard: some View {
         NavigationStack(path: $router.dashboardPath) {
@@ -327,34 +327,35 @@ struct NativeRoot: View {
 private struct NativeTabArrival: ViewModifier {
     @Environment(\.nativeReduceMotion) private var reduceMotion
     let tab: NativeTab
-    let selection: NativeTab
+    @EnvironmentObject private var router: NativeRouter
+    private var selection: NativeTab { router.tab }
     @State private var offset: CGFloat = 0
-    @State private var opacity = 1.0
+    @State private var arrivalTask: Task<Void, Never>?
 
     func body(content: Content) -> some View {
-        content
-            .offset(x: offset)
-            .opacity(opacity)
+        content.offset(x: offset)
             .onChange(of: selection) { previous, current in
-                guard current == tab else {
-                    offset = 0
-                    opacity = 1
-                    return
-                }
+                reset()
+                guard current == tab, !reduceMotion else { return }
                 var instant = Transaction()
                 instant.disablesAnimations = true
-                withTransaction(instant) {
-                    offset = reduceMotion ? 0 : (current.rawValue > previous.rawValue ? 28 : -28)
-                    opacity = reduceMotion ? 0.75 : 1
-                }
-                Task { @MainActor in
+                withTransaction(instant) { offset = current.rawValue > previous.rawValue ? 28 : -28 }
+                arrivalTask = Task { @MainActor in
                     await Task.yield()
-                    withAnimation(.easeOut(duration: NativeDesign.Motion.selectionDuration)) {
-                        offset = 0
-                        opacity = 1
-                    }
+                    guard !Task.isCancelled else { return }
+                    withAnimation(.easeOut(duration: NativeDesign.Motion.selectionDuration)) { offset = 0 }
                 }
             }
+            .onChange(of: reduceMotion) { _, reduced in if reduced { reset() } }
+            .onDisappear { reset() }
+    }
+
+    private func reset() {
+        arrivalTask?.cancel()
+        arrivalTask = nil
+        var instant = Transaction()
+        instant.disablesAnimations = true
+        withTransaction(instant) { offset = 0 }
     }
 }
 

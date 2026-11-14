@@ -92,10 +92,12 @@ final class NativeNutritionQuickUITests: XCTestCase {
         let cut = app.buttons["generic-food-estimate-sovracoscia-forno-pelle"]
         XCTAssertTrue(cut.waitForExistence(timeout: 5))
         cut.tap()
-        let weighing = app.buttons["quick-nutrition-weighing"]
+        let weighing = app.descendants(matching: .any)["quick-nutrition-weighing"]
         XCTAssertTrue(weighing.waitForExistence(timeout: 5))
         weighing.tap()
-        app.buttons["Con osso"].tap()
+        let bone = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Con osso")).firstMatch
+        XCTAssertTrue(bone.waitForExistence(timeout: 10))
+        bone.tap()
         XCTAssertTrue(app.staticTexts.containing(NSPredicate(format: "label CONTAINS %@", "Parte edibile stimata")).firstMatch.waitForExistence(timeout: 5))
         capture("03 Chicken cut weighed with bone", app)
     }
@@ -146,10 +148,12 @@ final class NativeNutritionQuickUITests: XCTestCase {
         capture("Integratore generico nella scheda Integratori", app)
         app.buttons["quick-nutrition-catalog"].tap()
         app.buttons["generic-food-create"].tap()
-        let family = app.buttons["personal-food-family"]
+        let family = app.descendants(matching: .any)["personal-food-family"]
         XCTAssertTrue(family.waitForExistence(timeout: 10))
         family.tap()
-        app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Integratori")).firstMatch.tap()
+        let supplement = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "💊 Integratori")).firstMatch
+        XCTAssertTrue(supplement.waitForExistence(timeout: 10))
+        supplement.tap()
         XCTAssertTrue(app.staticTexts["Valori per capsula"].exists)
         for (id, value) in [("name", "Integratore di prova"), ("energy", "0"), ("protein", "0"), ("carbs", "0"), ("fat", "0")] {
             let field = app.textFields["personal-food-" + id]

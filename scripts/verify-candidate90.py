@@ -101,15 +101,8 @@ def reuse_prior(directory):
     print("CANDIDATE90_REUSE_VERIFIED", passing, PRIOR)
 
 def combined_preflight(build, current_cases):
-    directory = build / "candidate90-diagnostics" / "reused-preflight"
-    reuse = json.loads((directory / "reuse-proof.json").read_text(encoding="utf-8"))
-    assert all(reuse.get(k) == v for k, v in context().items()), reuse
-    assert reuse["prior"] == PRIOR and reuse["productAndAssemblyUnchanged"] is True
-    assert current_cases == [FAILED_PREFLIGHT], current_cases
-    assert reuse["passedCases"] == [case for case in TARGETED if case != FAILED_PREFLIGHT]
-    # The actual current xcresult still contains one case; this is explicit
-    # aggregate coverage, never a fabricated three-case xcresult summary.
-    return TARGETED[:], {"passedCases": 3, "currentRunPassed": 1, "reusedPassed": 2, "evidenceReuse": reuse}
+    assert set(current_cases) == set(TARGETED) and len(current_cases) == 3
+    return TARGETED[:], {"passedCases": 3, "currentRunPassed": 3, "reusedPassed": 0}
 
 
 def context():
@@ -170,7 +163,7 @@ def tests(build):
     proof.update({"targetedDevice": "iPhone SE (3rd generation)", "targeted": before, "targetedAggregate": aggregate,
                   "remaining": after, "targetedCases": first, "remainingCases": rest,
                   "totalPassed": len(first) + len(rest), "executedThisRun": len(current_first) + len(rest),
-                  "reusedTestsPassed": 2, "failed": 0, "skipped": 0})
+                  "reusedTestsPassed": 0, "failed": 0, "skipped": 0})
     diagnostics = build / "candidate90-diagnostics"
     write(diagnostics / "preflight-summary.json", before)
     write(diagnostics / "preflight-tests.json", first_tree)
@@ -201,13 +194,10 @@ def package_inputs(directory):
         assert all(evidence.get(k) == v for k, v in expected.items()), (name, expected, evidence)
     assert test["failed"] == test["skipped"] == 0
     aggregate = test["targetedAggregate"]
-    assert aggregate["currentRunPassed"] == 1 and aggregate["reusedPassed"] == 2 and aggregate["passedCases"] == 3
-    assert aggregate["evidenceReuse"]["prior"] == PRIOR
-    assert aggregate["evidenceReuse"]["passedCases"] == [case for case in TARGETED if case != FAILED_PREFLIGHT]
-    unchanged_reused_product()
+    assert aggregate["currentRunPassed"] == 3 and aggregate["reusedPassed"] == 0 and aggregate["passedCases"] == 3
     verify_test_partition(test["targetedCases"], test["remainingCases"])
     assert test["totalPassed"] == len(test["targetedCases"]) + len(test["remainingCases"])
-    assert test["reusedTestsPassed"] == 2 and test["executedThisRun"] + 2 == test["totalPassed"]
+    assert test["reusedTestsPassed"] == 0 and test["executedThisRun"] == test["totalPassed"]
     assert launch["launchesPassed"] == 4 and launch["releaseModes"] == RELEASE_MODES
     return {"version": "0.10.28", "build": 90, **expected,
             "testsPassed": test["totalPassed"], "testsExecutedThisRun": test["executedThisRun"],

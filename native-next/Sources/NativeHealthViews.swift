@@ -237,7 +237,7 @@ private struct NativeHealthWeightChart: View {
                             }
                         }
                     }
-                    .animation(reduceMotion ? nil : .default, value: period)
+                    .animation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration), value: period)
                     .chartXScale(domain: start...end).chartYScale(domain: domain)
                     .chartXAxis { AxisMarks(values: .stride(by: .day, count: forecast.isEmpty ? period.axisDays : 28)) { _ in AxisValueLabel(format: .dateTime.day().month(.abbreviated)) } }
                     .frame(height: 190)
@@ -304,7 +304,7 @@ private struct NativeHealthCaloriesChart: View {
                             }
                         }
                     }
-                    .animation(reduceMotion ? nil : .default, value: period)
+                    .animation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration), value: period)
                     .chartXScale(domain: start...Calendar.current.date(byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: referenceDate))!)
                     .chartYScale(domain: 0...max(3000, (visibleDays.compactMap(\.calories).max() ?? 0) * 1.1))
                     .chartXAxis { AxisMarks(values: .stride(by: .day, count: period.axisDays)) { _ in AxisValueLabel(format: .dateTime.day().month(.abbreviated)) } }

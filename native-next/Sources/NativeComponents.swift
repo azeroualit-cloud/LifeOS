@@ -147,7 +147,7 @@ struct NativeCheckmark: View {
             .symbolRenderingMode(.monochrome).font(.title2.weight(.regular))
             .foregroundStyle(checked ? NativeDesign.accent : NativeDesign.secondary)
             .contentTransition(reduceMotion ? .identity : .symbolEffect(.replace))
-            .animation(reduceMotion ? nil : .default, value: checked)
+            .animation(reduceMotion ? nil : .easeOut(duration: NativeDesign.Motion.selectionDuration), value: checked)
             .frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget)
             .contentShape(Rectangle()).accessibilityHidden(true)
     }
@@ -199,6 +199,7 @@ struct NativeRowText: View {
 /// Explicit 44 pt geometry, without the additional inset of bordered styles.
 struct NativeCompactPrimaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var enabled
+    @Environment(\.nativeReduceMotion) private var reduceMotion
     var readableDisabled = false
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -208,6 +209,7 @@ struct NativeCompactPrimaryButtonStyle: ButtonStyle {
             .background(!enabled && readableDisabled ? NativeDesign.actionSurface : NativeDesign.accent, in: Capsule())
             .contentShape(Capsule())
             .opacity(enabled ? (configuration.isPressed ? NativeDesign.Motion.pressedOpacity : 1) : (readableDisabled ? 1 : 0.45))
+            .animation(reduceMotion ? nil : .easeOut(duration: NativeDesign.Motion.selectionDuration), value: configuration.isPressed)
     }
 }
 
@@ -384,7 +386,7 @@ struct NativeNumericFeedback: ViewModifier {
     var enabled = true
     func body(content: Content) -> some View {
         content.contentTransition(reduceMotion || !enabled ? .identity : .numericText())
-            .animation(reduceMotion || !enabled ? nil : .default, value: value)
+            .animation(reduceMotion || !enabled ? nil : .easeOut(duration: NativeDesign.Motion.selectionDuration), value: value)
             .transaction { transaction in
                 if reduceMotion || !enabled { transaction.animation = nil; transaction.disablesAnimations = true }
             }

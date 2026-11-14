@@ -1280,5 +1280,12 @@
     "original_quote": "produci l'ipa",
     "rule": "Autorizzata nuova produzione IPA delle modifiche correnti;non richiedere di nuovo autorizzazione packaging. Non è conferma esplicita della proposta prodotto SIX-TABS-KEYBOARD-REPAIR-2026-11-13,ancora PENDING_APPROVAL secondoDEV02. Nessun deploy backend.",
     "readiness": "Correzione approvata e implementata;preparare nuovaIPA0.10.28build90 dopo gate mirato iniziale,suite restante e4avviiRelease sullo stessoSHA;nessun nuovo consenso IPA richiesto."
+  },
+  "motion_review_2026_11_14": {
+    "id": "MOTION-REVIEW-2026-11-14",
+    "status": "ACTIVE",
+    "recorded_on": "2026-11-14",
+    "source": "Richiesta revisione animazioni e dettagli; approvazione esplicita correzione navigazione: Sì, correggi e verifica; continua fino al run IPA finale",
+    "rule": "Polish condiviso, correzione contenitori, verifica completa prima della IPA90. Nessun deploy backend."
   }
 }
