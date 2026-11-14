@@ -56,28 +56,34 @@ jobs:
           subprocess.run(['xcrun','simctl','boot',device],check=True)
           print('CANDIDATE90_COMPACT_PREFLIGHT',device,runtime)
           PY
-      - name: Run all three targeted navigation cases on compact iPhone
+      - name: Run targeted navigation and hit-region cases on compact iPhone
         working-directory: app
         run: |
           set -euo pipefail
           xcrun simctl bootstatus "$COMPACT_DEVICE" -b
-          cases=(
-            LifeOSProbeUITests/NativeNavigationUITests/testSixVisibleTabsPreserveCalendarFinanceAndDashboardStacks
-            LifeOSProbeUITests/NativeNavigationUITests/testSixVisibleTabsWithLargeTextAndKeyboard
-            LifeOSProbeUITests/NativePersonalFoodUITests/testSupplementTabSeparatesFoodsAndSearchesKnownBrands
-          )
+          python3 ../scripts/verify-candidate90.py compact-selectors > build/compact-cases.txt
           only=()
-          for test in "${cases[@]}"; do only+=("-only-testing:$test"); done
-          printf '%s\n' "${cases[@]}" > build/preflight-cases.txt
+          while IFS= read -r test; do only+=("-only-testing:$test"); done < build/compact-cases.txt
+          python3 ../scripts/verify-candidate90.py all-selectors > build/preflight-cases.txt
           xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$COMPACT_DEVICE" -parallel-testing-enabled NO -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 660 "${only[@]}" -resultBundlePath build/Preflight.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/preflight-tests.log 2>&1 || { grep -E 'error:|Test Case .*failed' build/preflight-tests.log || true; tail -n 80 build/preflight-tests.log; exit 1; }
-      - name: Require three fresh targeted passes
-        run: python3 scripts/verify-candidate90.py preflight
+      - name: Require fresh compact targeted passes
+        run: python3 scripts/verify-candidate90.py compact-preflight
       - name: Resume primary simulator for the remaining suite
         run: |
           set -euo pipefail
           xcrun simctl shutdown "$COMPACT_DEVICE"
           xcrun simctl boot "$MAIN_DEVICE"
           xcrun simctl bootstatus "$MAIN_DEVICE" -b
+      - name: Run previously failing regressions first on the original primary device
+        working-directory: app
+        run: |
+          set -euo pipefail
+          python3 ../scripts/verify-candidate90.py primary-selectors > build/regression-cases.txt
+          only=()
+          while IFS= read -r test; do only+=("-only-testing:$test"); done < build/regression-cases.txt
+          xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 660 "${only[@]}" -resultBundlePath build/Regressions.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/regression-tests.log 2>&1 || { grep -E 'error:|Test Case .*failed' build/regression-tests.log || true; tail -n 80 build/regression-tests.log; exit 1; }
+      - name: Require all targeted cases before the remaining suite
+        run: python3 scripts/verify-candidate90.py preflight
       - name: Run the remaining unit and UI tests
         working-directory: app
         run: |
@@ -95,13 +101,17 @@ jobs:
           mkdir -p app/build/candidate90-diagnostics
           diag=app/build/candidate90-diagnostics
           result=app/build/Final.xcresult
+          if [ ! -f "$result/Info.plist" ]; then result=app/build/Regressions.xcresult; fi
           if [ ! -f "$result/Info.plist" ]; then result=app/build/Preflight.xcresult; fi
           if [ -f app/build/preflight-tests.log ]; then cp app/build/preflight-tests.log "$diag/"; fi
+          if [ -f app/build/regression-tests.log ]; then cp app/build/regression-tests.log "$diag/"; fi
           printf 'Commit: %s\nRun: %s attempt %s\n' "$GITHUB_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" > "$diag/context.txt"
           if [ -f app/build/final-tests.log ]; then
             cp app/build/final-tests.log "$diag/final-tests.log"
             # Preserve every matching line; the complete log remains available for context.
             grep -E 'error:|Test Case .*failed|Executed [0-9]+ tests?, with [0-9]+ failures?' app/build/final-tests.log > "$diag/failures-and-counts.txt" || true
+          elif [ -f app/build/regression-tests.log ]; then
+            grep -E 'error:|Test Case .*failed|Executed [0-9]+ tests?, with [0-9]+ failures?' app/build/regression-tests.log > "$diag/failures-and-counts.txt" || true
           elif [ -f app/build/preflight-tests.log ]; then
             grep -E 'error:|Test Case .*failed|Executed [0-9]+ tests?, with [0-9]+ failures?' app/build/preflight-tests.log > "$diag/failures-and-counts.txt" || true
           else
@@ -139,7 +149,7 @@ jobs:
       - name: Export screenshots
         if: ${{ !cancelled() }}
         run: |
-          for suite in Preflight Final; do
+          for suite in Preflight Regressions Final; do
             if [ -f "app/build/$suite.xcresult/Info.plist" ]; then
               xcrun xcresulttool export attachments --path "app/build/$suite.xcresult" --output-path "app/build/final-screenshots/$suite"
             fi
@@ -152,6 +162,8 @@ jobs:
             app/build/final-*.log
             app/build/Preflight.xcresult
             app/build/Final.xcresult
+            app/build/Regressions.xcresult
+            app/build/regression-tests.log
             app/build/final-screenshots
 
   release-launches:

@@ -52,6 +52,9 @@ struct NativeSixTabBar: View {
                                 .padding(NativeDesign.Space.xs)
                         }
                     }
+                    // Apply the interaction region to the completed label, after
+                    // the conditional selected background, including blank gaps.
+                    .contentShape(.interaction, Rectangle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(tab.title)
@@ -112,8 +115,10 @@ private struct NativeTabPresentationSnapshot {
     init(snapshot: NativeTabPresentationSnapshot) { self.snapshot = snapshot }
 
     func update(_ next: NativeTabPresentationSnapshot) {
-        guard next.environment != snapshot.environment else { return }
+        // Even returning to the current value invalidates an older queued value:
+        // A -> queued B -> A must not publish stale B on the next main turn.
         generation &+= 1
+        guard next.environment != snapshot.environment else { return }
         let requestedGeneration = generation
         // Representable updates occur inside a SwiftUI render. Publish on the
         // next main turn, coalescing superseded environment/content snapshots.

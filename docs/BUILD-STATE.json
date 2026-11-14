@@ -683,7 +683,7 @@
     "failed": 0
   },
   "six_tab_glass_revision": {
-    "status": "product_fix_verified_two_cases_retained_remaining_test_recovery_running",
+    "status": "full_hit_area_and_environment_queue_fix_pending_runtime",
     "order": [
       "Dashboard",
       "Attività",
@@ -703,8 +703,8 @@
     "selected_ui_tests": 3,
     "screenshots": "pending_run_artifacts",
     "result": {
-      "run": "43506535087",
-      "source_commit": "aa3fb83ec452a5bca32bbfdf0cb6c9781508f3ac",
+      "run": "43618379858",
+      "source_commit": "82d56cfeccfe5befb45b806193c35fd08f0ad8f1",
       "compile": "passed",
       "targeted_ui_passed": 2,
       "targeted_ui_failed": 1,
@@ -719,7 +719,7 @@
   "next_ipa_request": {
     "authorized": true,
     "decision": "IPA-DELIVERY-2026-11-13",
-    "status": "fresh_validation_dispatched_after_motion_review",
+    "status": "independent_audit_completed_fresh_19_case_gate_prepared",
     "packaging_workflow_current90": ".github/workflows/lifeos-candidate90.yml",
     "existing_package89": "pinned_to_previous_candidate_not_reusable",
     "version": "0.10.28",
@@ -728,6 +728,6 @@
     "run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43618379858",
     "default_workflow_registration_commit": "672fcad9f9233b7ffe75223ce422368fc781637e",
     "reused_preflight": null,
-    "current_preflight_cases_to_execute": 3
+    "current_preflight_cases_to_execute": 19
   }
 }

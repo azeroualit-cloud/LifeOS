@@ -50,3 +50,9 @@ La partizione viene verificata contro l’artefatto 14077666871 del run 43506535
 
 https://github.com/azeroualit-cloud/LifeOS/actions/runs/43522275345
 Sorgente `47cc00e4a89c3b73b95292f79e0c2bbabbe08377`. Non rilanciare senza analizzare questo risultato. Conservare la distinzione tra 2 casi UI riutilizzati dal run 43506535087 e il caso riparato eseguito qui; tutte le prove restanti e Release sono nuove sul candidato corrente. Autorizzazioni correzione e IPA già registrate.
+
+## Revisione indipendente dopo run 43618379858
+
+**Revisione indipendente del 14 novembre completata prima del nuovo run.** Tre sottoagenti hanno controllato contenitori, evidenze UI e pipeline. Ultimo run 43618379858: compilazione e 2/3 mirati verdi; il primo tap Calendario non attivava la destinazione. Hit area rettangolare applicata dopo lo sfondo; corretta anche l’invalidazione degli aggiornamenti ambiente accodati. Nuovi test verificano centro, icona e didascalia di tutte le sei voci. Pipeline ripulita dal riuso obsoleto: 5 mirati compatti e 14 regressioni sul principale prima della suite restante, poi quattro Release e IPA solo a gate verdi. Sette test locali del gate, otto del selettore, verifica dei 19 selettori reali e diff passati. La correzione runtime resta da provare; nessuna IPA90 prodotta.
+
+Rapporto: INDEPENDENT-AUDIT-2026-11-14.md. Nessun aumento dei timeout e nessuna asserzione funzionale indebolita. I 14 casi primari comprendono tutti i 12 fallimenti della precedente suite e due probe Bloom (colonna/gap). Non dichiarare risolti scroll e percorso Finanza sulla sola compilazione o sui cinque casi compatti.

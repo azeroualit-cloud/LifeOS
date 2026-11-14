@@ -8,101 +8,22 @@ import subprocess
 from pathlib import Path
 from zipfile import ZipFile
 
-TARGETED = [
+COMPACT_TARGETED = [
     "LifeOSProbeUITests/NativeNavigationUITests/testSixVisibleTabsPreserveCalendarFinanceAndDashboardStacks",
     "LifeOSProbeUITests/NativeNavigationUITests/testSixVisibleTabsWithLargeTextAndKeyboard",
     "LifeOSProbeUITests/NativePersonalFoodUITests/testSupplementTabSeparatesFoodsAndSearchesKnownBrands",
+    "LifeOSProbeUITests/NativeTabHitRegionUITests/testEveryTabRespondsAtCenterIconAndCaption",
+    "LifeOSProbeUITests/NativeTabHitRegionUITests/testEveryLargeTextTabRespondsAtCenterAndIcon",
 ]
+PRIMARY_TARGETED = ['LifeOSProbeUITests/NativeBloomGridUITests/testMixedLibraryStaysInTwoColumnsAndShowsLinkPreviews', 'LifeOSProbeUITests/NativeBloomGridUITests/testMixedLibraryWithLargeTextRemainsBounded', 'LifeOSProbeUITests/NativeInterfaceTests/testCalendarEventCanBeCreatedAfterBoundaryScroll', 'LifeOSProbeUITests/NativeInterfaceTests/testCalendarRepeatedScrollingKeepsMonthAnchorsAndReturnsToToday', 'LifeOSProbeUITests/NativeInterfaceTests/testCalendarScrollPerformance', 'LifeOSProbeUITests/NativeInterfaceTests/testFinanceMonthButtonsMoveIndependentlyInBothDirections', 'LifeOSProbeUITests/NativeInterfaceTests/testFinanceOverviewSupportsLargeTextAndEmptySnapshot', 'LifeOSProbeUITests/NativeInterfaceTests/testRepeatedBoundaryScrollingKeepsNavigationStable', 'LifeOSProbeUITests/NativeNutritionQuickUITests/testRenderCocktailAndBoneInPortions', 'LifeOSProbeUITests/NativeNutritionQuickUITests/testSupermarketFoodsAndSupplementEditor', 'LifeOSProbeUITests/NativeRevision78UITests/testSafeAreaLastContentLargeText', 'LifeOSProbeUITests/NativeRevision78UITests/testSafeAreaLastContentStandard', 'LifeOSProbeUITests/NativeBloomScrollProbeUITests/testDraggingInsideColumnMovesLibrary', 'LifeOSProbeUITests/NativeBloomScrollProbeUITests/testDraggingBetweenColumnsMovesLibrary']
+TARGETED = COMPACT_TARGETED + PRIMARY_TARGETED
 RELEASE_MODES = ["fresh", "synthetic-upgrade", "synthetic-populated-upgrade", "synthetic-session-upgrade"]
 
-PRIOR = {"sourceCommit": "aa3fb83ec452a5bca32bbfdf0cb6c9781508f3ac",
-         "runID": "43506535087", "runAttempt": "1", "artifactID": 14077666871}
-FAILED_PREFLIGHT = TARGETED[1]
-
-def case_results(tree):
-    found = {}
-    def visit(node):
-        if isinstance(node, dict):
-            if node.get("nodeType") == "Test Case":
-                key = node["nodeIdentifierURL"].split("/LifeOSProbe/", 1)[1].rstrip("/").removesuffix("()")
-                assert key not in found, "Duplicate evidence: " + key
-                found[key] = node["result"]
-            for value in node.values():
-                if isinstance(value, (dict, list)): visit(value)
-        elif isinstance(node, list):
-            for value in node: visit(value)
-    visit(tree)
-    return found
-
-def without_repaired_method(source):
-    marker = re.search(r"^    func testSixVisibleTabsWithLargeTextAndKeyboard\s*\(", source, re.M)
-    assert marker, "Failed method missing"
-    opening = source.index("{", marker.end())
-    # Count code braces only; literal/comment braces cannot enlarge the allowed
-    # change to include a helper, property, or another passing test method.
-    tokens = re.compile(r'//[^\n]*|/\*.*?\*/|""".*?"""|"(?:\\.|[^"\\])*"|[{}]', re.S)
-    depth = 0
-    for token in tokens.finditer(source, opening):
-        text = token.group()
-        if text == "{": depth += 1
-        elif text == "}":
-            depth -= 1
-            if depth == 0:
-                return source[:marker.start()] + "<REPAIRED_METHOD>" + source[token.end():]
-    raise AssertionError("Cannot delimit repaired XCTest method")
-
-def unchanged_reused_product():
-    prior = PRIOR["sourceCommit"]
-    changed = subprocess.check_output(["git", "diff", "--name-only", prior, "HEAD"], text=True).splitlines()
-    allowed = lambda p: p.startswith("docs/") or p in (
-        "README.md", "native-next/UITests/NativeNavigationUITests.swift",
-        ".github/workflows/lifeos-candidate90.yml", "scripts/verify-candidate90.py", "scripts/test-candidate90-evidence.py")
-    assert all(allowed(p) for p in changed), ("Product/assembly changed; prior UI evidence cannot be reused", changed)
-    ui_changed = [p for p in changed if p.startswith("native-next/UITests/")]
-    navigation = "native-next/UITests/NativeNavigationUITests.swift"
-    assert all(p == navigation for p in ui_changed), ("Reused UI helpers/test files changed", ui_changed)
-    old = subprocess.check_output(["git", "show", prior + ":" + navigation], text=True)
-    new = subprocess.check_output(["git", "show", "HEAD:" + navigation], text=True)
-    assert without_repaired_method(old) == without_repaired_method(new), "Passing navigation method or shared helpers changed"
-
-def verify_prior_result(summary, tree):
-    assert (summary["totalTestCount"], summary["passedTests"], summary["failedTests"], summary["skippedTests"]) == (3, 2, 1, 0), summary
-    assert summary.get("expectedFailures", 0) == 0 and summary["result"] == "Failed", summary
-    result = case_results(tree)
-    assert set(result) == set(TARGETED), result
-    assert result[FAILED_PREFLIGHT] == "Failed", result
-    passing = [case for case in TARGETED if case != FAILED_PREFLIGHT]
-    assert all(result[case] == "Passed" for case in passing), result
-    return passing
-
-def reuse_prior(directory):
-    import urllib.request
-    unchanged_reused_product()
-    text = (directory / "context.txt").read_text(encoding="utf-8")
-    assert "Commit: " + PRIOR["sourceCommit"] in text
-    assert "Run: " + PRIOR["runID"] + " attempt 1" in text
-    summary = json.loads((directory / "summary.json").read_text(encoding="utf-8"))
-    tree = json.loads((directory / "tests.json").read_text(encoding="utf-8"))
-    passing = verify_prior_result(summary, tree)
-    def api(path):
-        request = urllib.request.Request("https://api.github.com/repos/" + os.environ["GITHUB_REPOSITORY"] + "/" + path,
-            headers={"Authorization": "Bearer " + os.environ["GH_TOKEN"], "Accept": "application/vnd.github+json"})
-        with urllib.request.urlopen(request, timeout=30) as response: return json.load(response)
-    run = api("actions/runs/" + PRIOR["runID"])
-    assert run["head_sha"] == PRIOR["sourceCommit"] and run["status"] == "completed" and run["conclusion"] == "failure", run
-    artifact = api("actions/artifacts/" + str(PRIOR["artifactID"]))
-    assert not artifact["expired"] and artifact["workflow_run"]["id"] == int(PRIOR["runID"])
-    assert artifact["name"] == "lifeos-candidate90-diagnostics-" + PRIOR["sourceCommit"] + "-1", artifact
-    jobs = api("actions/runs/" + PRIOR["runID"] + "/jobs?per_page=100")["jobs"]
-    suite = next(job for job in jobs if job["name"] == "full-suite")
-    assert any(step["name"] == "Compile app and full test suite" and step["conclusion"] == "success" for step in suite["steps"])
-    write(directory / "reuse-proof.json", {**context(), "prior": PRIOR, "passedCases": passing,
-        "failedCaseToRerun": FAILED_PREFLIGHT, "productAndAssemblyUnchanged": True})
-    print("CANDIDATE90_REUSE_VERIFIED", passing, PRIOR)
-
 def combined_preflight(build, current_cases):
-    assert set(current_cases) == set(TARGETED) and len(current_cases) == 3
-    return TARGETED[:], {"passedCases": 3, "currentRunPassed": 3, "reusedPassed": 0}
+    """Only fresh results are accepted after product changes; no historical reuse."""
+    assert len(current_cases) == len(set(current_cases)) == len(TARGETED), current_cases
+    assert set(current_cases) == set(TARGETED), current_cases
+    return TARGETED[:], {"passedCases": len(TARGETED), "currentRunPassed": len(TARGETED), "reusedPassed": 0}
 
 
 def context():
@@ -137,40 +58,64 @@ def extract_suite(bundle):
     return summary, cases, tree
 
 def verify_test_partition(preflight, remaining):
-    assert set(preflight) == set(TARGETED) and len(preflight) == 3, preflight
+    assert set(preflight) == set(TARGETED) and len(preflight) == len(TARGETED), preflight
     assert len(remaining) == len(set(remaining)), "Duplicate remaining test evidence"
     assert remaining and not set(preflight).intersection(remaining), "A preflight case was repeated"
-    assert all(not case.startswith("LifeOSProbeUITests/NativeNavigationUITests/") for case in remaining), "Navigation preflight repeated"
     assert any(case.startswith("LifeOSProbeTests/") for case in remaining), "Unit suite missing"
     assert any(case.startswith("LifeOSProbeUITests/") for case in remaining), "Remaining UI suite missing"
     assert len(preflight) + len(remaining) >= 405, "Full regression unexpectedly smaller than the preceding 405-case candidate"
 
-def preflight(build):
+def compact_preflight(build):
     summary, cases, tree = extract_suite(build / "Preflight.xcresult")
-    aggregate_cases, aggregate = combined_preflight(build, cases)
-    assert set(aggregate_cases) == set(TARGETED)
-    write(build / "candidate90-diagnostics" / "preflight-aggregate.json", aggregate)
+    assert set(cases) == set(COMPACT_TARGETED) and len(cases) == len(COMPACT_TARGETED), cases
     write(build / "candidate90-diagnostics" / "preflight-summary.json", summary)
     write(build / "candidate90-diagnostics" / "preflight-tests.json", tree)
     print("CANDIDATE90_COMPACT_PREFLIGHT_PASSED", context())
 
+
+def targeted_results(build):
+    compact, compact_cases, compact_tree = extract_suite(build / "Preflight.xcresult")
+    primary, primary_cases, primary_tree = extract_suite(build / "Regressions.xcresult")
+    assert set(compact_cases) == set(COMPACT_TARGETED) and len(compact_cases) == len(COMPACT_TARGETED)
+    assert set(primary_cases) == set(PRIMARY_TARGETED) and len(primary_cases) == len(PRIMARY_TARGETED)
+    assert {item["device"]["modelName"] for item in compact["devicesAndConfigurations"]} == {"iPhone SE (3rd generation)"}
+    assert {item["device"]["modelName"] for item in primary["devicesAndConfigurations"]} == {"iPhone 15 Pro"}
+    cases, aggregate = combined_preflight(build, compact_cases + primary_cases)
+    aggregate["devices"] = {"compactPassed": len(compact_cases), "primaryPassed": len(primary_cases)}
+    return compact, compact_tree, primary, primary_tree, cases, aggregate
+
+
+def preflight(build):
+    compact, compact_tree, primary, primary_tree, cases, aggregate = targeted_results(build)
+    diagnostics = build / "candidate90-diagnostics"
+    write(diagnostics / "preflight-aggregate.json", aggregate)
+    write(diagnostics / "preflight-summary.json", compact)
+    write(diagnostics / "preflight-tests.json", compact_tree)
+    write(diagnostics / "regressions-summary.json", primary)
+    write(diagnostics / "regressions-tests.json", primary_tree)
+    print("CANDIDATE90_ALL_TARGETED_PASSED", len(cases), context())
+
+
 def tests(build):
     proof = context()
-    before, current_first, first_tree = extract_suite(build / "Preflight.xcresult")
-    first, aggregate = combined_preflight(build, current_first)
+    compact, compact_tree, primary, primary_tree, first, aggregate = targeted_results(build)
     after, rest, rest_tree = extract_suite(build / "Final.xcresult")
     verify_test_partition(first, rest)
-    proof.update({"targetedDevice": "iPhone SE (3rd generation)", "targeted": before, "targetedAggregate": aggregate,
+    proof.update({"targetedDevices": ["iPhone SE (3rd generation)", "iPhone 15 Pro"],
+                  "targetedCompact": compact, "targetedPrimary": primary, "targetedAggregate": aggregate,
                   "remaining": after, "targetedCases": first, "remainingCases": rest,
-                  "totalPassed": len(first) + len(rest), "executedThisRun": len(current_first) + len(rest),
+                  "totalPassed": len(first) + len(rest), "executedThisRun": len(first) + len(rest),
                   "reusedTestsPassed": 0, "failed": 0, "skipped": 0})
     diagnostics = build / "candidate90-diagnostics"
-    write(diagnostics / "preflight-summary.json", before)
-    write(diagnostics / "preflight-tests.json", first_tree)
+    write(diagnostics / "preflight-summary.json", compact)
+    write(diagnostics / "preflight-tests.json", compact_tree)
+    write(diagnostics / "regressions-summary.json", primary)
+    write(diagnostics / "regressions-tests.json", primary_tree)
     write(diagnostics / "remaining-summary.json", after)
     write(diagnostics / "remaining-tests.json", rest_tree)
     write(diagnostics / "test-gate.json", proof)
-    print("CANDIDATE90_TEST_GATE_PASSED", proof["totalPassed"], "unique cases; targeted compact cases not repeated")
+    print("CANDIDATE90_TEST_GATE_PASSED", proof["totalPassed"], "unique fresh cases; targeted cases not repeated")
+
 
 def release(build, launch_dir):
     proof = context()
@@ -194,7 +139,8 @@ def package_inputs(directory):
         assert all(evidence.get(k) == v for k, v in expected.items()), (name, expected, evidence)
     assert test["failed"] == test["skipped"] == 0
     aggregate = test["targetedAggregate"]
-    assert aggregate["currentRunPassed"] == 3 and aggregate["reusedPassed"] == 0 and aggregate["passedCases"] == 3
+    assert aggregate["currentRunPassed"] == len(TARGETED) and aggregate["reusedPassed"] == 0 and aggregate["passedCases"] == len(TARGETED)
+    assert aggregate["devices"] == {"compactPassed": len(COMPACT_TARGETED), "primaryPassed": len(PRIMARY_TARGETED)}
     verify_test_partition(test["targetedCases"], test["remainingCases"])
     assert test["totalPassed"] == len(test["targetedCases"]) + len(test["remainingCases"])
     assert test["reusedTestsPassed"] == 0 and test["executedThisRun"] == test["totalPassed"]
@@ -240,23 +186,29 @@ def authorization():
     visit(data)
     for identifier in ("IPA-DELIVERY-2026-11-13", "SIX-TABS-KEYBOARD-REPAIR-2026-11-13"):
         assert any(r.get("id") == identifier and r.get("status") == "ACTIVE" for r in rules), identifier
+    assert len(TARGETED) == len(set(TARGETED)), "Duplicate targeted selector"
     for selector in TARGETED:
         _, cls, method = selector.split("/")
-        paths = list(Path("native-next/UITests").glob("*.swift"))
-        assert any(re.search(r"\bfunc\s+" + re.escape(method) + r"\s*\(", p.read_text(encoding="utf-8-sig")) for p in paths), selector
+        path = Path("native-next/UITests") / (cls + ".swift")
+        assert path.is_file(), selector
+        source = path.read_text(encoding="utf-8-sig")
+        assert re.search(r"\bclass\s+" + re.escape(cls) + r"\b", source), selector
+        assert re.search(r"\bfunc\s+" + re.escape(method) + r"\s*\(", source), selector
     print("CANDIDATE90_AUTHORIZATION_AND_CHECKOUT", context())
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=["authorize", "reuse-prior", "preflight", "tests", "release", "package-inputs", "ipa"])
+    parser.add_argument("mode", choices=["authorize", "compact-preflight", "all-selectors", "compact-selectors", "primary-selectors", "preflight", "tests", "release", "package-inputs", "ipa"])
     parser.add_argument("--build-dir", type=Path, default=Path("app/build"))
     parser.add_argument("--launch-dir", type=Path, default=Path("app/release-launch"))
     parser.add_argument("--evidence-dir", type=Path, default=Path("candidate90-evidence"))
     parser.add_argument("--ipa", type=Path)
-    parser.add_argument("--prior-dir", type=Path, default=Path("app/build/candidate90-diagnostics/reused-preflight"))
     args = parser.parse_args()
     if args.mode == "authorize": authorization()
-    elif args.mode == "reuse-prior": reuse_prior(args.prior_dir)
+    elif args.mode == "compact-preflight": compact_preflight(args.build_dir)
+    elif args.mode == "all-selectors": print("\n".join(TARGETED))
+    elif args.mode == "compact-selectors": print("\n".join(COMPACT_TARGETED))
+    elif args.mode == "primary-selectors": print("\n".join(PRIMARY_TARGETED))
     elif args.mode == "preflight": preflight(args.build_dir)
     elif args.mode == "tests": tests(args.build_dir)
     elif args.mode == "release": release(args.build_dir, args.launch_dir)

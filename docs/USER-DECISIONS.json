@@ -1287,5 +1287,13 @@
     "recorded_on": "2026-11-14",
     "source": "Richiesta revisione animazioni e dettagli; approvazione esplicita correzione navigazione: Sì, correggi e verifica; continua fino al run IPA finale",
     "rule": "Polish condiviso, correzione contenitori, verifica completa prima della IPA90. Nessun deploy backend."
+  },
+  "independent_audit_task_2026_11_14": {
+    "id": "INDEPENDENT-AUDIT-TASK-2026-11-14",
+    "status": "ACTIVE",
+    "kind": "one_time_task",
+    "source": "Richiesta diretta utente",
+    "original_quote": "fallito,impegnati meglio e controlla tutto usa i sottoagenti",
+    "scope": "Revisione indipendente di codice, prove e pipeline prima di nuovo tentativo IPA; autorizzazioni precedenti e accettazione fisica separate."
   }
 }

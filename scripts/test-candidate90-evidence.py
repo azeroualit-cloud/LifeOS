@@ -1,4 +1,4 @@
-"""Check reuse/aggregation gates without credentials, macOS, or network."""
+"""Behavioral checks of fresh candidate gates; no credentials, Xcode, or network."""
 import copy
 import importlib.util
 import json
@@ -6,66 +6,115 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
+from zipfile import ZipFile
 
 SPEC = importlib.util.spec_from_file_location("candidate90", Path(__file__).with_name("verify-candidate90.py"))
 V = importlib.util.module_from_spec(SPEC); SPEC.loader.exec_module(V)
 
-def prior():
-    summary = {"totalTestCount": 3, "passedTests": 2, "failedTests": 1, "skippedTests": 0, "result": "Failed"}
-    tree = {"testNodes": [{"nodeType": "Test Case", "result": "Failed" if case == V.FAILED_PREFLIGHT else "Passed",
-                          "nodeIdentifierURL": "test://com.apple.xcode/LifeOSProbe/" + case} for case in V.TARGETED]}
+
+def suite(cases):
+    summary = {"totalTestCount": len(cases), "passedTests": len(cases), "failedTests": 0,
+               "skippedTests": 0, "expectedFailures": 0, "result": "Passed"}
+    tree = {"testNodes": [{"nodeType": "Test Case", "result": "Passed",
+                          "nodeIdentifierURL": "test://com.apple.xcode/LifeOSProbe/" + case} for case in cases]}
     return summary, tree
 
-class Candidate90ReuseTests(unittest.TestCase):
-    def testKeepsOnlyTheTwoActuallyPassingPriorCases(self):
-        summary, tree = prior()
-        self.assertEqual(V.verify_prior_result(summary, tree), [V.TARGETED[0], V.TARGETED[2]])
 
-    def testRejectsSkippedWrongOrDuplicatePriorCases(self):
-        summary, tree = prior()
-        for mutate in ("skipped", "wrong_result", "wrong_case", "duplicate"):
-            s, t = copy.deepcopy(summary), copy.deepcopy(tree)
-            if mutate == "skipped": s["skippedTests"] = 1
-            elif mutate == "wrong_result": t["testNodes"][0]["result"] = "Failed"
-            elif mutate == "wrong_case": t["testNodes"][0]["nodeIdentifierURL"] += "Other"
-            else: t["testNodes"].append(t["testNodes"][0])
-            with self.assertRaises(AssertionError, msg=mutate): V.verify_prior_result(s, t)
+class Candidate90EvidenceTests(unittest.TestCase):
+    def testFreshPreflightRequiresAllUniqueCasesAndNeverReuses(self):
+        cases, coverage = V.combined_preflight(Path("unused"), V.TARGETED[:])
+        self.assertEqual(cases, V.TARGETED)
+        self.assertEqual(coverage, {"passedCases": len(V.TARGETED), "currentRunPassed": len(V.TARGETED), "reusedPassed": 0})
+        for bad in (V.TARGETED[:-1], V.TARGETED + V.TARGETED[:1], ["LifeOSProbeUITests/Wrong/testCase"]):
+            with self.assertRaises(AssertionError): V.combined_preflight(Path("unused"), bad)
 
-    def testBalancedMethodMaskPreservesHelpersAndOtherPassingMethods(self):
-        before = 'class Tests {\n    func testSixVisibleTabsWithLargeTextAndKeyboard() {\n        let text = "brace }"; if true { action() } // }\n    }\n    private func helper() { same() }\n}\n'
-        repaired = before.replace("action()", "repaired()")
-        self.assertEqual(V.without_repaired_method(before), V.without_repaired_method(repaired))
-        altered_helper = repaired.replace("same()", "different()")
-        self.assertNotEqual(V.without_repaired_method(before), V.without_repaired_method(altered_helper))
+    def testExtractSuiteAcceptsRealIdentifierFormat(self):
+        summary, tree = suite(V.TARGETED)
+        with patch.object(V.subprocess, "check_output", side_effect=[json.dumps(summary), json.dumps(tree)]):
+            actual, cases, _ = V.extract_suite(Path("fixture.xcresult"))
+        self.assertEqual(cases, V.TARGETED)
+        self.assertEqual(actual["passedTests"], len(V.TARGETED))
 
-    def testProductChangeOrAnotherUITestFileRefusesReuse(self):
-        for path in ("native-next/Sources/App.swift", "native-next/project.yml", ".github/actions/native-compat76/action.yml",
-                     "native-next/UITests/NativePersonalFoodUITests.swift"):
-            with patch.object(V.subprocess, "check_output", return_value=path + "\n"):
-                with self.assertRaises(AssertionError, msg=path): V.unchanged_reused_product()
+    def testExtractSuiteRejectsFailuresSkipsExpectedFailuresAndMissingEvidence(self):
+        for change in ("failedTests", "skippedTests", "expectedFailures", "missing", "duplicate", "failed_node"):
+            summary, tree = suite(V.TARGETED)
+            if change in summary: summary[change] = 1
+            elif change == "missing": tree["testNodes"].pop()
+            elif change == "duplicate": tree["testNodes"].append(copy.deepcopy(tree["testNodes"][0]))
+            else: tree["testNodes"][0]["result"] = "Failed"
+            with patch.object(V.subprocess, "check_output", side_effect=[json.dumps(summary), json.dumps(tree)]):
+                with self.assertRaises(AssertionError, msg=change): V.extract_suite(Path("fixture.xcresult"))
 
-    def testOnlyRepairedMethodMayChangeWhenProductIdentical(self):
-        before = 'class Tests {\n    func testSixVisibleTabsWithLargeTextAndKeyboard() { old() }\n    private func helper() { stable() }\n}\n'
-        after = before.replace("old()", "new()")
-        with patch.object(V.subprocess, "check_output", side_effect=["native-next/UITests/NativeNavigationUITests.swift\n", before, after]):
-            V.unchanged_reused_product()
-        with patch.object(V.subprocess, "check_output", side_effect=["native-next/UITests/NativeNavigationUITests.swift\n", before, after.replace("stable()", "changed()")]):
-            with self.assertRaises(AssertionError): V.unchanged_reused_product()
+    def testPartitionRejectsRepeatedPreflightMissingUnitOrSmallSuite(self):
+        units = ["LifeOSProbeTests/Fixture/test" + str(i) for i in range(405)]
+        ui = ["LifeOSProbeUITests/Other/testAnother"]
+        V.verify_test_partition(V.TARGETED, units + ui)
+        for bad in (units + ui + V.TARGETED[:1], ui * 2, units, ui):
+            with self.assertRaises(AssertionError): V.verify_test_partition(V.TARGETED, bad)
 
-    def testAggregateIsExplicitTwoRetainedPlusOneCurrentAndRejectsWrongSHA(self):
-        context = {"sourceCommit": "new-sha", "runID": "current-run", "runAttempt": "1"}
-        proof = {**context, "prior": V.PRIOR, "passedCases": [V.TARGETED[0], V.TARGETED[2]],
-                 "failedCaseToRerun": V.FAILED_PREFLIGHT, "productAndAssemblyUnchanged": True}
+    def testTargetedCoverageRequiresCorrectCasesOnBothOriginalDevices(self):
+        compact, compact_tree = suite(V.COMPACT_TARGETED)
+        primary, primary_tree = suite(V.PRIMARY_TARGETED)
+        compact["devicesAndConfigurations"] = [{"device": {"modelName": "iPhone SE (3rd generation)"}}]
+        primary["devicesAndConfigurations"] = [{"device": {"modelName": "iPhone 15 Pro"}}]
+        with patch.object(V, "extract_suite", side_effect=[(compact, V.COMPACT_TARGETED, compact_tree), (primary, V.PRIMARY_TARGETED, primary_tree)]):
+            result = V.targeted_results(Path("fixture"))
+        self.assertEqual(result[-1]["passedCases"], len(V.TARGETED))
+        for wrong in ("device", "case"):
+            bad = copy.deepcopy(primary)
+            cases = V.PRIMARY_TARGETED[:]
+            if wrong == "device": bad["devicesAndConfigurations"][0]["device"]["modelName"] = "iPhone SE (3rd generation)"
+            else: cases[0] = V.COMPACT_TARGETED[0]
+            with patch.object(V, "extract_suite", side_effect=[(compact, V.COMPACT_TARGETED, compact_tree), (bad, cases, primary_tree)]):
+                with self.assertRaises(AssertionError, msg=wrong): V.targeted_results(Path("fixture"))
+
+    def evidence(self):
+        context = {"sourceCommit": "exact-sha", "runID": "current-run", "runAttempt": "1"}
+        rest = ["LifeOSProbeTests/Fixture/test" + str(i) for i in range(405)] + ["LifeOSProbeUITests/Other/testAnother"]
+        total = len(V.TARGETED) + len(rest)
+        test = {**context, "failed": 0, "skipped": 0, "targetedCases": V.TARGETED[:], "remainingCases": rest,
+                "targetedAggregate": {"currentRunPassed": len(V.TARGETED), "reusedPassed": 0, "passedCases": len(V.TARGETED),
+                    "devices": {"compactPassed": len(V.COMPACT_TARGETED), "primaryPassed": len(V.PRIMARY_TARGETED)}},
+                "totalPassed": total, "reusedTestsPassed": 0, "executedThisRun": total}
+        release = {**context, "launchesPassed": 4, "releaseModes": V.RELEASE_MODES[:]}
+        return context, test, release
+
+    def testPackagingRequiresExactSourceRunAttemptAndFreshCompleteEvidence(self):
+        context, test, release = self.evidence()
         with tempfile.TemporaryDirectory() as folder, patch.object(V, "context", return_value=context):
-            build = Path(folder)
-            path = build / "candidate90-diagnostics/reused-preflight/reuse-proof.json"
-            V.write(path, proof)
-            cases, coverage = V.combined_preflight(build, [V.FAILED_PREFLIGHT])
-            self.assertEqual(cases, V.TARGETED)
-            self.assertEqual((coverage["currentRunPassed"], coverage["reusedPassed"]), (1, 2))
-            with self.assertRaises(AssertionError): V.combined_preflight(build, V.TARGETED)
-            proof["sourceCommit"] = "wrong-sha"; V.write(path, proof)
-            with self.assertRaises(AssertionError): V.combined_preflight(build, [V.FAILED_PREFLIGHT])
+            root = Path(folder)
+            V.write(root / "tests/test-gate.json", test); V.write(root / "release/release-gate.json", release)
+            proof = V.package_inputs(root)
+            self.assertEqual(proof["testsExecutedThisRun"], proof["testsPassed"])
+            self.assertEqual(proof["reusedTestsPassed"], 0)
+            self.assertFalse(proof["physicalAcceptance"])
+            for key in ("sourceCommit", "runID", "runAttempt"):
+                bad = copy.deepcopy(test); bad[key] = "wrong"
+                V.write(root / "tests/test-gate.json", bad)
+                with self.assertRaises(AssertionError, msg=key): V.package_inputs(root)
+            for field in ("failed", "skipped", "reusedTestsPassed"):
+                bad = copy.deepcopy(test); bad[field] = 1
+                V.write(root / "tests/test-gate.json", bad)
+                with self.assertRaises(AssertionError, msg=field): V.package_inputs(root)
+            V.write(root / "tests/test-gate.json", test)
+            bad = copy.deepcopy(release); bad["launchesPassed"] = 3
+            V.write(root / "release/release-gate.json", bad)
+            with self.assertRaises(AssertionError): V.package_inputs(root)
+
+    def testPackagedCatalogMustMatchTestedCheckout(self):
+        resources = Path("native-next/Resources")
+        names = ("generic-foods", "branded-foods", "branded-supplements", "italian-brands", "open-food-facts-italy", "cocktails", "supplements")
+        with tempfile.TemporaryDirectory() as folder:
+            for mutate in (False, True):
+                ipa = Path(folder) / ("bad.ipa" if mutate else "good.ipa")
+                with ZipFile(ipa, "w") as z:
+                    for name in names:
+                        content = (resources / (name + ".json")).read_bytes()
+                        if mutate and name == "open-food-facts-italy": content = b"[]"
+                        z.writestr("Payload/LifeOSProbe.app/" + name + ".json", content)
+                if mutate:
+                    with self.assertRaises(AssertionError): V.ipa(ipa)
+                else: V.ipa(ipa)
+
 
 if __name__ == "__main__": unittest.main()
-

@@ -1,5 +1,7 @@
 # LifeOS — punto di ingresso per qualsiasi IA
 
+**Revisione indipendente del 14 novembre completata prima del nuovo run.** Tre sottoagenti hanno controllato contenitori, evidenze UI e pipeline. Ultimo run 43618379858: compilazione e 2/3 mirati verdi; il primo tap Calendario non attivava la destinazione. Hit area rettangolare applicata dopo lo sfondo; corretta anche l’invalidazione degli aggiornamenti ambiente accodati. Nuovi test verificano centro, icona e didascalia di tutte le sei voci. Pipeline ripulita dal riuso obsoleto: 5 mirati compatti e 14 regressioni sul principale prima della suite restante, poi quattro Release e IPA solo a gate verdi. Sette test locali del gate, otto del selettore, verifica dei 19 selettori reali e diff passati. La correzione runtime resta da provare; nessuna IPA90 prodotta.
+
 Run corrente: https://github.com/azeroualit-cloud/LifeOS/actions/runs/43618379858 — sorgente82d56cf. Nuove prove senza riuso UI dopo modifiche movimento/contenitori. Utente monitora; esiti ancora da acquisire.
 
 Revisione 14 novembre: animazioni censite dall’agente, tempi condivisi e Reduce Motion migliorati; transizioni cancellabili. Correzione contenitori approvata: contenuto stabile, aggiornamenti solo quando cambiano preferenze pubbliche. Finanza/calendario e Bloom richiedono nuova verifica. Il prodotto cambia: nessun riuso dei due precedenti UI. Pipeline90 torna a tre casi mirati nuovi, suite restante, quattro Release e packaging solo a gate verdi. Nessuna IPA ancora prodotta.
