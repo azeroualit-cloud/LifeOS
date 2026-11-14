@@ -1,10 +1,10 @@
 # LifeOS
 
-**LifeOS 0.10.28 build90 — verifica in corso, IPA non ancora prodotta.**
+**LifeOS 0.10.28 build90 — verifica avviata il 15 novembre; IPA90 non ancora prodotta.**
 
-Run precedente43623029267: compilazione e2/5UI passati, tre falliti; suite/Release/IPA non eseguiti. Diagnosi indipendente: osservazione percorso Dashboard, tap perso con testo grande, query icona AX. Correzione stack e prova isolata interazione vetro, test rigorosi con diagnostica. [Nuovo run43628175869](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43628175869), sorgente `c64430e7fbc71e80b47d7bd1c5a46d284cd67e59`: 5compatti,14regressioni,suite restante,4Release,IPA solo se tutti i gate passano. Esito ancora da acquisire.
+[Run43651934566](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43651934566), sorgente `64b31355cebe3297cb09df2f48d5bf6a8804a42b`. Ottimizzate soltanto le letture geometriche del test, senza togliere asserzioni né aumentare timeout. Run precedente: compilazione e4/5UI verdi, caso grande217s oltre limite180s; runner riavviato. Nuovo gate pulito:5compatti,14regressioni,suite restante,4Release,IPA solo se tutto passa. Esito ancora da acquisire.
 
-Ramo corrente: [codex/revision77](https://github.com/azeroualit-cloud/LifeOS/tree/codex/revision77). Leggere [AI-HANDOFF](https://github.com/azeroualit-cloud/LifeOS/blob/codex/revision77/docs/AI-HANDOFF.md) e [RELEASE90](https://github.com/azeroualit-cloud/LifeOS/blob/codex/revision77/docs/RELEASE90.md). Ultima IPA verificata89. Nessun deploy backend. Prove fisiche e accettazione aperte.
+Ramo corrente: [codex/revision77](https://github.com/azeroualit-cloud/LifeOS/tree/codex/revision77). Leggere [AI-HANDOFF](https://github.com/azeroualit-cloud/LifeOS/blob/codex/revision77/docs/AI-HANDOFF.md) e [RELEASE90](https://github.com/azeroualit-cloud/LifeOS/blob/codex/revision77/docs/RELEASE90.md). Ultima IPA verificata89. Nessun deploy backend; prove fisiche e accettazione aperte.
 
 **LifeOS 0.10.19 build 80 consegnata.** [IPA](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.19-build80/LifeOS-80.ipa), SHA-256 80a4e4759c810e2f2f69ef860a128d8cd020cf133cfa2e223cc4d51edf9f60c0. Sorgente 5aba0d5b888471025a45568d6ff567199b5a4fec. [Suite 368/368](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42224387516), [avvii Release 4/4](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42224387516), [confezionamento verificato](https://github.com/azeroualit-cloud/LifeOS/actions/runs/42235788082). Restano firma Signulous, aggiornamento sul telefono, parità dei dati personali, verifiche fisiche e accettazione esplicita.
 
