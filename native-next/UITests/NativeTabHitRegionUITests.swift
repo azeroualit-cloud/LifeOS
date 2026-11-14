@@ -20,7 +20,11 @@ final class NativeTabHitRegionUITests: XCTestCase {
                 let target: XCUIElement
                 switch region {
                 case "icon":
-                    target = button.images.firstMatch
+                    // At accessibility sizes the visible label is only the
+                    // centered icon. SwiftUI exposes that label as the Button,
+                    // without an Image child (the failed query; icon visible in screenshot).
+                    // Its visual icon center therefore equals the button center.
+                    target = large ? button : button.images.firstMatch
                 case "caption":
                     target = button.staticTexts[title]
                 default:

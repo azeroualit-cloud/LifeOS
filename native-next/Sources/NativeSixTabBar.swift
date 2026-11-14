@@ -21,7 +21,9 @@ struct NativeSixTabBar: View {
 
     @ViewBuilder private var bar: some View {
         if #available(iOS 26.0, *) {
-            items.glassEffect(.regular.interactive(), in: Capsule())
+            // Keep one decorative glass surface; individual Buttons own taps.
+            // This isolates whole-container interaction from six adjacent targets.
+            items.glassEffect(.regular, in: Capsule())
         } else {
             items.background(.regularMaterial, in: Capsule())
         }
@@ -31,6 +33,11 @@ struct NativeSixTabBar: View {
         HStack(spacing: NativeDesign.Space.none) {
             ForEach(NativeTab.allCases) { tab in
                 Button {
+                    #if DEBUG
+                    if ProcessInfo.processInfo.arguments.contains("--visual-test") {
+                        print("NATIVE_TAB_ACTION target=\(tab.rawValue) previous=\(selection.rawValue)")
+                    }
+                    #endif
                     if selection == tab { onReselect() }
                     else { selection = tab }
                 } label: {

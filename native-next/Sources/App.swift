@@ -275,15 +275,9 @@ struct NativeRoot: View {
         .modifier(NativeTabArrival(tab: tab))
     }
     private var dashboard: some View {
-        NavigationStack(path: $router.dashboardPath) {
+        NativeDashboardStack(content: AnyView(
             DashboardScreen().toolbar { tools }.navigationTitle("Dashboard").navigationBarTitleDisplayMode(.inline)
-                .navigationDestination(for: NativeDashboardDestination.self) { destination in
-                    switch destination {
-                    case .finance: FinanceScreen()
-                    case .calendar: CalendarScreen()
-                    }
-                }
-        }
+        ))
     }
     private var tasks: some View { NavigationStack { TasksScreen().toolbar { tools }.navigationTitle("Attività").navigationBarTitleDisplayMode(.inline) } }
     @ToolbarContentBuilder private var tools: some ToolbarContent {
@@ -324,6 +318,24 @@ struct NativeRoot: View {
         }
     }
 }
+/// The cached host must own the router subscription used by its NavigationStack.
+/// Observing only NativeRoot outside that host leaves external path writes stale.
+private struct NativeDashboardStack: View {
+    @EnvironmentObject private var router: NativeRouter
+    let content: AnyView
+
+    var body: some View {
+        NavigationStack(path: $router.dashboardPath) {
+            content.navigationDestination(for: NativeDashboardDestination.self) { destination in
+                switch destination {
+                case .finance: FinanceScreen()
+                case .calendar: CalendarScreen()
+                }
+            }
+        }
+    }
+}
+
 private struct NativeTabArrival: ViewModifier {
     @Environment(\.nativeReduceMotion) private var reduceMotion
     let tab: NativeTab

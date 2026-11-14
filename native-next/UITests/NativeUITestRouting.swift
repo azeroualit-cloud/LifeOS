@@ -8,6 +8,23 @@ extension XCUIApplication {
         XCTAssertTrue(destination.waitForExistence(timeout: 10), "Missing visible destination " + name)
         XCTAssertTrue(destination.isHittable, "Destination must remain directly reachable: " + name)
         destination.tap()
+        // Keep the native tap path. Selection may be published after the event;
+        // require the actual selected trait rather than an immediate snapshot.
+        let selected = XCTNSPredicateExpectation(predicate: NSPredicate { element, _ in
+            (element as? XCUIElement)?.isSelected == true
+        }, object: destination)
+        let result = XCTWaiter.wait(for: [selected], timeout: 10)
+        if result != .completed {
+            let capture = XCTAttachment(screenshot: screenshot())
+            let activityName = "Navigation selection failure " + name
+            capture.name = activityName
+            capture.lifetime = .keepAlways
+            XCTContext.runActivity(named: activityName) { activity in
+                activity.add(capture)
+            }
+            print("TAB_SELECTION_FAILURE " + name + "\n" + debugDescription)
+        }
+        XCTAssertEqual(result, .completed, "The tapped destination must become selected: " + name)
     }
 
     func mainTabButton(_ name: String) -> XCUIElement {
