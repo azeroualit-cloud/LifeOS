@@ -683,7 +683,7 @@
     "failed": 0
   },
   "six_tab_glass_revision": {
-    "status": "dashboard_path_and_glass_interaction_under_validation",
+    "status": "navigation_and_hit_regions_passed_large_case_timeout_test_optimized",
     "order": [
       "Dashboard",
       "Attività",
@@ -703,25 +703,27 @@
     "selected_ui_tests": 3,
     "screenshots": "pending_run_artifacts",
     "result": {
-      "run": "43623029267",
-      "source_commit": "0de02872e459f4cb3cfe56684ed83d1cd8d66941",
+      "run": "43628175869",
+      "source_commit": "c64430e7fbc71e80b47d7bd1c5a46d284cd67e59",
       "compile": "passed",
-      "targeted_ui_passed": 2,
-      "targeted_ui_failed": 3,
+      "targeted_ui_passed": 4,
+      "targeted_ui_failed": 1,
+      "failure": "large_navigation_keyboard_total_217_seconds_exceeded_180_seconds",
+      "runner_restart": "Catalog initially failed to terminate app after timeout, passed after automatic Xcode runner restart",
       "remaining_suite": "not_run",
       "release_launches": "not_run",
       "ipa": "not_created"
     },
-    "diagnostics_artifact": 14125792401,
+    "diagnostics_artifact": 14128102976,
     "product_fix_applied": true,
     "next_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43628175869",
-    "validation_artifact": 14125637973,
-    "large_text_tap": "Video ends on Attivita after Salute tap. Removing ancestor glass interaction is an isolated hypothesis; native tap wait remains strict with diagnostics. Runtime verification pending."
+    "validation_artifact": 14127593883,
+    "large_text_tap": "All six native tab taps and large hit regions passed in 43628175869; combined geometry/keyboard test exceeded total time budget. No claim that scroll regressions passed."
   },
   "next_ipa_request": {
     "authorized": true,
     "decision": "IPA-DELIVERY-2026-11-13",
-    "status": "fresh_19_case_gate_and_conditional_ipa_dispatched",
+    "status": "test_only_geometry_roundtrip_optimization_pending_fresh_compact_gate",
     "packaging_workflow_current90": ".github/workflows/lifeos-candidate90.yml",
     "existing_package89": "pinned_to_previous_candidate_not_reusable",
     "version": "0.10.28",

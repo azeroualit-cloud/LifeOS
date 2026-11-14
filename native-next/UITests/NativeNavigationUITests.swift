@@ -16,16 +16,18 @@ final class NativeNavigationUITests: XCTestCase {
         XCTAssertEqual(app.mainTabBar.buttons.count, 6, file: file, line: line)
         XCTAssertFalse(app.mainTabBar.buttons["Altro"].exists, file: file, line: line)
         XCTAssertFalse(app.mainTabBar.buttons["More"].exists, file: file, line: line)
+        let appFrame = app.frame
         var previousX = -CGFloat.infinity
         for title in destinations {
             let button = app.mainTabButton(title)
             XCTAssertTrue(button.exists && button.isHittable, title, file: file, line: line)
-            XCTAssertGreaterThanOrEqual(button.frame.width.rounded(), 44, title, file: file, line: line)
-            XCTAssertGreaterThanOrEqual(button.frame.height.rounded(), 44, title, file: file, line: line)
-            XCTAssertGreaterThan(button.frame.midX, previousX, title, file: file, line: line)
-            XCTAssertGreaterThanOrEqual(button.frame.minX, app.frame.minX, title, file: file, line: line)
-            XCTAssertLessThanOrEqual(button.frame.maxX, app.frame.maxX, title, file: file, line: line)
-            previousX = button.frame.midX
+            let buttonFrame = button.frame
+            XCTAssertGreaterThanOrEqual(buttonFrame.width.rounded(), 44, title, file: file, line: line)
+            XCTAssertGreaterThanOrEqual(buttonFrame.height.rounded(), 44, title, file: file, line: line)
+            XCTAssertGreaterThan(buttonFrame.midX, previousX, title, file: file, line: line)
+            XCTAssertGreaterThanOrEqual(buttonFrame.minX, appFrame.minX, title, file: file, line: line)
+            XCTAssertLessThanOrEqual(buttonFrame.maxX, appFrame.maxX, title, file: file, line: line)
+            previousX = buttonFrame.midX
         }
     }
 
