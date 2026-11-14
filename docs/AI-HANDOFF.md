@@ -1,5 +1,7 @@
 # LifeOS — punto di ingresso per qualsiasi IA
 
+Run corrente: https://github.com/azeroualit-cloud/LifeOS/actions/runs/43618379858 — sorgente82d56cf. Nuove prove senza riuso UI dopo modifiche movimento/contenitori. Utente monitora; esiti ancora da acquisire.
+
 Revisione 14 novembre: animazioni censite dall’agente, tempi condivisi e Reduce Motion migliorati; transizioni cancellabili. Correzione contenitori approvata: contenuto stabile, aggiornamenti solo quando cambiano preferenze pubbliche. Finanza/calendario e Bloom richiedono nuova verifica. Il prodotto cambia: nessun riuso dei due precedenti UI. Pipeline90 torna a tre casi mirati nuovi, suite restante, quattro Release e packaging solo a gate verdi. Nessuna IPA ancora prodotta.
 
 **Recupero singolo avviato — 13 novembre 2026:** [run 43522275345](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43522275345), sorgente `47cc00e`. Codice applicativo identico ad `aa3fb83`: due UI passati conservati con verifica di immutabilità, solo il test Bloom riparato da eseguire. Poi suite restante senza ripetere i tre casi coperti, quattro avvii Release e IPA 90 soltanto a gate superati. Esito del recupero ancora da acquisire; nessun monitoraggio attivo, come richiesto dall’utente. Nessuna IPA 90 ancora verificata o distribuita; nessun deploy backend.

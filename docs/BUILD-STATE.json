@@ -719,20 +719,15 @@
   "next_ipa_request": {
     "authorized": true,
     "decision": "IPA-DELIVERY-2026-11-13",
-    "status": "single_ui_recovery_and_conditional_ipa_dispatched_user_monitors",
+    "status": "fresh_validation_dispatched_after_motion_review",
     "packaging_workflow_current90": ".github/workflows/lifeos-candidate90.yml",
     "existing_package89": "pinned_to_previous_candidate_not_reusable",
     "version": "0.10.28",
     "build": 90,
-    "source_commit": "47cc00e4a89c3b73b95292f79e0c2bbabbe08377",
-    "run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43522275345",
+    "source_commit": "82d56cfeccfe5befb45b806193c35fd08f0ad8f1",
+    "run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/43618379858",
     "default_workflow_registration_commit": "672fcad9f9233b7ffe75223ce422368fc781637e",
-    "reused_preflight": {
-      "run": "43506535087",
-      "source_commit": "aa3fb83ec452a5bca32bbfdf0cb6c9781508f3ac",
-      "passed_cases": 2,
-      "artifact_id": 14077666871
-    },
-    "current_preflight_cases_to_execute": 1
+    "reused_preflight": null,
+    "current_preflight_cases_to_execute": 3
   }
 }
