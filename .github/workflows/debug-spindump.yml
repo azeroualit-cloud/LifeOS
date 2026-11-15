@@ -4,7 +4,7 @@ on:
     branches: [codex/revision77]
     paths: [.github/workflows/debug-spindump.yml]
 env:
-  RUN_ID: "43708179109"
+  RUN_ID: "43722940589"
 permissions:
   actions: read
   contents: read
@@ -22,13 +22,14 @@ jobs:
           gh run download "$RUN_ID" -R "${{ github.repository }}" -n "$name" -D art
       - name: Print the app main-thread stacks from every spindump
         run: |
-          set -uo pipefail
+          set -u
           sudo apt-get install -y zstd >/dev/null
           mkdir -p out
           for f in art/*.xcresult/Data/data.*; do
             if head -c 4 "$f" | od -An -tx1 | grep -q "28 b5 2f fd"; then zstd -dqc "$f" > out/tmp 2>/dev/null || continue; else cp "$f" out/tmp; fi
             if grep -q "^Process: *LifeOSProbe \[" out/tmp 2>/dev/null; then
               echo "=================== $(basename "$f" | cut -c1-40) ($(dirname "$f" | cut -d/ -f2))"
-              awk '/^Process: *LifeOSProbe \[/{p=1} p&&/^Process:/&&!/LifeOSProbe \[/{exit} p' out/tmp | head -260
+              awk '/^Process: *LifeOSProbe \[/{p=1} p&&/^Process:/&&!/LifeOSProbe \[/{exit} p' out/tmp > out/app.txt || true
+              grep -E '^Thread|LifeOSProbe \+|\(LifeOSProbe' out/app.txt | sed -E 's/ +/ /g' | cut -c1-220 | head -120 || true
             fi
           done
