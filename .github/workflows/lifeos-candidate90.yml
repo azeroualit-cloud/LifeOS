@@ -75,6 +75,9 @@ jobs:
           xcrun simctl boot "$MAIN_DEVICE"
           xcrun simctl bootstatus "$MAIN_DEVICE" -b
       - name: Run previously failing regressions first on the original primary device
+        id: regressions
+        # Keep going so one run reports every failing test; the gate step below still fails the job.
+        continue-on-error: true
         working-directory: app
         run: |
           set -euo pipefail
@@ -83,14 +86,28 @@ jobs:
           while IFS= read -r test; do only+=("-only-testing:$test"); done < build/regression-cases.txt
           xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 660 "${only[@]}" -resultBundlePath build/Regressions.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/regression-tests.log 2>&1 || { grep -E 'error:|Test Case .*failed' build/regression-tests.log || true; tail -n 80 build/regression-tests.log; exit 1; }
       - name: Require all targeted cases before the remaining suite
+        id: targeted
+        continue-on-error: true
         run: python3 scripts/verify-candidate90.py preflight
       - name: Run the remaining unit and UI tests
+        id: remaining
+        continue-on-error: true
         working-directory: app
         run: |
           set -euo pipefail
           skip=()
           while IFS= read -r test; do skip+=("-skip-testing:$test"); done < build/preflight-cases.txt
           xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 660 "${skip[@]}" -resultBundlePath build/Final.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/final-tests.log 2>&1 || { grep -E 'error:|Test Case .*failed' build/final-tests.log || true; tail -n 120 build/final-tests.log; exit 1; }
+      - name: Fail the job if any test step failed
+        if: ${{ steps.regressions.outcome == 'failure' || steps.targeted.outcome == 'failure' || steps.remaining.outcome == 'failure' }}
+        working-directory: app
+        run: |
+          echo "## Test falliti" >> "$GITHUB_STEP_SUMMARY"
+          for f in build/regression-tests.log build/final-tests.log; do
+            [ -f "$f" ] && grep -E "error: -\[|Test Case .*failed" "$f" | sed -E 's#^/Users/runner/work/[^ ]*/##' | sort -u | tee -a "$GITHUB_STEP_SUMMARY"
+          done
+          echo "regressions=${{ steps.regressions.outcome }} targeted=${{ steps.targeted.outcome }} remaining=${{ steps.remaining.outcome }}"
+          exit 1
       - name: Verify unique passing cases and retain exact SHA evidence
         run: python3 scripts/verify-candidate90.py tests
       - name: Collect lightweight test diagnostics
