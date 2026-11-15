@@ -4,7 +4,35 @@ private struct NativeForceReduceMotionKey: EnvironmentKey {
     static let defaultValue = false
 }
 
+private struct NativeTabBarReserveKey: EnvironmentKey {
+    static let defaultValue: CGFloat = 0
+}
+
+/// Height of the floating six-tab bar plus its padding.
+enum NativeTabBarMetrics {
+    static let reserve = NativeDesign.Layout.tabHeight + 2 * NativeDesign.Space.xs
+}
+
+/// The floating tab bar is an overlay of the root container. A safe-area inset
+/// applied outside the tab NavigationStacks did not reach their scroll views
+/// (CI runs 43684175590 and 43693074694: last Dashboard row and Health actions
+/// stayed under the bar), so each tab root reserves the space inside its own
+/// NavigationStack, where screen-level insets are proven to work.
+struct NativeTabBarReserve: ViewModifier {
+    @Environment(\.nativeTabBarReserve) private var reserve
+    func body(content: Content) -> some View {
+        content.safeAreaInset(edge: .bottom, spacing: NativeDesign.Space.none) {
+            Color.clear.frame(height: reserve).accessibilityHidden(true).allowsHitTesting(false)
+        }
+    }
+}
+
 extension EnvironmentValues {
+    var nativeTabBarReserve: CGFloat {
+        get { self[NativeTabBarReserveKey.self] }
+        set { self[NativeTabBarReserveKey.self] = newValue }
+    }
+
     /// Test-only forcing is additive: the system preference always wins.
     var nativeForceReduceMotion: Bool {
         get { self[NativeForceReduceMotionKey.self] }
