@@ -1,5 +1,7 @@
 # LifeOS — correzioni e difetti aperti
 
+**15 novembre, esito del run 43651934566:** fallito sul commit `64b31355cebe3297cb09df2f48d5bf6a8804a42b` al passo delle 14 regressioni (11 fallite, 3 passate); release-launches, package90 e publish90 saltati. Fallite: 4 scroll Bloom e 2 safe area Bloom, 2 scroll Calendario (timeout query), 1 Finanza (`finance-scroll` assente), 2 Nutrizione (righe 99 e 155). Build 89 con TabView nativa passava le stesse prove. Correzione in corso su richiesta utente: contenitore SwiftUI puro (`IPA90-SWIFTUI-CONTAINER-2026-11-15`), non compilato né provato in locale; nessuna IPA90 prodotta, nessun deploy backend.
+
 **15 novembre — verifica avviata:** [43651934566](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43651934566), sorgente `64b31355cebe3297cb09df2f48d5bf6a8804a42b`. Solo ottimizzazione del test geometrico: asserzioni e timeout invariati, prodotto invariato rispetto a c64430e. Prima 5 UI compatti puliti dopo timeout/riavvio del runner, poi 14 regressioni, restante suite, 4 Release e IPA90 soltanto a gate verdi. Esito ancora da acquisire. Utente monitora; nessun polling attivo. Nessuna nuova IPA verificata, nessun deploy backend. Il precedente tentativo di push/dispatch era rimasto ineseguito per limite temporaneo del revisore automatico; ripresa ora riuscita.
 
 ## Run 43628175869 analizzato — 14 novembre 2026

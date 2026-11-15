@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "LifeOS",
-  "updated_on": "2026-11-13",
+  "updated_on": "2026-11-15",
   "policy": {
     "id": "META-01",
     "status": "ACTIVE",
@@ -928,6 +928,16 @@
       "original_quote": "facciamo il calcolo sulle ultime 2 settimane dall'ultima pesata ma senza limiti minimi di numero di pesate",
       "rule": "Finestra di 14 giorni a ritroso dall’ultima pesata disponibile, inclusa. Rimuovere i minimi arbitrari di numero pesate, durata e numero/distanza dei confronti. Due date distinte sono necessarie per misurare una variazione. Conservare il requisito esistente di copertura calorica 90%, non oggetto della richiesta. Nessuna nuova IPA o deploy autorizzati.",
       "relationship": "Precisa HEALTH-WEEK-REVIEW-01, che approva 14 giorni senza ancoraggio o soglie esplicite. Nessun conflitto con una regola utente attiva."
+    },
+    {
+      "id": "IPA90-SWIFTUI-CONTAINER-2026-11-15",
+      "status": "ACTIVE",
+      "scope": "LifeOS build 90, contenitore delle sei schede",
+      "recorded_on": "2026-11-15",
+      "provenance": "Richiesta diretta utente e scelta esplicita in questa chat (Claude)",
+      "original_quote": "intendevo l'ipa 90 dopo che correggi gli errori te",
+      "rule": "Dopo il run 43651934566 (11 regressioni UI fallite su 14) l'utente chiede di correggere gli errori e poi produrre IPA90. Scelta esplicita: contenitore SwiftUI puro al posto degli UIHostingController annidati, mantenendo la barra a sei voci in vetro. Sostituisce soltanto il dettaglio implementativo delle radici UIKit stabili di SIX-TABS-KEYBOARD-REPAIR-2026-11-13 (stesso ambito, già confermato). IPA consentita solo dopo mirati, suite restante e quattro avvii Release verdi sullo stesso SHA. Nessun deploy backend.",
+      "readiness": "Implementato in native-next/Sources/NativeSixTabBar.swift; non compilato né provato in locale (nessun Mac). Esito runtime da acquisire dalla CI."
     }
   ],
   "pending_confirmations": [

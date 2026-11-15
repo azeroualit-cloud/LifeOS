@@ -384,3 +384,7 @@ Richiesta diretta: «produci l’ipa». Autorizzata nuova produzione delle modif
 ## SIX-TABS-KEYBOARD-REPAIR-2026-11-13 — ACTIVE
 
 Utente: «confermo» alla richiesta approvazione della correzione radici stabili e verifica prima dell’IPA già autorizzata. Autorizzata implementazione della proposta descritta e successive prove/confezionamento0.10.28build90. Non chiedere nuovamente conferma correzione oIPA per questo stesso ambito. Nessun deploybackend;installazione/accettazione separate.
+
+## IPA90-SWIFTUI-CONTAINER-2026-11-15 — ACTIVE
+
+Utente: «intendevo l'ipa 90 dopo che correggi gli errori te». Scelta esplicita tra tre strade: contenitore SwiftUI puro (scelto), correzione del contenitore UIKit attuale, analisi dei log completi. Dopo il run 43651934566 (11 regressioni UI fallite su 14) si sostituiscono gli UIHostingController annidati con un contenitore SwiftUI unico che mantiene montate le schede visitate; barra a sei voci in vetro invariata. Sostituisce solo il dettaglio implementativo di SIX-TABS-KEYBOARD-REPAIR-2026-11-13. IPA solo a gate verdi sullo stesso SHA; nessun deploy backend. Non compilato né provato in locale: serve l'esito della CI.
