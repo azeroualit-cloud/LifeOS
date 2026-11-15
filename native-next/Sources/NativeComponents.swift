@@ -18,12 +18,15 @@ enum NativeTabBarMetrics {
 /// (CI runs 43684175590 and 43693074694: last Dashboard row and Health actions
 /// stayed under the bar), so each tab root reserves the space inside its own
 /// NavigationStack, where screen-level insets are proven to work.
+/// safeAreaPadding, not safeAreaInset: an inset view makes SwiftUI ask the
+/// screen for its minimum size, which for the Calendar measured every lazy
+/// week of the 13-month window on each animation frame and kept the main
+/// thread busy forever (spindump of run 43708179109). Padding the safe area
+/// changes the insets without measuring the content.
 struct NativeTabBarReserve: ViewModifier {
     @Environment(\.nativeTabBarReserve) private var reserve
     func body(content: Content) -> some View {
-        content.safeAreaInset(edge: .bottom, spacing: NativeDesign.Space.none) {
-            Color.clear.frame(height: reserve).accessibilityHidden(true).allowsHitTesting(false)
-        }
+        content.safeAreaPadding(.bottom, reserve)
     }
 }
 
