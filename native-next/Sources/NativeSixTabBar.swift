@@ -70,29 +70,17 @@ struct NativeSixTabBar: View {
     }
 }
 
-/// Keeps every visited destination mounted in one SwiftUI hierarchy, so each
-/// NavigationStack, scroll position and draft survives tab changes. There are no
-/// nested hosting controllers: sheets, safe areas and keyboard state belong to the
-/// single root, and the content closure is re-evaluated on every update.
-/// Hidden destinations are removed from hit testing and accessibility.
+/// Mounts only the selected destination. Hidden destinations are not kept in the
+/// view hierarchy, so they cannot appear in accessibility or run hidden work, and
+/// there are no nested hosting controllers. State that must survive a tab change
+/// (navigation paths, calendar painting, finance month, task category) lives in
+/// NativeRouter or NativeStore, not in the screens. The identity per tab prevents
+/// SwiftUI from carrying one tab's local state into another.
 struct NativeTabContainer: View {
     let selection: NativeTab
     let content: (NativeTab) -> AnyView
-    @State private var visited: Set<NativeTab> = []
 
     var body: some View {
-        ZStack {
-            ForEach(NativeTab.allCases) { tab in
-                if tab == selection || visited.contains(tab) {
-                    content(tab)
-                        .opacity(tab == selection ? 1 : 0)
-                        .allowsHitTesting(tab == selection)
-                        .accessibilityHidden(tab != selection)
-                        .zIndex(tab == selection ? 1 : 0)
-                }
-            }
-        }
-        .onAppear { visited.insert(selection) }
-        .onChange(of: selection) { _, current in visited.insert(current) }
+        content(selection).id(selection)
     }
 }

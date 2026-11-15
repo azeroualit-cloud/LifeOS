@@ -12,7 +12,10 @@ struct CalendarScreen: View {
         get { router.calendarDay }
         nonmutating set { router.calendarDay = newValue }
     }
-    @State private var brush = "consult"
+    private var brush: String {
+        get { router.calendarBrush }
+        nonmutating set { router.calendarBrush = newValue }
+    }
     @State private var lastShift: (String, String)?
     @State private var months: [String] = []
     @State private var visibleMonth: String?
@@ -480,7 +483,10 @@ struct CalendarScreen: View {
                 Divider()
         }.dynamicTypeSize(...DynamicTypeSize.xxxLarge)
     }
-    @State private var painting = false
+    private var painting: Bool {
+        get { router.calendarPainting }
+        nonmutating set { router.calendarPainting = newValue }
+    }
     private var brushPanel: some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
             HStack(spacing: NativeDesign.Space.large) {
@@ -498,7 +504,7 @@ struct CalendarScreen: View {
                 ScrollView(.horizontal) {
                     HStack(spacing: NativeDesign.Space.small) {
                         ForEach(ShiftKind.allCases) { kind in
-                            NativeShiftBrushOption(kind: kind, brush: $brush)
+                            NativeShiftBrushOption(kind: kind, brush: Binding(get: { router.calendarBrush }, set: { router.calendarBrush = $0 }))
                         }
                     }
                     .padding(.vertical, NativeDesign.Space.xs)

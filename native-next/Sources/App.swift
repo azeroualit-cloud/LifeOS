@@ -98,6 +98,8 @@ enum NativeSheet: Identifiable {
     @Published var calendarDay = CivilDate.day()
     @Published var activationDate = Date()
     @Published var calendarOpensDay = false
+    @Published var calendarPainting = false
+    @Published var calendarBrush = "consult"
     @Published var calendarFocusRequest = UUID()
     var requestedCalendarDay: String?
     init() {
