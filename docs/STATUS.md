@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Run avviato:** [43684175590](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43684175590) sul commit `74c95d0aa60d5185a95510cf8c54b2c067582516` (solo scheda selezionata montata, stato Dipingi turni nel router). Gate invariato: 5 compatti, 14 regressioni, suite restante, 4 Release, IPA90 solo a gate verdi. Esito da acquisire; nessun polling; nessuna IPA90, nessun deploy backend.
+
 **Correzione successiva (15 novembre):** contenitore che monta soltanto la scheda selezionata, con lo stato di Dipingi turni nel router (`NativeSixTabBar.swift`, `CalendarScreen.swift`, `App.swift`). Non compilato né provato in locale; esito CI da acquisire. Nessuna IPA90, nessun deploy backend.
 
 **Esito run 43681244774 (commit `014a4b9`, contenitore SwiftUI puro):** fallito al passo dei 5 casi compatti, 4 passati e 1 fallito (`testSixVisibleTabsPreserveCalendarFinanceAndDashboardStacks`, riga 60: «Multiple matching elements found» per il pulsante «Mese successivo»). La compilazione passa. Causa probabile, non provata: le schede nascoste restano montate (necessario per conservare stato di Calendario e Finanza) e `.accessibilityHidden(true)` non le esclude dall'albero di accessibilità attraverso i NavigationStack, quindi il Calendario nascosto duplica il pulsante. Le 14 regressioni principali non sono state eseguite perché la pipeline si ferma al preflight; release-launches, package90 e publish90 saltati. Nessuna IPA90, nessun deploy backend.
