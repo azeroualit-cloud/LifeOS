@@ -276,7 +276,7 @@ struct NativeRoot: View {
             case .health: NavigationStack { NativeHealthDetail(health: health, demo: NativeHealthLaunchPolicy.simulated).modifier(NativeTabBarReserve()) }
             case .bloom: NavigationStack { NativeBloomScreen().modifier(NativeTabBarReserve()) }
             case .finance: NavigationStack { FinanceScreen().modifier(NativeTabBarReserve()) }
-            case .calendar: NavigationStack { CalendarScreen().modifier(NativeTabBarReserve()) }
+            case .calendar: NavigationStack { CalendarScreen() }
             }
         }
         .modifier(NativeTabArrival(tab: tab))
@@ -337,7 +337,7 @@ private struct NativeDashboardStack: View {
             content.navigationDestination(for: NativeDashboardDestination.self) { destination in
                 switch destination {
                 case .finance: FinanceScreen().modifier(NativeTabBarReserve())
-                case .calendar: CalendarScreen().modifier(NativeTabBarReserve())
+                case .calendar: CalendarScreen()
                 }
             }
         }
