@@ -6,6 +6,11 @@ struct CalendarScreen: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.nativeReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var typeSize
+    /// The Calendar reserves the floating tab bar inside its own content. Any
+    /// safe-area modifier around this screen (safeAreaInset or safeAreaPadding)
+    /// makes SwiftUI measure every lazy week on each animation frame and the
+    /// main thread never idles (spindumps of runs 43708179109 and 43722940589).
+    @Environment(\.nativeTabBarReserve) private var tabBarReserve
     @State private var showingDay = false
     @State private var monthReturnDay: String?
     private var selected: String {
@@ -123,7 +128,7 @@ struct CalendarScreen: View {
                                 }
                         }
                     }.scrollTargetLayout().padding(.horizontal, NativeDesign.Layout.screenInset)
-                        .padding(.vertical, NativeDesign.Space.large).padding(.bottom, NativeDesign.Layout.scrollClearance)
+                        .padding(.vertical, NativeDesign.Space.large).padding(.bottom, NativeDesign.Layout.scrollClearance + tabBarReserve)
                 }.scrollPosition(id: $scrollWeek, anchor: .top)
                 .onChange(of: scrollWeek) { _, week in
                     guard monthPositionReady, !restoringWindow, !showingDay, let week else { return }
@@ -234,6 +239,7 @@ struct CalendarScreen: View {
             .frame(maxWidth: .infinity)
             .padding(.horizontal, NativeDesign.Layout.screenInset)
             .padding(.vertical, NativeDesign.Space.small)
+            .padding(.bottom, tabBarReserve)
             .background(NativeDesign.calendarCanvas)
         }
     }
