@@ -240,7 +240,13 @@ struct NativeRoot: View {
         }
     }
     @State private var keyboardVisible = false
+    /// The tab bar is laid out below the content in a VStack instead of being added
+    /// with safeAreaInset. Run 43684175590 showed that the scroll content still
+    /// extended behind the bar (the Dashboard status badge ended 8 pt under it), so
+    /// the content frame itself now ends at the top of the bar and nothing can
+    /// scroll underneath it.
     private var nativeTabs: some View {
+        VStack(spacing: NativeDesign.Space.none) {
         NativeTabContainer(selection: router.tab) { tab in
             AnyView(tabContent(tab)
                 .environmentObject(store).environmentObject(router).environmentObject(health)
@@ -252,14 +258,14 @@ struct NativeRoot: View {
                 .preferredColorScheme(theme == "dark" ? .dark : theme == "light" ? .light : nil)
                 .modifier(NativeVisualTestSize()).modifier(NativeVisualTestMotion()))
         }
-        .background(NativeDesign.canvas)
-        .safeAreaInset(edge: .bottom, spacing: NativeDesign.Space.none) {
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
             if !keyboardVisible {
                 NativeSixTabBar(selection: $router.tab) {
                     if router.tab == .dashboard { router.dashboardPath = [] }
                 }
             }
         }
+        .background(NativeDesign.canvas)
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in keyboardVisible = true }
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in keyboardVisible = false }
     }
