@@ -4,7 +4,7 @@ on:
     branches: [codex/revision77]
     paths: [.github/workflows/debug-spindump.yml]
 env:
-  RUN_ID: "43722940589"
+  RUN_ID: "43722940589" # rev3
 permissions:
   actions: read
   contents: read
@@ -30,7 +30,7 @@ jobs:
             if grep -q "^Process: *LifeOSProbe \[" out/tmp 2>/dev/null; then
               echo "=================== $(basename "$f" | cut -c1-40) ($(dirname "$f" | cut -d/ -f2))"
               awk '/^Process: *LifeOSProbe \[/{p=1} p&&/^Process:/&&!/LifeOSProbe \[/{exit} p' out/tmp > out/app.txt || true
-              awk '/^Thread .*main-thread/{m=1;next} /^Thread /{m=0} m' out/app.txt \
+              awk '/^ *Thread 0x.*main-thread/{m=1;next} /^ *Thread 0x/{m=0} m' out/app.txt \
                 | sed -E 's/^ *([0-9]+) +(.*) \(([A-Za-z.]+) \+ [0-9]+\).*/\1|\3|\2/' \
                 | grep -E 'Layout|Lazy|Scroll|Inset|Preference|Geometry|onChange|Animat|Transaction|Safe|Frame|Hosting|Navigation|Toolbar|Bar|Accessib|LifeOSProbe' \
                 | awk -F'|' '{ if (!($3 in best) || $1+0 > best[$3]+0) best[$3]=$1"|"$2 } END { for (k in best) print best[k]"|"k }' \
