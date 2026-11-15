@@ -140,7 +140,7 @@ struct CalendarScreen: View {
                 .onPreferenceChange(NativeCalendarMonthFrames.self) { frames in
                     if let target = requestedWeek {
                         guard let frame = frames[target], frame.maxY > 0,
-                              frame.minY < viewportHeight else { return }
+                              frame.minY < viewportHeight - tabBarReserve else { return }
                         requestedWeek = nil; restoringWindow = false; monthPositionReady = true
                         if let anchoredMonth { visibleMonth = anchoredMonth }
                     }
@@ -280,10 +280,11 @@ struct CalendarScreen: View {
             selected = origin
             let month = String(origin.prefix(7))
             store.calendarMonth = month
-            if !calendarWeeks.contains(where: { $0.id == weekID(for: origin) }) {
-                ensureWindow(around: month)
-                position(month: month, day: origin)
-            }
+            // Always bring the origin week back to the top: the month scroll runs
+            // under the floating tab bar, so a week that is merely inside the
+            // window can still sit behind the bar and not be tappable.
+            ensureWindow(around: month)
+            position(month: month, day: origin)
         }
         showingDay = false
     }
