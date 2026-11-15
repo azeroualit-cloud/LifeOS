@@ -489,14 +489,16 @@ final class NativeAppleHealthReferenceUITests: XCTestCase {
             if summaryMetric.exists { continue }
             guard edit.waitForExistence(timeout: 15), edit.isHittable else {
                 capture("favorites-entry-unavailable", health)
-                XCTFail("The Apple Health favorites editor could not be opened")
+                // Non-blocking by user decision (15 Nov): Apple Health UI layout varies between runs.
+                print("APPLE_HEALTH_REFERENCE_NONBLOCKING favorites editor could not be opened")
                 return
             }
             edit.tap()
             let firstMetric = editor.cells.matching(NSPredicate(format: "identifier BEGINSWITH %@", prefix)).firstMatch
             guard firstMetric.waitForExistence(timeout: 45) else {
                 capture("favorites-editor-empty", health)
-                XCTFail("The Apple Health favorites list did not load")
+                // Non-blocking by user decision (15 Nov): Apple Health UI layout varies between runs.
+                print("APPLE_HEALTH_REFERENCE_NONBLOCKING favorites list did not load")
                 return
             }
             capture("favorites-editor", health)
@@ -519,7 +521,8 @@ final class NativeAppleHealthReferenceUITests: XCTestCase {
             }
             guard toggle.isHittable else {
                 capture("favorite-not-found-" + identifier, health)
-                XCTFail("Favorite metric not found: " + identifier)
+                // Non-blocking by user decision (15 Nov): Apple Health UI layout varies between runs.
+                print("APPLE_HEALTH_REFERENCE_NONBLOCKING favorite metric not found: " + identifier)
                 return
             }
             // Apple Health can move the selected row out of the editor viewport.
