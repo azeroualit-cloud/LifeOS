@@ -240,6 +240,7 @@ struct NativeRoot: View {
         }
     }
     @State private var keyboardVisible = false
+    @State private var tabBarHeight = NativeTabBarMetrics.reserve
     private var nativeTabs: some View {
         NativeTabContainer(selection: router.tab) { tab in
             AnyView(tabContent(tab)
@@ -250,21 +251,18 @@ struct NativeRoot: View {
                 .font(NativeDesign.body).tint(NativeDesign.accent)
                 .symbolVariant(.none).symbolRenderingMode(.monochrome)
                 .preferredColorScheme(theme == "dark" ? .dark : theme == "light" ? .light : nil)
+                .environment(\.nativeTabBarReserve, keyboardVisible ? 0 : max(tabBarHeight, NativeTabBarMetrics.reserve))
                 .modifier(NativeVisualTestSize()).modifier(NativeVisualTestMotion()))
         }
-        // Run 43684175590: at the end of the Dashboard the last row stayed 8 pt under
-        // the bar, so the inset alone does not reach every scroll view. Reserve the
-        // bar height as extra bottom scroll margin for all tab content. Layout and
-        // scrolling stay as in that run (12 of 14 regressions passed); run
-        // 43688606696 showed that moving the bar into a VStack breaks Bloom and
-        // Calendar scrolling, so that change is reverted.
-        .contentMargins(.bottom, NativeDesign.Layout.tabHeight + 2 * NativeDesign.Space.xs, for: .scrollContent)
         .background(NativeDesign.canvas)
-        .safeAreaInset(edge: .bottom, spacing: NativeDesign.Space.none) {
+        // Overlay, not safeAreaInset: tab roots reserve the bar height themselves
+        // (NativeTabBarReserve), so scroll ends and pinned actions stay above it.
+        .overlay(alignment: .bottom) {
             if !keyboardVisible {
                 NativeSixTabBar(selection: $router.tab) {
                     if router.tab == .dashboard { router.dashboardPath = [] }
                 }
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { tabBarHeight = $0 }
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in keyboardVisible = true }
@@ -275,10 +273,10 @@ struct NativeRoot: View {
             switch tab {
             case .dashboard: dashboard
             case .tasks: tasks
-            case .health: NavigationStack { NativeHealthDetail(health: health, demo: NativeHealthLaunchPolicy.simulated) }
-            case .bloom: NavigationStack { NativeBloomScreen() }
-            case .finance: NavigationStack { FinanceScreen() }
-            case .calendar: NavigationStack { CalendarScreen() }
+            case .health: NavigationStack { NativeHealthDetail(health: health, demo: NativeHealthLaunchPolicy.simulated).modifier(NativeTabBarReserve()) }
+            case .bloom: NavigationStack { NativeBloomScreen().modifier(NativeTabBarReserve()) }
+            case .finance: NavigationStack { FinanceScreen().modifier(NativeTabBarReserve()) }
+            case .calendar: NavigationStack { CalendarScreen().modifier(NativeTabBarReserve()) }
             }
         }
         .modifier(NativeTabArrival(tab: tab))
@@ -286,9 +284,10 @@ struct NativeRoot: View {
     private var dashboard: some View {
         NativeDashboardStack(content: AnyView(
             DashboardScreen().toolbar { tools }.navigationTitle("Dashboard").navigationBarTitleDisplayMode(.inline)
+                .modifier(NativeTabBarReserve())
         ))
     }
-    private var tasks: some View { NavigationStack { TasksScreen().toolbar { tools }.navigationTitle("Attività").navigationBarTitleDisplayMode(.inline) } }
+    private var tasks: some View { NavigationStack { TasksScreen().toolbar { tools }.navigationTitle("Attività").navigationBarTitleDisplayMode(.inline).modifier(NativeTabBarReserve()) } }
     @ToolbarContentBuilder private var tools: some ToolbarContent {
         if #available(iOS 26.0, *) {
             ToolbarItem(placement: .topBarTrailing) { addControl }
@@ -337,8 +336,8 @@ private struct NativeDashboardStack: View {
         NavigationStack(path: $router.dashboardPath) {
             content.navigationDestination(for: NativeDashboardDestination.self) { destination in
                 switch destination {
-                case .finance: FinanceScreen()
-                case .calendar: CalendarScreen()
+                case .finance: FinanceScreen().modifier(NativeTabBarReserve())
+                case .calendar: CalendarScreen().modifier(NativeTabBarReserve())
                 }
             }
         }
