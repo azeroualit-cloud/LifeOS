@@ -974,6 +974,42 @@
       "provenance": "Richiesta diretta utente; due varianti mostrate in Claude Design; risposta «approvo fai te»",
       "original_quote": "Fare tutte le cose dal web, dai social eccetera, e poterle ritrovare velocemente con manutenzione comunque minima, quindi evitare di stare a salvare roba e modificare titoli eccetera. C'è anche il problema che le categorie possono sovrapporsi molto facilmente",
       "rule": "Obiettivo: salvataggio da web e social con attrito minimo e ritrovamento veloce senza manutenzione. La scelta tra le due varianti è stata delegata all'assistente: variante B, sola ricerca con filtri automatici per fonte e tipo, senza categorie da assegnare. Scelta dell'assistente su delega, non preferenza espressa dall'utente. Non implementata."
+    },
+    {
+      "id": "FINANCE-SAVINGS-RESTORE-2026-11-16",
+      "status": "ACTIVE",
+      "scope": "Nuova spesa: pagamento dai risparmi",
+      "recorded_on": "2026-11-16",
+      "provenance": "Richiesta diretta utente; mockup Claude Design approvato con «approvo»",
+      "original_quote": "ho visto che non cé piú la possibilità di pagare una spesa dai risparmi invece che dal budget",
+      "rule": "Una nuova spesa può essere pagata dai risparmi senza ridurre il budget del mese, accanto a Budget e Piano. L'app la offre solo se il server la dichiara."
+    },
+    {
+      "id": "FINANCE-SCREEN-REDESIGN-2026-11-16",
+      "status": "ACTIVE",
+      "scope": "Schermata Finanza",
+      "recorded_on": "2026-11-16",
+      "provenance": "Richiesta diretta utente; mockup Claude Design approvato con «approvo»",
+      "original_quote": "la schermata finanza fa cagare ha 2 tasti grossi e 2 nascosti",
+      "rule": "Quattro azioni dello stesso peso e tutte visibili (Budget, Analisi, Nuovo piano, Movimenti), nessun menu a tre puntini, Aggiungi spesa in basso."
+    },
+    {
+      "id": "BACKEND-DEPLOY-SAVINGS-2026-11-16",
+      "status": "ACTIVE",
+      "scope": "Solo destinazione Risparmi del flusso spese nel Worker",
+      "recorded_on": "2026-11-16",
+      "provenance": "Risposta «approvo» alla domanda esplicita sull'autorizzazione di modifica e deploy del Worker",
+      "original_quote": "approvo, voglio l'ipa, manda tutto in produzione",
+      "rule": "Autorizzati modifica e deploy del Worker limitati alla destinazione Risparmi. Nessun'altra modifica backend."
+    },
+    {
+      "id": "IPA-DELIVERY-91-2026-11-16",
+      "status": "ACTIVE",
+      "scope": "Build 91 (0.10.29)",
+      "recorded_on": "2026-11-16",
+      "provenance": "Richiesta diretta utente in chat Claude",
+      "original_quote": "approvo, voglio l'ipa, manda tutto in produzione",
+      "rule": "IPA di produzione 0.10.29 build 91 con efficienza, barra a cinque voci, Finanza, pagamento dai risparmi e Bloom. Consegna unica («non un pezzo alla volta, tutto in 1 senza errori»). Pubblicazione solo a gate verdi sullo stesso commit; prova su iPhone e accettazione distinte."
     }
   ],
   "pending_confirmations": [
