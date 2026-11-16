@@ -11,7 +11,7 @@ final class NativeTabHitRegionUITests: XCTestCase {
         app.launch()
         XCTAssertTrue(app.mainTabBar.waitForExistence(timeout: 15))
         // The first action reproduces the failing fresh-launch Calendar center tap.
-        let titles = ["Calendario", "Dashboard", "Attività", "Salute", "Bloom", "Finanza"]
+        let titles = ["Calendario", "Dashboard", "Attività", "Salute", "Bloom"]
         let regions = large ? ["center", "icon"] : ["center", "icon", "caption"]
         for region in regions {
             for title in titles {
@@ -46,7 +46,7 @@ final class NativeTabHitRegionUITests: XCTestCase {
                 XCTAssertTrue(destination.waitForExistence(timeout: 15), title + " content must be visible")
             }
             let capture = XCTAttachment(screenshot: app.screenshot())
-            capture.name = "Six tab hit regions " + region + (large ? " large" : " standard")
+            capture.name = "Five tab hit regions " + region + (large ? " large" : " standard")
             capture.lifetime = .keepAlways
             add(capture)
         }

@@ -359,7 +359,7 @@ private struct NativeTabArrival: ViewModifier {
                 guard current == tab, !reduceMotion else { return }
                 var instant = Transaction()
                 instant.disablesAnimations = true
-                withTransaction(instant) { offset = current.rawValue > previous.rawValue ? 28 : -28 }
+                withTransaction(instant) { offset = current.barIndex > previous.barIndex ? 28 : -28 }
                 arrivalTask = Task { @MainActor in
                     await Task.yield()
                     guard !Task.isCancelled else { return }

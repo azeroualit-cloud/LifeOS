@@ -1,7 +1,7 @@
 import XCTest
 
 final class NativeNavigationUITests: XCTestCase {
-    private let destinations = ["Dashboard", "Attività", "Salute", "Bloom", "Finanza", "Calendario"]
+    private let destinations = ["Dashboard", "Attività", "Calendario", "Salute", "Bloom"]
 
     private func launch(large: Bool = false) -> XCUIApplication {
         continueAfterFailure = false
@@ -13,7 +13,8 @@ final class NativeNavigationUITests: XCTestCase {
     }
 
     private func assertSixVisibleTargets(_ app: XCUIApplication, file: StaticString = #filePath, line: UInt = #line) {
-        XCTAssertEqual(app.mainTabBar.buttons.count, 6, file: file, line: line)
+        XCTAssertEqual(app.mainTabBar.buttons.count, 5, file: file, line: line)
+        XCTAssertFalse(app.mainTabBar.buttons["Finanza"].exists, file: file, line: line)
         XCTAssertFalse(app.mainTabBar.buttons["Altro"].exists, file: file, line: line)
         XCTAssertFalse(app.mainTabBar.buttons["More"].exists, file: file, line: line)
         let appFrame = app.frame
@@ -34,7 +35,7 @@ final class NativeNavigationUITests: XCTestCase {
     func testSixVisibleTabsPreserveCalendarFinanceAndDashboardStacks() {
         let app = launch()
         assertSixVisibleTargets(app)
-        capture("Sei destinazioni Liquid Glass senza Altro")
+        capture("Cinque destinazioni Liquid Glass senza Altro")
 
         app.openMainTab("Calendario")
         XCTAssertTrue(app.scrollViews["calendar-scroll"].waitForExistence(timeout: 15))
@@ -53,7 +54,8 @@ final class NativeNavigationUITests: XCTestCase {
         app.buttons["other-back"].tap()
         XCTAssertTrue(app.isMainTabSelected("Dashboard"))
 
-        app.openMainTab("Finanza")
+        // Finance has no bar entry: it opens from its Dashboard card.
+        app.openOtherDestination("Finanza")
         XCTAssertTrue(app.scrollViews["finance-scroll"].waitForExistence(timeout: 10))
         let month = app.staticTexts["finance-month"]
         let original = month.label
@@ -61,12 +63,14 @@ final class NativeNavigationUITests: XCTestCase {
         let changed = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label != %@", original), object: month)
         XCTAssertEqual(XCTWaiter.wait(for: [changed], timeout: 10), .completed)
         let nextMonth = month.label
-        capture("Finanza dalla barra inferiore")
+        capture("Finanza dalla scheda in Dashboard")
         app.openMainTab("Bloom")
         XCTAssertTrue(app.navigationBars["Bloom"].waitForExistence(timeout: 10))
-        app.openMainTab("Finanza")
+        app.openMainTab("Dashboard")
+        XCTAssertTrue(app.scrollViews["finance-scroll"].waitForExistence(timeout: 10), "The dashboard stack keeps Finance open across a tab switch")
         XCTAssertEqual(month.label, nextMonth, "Switching tabs preserves the finance month")
         app.buttons["other-back"].tap()
+        XCTAssertTrue(app.scrollViews["dashboard-scroll"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.isMainTabSelected("Dashboard"))
 
         let calendar = app.buttons["home-calendar"]
@@ -86,8 +90,8 @@ final class NativeNavigationUITests: XCTestCase {
     func testSixVisibleTabsWithLargeTextAndKeyboard() {
         let app = launch(large: true)
         assertSixVisibleTargets(app)
-        capture("Sei destinazioni con testo grande")
-        for title in ["Attività", "Salute", "Bloom", "Finanza", "Calendario", "Dashboard"] {
+        capture("Cinque destinazioni con testo grande")
+        for title in ["Attività", "Calendario", "Salute", "Bloom", "Dashboard"] {
             app.openMainTab(title)
             XCTAssertTrue(app.isMainTabSelected(title))
             assertSixVisibleTargets(app)

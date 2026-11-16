@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// Six destinations remain visible even on compact iPhones; no More controller.
+/// Five destinations remain visible even on compact iPhones; no More controller.
+/// Finance opens from its Dashboard card (NAVIGATION-FIVE-2026-11-16).
 struct NativeSixTabBar: View {
     @Binding var selection: NativeTab
     var onReselect: () -> Void = {}
@@ -29,7 +30,7 @@ struct NativeSixTabBar: View {
 
     private var items: some View {
         HStack(spacing: NativeDesign.Space.none) {
-            ForEach(NativeTab.allCases) { tab in
+            ForEach(NativeTab.barOrder) { tab in
                 Button {
                     #if DEBUG
                     if ProcessInfo.processInfo.arguments.contains("--visual-test") {
@@ -68,6 +69,12 @@ struct NativeSixTabBar: View {
             }
         }
     }
+}
+
+extension NativeTab {
+    static let barOrder: [NativeTab] = [.dashboard, .tasks, .calendar, .health, .bloom]
+    /// Visual position in the bar; destinations outside it sort after the last one.
+    var barIndex: Int { Self.barOrder.firstIndex(of: self) ?? Self.barOrder.count }
 }
 
 /// Mounts only the selected destination. Hidden destinations are not kept in the
