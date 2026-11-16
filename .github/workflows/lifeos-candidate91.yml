@@ -1,6 +1,10 @@
 name: LifeOS candidate 91 validation and authorized IPA
+# Start 1 for IPA-DELIVERY-91-2026-11-16. Change this line to start a new attempt on the current commit.
 on:
   workflow_dispatch:
+  push:
+    branches: ['codex/build91']
+    paths: ['.github/workflows/lifeos-candidate91.yml']
 permissions:
   contents: read
   actions: read
@@ -9,7 +13,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   full-suite:
-    if: github.event_name == 'workflow_dispatch' && github.repository == 'azeroualit-cloud/LifeOS' && github.ref == 'refs/heads/codex/build91'
+    if: (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && github.repository == 'azeroualit-cloud/LifeOS' && github.ref == 'refs/heads/codex/build91'
     runs-on: macos-15
     timeout-minutes: 240
     steps:
