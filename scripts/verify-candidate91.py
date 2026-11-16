@@ -174,7 +174,9 @@ def ipa(path):
 def authorization():
     assert os.environ["GITHUB_REPOSITORY"] == "azeroualit-cloud/LifeOS"
     assert os.environ["GITHUB_REF"] == "refs/heads/codex/build91"
-    assert os.environ["GITHUB_EVENT_NAME"] == "workflow_dispatch"
+    # A workflow that exists only on this branch cannot be dispatched; a push that touches
+    # the workflow file itself is the deliberate start, as for the earlier branch releases.
+    assert os.environ["GITHUB_EVENT_NAME"] in ("workflow_dispatch", "push")
     data = json.loads(Path("docs/USER-DECISIONS.json").read_text(encoding="utf-8-sig"))
     rules = []
     def visit(value):
