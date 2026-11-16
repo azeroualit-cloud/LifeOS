@@ -188,6 +188,8 @@ struct NativeGenericFood: Codable, Identifiable {
             let legacyID = names?.count == 1 ? names?.first?.id : nil
             if let key = entry.foodID ?? legacyID { counts[key, default: 0] += 1 }
         }
+        // Without recent use every count ties and the original order is the result.
+        guard !counts.isEmpty else { return foods }
         return foods.enumerated().sorted {
             let a = counts[$0.element.id, default: 0], b = counts[$1.element.id, default: 0]
             return a == b ? $0.offset < $1.offset : a > b
@@ -202,6 +204,18 @@ struct NativeGenericFood: Codable, Identifiable {
     static let brandedFoods = loadCatalog("branded-foods")
     static let brandedSupplements = loadCatalog("branded-supplements")
     static let supplements = loadCatalog("supplements")
+    static let catalogFoods = catalog.filter { $0.family != .supplement }
+    static let catalogSupplements = catalog.filter { $0.family == .supplement }
+
+    /// Decode the bundled catalog and its search index away from the main thread,
+    /// so the first opening of the picker does not wait for the JSON resources.
+    static func preload() async {
+        await Task.detached(priority: .utility) { () -> Void in
+            _ = NativeGenericFood.catalogFoods.count
+            _ = NativeGenericFood.catalogSupplements.count
+            _ = NativeGenericFood.searchIndex.count
+        }.value
+    }
 
     private static func loadCatalog(_ name: String) -> [Self] {
         guard let url = Bundle.main.url(forResource: name, withExtension: "json"),
@@ -231,18 +245,18 @@ struct NativeFoodPicker: View {
         personalData.isEmpty ? [] : try? JSONDecoder().decode([NativeGenericFood].self, from: personalData)
     }
 
-    private var visibleFoods: [NativeGenericFood] {
+    private func visibleFoods(_ personal: [NativeGenericFood]) -> [NativeGenericFood] {
         switch scope {
-        case .all: NativeGenericFood.ranked(Self.items(in: .all, personal: personalFoods ?? []), entries: nutrition.entries)
-        case .supplements: NativeGenericFood.ranked(Self.items(in: .supplements, personal: personalFoods ?? []), entries: nutrition.entries)
-        case .personal: personalFoods ?? []
+        case .all: NativeGenericFood.ranked(Self.items(in: .all, personal: personal), entries: nutrition.entries)
+        case .supplements: NativeGenericFood.ranked(Self.items(in: .supplements, personal: personal), entries: nutrition.entries)
+        case .personal: personal
         }
     }
     static func items(in scope: Scope, personal: [NativeGenericFood]) -> [NativeGenericFood] {
         switch scope {
-        case .all: (NativeGenericFood.catalog + personal).filter { $0.family != .supplement }
+        case .all: NativeGenericFood.catalogFoods + personal.filter { $0.family != .supplement }
         case .personal: personal
-        case .supplements: (NativeGenericFood.catalog + personal).filter { $0.family == .supplement }
+        case .supplements: NativeGenericFood.catalogSupplements + personal.filter { $0.family == .supplement }
         }
     }
     let select: (NativeGenericFood) -> Void
@@ -250,8 +264,12 @@ struct NativeFoodPicker: View {
     @FocusState private var searchFocused: Bool
 
     var body: some View {
+        // Decode the personal list once per render, not once per row.
+        let personal = personalFoods
+        let personalIDs = Set((personal ?? []).map(\.id))
+        let visible = visibleFoods(personal ?? [])
         let matches = query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            ? visibleFoods : NativeGenericFood.matches(query, in: visibleFoods)
+            ? visible : NativeGenericFood.matches(query, in: visible)
 
         VStack(spacing: NativeDesign.Space.none) {
             HStack(spacing: NativeDesign.Space.small) {
@@ -312,7 +330,7 @@ struct NativeFoodPicker: View {
                         }.accessibilityIdentifier("generic-food-" + food.id)
                             .listRowBackground(NativeDesign.nutritionInput)
                             .swipeActions {
-                                if personalFoods?.contains(where: { $0.id == food.id }) == true {
+                                if personalIDs.contains(food.id) {
                                     Button("Modifica") { copyingFood = false; editingFood = food }.tint(.blue)
                                     Button("Elimina", role: .destructive) {
                                         if let foods = personalFoods { persist(foods.filter { $0.id != food.id }) }

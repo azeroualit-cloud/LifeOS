@@ -46,7 +46,7 @@ struct NativeNutritionQuickEntry: View {
                 .modifier(NativeVisualTestSize()).modifier(NativeVisualTestMotion())
         }.sheet(isPresented: $addingWeight) {
             NativeAddWeightSheet(health: health)
-        }
+        }.task { await NativeGenericFood.preload() }
     }
 }
 

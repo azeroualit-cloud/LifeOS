@@ -13,6 +13,12 @@ struct NativeBloomLinkSnapshot: Codable {
     static let shared = NativeBloomLinkPreviews()
     private var pending: [URL: Task<NativeBloomLinkSnapshot?, Never>] = [:]
     private var failures: [URL: Date] = [:]
+    // Fresh snapshots already read this session; avoids a file read per visible card.
+    private var memory: [URL: NativeBloomLinkSnapshot] = [:]
+    private func remember(_ url: URL, _ snapshot: NativeBloomLinkSnapshot) {
+        if memory.count > 200 { memory.removeAll() }
+        memory[url] = snapshot
+    }
     private let directory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("BloomLinkPreviews", isDirectory: true)
     func load(_ url: URL) async -> NativeBloomLinkSnapshot? {
         #if DEBUG
@@ -23,8 +29,9 @@ struct NativeBloomLinkSnapshot: Codable {
         #endif
         let key = SHA256.hash(data: Data(url.absoluteString.utf8)).map { String(format: "%02x", $0) }.joined()
         let file = directory.appendingPathComponent(key + ".json")
+        if let hit = memory[url], Date().timeIntervalSince(hit.fetchedAt) < 7 * 86400 { return hit }
         let cached = (try? Data(contentsOf: file)).flatMap { try? JSONDecoder().decode(NativeBloomLinkSnapshot.self, from: $0) }
-        if let cached, Date().timeIntervalSince(cached.fetchedAt) < 7 * 86400 { return cached }
+        if let cached, Date().timeIntervalSince(cached.fetchedAt) < 7 * 86400 { remember(url, cached); return cached }
         if let failed = failures[url], Date().timeIntervalSince(failed) < 60 { return cached }
         if let task = pending[url] { return await task.value }
         let task = Task { @MainActor () -> NativeBloomLinkSnapshot? in
@@ -64,6 +71,7 @@ struct NativeBloomLinkSnapshot: Codable {
                 for old in sorted.prefix(files.count - 200) { try? FileManager.default.removeItem(at: old) }
             }
         } catch { /* Cache failure must never prevent opening the original note. */ }
+        remember(url, snapshot)
         return snapshot
     }
 }
@@ -73,10 +81,12 @@ struct NativeBloomLinkPreview: View {
     let width: CGFloat
     var showTitle = true
     @State private var snapshot: NativeBloomLinkSnapshot?
+    // Decoded once per snapshot, not on every render of the card.
+    @State private var image: UIImage?
     @State private var finished = false
     var body: some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-            if let bytes = snapshot?.image, let image = UIImage(data: bytes) {
+            if let image {
                 Image(uiImage: image).resizable().scaledToFit().frame(width: width).clipped()
                     .accessibilityLabel("Anteprima link").accessibilityIdentifier("bloom-link-image")
             } else {
@@ -92,9 +102,10 @@ struct NativeBloomLinkPreview: View {
             Text(url.host ?? url.absoluteString).font(.caption).foregroundStyle(.secondary).lineLimit(1)
         }.frame(width: width, alignment: .leading)
             .task(id: url) {
-                snapshot = nil; finished = false
+                snapshot = nil; image = nil; finished = false
                 let value = await NativeBloomLinkPreviews.shared.load(url)
                 guard !Task.isCancelled else { return }
+                image = value?.image.flatMap { UIImage(data: $0) }
                 snapshot = value; finished = true
             }
     }

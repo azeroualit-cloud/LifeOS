@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "LifeOS",
-  "updated_on": "2026-11-15",
+  "updated_on": "2026-11-16",
   "policy": {
     "id": "META-01",
     "status": "ACTIVE",
@@ -938,6 +938,42 @@
       "original_quote": "intendevo l'ipa 90 dopo che correggi gli errori te",
       "rule": "Dopo il run 43651934566 (11 regressioni UI fallite su 14) l'utente chiede di correggere gli errori e poi produrre IPA90. Scelta esplicita: contenitore SwiftUI puro al posto degli UIHostingController annidati, mantenendo la barra a sei voci in vetro. Sostituisce soltanto il dettaglio implementativo delle radici UIKit stabili di SIX-TABS-KEYBOARD-REPAIR-2026-11-13 (stesso ambito, già confermato). IPA consentita solo dopo mirati, suite restante e quattro avvii Release verdi sullo stesso SHA. Nessun deploy backend. Aggiornamento 15 novembre dopo il run 43681244774: le schede nascoste montate duplicavano elementi di accessibilità (4/5 compatti). L'utente chiede la strada più affidabile («voglio solo un run che non fallisca e l'app che funzioni»): il contenitore monta solo la scheda selezionata; lo stato da conservare (Dipingi turni del Calendario, pennello) passa da @State a NativeRouter; mese di Finanza e percorso Dashboard erano già in NativeStore/NativeRouter. Effetto visibile: la posizione di scorrimento locale delle altre schede non è conservata al cambio scheda. Raccomandazione di Claude, scelta delegata dall'utente.",
       "readiness": "Implementato in NativeSixTabBar.swift, CalendarScreen.swift e App.swift; non compilato né provato in locale (nessun Mac). Esito runtime da acquisire dalla CI."
+    },
+    {
+      "id": "PERF-AUTONOMY-2026-11-16",
+      "status": "ACTIVE",
+      "scope": "Efficientamento di LifeOS senza cambi di funzionalità",
+      "recorded_on": "2026-11-16",
+      "provenance": "Richiesta diretta utente in chat Claude",
+      "original_quote": "Allora ti lascio carta libera per quanto riguarda l'efficientamento dell'applicazione finché non cambiano le funzionalità.",
+      "rule": "Le modifiche di sola efficienza che non cambiano le funzionalità non richiedono approvazione preventiva DEV-02. IPA-GATE-01 e il divieto di deploy backend restano validi."
+    },
+    {
+      "id": "UI-DESIGN-PREVIEW-2026-11-16",
+      "status": "ACTIVE",
+      "scope": "Modifiche UI e UX",
+      "recorded_on": "2026-11-16",
+      "provenance": "Richiesta diretta utente in chat Claude",
+      "original_quote": "Lato UI e UX possibilmente magari le modifiche che vuoi fare me le mostri tramite Claude Design.",
+      "rule": "Mostrare le modifiche UI/UX proposte in Claude Design prima di implementarle. Precisa DEV-02, non lo sostituisce."
+    },
+    {
+      "id": "NAVIGATION-FIVE-2026-11-16",
+      "status": "ACTIVE",
+      "scope": "Barra di navigazione principale",
+      "recorded_on": "2026-11-16",
+      "provenance": "Domanda META-01 sul conflitto con NAVIGATION-SIX-GLASS-2026-11-13; risposta dell'utente: «Togli Finanza»",
+      "original_quote": "secondo me forse 6 cose nella barra delle applicazioni è un po' troppo, forse dovremmo puntare a 5",
+      "rule": "Cinque destinazioni visibili: Dashboard, Attività, Calendario, Salute, Bloom. Finanza esce dalla barra e si apre dalla scheda Finanza in Dashboard. Sostituisce NAVIGATION-SIX-GLASS-2026-11-13. Non implementata: da fare dopo la chiusura del candidato 90, che resta a sei voci."
+    },
+    {
+      "id": "BLOOM-REDESIGN-2026-11-16",
+      "status": "ACTIVE",
+      "scope": "Sezione Bloom",
+      "recorded_on": "2026-11-16",
+      "provenance": "Richiesta diretta utente; due varianti mostrate in Claude Design; risposta «approvo fai te»",
+      "original_quote": "Fare tutte le cose dal web, dai social eccetera, e poterle ritrovare velocemente con manutenzione comunque minima, quindi evitare di stare a salvare roba e modificare titoli eccetera. C'è anche il problema che le categorie possono sovrapporsi molto facilmente",
+      "rule": "Obiettivo: salvataggio da web e social con attrito minimo e ritrovamento veloce senza manutenzione. La scelta tra le due varianti è stata delegata all'assistente: variante B, sola ricerca con filtri automatici per fonte e tipo, senza categorie da assegnare. Scelta dell'assistente su delega, non preferenza espressa dall'utente. Non implementata."
     }
   ],
   "pending_confirmations": [

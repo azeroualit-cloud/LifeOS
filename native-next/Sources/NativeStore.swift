@@ -2,7 +2,13 @@ import Foundation
 import SwiftUI
 
 @MainActor final class NativeStore: ObservableObject {
-    @Published private(set) var state = NativeArchive()
+    @Published private(set) var state = NativeArchive() {
+        didSet { derivedShifts = nil; derivedTasks = nil; derivedCategories = nil }
+    }
+    // Read-only projections of `state.life`, rebuilt lazily after each state change.
+    private var derivedShifts: [String: String]?
+    private var derivedTasks: [Record]?
+    private var derivedCategories: [Record]?
     @Published private(set) var busy = false
     @Published private(set) var syncing = false
     private var syncTask: Task<Void, Never>?
@@ -38,8 +44,18 @@ import SwiftUI
     var summary: Record { finance.record("summary") }
     private var transferablePending: [PendingWrite] { state.pending.filter { $0.method != "saveHealthEntry" } }
     var financialPending: [PendingWrite] { state.pending.filter { ["saveTransaction", "saveUtilityBill", "saveExtra"].contains($0.method) } }
-    var tasks: [Record] { life.records("tasks") }
-    var categories: [Record] { life.records("categories").sorted { $0.amount("position") < $1.amount("position") } }
+    var tasks: [Record] {
+        if let derivedTasks { return derivedTasks }
+        let rows = life.records("tasks")
+        derivedTasks = rows
+        return rows
+    }
+    var categories: [Record] {
+        if let derivedCategories { return derivedCategories }
+        let rows = life.records("categories").sorted { $0.amount("position") < $1.amount("position") }
+        derivedCategories = rows
+        return rows
+    }
     var routines: [Record] { life.records("routines").map { record in
         var r = record; if life.text("today") != CivilDate.day() { r["checked"] = .bool(false) }; return r
     } }
@@ -658,7 +674,15 @@ import SwiftUI
     func run(_ method: String, _ payload: Record = [:], args: [JSONValue]? = nil) async {
         do { try await perform(method, payload, args: args) } catch { self.error = error.localizedDescription }
     }
-    func shift(_ day: String) -> ShiftKind? { life.records("shifts").first { $0.text("day") == day }.flatMap { ShiftKind(rawValue: $0.text("kind")) } }
+    func shift(_ day: String) -> ShiftKind? {
+        if derivedShifts == nil {
+            // The first row for a day wins, as in the previous linear search.
+            var index: [String: String] = [:]
+            for row in life.records("shifts") where index[row.text("day")] == nil { index[row.text("day")] = row.text("kind") }
+            derivedShifts = index
+        }
+        return derivedShifts?[day].flatMap { ShiftKind(rawValue: $0) }
+    }
     func changeMonth(_ delta: Int, finance: Bool) async {
         guard !busy, !syncing else { return }
         if finance {
