@@ -3,12 +3,14 @@ import SwiftUI
 
 @MainActor final class NativeStore: ObservableObject {
     @Published private(set) var state = NativeArchive() {
-        didSet { derivedShifts = nil; derivedTasks = nil; derivedCategories = nil }
+        didSet { derivedShifts = nil; derivedTasks = nil; derivedCategories = nil; derivedEvents = nil; derivedTransactions = nil }
     }
     // Read-only projections of `state.life`, rebuilt lazily after each state change.
     private var derivedShifts: [String: String]?
     private var derivedTasks: [Record]?
     private var derivedCategories: [Record]?
+    private var derivedEvents: [Record]?
+    private var derivedTransactions: (month: String, rows: [Record])?
     @Published private(set) var busy = false
     @Published private(set) var syncing = false
     private var syncTask: Task<Void, Never>?
@@ -60,7 +62,12 @@ import SwiftUI
         var r = record; if life.text("today") != CivilDate.day() { r["checked"] = .bool(false) }; return r
     } }
     var todayRoutines: [Record] { routines.filter { NativeRoutineSchedule.due($0) } }
-    var transactions: [Record] { NativeMovementOrder.sorted(finance.records("transactions").filter { !isDemo || $0.text("date").hasPrefix(financeMonth) }) }
+    var transactions: [Record] {
+        if let cached = derivedTransactions, cached.month == financeMonth { return cached.rows }
+        let rows = NativeMovementOrder.sorted(finance.records("transactions").filter { !isDemo || $0.text("date").hasPrefix(financeMonth) })
+        derivedTransactions = (financeMonth, rows)
+        return rows
+    }
     var allocations: [Record] { state.plan.records("allocations") }
     var dashboardEvents: [Record] {
         let today = CivilDate.day()
@@ -69,7 +76,12 @@ import SwiftUI
         return isDemo ? expandedEvents(low: today, high: CivilDate.adding(7, to: today), source: life.records("events")) : life.records("activityEvents") + life.records("upcomingEvents") + life.records("events")
     }
     var events: [Record] {
-        guard isDemo else { return life.records("events").map { NativeActivityCatalog.calendarRecord($0) } }
+        guard isDemo else {
+            if let derivedEvents { return derivedEvents }
+            let rows = life.records("events").map { NativeActivityCatalog.calendarRecord($0) }
+            derivedEvents = rows
+            return rows
+        }
         let low = CivilDate.adding(-1, to: calendarMonth + "-01", component: .month)
         let high = CivilDate.adding(2, to: calendarMonth + "-01", component: .month)
         return expandedEvents(low: low, high: high, source: life.records("events"))
@@ -466,7 +478,7 @@ import SwiftUI
         if isDemo { rollover(); return }
         guard server != nil, !busy, !syncing else { return }
         if automatic, !writeTriggered, Date().timeIntervalSince(lastAutomaticSync) < 25 { return }
-        syncing = true; error = nil; syncStatus = "Sincronizzazione…"; defer { syncing = false }
+        syncing = true; if error != nil { error = nil }; syncStatus = "Sincronizzazione…"; defer { syncing = false }
         var pendingScope = scope
         for write in transferablePending { pendingScope.formUnion(NativeSyncPolicy.scope(for: write.method)) }
         do {

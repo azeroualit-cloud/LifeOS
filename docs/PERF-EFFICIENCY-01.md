@@ -21,11 +21,18 @@ Comportamento visibile invariato; cambiano solo quante volte lo stesso lavoro vi
 - Tempi medi di `testFoodSearchTime` e `testShiftLookupTime`: non acquisiti. Il log pubblico non li riporta e lo scaricamento dell'artefatto è stato rifiutato dalla sessione.
 - Non coperti: test UI di Calendario, Attività, Finanza, Salute e Dashboard; nessuna prova su iPhone. L'esito CI non è accettazione del prodotto.
 
-## Non ancora fatto, in ordine
+## Secondo incremento (16 novembre 2026)
 
-1. Salvataggio dell'archivio fuori dal main thread. Tocca le garanzie di durabilità della coda offline: richiede prima una misura e test dedicati.
-2. Store diviso in parti osservabili per ridurre i ridisegni.
-3. Ricerca alimenti fuori dal main thread.
-4. Cadenza della sincronizzazione automatica e risposta "nessuna modifica" dal Worker (richiede deploy backend, non autorizzato qui).
-5. Bloom: filtro, ordinamento e gruppi mappa calcolati una volta per modifica dell'archivio.
-6. Misure in CI su tre flussi: apertura ricerca alimenti, tap su checkbox, cambio scheda.
+Richiesta utente: «fai tutto in uno». Tutto ciò che resta e non cambia il comportamento è in un solo commit; le voci escluse sono motivate sotto. Non compilato in locale.
+
+- `NativeStore.swift`: in cache anche `events` (solo archivio reale; la demo dipende dal mese) e `transactions` (per mese di Finanza). `sync` non ripubblica `error` quando è già vuoto.
+- `NativeFoodPicker.swift`: la lista ordinata per uso recente viene ricalcolata solo se cambiano ambito, alimenti personali, diario o giorno; digitare nella ricerca non riordina più l'intero catalogo a ogni lettera. Confronto esatto dei dati, nessun hash.
+- `NativeBloomScreen.swift`: filtro e ordinamento delle note calcolati una volta per render e condivisi tra Libreria, Riscopri e Mappa.
+- `Tests/NativeEfficiencyTests.swift`: equivalenza di `transactions` al cambio mese, tetti larghi sui tempi di ricerca alimenti e salvataggio archivio.
+
+## Escluso di proposito
+
+- **Salvataggio fuori dal main thread.** Oggi `save` fallisce in modo sincrono e lo stato non cambia se il file non viene scritto; la coda offline dei movimenti dipende da questa garanzia. Renderlo asincrono cambia il comportamento in caso di errore o chiusura dell'app, quindi non rientra in «senza cambi di funzionalità». Prima serve il tempo reale di `save` su iPhone.
+- **Cadenza della sincronizzazione e risposta "nessuna modifica" dal Worker.** Cambia la freschezza dei dati condivisi col sito e richiede un deploy backend non autorizzato.
+- **Store diviso in parti osservabili.** Tocca `App.swift`, `CalendarScreen.swift` e la barra, in correzione per il candidato 90: da fare dopo la sua chiusura.
+- **Ricerca alimenti asincrona.** I test UI leggono i risultati subito dopo la digitazione; un ritardo li renderebbe instabili.

@@ -51,10 +51,39 @@ import XCTest
         XCTAssertEqual(NativeGenericFood.ranked(foods, entries: []).map(\.id), foods.map(\.id))
     }
 
+    func testCachedTransactionsFollowTheArchiveAndTheMonth() async {
+        let store = makeStore()
+        func expected() -> [Record] {
+            NativeMovementOrder.sorted(store.finance.records("transactions").filter { $0.text("date").hasPrefix(store.financeMonth) })
+        }
+        XCTAssertEqual(store.transactions, expected())
+        store.seedVisualMoney()
+        XCTAssertEqual(store.transactions, expected())
+        await store.changeMonth(-1, finance: true)
+        XCTAssertEqual(store.transactions, expected())
+        await store.changeMonth(1, finance: true)
+        XCTAssertEqual(store.transactions, expected())
+    }
+
+    /// Loose ceilings for the simulator: they catch a regression of an order of
+    /// magnitude, they are not a benchmark.
+    private func seconds(_ runs: Int, _ work: () -> Void) -> Double {
+        let start = Date()
+        for _ in 0..<runs { work() }
+        return Date().timeIntervalSince(start) / Double(runs)
+    }
+
     func testFoodSearchTime() {
         let foods = NativeFoodPicker.items(in: .all, personal: [])
         XCTAssertFalse(NativeGenericFood.matches("pollo", in: foods).isEmpty)
+        XCTAssertLessThan(seconds(10) { _ = NativeGenericFood.matches("pollo", in: foods) }, 0.5)
         measure { _ = NativeGenericFood.matches("pollo", in: foods) }
+    }
+
+    func testArchiveSaveTime() {
+        let store = makeStore()
+        XCTAssertLessThan(seconds(5) { store.seedVisualTasks() }, 0.5)
+        measure { store.seedVisualTasks() }
     }
 
     func testShiftLookupTime() {

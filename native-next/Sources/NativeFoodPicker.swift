@@ -225,6 +225,16 @@ struct NativeGenericFood: Codable, Identifiable {
     }
 }
 
+/// The ranked list for one scope, personal list, journal and day. Typing in the
+/// search field reuses it instead of ranking the whole catalog for every letter.
+private final class NativeFoodListCache {
+    var scope: NativeFoodPicker.Scope?
+    var personalData = Data()
+    var entries: [NativeNutritionEntry] = []
+    var day = Date.distantPast
+    var foods: [NativeGenericFood] = []
+}
+
 struct NativeFoodPicker: View {
     @Environment(\.dismiss) private var dismiss
     @State private var query = ""
@@ -235,6 +245,7 @@ struct NativeFoodPicker: View {
     @State private var copyingFood = false
     @State private var storageError = false
     @AppStorage("lifeos-personal-foods-v1") private var personalData = Data()
+    @State private var listCache = NativeFoodListCache()
 
     enum Scope: String, CaseIterable, Identifiable {
         case all = "Tutti", personal = "Personali", supplements = "Integratori"
@@ -246,6 +257,14 @@ struct NativeFoodPicker: View {
     }
 
     private func visibleFoods(_ personal: [NativeGenericFood]) -> [NativeGenericFood] {
+        let day = Calendar.current.startOfDay(for: .now)
+        if listCache.scope == scope, listCache.personalData == personalData, listCache.day == day, listCache.entries == nutrition.entries { return listCache.foods }
+        let foods = rankedFoods(personal)
+        listCache.scope = scope; listCache.personalData = personalData; listCache.day = day
+        listCache.entries = nutrition.entries; listCache.foods = foods
+        return foods
+    }
+    private func rankedFoods(_ personal: [NativeGenericFood]) -> [NativeGenericFood] {
         switch scope {
         case .all: NativeGenericFood.ranked(Self.items(in: .all, personal: personal), entries: nutrition.entries)
         case .supplements: NativeGenericFood.ranked(Self.items(in: .supplements, personal: personal), entries: nutrition.entries)

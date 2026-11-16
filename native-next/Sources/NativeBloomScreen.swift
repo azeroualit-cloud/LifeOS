@@ -56,6 +56,8 @@ struct NativeBloomScreen: View {
     }
     var body: some View {
         VStack {
+            // Filter and sort the archive once per render; the panes below share it.
+            let current = notes
             let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: NativeDesign.Space.small)) : AnyLayout(HStackLayout(spacing: NativeDesign.Space.small))
             layout {
                 NativeBloomSectionButton(title: "Libreria", id: "library", selection: $section)
@@ -88,13 +90,13 @@ struct NativeBloomScreen: View {
             if let error = store.error { Text(error).foregroundStyle(.red) }
             ZStack {
                 if hasOpenedMap {
-                    NativeBloomClusteredPlacesMap(places: mapAnnotations, isVisible: section == "Mappa", selectedID: selectedPlaceNote, fitRequest: mapFitRequest) { selectedPlaceNote = $0 }
+                    NativeBloomClusteredPlacesMap(places: mapAnnotations(current), isVisible: section == "Mappa", selectedID: selectedPlaceNote, fitRequest: mapFitRequest) { selectedPlaceNote = $0 }
                         .opacity(section == "Mappa" ? 1 : 0).allowsHitTesting(section == "Mappa").accessibilityHidden(section != "Mappa")
                 }
-                NativeBloomLibraryContent(store: store, notes: notes, category: $category, showTrash: showTrash, rediscovery: false, newRound: { rediscoveryRound += 1 }, goToLibrary: { section = "Libreria" })
+                NativeBloomLibraryContent(store: store, notes: current, category: $category, showTrash: showTrash, rediscovery: false, newRound: { rediscoveryRound += 1 }, goToLibrary: { section = "Libreria" })
                     .opacity(section == "Libreria" ? 1 : 0).allowsHitTesting(section == "Libreria").accessibilityHidden(section != "Libreria")
                 if hasOpenedRediscovery {
-                    NativeBloomLibraryContent(store: store, notes: ordered, category: $category, showTrash: false, rediscovery: true, newRound: { rediscoveryRound += 1 }, goToLibrary: { section = "Libreria" })
+                    NativeBloomLibraryContent(store: store, notes: ordered(current), category: $category, showTrash: false, rediscovery: true, newRound: { rediscoveryRound += 1 }, goToLibrary: { section = "Libreria" })
                         .opacity(section == "Riscopri" ? 1 : 0).allowsHitTesting(section == "Riscopri").accessibilityHidden(section != "Riscopri")
                 }
             }
@@ -102,7 +104,7 @@ struct NativeBloomScreen: View {
             .modifier(NativeUITestValue(value: pickerHandoff.diagnostic + ";preparing=\(preparingImport);preview=\(pendingData != nil)", identifier: "bloom-import-state"))
             .searchable(text: $search, prompt: "Cerca nella Libreria")
             .navigationDestination(isPresented: Binding(get: { selectedPlaceNote != nil }, set: { if !$0 { selectedPlaceNote = nil } })) {
-                if let id = selectedPlaceNote, let group = mapGroups.first(where: { $0.id == id }) {
+                if let id = selectedPlaceNote, let group = mapGroups(notes).first(where: { $0.id == id }) {
                     List {
                         Section(group.place.name) {
                             ForEach(group.notes.map { NativeBloomRow($0) }) { row in
@@ -278,7 +280,7 @@ struct NativeBloomScreen: View {
         let place: NativeBloomPlace
         var notes: [Record]
     }
-    private var mapGroups: [MapGroup] {
+    private func mapGroups(_ notes: [Record]) -> [MapGroup] {
         var groups: [String: MapGroup] = [:]
         for row in notes {
             guard let bytes = try? JSONEncoder().encode(row.record("place")), let place = try? JSONDecoder().decode(NativeBloomPlace.self, from: bytes), place.isValid else { continue }
@@ -289,10 +291,10 @@ struct NativeBloomScreen: View {
         }
         return groups.values.sorted { $0.id < $1.id }
     }
-    private var mapAnnotations: [NativeBloomPlaceMapAnnotation] {
-        mapGroups.map { NativeBloomPlaceMapAnnotation(id: $0.id, place: $0.place, count: $0.notes.count) }
+    private func mapAnnotations(_ notes: [Record]) -> [NativeBloomPlaceMapAnnotation] {
+        mapGroups(notes).map { NativeBloomPlaceMapAnnotation(id: $0.id, place: $0.place, count: $0.notes.count) }
     }
-    private var ordered: [Record] {
+    private func ordered(_ notes: [Record]) -> [Record] {
         let candidates = notes.compactMap { item -> NativeBloomRediscoveryCandidate? in
             guard let id = UUID(uuidString: item.text("id")) else { return nil }
             return .init(id: id, kind: item.text("kind"), collectionID: UUID(uuidString: item.text("collectionID")), host: URL(string: item.text("urlString"))?.host, isArchived: item.flag("archived"))
