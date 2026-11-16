@@ -52,7 +52,7 @@ struct SaveBloomLinkIntent: AppIntent {
     @Parameter(title: "Link") var url: URL
     @MainActor func perform() async throws -> some IntentResult & ProvidesDialog {
         guard ["http", "https"].contains(url.scheme?.lowercased() ?? ""), url.host != nil else { throw Message(text: "Scegli un link web HTTP o HTTPS.") }
-        let row: Record = ["id": .string(UUID().uuidString), "kind": .string("link"), "capturedAt": .number(Date().timeIntervalSinceReferenceDate), "urlString": .string(url.absoluteString), "archived": .bool(false), "title": .string(url.host ?? url.absoluteString), "noteVersion": .int(1)]
+        let row: Record = ["id": .string(UUID().uuidString), "kind": .string("link"), "capturedAt": .number(Date().timeIntervalSinceReferenceDate), "urlString": .string(url.absoluteString), "archived": .bool(false), "title": .string(url.host ?? url.absoluteString), "noteVersion": .int(1), "lifeosAutoTitle": .bool(true)]
         try NativeBloomCaptureInbox.shared.capture(row, in: NativeBloomStore.shared)
         let destination = URL(string: "lifeos://bloom")!
         NativeIntentDraft.pendingURL = destination

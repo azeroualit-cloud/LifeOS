@@ -24,6 +24,8 @@ struct NativeBloomLibraryContent: View {
     @ObservedObject var store: NativeBloomStore
     let notes: [Record]
     @Binding var category: String
+    @Binding var filter: NativeBloomAutoFilter
+    let filters: [NativeBloomAutoFilter]
     let showTrash: Bool
     let rediscovery: Bool
     let newRound: () -> Void
@@ -36,31 +38,28 @@ struct NativeBloomLibraryContent: View {
         VStack(spacing: NativeDesign.Space.small) {
             if !rediscovery {
                 VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-                    Picker("Categoria", selection: $category) {
-                        Text("Tutte le note").tag("")
-                        ForEach(store.archive.collections.map { NativeBloomRow($0) }) { row in Text(row.value.text("name")).tag(row.value.text("id")) }
-                    }.pickerStyle(.menu).labelsHidden().lineLimit(1).minimumScaleFactor(0.75)
-                        .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
+                    // Variant B: automatic filters by source and type replace manual categories.
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: NativeDesign.Space.small) {
+                            ForEach(filters) { item in
+                                NativeCategoryChip(title: item.title, selected: filter == item) { filter = item }
+                                    .accessibilityIdentifier("bloom-filter-" + item.rawValue)
+                            }
+                        }.padding(.horizontal)
+                    }.accessibilityIdentifier("bloom-filters")
                     HStack {
                         Button(grid ? "Elenco" : "Griglia", systemImage: grid ? "list.bullet" : "square.grid.2x2") { grid.toggle() }.labelStyle(.iconOnly)
                             .frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget)
                         Button(selecting ? "Fine" : "Seleziona") { selecting.toggle(); selected = [] }.frame(minHeight: NativeDesign.Layout.touchTarget)
                         Spacer()
-                        Button("Categorie", systemImage: "folder") { showingCategories = true }.labelStyle(.iconOnly)
-                            .frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget)
-                    }
-                }.padding(.horizontal)
+                    }.padding(.horizontal)
+                }
             } else {
                 HStack { Button("Nuovo giro", action: newRound); Spacer(); Button("Vai alla libreria", action: goToLibrary) }.padding(.horizontal)
             }
             if selecting {
                 HStack {
                     Text("\(selected.count) selezionate").font(.caption)
-                    Menu("Categoria") {
-                        ForEach(store.archive.collections.map { NativeBloomRow($0) }) { row in
-                            Button(row.value.text("name")) { perform { try store.updateNotes(selected, category: row.value.text("id")) } }
-                        }
-                    }.disabled(selected.isEmpty)
                     Button(showTrash ? "Ripristina" : "Cestino") { perform { try store.updateNotes(selected, archived: !showTrash) } }.disabled(selected.isEmpty)
                 }.padding(.horizontal)
             }

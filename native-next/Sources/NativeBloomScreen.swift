@@ -35,6 +35,7 @@ struct NativeBloomScreen: View {
     @State private var showingReport = false
     @State private var showTrash = false
     @State private var category = ""
+    @State private var filter = NativeBloomAutoFilter.all
     @State private var composing = false
     @AppStorage("lifeos.bloom.rediscovery.round") private var rediscoveryRound = 0
     @AppStorage("lifeos.bloom.filter.category") private var savedCategory = ""
@@ -44,7 +45,7 @@ struct NativeBloomScreen: View {
     @State private var mapFitRequest = 0
     private var notes: [Record] {
         store.archive.items.filter { item in
-            item.flag("archived") == showTrash && (category.isEmpty || (item["tagIDs"]?.array.map(\.string) ?? [item.text("collectionID")]).contains(category)) && (search.isEmpty || [item.text("title"), item.text("text"), item.text("notes"), item.text("urlString")].joined(separator: " ").localizedCaseInsensitiveContains(search))
+            item.flag("archived") == showTrash && filter.matches(item) && (search.isEmpty || [item.text("title"), item.text("text"), item.text("notes"), item.text("urlString")].joined(separator: " ").localizedCaseInsensitiveContains(search))
         }.sorted {
             if !category.isEmpty {
                 let left = $0["pinnedCategoryIDs"]?.array.map(\.string).contains(category) ?? false
@@ -58,6 +59,7 @@ struct NativeBloomScreen: View {
         VStack {
             // Filter and sort the archive once per render; the panes below share it.
             let current = notes
+            let filters = NativeBloomAutoFilter.available(in: store.archive.items.filter { $0.flag("archived") == showTrash })
             let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: NativeDesign.Space.small)) : AnyLayout(HStackLayout(spacing: NativeDesign.Space.small))
             layout {
                 NativeBloomSectionButton(title: "Libreria", id: "library", selection: $section)
@@ -93,10 +95,10 @@ struct NativeBloomScreen: View {
                     NativeBloomClusteredPlacesMap(places: mapAnnotations(current), isVisible: section == "Mappa", selectedID: selectedPlaceNote, fitRequest: mapFitRequest) { selectedPlaceNote = $0 }
                         .opacity(section == "Mappa" ? 1 : 0).allowsHitTesting(section == "Mappa").accessibilityHidden(section != "Mappa")
                 }
-                NativeBloomLibraryContent(store: store, notes: current, category: $category, showTrash: showTrash, rediscovery: false, newRound: { rediscoveryRound += 1 }, goToLibrary: { section = "Libreria" })
+                NativeBloomLibraryContent(store: store, notes: current, category: $category, filter: $filter, filters: filters, showTrash: showTrash, rediscovery: false, newRound: { rediscoveryRound += 1 }, goToLibrary: { section = "Libreria" })
                     .opacity(section == "Libreria" ? 1 : 0).allowsHitTesting(section == "Libreria").accessibilityHidden(section != "Libreria")
                 if hasOpenedRediscovery {
-                    NativeBloomLibraryContent(store: store, notes: ordered(current), category: $category, showTrash: false, rediscovery: true, newRound: { rediscoveryRound += 1 }, goToLibrary: { section = "Libreria" })
+                    NativeBloomLibraryContent(store: store, notes: ordered(current), category: $category, filter: $filter, filters: filters, showTrash: false, rediscovery: true, newRound: { rediscoveryRound += 1 }, goToLibrary: { section = "Libreria" })
                         .opacity(section == "Riscopri" ? 1 : 0).allowsHitTesting(section == "Riscopri").accessibilityHidden(section != "Riscopri")
                 }
             }
@@ -123,10 +125,15 @@ struct NativeBloomScreen: View {
             .onChange(of: store.archive.collections.map { $0.text("id") }) { _, ids in if !category.isEmpty && !ids.contains(category) { category = "" } }
             .onChange(of: router.bloomCaptureURL, initial: true) { _, raw in
                 guard let raw else { return }
-                captureRecord = ["id": .string(UUID().uuidString), "kind": .string("link"), "urlString": .string(raw), "title": .string(URL(string: raw)?.host ?? raw), "archived": .bool(false), "capturedAt": .number(Date().timeIntervalSinceReferenceDate), "noteVersion": .int(1)]
-                router.bloomCaptureURL = nil; composing = true
+                router.bloomCaptureURL = nil
+                // One tap from a link: saved at once, no form to fill in.
+                let record: Record = ["id": .string(UUID().uuidString), "kind": .string("link"), "urlString": .string(raw), "title": .string(URL(string: raw)?.host ?? raw), "archived": .bool(false), "capturedAt": .number(Date().timeIntervalSinceReferenceDate), "noteVersion": .int(1), "lifeosAutoTitle": .bool(true)]
+                do { try store.save(record); notice = "Salvato in Bloom."; section = "Libreria"; filter = .all; showTrash = false; search = "" }
+                catch { store.error = error.localizedDescription }
             }
             .onChange(of: category) { _, value in savedCategory = value }
+            .onChange(of: NativeBloomAutoFilter.available(in: store.archive.items.filter { $0.flag("archived") == showTrash })) { _, offered in if !offered.contains(filter) { filter = .all } }
+            .task(id: store.archive.items.count) { await completeCapturedTitles() }
             .onChange(of: section) { _, value in
                 if value == "Riscopri" { showTrash = false; hasOpenedRediscovery = true }
                 if value == "Mappa" { hasOpenedMap = true }
@@ -274,6 +281,19 @@ struct NativeBloomScreen: View {
                     }.navigationTitle("Importa backup")
                         .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Annulla") { pendingData = nil } } }
                 }
+    }
+    /// Captured links start with their host as a title. Replace it once with the
+    /// page's own title; a note whose title was changed is never touched.
+    private func completeCapturedTitles() async {
+        let pending = store.archive.items.filter { $0.flag("lifeosAutoTitle") && !$0.flag("archived") }.prefix(5)
+        for item in pending {
+            guard let url = NativeBloomRow(item).previewURL, let host = url.host, item.text("title") == host else { continue }
+            guard let snapshot = await NativeBloomLinkPreviews.shared.load(url), !snapshot.title.isEmpty else { continue }
+            guard var current = store.archive.items.first(where: { $0.text("id") == item.text("id") }), current.text("title") == host else { continue }
+            current["title"] = .string(String(snapshot.title.prefix(200)))
+            current["lifeosAutoTitle"] = nil
+            try? store.save(current)
+        }
     }
     private struct MapGroup: Identifiable {
         let id: String
