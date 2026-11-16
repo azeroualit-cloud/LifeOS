@@ -6,7 +6,7 @@ final class NativeRevision77UITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["--visual-test", "--busy-home"]
         app.launch()
-        for name in ["Dashboard", "Attività", "Salute", "Bloom", "Finanza", "Calendario"] {
+        for name in ["Dashboard", "Attività", "Calendario", "Salute", "Bloom"] {
             XCTAssertTrue(app.mainTabBar.buttons[name].waitForExistence(timeout: 15))
         }
         XCTAssertFalse(app.mainTabBar.buttons["Altro"].exists); XCTAssertFalse(app.mainTabBar.buttons["More"].exists)

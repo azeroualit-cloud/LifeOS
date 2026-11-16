@@ -593,7 +593,7 @@ final class NativeInterfaceTests: XCTestCase {
         let detail = app.buttons["health-summary-weight"]
         for _ in 0..<6 where !detail.isHittable { app.scrollViews["health-detail-scroll"].swipeDown() }
         XCTAssertTrue(detail.waitForExistence(timeout: 10)); XCTAssertTrue(detail.label.contains("83,4"))
-        XCTAssertEqual(app.mainTabBar.buttons.count, 6)
+        XCTAssertEqual(app.mainTabBar.buttons.count, 5)
         add.tap(); app.buttons["Annulla"].tap()
         XCTAssertTrue(detail.waitForExistence(timeout: 10)); XCTAssertTrue(detail.label.contains("83,4"))
     }
@@ -637,7 +637,7 @@ final class NativeInterfaceTests: XCTestCase {
         field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: previous.count) + "2100")
         app.buttons["Fine"].tap()
         XCTAssertEqual(field.value as? String, "2100")
-        XCTAssertEqual(app.mainTabBar.buttons.count, 6)
+        XCTAssertEqual(app.mainTabBar.buttons.count, 5)
         capture("health-scenario-2100")
     }
     func testHomeManyEventsAndTasksStayBoundedAndReachable() {
@@ -1150,7 +1150,10 @@ final class NativeInterfaceTests: XCTestCase {
             if element.isHittable { return }
             let visible = scroll.frame.intersection(app.frame)
             let top = max(visible.minY, app.navigationBars.firstMatch.exists ? app.navigationBars.firstMatch.frame.maxY : visible.minY)
-            let bottom = min(visible.maxY, app.mainTabBar.frame.minY)
+            // Finance pins Add expense above the tab bar; content behind it is not reachable.
+            let pinned = app.buttons["primary-add"]
+            let pinnedTop = pinned.exists && pinned.frame.minY > visible.midY && pinned.frame != element.frame ? pinned.frame.minY : visible.maxY
+            let bottom = min(visible.maxY, app.mainTabBar.frame.minY, pinnedTop)
             guard bottom > top else { return }
             // Short drags avoid flicking past a control on a short screen.
             // Reverse direction if it has already moved above the viewport.

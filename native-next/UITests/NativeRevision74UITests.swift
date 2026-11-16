@@ -14,7 +14,8 @@ final class NativeRevision74UITests: XCTestCase {
     }
     func testFourTabsAndNutritionCalculation() {
         let app = launch()
-        for name in ["Dashboard", "Attività", "Salute", "Bloom", "Finanza", "Calendario"] { XCTAssertTrue(app.mainTabBar.buttons[name].exists) }
+        for name in ["Dashboard", "Attività", "Calendario", "Salute", "Bloom"] { XCTAssertTrue(app.mainTabBar.buttons[name].exists) }
+        XCTAssertFalse(app.mainTabBar.buttons["Finanza"].exists)
         XCTAssertFalse(app.mainTabBar.buttons["Altro"].exists); XCTAssertFalse(app.mainTabBar.buttons["More"].exists)
         app.mainTabBar.buttons["Salute"].tap()
         let add = app.buttons["health-add-nutrition"]
