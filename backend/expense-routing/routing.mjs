@@ -64,7 +64,7 @@ export function createExpenseRouting({ PlanError, balance, command, completePaym
     }
     const plans = candidates(state, checked);
     if (parseUtilityPeriod && retained && !plans.some(p => p.id === retained.id)) plans.push({ ...retained, retained: true });
-    return { version: 1, utilityCompetenceVersion: parseUtilityPeriod ? 1 : 0, category: checked.category, amountCents:checked.amount, date:checked.date, plans: plans.map(p => {
+    return { version: 1, savingsDestination: true, utilityCompetenceVersion: parseUtilityPeriod ? 1 : 0, category: checked.category, amountCents:checked.amount, date:checked.date, plans: plans.map(p => {
       const funds = available(state, p, checked.date.slice(0,7));
       return { id:p.id, name:p.name, kind:p.kind, status:p.status, retained:!!p.retained, availableCents:funds, fromFundCents:Math.min(funds,checked.amount), fromSavingsCents:Math.max(0,checked.amount-funds) };
     }) };
@@ -83,9 +83,12 @@ export function createExpenseRouting({ PlanError, balance, command, completePaym
     const checked = validate(input, today);
     if (typeof input.name!=='string' || !input.name.trim() || input.name.trim().length>120 || input.note!=null && (typeof input.note!=='string' || input.note.length>1000)) fail('Descrizione o note non valide.');
     if (input.type !== 'Spesa' || input.account !== 'Trade Republic') fail('Usa il flusso spese sul conto Trade Republic.');
-    if (!['ordinary','plan'].includes(input.expenseDestination)) fail('Scegli la destinazione della spesa.');
-    if (input.expenseDestination === 'ordinary') {
+    if (!['ordinary','plan','savings'].includes(input.expenseDestination)) fail('Scegli la destinazione della spesa.');
+    if (input.expenseDestination !== 'plan') {
+      // FINANCE-SAVINGS-RESTORE-2026-11-16: same single bank movement, kept out of the monthly budget.
+      const kind = input.expenseDestination === 'savings' ? 'savings' : 'ordinary';
       if (input.planId) fail('Destinazione e piano non coerenti.');
+      if (kind === 'savings' && checked.utilityPeriod) fail('Una bolletta con periodo di competenza non si paga dai risparmi.');
       // Reserve the routing choice too: a reused request may never debit a second path.
       const key = requestKey(input.requestId), sig = signature(input);
       const reserved = await service.change(state => {
@@ -94,12 +97,12 @@ export function createExpenseRouting({ PlanError, balance, command, completePaym
         if (old && old.signature !== sig) fail('Identificatore già usato con dati diversi.',409);
         if (old && !old.pending) return { state, result: { complete: true } };
         const next = structuredClone(state); next.expenseRoutingCommands ??= {};
-        next.expenseRoutingCommands[key] = { signature:sig, kind:'ordinary', pending:true, utilityPeriod: checked.utilityPeriod,
+        next.expenseRoutingCommands[key] = { signature:sig, kind, pending:true, utilityPeriod: checked.utilityPeriod,
           amountCents: checked.amount, date: checked.date, category: checked.category };
         return { state:next,result:{} };
       });
       if (reserved.complete) return true;
-      await recordTransaction(env, { ...input, months:checked.utilityPeriod ? checked.competenceMonths : 1, budgetTreatment:'ordinary' });
+      await recordTransaction(env, { ...input, months:checked.utilityPeriod ? checked.competenceMonths : 1, budgetTreatment:kind });
       let movementId;
       if (checked.utilityPeriod) {
         const row = await db.prepare('SELECT * FROM movements WHERE import_id=?').bind('APP-' + key).first();

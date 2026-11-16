@@ -166,3 +166,13 @@ test('movement detail exposes the original plan billing period for destination c
  assert.equal(response.status,200);assert.equal((await response.json()).financePlanCompetenceMonths,3);
  const {state}=await repository.read();assert.equal(state.plans.water.rateChanges[0].amountCents,1000);
 });
+test('savings choice records one bank movement outside the monthly budget and cannot be replayed through another path',async()=>{
+ const {ctx,payload,sqlite}=await fixture();const savings={...payload,expenseDestination:'savings'};delete savings.planId;
+ await core.expenseRouting.save({...ctx,input:savings});await core.expenseRouting.save({...ctx,input:savings});
+ await assert.rejects(core.expenseRouting.save({...ctx,input:payload}),/appartiene già/);
+ await assert.rejects(core.expenseRouting.save({...ctx,input:{...savings,expenseDestination:'ordinary'}}),/dati diversi/);
+ assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM movements').get().n,1);assert.equal(sqlite.prepare('SELECT treatment FROM movement_budget_policies').get().treatment,'savings');
+ await assert.rejects(core.expenseRouting.save({...ctx,input:{...savings,requestId:'savings-with-plan-0001',planId:'water'}}),/non coerenti/);
+ await assert.rejects(core.expenseRouting.save({...ctx,input:{...savings,requestId:'unknown-destination-0001',expenseDestination:'other'}}),/Scegli la destinazione/);
+ assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM movements').get().n,1);
+});

@@ -39,7 +39,8 @@ enum NativeExpenseDemo {
             movement = old; movement["amount"] = .number(abs(old.amount("amount")))
         }
         let planned = payload.text("expenseDestination") == "plan"
-        movement["budgetTreatment"] = .string(planned ? "savings" : "ordinary")
+        let fromSavings = method != "changeExpenseDestination" && payload.text("expenseDestination") == "savings"
+        movement["budgetTreatment"] = .string(planned || fromSavings ? "savings" : "ordinary")
         if method == "changeExpenseDestination" { try DemoActions.apply("editMovement", movement, args: nil, state: &next) }
         if planned {
             let candidates = preview(state: next, category: movement.text("category"), day: movement.text("date"), movementID: 0, bill: NativeUtilityPeriodDraft(record: payload).enabled)

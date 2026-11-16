@@ -3,6 +3,8 @@ import Foundation
 /// Shared by the form, previews and the explicit demo adapter. Server remains authoritative.
 enum NativeExpenseRouting {
     static let ordinary = "__ordinary"
+    /// FINANCE-SAVINGS-RESTORE-2026-11-16: one bank movement kept out of the monthly budget.
+    static let savings = "__savings"
     static func coveredMonths(_ record: Record) -> Int {
         let values = [record.integer("financePlanCompetenceMonths"), record.integer("competence_months"), record.integer("months")]
         return min(12, max(1, values.first(where: { $0 > 0 }) ?? 1))
@@ -21,8 +23,9 @@ enum NativeExpenseRouting {
         let fund = min(max(0, amount), available(plan)); return (fund, max(0, amount - fund))
     }
     static func destination(_ selected: String) -> Record {
-        var payload: Record = ["expenseRoutingVersion": .int(1), "expenseDestination": .string(selected == ordinary ? "ordinary" : "plan")]
-        if selected != ordinary { payload["planId"] = .string(selected) }
+        let kind = selected == ordinary ? "ordinary" : selected == savings ? "savings" : "plan"
+        var payload: Record = ["expenseRoutingVersion": .int(1), "expenseDestination": .string(kind)]
+        if kind == "plan" { payload["planId"] = .string(selected) }
         return payload
     }
 }

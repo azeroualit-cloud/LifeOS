@@ -85,6 +85,7 @@ enum NativeDesign {
         static let groupedInset = Space.large
         static let nutritionInputLine: CGFloat = 32
         static let nutritionFieldHeight: CGFloat = 72
+        static let financeTile: CGFloat = 72
         static let touchTarget: CGFloat = 44
         static let toolbarVisual: CGFloat = 36
         static let nutritionGlyphWidth: CGFloat = 18

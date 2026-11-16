@@ -224,7 +224,7 @@ final class NativeRevision71UITests: XCTestCase {
         app.navigationBars.buttons.element(boundBy: 0).tap()
         reveal(budget, in: surface, app: app); budget.tap(); XCTAssertTrue(app.navigationBars["Budget"].waitForExistence(timeout: 10))
         app.navigationBars.buttons.element(boundBy: 0).tap()
-        app.buttons["finance-more"].tap(); app.buttons["Nuovo piano"].tap()
+        app.buttons["finance-new-plan"].tap()
         XCTAssertTrue(app.navigationBars["Nuovo piano"].waitForExistence(timeout: 10)); app.buttons["Annulla"].tap()
         app.buttons["primary-add"].tap()
         XCTAssertTrue(app.navigationBars["Nuovo movimento"].waitForExistence(timeout: 10))

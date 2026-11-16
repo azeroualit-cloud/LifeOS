@@ -63,4 +63,16 @@ final class NativeExpenseRoutingTests: XCTestCase {
         XCTAssertEqual(state.finance.record("summary").amount("monthlyRemaining"), remaining, accuracy: 0.001)
         XCTAssertEqual(state.finance.records("transactions").last?.integer("row"), original.integer("row"))
     }
+    func testSavingsDestinationPayloadCarriesNoPlan() {
+        let savings = NativeExpenseRouting.destination(NativeExpenseRouting.savings)
+        XCTAssertEqual(savings.text("expenseDestination"), "savings")
+        XCTAssertNil(savings["planId"])
+        XCTAssertEqual(savings.integer("expenseRoutingVersion"), 1)
+        let plan = NativeExpenseRouting.destination("water")
+        XCTAssertEqual(plan.text("expenseDestination"), "plan")
+        XCTAssertEqual(plan.text("planId"), "water")
+        let ordinary = NativeExpenseRouting.destination(NativeExpenseRouting.ordinary)
+        XCTAssertEqual(ordinary.text("expenseDestination"), "ordinary")
+        XCTAssertNil(ordinary["planId"])
+    }
 }

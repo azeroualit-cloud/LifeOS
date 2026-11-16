@@ -4276,7 +4276,7 @@ function withFinancePlans(base, { repositoryFactory = (env) => new D1PlanReposit
 }
 
 // Integrates the existing plan service. No second cash ledger or category-only debit rules.
-function createExpenseRouting({ PlanError, balance, command, completePayment, completePaymentDeletion, fingerprint, requestKey, month, cycleKey }) {
+function createExpenseRouting({ PlanError, balance, command, completePayment, completePaymentDeletion, fingerprint, requestKey, month, cycleKey, utilityPeriod: parseUtilityPeriod = null, refreshUtilityEstimate = null, isUtilityCostFund = p => p.kind === 'estimated' }) {
   const payable = new Set(['fixed', 'estimated', 'goal', 'fund']);
   const fail = (message, status = 400) => { throw new PlanError(message, status); };
   const signature = value => fingerprint(value);
@@ -4286,9 +4286,14 @@ function createExpenseRouting({ PlanError, balance, command, completePayment, co
     if (!Number.isSafeInteger(amount) || amount <= 0 || amount > 100000000) fail('Importo non valido.');
     const date = String(input.date ?? '');
     if (!/^20\d\d-(0[1-9]|1[0-2])-\d\d$/.test(date) || !Number.isFinite(Date.parse(date)) || new Date(date + 'T12:00:00Z').toISOString().slice(0,10) !== date || date > today) fail('Data non valida.');
-    const competenceMonths = Number(input.competenceMonths ?? input.months ?? 1);
+    let period = null;
+    if (input.competenceStartMonth != null || input.competenceEndMonth != null) {
+      if (!parseUtilityPeriod) fail('Aggiorna il server per attribuire il periodo della bolletta.', 503);
+      try { period = parseUtilityPeriod(input); } catch (error) { fail(error.message); }
+    }
+    const competenceMonths = period?.count ?? Number(input.competenceMonths ?? input.months ?? 1);
     if (!Number.isInteger(competenceMonths) || competenceMonths < 1 || competenceMonths > 12) fail('Indica da 1 a 12 mesi coperti.');
-    return { amount, date, competenceMonths, category: String(input.category ?? '').trim() };
+    return { amount, date, competenceMonths, utilityPeriod: period, category: String(input.category ?? '').trim() };
   }
   function detach(state, payment, id, today) {
     if (payment.status !== 'posted') fail('Completa il pagamento in sospeso prima di cambiare destinazione.', 409);
@@ -4298,10 +4303,10 @@ function createExpenseRouting({ PlanError, balance, command, completePayment, co
   }
   function candidates(state, checked) {
     return Object.values(state.plans).filter(p => {
-      if (!payable.has(p.kind) || p.status !== 'active' || p.category !== checked.category || p.startMonth > checked.date.slice(0,7)) return false;
+      if (!payable.has(p.kind) || p.status !== 'active' || p.category !== checked.category || p.startMonth > checked.date.slice(0,7) && !(checked.utilityPeriod && isUtilityCostFund(p))) return false;
       if (['fixed','estimated'].includes(p.kind)) {
         const key = cycleKey(p, checked.date.slice(0,7));
-        if (Object.values(state.payments).some(x => x.planId === p.id && x.status !== 'deleted' && x.settlementKey === key)) return false;
+        if (!(checked.utilityPeriod && isUtilityCostFund(p)) && Object.values(state.payments).some(x => x.planId === p.id && x.status !== 'deleted' && x.settlementKey === key)) return false;
       }
       return true;
     }).sort((a,b) => a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
@@ -4322,16 +4327,23 @@ function createExpenseRouting({ PlanError, balance, command, completePayment, co
   }
   async function preview({ input, repository, db, today }) {
     let checked = validate(input, today), { state } = await repository.read();
+    let retained = null;
     if (input.movementId) {
       const row = await movement(db, Number(input.movementId));
-      checked = validate({ amount: -Number(row.amount), date: String(row.actual_date).slice(0,10), category: row.category }, today);
+      checked = validate({ amount: -Number(row.amount), date: String(row.actual_date).slice(0,10), category: row.category,
+        competenceStartMonth: input.competenceStartMonth, competenceEndMonth: input.competenceEndMonth }, today);
       const payments = linked(state, row.source_row);
       if (payments.length > 1) fail('Il movimento ha più collegamenti: gestiscilo dal piano.',409);
-      if (payments[0]) state = detach(state, payments[0], 'preview-detach-' + row.source_row, today);
+      if (payments[0]) {
+        retained = state.plans[payments[0].planId];
+        state = detach(state, payments[0], 'preview-detach-' + row.source_row, today);
+      }
     }
-    return { version: 1, category: checked.category, amountCents:checked.amount, date:checked.date, plans: candidates(state, checked).map(p => {
+    const plans = candidates(state, checked);
+    if (parseUtilityPeriod && retained && !plans.some(p => p.id === retained.id)) plans.push({ ...retained, retained: true });
+    return { version: 1, savingsDestination: true, utilityCompetenceVersion: parseUtilityPeriod ? 1 : 0, category: checked.category, amountCents:checked.amount, date:checked.date, plans: plans.map(p => {
       const funds = available(state, p, checked.date.slice(0,7));
-      return { id:p.id, name:p.name, kind:p.kind, availableCents:funds, fromFundCents:Math.min(funds,checked.amount), fromSavingsCents:Math.max(0,checked.amount-funds) };
+      return { id:p.id, name:p.name, kind:p.kind, status:p.status, retained:!!p.retained, availableCents:funds, fromFundCents:Math.min(funds,checked.amount), fromSavingsCents:Math.max(0,checked.amount-funds) };
     }) };
   }
   async function status({ input, repository, db }) {
@@ -4348,24 +4360,42 @@ function createExpenseRouting({ PlanError, balance, command, completePayment, co
     const checked = validate(input, today);
     if (typeof input.name!=='string' || !input.name.trim() || input.name.trim().length>120 || input.note!=null && (typeof input.note!=='string' || input.note.length>1000)) fail('Descrizione o note non valide.');
     if (input.type !== 'Spesa' || input.account !== 'Trade Republic') fail('Usa il flusso spese sul conto Trade Republic.');
-    if (!['ordinary','plan'].includes(input.expenseDestination)) fail('Scegli la destinazione della spesa.');
-    if (input.expenseDestination === 'ordinary') {
+    if (!['ordinary','plan','savings'].includes(input.expenseDestination)) fail('Scegli la destinazione della spesa.');
+    if (input.expenseDestination !== 'plan') {
+      // FINANCE-SAVINGS-RESTORE-2026-11-16: same single bank movement, kept out of the monthly budget.
+      const kind = input.expenseDestination === 'savings' ? 'savings' : 'ordinary';
       if (input.planId) fail('Destinazione e piano non coerenti.');
+      if (kind === 'savings' && checked.utilityPeriod) fail('Una bolletta con periodo di competenza non si paga dai risparmi.');
       // Reserve the routing choice too: a reused request may never debit a second path.
       const key = requestKey(input.requestId), sig = signature(input);
-      await service.change(state => {
+      const reserved = await service.change(state => {
         if (state.commands[key]) fail('Questa operazione appartiene già a un piano.',409);
         const old = state.expenseRoutingCommands?.[key];
         if (old && old.signature !== sig) fail('Identificatore già usato con dati diversi.',409);
+        if (old && !old.pending) return { state, result: { complete: true } };
         const next = structuredClone(state); next.expenseRoutingCommands ??= {};
-        next.expenseRoutingCommands[key] = { signature:sig, kind:'ordinary', pending:true };
+        next.expenseRoutingCommands[key] = { signature:sig, kind, pending:true, utilityPeriod: checked.utilityPeriod,
+          amountCents: checked.amount, date: checked.date, category: checked.category };
         return { state:next,result:{} };
       });
-      await recordTransaction(env, { ...input, months:1, budgetTreatment:'ordinary' });
-      await service.change(state => { const next=structuredClone(state); next.expenseRoutingCommands[key].pending=false;return {state:next,result:{}}; });
+      if (reserved.complete) return true;
+      await recordTransaction(env, { ...input, months:checked.utilityPeriod ? checked.competenceMonths : 1, budgetTreatment:kind });
+      let movementId;
+      if (checked.utilityPeriod) {
+        const row = await db.prepare('SELECT * FROM movements WHERE import_id=?').bind('APP-' + key).first();
+        if (!row || row.account !== 'Trade Republic' || row.movement_type !== 'Spesa' || row.status !== 'Eseguito'
+            || Math.round(-Number(row.amount) * 100) !== checked.amount || String(row.actual_date).slice(0,10) !== checked.date || row.category !== checked.category)
+          fail('Pagamento da riconciliare. Riprova questa operazione senza creare una nuova bolletta.', 503);
+        movementId = row.source_row;
+      }
+      await service.change(state => { const next=structuredClone(state); next.expenseRoutingCommands[key].pending=false;
+        if (movementId) next.expenseRoutingCommands[key].movementId=movementId;
+        return {state:next,result:{}}; });
       return true;
     }
-    const paymentInput = { requestId:input.requestId, planId:input.planId, amountCents:checked.amount, date:checked.date, cycleMonth:checked.date.slice(0,7), competenceMonths:checked.competenceMonths, originalName:String(input.name ?? ''), originalNote:String(input.note ?? ''), originalIncludedInSnapshot:input.includedInSnapshot===true };
+    const paymentInput = { requestId:input.requestId, planId:input.planId, amountCents:checked.amount, date:checked.date, cycleMonth:checked.date.slice(0,7), competenceMonths:checked.competenceMonths,
+      ...(checked.utilityPeriod ? { competenceStartMonth: checked.utilityPeriod.start, competenceEndMonth: checked.utilityPeriod.end } : {}),
+      originalName:String(input.name ?? ''), originalNote:String(input.note ?? ''), originalIncludedInSnapshot:input.includedInSnapshot===true };
     const result = await service.change(state => {
       if (state.expenseRoutingCommands?.[input.requestId]) fail('Questa operazione appartiene già al budget ordinario.',409);
       const existing = state.payments[input.requestId];
@@ -4384,20 +4414,43 @@ function createExpenseRouting({ PlanError, balance, command, completePayment, co
       const { revision,state }=await repository.read(), old=state.expenseRoutingCommands?.[id];
       if (old) { if(old.signature!==sig) fail('Identificatore già usato con dati diversi.',409);return true; }
       const row=await movement(db,rowID), payments=linked(state,rowID);
+      if (Object.entries(state.expenseRoutingCommands || {}).some(([key, c]) => c.pending && row.import_id === 'APP-' + key))
+        fail('Completa prima il salvataggio in sospeso della bolletta.',409);
       if(Number(input.expectedAmountCents)!==Math.round(-Number(row.amount)*100) || input.expectedDate!==String(row.actual_date).slice(0,10) || input.expectedCategory!==row.category) fail('Il movimento è cambiato. Riaprilo prima di cambiare destinazione.',409);
       if (payments.length>1) fail('Movimento con più collegamenti.',409);
       const payment=payments[0];
       if ((input.expectedPaymentId ?? '') !== (payment?.id ?? '')) fail('La destinazione è cambiata su un altro dispositivo. Riapri il movimento.',409);
-      let next=payment ? detach(state,payment,id+'-detach',today) : structuredClone(state);
-      const checked=validate({amount:-Number(row.amount),date:String(row.actual_date).slice(0,10),category:row.category,competenceMonths:input.competenceMonths},today);
-      if(input.expenseDestination==='plan') {
-        if (checked.date.slice(0,7)<today.slice(0,7) && row.treatment!=='savings' && !payment) fail('Per cambiare una spesa ordinaria di un mese passato occorre prima una verifica del budget storico.');
+      const previousOrdinary = Object.values(state.expenseRoutingCommands || {}).find(c => c.kind === 'ordinary' && c.active !== false && c.movementId === rowID && c.utilityPeriod);
+      const inherited = payment?.utilityPeriod ?? previousOrdinary?.utilityPeriod;
+      if (input.expectedCompetenceStartMonth != null || input.expectedCompetenceEndMonth != null) {
+        if (input.expectedCompetenceStartMonth !== (inherited?.start ?? '') || input.expectedCompetenceEndMonth !== (inherited?.end ?? ''))
+          fail('Il periodo della bolletta è cambiato su un altro dispositivo. Riaprila prima di modificarlo.', 409);
+      }
+      const periodInput = input.competenceStartMonth != null || input.competenceEndMonth != null
+        ? { competenceStartMonth: input.competenceStartMonth, competenceEndMonth: input.competenceEndMonth }
+        : inherited ? { competenceStartMonth: inherited.start, competenceEndMonth: inherited.end } : {};
+      const checked=validate({amount:-Number(row.amount),date:String(row.actual_date).slice(0,10),category:row.category,competenceMonths:input.competenceMonths,...periodInput},today);
+      const periodOnly = payment && input.expenseDestination === 'plan' && input.planId === payment.planId && checked.utilityPeriod;
+      let next;
+      if (periodOnly) {
+        if (payment.status !== 'posted') fail('Completa prima il pagamento in sospeso.', 409);
+        if (state.plans[payment.planId]?.kind === 'recovery') fail('Gestisci questo pagamento dal piano di recupero.');
+        next = structuredClone(state);
+        next.payments[payment.id].utilityPeriod = checked.utilityPeriod;
+        next.payments[payment.id].competenceMonths = checked.competenceMonths;
+        if (refreshUtilityEstimate) refreshUtilityEstimate(next, payment.planId, today);
+      } else next=payment ? detach(state,payment,id+'-detach',today) : structuredClone(state);
+      if(input.expenseDestination==='plan' && !periodOnly) {
+        if (checked.date.slice(0,7)<today.slice(0,7) && row.treatment!=='savings' && !payment && !checked.utilityPeriod) fail('Per cambiare una spesa ordinaria di un mese passato occorre prima una verifica del budget storico.');
         if (!candidates(next,checked).some(p=>p.id===input.planId)) fail('Piano non disponibile per questa spesa.',409);
         checkQuote(next,next.plans[input.planId],checked,input);
-        const added=command(next,'pay',{requestId:id+'-attach',planId:input.planId,amountCents:checked.amount,date:checked.date,cycleMonth:checked.date.slice(0,7),competenceMonths:checked.competenceMonths,movementId:rowID},today);
+        const added=command(next,'pay',{requestId:id+'-attach',planId:input.planId,amountCents:checked.amount,date:checked.date,cycleMonth:checked.date.slice(0,7),competenceMonths:checked.competenceMonths,movementId:rowID,
+          ...(checked.utilityPeriod ? { competenceStartMonth: checked.utilityPeriod.start, competenceEndMonth: checked.utilityPeriod.end } : {})},today);
         next=completePayment(added.state,added.result.paymentId,rowID,today);
-      } else if (input.planId) fail('Destinazione e piano non coerenti.');
-      next.expenseRoutingCommands ??= {};next.expenseRoutingCommands[id]={signature:sig,kind:input.expenseDestination};
+      } else if (input.expenseDestination === 'ordinary' && input.planId) fail('Destinazione e piano non coerenti.');
+      next.expenseRoutingCommands ??= {};
+      for (const c of Object.values(next.expenseRoutingCommands)) if (c.kind === 'ordinary' && c.movementId === rowID) c.active=false;
+      next.expenseRoutingCommands[id]={signature:sig,kind:input.expenseDestination, movementId: rowID, utilityPeriod: checked.utilityPeriod};
       const document=JSON.stringify(next), path='$.'+JSON.stringify('expenseRoutingCommands')+'.'+JSON.stringify(id)+'.signature';
       // D1 batch is a single transaction. Both state and policy are guarded by the same CAS.
       const results=await db.batch([

@@ -6,6 +6,7 @@ struct FinanceScreen: View {
     @EnvironmentObject var router: NativeRouter
     @Environment(\.dismiss) private var dismiss
     @ScaledMetric(relativeTo: .largeTitle) private var budgetAmountSize = NativeDesign.Layout.budgetAmount
+    @Environment(\.dynamicTypeSize) private var typeSize
     @State private var search = ""
     @State private var account = "Tutti"
     @AppStorage("native-hide-money") private var hidden = false
@@ -17,7 +18,6 @@ struct FinanceScreen: View {
                 Spacer()
                 NativeToolbarButton(symbol: "gearshape", label: "Impostazioni") { router.sheet = .settings }
                     .contextMenu { Button("Sincronizza", systemImage: "arrow.triangle.2.circlepath") { Task { await store.sync() } }.disabled(store.busy || store.syncing) }
-                NativeToolbarButton(symbol: "plus", label: "Aggiungi spesa") { router.sheet = .movement([:]) }.accessibilityIdentifier("primary-add")
             }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.top, NativeDesign.Space.small).padding(.bottom, NativeDesign.Space.large)
         ScrollView {
             VStack(alignment: .leading, spacing: NativeDesign.Space.section) {
@@ -35,6 +35,18 @@ struct FinanceScreen: View {
             }.padding(.horizontal, NativeDesign.Layout.screenInset)
                 .padding(.top, NativeDesign.Space.small).padding(.bottom, NativeDesign.Layout.scrollClearance)
         }.background(NativeDesign.canvas).scrollBounceBehavior(.basedOnSize).accessibilityIdentifier("finance-scroll")
+        // UX-REACH-01: the action used many times a day stays within thumb reach.
+        .safeAreaInset(edge: .bottom, spacing: NativeDesign.Space.none) {
+            Button { router.sheet = .movement([:]) } label: {
+                Label("Aggiungi spesa", systemImage: "plus").font(.headline)
+                    .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget)
+            }
+            .buttonStyle(NativeCompactPrimaryButtonStyle())
+            .accessibilityIdentifier("primary-add")
+            .padding(.horizontal, NativeDesign.Layout.screenInset)
+            .padding(.vertical, NativeDesign.Space.small)
+            .background(NativeDesign.canvas)
+        }
         }.background(NativeDesign.canvas)
         .toolbar(.hidden, for: .navigationBar)
         .onAppear { router.financeSection = "Panoramica" }
@@ -78,35 +90,30 @@ struct FinanceScreen: View {
             .font(.title3.weight(.semibold)).monospacedDigit().accessibilityIdentifier("finance-current-balance")
     }
     private var presentation: NativeFinanceOverview { NativeFinanceOverview(summary: store.summary, month: store.financeMonth) }
+    // FINANCE-SCREEN-REDESIGN-2026-11-16: four visible actions of equal weight, no overflow menu.
     private var actions: some View {
-        HStack(spacing: NativeDesign.Space.medium) {
-            NavigationLink { NativePlansScreen().toolbar(.visible, for: .navigationBar) } label: { financePill("Budget", symbol: "wallet.bifold") }.accessibilityIdentifier("finance-budget")
-            NavigationLink { FinanceAnalysisScreen().toolbar(.visible, for: .navigationBar) } label: { financePill("Analisi", symbol: "chart.xyaxis.line") }.accessibilityIdentifier("finance-analysis")
-            Spacer(minLength: 0)
-            Menu {
-                Button("Nuovo piano", systemImage: "folder.badge.plus") { router.sheet = .financePlan }
-                Button("Nuova spesa", systemImage: "minus.circle") { router.sheet = .movement([:]) }
-            } label: {
-                Image(systemName: "ellipsis").frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget).modifier(NativeGlass())
-            }.accessibilityLabel("Altre azioni finanziarie").accessibilityIdentifier("finance-more")
+        let columns = Array(repeating: GridItem(.flexible(), spacing: NativeDesign.Space.small), count: typeSize.isAccessibilitySize ? 2 : 4)
+        return LazyVGrid(columns: columns, spacing: NativeDesign.Space.small) {
+            NavigationLink { NativePlansScreen().toolbar(.visible, for: .navigationBar) } label: { financeTile("Budget", symbol: "wallet.bifold") }.accessibilityIdentifier("finance-budget")
+            NavigationLink { FinanceAnalysisScreen().toolbar(.visible, for: .navigationBar) } label: { financeTile("Analisi", symbol: "chart.xyaxis.line") }.accessibilityIdentifier("finance-analysis")
+            Button { router.sheet = .financePlan } label: { financeTile("Nuovo piano", symbol: "folder.badge.plus") }.accessibilityIdentifier("finance-new-plan")
+            NavigationLink {
+                List { movements }.modifier(NativeListAppearance()).navigationTitle("Movimenti").navigationBarTitleDisplayMode(.inline).toolbar(.visible, for: .navigationBar)
+            } label: { financeTile("Movimenti", symbol: "list.bullet") }
+                .accessibilityLabel("Mostra tutti i movimenti").accessibilityIdentifier("all-movements")
         }.buttonStyle(.plain).foregroundStyle(Color.primary)
     }
-    private func financePill(_ title: String, symbol: String) -> some View {
-        HStack(spacing: NativeDesign.Space.small) {
-            Image(systemName: symbol).font(.subheadline.weight(.regular))
-            Text(title).font(.subheadline.weight(.medium))
-            Image(systemName: "chevron.right").font(.caption.weight(.semibold))
-        }.padding(.horizontal, NativeDesign.Space.large).frame(minHeight: NativeDesign.Layout.touchTarget)
-            .modifier(NativeGlass()).contentShape(Capsule())
+    private func financeTile(_ title: String, symbol: String) -> some View {
+        VStack(spacing: NativeDesign.Space.small) {
+            Image(systemName: symbol).font(.title3.weight(.regular)).foregroundStyle(NativeDesign.financeTitle)
+            Text(title).font(.footnote.weight(.medium)).lineLimit(1).minimumScaleFactor(0.75)
+        }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.financeTile)
+            .background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: NativeDesign.controlRadius, style: .continuous))
     }
     private var recentMovements: some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.large) {
-            NativeSectionHeader("Ultimi movimenti") {
-                NavigationLink {
-                    List { movements }.modifier(NativeListAppearance()).navigationTitle("Movimenti").navigationBarTitleDisplayMode(.inline).toolbar(.visible, for: .navigationBar)
-                } label: { Text("Vedi tutti ›").foregroundStyle(Color.blue).font(.subheadline).frame(minHeight: NativeDesign.Layout.touchTarget) }
-                    .accessibilityLabel("Mostra tutti i movimenti").accessibilityIdentifier("all-movements")
-            }
+            NativeSectionHeader("Ultimi movimenti") { EmptyView() }
             ForEach(store.transactions.prefix(3).map { DisplayRecord($0, key: "row") }) { item in
                 Button { router.sheet = .movement(item.value) } label: {
                     ViewThatFits(in: .horizontal) {

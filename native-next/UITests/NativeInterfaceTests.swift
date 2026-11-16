@@ -76,7 +76,7 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "dashboard-day-")).count, 7)
         capture("dashboard-week-80-and-shift-progress")
         app.openOtherDestination("Finanza")
-        for name in ["finance-budget", "finance-analysis", "finance-more", "primary-add"] {
+        for name in ["finance-budget", "finance-analysis", "finance-new-plan", "all-movements", "primary-add"] {
             let button = app.buttons[name]; XCTAssertTrue(button.waitForExistence(timeout: 10)); assertMinimumTouchTarget(button)
         }
         capture("finance-native-glass-actions")
@@ -1106,11 +1106,12 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertTrue(app.staticTexts["finance-heading"].exists)
         XCTAssertFalse(app.segmentedControls.firstMatch.exists)
         XCTAssertFalse(app.otherElements["wealth-forecast-chart"].exists)
-        let budget = app.buttons["finance-budget"], analysis = app.buttons["finance-analysis"], more = app.buttons["finance-more"]
+        let budget = app.buttons["finance-budget"], analysis = app.buttons["finance-analysis"], more = app.buttons["finance-new-plan"]
         revealFinanceControl(budget, in: app)
         for action in [budget, analysis, more] { assertMinimumTouchTarget(action) }
         XCTAssertGreaterThan(analysis.frame.minX, budget.frame.maxX)
-        more.tap(); app.buttons["Nuovo piano"].tap()
+        XCTAssertFalse(app.buttons["finance-more"].exists, "No hidden overflow menu")
+        more.tap()
         XCTAssertTrue(app.navigationBars["Nuovo piano"].waitForExistence(timeout: 10)); app.buttons["Annulla"].tap()
         app.buttons["primary-add"].tap()
         XCTAssertTrue(app.navigationBars["Nuovo movimento"].waitForExistence(timeout: 10)); app.buttons["Annulla"].tap()

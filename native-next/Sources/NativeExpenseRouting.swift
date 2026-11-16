@@ -15,6 +15,9 @@ struct NativeExpenseRouteSection: View {
     @State private var loading = false
     @State private var issue: String?
     @State private var retry = 0
+    // Offered only when the connected server declares it, never for bills with a period or existing movements.
+    @State private var savingsSupported = false
+    private var offersSavings: Bool { savingsSupported && movementID == 0 && !bill.enabled }
     private var query: String { category + day + String(movementID) + String(bill.enabled) + String(retry) }
     private var chosen: Record? { plans.first { $0.text("id") == selected } }
     var body: some View {
@@ -28,6 +31,7 @@ struct NativeExpenseRouteSection: View {
                     Picker("Destinazione", selection: $selected) {
                         if selected.isEmpty { Text("Scegli un piano o il budget").tag("") }
                         Text("Budget mensile").tag(NativeExpenseRouting.ordinary)
+                        if offersSavings || selected == NativeExpenseRouting.savings { Text("Risparmi").tag(NativeExpenseRouting.savings) }
                         ForEach(plans.indices, id: \.self) { index in Text("Piano · " + plans[index].text("name")).tag(plans[index].text("id")) }
                     }.accessibilityIdentifier("expense-destination")
                     if let chosen {
@@ -39,6 +43,9 @@ struct NativeExpenseRouteSection: View {
                         LabeledContent("Dagli altri risparmi", value: (Double(split.savings) / 100).euro).accessibilityIdentifier("expense-savings-preview")
                         Text("Il pagamento non viene sottratto di nuovo dal budget. Disponibilità verificata nuovamente al salvataggio.").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
                     }
+                    } else if selected == NativeExpenseRouting.savings {
+                        LabeledContent("Dai risparmi", value: (Double(amount) / 100).euro).accessibilityIdentifier("expense-direct-savings-preview")
+                        Text("La spesa esce dal conto ma non riduce il budget del mese.").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
                     } else if selected == NativeExpenseRouting.ordinary {
                         LabeledContent(bill.enabled ? "Pagamento bancario" : "Dal budget mensile", value: (Double(amount) / 100).euro).accessibilityIdentifier("expense-budget-preview")
                         Text(plans.isEmpty ? "Nessun piano compatibile con questa categoria e data." : "Hai scelto di non usare il fondo del piano.").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
@@ -52,6 +59,7 @@ struct NativeExpenseRouteSection: View {
             .onChange(of: selected) { _, _ in updateReady() }
             .onChange(of: bill) { _, value in
                 if let months = value.months { competenceMonths = months.count }
+                if value.enabled && selected == NativeExpenseRouting.savings { selected = NativeExpenseRouting.ordinary }
                 updateReady()
             }
             .onChange(of: category + day) { _, _ in selected = ""; ready = false }
@@ -60,7 +68,7 @@ struct NativeExpenseRouteSection: View {
     private func updateReady() {
         bill.prepare(day: day, required: NativeUtilityPeriodDraft.categories.contains(category) || chosen?.text("kind") == "estimated" || bill.enabled)
         quotedAvailable = chosen.map(NativeExpenseRouting.available) ?? 0
-        ready = !loading && issue == nil && (!bill.enabled || bill.months != nil) && (selected == NativeExpenseRouting.ordinary || chosen != nil)
+        ready = !loading && issue == nil && (!bill.enabled || bill.months != nil) && (selected == NativeExpenseRouting.ordinary || (selected == NativeExpenseRouting.savings && offersSavings) || chosen != nil)
     }
     private func load() async {
         loading = true; ready = false; issue = nil
@@ -69,6 +77,7 @@ struct NativeExpenseRouteSection: View {
             let rows: [Record]
             if store.isDemo {
                 rows = NativeExpenseDemo.preview(state: store.state, category: category, day: day, movementID: movementID, bill: bill.enabled)
+                savingsSupported = true
             } else {
                 var payload: Record = ["category": .string(category), "date": .string(day), "amountCents": .int(max(1, amount))]
                 if movementID > 0 { payload["movementId"] = .int(movementID) }
@@ -83,10 +92,12 @@ struct NativeExpenseRouteSection: View {
                 }
                 if movementID > 0 && (result.integer("amountCents") != amount || result.text("date") != day || result.text("category") != category) { throw Message(text: "Il movimento è cambiato. Chiudi e riaprilo.") }
                 rows = result.records("plans")
+                savingsSupported = result.flag("savingsDestination")
             }
             try Task.checkCancellation()
             plans = rows
             if selected.isEmpty { selected = NativeExpenseRouting.suggestion(rows) }
+            else if selected == NativeExpenseRouting.savings { if !offersSavings { selected = NativeExpenseRouting.suggestion(rows) } }
             else if selected != NativeExpenseRouting.ordinary && !rows.contains(where: { $0.text("id") == selected }) { selected = NativeExpenseRouting.suggestion(rows) }
             loading = false; updateReady()
         } catch is CancellationError { }
