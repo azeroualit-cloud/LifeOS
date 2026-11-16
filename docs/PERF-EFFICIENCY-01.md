@@ -13,6 +13,12 @@ Comportamento visibile invariato; cambiano solo quante volte lo stesso lavoro vi
 - `NativeNutritionQuickEntry.swift`: avvia `preload()` quando compare la scheda Nutrizione.
 - `NativeBloomLinkPreview.swift`: immagine dell'anteprima decodificata una volta per snapshot invece che a ogni render; snapshot freschi tenuti in memoria (massimo 200) per evitare una lettura da disco per ogni card visibile. Stessa scadenza di 7 giorni.
 
+## Verifica in CI
+
+- Run 43880951454 (push, commit `25a314e`): compilazione passata; passo dei test annullato al limite di 35 minuti senza esiti, perché la modifica allo store seleziona tutte le aree. Non è una prova né a favore né contro.
+- Run 43887359860 (focused, area nutrition, stesso commit): esito da acquisire.
+- `Tests/NativeEfficiencyTests.swift`: confronta le proiezioni in cache con le espressioni originali prima e dopo ogni modifica dell'archivio, verifica l'ordine del catalogo e misura ricerca alimenti e lettura turni. Non ancora eseguito.
+
 ## Non ancora fatto, in ordine
 
 1. Salvataggio dell'archivio fuori dal main thread. Tocca le garanzie di durabilità della coda offline: richiede prima una misura e test dedicati.
