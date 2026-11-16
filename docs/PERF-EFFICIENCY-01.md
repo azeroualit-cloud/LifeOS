@@ -16,8 +16,10 @@ Comportamento visibile invariato; cambiano solo quante volte lo stesso lavoro vi
 ## Verifica in CI
 
 - Run 43880951454 (push, commit `25a314e`): compilazione passata; passo dei test annullato al limite di 35 minuti senza esiti, perché la modifica allo store seleziona tutte le aree. Non è una prova né a favore né contro.
-- Run 43887359860 (focused, area nutrition, stesso commit): esito da acquisire.
-- `Tests/NativeEfficiencyTests.swift`: confronta le proiezioni in cache con le espressioni originali prima e dopo ogni modifica dell'archivio, verifica l'ordine del catalogo e misura ricerca alimenti e lettura turni. Non ancora eseguito.
+- Run 43887359860 (focused, area nutrition, commit `25a314e`): passato. 311 test unitari e 12 test UI di Nutrizione, 0 fallimenti, 11 minuti.
+- Run 43894770211 (focused, area bloom, commit `1172890`): passato. 317 test unitari, inclusi i 6 di `Tests/NativeEfficiencyTests.swift` (equivalenza delle proiezioni in cache, ordine del catalogo, due misure), e 12 test UI tra smoke e Bloom, 0 fallimenti.
+- Tempi medi di `testFoodSearchTime` e `testShiftLookupTime`: non acquisiti. Il log pubblico non li riporta e lo scaricamento dell'artefatto è stato rifiutato dalla sessione.
+- Non coperti: test UI di Calendario, Attività, Finanza, Salute e Dashboard; nessuna prova su iPhone. L'esito CI non è accettazione del prodotto.
 
 ## Non ancora fatto, in ordine
 
