@@ -82,3 +82,9 @@ Suite restante verde, compresi `testPaintingPaletteFullNamesWithLargeText` e `te
 - `testFinanceOverviewSupportsLargeTextAndEmptySnapshot`: con testo accessibile «Movimenti», nella seconda riga della griglia lazy, non apriva l'elenco. Le quattro azioni sono ora due pile semplici (una riga con testo standard, due righe con testo accessibile): stessa disposizione, nessun contenitore lazy.
 
 Start 6 sullo stesso gate, invariato.
+
+### Start 6 (44012183022, `1beb76b`)
+
+Verdi: preflight compatto, `testCalendarReturnsToDashboardAndFinanceOpens`, suite restante (palette con testo grande e Apple Salute compresi). Rosso solo `testFinanceOverviewSupportsLargeTextAndEmptySnapshot`. L'albero di accessibilità stampato nel run 44024746135 mostra la causa: con testo accessibile «Movimenti» (y 699–771) sta sotto la barra fissa «Aggiungi spesa» (y 706–750) quando la schermata è in cima; XCTest lo dichiarava `isHittable`, il tocco colpiva la barra e apriva «Nuovo movimento». Comportamento dell'app corretto (il contenuto scorre sotto la barra fissa come previsto da UX-REACH-01); l'helper del test ora scorre finché il controllo è interamente tra intestazione e barra fissa prima di toccarlo. Assert invariati.
+
+Start 7 sullo stesso gate.

@@ -1147,7 +1147,6 @@ final class NativeInterfaceTests: XCTestCase {
     private func revealFinanceControl(_ element: XCUIElement, in app: XCUIApplication) {
         let scroll = app.scrollViews["finance-scroll"]
         for _ in 0..<18 {
-            if element.isHittable { return }
             let visible = scroll.frame.intersection(app.frame)
             let top = max(visible.minY, app.navigationBars.firstMatch.exists ? app.navigationBars.firstMatch.frame.maxY : visible.minY)
             // Finance pins Add expense above the tab bar; content behind it is not reachable.
@@ -1155,6 +1154,9 @@ final class NativeInterfaceTests: XCTestCase {
             let pinnedTop = pinned.exists && pinned.frame.minY > visible.midY && pinned.frame != element.frame ? pinned.frame.minY : visible.maxY
             let bottom = min(visible.maxY, app.mainTabBar.frame.minY, pinnedTop)
             guard bottom > top else { return }
+            // isHittable alone accepted «Movimenti» under the pinned Add expense bar with
+            // accessibility text; the tap then opened Nuovo movimento (run 44024746135).
+            if element.isHittable && element.frame.minY >= top && element.frame.maxY <= bottom { return }
             // Short drags avoid flicking past a control on a short screen.
             // Reverse direction if it has already moved above the viewport.
             let target = element.exists ? element.frame : CGRect.null
