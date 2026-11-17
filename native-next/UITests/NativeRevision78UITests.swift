@@ -477,6 +477,15 @@ final class NativeAppleHealthReferenceUITests: XCTestCase {
         let notificationTile = health.buttons["UIA.Health.NotificationAuthorizationTile.Header.Accessory"]
         if notificationTile.exists && notificationTile.isHittable { notificationTile.tap() }
         capture("summary-before-favorites", health)
+        // Apple Health can report a row element with an empty or off-screen frame;
+        // isHittable then raises "Activation point invalid" instead of returning false
+        // (gate run 43957165264). Treat that as not reachable yet.
+        func reachable(_ element: XCUIElement) -> Bool {
+            guard element.exists else { return false }
+            let frame = element.frame
+            guard !frame.isEmpty, frame.width > 1, frame.height > 1, frame.intersects(health.frame) else { return false }
+            return element.isHittable
+        }
         let edit = health.buttons["UIA.Health.Inevidenza.Detail"]
         let identifiers = ["HKQuantityTypeIdentifierDietaryEnergyConsumed", "HKQuantityTypeIdentifierBodyMass"]
         let feed = health.collectionViews["UIA.Health.SummaryFeedViewController.CollectionView"]
@@ -487,7 +496,7 @@ final class NativeAppleHealthReferenceUITests: XCTestCase {
         for identifier in identifiers {
             let summaryMetric = feed.cells["UIA.Health.Snippet." + identifier]
             if summaryMetric.exists { continue }
-            guard edit.waitForExistence(timeout: 15), edit.isHittable else {
+            guard edit.waitForExistence(timeout: 15), reachable(edit) else {
                 capture("favorites-entry-unavailable", health)
                 // Non-blocking by user decision (15 Nov): Apple Health UI layout varies between runs.
                 print("APPLE_HEALTH_REFERENCE_NONBLOCKING favorites editor could not be opened")
@@ -506,7 +515,7 @@ final class NativeAppleHealthReferenceUITests: XCTestCase {
             if let identifier = firstMetricIdentifier {
                 let topMetric = editor.cells[identifier]
                 // Stop at the first row so a pull past the top cannot dismiss the sheet.
-                for _ in 0..<12 where !topMetric.isHittable {
+                for _ in 0..<12 where !reachable(topMetric) {
                     let start = editor.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.40))
                     let end = editor.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.65))
                     start.press(forDuration: 0.05, thenDragTo: end)
@@ -514,12 +523,12 @@ final class NativeAppleHealthReferenceUITests: XCTestCase {
             }
             let row = editor.cells[prefix + identifier]
             let toggle = row.images["UIA.Health.Toggle"]
-            for _ in 0..<24 where !toggle.isHittable {
+            for _ in 0..<24 where !reachable(toggle) {
                 let start = editor.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.73))
                 let end = editor.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.40))
                 start.press(forDuration: 0.05, thenDragTo: end)
             }
-            guard toggle.isHittable else {
+            guard reachable(toggle) else {
                 capture("favorite-not-found-" + identifier, health)
                 // Non-blocking by user decision (15 Nov): Apple Health UI layout varies between runs.
                 print("APPLE_HEALTH_REFERENCE_NONBLOCKING favorite metric not found: " + identifier)
@@ -529,16 +538,16 @@ final class NativeAppleHealthReferenceUITests: XCTestCase {
             // Verify the saved values in the summary after closing the editor.
             if !row.isSelected { toggle.tap() }
             capture("favorite-" + identifier, health)
-            if done.exists && done.isHittable { done.tap() }
+            if reachable(done) { done.tap() }
         }
         let summary = health.tabBars.buttons["Riepilogo"]
-        if summary.exists && summary.isHittable { summary.tap() }
+        if reachable(summary) { summary.tap() }
         XCTAssertTrue(feed.waitForExistence(timeout: 15))
         var found: [String: String] = [:]
         for _ in 0..<13 {
             for identifier in identifiers where found[identifier] == nil {
                 let cell = health.cells["UIA.Health.Snippet." + identifier]
-                if cell.exists && cell.isHittable {
+                if reachable(cell) {
                     found[identifier] = cell.label.lowercased()
                     capture("reference-visible-" + identifier, health)
                 }
