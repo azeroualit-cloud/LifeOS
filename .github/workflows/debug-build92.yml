@@ -15,7 +15,7 @@ jobs:
       - name: Extract failure lines into the branch
         env:
           GH_TOKEN: ${{ github.token }}
-          RUN: "44083943891"
+          RUN: "44147735238"
         run: |
           set -u
           rm -rf diag; mkdir -p diag
@@ -24,7 +24,7 @@ jobs:
           find art -maxdepth 4 | head -80 > diag/tree.txt
           for f in $(find art -name '*.log' -o -name '*failure*.txt' -o -name '*.md' | head -40); do
             echo "=== $f" >> diag/logs.txt
-            grep -a -n -B40 -E "error: -\[" "$f" | grep -a -v -E "^[0-9]+-\s*$" | cut -c1-260 | head -900 >> diag/logs.txt
+            grep -a -n -B40 -E "error: -\[" "$f" | grep -a -v -E "^[0-9]+-\s*$" | cut -c1-260 | head -900 >> diag/logs.txt; grep -a -h -E "error: -\[|Executed [0-9]+ tests|failed \(" "$f" | head -40 >> diag/summary.txt
           done
           git config user.name lifeos-diag; git config user.email diag@lifeos.invalid
           rm -f diag/logs.txt.old; git add -A diag && git commit -m "Build 92 failure lines [diagnostics]" && git push origin HEAD:diagnostics/build92
