@@ -438,6 +438,13 @@ struct CalendarScreen: View {
         let weekday = CivilDate.calendar.component(.weekday, from: CivilDate.date(day))
         return "week-" + CivilDate.adding(-((weekday + 5) % 7), to: day)
     }
+    /// Week rows have exact heights so lazy estimates match realized rows and the
+    /// anchored scroll offset is never corrected in a loop.
+    private var monthLabelLine: CGFloat {
+        let size = min(typeSize, .xxxLarge)
+        let traits = UITraitCollection(preferredContentSizeCategory: UIContentSizeCategory(size))
+        return UIFont.preferredFont(forTextStyle: .title3, compatibleWith: traits).lineHeight.rounded(.up)
+    }
     private func weekGrid(_ month: String, week: Int) -> some View {
         let days = monthDays[month] ?? []
         return VStack(spacing: NativeDesign.Space.none) {
@@ -450,7 +457,7 @@ struct CalendarScreen: View {
                                 .foregroundStyle(day.hasPrefix(CivilDate.month()) ? Color.primary : NativeDesign.secondary)
                                 .frame(maxWidth: .infinity)
                         }
-                    }.padding(.top, NativeDesign.Space.medium).padding(.bottom, NativeDesign.Space.small)
+                    }.frame(height: monthLabelLine).padding(.top, NativeDesign.Space.medium).padding(.bottom, NativeDesign.Space.small)
                     Divider()
                 }
                 HStack(alignment: .top, spacing: NativeDesign.Space.xs) {
@@ -486,7 +493,7 @@ struct CalendarScreen: View {
                                 .accessibilityAddTraits(item.day == selected ? .isSelected : [])
 
                     }
-                }
+                }.frame(height: NativeDesign.Layout.calendarMonthDayHeight, alignment: .top)
                 Divider()
         }.dynamicTypeSize(...DynamicTypeSize.xxxLarge)
     }
