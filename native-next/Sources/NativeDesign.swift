@@ -1,13 +1,15 @@
 import SwiftUI
 
 enum NativeDesign {
-    // Platinum is an interaction colour. Shift colours retain their own meaning.
+    // No accent colour (UI-LOOK-92): interaction and selection are neutral, as
+    // the iOS 26 glass. Colour belongs to section titles and to data (shifts).
     static let accent = Color(uiColor: UIColor { trait in
-        trait.userInterfaceStyle == .dark ? UIColor(white: 0.87, alpha: 1) : UIColor(white: 0.23, alpha: 1)
+        trait.userInterfaceStyle == .dark ? UIColor(red: 0.949, green: 0.949, blue: 0.969, alpha: 1) : UIColor(red: 0.110, green: 0.110, blue: 0.118, alpha: 1)
     })
     static let onAccent = Color(uiColor: .systemBackground)
-    static let canvas = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor(white: 0.045, alpha: 1) : .systemGroupedBackground })
-    static let surface = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor(white: 0.075, alpha: 1) : .secondarySystemGroupedBackground })
+    // System grouped colours: they follow Increase Contrast and dark mode by themselves.
+    static let canvas = Color(uiColor: .systemGroupedBackground)
+    static let surface = Color(uiColor: .secondarySystemGroupedBackground)
     static let secondary = Color(uiColor: UIColor { traits in
         UIColor(white: traits.userInterfaceStyle == .dark ? 0.68 : 0.37, alpha: 1)
     })
@@ -86,6 +88,14 @@ enum NativeDesign {
         static let nutritionInputLine: CGFloat = 32
         static let nutritionFieldHeight: CGFloat = 72
         static let financeTile: CGFloat = 72
+        static let bottomAction: CGFloat = 50
+        static let quickRow: CGFloat = 56
+        static let nutritionKcalColumn: CGFloat = 64
+        static let segmentHeight: CGFloat = 36
+        static let bloomSectionSwitch: CGFloat = 200
+        static let bloomRowThumbnail: CGFloat = 60
+        static let bloomRowHeight: CGFloat = 76
+        static let bloomListDivider: CGFloat = 88
         static let touchTarget: CGFloat = 44
         static let toolbarVisual: CGFloat = 36
         static let nutritionGlyphWidth: CGFloat = 18

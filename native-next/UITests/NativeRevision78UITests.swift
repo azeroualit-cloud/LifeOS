@@ -32,25 +32,25 @@ final class NativeRevision78UITests: XCTestCase {
         capture("78-prayers", app)
     }
     func testFinanceBudgetAndThumbActionUseTheSameRow() {
+        // DASHBOARD-ORDER-92: Finanza is one compact row (title, remaining, chevron);
+        // adding an expense moved to Finanza's bottom glass action.
         let app = launch()
-        let button = app.buttons["home-add-expense"]
+        let row = app.buttons["home-finance"]
         for _ in 0..<15 {
-            if button.exists && button.isHittable { break }
+            if row.exists && row.isHittable { break }
             app.scrollViews["dashboard-scroll"].swipeUp(velocity: .slow)
         }
-        XCTAssertTrue(button.isHittable)
-        let value = app.staticTexts["home-budget-value"], label = app.staticTexts["home-budget-label"]
-        let header = app.buttons["home-finance"]
-        XCTAssertTrue(value.exists); XCTAssertTrue(label.exists)
-        XCTAssertEqual(label.label, "Budget")
-        XCTAssertEqual(value.frame.minX, label.frame.minX, accuracy: 1)
-        // Permit at most one physical pixel for fractional coordinate rounding.
-        XCTAssertLessThanOrEqual(value.frame.maxY, label.frame.minY + 1 / UIScreen.main.scale)
-        XCTAssertGreaterThan(button.frame.minX, value.frame.maxX)
-        XCTAssertLessThanOrEqual(button.frame.maxX, header.frame.maxX + 1 + 1 / UIScreen.main.scale)
-        XCTAssertGreaterThanOrEqual(button.frame.height, 44 - 0.001)
-        capture("78-dashboard-budget-action", app)
-        button.tap()
+        XCTAssertTrue(row.isHittable)
+        XCTAssertFalse(app.buttons["home-add-expense"].exists)
+        XCTAssertTrue(row.label.contains("disponibili"), row.label)
+        XCTAssertLessThan(row.frame.height, 80, "Finance must stay one row")
+        XCTAssertGreaterThanOrEqual(row.frame.height, 44 - 0.001)
+        capture("92-dashboard-finance-row", app)
+        row.tap()
+        let add = app.buttons["primary-add"]
+        XCTAssertTrue(add.waitForExistence(timeout: 10))
+        XCTAssertTrue(add.isHittable)
+        add.tap()
         XCTAssertTrue(app.textFields["movement-amount"].waitForExistence(timeout: 10))
     }
     func testHealthUniformRowsAndCompactActions() {

@@ -4,7 +4,7 @@ import HealthKit
 
 @MainActor final class NativeFoodUnitsTests: XCTestCase {
     func testBrandedCapsulesUseElementalAmountPerCapsuleAndKeepQuantityAfterReload() throws {
-        let magnesium = try XCTUnwrap(NativeGenericFood.brandedSupplements.first { $0.id == "brand-vit4ever-magnesium-citrate" })
+        let magnesium = try XCTUnwrap(TestCatalogFixtures.brandedSupplements.first { $0.id == "brand-vit4ever-magnesium-citrate" })
         let entry = try XCTUnwrap(magnesium.portion(id: UUID(), date: .now, grams: 2))
         XCTAssertEqual(entry.nutrientValues?["magnesium"]?.amount, 240)
         XCTAssertEqual(entry.supplementQuantity, 2)
@@ -15,7 +15,7 @@ import HealthKit
     }
 
     func testPowderUsesActualGramsAndLegacyDoseKeepsItsOriginalMeaning() throws {
-        let whey = try XCTUnwrap(NativeGenericFood.supplements.first { $0.id == "supplement-whey" })
+        let whey = try XCTUnwrap(TestCatalogFixtures.supplements.first { $0.id == "supplement-whey" })
         let portion = try XCTUnwrap(whey.portion(id: UUID(), date: .now, grams: 30))
         XCTAssertEqual(portion.protein, 24)
         XCTAssertEqual(NSDecimalNumber(decimal: portion.calories).doubleValue, 122, accuracy: 0.0001)
@@ -42,7 +42,7 @@ import HealthKit
     }
 
     func testUndeclaredMacrosDoNotCreateFalseZeroHealthSamples() throws {
-        let vitamin = try XCTUnwrap(NativeGenericFood.brandedSupplements.first { $0.id == "brand-natural-elements-vitamin-c" })
+        let vitamin = try XCTUnwrap(TestCatalogFixtures.brandedSupplements.first { $0.id == "brand-natural-elements-vitamin-c" })
         var entry = try XCTUnwrap(vitamin.portion(id: UUID(), date: .now, grams: 1))
         entry.sharedNutrientKeys = ["vitaminC"]
         let samples = NativeHealthNutritionWriter.samples(for: entry)
@@ -72,7 +72,7 @@ import HealthKit
     }
 
     func testManualTotalsClearPortionWhileDateOnlyEditKeepsUnits() throws {
-        let capsule = try XCTUnwrap(NativeGenericFood.brandedSupplements.first { $0.id == "brand-weightworld-omega3" })
+        let capsule = try XCTUnwrap(TestCatalogFixtures.brandedSupplements.first { $0.id == "brand-weightworld-omega3" })
         let old = try XCTUnwrap(capsule.portion(id: UUID(), date: .now, grams: 2))
         let updated = try XCTUnwrap(NativeNutritionEntry.direct(id: old.id, date: old.date, protein: 0,
             carbohydrate: 0, fat: 3, fibre: 0, preserving: old))
@@ -99,7 +99,7 @@ import HealthKit
     }
 
     func testPersonalCopyPreservesCompositionWithoutRewritingLoggedEntries() throws {
-        let source = try XCTUnwrap(NativeGenericFood.brandedSupplements.first { $0.id == "brand-weightworld-omega3" })
+        let source = try XCTUnwrap(TestCatalogFixtures.brandedSupplements.first { $0.id == "brand-weightworld-omega3" })
         let logged = try XCTUnwrap(source.portion(id: UUID(), date: .now, grams: 1))
         let copy = source.personalCopy()
         XCTAssertNotEqual(copy.id, source.id)

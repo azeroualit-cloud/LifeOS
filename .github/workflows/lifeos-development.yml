@@ -41,6 +41,8 @@ jobs:
       - uses: ./.github/actions/native-compat76
         with:
           variant: ${{ inputs.device || 'primary' }}
+      - name: Design system ratchet (UI-FRAMEWORK-92)
+        run: python3 scripts/check-design-system.py
       - name: Select bounded checks
         env:
           MODE: ${{ inputs.mode || (contains(github.event.head_commit.message, '[nutrition-render]') && 'nutrition-render') || (contains(github.event.head_commit.message, '[calendar-render]') && 'calendar-render') || (contains(github.event.head_commit.message, '[health-render]') && 'health-render') || (contains(github.event.head_commit.message, '[health-detail-render]') && 'health-detail-render') || (contains(github.event.head_commit.message, '[health-reference]') && 'health-reference') || (contains(github.event.head_commit.message, '[shift-render]') && 'shift-render') || (contains(github.event.head_commit.message, '[catalog-review]') && 'catalog-review') || (contains(github.event.head_commit.message, '[catalog-fixes]') && 'catalog-fixes') || (contains(github.event.head_commit.message, '[catalog-last]') && 'catalog-last') || 'preview' }}

@@ -660,8 +660,9 @@ final class NativeInterfaceTests: XCTestCase {
     }
     func testKeyboardAndLocalMovementFlow() {
         let app = launch()
-        let addExpense = app.buttons["home-add-expense"]
-        reveal(addExpense, in: app); XCTAssertTrue(addExpense.isHittable); addExpense.tap()
+        app.openOtherDestination("Finanza")
+        let addExpense = app.buttons["primary-add"]
+        XCTAssertTrue(addExpense.waitForExistence(timeout: 10)); XCTAssertTrue(addExpense.isHittable); addExpense.tap()
         let description = app.textFields["Descrizione"]
         XCTAssertTrue(description.waitForExistence(timeout: 10))
         XCTAssertEqual(app.steppers.count, 0)
@@ -671,8 +672,6 @@ final class NativeInterfaceTests: XCTestCase {
         let amount = app.textFields["Importo €"]
         amount.tap(); amount.typeText("2")
         app.buttons["Salva"].tap()
-        XCTAssertTrue(app.mainTabBar.buttons["Dashboard"].isSelected)
-        app.openOtherDestination("Finanza")
         let all = app.buttons["all-movements"]
         for _ in 0..<8 { if all.isHittable { break }; app.scrollViews["finance-scroll"].swipeUp() }
         XCTAssertTrue(all.isHittable); all.tap()

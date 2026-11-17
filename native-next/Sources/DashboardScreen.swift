@@ -18,10 +18,11 @@ struct DashboardScreen: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: NativeDesign.Space.large) {
                     heading(today: today, now: now)
+                    // DASHBOARD-ORDER-92: week, things to do, nutrition, finance.
                     rollingCalendar(today)
                     checklist(today: today)
-                    financeOverview
                     NativeNutritionQuickEntry()
+                    financeOverview
                     NativeConnectionBadge()
                     if let notice = store.notice { Text(notice).font(.caption).foregroundStyle(NativeDesign.secondary) }
                 }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.top, NativeDesign.Space.small).padding(.bottom, NativeDesign.Layout.scrollClearance)
@@ -43,12 +44,7 @@ struct DashboardScreen: View {
         let marked = Set(store.events.map { $0.text("day") } + store.tasks.map { $0.text("scheduled_date") })
         return NativeCard(density: .compact, topInset: NativeDesign.Space.xs) {
             Button { openCalendar(today) } label: {
-                HStack {
-                    Label("Calendario", systemImage: "calendar")
-                        .font(.headline).foregroundStyle(NativeDesign.calendarTitle)
-                    Spacer()
-                    NativeDisclosureIndicator()
-                }.frame(minHeight: NativeDesign.Layout.touchTarget)
+                LOCardHeader(title: "Settimana", systemImage: "calendar", section: .calendar, showsChevron: true)
                     .contentShape(Rectangle())
             }.buttonStyle(NativePressStyle()).accessibilityIdentifier("home-calendar")
             HStack(spacing: NativeDesign.Space.xs) {
@@ -172,34 +168,46 @@ struct DashboardScreen: View {
                 }
         }
     }
+    /// Finance in one row (DASHBOARD-ORDER-92): title, what is left this month, chevron.
+    /// Adding an expense lives in Finanza's bottom glass action.
     private var financeOverview: some View {
-        NativeCard(density: .compact, topInset: NativeDesign.Space.xs) {
-            // Explicit path write, like the Calendar entry: a value link did not push
-            // after a programmatic Calendar visit (gate 91 run 43999971306).
-            Button { router.dashboardPath = [.finance] } label: {
-                HStack {
-                    Label("Finanza", systemImage: "chart.bar").font(.headline).foregroundStyle(NativeDesign.financeTitle)
-                    Spacer()
-                    NativeDisclosureIndicator()
-                }.frame(minHeight: NativeDesign.Layout.touchTarget)
-            }.buttonStyle(NativePressStyle()).accessibilityIdentifier("home-finance")
-            let overview = NativeFinanceOverview(summary: store.summary, month: store.financeMonth)
-            let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: NativeDesign.Space.medium)) : AnyLayout(HStackLayout(alignment: .center, spacing: NativeDesign.Space.medium))
-            layout {
-                VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-                    Text(hiddenMoney ? "•••• €" : overview.remaining.map(\.euro) ?? "—")
-                        .font(.title2.weight(.semibold)).monospacedDigit().accessibilityIdentifier("home-budget-value")
-                    Text("Budget").font(.caption).foregroundStyle(NativeDesign.secondary).accessibilityIdentifier("home-budget-label")
+        let overview = NativeFinanceOverview(summary: store.summary, month: store.financeMonth)
+        // Explicit path write, like the Calendar entry: a value link did not push
+        // after a programmatic Calendar visit (gate 91 run 43999971306).
+        return Button { router.dashboardPath = [.finance] } label: {
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: NativeDesign.Space.small) {
+                    LOCardHeader(title: "Finanza", systemImage: "chart.bar", section: .finance).fixedSize()
+                    Spacer(minLength: NativeDesign.Space.small)
+                    financeValue(overview)
+                    chevron
                 }
-                if !typeSize.isAccessibilitySize { Spacer(minLength: NativeDesign.Space.small) }
-                Button { router.sheet = .movement([:]) } label: {
-                    Label("Aggiungi spesa", systemImage: "plus")
-                        .frame(maxWidth: typeSize.isAccessibilitySize ? .infinity : nil, minHeight: NativeDesign.Layout.touchTarget)
-                        .contentShape(Rectangle())
-                }.buttonStyle(NativeGlassButtonStyle()).accessibilityIdentifier("home-add-expense")
+                VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
+                    HStack { LOCardHeader(title: "Finanza", systemImage: "chart.bar", section: .finance); chevron }
+                    financeValue(overview)
+                }
             }
-
+            .padding(.horizontal, NativeDesign.Layout.compactCardInset)
+            .padding(.vertical, NativeDesign.Space.xs)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.cardRadius, style: .continuous))
+            .contentShape(Rectangle())
         }
+        .buttonStyle(NativePressStyle())
+        .accessibilityLabel("Finanza, " + (hiddenMoney ? "importo nascosto" : (overview.remaining.map(\.euro) ?? "nessun dato")) + " disponibili")
+        .accessibilityIdentifier("home-finance")
+    }
+    private func financeValue(_ overview: NativeFinanceOverview) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xs) {
+            Text(hiddenMoney ? "•••• €" : overview.remaining.map(\.euro) ?? "—")
+                .font(.body.weight(.semibold)).monospacedDigit().foregroundStyle(.primary)
+                .accessibilityIdentifier("home-budget-value")
+            Text("disponibili").font(.subheadline).foregroundStyle(NativeDesign.secondary)
+                .accessibilityIdentifier("home-budget-label")
+        }
+    }
+    private var chevron: some View {
+        Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(.tertiary).accessibilityHidden(true)
     }
     private func checkRoutine(_ record: Record) {
         guard routineBusy == nil else { return }

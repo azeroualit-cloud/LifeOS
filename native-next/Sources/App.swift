@@ -239,55 +239,54 @@ struct NativeRoot: View {
         case .dashboard: router.tab = .dashboard
         }
     }
-    @State private var keyboardVisible = false
-    @State private var tabBarHeight = NativeTabBarMetrics.reserve
+    /// Finance lives inside the Dashboard stack (NAVIGATION-FIVE-2026-11-16), so the
+    /// bar never selects it. Tapping the selected destination again returns the
+    /// Dashboard to its root, as the previous bar did.
+    private var tabSelection: Binding<NativeTab> {
+        Binding(get: { router.tab == .finance ? .dashboard : router.tab }, set: { selected in
+            if selected == router.tab, selected == .dashboard { router.dashboardPath = [] }
+            #if DEBUG
+            if ProcessInfo.processInfo.arguments.contains("--visual-test") {
+                print("NATIVE_TAB_ACTION target=\(selected.rawValue) previous=\(router.tab.rawValue)")
+            }
+            #endif
+            router.tab = selected
+        })
+    }
+    /// The iOS tab bar (UI-FRAMEWORK-92): Liquid Glass, contrast, keyboard and safe
+    /// areas are the system's. No screen reserves space for it.
     private var nativeTabs: some View {
-        NativeTabContainer(selection: router.tab) { tab in
-            AnyView(tabContent(tab)
-                .environmentObject(store).environmentObject(router).environmentObject(health)
-                .environment(\.calendar, CivilDate.calendar)
-                .environment(\.timeZone, CivilDate.calendar.timeZone)
-                .environment(\.defaultMinListRowHeight, NativeDesign.Layout.touchTarget)
-                .font(NativeDesign.body).tint(NativeDesign.accent)
-                .symbolVariant(.none).symbolRenderingMode(.monochrome)
-                .preferredColorScheme(theme == "dark" ? .dark : theme == "light" ? .light : nil)
-                .environment(\.nativeTabBarReserve, keyboardVisible ? 0 : max(tabBarHeight, NativeTabBarMetrics.reserve))
-                .modifier(NativeVisualTestSize()).modifier(NativeVisualTestMotion()))
-        }
-        .background(NativeDesign.canvas)
-        // Overlay, not safeAreaInset: tab roots reserve the bar height themselves
-        // (NativeTabBarReserve), so scroll ends and pinned actions stay above it.
-        .overlay(alignment: .bottom) {
-            if !keyboardVisible {
-                NativeSixTabBar(selection: $router.tab) {
-                    if router.tab == .dashboard { router.dashboardPath = [] }
-                }
-                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { tabBarHeight = $0 }
+        TabView(selection: tabSelection) {
+            ForEach(NativeTab.barOrder) { tab in
+                tabContent(tab)
+                    .tabItem { Label(tab.title, systemImage: tab.symbol) }
+                    .tag(tab)
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in keyboardVisible = true }
-        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in keyboardVisible = false }
+        .environment(\.calendar, CivilDate.calendar)
+        .environment(\.timeZone, CivilDate.calendar.timeZone)
+        .tint(NativeDesign.accent)
+        .modifier(NativeVisualTestSize()).modifier(NativeVisualTestMotion())
+        .sensoryFeedback(.selection, trigger: router.tab)
     }
     @ViewBuilder private func tabContent(_ tab: NativeTab) -> some View {
         Group {
             switch tab {
             case .dashboard: dashboard
             case .tasks: tasks
-            case .health: NavigationStack { NativeHealthDetail(health: health, demo: NativeHealthLaunchPolicy.simulated).modifier(NativeTabBarReserve()) }
-            case .bloom: NavigationStack { NativeBloomScreen().modifier(NativeTabBarReserve()) }
-            case .finance: NavigationStack { FinanceScreen().modifier(NativeTabBarReserve()) }
+            case .health: NavigationStack { NativeHealthDetail(health: health, demo: NativeHealthLaunchPolicy.simulated) }
+            case .bloom: NavigationStack { NativeBloomScreen() }
+            case .finance: NavigationStack { FinanceScreen() }
             case .calendar: NavigationStack { CalendarScreen() }
             }
         }
-        .modifier(NativeTabArrival(tab: tab))
     }
     private var dashboard: some View {
         NativeDashboardStack(content: AnyView(
             DashboardScreen().toolbar { tools }.navigationTitle("Dashboard").navigationBarTitleDisplayMode(.inline)
-                .modifier(NativeTabBarReserve())
         ))
     }
-    private var tasks: some View { NavigationStack { TasksScreen().toolbar { tools }.navigationTitle("Attività").navigationBarTitleDisplayMode(.inline).modifier(NativeTabBarReserve()) } }
+    private var tasks: some View { NavigationStack { TasksScreen().toolbar { tools }.navigationTitle("Attività").navigationBarTitleDisplayMode(.inline) } }
     @ToolbarContentBuilder private var tools: some ToolbarContent {
         if #available(iOS 26.0, *) {
             ToolbarItem(placement: .topBarTrailing) { addControl }
@@ -336,46 +335,11 @@ private struct NativeDashboardStack: View {
         NavigationStack(path: $router.dashboardPath) {
             content.navigationDestination(for: NativeDashboardDestination.self) { destination in
                 switch destination {
-                case .finance: FinanceScreen().modifier(NativeTabBarReserve())
+                case .finance: FinanceScreen()
                 case .calendar: CalendarScreen()
                 }
             }
         }
-    }
-}
-
-private struct NativeTabArrival: ViewModifier {
-    @Environment(\.nativeReduceMotion) private var reduceMotion
-    let tab: NativeTab
-    @EnvironmentObject private var router: NativeRouter
-    private var selection: NativeTab { router.tab }
-    @State private var offset: CGFloat = 0
-    @State private var arrivalTask: Task<Void, Never>?
-
-    func body(content: Content) -> some View {
-        content.offset(x: offset)
-            .onChange(of: selection) { previous, current in
-                reset()
-                guard current == tab, !reduceMotion else { return }
-                var instant = Transaction()
-                instant.disablesAnimations = true
-                withTransaction(instant) { offset = current.barIndex > previous.barIndex ? 28 : -28 }
-                arrivalTask = Task { @MainActor in
-                    await Task.yield()
-                    guard !Task.isCancelled else { return }
-                    withAnimation(.easeOut(duration: NativeDesign.Motion.selectionDuration)) { offset = 0 }
-                }
-            }
-            .onChange(of: reduceMotion) { _, reduced in if reduced { reset() } }
-            .onDisappear { reset() }
-    }
-
-    private func reset() {
-        arrivalTask?.cancel()
-        arrivalTask = nil
-        var instant = Transaction()
-        instant.disablesAnimations = true
-        withTransaction(instant) { offset = 0 }
     }
 }
 

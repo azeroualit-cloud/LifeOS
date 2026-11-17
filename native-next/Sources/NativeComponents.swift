@@ -4,38 +4,7 @@ private struct NativeForceReduceMotionKey: EnvironmentKey {
     static let defaultValue = false
 }
 
-private struct NativeTabBarReserveKey: EnvironmentKey {
-    static let defaultValue: CGFloat = 0
-}
-
-/// Height of the floating six-tab bar plus its padding.
-enum NativeTabBarMetrics {
-    static let reserve = NativeDesign.Layout.tabHeight + 2 * NativeDesign.Space.xs
-}
-
-/// The floating tab bar is an overlay of the root container. A safe-area inset
-/// applied outside the tab NavigationStacks did not reach their scroll views
-/// (CI runs 43684175590 and 43693074694: last Dashboard row and Health actions
-/// stayed under the bar), so each tab root reserves the space inside its own
-/// NavigationStack, where screen-level insets are proven to work.
-/// safeAreaPadding, not safeAreaInset: an inset view makes SwiftUI ask the
-/// screen for its minimum size, which for the Calendar measured every lazy
-/// week of the 13-month window on each animation frame and kept the main
-/// thread busy forever (spindump of run 43708179109). Padding the safe area
-/// changes the insets without measuring the content.
-struct NativeTabBarReserve: ViewModifier {
-    @Environment(\.nativeTabBarReserve) private var reserve
-    func body(content: Content) -> some View {
-        content.safeAreaPadding(.bottom, reserve)
-    }
-}
-
 extension EnvironmentValues {
-    var nativeTabBarReserve: CGFloat {
-        get { self[NativeTabBarReserveKey.self] }
-        set { self[NativeTabBarReserveKey.self] = newValue }
-    }
-
     /// Test-only forcing is additive: the system preference always wins.
     var nativeForceReduceMotion: Bool {
         get { self[NativeForceReduceMotionKey.self] }
@@ -228,17 +197,20 @@ struct NativeRowText: View {
     }
 }
 /// Explicit 44 pt geometry, without the additional inset of bordered styles.
+/// Former filled primary button, now Liquid Glass like every other button
+/// (UI-LOOK-92). Kept as a name so existing call sites need no change.
 struct NativeCompactPrimaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var enabled
     @Environment(\.nativeReduceMotion) private var reduceMotion
     var readableDisabled = false
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .foregroundStyle(!enabled && readableDisabled ? NativeDesign.secondary : NativeDesign.onAccent)
-            .padding(.horizontal, NativeDesign.Space.medium)
+            .font(.body.weight(.semibold))
+            .foregroundStyle(!enabled && readableDisabled ? NativeDesign.secondary : Color.primary)
+            .padding(.horizontal, NativeDesign.Space.large)
             .frame(minHeight: NativeDesign.Layout.touchTarget)
-            .background(!enabled && readableDisabled ? NativeDesign.actionSurface : NativeDesign.accent, in: Capsule())
             .contentShape(Capsule())
+            .modifier(NativeGlass())
             .opacity(enabled ? (configuration.isPressed ? NativeDesign.Motion.pressedOpacity : 1) : (readableDisabled ? 1 : 0.45))
             .animation(reduceMotion ? nil : .easeOut(duration: NativeDesign.Motion.selectionDuration), value: configuration.isPressed)
     }

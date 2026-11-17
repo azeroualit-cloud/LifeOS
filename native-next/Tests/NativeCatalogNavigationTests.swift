@@ -3,7 +3,7 @@ import XCTest
 
 @MainActor final class NativeCatalogNavigationTests: XCTestCase {
     func testSupplementsHaveTheirOwnScopeAndPersonalCopiesStayEditable() throws {
-        let capsule = try XCTUnwrap(NativeGenericFood.brandedSupplements.first).personalCopy()
+        let capsule = try XCTUnwrap(TestCatalogFixtures.brandedSupplements.first).personalCopy()
         let food = try XCTUnwrap(NativeGenericFood.foods.first).personalCopy()
         let personal = [capsule, food]
         XCTAssertFalse(NativeFoodPicker.items(in: .all, personal: personal).contains { $0.family == .supplement })

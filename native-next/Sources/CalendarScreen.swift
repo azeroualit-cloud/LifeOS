@@ -10,7 +10,6 @@ struct CalendarScreen: View {
     /// safe-area modifier around this screen (safeAreaInset or safeAreaPadding)
     /// makes SwiftUI measure every lazy week on each animation frame and the
     /// main thread never idles (spindumps of runs 43708179109 and 43722940589).
-    @Environment(\.nativeTabBarReserve) private var tabBarReserve
     @State private var showingDay = false
     @State private var monthReturnDay: String?
     private var selected: String {
@@ -128,7 +127,7 @@ struct CalendarScreen: View {
                                 }
                         }
                     }.scrollTargetLayout().padding(.horizontal, NativeDesign.Layout.screenInset)
-                        .padding(.vertical, NativeDesign.Space.large).padding(.bottom, NativeDesign.Layout.scrollClearance + tabBarReserve)
+                        .padding(.vertical, NativeDesign.Space.large).padding(.bottom, NativeDesign.Layout.scrollClearance)
                 }.scrollPosition(id: $scrollWeek, anchor: .top)
                 .onChange(of: scrollWeek) { _, week in
                     guard monthPositionReady, !restoringWindow, !showingDay, let week else { return }
@@ -140,7 +139,7 @@ struct CalendarScreen: View {
                 .onPreferenceChange(NativeCalendarMonthFrames.self) { frames in
                     if let target = requestedWeek {
                         guard let frame = frames[target], frame.maxY > 0,
-                              frame.minY < viewportHeight - tabBarReserve else { return }
+                              frame.minY < viewportHeight else { return }
                         requestedWeek = nil; restoringWindow = false; monthPositionReady = true
                         if let anchoredMonth { visibleMonth = anchoredMonth }
                     }
@@ -227,20 +226,14 @@ struct CalendarScreen: View {
             .padding(.vertical, NativeDesign.Space.small)
             agendaContent
         }
-        .safeAreaInset(edge: .bottom, spacing: NativeDesign.Space.none) {
+        .loBottomActions {
             Button {
                 router.sheet = .event(["day": .string(selected)])
             } label: {
-                Label("Aggiungi evento", systemImage: "plus")
-                    .font(.subheadline.weight(.semibold))
+                LOActionLabel(title: "Aggiungi evento", systemImage: "plus", section: .calendar)
             }
-            .buttonStyle(NativeGlassButtonStyle())
+            .buttonStyle(LOGlassButtonStyle(fillsWidth: true))
             .accessibilityIdentifier("calendar-add-event")
-            .frame(maxWidth: .infinity)
-            .padding(.horizontal, NativeDesign.Layout.screenInset)
-            .padding(.vertical, NativeDesign.Space.small)
-            .padding(.bottom, tabBarReserve)
-            .background(NativeDesign.calendarCanvas)
         }
     }
 

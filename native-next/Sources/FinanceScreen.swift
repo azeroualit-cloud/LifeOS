@@ -35,17 +35,14 @@ struct FinanceScreen: View {
             }.padding(.horizontal, NativeDesign.Layout.screenInset)
                 .padding(.top, NativeDesign.Space.small).padding(.bottom, NativeDesign.Layout.scrollClearance)
         }.background(NativeDesign.canvas).scrollBounceBehavior(.basedOnSize).accessibilityIdentifier("finance-scroll")
-        // UX-REACH-01: the action used many times a day stays within thumb reach.
-        .safeAreaInset(edge: .bottom, spacing: NativeDesign.Space.none) {
+        // UX-REACH-01: the action used many times a day stays within thumb reach,
+        // in Liquid Glass with no band behind it (UI-LOOK-92).
+        .loBottomActions {
             Button { router.sheet = .movement([:]) } label: {
-                Label("Aggiungi spesa", systemImage: "plus").font(.headline)
-                    .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget)
+                LOActionLabel(title: "Aggiungi spesa", systemImage: "plus", section: .finance)
             }
-            .buttonStyle(NativeCompactPrimaryButtonStyle())
+            .buttonStyle(LOGlassButtonStyle(fillsWidth: true))
             .accessibilityIdentifier("primary-add")
-            .padding(.horizontal, NativeDesign.Layout.screenInset)
-            .padding(.vertical, NativeDesign.Space.small)
-            .background(NativeDesign.canvas)
         }
         }.background(NativeDesign.canvas)
         .toolbar(.hidden, for: .navigationBar)
@@ -55,7 +52,7 @@ struct FinanceScreen: View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.large) {
             VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
                 HStack {
-                    Text("Budget rimanente").font(.title3).foregroundStyle(NativeDesign.secondary)
+                    LOCardHeader(title: "Budget rimanente", systemImage: "wallet.bifold", section: .finance)
                     Spacer()
                     NativeIconButton(symbol: hidden ? "eye.slash" : "eye", label: hidden ? "Mostra importi" : "Nascondi importi") { hidden.toggle() }
                 }
@@ -83,6 +80,8 @@ struct FinanceScreen: View {
                 }
             }
         }.frame(maxWidth: .infinity, alignment: .leading)
+            .padding(NativeDesign.Layout.compactCardInset)
+            .background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.cardRadius, style: .continuous))
     }
     private var accountName: some View { Text(store.summary.text("account", fallback: "Trade Republic")).font(.title3.weight(.semibold)) }
     private var accountBalance: some View {
@@ -102,6 +101,7 @@ struct FinanceScreen: View {
             List { movements }.modifier(NativeListAppearance()).navigationTitle("Movimenti").navigationBarTitleDisplayMode(.inline).toolbar(.visible, for: .navigationBar)
         } label: { financeTile("Movimenti", symbol: "list.bullet") }
             .accessibilityLabel("Mostra tutti i movimenti").accessibilityIdentifier("all-movements")
+        // One compact row in a single card (mockup build 92): four equal shortcuts.
         return Group {
             if typeSize.isAccessibilitySize {
                 VStack(spacing: spacing) {
@@ -109,17 +109,18 @@ struct FinanceScreen: View {
                     HStack(alignment: .top, spacing: spacing) { plan; all }
                 }
             } else {
-                HStack(alignment: .top, spacing: spacing) { budget; analysis; plan; all }
+                HStack(alignment: .top, spacing: NativeDesign.Space.none) { budget; analysis; plan; all }
             }
         }.buttonStyle(.plain).foregroundStyle(Color.primary)
+            .padding(NativeDesign.Space.xs)
+            .background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.cardRadius, style: .continuous))
     }
     private func financeTile(_ title: String, symbol: String) -> some View {
-        VStack(spacing: NativeDesign.Space.small) {
+        VStack(spacing: NativeDesign.Space.xs) {
             Image(systemName: symbol).font(.title3.weight(.regular)).foregroundStyle(NativeDesign.financeTitle)
-            Text(title).font(.footnote.weight(.medium)).lineLimit(1).minimumScaleFactor(0.75)
-        }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.financeTile)
-            .background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius, style: .continuous))
-            .contentShape(RoundedRectangle(cornerRadius: NativeDesign.controlRadius, style: .continuous))
+            Text(title).font(.caption.weight(.medium)).lineLimit(1).minimumScaleFactor(0.75)
+        }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.quickRow)
+            .contentShape(Rectangle())
     }
     private var recentMovements: some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.large) {
@@ -147,9 +148,8 @@ struct FinanceScreen: View {
     private func movementDescription(_ record: Record) -> some View {
         HStack(spacing: NativeDesign.Space.medium) {
             Image(systemName: NativeCategoryCatalog.symbol(for: record.text("displayCategory", fallback: record.text("category"))))
-                .font(.title3.weight(.regular)).foregroundStyle(Color.primary)
+                .font(.title3.weight(.regular)).foregroundStyle(NativeDesign.secondary)
                 .frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget)
-                .background(NativeDesign.actionSurface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
             NativeRowText(title: record.text("name"), subtitle: CivilDate.label(record.text("date")), titleLineLimit: 2)
         }
     }

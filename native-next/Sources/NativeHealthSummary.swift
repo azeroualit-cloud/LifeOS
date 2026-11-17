@@ -54,6 +54,7 @@ struct NativeHealthDetail: View {
     @State private var selectedDate = Calendar.current.startOfDay(for: .now)
     let demo: Bool
     @State private var addingWeight = false
+    @State private var openedMetric: NativeHealthMetric?
     @State private var showingNutrition = false
     @State private var deletingFood: UUID?
     @State private var diaryNotice: String?
@@ -65,16 +66,9 @@ struct NativeHealthDetail: View {
             VStack(spacing: NativeDesign.Space.medium) {
                 weekPicker
                 if demo { Text("Dati illustrativi").font(.caption).foregroundStyle(.secondary) }
-                if typeSize.isAccessibilitySize {
-                    VStack(spacing: NativeDesign.Space.medium) {
-                        ForEach(NativeHealthMetric.allCases) { metricLink($0) }
-                    }
-                } else {
-                    VStack(spacing: NativeDesign.Space.medium) {
-                        HStack(alignment: .top, spacing: NativeDesign.Space.medium) { metricLink(.tdee); metricLink(.simulation) }
-                        HStack(alignment: .top, spacing: NativeDesign.Space.medium) { metricLink(.weight); metricLink(.calories) }
-                        HStack(alignment: .top, spacing: NativeDesign.Space.medium) { metricLink(.weeklyCalories); metricLink(.weeklyProtein) }
-                    }
+                // HEALTH-GRID-3X2-92: TDEE, Peso previsto, Peso / Calorie, Media calorie, Media proteine.
+                LOStatGrid(stats: summaryStats) { stat in
+                    if let metric = NativeHealthMetric(rawValue: String(stat.id.dropFirst("health-summary-".count))) { openedMetric = metric }
                 }
                 nutrients
                 diary
@@ -90,8 +84,9 @@ struct NativeHealthDetail: View {
             .accessibilityIdentifier("health-detail-scroll")
             .task { await NativeNutritionUIFixture.prepareReview() }
             .refreshable { await health.refresh() }
-            .safeAreaInset(edge: .bottom, spacing: NativeDesign.Space.none) {
-                nutritionActionBar
+            .loBottomActions { nutritionActions }
+            .navigationDestination(item: $openedMetric) { metric in
+                NativeHealthMetricDetail(metric: metric, health: health, demo: demo)
             }
             .background(NativeDesign.healthCanvas)
             .navigationTitle("Salute")
@@ -110,16 +105,11 @@ struct NativeHealthDetail: View {
             }
 
     }
-    @ViewBuilder private func metricLink(_ metric: NativeHealthMetric) -> some View {
-        let row = NativeHealthSummaryRow(metric: metric, value: value(metric), contextLabel: context(metric))
-        if metric == .weeklyCalories || metric == .weeklyProtein {
-            row.accessibilityIdentifier("health-summary-" + metric.rawValue)
-        } else {
-            NavigationLink {
-                NativeHealthMetricDetail(metric: metric, health: health, demo: demo)
-            } label: { row }
-                .buttonStyle(NativePressStyle()).accessibilityIdentifier("health-summary-" + metric.rawValue)
-                .frame(maxWidth: .infinity)
+    private var summaryStats: [LOStat] {
+        let order: [NativeHealthMetric] = [.tdee, .simulation, .weight, .calories, .weeklyCalories, .weeklyProtein]
+        return order.map { metric in
+            LOStat(id: "health-summary-" + metric.rawValue, title: metric.title, value: value(metric), unit: metric.unit,
+                   accessibilityHint: metric == .weeklyCalories || metric == .weeklyProtein ? "" : "Apre il dettaglio")
         }
     }
 
@@ -187,7 +177,7 @@ struct NativeHealthDetail: View {
 
     private var nutrients: some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-            Text("Nutrienti").font(.headline).foregroundStyle(NativeDesign.nutritionTitle)
+            LOCardHeader(title: "Nutrienti", systemImage: NativeHealthMetric.calories.symbol, section: .nutrition)
             NativeNutrientValues(health: health, includesFibre: true, date: selectedDate)
             Divider().padding(.vertical, NativeDesign.Space.xs)
             NativePinnedNutrients(entries: nutrition.entries, date: selectedDate)
@@ -206,29 +196,16 @@ struct NativeHealthDetail: View {
             .accessibilityIdentifier("health-micronutrients")
         }.padding(NativeDesign.Layout.compactCardInset)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(NativeDesign.healthSurface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
+            .background(NativeDesign.healthSurface, in: RoundedRectangle(cornerRadius: NativeDesign.cardRadius, style: .continuous))
     }
-    private var nutritionActionBar: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: NativeDesign.Space.small) { nutritionActions }
-                .fixedSize(horizontal: true, vertical: false)
-            VStack(spacing: NativeDesign.Space.small) { nutritionActions }
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, NativeDesign.Layout.listInset)
-        .padding(.vertical, NativeDesign.Space.small)
-    }
-
+    /// Liquid Glass actions above the tab bar (G06 icons, UI-80-01 visible text).
     @ViewBuilder private var nutritionActions: some View {
-        Button { addingWeight = true } label: {
-            Label { Text("Aggiungi peso") } icon: { NativeSymbol(symbol: NativeHealthMetric.weight.symbol) }
-                .font(.subheadline.weight(.semibold))
-        }.buttonStyle(NativeGlassButtonStyle()).accessibilityIdentifier("health-add-weight")
         Button { showingNutrition = true } label: {
-            Label { Text("Aggiungi alimento") } icon: { NativeSymbol(symbol: NativeHealthMetric.calories.symbol) }
-                .font(.subheadline.weight(.semibold))
-                .fixedSize(horizontal: false, vertical: true)
-        }.buttonStyle(NativeGlassButtonStyle()).accessibilityIdentifier("health-add-nutrition")
+            LOActionLabel(title: "Alimento", systemImage: NativeHealthMetric.calories.symbol, section: .nutrition)
+        }.buttonStyle(LOGlassButtonStyle(fillsWidth: true)).accessibilityLabel("Aggiungi alimento").accessibilityIdentifier("health-add-nutrition")
+        Button { addingWeight = true } label: {
+            LOActionLabel(title: "Peso", systemImage: NativeHealthMetric.weight.symbol, section: .weight)
+        }.buttonStyle(LOGlassButtonStyle(fillsWidth: true)).accessibilityLabel("Aggiungi peso").accessibilityIdentifier("health-add-weight")
     }
     private var diary: some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.small) {

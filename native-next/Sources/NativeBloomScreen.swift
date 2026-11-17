@@ -45,7 +45,7 @@ struct NativeBloomScreen: View {
     @State private var mapFitRequest = 0
     private var notes: [Record] {
         store.archive.items.filter { item in
-            item.flag("archived") == showTrash && filter.matches(item) && (search.isEmpty || [item.text("title"), item.text("text"), item.text("notes"), item.text("urlString")].joined(separator: " ").localizedCaseInsensitiveContains(search))
+            item.flag("archived") == showTrash && filter.matches(item) && (category.isEmpty || NativeBloomRow.categories(of: item).contains(category)) && (search.isEmpty || [item.text("title"), item.text("text"), item.text("notes"), item.text("urlString")].joined(separator: " ").localizedCaseInsensitiveContains(search))
         }.sorted {
             if !category.isEmpty {
                 let left = $0["pinnedCategoryIDs"]?.array.map(\.string).contains(category) ?? false
@@ -56,43 +56,41 @@ struct NativeBloomScreen: View {
         }
     }
     var body: some View {
-        VStack {
+        VStack(spacing: NativeDesign.Space.small) {
             // Filter and sort the archive once per render; the panes below share it.
             let current = notes
             let filters = NativeBloomAutoFilter.available(in: store.archive.items.filter { $0.flag("archived") == showTrash })
-            let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: NativeDesign.Space.small)) : AnyLayout(HStackLayout(spacing: NativeDesign.Space.small))
-            layout {
-                NativeBloomSectionButton(title: "Libreria", id: "library", selection: $section)
-                NativeBloomSectionButton(title: "Mappa", id: "map", selection: $section)
-            }.padding(.horizontal, NativeDesign.Layout.screenInset)
             if store.archive.items.isEmpty && section == "Libreria" {
                 VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
                     Text("Hai già contenuti in Bloom?").font(.headline)
                     Text("Importa il backup esportato dall’app Bloom. Note, raccolte e allegati verranno conservati su questo iPhone.")
                         .font(.subheadline).foregroundStyle(.secondary)
                     Button { startImport() } label: {
-                        Label("Importa backup Bloom", systemImage: "square.and.arrow.down")
-                            .foregroundStyle(NativeDesign.onAccent)
-                            .frame(minHeight: NativeDesign.Layout.touchTarget)
-                    }.buttonStyle(NativeCompactPrimaryButtonStyle())
-                        .frame(minHeight: NativeDesign.Layout.touchTarget)
+                        LOActionLabel(title: "Importa backup Bloom", systemImage: "square.and.arrow.down")
+                    }.buttonStyle(LOGlassButtonStyle())
                         .accessibilityIdentifier("bloom.importBackup")
                 }.frame(maxWidth: .infinity, alignment: .leading)
                     .padding(NativeDesign.Layout.screenInset)
             }
             if preparingImport { ProgressView("Preparazione backup…") }
-            if let notice { Text(notice).font(.caption).foregroundStyle(.secondary) }
-            if section == "Mappa" {
-                HStack {
-                    Button("Inquadra luoghi") { mapFitRequest += 1 }
-                    Button(classifier.running ? "Ricerca in corso" : "Classifica luoghi") { Task { await classifier.classify(in: store) } }.disabled(classifier.running)
-                }.font(.subheadline)
-                if let message = classifier.message { Text(message).font(.caption).foregroundStyle(.secondary) }
-            }
+            if let notice, section == "Libreria" { Text(notice).font(.caption).foregroundStyle(.secondary) }
             if let error = store.error { Text(error).foregroundStyle(.red) }
             ZStack {
                 if hasOpenedMap {
-                    NativeBloomClusteredPlacesMap(places: mapAnnotations(current), isVisible: section == "Mappa", selectedID: selectedPlaceNote, fitRequest: mapFitRequest) { selectedPlaceNote = $0 }
+                    // BLOOM-CATEGORIES-92: the map fills the screen under the bars,
+                    // with its controls floating in glass.
+                    ZStack(alignment: .topTrailing) {
+                        NativeBloomClusteredPlacesMap(places: mapAnnotations(current), isVisible: section == "Mappa", selectedID: selectedPlaceNote, fitRequest: mapFitRequest) { selectedPlaceNote = $0 }
+                            .ignoresSafeArea()
+                        mapControls.padding(NativeDesign.Layout.screenInset)
+                    }
+                    .overlay(alignment: .top) {
+                        if let message = classifier.message {
+                            Text(message).font(.caption).padding(.horizontal, NativeDesign.Space.medium)
+                                .frame(minHeight: NativeDesign.Layout.touchTarget).modifier(NativeGlass(interactive: false))
+                                .padding(.top, NativeDesign.Space.small)
+                        }
+                    }
                         .opacity(section == "Mappa" ? 1 : 0).allowsHitTesting(section == "Mappa").accessibilityHidden(section != "Mappa")
                 }
                 NativeBloomLibraryContent(store: store, notes: current, category: $category, filter: $filter, filters: filters, showTrash: showTrash, rediscovery: false, newRound: { rediscoveryRound += 1 }, goToLibrary: { section = "Libreria" })
@@ -103,6 +101,7 @@ struct NativeBloomScreen: View {
                 }
             }
         }.navigationTitle("Bloom")
+            .navigationBarTitleDisplayMode(.inline)
             .modifier(NativeUITestValue(value: pickerHandoff.diagnostic + ";preparing=\(preparingImport);preview=\(pendingData != nil)", identifier: "bloom-import-state"))
             .searchable(text: $search, prompt: "Cerca nella Libreria")
             .navigationDestination(isPresented: Binding(get: { selectedPlaceNote != nil }, set: { if !$0 { selectedPlaceNote = nil } })) {
@@ -157,7 +156,26 @@ struct NativeBloomScreen: View {
             .sheet(isPresented: Binding(get: { pendingData != nil }, set: { if !$0 { pendingData = nil } })) { importSheet }
             .fileExporter(isPresented: $exporting, document: NativeBloomDocument(data: exportData), contentType: .json, defaultFilename: "LifeOS-Bloom-backup") { result in if case .failure(let error) = result { store.error = error.localizedDescription } }
     }
+    /// Libreria / Mappa in the navigation bar, like a native segmented control.
+    private var sectionSwitch: some View {
+        LOSegmented(options: [("Libreria", "library"), ("Mappa", "map")], selection: $section, identifierPrefix: "bloom-section-")
+            .frame(width: NativeDesign.Layout.bloomSectionSwitch)
+    }
+    private var mapControls: some View {
+        VStack(spacing: NativeDesign.Space.none) {
+            Button { mapFitRequest += 1 } label: {
+                Image(systemName: "location.viewfinder").frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget)
+            }.accessibilityLabel("Inquadra luoghi")
+            Divider().frame(width: NativeDesign.Layout.touchTarget - NativeDesign.Space.medium)
+            Button { Task { await classifier.classify(in: store) } } label: {
+                Image(systemName: classifier.running ? "hourglass" : "sparkle.magnifyingglass").frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget)
+            }.disabled(classifier.running).accessibilityLabel(classifier.running ? "Ricerca in corso" : "Classifica luoghi")
+        }
+        .font(.body.weight(.medium)).foregroundStyle(.primary).buttonStyle(NativePressStyle())
+        .modifier(LOGlassPanel())
+    }
     @ToolbarContentBuilder private var bloomToolbar: some ToolbarContent {
+        ToolbarItem(placement: .principal) { sectionSwitch }
         if #available(iOS 26.0, *) {
             ToolbarItem(placement: .topBarLeading) { archiveMenu }.sharedBackgroundVisibility(.hidden)
             ToolbarItem(placement: .topBarTrailing) { newNoteButton }.sharedBackgroundVisibility(.hidden)
@@ -325,39 +343,6 @@ struct NativeBloomScreen: View {
         return ids.compactMap { byID[$0.uuidString.lowercased()] }
     }
 
-}
-
-private struct NativeBloomSectionButton: View {
-    let title: String
-    let id: String
-    @Binding var selection: String
-    private var selected: Bool { selection == title }
-    private var control: some View {
-        Button { selection = title } label: {
-            Text(title).font(.subheadline)
-                .foregroundStyle(selected ? NativeDesign.onAccent : Color.primary)
-                .lineLimit(1).minimumScaleFactor(0.8)
-                .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget)
-        }
-    }
-    var body: some View {
-        styledControl
-            .contentShape(.accessibility, Capsule())
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(title)
-            .accessibilityIdentifier("bloom-section-" + id)
-            .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton)
-            .accessibilityAction { selection = title }
-    }
-    @ViewBuilder private var styledControl: some View {
-        if #available(iOS 26.0, *) {
-            control.buttonStyle(NativePressStyle())
-                .glassEffect(.regular.tint(selected ? NativeDesign.accent : .clear).interactive(), in: Capsule())
-        } else {
-            control.buttonStyle(NativePressStyle())
-                .background(selected ? NativeDesign.accent : NativeDesign.surface, in: Capsule())
-        }
-    }
 }
 
 struct NativeBloomDetail: View {

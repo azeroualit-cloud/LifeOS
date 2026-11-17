@@ -1,0 +1,15 @@
+{
+ "CalendarScreen.swift|hand-drawn-surface": 2,
+ "DashboardScreen.swift|hand-drawn-surface": 1,
+ "FinanceScreen.swift|hand-drawn-surface": 2,
+ "NativeBloomLibraryContent.swift|hand-drawn-surface": 3,
+ "NativeBloomMarkdownDocumentView.swift|hand-drawn-surface": 1,
+ "NativeExperience.swift|hand-drawn-surface": 1,
+ "NativeFoodPicker.swift|hand-drawn-surface": 1,
+ "NativeHealthSummary.swift|hand-drawn-surface": 4,
+ "NativeNavigation.swift|glass-effect": 1,
+ "NativeNavigation.swift|hand-drawn-surface": 1,
+ "NativeNutritionQuickEntry.swift|bottom-bar-inset": 1,
+ "NativeNutritionQuickEntry.swift|hand-drawn-surface": 4,
+ "NativeWidgetPreview.swift|hand-drawn-surface": 1
+}

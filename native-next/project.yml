@@ -21,15 +21,11 @@ targets:
       - path: Resources/generic-foods.json
       - path: Resources/cocktails.json
         buildPhase: resources
-      - path: Resources/supplements.json
-        buildPhase: resources
       - path: Resources/open-food-facts-italy.json
         buildPhase: resources
       - path: Resources/italian-brands.json
         buildPhase: resources
       - path: Resources/branded-foods.json
-        buildPhase: resources
-      - path: Resources/branded-supplements.json
         buildPhase: resources
     info:
       path: GeneratedInfo.plist
@@ -50,8 +46,8 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.nas.lifeos.probe
         GENERATE_INFOPLIST_FILE: YES
         CODE_SIGN_ENTITLEMENTS: LifeOS.entitlements
-        MARKETING_VERSION: '0.10.29'
-        CURRENT_PROJECT_VERSION: '91'
+        MARKETING_VERSION: '0.10.30'
+        CURRENT_PROJECT_VERSION: '92'
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         INFOPLIST_KEY_CFBundleDisplayName: Life OS
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
@@ -77,14 +73,19 @@ targets:
       base:
         CODE_SIGN_ENTITLEMENTS: Widget.entitlements
         PRODUCT_BUNDLE_IDENTIFIER: com.nas.lifeos.probe.quickactions
-        MARKETING_VERSION: '0.10.29'
-        CURRENT_PROJECT_VERSION: '91'
+        MARKETING_VERSION: '0.10.30'
+        CURRENT_PROJECT_VERSION: '92'
         SKIP_INSTALL: YES
         APPLICATION_EXTENSION_API_ONLY: YES
   LifeOSProbeTests:
     type: bundle.unit-test
     platform: iOS
-    sources: [Tests]
+    # Supplement presets are test data only (SUPPLEMENTS-PERSONAL-ONLY-92).
+    sources:
+      - path: Tests
+        excludes: [Fixtures]
+      - path: Tests/Fixtures
+        buildPhase: resources
     dependencies:
       - target: LifeOSProbe
     settings:

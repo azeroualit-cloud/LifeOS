@@ -128,12 +128,14 @@ final class NativePersonalFoodUITests: XCTestCase {
     func testSupplementTabSeparatesFoodsAndSearchesKnownBrands() {
         let app = openCatalog()
         let search = app.textFields["generic-food-search"]
-        replace(search, with: "vit4ever", app: app)
-        XCTAssertFalse(app.buttons["generic-food-brand-vit4ever-magnesium-citrate"].exists)
         app.segmentedControls.buttons["Integratori"].tap()
-        let magnesium = app.buttons["generic-food-brand-vit4ever-magnesium-citrate"]
-        XCTAssertTrue(magnesium.waitForExistence(timeout: 10))
-        capture("Scheda Integratori separata dagli alimenti")
+        // SUPPLEMENTS-PERSONAL-ONLY-92: no preset supplement, only the user's own.
+        for query in ["vit4ever", "Proteine whey", "Vitamina C"] {
+            replace(search, with: query, app: app)
+            XCTAssertFalse(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND NOT identifier BEGINSWITH %@", "generic-food-", "generic-food-personal-")).firstMatch.exists, "Preset supplement for " + query)
+        }
+        XCTAssertTrue(app.buttons["generic-food-create"].exists)
+        capture("Scheda Integratori con sole voci personali")
         app.segmentedControls.buttons["Tutti"].tap()
         replace(search, with: "Milka", app: app)
         let milka = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS[c] %@", "generic-food-", "Milka")).firstMatch
@@ -145,45 +147,6 @@ final class NativePersonalFoodUITests: XCTestCase {
         capture("Ricerca prodotti Pepsi con marca e unità")
     }
 
-    func testBrandedCapsulesAndPowderUseTheirOwnUnits() {
-        let app = openCatalog()
-        let search = app.textFields["generic-food-search"]
-        app.segmentedControls.buttons["Integratori"].tap()
-        replace(search, with: "vit4ever", app: app)
-        let magnesium = app.buttons["generic-food-brand-vit4ever-magnesium-citrate"]
-        XCTAssertTrue(magnesium.waitForExistence(timeout: 10))
-        XCTAssertTrue(magnesium.label.contains("vit4ever"))
-        XCTAssertTrue(magnesium.label.contains("non dichiarati"))
-        magnesium.tap()
-        let capsules = app.textFields["quick-nutrition-Capsule"]
-        XCTAssertTrue(capsules.waitForExistence(timeout: 10))
-        XCTAssertEqual(capsules.value as? String, "1")
-        XCTAssertFalse(app.textFields["quick-nutrition-Porzione"].exists)
-        let calories = app.staticTexts["quick-nutrition-calories"]
-        XCTAssertEqual(calories.label, "Non dichiarate")
-        XCTAssertEqual(app.staticTexts["quick-nutrition-nutrient-magnesium"].label, "Magnesio: 120 mg")
-        replace(capsules, with: "2", app: app)
-        XCTAssertEqual(capsules.value as? String, "2")
-        XCTAssertEqual(app.staticTexts["quick-nutrition-nutrient-magnesium"].label, "Magnesio: 240 mg")
-        XCTAssertEqual(calories.label, "Non dichiarate")
-        XCTAssertTrue(app.buttons["quick-nutrition-save"].isEnabled)
-        capture("Integratore di marca per singola capsula")
-        app.buttons["quick-nutrition-catalog"].tap()
-        app.segmentedControls.buttons["Integratori"].tap()
-        replace(search, with: "Proteine whey isolate", app: app)
-        let powder = app.buttons["generic-food-supplement-whey-isolate"]
-        XCTAssertTrue(powder.waitForExistence(timeout: 10))
-        powder.tap()
-        let grams = app.textFields["quick-nutrition-Quantità"]
-        XCTAssertTrue(grams.waitForExistence(timeout: 10))
-        XCTAssertEqual(grams.value as? String, "30")
-        XCTAssertTrue(grams.label.contains("grammi"))
-        XCTAssertEqual(calories.label, "114 kcal")
-        replace(grams, with: "60", app: app)
-        XCTAssertEqual(calories.label, "228 kcal")
-        XCTAssertFalse(app.textFields["quick-nutrition-Capsule"].exists)
-        capture("Integratore in polvere pesato in grammi")
-    }
     func testCoopSpesottiMilkUsesMillilitresAndBrand() {
         let app = openCatalog()
         replace(app.textFields["generic-food-search"], with: "Spesotti latte", app: app)

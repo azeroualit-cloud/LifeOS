@@ -198,14 +198,13 @@ struct NativeGenericFood: Codable, Identifiable {
 
     static let foods = loadCatalog("generic-foods")
     static let cocktails = loadCatalog("cocktails")
-    static let catalog = (foods + cocktails + supplements + brandedFoods + brandedSupplements + italianBrands + communityFoods).filter(NativeFoodCatalogPolicy.includes)
+    /// No preset supplements (SUPPLEMENTS-PERSONAL-ONLY-92): the user adds his own.
+    static let catalog = (foods + cocktails + brandedFoods + italianBrands + communityFoods).filter { $0.family != .supplement && NativeFoodCatalogPolicy.includes($0) }
     static let communityFoods = loadCatalog("open-food-facts-italy")
     static let italianBrands = loadCatalog("italian-brands")
     static let brandedFoods = loadCatalog("branded-foods")
-    static let brandedSupplements = loadCatalog("branded-supplements")
-    static let supplements = loadCatalog("supplements")
     static let catalogFoods = catalog.filter { $0.family != .supplement }
-    static let catalogSupplements = catalog.filter { $0.family == .supplement }
+    static let catalogSupplements: [NativeGenericFood] = []
 
     /// Decode the bundled catalog and its search index away from the main thread,
     /// so the first opening of the picker does not wait for the JSON resources.

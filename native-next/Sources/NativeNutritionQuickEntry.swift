@@ -12,34 +12,38 @@ struct NativeNutritionQuickEntry: View {
     var body: some View {
         NativeCard(density: .compact, topInset: NativeDesign.Space.xs) {
             Button { router.tab = .health } label: {
-                HStack {
-                    Label { Text("Nutrizione") } icon: { NativeSymbol(symbol: NativeHealthMetric.calories.symbol) }
-                        .font(.headline).foregroundStyle(NativeDesign.nutritionTitle)
-                    Spacer()
-                    NativeDisclosureIndicator()
-                }.frame(minHeight: NativeDesign.Layout.touchTarget)
+                LOCardHeader(title: "Nutrizione", systemImage: NativeHealthMetric.calories.symbol, section: .nutrition, showsChevron: true)
                     .contentShape(Rectangle())
             }.buttonStyle(NativePressStyle()).accessibilityIdentifier("home-nutrition")
+            // Today's totals only: no calorie or macro goals (MACRO-NO-GOALS-92).
             let layout = typeSize >= .xxxLarge
                 ? AnyLayout(VStackLayout(alignment: .leading, spacing: NativeDesign.Space.small))
-                : AnyLayout(HStackLayout(spacing: NativeDesign.Space.small))
+                : AnyLayout(HStackLayout(alignment: .top, spacing: NativeDesign.Space.small))
             layout {
-                HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xs) {
+                VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
+                    Text("Kcal").font(.caption).foregroundStyle(.secondary)
                     Text(health.todayCalories?.formatted(.number.precision(.fractionLength(0))) ?? "—")
-                        .font(.title2.weight(.semibold)).monospacedDigit()
-                    Text("kcal").font(.caption).foregroundStyle(NativeDesign.secondary)
-                }.accessibilityLabel("Calorie di oggi")
-                if typeSize < .xxxLarge { Spacer(minLength: 0) }
-                Button { addingWeight = true } label: {
-                    Label("Peso", systemImage: "plus")
-                }.buttonStyle(NativeGlassButtonStyle()).accessibilityLabel("Aggiungi peso")
-                Button { notice = nil; showing = true } label: {
-                    Label("Cibo", systemImage: "plus")
-                }.buttonStyle(NativeGlassButtonStyle()).accessibilityLabel("Aggiungi alimento")
-                    .accessibilityIdentifier("quick-nutrition-open")
+                        .font(.subheadline.weight(.semibold)).monospacedDigit()
+                }
+                .frame(maxWidth: typeSize >= .xxxLarge ? .infinity : nil, alignment: .leading)
+                .frame(minWidth: NativeDesign.Layout.nutritionKcalColumn, alignment: .leading)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Calorie di oggi, " + (health.todayCalories?.formatted(.number.precision(.fractionLength(0))) ?? "nessun dato") + " chilocalorie")
+                NativeNutrientValues(health: health, includesFibre: false)
             }.frame(maxWidth: .infinity, alignment: .leading)
-            NativeNutrientValues(health: health, includesFibre: false)
             NativePinnedNutrients(entries: nutrition.entries)
+            let actions = typeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(spacing: NativeDesign.Space.small))
+                : AnyLayout(HStackLayout(spacing: NativeDesign.Space.small))
+            actions {
+                Button { notice = nil; showing = true } label: {
+                    LOActionLabel(title: "Alimento", systemImage: NativeHealthMetric.calories.symbol, section: .nutrition)
+                }.buttonStyle(LOGlassButtonStyle(fillsWidth: true)).accessibilityLabel("Aggiungi alimento")
+                    .accessibilityIdentifier("quick-nutrition-open")
+                Button { addingWeight = true } label: {
+                    LOActionLabel(title: "Peso", systemImage: NativeHealthMetric.weight.symbol, section: .weight)
+                }.buttonStyle(LOGlassButtonStyle(fillsWidth: true)).accessibilityLabel("Aggiungi peso")
+            }
             if let notice { Text(notice).font(.caption).foregroundStyle(.secondary).accessibilityIdentifier("quick-nutrition-notice") }
         }.sheet(isPresented: $showing) {
             NavigationStack { NativeNutritionQuickSheet { notice = "Registrazione salvata." } }

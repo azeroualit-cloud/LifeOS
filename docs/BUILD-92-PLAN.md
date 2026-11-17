@@ -32,3 +32,9 @@ Utente: «troppi colori accentati, e sembra troppo un app web invece di un app i
    - Porzioni a pezzo: nuovo campo `pieces: [{name, grams}]` con peso edibile standard (LARN/CREA), es. uovo medio 50 g edibili, mela media, banana, fetta biscottata, vasetto di yogurt, mozzarella 125 g, gelato a stecco. L'inserimento propone pezzi o grammi.
    - Nuove voci: circa 90 (40 ad alta priorità) come da schema concordato in chat (albume, skyr, fiocchi di latte, ricotta, pesce, legumi, gallette, datteri, pane arabo, ecc.).
 6. **Collaudo.** Adattare i test UI alla barra nativa (identificatori `main-tab-*`), gate completo come per la 91.
+
+## Stato implementazione (17 nov, primo push)
+- Fatto: TabView nativa, accento neutro, `Sources/DesignSystem/LifeOSDesign.swift` (LOCardHeader, LOGlassButtonStyle, loBottomActions, LOStatGrid, LOFilterPill, LOSegmented, LOGlassPanel), Dashboard nell'ordine di produzione con Finanza in una riga, Nutrizione senza obiettivi, Salute 3×2, Finanza con azione glass in basso, Bloom (segmented in barra, filtri Fonte/Categoria, gestione e assegnazione categorie, elenco con miniature, mappa a schermo intero).
+- Integratori preimpostati rimossi dal catalogo; restano solo come fixture dei test (`Tests/Fixtures`).
+- Ratchet `scripts/check-design-system.py` con baseline `docs/design-system-baseline.json`, eseguito nel workflow di sviluppo.
+- Da fare: micronutrienti completi, porzioni a pezzo, ~90 alimenti generici nuovi.

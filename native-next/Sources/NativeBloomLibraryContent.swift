@@ -20,6 +20,35 @@ struct NativeBloomThumbnail: View {
     }
 }
 
+/// 60 pt square preview for list rows: the note's image, else the link's
+/// preview image, else a neutral symbol.
+struct NativeBloomRowThumbnail: View {
+    let fileURL: URL?
+    let linkURL: URL?
+    @State private var linkImage: UIImage?
+    var body: some View {
+        ZStack {
+            NativeDesign.inset
+            if let fileURL {
+                NativeBloomThumbnail(url: fileURL).scaledToFill()
+            } else if let linkImage {
+                Image(uiImage: linkImage).resizable().scaledToFill()
+                    .accessibilityLabel("Anteprima link").accessibilityIdentifier("bloom-link-image")
+            } else {
+                Image(systemName: linkURL == nil ? "note.text" : "link").font(.title3).foregroundStyle(.secondary).accessibilityHidden(true)
+            }
+        }
+        .frame(width: NativeDesign.Layout.bloomRowThumbnail, height: NativeDesign.Layout.bloomRowThumbnail)
+        .clipShape(RoundedRectangle(cornerRadius: NativeDesign.controlRadius, style: .continuous))
+        .task(id: linkURL) {
+            guard fileURL == nil, let linkURL else { linkImage = nil; return }
+            let value = await NativeBloomLinkPreviews.shared.load(linkURL)
+            guard !Task.isCancelled else { return }
+            linkImage = value?.image.flatMap { UIImage(data: $0) }
+        }
+    }
+}
+
 struct NativeBloomLibraryContent: View {
     @ObservedObject var store: NativeBloomStore
     let notes: [Record]
@@ -30,38 +59,22 @@ struct NativeBloomLibraryContent: View {
     let rediscovery: Bool
     let newRound: () -> Void
     let goToLibrary: () -> Void
-    @AppStorage("lifeos.bloom.library.grid") private var grid = true
+    // Build 92: a list is the default (mockup approved), the grid stays one tap away.
+    @AppStorage("lifeos.bloom.library.layout") private var layoutChoice = "list"
     @State private var selecting = false
     @State private var selected = Set<String>()
     @State private var showingCategories = false
+    private var grid: Bool { layoutChoice == "grid" }
+    private var categoryTitle: String {
+        store.archive.collections.first { $0.text("id") == category }?.text("name") ?? "tutte"
+    }
     var body: some View {
         VStack(spacing: NativeDesign.Space.small) {
             if !rediscovery {
-                VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-                    // Variant B: automatic filters by source and type replace manual categories.
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: NativeDesign.Space.small) {
-                            ForEach(filters) { item in
-                                NativeCategoryChip(title: item.title, selected: filter == item) { filter = item }
-                                    .accessibilityIdentifier("bloom-filter-" + item.rawValue)
-                            }
-                        }.padding(.horizontal)
-                    }.accessibilityIdentifier("bloom-filters")
-                    HStack {
-                        Button(grid ? "Elenco" : "Griglia", systemImage: grid ? "list.bullet" : "square.grid.2x2") { grid.toggle() }.labelStyle(.iconOnly)
-                            .frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget)
-                        Button(selecting ? "Fine" : "Seleziona") { selecting.toggle(); selected = [] }.frame(minHeight: NativeDesign.Layout.touchTarget)
-                        Spacer()
-                    }.padding(.horizontal)
-                }
+                filterBar
+                if selecting { selectionBar }
             } else {
                 HStack { Button("Nuovo giro", action: newRound); Spacer(); Button("Vai alla libreria", action: goToLibrary) }.padding(.horizontal)
-            }
-            if selecting {
-                HStack {
-                    Text("\(selected.count) selezionate").font(.caption)
-                    Button(showTrash ? "Ripristina" : "Cestino") { perform { try store.updateNotes(selected, archived: !showTrash) } }.disabled(selected.isEmpty)
-                }.padding(.horizontal)
             }
             if notes.isEmpty { ContentUnavailableView("Nessuna nota", systemImage: "books.vertical", description: Text("Aggiungi una nota o importa un backup Bloom.")) }
             else if grid || rediscovery {
@@ -82,25 +95,123 @@ struct NativeBloomLibraryContent: View {
                     }.accessibilityIdentifier("bloom-library-scroll")
                 }
             } else {
-                List {
-                    ForEach(notes.map { NativeBloomRow($0) }) { item in
-                        destination(item.value, width: nil).swipeActions {
-                            Button(showTrash ? "Ripristina" : "Cestino", role: showTrash ? nil : .destructive) { perform { try store.trash(item.value, restore: showTrash) } }
+                ScrollView {
+                    LazyVStack(spacing: NativeDesign.Space.none) {
+                        ForEach(notes.map { NativeBloomRow($0) }) { item in
+                            destination(item.value, width: nil)
+                                .contextMenu {
+                                    Button(showTrash ? "Ripristina" : "Sposta nel Cestino", systemImage: showTrash ? "arrow.uturn.backward" : "trash", role: showTrash ? nil : .destructive) {
+                                        perform { try store.trash(item.value, restore: showTrash) }
+                                    }
+                                }
+                            if item.id != notes.last?.text("id") { Divider().padding(.leading, NativeDesign.Layout.bloomListDivider) }
                         }
                     }
-                }
+                    .background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.cardRadius, style: .continuous))
+                    .padding(.horizontal, NativeDesign.Layout.screenInset)
+                    .padding(.bottom, NativeDesign.Layout.scrollClearance)
+                }.accessibilityIdentifier("bloom-library-scroll")
             }
         }.sheet(isPresented: $showingCategories) { NavigationStack { NativeBloomCategories(store: store) } }
             .onChange(of: notes.map { $0.text("id") }) { _, ids in selected.formIntersection(ids) }
     }
+    /// One row of glass pills: source and category open native menus
+    /// (BLOOM-CATEGORIES-92); view and selection on the right.
+    private var filterBar: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: NativeDesign.Space.small) { sourcePill; categoryPill; Spacer(minLength: 0); viewTools }
+            VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+                HStack(spacing: NativeDesign.Space.small) { sourcePill; categoryPill }
+                HStack { Spacer(minLength: 0); viewTools }
+            }
+        }
+        .padding(.horizontal, NativeDesign.Layout.screenInset)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("bloom-filters")
+    }
+    private var sourcePill: some View {
+        LOFilterPill(title: "Fonte", value: filter == .all ? "tutte" : filter.title, isActive: filter != .all, identifier: "bloom-filter-source") {
+            Picker("Fonte", selection: $filter) {
+                ForEach(filters) { item in Text(item == .all ? "Tutte le fonti" : item.title).tag(item) }
+            }
+        }
+    }
+    private var categoryPill: some View {
+        LOFilterPill(title: "Categoria", value: categoryTitle, isActive: !category.isEmpty, identifier: "bloom-filter-category") {
+            Picker("Categoria", selection: $category) {
+                Text("Tutte le categorie").tag("")
+                ForEach(store.archive.collections.map { NativeBloomRow($0) }) { row in
+                    let count = store.archive.items.filter { !$0.flag("archived") && NativeBloomRow.categories(of: $0).contains(row.id) }.count
+                    Text(row.value.text("name") + " (\(count))").tag(row.id)
+                }
+            }
+            Divider()
+            Button("Gestisci categorie", systemImage: "folder.badge.gearshape") { showingCategories = true }
+                .accessibilityIdentifier("bloom-manage-categories")
+        }
+    }
+    private var viewTools: some View {
+        HStack(spacing: NativeDesign.Space.xs) {
+            Button { layoutChoice = grid ? "list" : "grid" } label: {
+                Image(systemName: grid ? "list.bullet" : "square.grid.2x2")
+                    .frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget)
+            }.accessibilityLabel(grid ? "Vista elenco" : "Vista griglia").accessibilityIdentifier("bloom-layout")
+            Button { selecting.toggle(); selected = [] } label: {
+                Image(systemName: selecting ? "checkmark.circle.fill" : "checkmark.circle")
+                    .frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget)
+            }.accessibilityLabel(selecting ? "Fine selezione" : "Seleziona").accessibilityIdentifier("bloom-select")
+        }
+        .foregroundStyle(.primary).buttonStyle(NativePressStyle())
+    }
+    private var selectionBar: some View {
+        HStack(spacing: NativeDesign.Space.small) {
+            Text("\(selected.count) selezionate").font(.subheadline).foregroundStyle(.secondary)
+            Spacer(minLength: 0)
+            Menu {
+                ForEach(store.archive.collections.map { NativeBloomRow($0) }) { row in
+                    Button(row.value.text("name")) { perform { try store.updateNotes(selected, category: row.id) } }
+                }
+                Divider()
+                Button("Nuova categoria…", systemImage: "folder.badge.plus") { showingCategories = true }
+            } label: { LOActionLabel(title: "Categoria", systemImage: "folder") }
+                .buttonStyle(LOGlassButtonStyle()).disabled(selected.isEmpty)
+                .accessibilityIdentifier("bloom-assign-category")
+            Button { perform { try store.updateNotes(selected, archived: !showTrash) } } label: {
+                LOActionLabel(title: showTrash ? "Ripristina" : "Cestino", systemImage: showTrash ? "arrow.uturn.backward" : "trash")
+            }.buttonStyle(LOGlassButtonStyle()).disabled(selected.isEmpty)
+        }.padding(.horizontal, NativeDesign.Layout.screenInset)
+    }
     @ViewBuilder private func destination(_ row: Record, width: CGFloat?) -> some View {
         if selecting {
             Button { let id = row.text("id"); if selected.contains(id) { selected.remove(id) } else { selected.insert(id) } } label: {
-                card(row, width: width).overlay(alignment: .topTrailing) { Image(systemName: selected.contains(row.text("id")) ? "checkmark.circle.fill" : "circle").padding(NativeDesign.Space.small) }
+                presentation(row, width: width).overlay(alignment: .topTrailing) { Image(systemName: selected.contains(row.text("id")) ? "checkmark.circle.fill" : "circle").padding(NativeDesign.Space.small) }
             }.buttonStyle(.plain)
-        } else { NavigationLink { NativeBloomDetail(store: store, id: row.text("id")) } label: { card(row, width: width) }.buttonStyle(.plain)
+        } else { NavigationLink { NativeBloomDetail(store: store, id: row.text("id")) } label: { presentation(row, width: width) }.buttonStyle(.plain)
             .accessibilityIdentifier("bloom-note-" + row.text("id"))
             .accessibilityLabel(NativeBloomRow(row).displayTitle) }
+    }
+    @ViewBuilder private func presentation(_ row: Record, width: CGFloat?) -> some View {
+        if grid || rediscovery { card(row, width: width) } else { listRow(row) }
+    }
+    /// Reading-list row: thumbnail, title on two lines, source · category.
+    private func listRow(_ row: Record) -> some View {
+        let item = NativeBloomRow(row)
+        let categoryNames = store.archive.collections.filter { NativeBloomRow.categories(of: row).contains($0.text("id")) }.map { $0.text("name") }
+        let source = NativeBloomAutoFilter.allCases.first { $0 != .all && $0.matches(row) }?.title ?? "Nota"
+        return HStack(spacing: NativeDesign.Space.medium) {
+            NativeBloomRowThumbnail(fileURL: store.primaryFileURL(row), linkURL: item.previewURL)
+            VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
+                Text(item.displayTitle).font(.subheadline.weight(.semibold)).foregroundStyle(.primary)
+                    .lineLimit(2).multilineTextAlignment(.leading)
+                Text(([source] + categoryNames).joined(separator: " · ")).font(.footnote).foregroundStyle(NativeDesign.secondary).lineLimit(1)
+            }
+            Spacer(minLength: 0)
+            Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(.tertiary).accessibilityHidden(true)
+        }
+        .padding(.horizontal, NativeDesign.Layout.compactCardInset)
+        .padding(.vertical, NativeDesign.Space.small)
+        .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.bloomRowHeight, alignment: .leading)
+        .contentShape(Rectangle())
     }
     private func card(_ row: Record, width: CGFloat?) -> some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
@@ -114,7 +225,7 @@ struct NativeBloomLibraryContent: View {
             if !row.text("text").isEmpty { Text(row.text("text")).font(.subheadline).foregroundStyle(.secondary).lineLimit(4).multilineTextAlignment(.leading) }
         }.frame(maxWidth: .infinity, alignment: .leading).padding(NativeDesign.Space.medium)
             .frame(width: width, alignment: .leading).clipped()
-            .background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
+            .background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.cardRadius, style: .continuous))
             .contentShape(Rectangle())
     }
     private func perform(_ operation: () throws -> Void) { do { try operation(); selected = [] } catch { store.error = error.localizedDescription } }

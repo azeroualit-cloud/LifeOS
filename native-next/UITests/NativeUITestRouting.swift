@@ -1,7 +1,8 @@
 import XCTest
 
 extension XCUIApplication {
-    var mainTabBar: XCUIElement { otherElements["lifeos-main-tabs"] }
+    // Build 92: the system TabView (Liquid Glass on iOS 26) replaces the custom bar.
+    var mainTabBar: XCUIElement { tabBars.firstMatch }
 
     func openMainTab(_ name: String) {
         let destination = mainTabButton(name)

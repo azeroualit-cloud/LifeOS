@@ -15,6 +15,10 @@ struct NativeBloomRow: Identifiable {
         return url
     }
     init(_ value: Record) { self.value = value }
+    /// Category identifiers of a note: tags, or the legacy single collection.
+    static func categories(of item: Record) -> Set<String> {
+        Set(item["tagIDs"]?.array.map(\.string) ?? (item.text("collectionID").isEmpty ? [] : [item.text("collectionID")]))
+    }
 }
 
 enum NativeBloomConflictChoice: String, CaseIterable { case keep, replace, copy }

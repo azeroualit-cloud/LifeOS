@@ -141,12 +141,8 @@ final class NativeNutritionQuickUITests: XCTestCase {
             capture("Supermercato " + name, app)
         }
         app.segmentedControls.buttons["Integratori"].tap()
-        let vitamin = app.buttons["generic-food-supplement-vitamin-c"]
-        XCTAssertTrue(vitamin.isHittable)
-        vitamin.tap()
-        XCTAssertTrue(app.staticTexts["Compresse"].waitForExistence(timeout: 10))
-        capture("Integratore generico nella scheda Integratori", app)
-        app.buttons["quick-nutrition-catalog"].tap()
+        // SUPPLEMENTS-PERSONAL-ONLY-92: the tab starts empty; the user creates his own.
+        XCTAssertFalse(app.buttons["generic-food-supplement-vitamin-c"].exists)
         app.buttons["generic-food-create"].tap()
         let family = app.descendants(matching: .any)["personal-food-family"]
         XCTAssertTrue(family.waitForExistence(timeout: 10))
