@@ -164,8 +164,11 @@ if __name__ == "__main__":
             "LifeOSProbeUITests/NativeRevision71UITests/testPaintingPaletteFullNamesWithLargeText",
         ]
     elif a.mode == "shift-render":
-        areas = ["calendar"]
+        areas = ["finance"]
         tests = [
+            "LifeOSProbeUITests/NativeInterfaceTests/testFinanceOverviewSupportsLargeTextAndEmptySnapshot",
+        ]
+        tests_unused = [
             "LifeOSProbeUITests/NativeRevision71UITests/testPaintingHasGlassPaletteAndRapidEditsPreserveLastIntentAndUndo",
             "LifeOSProbeUITests/NativeRevision71UITests/testPaintingPaletteFullNamesWithLargeText",
         ]

@@ -1184,7 +1184,8 @@ final class NativeInterfaceTests: XCTestCase {
             let all = app.buttons["all-movements"]
             revealFinanceControl(all, in: app)
             XCTAssertTrue(all.isHittable, "Movimenti irraggiungibili: args \(args), frame \(all.frame)"); all.tap()
-            XCTAssertTrue(app.navigationBars["Movimenti"].waitForExistence(timeout: 10))
+            if !app.navigationBars["Movimenti"].waitForExistence(timeout: 10) { print("FINANCE_DIAG_TREE " + app.debugDescription) }
+            XCTAssertTrue(app.navigationBars["Movimenti"].exists)
             capture(args.contains("--large-text") ? "finance-large-text" : "finance-empty-snapshot")
             app.terminate()
         }
