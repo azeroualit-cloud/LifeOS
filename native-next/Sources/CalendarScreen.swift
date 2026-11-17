@@ -122,8 +122,13 @@ struct CalendarScreen: View {
                         ForEach(calendarWeeks) { week in
                             weekGrid(week.month, week: week.index).id(week.id)
                                 .background {
-                                    GeometryReader { geometry in
-                                        Color.clear.preference(key: NativeCalendarMonthFrames.self, value: [week.id: geometry.frame(in: .named("calendar-viewport"))])
+                                    // Only the week being positioned reports its frame, and only
+                                    // while a request is pending: per-row geometry on every pass
+                                    // kept the lazy stack re-measuring in paint mode.
+                                    if requestedWeek == week.id {
+                                        GeometryReader { geometry in
+                                            Color.clear.preference(key: NativeCalendarMonthFrames.self, value: [week.id: geometry.frame(in: .named("calendar-viewport"))])
+                                        }
                                     }
                                 }
                         }
