@@ -15,7 +15,7 @@ jobs:
       - name: Extract failure lines into the branch
         env:
           GH_TOKEN: ${{ github.token }}
-          RUN: "44077073291"
+          RUN: "44082571619"
         run: |
           set -u
           mkdir -p diag
@@ -27,4 +27,4 @@ jobs:
             grep -a -n -E "error:|failed|Failing tests|XCTAssert|Test Case .* failed|\*\* TEST|Executed [0-9]+ tests|crash|Fatal" "$f" | head -400 >> diag/logs.txt
           done
           git config user.name lifeos-diag; git config user.email diag@lifeos.invalid
-          git add diag && git commit -m "Build 92 failure lines [diagnostics]" && git push origin HEAD:diagnostics/build92
+          rm -f diag/logs.txt.old; git add -A diag && git commit -m "Build 92 failure lines [diagnostics]" && git push origin HEAD:diagnostics/build92
