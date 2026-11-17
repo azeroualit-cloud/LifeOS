@@ -16,6 +16,10 @@ Consegna unica nella build 92, dopo l'ok dell'utente sui mockup (DEV-02).
 - Pulsanti: 8 forme diverse (`NativePressStyle` 24, `.plain` 14, `NativeGlassButtonStyle` 8, `.borderless` 4, `NativeCompactPrimaryButtonStyle` 3, `.glass` 1, `.bordered` 1). Fondi arrotondati disegnati nelle schermate: 27.
 - Bloom: `.searchable` + barra fatta a mano; Libreria/Mappa, Inquadra/Classifica e Seleziona occupano righe proprie; la mappa vive in una `VStack` sotto le intestazioni. Le categorie esistono ancora nei dati, non più nell'interfaccia.
 
+## Revisione dei mockup, 17 novembre 12:00
+
+Utente: «troppi colori accentati, e sembra troppo un app web invece di un app ios». Il framework passa a **un solo accento** per tutta l'app (`accent`, blu iOS a 5,6:1), niente colori per area né colori per grandezza; tinte residue solo per dati dell'utente (entrate in `positive`, pallino del turno in `shift`). Regole "iOS, non web": filtri in `Menu` aperti da pillole in vetro invece di file di chip, SF Symbols senza riquadri colorati, controlli e liste nativi.
+
 ## Piano
 
 1. **Framework.** `Sources/DesignSystem/` con token e i 10 componenti del design system; CI che rifiuta colori, forme, stili di pulsante e riservi di barra fuori da lì (eccezioni `// DS-EXCEPTION`).
