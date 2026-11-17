@@ -1,0 +1,49 @@
+name: Debug palette large text spindumps
+on:
+  push:
+    branches: [diagnostics/palette-91]
+    paths: [.github/workflows/debug-palette91.yml]
+permissions:
+  actions: read
+  contents: read
+jobs:
+  spindumps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - run: "43987674222"
+            prefix: "lifeos-development-shift-render"
+          - run: "43957165264"
+            prefix: "lifeos-candidate91-validation"
+    steps:
+      - name: Download artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          name=$(gh api "repos/${{ github.repository }}/actions/runs/${{ matrix.run }}/artifacts" --jq '.artifacts[] | select(.name | startswith("${{ matrix.prefix }}")) | .name' | head -1)
+          gh run download "${{ matrix.run }}" -R "${{ github.repository }}" -n "$name" -D art
+          find art -maxdepth 2 | head -40
+      - name: Print app main-thread stacks from every spindump
+        run: |
+          set -u
+          sudo apt-get install -y zstd >/dev/null
+          mkdir -p out
+          n=0
+          for f in $(find art -path '*xcresult/Data/data.*' -type f); do
+            if head -c 4 "$f" | od -An -tx1 | grep -q "28 b5 2f fd"; then zstd -dqc "$f" > out/tmp 2>/dev/null || continue; else cp "$f" out/tmp; fi
+            if grep -q "^Process: *LifeOSProbe \[" out/tmp 2>/dev/null; then
+              n=$((n+1))
+              echo "=================== $f"
+              grep -m3 -E "^(Date/Time|Duration|Steps|Reason|Command):" out/tmp || true
+              awk '/^Process: *LifeOSProbe \[/{p=1} p&&/^Process:/&&!/LifeOSProbe \[/{exit} p' out/tmp > out/app.txt || true
+              echo "--- main thread (top 140 lines, LifeOSProbe frames + SwiftUI)"
+              awk '/^ *Thread 0x.*(main-thread|DispatchQueue_1)/{m=1;print;next} /^ *Thread 0x/{m=0} m' out/app.txt | cut -c1-220 | head -140
+              echo "--- heaviest LifeOSProbe frames"
+              grep -E "\(LifeOSProbe \+" out/app.txt | sed -E 's/^ *([0-9]+) +(.*) \(LifeOSProbe.*/\1 \2/' | sort -k1,1nr | awk '!seen[$0]++' | cut -c1-200 | head -40
+            fi
+          done
+          echo "spindumps found: $n"
