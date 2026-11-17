@@ -1,0 +1,73 @@
+=== art/lifeos-development-preview-bd2c4aa14745709437e846a06991cce2eae5d63c/build/development-tests.log
+26:	 Executed 3 tests, with 0 failures (0 unexpected) in 0.053 (0.054) seconds
+69:	 Executed 20 tests, with 0 failures (0 unexpected) in 1.870 (1.940) seconds
+82:	 Executed 5 tests, with 0 failures (0 unexpected) in 0.172 (0.189) seconds
+89:/Users/runner/work/LifeOS/LifeOS/app/Tests/NativeNutritionEntryTests.swift:90: error: -[LifeOSProbeTests.NativeNutritionEntryTests testCatalogExcludesPorkAndSeparatesMoroccanDishes] : XCTAssertTrue failed
+90:/Users/runner/work/LifeOS/LifeOS/app/Tests/NativeNutritionEntryTests.swift:90: error: -[LifeOSProbeTests.NativeNutritionEntryTests testCatalogExcludesPorkAndSeparatesMoroccanDishes] : XCTAssertTrue failed
+91:Test Case '-[LifeOSProbeTests.NativeNutritionEntryTests testCatalogExcludesPorkAndSeparatesMoroccanDishes]' failed (0.605 seconds).
+114:Test Suite 'NativeNutritionEntryTests' failed at 2026-11-17 11:57:05.265.
+115:	 Executed 14 tests, with 2 failures (0 unexpected) in 0.794 (0.799) seconds
+130:	 Executed 6 tests, with 0 failures (0 unexpected) in 0.013 (0.024) seconds
+151:	 Executed 9 tests, with 0 failures (0 unexpected) in 0.083 (0.135) seconds
+170:	 Executed 8 tests, with 0 failures (0 unexpected) in 0.076 (0.079) seconds
+171:Test Suite 'LifeOSProbeTests.xctest' failed at 2026-11-17 11:57:05.504.
+172:	 Executed 65 tests, with 2 failures (0 unexpected) in 3.061 (3.224) seconds
+173:Test Suite 'Selected tests' failed at 2026-11-17 11:57:05.505.
+174:	 Executed 65 tests, with 2 failures (0 unexpected) in 3.061 (3.225) seconds
+2384:	 Executed 2 tests, with 0 failures (0 unexpected) in 188.411 (188.414) seconds
+3790:	 Executed 6 tests, with 0 failures (0 unexpected) in 249.491 (249.495) seconds
+5237:/Users/runner/work/LifeOS/LifeOS/app/UITests/NativeNutritionQuickUITests.swift:215: error: -[LifeOSProbeUITests.NativeNutritionQuickUITests testSearchFindsGenericBiscottiAndUsesItsPortion] : XCTAssertEqual failed: ("35 kcal") is not equal to ("438 kcal")
+5239:Test Case '-[LifeOSProbeUITests.NativeNutritionQuickUITests testSearchFindsGenericBiscottiAndUsesItsPortion]' failed (18.579 seconds).
+5539:Test Suite 'NativeNutritionQuickUITests' failed at 2026-11-17 12:09:33.327.
+5540:	 Executed 9 tests, with 1 failure (0 unexpected) in 301.970 (301.978) seconds
+5876:/Users/runner/work/LifeOS/LifeOS/app/UITests/NativeRevision73UITests.swift:47: error: -[LifeOSProbeUITests.NativeRevision73UITests testDayRemainsUsableWithLargeTextAndReducedMotion] : Failed to get matching snapshots: Timed out while evaluating UI query.
+5878:Test Case '-[LifeOSProbeUITests.NativeRevision73UITests testDayRemainsUsableWithLargeTextAndReducedMotion]' failed (113.334 seconds).
+5879:Test Suite 'NativeRevision73UITests' failed at 2026-11-17 12:12:37.998.
+5880:	 Executed 2 tests, with 1 failure (0 unexpected) in 132.914 (132.915) seconds
+6419:	 Executed 3 tests, with 0 failures (0 unexpected) in 103.295 (103.297) seconds
+6790:	 Executed 2 tests, with 0 failures (0 unexpected) in 104.715 (104.717) seconds
+6983:	 Executed 3 tests, with 0 failures (0 unexpected) in 46.965 (46.966) seconds
+7197:/Users/runner/work/LifeOS/LifeOS/app/UITests/NativeRevision78UITests.swift:130: error: -[LifeOSProbeUITests.NativeRevision78UITests testHealthNutritionQuickAddAndHistoryAreReachable] : XCTAssertTrue failed
+7199:Test Case '-[LifeOSProbeUITests.NativeRevision78UITests testHealthNutritionQuickAddAndHistoryAreReachable]' failed (24.123 seconds).
+7231:/Users/runner/work/LifeOS/LifeOS/app/UITests/NativeRevision78UITests.swift:61: error: -[LifeOSProbeUITests.NativeRevision78UITests testHealthUniformRowsAndCompactActions] : XCTAssertTrue failed
+7233:Test Case '-[LifeOSProbeUITests.NativeRevision78UITests testHealthUniformRowsAndCompactActions]' failed (13.033 seconds).
+7325:Test Suite 'NativeRevision78UITests' failed at 2026-11-17 12:18:31.157.
+7326:	 Executed 6 tests, with 2 failures (0 unexpected) in 98.175 (98.178) seconds
+7327:Test Suite 'LifeOSProbeUITests.xctest' failed at 2026-11-17 12:18:31.158.
+7328:	 Executed 35 tests, with 4 failures (0 unexpected) in 1277.689 (1277.719) seconds
+7329:Test Suite 'Selected tests' failed at 2026-11-17 12:18:31.158.
+7330:	 Executed 35 tests, with 4 failures (0 unexpected) in 1277.689 (1277.720) seconds
+7338:** TEST EXECUTE FAILED **
+=== art/lifeos-development-preview-bd2c4aa14745709437e846a06991cce2eae5d63c/build/development-build.log
+2097:** TEST BUILD SUCCEEDED **
+=== art/lifeos-development-diagnostics-bd2c4aa14745709437e846a06991cce2eae5d63c/failures-and-counts.txt
+1:	 Executed 3 tests, with 0 failures (0 unexpected) in 0.053 (0.054) seconds
+2:	 Executed 20 tests, with 0 failures (0 unexpected) in 1.870 (1.940) seconds
+3:	 Executed 5 tests, with 0 failures (0 unexpected) in 0.172 (0.189) seconds
+4:/Users/runner/work/LifeOS/LifeOS/app/Tests/NativeNutritionEntryTests.swift:90: error: -[LifeOSProbeTests.NativeNutritionEntryTests testCatalogExcludesPorkAndSeparatesMoroccanDishes] : XCTAssertTrue failed
+5:/Users/runner/work/LifeOS/LifeOS/app/Tests/NativeNutritionEntryTests.swift:90: error: -[LifeOSProbeTests.NativeNutritionEntryTests testCatalogExcludesPorkAndSeparatesMoroccanDishes] : XCTAssertTrue failed
+6:Test Case '-[LifeOSProbeTests.NativeNutritionEntryTests testCatalogExcludesPorkAndSeparatesMoroccanDishes]' failed (0.605 seconds).
+7:	 Executed 14 tests, with 2 failures (0 unexpected) in 0.794 (0.799) seconds
+8:	 Executed 6 tests, with 0 failures (0 unexpected) in 0.013 (0.024) seconds
+9:	 Executed 9 tests, with 0 failures (0 unexpected) in 0.083 (0.135) seconds
+10:	 Executed 8 tests, with 0 failures (0 unexpected) in 0.076 (0.079) seconds
+11:	 Executed 65 tests, with 2 failures (0 unexpected) in 3.061 (3.224) seconds
+12:	 Executed 65 tests, with 2 failures (0 unexpected) in 3.061 (3.225) seconds
+13:	 Executed 2 tests, with 0 failures (0 unexpected) in 188.411 (188.414) seconds
+14:	 Executed 6 tests, with 0 failures (0 unexpected) in 249.491 (249.495) seconds
+15:/Users/runner/work/LifeOS/LifeOS/app/UITests/NativeNutritionQuickUITests.swift:215: error: -[LifeOSProbeUITests.NativeNutritionQuickUITests testSearchFindsGenericBiscottiAndUsesItsPortion] : XCTAssertEqual failed: ("35 kcal") is not equal to ("438 kcal")
+16:Test Case '-[LifeOSProbeUITests.NativeNutritionQuickUITests testSearchFindsGenericBiscottiAndUsesItsPortion]' failed (18.579 seconds).
+17:	 Executed 9 tests, with 1 failure (0 unexpected) in 301.970 (301.978) seconds
+20:/Users/runner/work/LifeOS/LifeOS/app/UITests/NativeRevision73UITests.swift:47: error: -[LifeOSProbeUITests.NativeRevision73UITests testDayRemainsUsableWithLargeTextAndReducedMotion] : Failed to get matching snapshots: Timed out while evaluating UI query.
+21:Test Case '-[LifeOSProbeUITests.NativeRevision73UITests testDayRemainsUsableWithLargeTextAndReducedMotion]' failed (113.334 seconds).
+22:	 Executed 2 tests, with 1 failure (0 unexpected) in 132.914 (132.915) seconds
+23:	 Executed 3 tests, with 0 failures (0 unexpected) in 103.295 (103.297) seconds
+24:	 Executed 2 tests, with 0 failures (0 unexpected) in 104.715 (104.717) seconds
+25:	 Executed 3 tests, with 0 failures (0 unexpected) in 46.965 (46.966) seconds
+26:/Users/runner/work/LifeOS/LifeOS/app/UITests/NativeRevision78UITests.swift:130: error: -[LifeOSProbeUITests.NativeRevision78UITests testHealthNutritionQuickAddAndHistoryAreReachable] : XCTAssertTrue failed
+27:Test Case '-[LifeOSProbeUITests.NativeRevision78UITests testHealthNutritionQuickAddAndHistoryAreReachable]' failed (24.123 seconds).
+28:/Users/runner/work/LifeOS/LifeOS/app/UITests/NativeRevision78UITests.swift:61: error: -[LifeOSProbeUITests.NativeRevision78UITests testHealthUniformRowsAndCompactActions] : XCTAssertTrue failed
+29:Test Case '-[LifeOSProbeUITests.NativeRevision78UITests testHealthUniformRowsAndCompactActions]' failed (13.033 seconds).
+30:	 Executed 6 tests, with 2 failures (0 unexpected) in 98.175 (98.178) seconds
+31:	 Executed 35 tests, with 4 failures (0 unexpected) in 1277.689 (1277.719) seconds
+32:	 Executed 35 tests, with 4 failures (0 unexpected) in 1277.689 (1277.720) seconds

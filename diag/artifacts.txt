@@ -1,0 +1,2 @@
+lifeos-development-preview-bd2c4aa14745709437e846a06991cce2eae5d63c
+lifeos-development-diagnostics-bd2c4aa14745709437e846a06991cce2eae5d63c
