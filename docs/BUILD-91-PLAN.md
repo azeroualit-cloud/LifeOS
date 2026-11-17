@@ -94,3 +94,7 @@ Start 7 sullo stesso gate.
 Tutto verde sullo stesso commit: preflight compatto, regressioni mirate, suite restante, quattro avvii Release, confezionamento e pubblicazione. [Release](https://github.com/azeroualit-cloud/LifeOS/releases/tag/ios-0.10.29-build91), IPA SHA-256 `a779c3e04b750c46ed174754d2cf1f7c8f85760e960d08332eb4caaf04d1ef8f`.
 
 Restano: firma Signulous, prova su iPhone, accettazione. Deploy del Worker per Risparmi non eseguito: da avviare con conferma esplicita in chat (finché non è distribuito, l'opzione Risparmi nella nuova spesa resta nascosta perché il server non dichiara `savingsDestination`).
+
+### Worker Risparmi distribuito (17 novembre, 10:30)
+
+Approvato in chat dall'utente («approvo»). [Run 44056109992](https://github.com/azeroualit-cloud/LifeOS/actions/runs/44056109992), ramo `codex/deploy-savings91`: test sintetici verdi, poi `SAVINGS_DESTINATION_91_DEPLOYED_AND_VERIFIED`, con moduli, autenticazione e binding non correlati preservati. Da ora l'opzione Risparmi compare nella nuova spesa della build 91.

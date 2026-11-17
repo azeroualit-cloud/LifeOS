@@ -20,7 +20,7 @@
     "direct_ipa": "https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.29-build91/LifeOS-91.ipa",
     "validation_run": "https://github.com/azeroualit-cloud/LifeOS/actions/runs/44026757613",
     "technical_checks": "passed_compact_preflight_regressions_remaining_suite_four_release_launches_package",
-    "backend_deployment": "not_executed_savings_worker_pending_user_go",
+    "backend_deployment": "savings_worker_deployed_and_verified_2026-11-17_run_44056109992",
     "physical_acceptance": "pending",
     "signulous_signing": "pending"
   },
