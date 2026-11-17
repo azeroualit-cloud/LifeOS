@@ -170,7 +170,10 @@ final class NativeRevision78UITests: XCTestCase {
         capture("Review 02 Health pinned nutrients and diary", app)
         micro.tap()
         XCTAssertTrue(app.navigationBars["Micronutrienti"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.staticTexts["Apporto registrato basso · Produzione di collagene"].waitForExistence(timeout: 5))
+        let warning = app.staticTexts["Apporto registrato basso · Produzione di collagene"]
+        let shown = warning.waitForExistence(timeout: 5)
+        if !shown { print("MICRO_TREE_BEGIN\n" + app.debugDescription + "\nMICRO_TREE_END") }
+        XCTAssertTrue(shown)
         capture("Review 03 Micronutrients daily and weekly", app)
         let edit = app.buttons["micronutrient-reorder"]
         XCTAssertTrue(edit.isHittable)

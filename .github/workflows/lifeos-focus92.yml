@@ -1,0 +1,71 @@
+name: LifeOS build 92 focused case (no IPA)
+# Start 1. Change this line to rerun the focused case on the current commit. Never packages or releases (IPA-GATE-01).
+on:
+  push:
+    branches: ['codex/build92']
+    paths: ['.github/workflows/lifeos-focus92.yml']
+permissions:
+  contents: read
+concurrency:
+  group: lifeos-focus92
+  cancel-in-progress: true
+jobs:
+  full-suite:
+    runs-on: macos-15
+    timeout-minutes: 200
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/native-compat76
+        with:
+          variant: primary
+      - name: Compile app and tests
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcodebuild build-for-testing -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/full-compile.log 2>&1 || { grep -E "error:" build/full-compile.log | head -20 | sed 's/^/::error::/'; exit 1; }
+      - name: Run every unit and UI test
+        id: suite
+        continue-on-error: true
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcrun simctl bootstatus "$MAIN_DEVICE" -b
+          xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 660 -only-testing:LifeOSProbeUITests/NativeRevision78UITests/testRenderHealthWeekAndDashboardAndBloom -resultBundlePath build/Full.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/full-tests.log 2>&1
+      - name: Report counts
+        if: always()
+        working-directory: app
+        run: |
+          grep -E "Executed [0-9]+ tests" build/full-tests.log | tail -2 | sed 's/^/::notice::/' || true
+          grep -E "error: -\[" build/full-tests.log | sed -E 's#^/Users/runner/work/[^ ]*/##' | sort -u > build/failures.txt || true
+          wc -l < build/failures.txt | sed 's/^/::notice::failures=/'
+      - name: Tree
+        if: always()
+        working-directory: app
+        run: awk '/MICRO_TREE_BEGIN/{f=1} f' build/full-tests.log | grep -E "StaticText|Cell|Button" | head -60 | cut -c1-200 | sed 's/^/::warning::/' | head -10; awk '/MICRO_TREE_BEGIN/{f=1} f' build/full-tests.log | grep -E "StaticText" | sed -n '11,40p' | cut -c1-200 | sed 's/^/::notice::/' | head -10
+      - name: Failures 1-10
+        if: always()
+        working-directory: app
+        run: sed -n '1,10p' build/failures.txt | cut -c1-400 | sed 's/^/::error::/' || true
+      - name: Failures 11-20
+        if: always()
+        working-directory: app
+        run: sed -n '11,20p' build/failures.txt | cut -c1-400 | sed 's/^/::error::/' || true
+      - name: Failures 21-30
+        if: always()
+        working-directory: app
+        run: sed -n '21,30p' build/failures.txt | cut -c1-400 | sed 's/^/::error::/' || true
+      - name: Failures 31-40
+        if: always()
+        working-directory: app
+        run: sed -n '31,40p' build/failures.txt | cut -c1-400 | sed 's/^/::error::/' || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lifeos-focus92-${{ github.sha }}
+          path: |
+            app/build/*.log
+            app/build/failures.txt
+          retention-days: 7
+      - name: Fail when any test failed
+        if: steps.suite.outcome == 'failure'
+        run: exit 1
