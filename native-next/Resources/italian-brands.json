@@ -88,7 +88,8 @@
     "protein": 4.2,
     "carbohydrate": 65,
     "fat": 28,
-    "fibre": 0
+    "fibre": 0,
+    "nutrientEstimateFrom": "usda-cioccolato-latte"
   },
   {
     "id": "it-brand-pepsi",
@@ -100,7 +101,8 @@
     "calories": 18,
     "protein": 0,
     "carbohydrate": 4.6,
-    "fat": 0
+    "fat": 0,
+    "nutrientEstimateFrom": "ciqual-18018"
   },
   {
     "id": "it-brand-pepsi-twist",
@@ -129,7 +131,8 @@
       "protein": "<0.1 g / 100 ml",
       "carbohydrate": "<0.1 g / 100 ml"
     },
-    "dataNote": "Etichetta con limiti: conteggiato il limite superiore; valori effettivi inferiori."
+    "dataNote": "Etichetta con limiti: conteggiato il limite superiore; valori effettivi inferiori.",
+    "nutrientEstimateFrom": "ciqual-18060"
   },
   {
     "id": "it-brand-pepsi-zero-zucchero-zero-caffeina",
@@ -146,7 +149,8 @@
       "protein": "<0.1 g / 100 ml",
       "carbohydrate": "<0.1 g / 100 ml"
     },
-    "dataNote": "Etichetta con limiti: conteggiato il limite superiore; valori effettivi inferiori."
+    "dataNote": "Etichetta con limiti: conteggiato il limite superiore; valori effettivi inferiori.",
+    "nutrientEstimateFrom": "ciqual-18068"
   },
   {
     "id": "it-brand-pepsi-zero-zucchero-lime",
@@ -158,7 +162,8 @@
     "calories": 0.7,
     "protein": 0.1,
     "carbohydrate": 0.1,
-    "fat": 0
+    "fat": 0,
+    "nutrientEstimateFrom": "ciqual-18060"
   },
   {
     "id": "it-brand-mulino-abbracci",
@@ -285,7 +290,8 @@
     "calories": 566,
     "protein": 8.7,
     "carbohydrate": 53.5,
-    "fat": 35
+    "fat": 35,
+    "nutrientEstimateFrom": "usda-cioccolato-latte"
   },
   {
     "id": "it-brand-nutella",
@@ -301,6 +307,7 @@
     "calories": 539,
     "protein": 6.3,
     "carbohydrate": 57.5,
-    "fat": 30.9
+    "fat": 30.9,
+    "nutrientEstimateFrom": "usda-crema-nocciole"
   }
 ]

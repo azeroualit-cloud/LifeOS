@@ -74,6 +74,8 @@ struct NativeNutritionQuickSheet: View {
     @State private var selectedFood: NativeGenericFood?
     @State private var portionGrams = "100"
     @State private var weighedWithBone = false
+    /// Selected natural unit; nil means grams/ml (FOOD-CATALOG-92).
+    @State private var pieceName: String?
     @FocusState private var focus: Field?
     init(initialDate: Date = .now, onSaved: @escaping () -> Void = {}) {
         let calendar = Calendar.current
@@ -85,12 +87,20 @@ struct NativeNutritionQuickSheet: View {
     }
 
     private enum Field: Hashable { case protein, carbohydrate, fat, fibre, portion }
+    private var selectedPiece: NativeGenericFood.Piece? {
+        guard let pieceName else { return nil }
+        return selectedFood?.pieces?.first { $0.name == pieceName }
+    }
     private var pending: NativeNutritionEntry? { nutrition.entries.first { $0.id == id && !$0.confirmed } }
     private var blocked: Bool { nutrition.entries.contains { ($0.id != id && !$0.confirmed) || $0.deletionPending == true } }
     private var draft: NativeNutritionEntry? {
         if let selectedFood {
-            guard let grams = NativeNutritionEntry.grams(portionGrams), grams <= 9999 else { return nil }
-            return selectedFood.portion(id: id, date: date, grams: grams, weighedWithBone: weighedWithBone)
+            guard let quantity = NativeNutritionEntry.grams(portionGrams), quantity <= 9999 else { return nil }
+            if let piece = selectedPiece {
+                guard quantity <= 99 else { return nil }
+                return selectedFood.portion(id: id, date: date, grams: quantity * piece.grams)
+            }
+            return selectedFood.portion(id: id, date: date, grams: quantity, weighedWithBone: weighedWithBone)
         }
         guard let p = NativeNutritionEntry.grams(protein), let c = NativeNutritionEntry.grams(carbohydrate), let f = NativeNutritionEntry.grams(fat), let fi = NativeNutritionEntry.grams(fibre) else { return nil }
         return .direct(id: id, date: date, protein: p, carbohydrate: c, fat: f, fibre: fi)
@@ -138,9 +148,29 @@ struct NativeNutritionQuickSheet: View {
                             .accessibilityIdentifier("quick-nutrition-weighing")
                             .disabled(nutrition.busy || pending != nil)
                         }
-                        grams(selectedFood.family == .supplement ? selectedFood.quantityUnit.quantityTitle : selectedFood.cocktail == nil ? "Porzione" : "Bicchieri", text: $portionGrams,
-                              field: .portion, unit: selectedFood.cocktail == nil && (selectedFood.family != .supplement || selectedFood.quantityUnit.isMassOrVolume) ? (selectedFood.quantityUnit == .millilitre ? "ml" : "g") : nil)
+                        if let pieces = selectedFood.pieces, !pieces.isEmpty, selectedFood.family != .supplement {
+                            Picker("Unità", selection: Binding(get: { pieceName }, set: { name in
+                                pieceName = name
+                                portionGrams = name == nil ? "100" : "1"
+                                weighedWithBone = false
+                            })) {
+                                Text(selectedFood.quantityUnit == .millilitre ? "Millilitri" : "Grammi").tag(String?.none)
+                                ForEach(pieces) { piece in
+                                    Text(piece.name.prefix(1).uppercased() + piece.name.dropFirst() + " (" + NSDecimalNumber(decimal: piece.grams).stringValue + " g)").tag(Optional(piece.name))
+                                }
+                            }
+                            .pickerStyle(.menu)
+                            .accessibilityIdentifier("quick-nutrition-unit")
                             .disabled(nutrition.busy || pending != nil)
+                        }
+                        if let piece = selectedPiece {
+                            grams("Pezzi", text: $portionGrams, field: .portion, unit: piece.name)
+                                .disabled(nutrition.busy || pending != nil)
+                        } else {
+                            grams(selectedFood.family == .supplement ? selectedFood.quantityUnit.quantityTitle : selectedFood.cocktail == nil ? "Porzione" : "Bicchieri", text: $portionGrams,
+                                  field: .portion, unit: selectedFood.cocktail == nil && (selectedFood.family != .supplement || selectedFood.quantityUnit.isMassOrVolume) ? (selectedFood.quantityUnit == .millilitre ? "ml" : "g") : nil)
+                                .disabled(nutrition.busy || pending != nil)
+                        }
                         if let draft {
                             if let recipe = selectedFood.cocktail, let alcohol = draft.alcoholGrams, let units = draft.standardDrinks {
                                 let precision = Decimal.FormatStyle().precision(.fractionLength(0...1))
@@ -233,7 +263,9 @@ struct NativeNutritionQuickSheet: View {
             NavigationStack {
                 NativeFoodPicker { food in
                     selectedFood = food
-                    portionGrams = food.defaultQuantity.map { NSDecimalNumber(decimal: $0).stringValue } ?? (food.cocktail == nil && food.family != .supplement ? "100" : "1")
+                    // Foods eaten by the piece open on their first natural unit.
+                    pieceName = food.family == .supplement ? nil : food.pieces?.first?.name
+                    portionGrams = pieceName != nil ? "1" : food.defaultQuantity.map { NSDecimalNumber(decimal: $0).stringValue } ?? (food.cocktail == nil && food.family != .supplement ? "100" : "1")
                     weighedWithBone = false
                 }
             }
@@ -310,7 +342,7 @@ struct NativeNutritionQuickSheet: View {
             HStack {
                 TextField("0", text: text, prompt: typeSize.isAccessibilitySize ? nil : Text("0").foregroundStyle(NativeDesign.secondary)).keyboardType(.decimalPad).focused($focus, equals: field)
                     .font(.title2.weight(.semibold)).frame(minHeight: NativeDesign.Layout.nutritionInputLine)
-                    .accessibilityLabel(unit == nil ? title : title + (unit == "ml" ? " in millilitri" : " in grammi")).accessibilityIdentifier("quick-nutrition-" + title)
+                    .accessibilityLabel(unit == nil ? title : unit == "ml" ? title + " in millilitri" : unit == "g" ? title + " in grammi" : title + ", " + (unit ?? "")).accessibilityIdentifier("quick-nutrition-" + title)
                 if let unit { Text(unit).foregroundStyle(.secondary) }
             }
         }.padding(NativeDesign.Space.small).frame(minHeight: NativeDesign.Layout.nutritionFieldHeight)

@@ -275,7 +275,8 @@
     "carbohydrate": 45.0,
     "fat": 36.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-crema-mandorle"
   },
   {
     "id": "off-it-8000070072954",
@@ -447,7 +448,8 @@
     "fat": 15.0,
     "fibre": 7.6,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-31106"
   },
   {
     "id": "off-it-8002580026267",
@@ -511,7 +513,8 @@
     "fat": 16.0,
     "fibre": 7.3,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-31106"
   },
   {
     "id": "off-it-1044536143762",
@@ -590,7 +593,8 @@
     "fat": 1.1,
     "fibre": 1.4,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-bevanda-avena"
   },
   {
     "id": "off-it-8001440127571",
@@ -732,7 +736,8 @@
     "carbohydrate": 8.7,
     "fat": 1.8,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-yogurt-greco-0"
   },
   {
     "id": "off-it-8000500391341",
@@ -839,7 +844,8 @@
     "carbohydrate": 37.0,
     "fat": 44.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-31074"
   },
   {
     "id": "off-it-8000380215799",
@@ -870,7 +876,8 @@
     "fat": 35.0,
     "fibre": 1.8,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-31128"
   },
   {
     "id": "off-it-8002590092245",
@@ -918,7 +925,8 @@
     "fat": 18.0,
     "fibre": 8.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-31106"
   },
   {
     "id": "off-it-80042532",
@@ -964,7 +972,8 @@
     "carbohydrate": 0.0,
     "fat": 0.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-18014"
   },
   {
     "id": "off-it-8000500382769",
@@ -1011,7 +1020,8 @@
     "fat": 8.4,
     "fibre": 3.4,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-24001"
   },
   {
     "id": "off-it-8002580001707",
@@ -1090,7 +1100,8 @@
     "fat": 0.1,
     "fibre": 1.1,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-latte-di-soia"
   },
   {
     "id": "off-it-8001630010379",
@@ -1170,7 +1181,8 @@
     "fat": 20.0,
     "fibre": 7.5,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-24001"
   },
   {
     "id": "off-it-5411188141341",
@@ -1295,7 +1307,8 @@
     "fat": 0.8,
     "fibre": 0.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-latte-di-soia"
   },
   {
     "id": "off-it-8026861054046",
@@ -1356,7 +1369,8 @@
     "carbohydrate": 59.0,
     "fat": 17.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-24001"
   },
   {
     "id": "off-it-8034097877131",
@@ -1388,7 +1402,8 @@
     "fat": 18.0,
     "fibre": 9.6,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-24001"
   },
   {
     "id": "off-it-5900020017437",
@@ -1420,7 +1435,8 @@
     "fat": 0.0,
     "fibre": 0.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-18014"
   },
   {
     "id": "off-it-8002580004203",
@@ -1451,7 +1467,8 @@
     "fat": 21.0,
     "fibre": 2.8,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-cioccolato-latte"
   },
   {
     "id": "off-it-8002580320372",
@@ -1514,7 +1531,8 @@
     "fat": 1.1,
     "fibre": 0.1,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-latte-di-soia"
   },
   {
     "id": "off-it-8001440132261",
@@ -1578,7 +1596,8 @@
     "fat": 17.0,
     "fibre": 0.325,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-31106"
   },
   {
     "id": "off-it-8001720445814",
@@ -1626,7 +1645,8 @@
     "fat": 11.0,
     "fibre": 5.4,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-24001"
   },
   {
     "id": "off-it-5411188513483",
@@ -1718,7 +1738,8 @@
     "fat": 19.4,
     "fibre": 6.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-31074"
   },
   {
     "id": "off-it-8000139000409",
@@ -1797,7 +1818,8 @@
     "fat": 20.0,
     "fibre": 7.6,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-24001"
   },
   {
     "id": "off-it-8034097876639",
@@ -1860,7 +1882,8 @@
     "carbohydrate": 8.9,
     "fat": 0.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-2070"
   },
   {
     "id": "off-it-8008343881609",
@@ -1955,7 +1978,8 @@
     "fat": 18.0,
     "fibre": 3.8,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-grana"
   },
   {
     "id": "off-it-8006040414311",
@@ -2082,7 +2106,8 @@
     "fat": 16.0,
     "fibre": 7.4,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-24001"
   },
   {
     "id": "off-it-8001630009700",
@@ -2174,7 +2199,8 @@
     "fat": 19.0,
     "fibre": 2.6,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-31074"
   },
   {
     "id": "off-it-8000139931161",
@@ -2253,7 +2279,8 @@
     "fat": 17.0,
     "fibre": 12.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-24001"
   },
   {
     "id": "off-it-80936985",
@@ -2394,7 +2421,8 @@
     "fat": 18.0,
     "fibre": 1.1,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-cracker-integrali"
   },
   {
     "id": "off-it-8006040417053",
@@ -2587,7 +2615,8 @@
     "fat": 20.5,
     "fibre": 8.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-24001"
   },
   {
     "id": "off-it-8000139920219",
@@ -2667,7 +2696,8 @@
     "fat": 13.0,
     "fibre": 4.8,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-38402"
   },
   {
     "id": "off-it-8005110004803",
@@ -2841,7 +2871,8 @@
     "fat": 4.0,
     "fibre": 3.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-9816"
   },
   {
     "id": "off-it-8053041001705",
@@ -2856,7 +2887,8 @@
     "carbohydrate": 14.0,
     "fat": 33.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-11179"
   },
   {
     "id": "off-it-8002590045357",
@@ -2903,7 +2935,8 @@
     "carbohydrate": 3.0,
     "fat": 5.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-yogurt-greco-0"
   },
   {
     "id": "off-it-8000500131329",
@@ -2950,7 +2983,8 @@
     "fat": 19.3,
     "fibre": 8.2,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-24001"
   },
   {
     "id": "off-it-8000139000782",
@@ -3012,7 +3046,8 @@
     "fat": 24.0,
     "fibre": 8.5,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-24001"
   },
   {
     "id": "off-it-8076809582155",
@@ -3028,7 +3063,8 @@
     "fat": 13.0,
     "fibre": 4.8,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-38402"
   },
   {
     "id": "off-it-8005110022265",
@@ -3202,7 +3238,8 @@
     "fat": 2.8,
     "fibre": 0.2,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19593"
   },
   {
     "id": "off-it-8001100069692",
@@ -3359,7 +3396,8 @@
     "fat": 17.2,
     "fibre": 2.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-24001"
   },
   {
     "id": "off-it-8000139935329",
@@ -3438,7 +3476,8 @@
     "fat": 14.0,
     "fibre": 4.4,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-24001"
   },
   {
     "id": "off-it-80967743",
@@ -3656,7 +3695,8 @@
     "carbohydrate": 13.4,
     "fat": 3.4,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19593"
   },
   {
     "id": "off-it-8001100067056",
@@ -3813,7 +3853,8 @@
     "fat": 1.9,
     "fibre": 8.4,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-9436"
   },
   {
     "id": "off-it-8002670384123",
@@ -3893,7 +3934,8 @@
     "fat": 6.1,
     "fibre": 6.5,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-7300"
   },
   {
     "id": "off-it-8005110080081",
@@ -3908,7 +3950,8 @@
     "carbohydrate": 5.1,
     "fat": 0.5,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-20170"
   },
   {
     "id": "off-it-3387390320008",
@@ -3924,7 +3967,8 @@
     "fat": 9.1,
     "fibre": 7.7,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-31106"
   },
   {
     "id": "off-it-8002580026236",
@@ -3939,7 +3983,8 @@
     "carbohydrate": 13.0,
     "fat": 0.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-latte-di-soia"
   },
   {
     "id": "off-it-8000300400816",
@@ -3986,7 +4031,8 @@
     "fat": 0.0,
     "fibre": 0.7,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-2074"
   },
   {
     "id": "off-it-8002190006802",
@@ -4082,7 +4128,8 @@
     "fat": 1.9,
     "fibre": 6.4,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-9436"
   },
   {
     "id": "off-it-8004905771722",
@@ -4145,7 +4192,8 @@
     "fat": 3.9,
     "fibre": 0.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-fiocchi-di-latte"
   },
   {
     "id": "off-it-5201054037140",
@@ -4238,7 +4286,8 @@
     "carbohydrate": 5.0,
     "fat": 1.6,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19033"
   },
   {
     "id": "off-it-8000380192199",
@@ -4285,7 +4334,8 @@
     "fat": 6.2,
     "fibre": 5.7,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-7300"
   },
   {
     "id": "off-it-8005110004018",
@@ -4315,7 +4365,8 @@
     "carbohydrate": 4.0,
     "fat": 0.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19860"
   },
   {
     "id": "off-it-8002580017111",
@@ -4330,7 +4381,8 @@
     "carbohydrate": 4.9,
     "fat": 1.6,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19033"
   },
   {
     "id": "off-it-8000300050387",
@@ -4425,7 +4477,8 @@
     "fat": 0.1,
     "fibre": 0.4,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-2016"
   },
   {
     "id": "off-it-8001100067032",
@@ -4595,7 +4648,8 @@
     "fat": 27.0,
     "fibre": 2.1,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-cioccolato-latte"
   },
   {
     "id": "off-it-8002590046439",
@@ -4626,7 +4680,8 @@
     "carbohydrate": 7.2,
     "fat": 0.4,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-39200"
   },
   {
     "id": "off-it-8002580008492",
@@ -4845,7 +4900,8 @@
     "carbohydrate": 7.0,
     "fat": 1.7,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19685"
   },
   {
     "id": "off-it-8000380000562",
@@ -4876,7 +4932,8 @@
     "fat": 37.0,
     "fibre": 4.3,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-cioccolato-latte"
   },
   {
     "id": "off-it-8076809541664",
@@ -4939,7 +4996,8 @@
     "fat": 38.0,
     "fibre": 3.6,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-cioccolato-latte"
   },
   {
     "id": "off-it-8041790504677",
@@ -5160,7 +5218,8 @@
     "fat": 1.0,
     "fibre": 0.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19016"
   },
   {
     "id": "off-it-8000380001446",
@@ -5255,7 +5314,8 @@
     "fat": 30.0,
     "fibre": 2.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-cioccolato-latte"
   },
   {
     "id": "off-it-8003130143335",
@@ -5457,7 +5517,8 @@
     "carbohydrate": 4.9,
     "fat": 0.1,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19050"
   },
   {
     "id": "off-it-8000380180745",
@@ -5519,7 +5580,8 @@
     "carbohydrate": 43.0,
     "fat": 13.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-39500"
   },
   {
     "id": "off-it-0475660970985",
@@ -5566,7 +5628,8 @@
     "fat": 39.0,
     "fibre": 13.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-31074"
   },
   {
     "id": "off-it-8003130527210",
@@ -5753,7 +5816,8 @@
     "carbohydrate": 4.9,
     "fat": 1.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19016"
   },
   {
     "id": "off-it-7622400883033",
@@ -5896,7 +5960,8 @@
     "fat": 15.0,
     "fibre": 1.3,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-39509"
   },
   {
     "id": "off-it-8001100072395",
@@ -5928,7 +5993,8 @@
     "fat": 44.0,
     "fibre": 1.8,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-11179"
   },
   {
     "id": "off-it-8004905570622",
@@ -6034,7 +6100,8 @@
     "carbohydrate": 73.0,
     "fat": 1.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-gnocchi"
   },
   {
     "id": "off-it-8002670161649",
@@ -6049,7 +6116,8 @@
     "carbohydrate": 5.1,
     "fat": 1.6,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19033"
   },
   {
     "id": "off-it-8000380194261",
@@ -6096,7 +6164,8 @@
     "fat": 13.0,
     "fibre": 3.1,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-sciroppo-acero"
   },
   {
     "id": "off-it-8076809536721",
@@ -6127,7 +6196,8 @@
     "carbohydrate": 5.1,
     "fat": 0.5,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-20170"
   },
   {
     "id": "off-it-8051369003432",
@@ -6267,7 +6337,8 @@
     "fat": 4.0,
     "fibre": 3.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-9816"
   },
   {
     "id": "off-it-8004905770862",
@@ -6467,7 +6538,8 @@
     "carbohydrate": 8.0,
     "fat": 0.5,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-20170"
   },
   {
     "id": "off-it-7613035682443",
@@ -6515,7 +6587,8 @@
     "fat": 35.6,
     "fibre": 5.4,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-31074"
   },
   {
     "id": "off-it-8008343235990",
@@ -6546,7 +6619,8 @@
     "fat": 37.0,
     "fibre": 1.5,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-cioccolato-latte"
   },
   {
     "id": "off-it-8006040255198",
@@ -6701,7 +6775,8 @@
     "fat": 21.0,
     "fibre": 7.5,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-32017"
   },
   {
     "id": "off-it-8000139929717",
@@ -6733,7 +6808,8 @@
     "fat": 1.4,
     "fibre": 0.6,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-bevanda-avena"
   },
   {
     "id": "off-it-8000380141548",
@@ -6794,7 +6870,8 @@
     "carbohydrate": 5.5,
     "fat": 0.5,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-20170"
   },
   {
     "id": "off-it-5900020012654",
@@ -6996,7 +7073,8 @@
     "fat": 1.6,
     "fibre": 0.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19016"
   },
   {
     "id": "off-it-8590160955088",
@@ -7043,7 +7121,8 @@
     "carbohydrate": 6.5,
     "fat": 0.5,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-20170"
   },
   {
     "id": "off-it-8436575296654",
@@ -7090,7 +7169,8 @@
     "fat": 27.8,
     "fibre": 7.7,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-31074"
   },
   {
     "id": "off-it-8008343801171",
@@ -7106,7 +7186,8 @@
     "fat": 0.0,
     "fibre": 0.8,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-gnocchi"
   },
   {
     "id": "off-it-8004205030031",
@@ -7137,7 +7218,8 @@
     "fat": 12.0,
     "fibre": 12.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-32140"
   },
   {
     "id": "off-it-8001100071725",
@@ -7201,7 +7283,8 @@
     "fat": 1.1,
     "fibre": 1.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-9104"
   },
   {
     "id": "off-it-3048630011505",
@@ -7262,7 +7345,8 @@
     "carbohydrate": 5.0,
     "fat": 3.6,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19016"
   },
   {
     "id": "off-it-7622210826251",
@@ -7294,7 +7378,8 @@
     "fat": 16.0,
     "fibre": 6.2,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-semi-zucca"
   },
   {
     "id": "off-it-8005110060106",
@@ -7340,7 +7425,8 @@
     "carbohydrate": 4.9,
     "fat": 1.6,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19016"
   },
   {
     "id": "off-it-8000300359893",
@@ -7356,7 +7442,8 @@
     "fat": 40.0,
     "fibre": 14.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-31074"
   },
   {
     "id": "off-it-8008343201735",
@@ -7372,7 +7459,8 @@
     "fat": 3.8,
     "fibre": 3.4,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-9816"
   },
   {
     "id": "off-it-8006040280138",
@@ -7388,7 +7476,8 @@
     "fat": 5.1,
     "fibre": 0.1,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-39500"
   },
   {
     "id": "off-it-8001100069715",
@@ -7435,7 +7524,8 @@
     "carbohydrate": 49.3,
     "fat": 22.1,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-cioccolato-latte"
   },
   {
     "id": "off-it-8002590012915",
@@ -7466,7 +7556,8 @@
     "carbohydrate": 3.9,
     "fat": 0.2,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-skyr"
   },
   {
     "id": "off-it-8051084007012",
@@ -7514,7 +7605,8 @@
     "fat": 23.0,
     "fibre": 7.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-7255"
   },
   {
     "id": "off-it-8000139929809",
@@ -7544,7 +7636,8 @@
     "carbohydrate": 5.0,
     "fat": 0.1,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19016"
   },
   {
     "id": "off-it-7622210017888",
@@ -7623,7 +7716,8 @@
     "carbohydrate": 4.8,
     "fat": 1.6,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19016"
   },
   {
     "id": "off-it-8000300194470",
@@ -7639,7 +7733,8 @@
     "fat": 28.0,
     "fibre": 7.5,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-31074"
   },
   {
     "id": "off-it-8003130338854",
@@ -7670,7 +7765,8 @@
     "fat": 7.2,
     "fibre": 5.7,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-39500"
   },
   {
     "id": "off-it-8001100069739",
@@ -7749,7 +7845,8 @@
     "carbohydrate": 3.4,
     "fat": 0.1,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-skyr"
   },
   {
     "id": "off-it-8000430058765",
@@ -7795,7 +7892,8 @@
     "carbohydrate": 5.0,
     "fat": 1.6,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19033"
   },
   {
     "id": "off-it-7622210720115",
@@ -7843,7 +7941,8 @@
     "fat": 21.0,
     "fibre": 2.4,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-11179"
   },
   {
     "id": "off-it-8000300424850",
@@ -7874,7 +7973,8 @@
     "carbohydrate": 4.9,
     "fat": 1.6,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19033"
   },
   {
     "id": "off-it-8000300379327",
@@ -7890,7 +7990,8 @@
     "fat": 40.0,
     "fibre": 14.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-31074"
   },
   {
     "id": "off-it-8003130332838",
@@ -7985,7 +8086,8 @@
     "carbohydrate": 9.2,
     "fat": 0.1,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-skyr"
   },
   {
     "id": "off-it-5201054055441",
@@ -8031,7 +8133,8 @@
     "fat": 24.0,
     "fibre": 12.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-7255"
   },
   {
     "id": "off-it-3045140280803",
@@ -8079,7 +8182,8 @@
     "fat": 24.0,
     "fibre": 3.8,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-11179"
   },
   {
     "id": "off-it-8002270326684",
@@ -8111,7 +8215,8 @@
     "fat": 1.6,
     "fibre": 0.5,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-cioccolato-latte"
   },
   {
     "id": "off-it-8000300412277",
@@ -8127,7 +8232,8 @@
     "fat": 32.0,
     "fibre": 8.4,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-31074"
   },
   {
     "id": "off-it-8008343200394",
@@ -8299,7 +8405,8 @@
     "carbohydrate": 5.0,
     "fat": 1.6,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19033"
   },
   {
     "id": "off-it-7622200009084",
@@ -8331,7 +8438,8 @@
     "fat": 6.1,
     "fibre": 7.4,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-7300"
   },
   {
     "id": "off-it-8005110001574",
@@ -8378,7 +8486,8 @@
     "carbohydrate": 4.9,
     "fat": 1.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19016"
   },
   {
     "id": "off-it-8000300308464",
@@ -8394,7 +8503,8 @@
     "fat": 29.7,
     "fibre": 8.3,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-31074"
   },
   {
     "id": "off-it-8008343201599",
@@ -8520,7 +8630,8 @@
     "carbohydrate": 8.6,
     "fat": 1.3,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19593"
   },
   {
     "id": "off-it-8057018221158",
@@ -8583,7 +8694,8 @@
     "fat": 1.6,
     "fibre": 0.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19016"
   },
   {
     "id": "off-it-8410128789077",
@@ -8645,7 +8757,8 @@
     "fat": 6.8,
     "fibre": 7.6,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-fiocchi-di-latte"
   },
   {
     "id": "off-it-8002580018484",
@@ -8785,7 +8898,8 @@
     "fat": 0.1,
     "fibre": 0.1,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19860"
   },
   {
     "id": "off-it-5201054036624",
@@ -8800,7 +8914,8 @@
     "carbohydrate": 8.4,
     "fat": 0.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19594"
   },
   {
     "id": "off-it-8057018224159",
@@ -8862,7 +8977,8 @@
     "carbohydrate": 5.1,
     "fat": 1.6,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19033"
   },
   {
     "id": "off-it-7622210516091",
@@ -8894,7 +9010,8 @@
     "fat": 8.1,
     "fibre": 8.8,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-31074"
   },
   {
     "id": "off-it-8000300369878",
@@ -8956,7 +9073,8 @@
     "carbohydrate": 3.0,
     "fat": 5.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19860"
   },
   {
     "id": "off-it-8000430139761",
@@ -9065,7 +9183,8 @@
     "carbohydrate": 4.9,
     "fat": 1.6,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19033"
   },
   {
     "id": "off-it-8000300185812",
@@ -9081,7 +9200,8 @@
     "fat": 39.0,
     "fibre": 13.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-31074"
   },
   {
     "id": "off-it-8003130607547",
@@ -9175,7 +9295,8 @@
     "carbohydrate": 3.0,
     "fat": 5.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19860"
   },
   {
     "id": "off-it-8057018226771",
@@ -9252,7 +9373,8 @@
     "carbohydrate": 5.0,
     "fat": 0.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19016"
   },
   {
     "id": "off-it-7622201137052",
@@ -9330,7 +9452,8 @@
     "carbohydrate": 4.9,
     "fat": 1.6,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19033"
   },
   {
     "id": "off-it-8000300427387",
@@ -9394,7 +9517,8 @@
     "fat": 7.6,
     "fibre": 1.4,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-39500"
   },
   {
     "id": "off-it-8076809517751",
@@ -9410,7 +9534,8 @@
     "fat": 32.0,
     "fibre": 1.2,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-11179"
   },
   {
     "id": "off-it-8004905550327",
@@ -9440,7 +9565,8 @@
     "carbohydrate": 10.0,
     "fat": 4.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19860"
   },
   {
     "id": "off-it-8057018226689",
@@ -9517,7 +9643,8 @@
     "carbohydrate": 4.9,
     "fat": 0.1,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19016"
   },
   {
     "id": "off-it-7622210277503",
@@ -9596,7 +9723,8 @@
     "carbohydrate": 4.9,
     "fat": 0.1,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19016"
   },
   {
     "id": "off-it-7613036877237",
@@ -9612,7 +9740,8 @@
     "fat": 43.0,
     "fibre": 10.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-31074"
   },
   {
     "id": "off-it-8008343709491",
@@ -9660,7 +9789,8 @@
     "fat": 20.0,
     "fibre": 3.4,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-39503"
   },
   {
     "id": "off-it-8076809586177",
@@ -9676,7 +9806,8 @@
     "fat": 55.0,
     "fibre": 1.8,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-11179"
   },
   {
     "id": "off-it-8001720445715",
@@ -9770,7 +9901,8 @@
     "carbohydrate": 3.4,
     "fat": 0.1,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19016"
   },
   {
     "id": "off-it-7622210773098",
@@ -9786,7 +9918,8 @@
     "fat": 32.0,
     "fibre": 2.4,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-crema-nocciole"
   },
   {
     "id": "off-it-8002590084981",
@@ -9802,7 +9935,8 @@
     "fat": 33.0,
     "fibre": 10.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-31074"
   },
   {
     "id": "off-it-8005110171215",
@@ -9848,7 +9982,8 @@
     "carbohydrate": 4.9,
     "fat": 1.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19016"
   },
   {
     "id": "off-it-8008343200745",
@@ -9895,7 +10030,8 @@
     "fat": 7.7,
     "fibre": 0.9,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-39500"
   },
   {
     "id": "off-it-8076809582643",
@@ -9911,7 +10047,8 @@
     "fat": 41.0,
     "fibre": 4.9,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-11179"
   },
   {
     "id": "off-it-8004905771876",
@@ -9941,7 +10078,8 @@
     "carbohydrate": 3.5,
     "fat": 0.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19593"
   },
   {
     "id": "off-it-8051084003380",
@@ -10114,7 +10252,8 @@
     "fat": 39.0,
     "fibre": 13.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-31074"
   },
   {
     "id": "off-it-8008343812078",
@@ -10225,7 +10364,8 @@
     "fat": 16.0,
     "fibre": 4.5,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-31074"
   },
   {
     "id": "off-it-8000139931192",
@@ -10319,7 +10459,8 @@
     "carbohydrate": 6.4,
     "fat": 10.5,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-panna"
   },
   {
     "id": "off-it-8000300399516",
@@ -10383,7 +10524,8 @@
     "fat": 3.0,
     "fibre": 1.8,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-20385"
   },
   {
     "id": "off-it-8057018223169",
@@ -10399,7 +10541,8 @@
     "fat": 0.5,
     "fibre": 4.1,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-fagiolini"
   },
   {
     "id": "off-it-8000430070767",
@@ -10477,7 +10620,8 @@
     "fat": 1.0,
     "fibre": 7.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-cornflakes"
   },
   {
     "id": "off-it-8005110060007",
@@ -10493,7 +10637,8 @@
     "fat": 0.5,
     "fibre": 0.8,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-20385"
   },
   {
     "id": "off-it-8005420547342",
@@ -10524,7 +10669,8 @@
     "fat": 21.5,
     "fibre": 0.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-panna"
   },
   {
     "id": "off-it-8000300337495",
@@ -10572,7 +10718,8 @@
     "fat": 30.0,
     "fibre": 3.4,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-crema-mandorle"
   },
   {
     "id": "off-it-8076809578226",
@@ -10588,7 +10735,8 @@
     "fat": 3.0,
     "fibre": 1.8,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-20385"
   },
   {
     "id": "off-it-8001720021032",
@@ -10698,7 +10846,8 @@
     "carbohydrate": 3.3,
     "fat": 0.5,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-20172"
   },
   {
     "id": "off-it-8000300375428",
@@ -10729,7 +10878,8 @@
     "carbohydrate": 3.0999999046326,
     "fat": 35.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-panna"
   },
   {
     "id": "off-it-8000300379426",
@@ -10901,7 +11051,8 @@
     "carbohydrate": 4.3,
     "fat": 0.5,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-20385"
   },
   {
     "id": "off-it-3023290020685",
@@ -10931,7 +11082,8 @@
     "carbohydrate": 14.0,
     "fat": 0.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-2371"
   },
   {
     "id": "off-it-8000300394245",
@@ -10963,7 +11115,8 @@
     "fat": 3.0,
     "fibre": 4.4,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-20589"
   },
   {
     "id": "off-it-8003130141225",
@@ -11011,7 +11164,8 @@
     "fat": 2.0,
     "fibre": 3.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-spaghetti-cotti"
   },
   {
     "id": "off-it-8001720435709",
@@ -11074,7 +11228,8 @@
     "fat": 6.1,
     "fibre": 7.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-9341"
   },
   {
     "id": "off-it-7622210603869",
@@ -11696,7 +11851,8 @@
     "fat": 7.6,
     "fibre": 8.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-38417"
   },
   {
     "id": "off-it-8004905770084",
@@ -12074,7 +12230,8 @@
     "fat": 61.0,
     "fibre": 0.1,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-11054"
   },
   {
     "id": "off-it-8001720442745",
@@ -12216,7 +12373,8 @@
     "fat": 21.0,
     "fibre": 0.8,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-39500"
   },
   {
     "id": "off-it-8030582019444",
@@ -12247,7 +12405,8 @@
     "fat": 1.6,
     "fibre": 2.9,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-spaghetti-cotti"
   },
   {
     "id": "off-it-8003130146480",
@@ -12435,7 +12594,8 @@
     "carbohydrate": 65.3,
     "fat": 1.9,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-spaghetti-cotti"
   },
   {
     "id": "off-it-8006040000347",
@@ -12591,7 +12751,8 @@
     "fat": 7.8,
     "fibre": 0.7,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-39500"
   },
   {
     "id": "off-it-8002580004920",
@@ -12623,7 +12784,8 @@
     "fat": 1.9,
     "fibre": 0.6,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-spaghetti-cotti"
   },
   {
     "id": "off-it-8003130127922",
@@ -12778,7 +12940,8 @@
     "carbohydrate": 38.0,
     "fat": 21.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-cioccolato-latte"
   },
   {
     "id": "off-it-8002580257357",
@@ -12793,7 +12956,8 @@
     "carbohydrate": 15.0,
     "fat": 0.1,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19593"
   },
   {
     "id": "off-it-8003130137648",
@@ -12888,7 +13052,8 @@
     "carbohydrate": 4.0,
     "fat": 20.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-panna"
   },
   {
     "id": "off-it-8002590079413",
@@ -12935,7 +13100,8 @@
     "fat": 20.0,
     "fibre": 0.8,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-39500"
   },
   {
     "id": "off-it-8002580000830",
@@ -12950,7 +13116,8 @@
     "carbohydrate": 12.0,
     "fat": 1.4,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19593"
   },
   {
     "id": "off-it-8008343002035",
@@ -12965,7 +13132,8 @@
     "carbohydrate": 73.0,
     "fat": 1.3,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-spaghetti-cotti"
   },
   {
     "id": "off-it-8003130329678",
@@ -12996,7 +13164,8 @@
     "fat": 14.0,
     "fibre": 3.3,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-17270"
   },
   {
     "id": "off-it-8000605261044",
@@ -13075,7 +13244,8 @@
     "carbohydrate": 3.6,
     "fat": 35.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-panna"
   },
   {
     "id": "off-it-7640110708873",
@@ -13121,7 +13291,8 @@
     "carbohydrate": 12.5,
     "fat": 0.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19860"
   },
   {
     "id": "off-it-8003131000804",
@@ -13263,7 +13434,8 @@
     "carbohydrate": 10.0,
     "fat": 1.6,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19593"
   },
   {
     "id": "off-it-10031308",
@@ -13311,7 +13483,8 @@
     "fat": 10.0,
     "fibre": 0.9,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-26043"
   },
   {
     "id": "off-it-8002190001449",
@@ -13404,7 +13577,8 @@
     "carbohydrate": 11.0,
     "fat": 3.4,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19593"
   },
   {
     "id": "off-it-8006040257109",
@@ -13470,7 +13644,8 @@
     "carbohydrate": 0.0,
     "fat": 29.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-grana"
   },
   {
     "id": "off-it-8002590040413",
@@ -13517,7 +13692,8 @@
     "fat": 8.1,
     "fibre": 0.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19016"
   },
   {
     "id": "off-it-8002580257739",
@@ -13532,7 +13708,8 @@
     "carbohydrate": 13.5,
     "fat": 3.3,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19593"
   },
   {
     "id": "off-it-8003130129544",
@@ -13608,7 +13785,8 @@
     "fat": 15.0,
     "fibre": 6.9,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-cioccolato-latte"
   },
   {
     "id": "off-it-10051108",
@@ -13654,7 +13832,8 @@
     "carbohydrate": 12.8,
     "fat": 4.6,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19593"
   },
   {
     "id": "off-it-8003840001093",
@@ -13670,7 +13849,8 @@
     "fat": 14.0,
     "fibre": 3.3,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-17270"
   },
   {
     "id": "off-it-8001720448426",
@@ -13796,7 +13976,8 @@
     "fat": 1.7,
     "fibre": 0.2,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-latte-di-soia"
   },
   {
     "id": "off-it-8014037001888",
@@ -14005,7 +14186,8 @@
     "fat": 0.0,
     "fibre": 0.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19860"
   },
   {
     "id": "off-it-8003130346620",
@@ -14115,7 +14297,8 @@
     "fat": 9.0,
     "fibre": 0.8,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-20904"
   },
   {
     "id": "off-it-8057018223190",
@@ -14147,7 +14330,8 @@
     "fat": 17.5,
     "fibre": 7.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-gallette-riso"
   },
   {
     "id": "off-it-8002670007572",
@@ -14209,7 +14393,8 @@
     "fat": 8.0,
     "fibre": 1.8,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-20912"
   },
   {
     "id": "off-it-8057018222629",
@@ -14241,7 +14426,8 @@
     "fat": 1.5,
     "fibre": 0.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-latte-di-soia"
   },
   {
     "id": "off-it-5601001120701",
@@ -14257,7 +14443,8 @@
     "fat": 8.0,
     "fibre": 0.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19016"
   },
   {
     "id": "off-it-8006040414113",
@@ -14305,7 +14492,8 @@
     "fat": 18.5,
     "fibre": 6.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "usda-gallette-riso"
   },
   {
     "id": "off-it-8002670007879",
@@ -14414,7 +14602,8 @@
     "fat": 2.6,
     "fibre": 0.6,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19016"
   },
   {
     "id": "off-it-8003130844737",
@@ -14508,7 +14697,8 @@
     "fat": 1.5,
     "fibre": 0.7,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19593"
   },
   {
     "id": "off-it-8057018223916",
@@ -14792,7 +14982,8 @@
     "carbohydrate": 13.0,
     "fat": 3.1,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19593"
   },
   {
     "id": "off-it-8006040200020",
@@ -14856,7 +15047,8 @@
     "fat": 3.4,
     "fibre": 0.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19593"
   },
   {
     "id": "off-it-7613035361201",
@@ -14904,7 +15096,8 @@
     "fat": 31.0,
     "fibre": 1.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-24311"
   },
   {
     "id": "off-it-80973805",
@@ -14920,7 +15113,8 @@
     "fat": 5.1,
     "fibre": 0.3,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19593"
   },
   {
     "id": "off-it-8051369001612",
@@ -14984,7 +15178,8 @@
     "fat": 4.3,
     "fibre": 0.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19593"
   },
   {
     "id": "off-it-8051369001858",
@@ -15016,7 +15211,8 @@
     "fat": 4.1,
     "fibre": 0.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19593"
   },
   {
     "id": "off-it-7613034673626",
@@ -15080,7 +15276,8 @@
     "fat": 3.5,
     "fibre": 0.2,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19593"
   },
   {
     "id": "off-it-5900020025395",
@@ -15144,7 +15341,8 @@
     "fat": 3.6,
     "fibre": 0.2,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19593"
   },
   {
     "id": "off-it-8000300404463",
@@ -15160,7 +15358,8 @@
     "fat": 30.1,
     "fibre": 5.5,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-39522"
   },
   {
     "id": "off-it-8057018224784",
@@ -15192,7 +15391,8 @@
     "fat": 3.6,
     "fibre": 0.2,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19593"
   },
   {
     "id": "off-it-3023290007860",
@@ -15239,7 +15439,8 @@
     "carbohydrate": 15.0,
     "fat": 4.2,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19593"
   },
   {
     "id": "off-it-0860300482537",
@@ -15303,7 +15504,8 @@
     "fat": 5.1,
     "fibre": 0.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19593"
   },
   {
     "id": "off-it-8057018220724",
@@ -15351,7 +15553,8 @@
     "fat": 3.5,
     "fibre": 0.4,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19593"
   },
   {
     "id": "off-it-8445290701695",
@@ -15415,7 +15618,8 @@
     "fat": 0.1,
     "fibre": 0.0,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19594"
   },
   {
     "id": "off-it-8000300355055",
@@ -15463,7 +15667,8 @@
     "fat": 0.1,
     "fibre": 0.1,
     "dataNote": "Open Food Facts · dati collaborativi, da verificare sull’etichetta",
-    "detail": "Open Food Facts · ODbL 1.0"
+    "detail": "Open Food Facts · ODbL 1.0",
+    "nutrientEstimateFrom": "ciqual-19594"
   },
   {
     "id": "off-it-4613297299031",

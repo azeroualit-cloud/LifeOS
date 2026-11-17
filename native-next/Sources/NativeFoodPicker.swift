@@ -6,7 +6,7 @@ struct NativeGenericFood: Codable, Identifiable {
     let detail: String?
     let family: Family
     let boneInEdiblePercent: Int?
-    let nutrientValues: [String: NativeNutrientAmount]?
+    var nutrientValues: [String: NativeNutrientAmount]?
     var cocktail: Cocktail? = nil
 
     struct Cocktail: Codable {
@@ -81,6 +81,17 @@ struct NativeGenericFood: Codable, Identifiable {
     var barcode: String? = nil
     var supplementUnit: NativeSupplementUnit? = nil
     var defaultQuantity: Decimal? = nil
+    /// Natural units for foods eaten by the piece (FOOD-CATALOG-92), e.g. an egg
+    /// is about 50 g edible. Values stay per 100 g; a piece is just a gram preset.
+    var pieces: [Piece]? = nil
+    /// Branded products rarely declare micronutrients: the catalog points them
+    /// at the closest generic food and the values are shown as estimates.
+    var nutrientEstimateFrom: String? = nil
+    struct Piece: Codable, Hashable, Identifiable {
+        let name: String
+        let grams: Decimal
+        var id: String { name }
+    }
 
     var isCommunitySourced: Bool {
         guard let sourceURL, let host = URL(string: sourceURL)?.host?.lowercased() else { return false }
@@ -136,7 +147,7 @@ struct NativeGenericFood: Codable, Identifiable {
         .init(id: "personal-" + UUID().uuidString, name: name, detail: "Personale", family: family,
               boneInEdiblePercent: boneInEdiblePercent, nutrientValues: nutrientValues, cocktail: cocktail,
               aliases: aliases, protein: protein, carbohydrate: carbohydrate, fat: fat, fibre: fibre, calories: calories,
-              zeroEnergyLabelVerified: zeroEnergyLabelVerified, estimatedMacroBounds: estimatedMacroBounds, dataNote: dataNote, nutritionNotDeclared: nutritionNotDeclared, measurementBasis: measurementBasis, brand: brand, sourceURL: sourceURL, barcode: barcode, supplementUnit: supplementUnit, defaultQuantity: defaultQuantity)
+              zeroEnergyLabelVerified: zeroEnergyLabelVerified, estimatedMacroBounds: estimatedMacroBounds, dataNote: dataNote, nutritionNotDeclared: nutritionNotDeclared, measurementBasis: measurementBasis, brand: brand, sourceURL: sourceURL, barcode: barcode, supplementUnit: supplementUnit, defaultQuantity: defaultQuantity, pieces: pieces, nutrientEstimateFrom: nutrientEstimateFrom)
     }
 
     // Cache public catalog tokenization; personal edits are indexed from their current values.
@@ -199,7 +210,27 @@ struct NativeGenericFood: Codable, Identifiable {
     static let foods = loadCatalog("generic-foods")
     static let cocktails = loadCatalog("cocktails")
     /// No preset supplements (SUPPLEMENTS-PERSONAL-ONLY-92): the user adds his own.
-    static let catalog = (foods + cocktails + brandedFoods + italianBrands + communityFoods).filter { $0.family != .supplement && NativeFoodCatalogPolicy.includes($0) }
+    static let catalog = withEstimatedNutrients(foods + cocktails + brandedFoods + italianBrands + communityFoods).filter { $0.family != .supplement && NativeFoodCatalogPolicy.includes($0) }
+
+    /// FOOD-CATALOG-92: fill undeclared micronutrients from the referenced generic
+    /// food, marked as estimates so totals show the "stimato" state.
+    static func withEstimatedNutrients(_ items: [Self]) -> [Self] {
+        let generic = Dictionary(foods.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        return items.map { item in
+            guard item.nutrientValues == nil, item.nutritionNotDeclared != true, let reference = item.nutrientEstimateFrom,
+                  let source = generic[reference], let values = source.nutrientValues else { return item }
+            // A dry product matched to a cooked generic (or the reverse) differs mostly
+            // by water: follow the energy ratio when it is clearly different.
+            var factor: Decimal = 1
+            if item.calories > 0, source.calories > 0 {
+                let ratio = item.calories / source.calories
+                if ratio < 0.75 || ratio > 1.33 { factor = min(5, max(0.2, ratio)) }
+            }
+            var copy = item
+            copy.nutrientValues = values.mapValues { NativeNutrientAmount(amount: $0.amount * factor, estimateSource: "stima:generico:" + reference) }
+            return copy
+        }
+    }
     static let communityFoods = loadCatalog("open-food-facts-italy")
     static let italianBrands = loadCatalog("italian-brands")
     static let brandedFoods = loadCatalog("branded-foods")
