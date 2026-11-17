@@ -54,6 +54,8 @@ struct NativeHealthDetail: View {
     @State private var selectedDate = Calendar.current.startOfDay(for: .now)
     let demo: Bool
     @State private var addingWeight = false
+    @State private var showingMicronutrients = false
+    @State private var showingHistory = false
     @State private var openedMetric: NativeHealthMetric?
     @State private var showingNutrition = false
     @State private var deletingFood: UUID?
@@ -85,6 +87,10 @@ struct NativeHealthDetail: View {
             .task { await NativeNutritionUIFixture.prepareReview() }
             .refreshable { await health.refresh() }
             .loBottomActions { nutritionActions }
+            .navigationDestination(isPresented: $showingMicronutrients) {
+                NativeMicronutrientScreen(nutrition: nutrition, selectedDate: selectedDate)
+            }
+            .navigationDestination(isPresented: $showingHistory) { NativeNutritionScreen() }
             .navigationDestination(item: $openedMetric) { metric in
                 NativeHealthMetricDetail(metric: metric, health: health, demo: demo)
             }
@@ -94,7 +100,7 @@ struct NativeHealthDetail: View {
             .toolbar {
                 // History in the navigation bar: always reachable, never under the bottom actions.
                 ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink { NativeNutritionScreen() } label: {
+                    Button { showingHistory = true } label: {
                         Label("Cronologia", systemImage: "clock.arrow.circlepath")
                     }
                     .accessibilityLabel("Cronologia nutrizione")
@@ -192,9 +198,8 @@ struct NativeHealthDetail: View {
             NativeNutrientValues(health: health, includesFibre: true, date: selectedDate)
             Divider().padding(.vertical, NativeDesign.Space.xs)
             NativePinnedNutrients(entries: nutrition.entries, date: selectedDate)
-            NavigationLink {
-                NativeMicronutrientScreen(nutrition: nutrition, selectedDate: selectedDate)
-            } label: {
+            // Programmatic push: closure links stop working next to navigationDestination(item:).
+            Button { showingMicronutrients = true } label: {
                 HStack {
                     Text("Micronutrienti").font(.subheadline.weight(.semibold))
                     Spacer()

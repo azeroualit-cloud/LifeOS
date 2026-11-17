@@ -132,7 +132,7 @@ final class NativePersonalFoodUITests: XCTestCase {
         // SUPPLEMENTS-PERSONAL-ONLY-92: no preset supplement, only the user's own.
         for query in ["vit4ever", "Proteine whey", "Vitamina C"] {
             replace(search, with: query, app: app)
-            XCTAssertFalse(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND NOT identifier BEGINSWITH %@", "generic-food-", "generic-food-personal-")).firstMatch.exists, "Preset supplement for " + query)
+            XCTAssertFalse(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND NOT identifier BEGINSWITH %@ AND NOT identifier IN %@", "generic-food-", "generic-food-personal-", ["generic-food-create", "generic-food-search", "generic-food-scope"])).firstMatch.exists, "Preset supplement for " + query)
         }
         XCTAssertTrue(app.buttons["generic-food-create"].exists)
         capture("Scheda Integratori con sole voci personali")

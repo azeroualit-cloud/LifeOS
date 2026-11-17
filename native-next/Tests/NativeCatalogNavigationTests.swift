@@ -24,15 +24,9 @@ import XCTest
         XCTAssertTrue(NativeGenericFood.matches("caffe inesistente", in: [custom]).isEmpty)
     }
 
-    func testCoopSupplementsUseMassOrVolumeWithoutInventingCapsuleComposition() throws {
-        let foods = NativeGenericFood.brandedFoods.filter { $0.sourceURL?.contains("/integratori/") == true }
-        XCTAssertEqual(foods.count, 32)
-        XCTAssertTrue(foods.allSatisfy { $0.family == .supplement && $0.quantityUnit.isMassOrVolume })
-        let liquid = try XCTUnwrap(foods.first { $0.quantityUnit == .millilitre })
-        let entry = try XCTUnwrap(liquid.portion(id: UUID(), date: .now, grams: 150))
-        XCTAssertEqual(entry.portionMillilitres, 150)
-        XCTAssertEqual(entry.quantityDescription, "150 ml")
-        XCTAssertEqual(entry.calories, liquid.calories * 1.5)
+    func testCoopSupplementsAreNoLongerPreset() {
+        // SUPPLEMENTS-PERSONAL-ONLY-92: the 32 Coop supplements left the bundled catalog.
+        XCTAssertTrue(NativeGenericFood.brandedFoods.filter { $0.sourceURL?.contains("/integratori/") == true }.isEmpty)
     }
 
     func testPersonalEditSearchUsesCurrentNameRatherThanStaleIndex() throws {

@@ -262,7 +262,9 @@ struct LOSegmented: View {
                         .lineLimit(1).minimumScaleFactor(0.8)
                         .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.segmentHeight)
                         .background { if selected { Capsule().fill(NativeDesign.surface).shadow(color: .black.opacity(0.12), radius: 2, y: 1) } }
-                        .contentShape(Capsule())
+                        // The capsule is 36 pt; the touch target stays 44 pt (HIG).
+                        .frame(minHeight: NativeDesign.Layout.touchTarget)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(NativePressStyle())
                 .accessibilityElement(children: .ignore)
@@ -272,8 +274,8 @@ struct LOSegmented: View {
                 .accessibilityAction { selection = option.title }
             }
         }
-        .padding(NativeDesign.Space.xxs)
-        .modifier(NativeGlass(interactive: false))
+        .padding(.horizontal, NativeDesign.Space.xxs)
+        .background { Capsule().fill(.clear).modifier(NativeGlass(interactive: false)).frame(height: NativeDesign.Layout.segmentHeight + NativeDesign.Space.xxs * 2) }
     }
 }
 

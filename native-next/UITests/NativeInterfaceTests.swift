@@ -1108,7 +1108,8 @@ final class NativeInterfaceTests: XCTestCase {
         let budget = app.buttons["finance-budget"], analysis = app.buttons["finance-analysis"], more = app.buttons["finance-new-plan"]
         revealFinanceControl(budget, in: app)
         for action in [budget, analysis, more] { assertMinimumTouchTarget(action) }
-        XCTAssertGreaterThan(analysis.frame.minX, budget.frame.maxX)
+        // One compact row (build 92): adjacent shortcuts may share an edge.
+        XCTAssertGreaterThanOrEqual(analysis.frame.minX, budget.frame.maxX - 1)
         XCTAssertFalse(app.buttons["finance-more"].exists, "No hidden overflow menu")
         more.tap()
         XCTAssertTrue(app.navigationBars["Nuovo piano"].waitForExistence(timeout: 10)); app.buttons["Annulla"].tap()

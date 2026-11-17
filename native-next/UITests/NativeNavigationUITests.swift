@@ -103,8 +103,12 @@ final class NativeNavigationUITests: XCTestCase {
         XCTAssertTrue(search.isHittable)
         search.tap()
         XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 10))
-        let hidden = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"), object: app.mainTabBar)
-        XCTAssertEqual(XCTWaiter.wait(for: [hidden], timeout: 10), .completed, "The navigation bar should not cover the keyboard")
+        // System tab bar (build 92): it may stay in the hierarchy, but under the keyboard.
+        let keyboard = app.keyboards.firstMatch
+        let notCovering = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            !app.mainTabBar.exists || app.mainTabBar.frame.minY >= keyboard.frame.minY - 1 || !app.mainTabBar.isHittable
+        }, object: nil)
+        XCTAssertEqual(XCTWaiter.wait(for: [notCovering], timeout: 10), .completed, "The navigation bar should not cover the keyboard")
         capture("Ricerca Bloom e tastiera senza barra sovrapposta")
         // The captured hierarchy puts the native "chiudi" button in a sibling
         // branch beside the SearchField. Match its exact label at app scope.

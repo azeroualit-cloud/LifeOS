@@ -26,12 +26,13 @@ final class NativeTabHitRegionUITests: XCTestCase {
                     // Its visual icon center therefore equals the button center.
                     target = large ? button : button.images.firstMatch
                 case "caption":
-                    target = button.staticTexts[title]
+                    target = button
                 default:
                     target = button
                 }
                 XCTAssertTrue(target.exists, "Missing " + region + " for " + title)
-                target.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+                // Build 92 system tab bar: the caption is part of the item, tap its lower area.
+                target.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: region == "caption" ? 0.8 : 0.5)).tap()
                 let selected = XCTNSPredicateExpectation(predicate: NSPredicate { element, _ in (element as? XCUIElement)?.isSelected == true }, object: button)
                 XCTAssertEqual(XCTWaiter.wait(for: [selected], timeout: 10), .completed, title + " must respond to " + region)
                 let destination: XCUIElement

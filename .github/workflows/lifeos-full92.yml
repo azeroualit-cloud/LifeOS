@@ -1,5 +1,5 @@
 name: LifeOS build 92 full suite (no IPA)
-# Start 2. Change this line to rerun the whole suite on the current commit. Never packages or releases (IPA-GATE-01).
+# Start 3. Change this line to rerun the whole suite on the current commit. Never packages or releases (IPA-GATE-01).
 on:
   push:
     branches: ['codex/build92']

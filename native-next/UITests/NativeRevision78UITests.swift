@@ -63,11 +63,13 @@ final class NativeRevision78UITests: XCTestCase {
         XCTAssertTrue(rows[1].label.contains("Peso"))
         XCTAssertNotNil(rows[3].label.components(separatedBy: ", ").last?.range(of: "[0-9]", options: .regularExpression), "The forecast date remains in the accessible summary")
         XCTAssertNotNil(rows[1].label.components(separatedBy: ", ").last?.range(of: "[0-9]", options: .regularExpression), "The latest weight and date remain in the accessible summary")
-        XCTAssertLessThan(rows[0].frame.midY, rows[1].frame.midY)
+        // HEALTH-GRID-3X2-92: TDEE · Peso previsto · Peso, then Calorie in the second row.
         XCTAssertEqual(rows[0].frame.midY, rows[3].frame.midY, accuracy: 2)
-        XCTAssertEqual(rows[1].frame.midY, rows[2].frame.midY, accuracy: 2)
+        XCTAssertEqual(rows[0].frame.midY, rows[1].frame.midY, accuracy: 2)
+        XCTAssertLessThan(rows[0].frame.midY, rows[2].frame.midY)
         XCTAssertLessThan(rows[0].frame.midX, rows[3].frame.midX)
-        XCTAssertLessThan(rows[1].frame.midX, rows[2].frame.midX)
+        XCTAssertLessThan(rows[3].frame.midX, rows[1].frame.midX)
+        XCTAssertEqual(rows[0].frame.midX, rows[2].frame.midX, accuracy: 2)
         capture("78-health-summary", app)
         let surface = app.scrollViews["health-detail-scroll"]
         let food = app.buttons["health-add-nutrition"]
