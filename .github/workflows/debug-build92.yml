@@ -1,0 +1,30 @@
+name: Debug build 92 failures
+on:
+  push:
+    branches: [diagnostics/build92]
+    paths: [.github/workflows/debug-build92.yml]
+permissions:
+  actions: read
+  contents: write
+jobs:
+  failures:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Extract failure lines into the branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN: "44077073291"
+        run: |
+          set -u
+          mkdir -p diag
+          gh api "repos/${{ github.repository }}/actions/runs/$RUN/artifacts" --jq '.artifacts[].name' > diag/artifacts.txt
+          for name in $(cat diag/artifacts.txt); do gh run download "$RUN" -R "${{ github.repository }}" -n "$name" -D "art/$name" || true; done
+          find art -maxdepth 4 | head -80 > diag/tree.txt
+          for f in $(find art -name '*.log' -o -name '*failure*.txt' -o -name '*.md' | head -40); do
+            echo "=== $f" >> diag/logs.txt
+            grep -a -n -E "error:|failed|Failing tests|XCTAssert|Test Case .* failed|\*\* TEST|Executed [0-9]+ tests|crash|Fatal" "$f" | head -400 >> diag/logs.txt
+          done
+          git config user.name lifeos-diag; git config user.email diag@lifeos.invalid
+          git add diag && git commit -m "Build 92 failure lines [diagnostics]" && git push origin HEAD:diagnostics/build92
