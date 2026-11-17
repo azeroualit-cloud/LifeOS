@@ -24,7 +24,7 @@ jobs:
             if head -c 4 "$f" | od -An -tx1 | grep -q "28 b5 2f fd"; then zstd -dqc "$f" > t 2>/dev/null || continue; else cp "$f" t; fi
             if grep -aq "FINANCE_DIAG_TREE" t; then
               echo "=== $f"
-              grep -a -A400 "FINANCE_DIAG_TREE" t | cut -c1-260 | grep -a -v -E "^\s*$" | head -400
+              grep -a -A20000 "FINANCE_DIAG_TREE" t | grep -a -E "^ *(→)?[A-Z][A-Za-z]+, 0x[0-9a-f]+, " | grep -a -v -E "^ *Other, 0x[0-9a-f]+, \{\{[^}]*\}\}$" | cut -c1-230 | head -150
               break
             fi
           done
