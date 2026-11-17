@@ -18,7 +18,7 @@ jobs:
           RUN: "44082571619"
         run: |
           set -u
-          mkdir -p diag
+          rm -rf diag; mkdir -p diag
           gh api "repos/${{ github.repository }}/actions/runs/$RUN/artifacts" --jq '.artifacts[].name' > diag/artifacts.txt
           for name in $(cat diag/artifacts.txt); do gh run download "$RUN" -R "${{ github.repository }}" -n "$name" -D "art/$name" || true; done
           find art -maxdepth 4 | head -80 > diag/tree.txt
