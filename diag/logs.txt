@@ -71,3 +71,7 @@
 30:	 Executed 6 tests, with 2 failures (0 unexpected) in 98.175 (98.178) seconds
 31:	 Executed 35 tests, with 4 failures (0 unexpected) in 1277.689 (1277.719) seconds
 32:	 Executed 35 tests, with 4 failures (0 unexpected) in 1277.689 (1277.720) seconds
+=== art/lifeos-development-preview-ad01e15e3b10ff888b644df2f0d10d623af4dd43/build/development-build.log
+1400:/Users/runner/work/LifeOS/LifeOS/app/Sources/DesignSystem/LifeOSDesign.swift:139:31: error: the compiler is unable to type-check this expression in reasonable time; try breaking up the expression into distinct sub-expressions
+1868:** TEST BUILD FAILED **
+1871:The following build commands failed:
