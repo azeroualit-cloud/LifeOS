@@ -1,391 +1,133 @@
-=== art/lifeos-full92-4a10bc8f95ef19c50210a973848910616ef10145/full-tests.log
-175-Test Case '-[LifeOSProbeTests.NativeBloomStoreTests testMixedVisualFixturePreserves122ValidItemsAndImages]' passed (1.936 seconds).
-176-Test Case '-[LifeOSProbeTests.NativeBloomStoreTests testOutOfSpaceAtIndexCommitRetainsArchiveAndRetryRecoversPreparedFiles]' started.
-177-Test Case '-[LifeOSProbeTests.NativeBloomStoreTests testOutOfSpaceAtIndexCommitRetainsArchiveAndRetryRecoversPreparedFiles]' passed (0.012 seconds).
-178-Test Case '-[LifeOSProbeTests.NativeBloomStoreTests testPermanentDeletionRetainsFilesSharedByAnotherNote]' started.
-179-Test Case '-[LifeOSProbeTests.NativeBloomStoreTests testPermanentDeletionRetainsFilesSharedByAnotherNote]' passed (0.006 seconds).
-180-Test Case '-[LifeOSProbeTests.NativeBloomStoreTests testPreviewURLSupportsImportedAndAttachedLinksAndRejectsNonWebURLs]' started.
-181-Test Case '-[LifeOSProbeTests.NativeBloomStoreTests testPreviewURLSupportsImportedAndAttachedLinksAndRejectsNonWebURLs]' passed (0.001 seconds).
-182-Test Case '-[LifeOSProbeTests.NativeBloomStoreTests testSnapshotFailureLeavesExistingArchiveUntouched]' started.
-183-Test Case '-[LifeOSProbeTests.NativeBloomStoreTests testSnapshotFailureLeavesExistingArchiveUntouched]' passed (0.003 seconds).
-184-Test Suite 'NativeBloomStoreTests' passed at 2026-11-17 12:42:46.745.
-185-	 Executed 20 tests, with 0 failures (0 unexpected) in 2.185 (2.208) seconds
-186-Test Suite 'NativeBudgetFlowTests' started at 2026-11-17 12:42:46.746.
-187-Test Case '-[LifeOSProbeTests.NativeBudgetFlowTests testLegacyCommitmentsAndRefundsReconcileWithNegativeBudget]' started.
-188-Test Case '-[LifeOSProbeTests.NativeBudgetFlowTests testLegacyCommitmentsAndRefundsReconcileWithNegativeBudget]' passed (0.002 seconds).
-189-Test Case '-[LifeOSProbeTests.NativeBudgetFlowTests testSalaryWaterfallCreditsAdvancesAndKeepsStoppedHistoryWithoutDuplicates]' started.
-190-Test Case '-[LifeOSProbeTests.NativeBudgetFlowTests testSalaryWaterfallCreditsAdvancesAndKeepsStoppedHistoryWithoutDuplicates]' passed (0.001 seconds).
-191-Test Suite 'NativeBudgetFlowTests' passed at 2026-11-17 12:42:46.749.
-192-	 Executed 2 tests, with 0 failures (0 unexpected) in 0.003 (0.004) seconds
-193-Test Suite 'NativeCalendarPerformanceTests' started at 2026-11-17 12:42:46.750.
-194-Test Case '-[LifeOSProbeTests.NativeCalendarPerformanceTests testBoundaryWeekFocusMatchesTheMonthLabelForEveryWeekdayAndLeapYear]' started.
-195-Test Case '-[LifeOSProbeTests.NativeCalendarPerformanceTests testBoundaryWeekFocusMatchesTheMonthLabelForEveryWeekdayAndLeapYear]' passed (0.010 seconds).
-196-Test Case '-[LifeOSProbeTests.NativeCalendarPerformanceTests testGridPreservesLeapDaysSixWeeksAndRomeDaylightSaving]' started.
-197-Test Case '-[LifeOSProbeTests.NativeCalendarPerformanceTests testGridPreservesLeapDaysSixWeeksAndRomeDaylightSaving]' passed (0.018 seconds).
-198-Test Case '-[LifeOSProbeTests.NativeCalendarPerformanceTests testNonCalendarUpdatesDoNotInvalidateMonthlySnapshots]' started.
-199-Test Case '-[LifeOSProbeTests.NativeCalendarPerformanceTests testNonCalendarUpdatesDoNotInvalidateMonthlySnapshots]' passed (0.002 seconds).
-200-Test Case '-[LifeOSProbeTests.NativeCalendarPerformanceTests testSnapshotsOutsideTheRetainedWindowCannotGrowTheCache]' started.
-201-Test Case '-[LifeOSProbeTests.NativeCalendarPerformanceTests testSnapshotsOutsideTheRetainedWindowCannotGrowTheCache]' passed (0.003 seconds).
-202-Test Case '-[LifeOSProbeTests.NativeCalendarPerformanceTests testWindowStaysBoundedAndContiguousAcrossYearsAndReverseScrolling]' started.
-203-Test Case '-[LifeOSProbeTests.NativeCalendarPerformanceTests testWindowStaysBoundedAndContiguousAcrossYearsAndReverseScrolling]' passed (0.210 seconds).
-204-Test Suite 'NativeCalendarPerformanceTests' passed at 2026-11-17 12:42:46.999.
-205-	 Executed 5 tests, with 0 failures (0 unexpected) in 0.243 (0.249) seconds
-206-Test Suite 'NativeCatalogExpansionTests' started at 2026-11-17 12:42:46.999.
-207-Test Case '-[LifeOSProbeTests.NativeCatalogExpansionTests testCommunityCatalogLoadsWithTraceableSourcesAndUniqueIdentities]' started.
-208-Test Case '-[LifeOSProbeTests.NativeCatalogExpansionTests testCommunityCatalogLoadsWithTraceableSourcesAndUniqueIdentities]' passed (0.104 seconds).
-209-Test Case '-[LifeOSProbeTests.NativeCatalogExpansionTests testCommunitySourceIsExplicitAndDoesNotTrustSimilarHostNames]' started.
-210-Test Case '-[LifeOSProbeTests.NativeCatalogExpansionTests testCommunitySourceIsExplicitAndDoesNotTrustSimilarHostNames]' passed (0.007 seconds).
-211-Test Suite 'NativeCatalogExpansionTests' passed at 2026-11-17 12:42:47.111.
-212-	 Executed 2 tests, with 0 failures (0 unexpected) in 0.111 (0.112) seconds
-213-Test Suite 'NativeCatalogNavigationTests' started at 2026-11-17 12:42:47.111.
-214-Test Case '-[LifeOSProbeTests.NativeCatalogNavigationTests testCoopSupplementsUseMassOrVolumeWithoutInventingCapsuleComposition]' started.
-215:/Users/runner/work/LifeOS/LifeOS/app/Tests/NativeCatalogNavigationTests.swift:29: error: -[LifeOSProbeTests.NativeCatalogNavigationTests testCoopSupplementsUseMassOrVolumeWithoutInventingCapsuleComposition] : XCTAssertEqual failed: ("0") is not equal to ("
-216:/Users/runner/work/LifeOS/LifeOS/app/Tests/NativeCatalogNavigationTests.swift:31: error: -[LifeOSProbeTests.NativeCatalogNavigationTests testCoopSupplementsUseMassOrVolumeWithoutInventingCapsuleComposition] : XCTUnwrap failed: expected non-nil value of typ
---
-6525-    t =    12.98s     Find the "square.grid.2x2" Button
-6526-    t =    13.06s Checking existence of `"dashboard-scroll" ScrollView`
-6527-    t =    13.25s Find the "home-finance" Button
-6528-    t =    13.37s Swipe up "dashboard-scroll" ScrollView
-6529-    t =    13.37s     Wait for com.nas.lifeos.probe to idle
-6530-    t =    13.40s     Find the "dashboard-scroll" ScrollView
-6531-    t =    13.52s     Check for interrupting elements affecting "dashboard-scroll" ScrollView
-6532-    t =    13.67s     Synthesize event
-6533-    t =    14.54s     Wait for com.nas.lifeos.probe to idle
-6534-    t =    15.35s Find the "home-finance" Button
-6535-    t =    15.69s Find the "home-finance" Button
-6536-    t =    16.03s Tap "home-finance" Button
-6537-    t =    16.03s     Wait for com.nas.lifeos.probe to idle
-6538-    t =    16.03s     Find the "home-finance" Button
-6539-    t =    16.37s     Check for interrupting elements affecting "home-finance" Button
-6540-    t =    16.55s     Synthesize event
-6541-    t =    16.89s     Wait for com.nas.lifeos.probe to idle
-6542-    t =    17.14s Checking existence of `"finance-heading" StaticText`
-6543-    t =    17.74s Checking existence of `SegmentedControl (First Match)`
-6544-    t =    18.70s Checking existence of `"wealth-forecast-chart" Other`
-6545-    t =    18.76s Find the "finance-scroll" ScrollView
-6546-    t =    18.87s Find the Target Application 'com.nas.lifeos.probe'
-6547-    t =    19.03s Checking existence of `NavigationBar (First Match)`
-6548-    t =    20.35s Checking existence of `"primary-add" Button`
-6549-    t =    20.44s Find the "primary-add" Button
-6550-    t =    20.59s Find the "primary-add" Button
-6551-    t =    20.67s Find the "finance-budget" Button
-6552-    t =    20.93s Find the "primary-add" Button
-6553-    t =    21.13s Find the TabBar (First Match)
-6554-    t =    21.34s Find the "finance-budget" Button
-6555-    t =    21.46s Find the "finance-budget" Button
-6556-    t =    21.55s Find the "finance-budget" Button
-6557-    t =    21.65s Find the "finance-budget" Button
-6558-    t =    21.75s Find the "finance-budget" Button
-6559-    t =    21.81s Find the "finance-analysis" Button
-6560-    t =    21.87s Find the "finance-analysis" Button
-6561-    t =    21.93s Find the "finance-new-plan" Button
-6562-    t =    21.99s Find the "finance-new-plan" Button
-6563-    t =    22.04s Find the "finance-analysis" Button
-6564-    t =    22.10s Find the "finance-budget" Button
-6565:/Users/runner/work/LifeOS/LifeOS/app/UITests/NativeInterfaceTests.swift:1111: error: -[LifeOSProbeUITests.NativeInterfaceTests testFinanceHasOpenOverviewAndDirectMovements] : XCTAssertGreaterThan failed: ("110.33333333333333") is not greater than ("110.33
---
-12367-    t =    50.61s Tap "Cerca nella Libreria" SearchField
-12368-    t =    50.61s     Wait for com.nas.lifeos.probe to idle
-12369-    t =    50.61s     Find the "Cerca nella Libreria" SearchField
-12370-    t =    50.75s     Check for interrupting elements affecting "Cerca nella Libreria" SearchField
-12371-    t =    50.84s     Synthesize event
-12372-    t =    51.18s     Wait for com.nas.lifeos.probe to idle
-12373-    t =    52.89s Waiting 10.0s for Keyboard (First Match) to exist
-12374-    t =    53.92s     Checking `Expect predicate `existsNoRetry == 1` for object Keyboard (First Match)`
-12375-    t =    53.93s         Checking existence of `Keyboard (First Match)`
-12376-    t =    54.97s Checking `Expect predicate `exists == 0` for object TabBar (First Match)`
-12377-    t =    54.98s     Checking existence of `TabBar (First Match)`
-12378-    t =    55.17s     Capturing element debug description
-12379-    t =    55.99s Checking `Expect predicate `exists == 0` for object TabBar (First Match)`
-12380-    t =    56.00s     Checking existence of `TabBar (First Match)`
-12381-    t =    56.16s     Capturing element debug description
-12382-    t =    56.98s Checking `Expect predicate `exists == 0` for object TabBar (First Match)`
-12383-    t =    56.98s     Checking existence of `TabBar (First Match)`
-12384-    t =    57.11s     Capturing element debug description
-12385-    t =    58.07s Checking `Expect predicate `exists == 0` for object TabBar (First Match)`
-12386-    t =    58.07s     Checking existence of `TabBar (First Match)`
-12387-    t =    58.20s     Capturing element debug description
-12388-    t =    58.98s Checking `Expect predicate `exists == 0` for object TabBar (First Match)`
-12389-    t =    58.98s     Checking existence of `TabBar (First Match)`
-12390-    t =    59.16s     Capturing element debug description
-12391-    t =    60.00s Checking `Expect predicate `exists == 0` for object TabBar (First Match)`
-12392-    t =    60.00s     Checking existence of `TabBar (First Match)`
-12393-    t =    60.18s     Capturing element debug description
-12394-    t =    61.01s Checking `Expect predicate `exists == 0` for object TabBar (First Match)`
-12395-    t =    61.01s     Checking existence of `TabBar (First Match)`
-12396-    t =    61.17s     Capturing element debug description
-12397-    t =    61.99s Checking `Expect predicate `exists == 0` for object TabBar (First Match)`
-12398-    t =    61.99s     Checking existence of `TabBar (First Match)`
-12399-    t =    62.13s     Capturing element debug description
-12400-    t =    63.06s Checking `Expect predicate `exists == 0` for object TabBar (First Match)`
-12401-    t =    63.06s     Checking existence of `TabBar (First Match)`
-12402-    t =    63.41s     Capturing element debug description
-12403-    t =    63.98s Checking `Expect predicate `exists == 0` for object TabBar (First Match)`
-12404-    t =    63.99s     Checking existence of `TabBar (First Match)`
-12405-    t =    64.28s     Checking existence of `TabBar (First Match)` (retry 1)
-12406-    t =    64.28s     Checking existence of `TabBar (First Match)` (retry 2)
-12407:/Users/runner/work/LifeOS/LifeOS/app/UITests/NativeNavigationUITests.swift:107: error: -[LifeOSProbeUITests.NativeNavigationUITests testSixVisibleTabsWithLargeTextAndKeyboard] : XCTAssertEqual failed: ("XCTWaiterResult(rawValue: 2)") is not equal to ("XC
---
-14918-    t =    17.87s     Checking `Expect predicate `existsNoRetry == 1` for object "generic-food-search" TextField`
-14919-    t =    17.87s         Checking existence of `"generic-food-search" TextField`
-14920-    t =    18.19s Tap "Integratori" Button
-14921-    t =    18.19s     Wait for com.nas.lifeos.probe to idle
-14922-    t =    18.20s     Find the "Integratori" Button
-14923-    t =    18.36s     Check for interrupting elements affecting "Integratori" Button
-14924-    t =    18.50s     Synthesize event
-14925-    t =    18.82s     Wait for com.nas.lifeos.probe to idle
-14926-    t =    20.00s Find the "generic-food-search" TextField
-14927-    t =    20.24s Find the "generic-food-search" TextField
-14928-    t =    20.37s Find the "generic-food-search" TextField
-14929-    t =    20.59s Find the "generic-food-search" TextField
-14930-    t =    20.79s Find the "generic-food-search" TextField
-14931-    t =    20.94s Find the "generic-food-search" TextField
-14932-    t =    21.09s Find the "generic-food-search" TextField
-14933-    t =    21.25s Find the "generic-food-search" TextField
-14934-    t =    21.38s Tap "generic-food-search" TextField
-14935-    t =    21.38s     Wait for com.nas.lifeos.probe to idle
-14936-    t =    21.39s     Find the "generic-food-search" TextField
-14937-    t =    21.52s     Check for interrupting elements affecting "generic-food-search" TextField
-14938-    t =    21.65s     Synthesize event
-14939-    t =    21.96s     Wait for com.nas.lifeos.probe to idle
-14940-    t =    22.86s Waiting 10.0s for Keyboard (First Match) to exist
-14941-    t =    23.86s     Checking `Expect predicate `existsNoRetry == 1` for object Keyboard (First Match)`
-14942-    t =    23.86s         Checking existence of `Keyboard (First Match)`
-14943-    t =    23.90s Waiting 10.0s for "generic-food-search" TextField to exist
-14944-    t =    24.93s     Checking `Expect predicate `existsNoRetry == 1` for object "generic-food-search" TextField`
-14945-    t =    24.93s         Checking existence of `"generic-food-search" TextField`
-14946-    t =    25.13s Find the "generic-food-search" TextField
-14947-    t =    25.29s Find the "generic-food-search" TextField
-14948-    t =    25.46s Find the "generic-food-search" TextField
-14949-    t =    25.64s Type 'vit4ever' into "generic-food-search" TextField
-14950-    t =    25.64s     Wait for com.nas.lifeos.probe to idle
-14951-    t =    25.65s     Find the "generic-food-search" TextField
-14952-    t =    25.86s     Check for interrupting elements affecting "generic-food-search" TextField
-14953-    t =    26.07s     Synthesize event
-14954-    t =    26.45s     Wait for com.nas.lifeos.probe to idle
-14955-    t =    27.60s Checking `Expect predicate `value == "vit4ever"` for object "generic-food-search" TextField`
-14956-    t =    27.60s     Find the "generic-food-search" TextField
-14957-    t =    27.80s Checking existence of `Button (First Match)`
-14958:/Users/runner/work/LifeOS/LifeOS/app/UITests/NativePersonalFoodUITests.swift:135: error: -[LifeOSProbeUITests.NativePersonalFoodUITests testSupplementTabSeparatesFoodsAndSearchesKnownBrands] : XCTAssertFalse failed - Preset supplement for vit4ever
---
-18274-Test Case '-[LifeOSProbeUITests.NativeRevision78UITests testBloomCancelClosesFilesAndAllowsRetry]' passed (41.701 seconds).
-18275-Test Case '-[LifeOSProbeUITests.NativeRevision78UITests testBloomSectionRespondsAtLowerEdgeOf44PointTouchTarget]' started.
-18276-    t =     0.00s Start Test at 2026-11-17 14:07:40.648
-18277-    t =     0.04s Set Up
-18278-    t =     0.05s Open com.nas.lifeos.probe
-18279-    t =     0.05s     Launch com.nas.lifeos.probe
-18280-    t =     0.05s         Terminate com.nas.lifeos.probe:15519
-18281-    t =     1.61s         Setting up automation session
-18282-    t =     4.39s         Wait for com.nas.lifeos.probe to idle
-18283-    t =     7.65s Waiting 20.0s for "Dashboard" Button to exist
-18284-    t =     8.70s     Checking `Expect predicate `existsNoRetry == 1` for object "Dashboard" Button`
-18285-    t =     8.70s         Checking existence of `"Dashboard" Button`
-18286-    t =     8.80s Waiting 10.0s for "Bloom" Button to exist
-18287-    t =     9.83s     Checking `Expect predicate `existsNoRetry == 1` for object "Bloom" Button`
-18288-    t =     9.83s         Checking existence of `"Bloom" Button`
-18289-    t =     9.86s Find the "Bloom" Button
-18290-    t =     9.92s Tap "Bloom" Button
-18291-    t =     9.92s     Wait for com.nas.lifeos.probe to idle
-18292-    t =     9.93s     Find the "Bloom" Button
-18293-    t =     9.97s     Check for interrupting elements affecting "Bloom" Button
-18294-    t =    10.15s     Synthesize event
-18295-    t =    10.46s     Wait for com.nas.lifeos.probe to idle
-18296-    t =    13.81s Checking `Expect predicate `BLOCKPREDICATE(0x600001475d70)` for object "Bloom" Button`
-18297-    t =    13.81s     Find the "Bloom" Button
-18298-    t =    13.89s Waiting 10.0s for "bloom-section-map" Button to exist
-18299-    t =    14.89s     Checking `Expect predicate `existsNoRetry == 1` for object "bloom-section-map" Button`
-18300-    t =    14.89s         Checking existence of `"bloom-section-map" Button`
-18301-    t =    15.11s Find the "bloom-section-map" Button
-18302-    t =    15.24s Find the Target Application 'com.nas.lifeos.probe'
-18303-    t =    15.33s Find the "bloom-section-map" Button
-18304-    t =    15.43s Tap Target Application 'com.nas.lifeos.probe'[0.62, 0.12]
-18305-    t =    15.44s     Wait for com.nas.lifeos.probe to idle
-18306-    t =    15.44s     Find the Target Application 'com.nas.lifeos.probe'
-18307-    t =    15.52s     Check for interrupting elements affecting "Life OS" Application
-18308-    t =    15.59s     Synthesize event
-18309-    t =    15.59s         Find the Target Application 'com.nas.lifeos.probe'
-18310-    t =    15.64s         Find the Target Application 'com.nas.lifeos.probe'
-18311-    t =    15.69s         Find the Target Application 'com.nas.lifeos.probe'
-18312-    t =    16.03s     Wait for com.nas.lifeos.probe to idle
-18313-    t =    16.04s Find the "bloom-section-map" Button
-18314:/Users/runner/work/LifeOS/LifeOS/app/UITests/NativeRevision78UITests.swift:399: error: -[LifeOSProbeUITests.NativeRevision78UITests testBloomSectionRespondsAtLowerEdgeOf44PointTouchTarget] : XCTAssertTrue failed - The section button should respond at the
---
-18317-Test Case '-[LifeOSProbeUITests.NativeRevision78UITests testBloomSystemFilesSelectionReachesPreviewAndPersists]' started.
-18318-    t =     0.00s Start Test at 2026-11-17 14:07:57.050
-18319-    t =     0.07s Set Up
-18320-    t =     0.07s Open com.nas.lifeos.probe
-18321-    t =     0.07s     Launch com.nas.lifeos.probe
-18322-    t =     0.08s         Terminate com.nas.lifeos.probe:17019
-18323-    t =     1.63s         Setting up automation session
-18324-    t =     4.10s         Wait for com.nas.lifeos.probe to idle
-18325-    t =     7.20s Waiting 20.0s for "Dashboard" Button to exist
-18326-    t =     8.28s     Checking `Expect predicate `existsNoRetry == 1` for object "Dashboard" Button`
-18327-    t =     8.28s         Checking existence of `"Dashboard" Button`
-18328-    t =     8.43s Waiting 10.0s for "Bloom" Button to exist
-18329-    t =     9.48s     Checking `Expect predicate `existsNoRetry == 1` for object "Bloom" Button`
-18330-    t =     9.48s         Checking existence of `"Bloom" Button`
-18331-    t =     9.51s Find the "Bloom" Button
-18332-    t =     9.60s Tap "books.vertical" Button
-18333-    t =     9.60s     Wait for com.nas.lifeos.probe to idle
-18334-    t =     9.60s     Find the "books.vertical" Button
-18335-    t =     9.68s     Check for interrupting elements affecting "books.vertical" Button
-18336-    t =     9.91s     Synthesize event
-18337-    t =    10.25s     Wait for com.nas.lifeos.probe to idle
-18338-    t =    13.50s Checking `Expect predicate `BLOCKPREDICATE(0x60000147c600)` for object "books.vertical" Button`
-18339-    t =    13.50s     Find the "books.vertical" Button
-18340-    t =    13.59s Waiting 10.0s for "bloom-section-library" Button to exist
-18341-    t =    14.63s     Checking `Expect predicate `existsNoRetry == 1` for object "bloom-section-library" Button`
-18342-    t =    14.63s         Checking existence of `"bloom-section-library" Button`
-18343-    t =    14.84s Get number of matches for: Elements matching predicate '"bloom-section-library" IN identifiers'
-18344-    t =    14.94s Find the "bloom-section-library" Any
-18345-    t =    15.02s Get number of matches for: Elements matching predicate '"bloom-section-map" IN identifiers'
-18346-    t =    15.10s Find the "bloom-section-map" Any
-18347-    t =    15.16s Find the "bloom-section-library" Button
-18348-    t =    15.28s Find the "bloom-section-library" Button
-18349-    t =    15.42s Find the "bloom-section-library" Button
-18350-BLOOM_SECTION_ACCESSIBILITY_FRAME (98.33333333333331, 63.0, 98.00000000000003, 36.0) hittable=true selected=true
-18351-    t =    15.56s Requesting snapshot of accessibility hierarchy for app with pid 17974
-18352-    t =    16.06s Requesting snapshot of accessibility hierarchy for app with pid 17974
-18353-    t =    16.44s Added attachment named '78 Bloom section before touch target assertion hierarchy'
-18354-    t =    16.44s Find the Target Application 'com.nas.lifeos.probe'
-18355-    t =    17.04s Added attachment named '78 Bloom section before touch target assertion'
-18356-    t =    17.06s Find the "bloom-section-library" Button
-18357:/Users/runner/work/LifeOS/LifeOS/app/UITests/NativeRevision78UITests.swift:364: error: -[LifeOSProbeUITests.NativeRevision78UITests testBloomSystemFilesSelectionReachesPreviewAndPersists] : XCTAssertGreaterThanOrEqual failed: ("36.0") is less than ("44.0
---
-18549-    t =    29.20s         Checking existence of `"health-detail-scroll" ScrollView`
-18550-    t =    29.33s Tear Down
-18551-Test Case '-[LifeOSProbeUITests.NativeRevision78UITests testHealthNutritionQuickAddAndHistoryAreReachable]' passed (29.674 seconds).
-18552-Test Case '-[LifeOSProbeUITests.NativeRevision78UITests testHealthUniformRowsAndCompactActions]' started.
-18553-    t =     0.00s Start Test at 2026-11-17 14:09:37.956
-18554-    t =     0.06s Set Up
-18555-    t =     0.07s Open com.nas.lifeos.probe
-18556-    t =     0.07s     Launch com.nas.lifeos.probe
-18557-    t =     0.07s         Terminate com.nas.lifeos.probe:19510
-18558-    t =     2.94s         Setting up automation session
-18559-    t =     4.47s         Wait for com.nas.lifeos.probe to idle
-18560-    t =     7.57s Waiting 20.0s for "Dashboard" Button to exist
-18561-    t =     8.64s     Checking `Expect predicate `existsNoRetry == 1` for object "Dashboard" Button`
-18562-    t =     8.64s         Checking existence of `"Dashboard" Button`
-18563-    t =     8.76s Tap "Salute" Button
-18564-    t =     8.76s     Wait for com.nas.lifeos.probe to idle
-18565-    t =     8.80s     Find the "Salute" Button
-18566-    t =     8.88s     Check for interrupting elements affecting "heart" Button
-18567-    t =     9.06s     Synthesize event
-18568-    t =     9.39s     Wait for com.nas.lifeos.probe to idle
-18569-    t =    11.78s Waiting 10.0s for "health-summary-tdee" Button to exist
-18570-    t =    12.84s     Checking `Expect predicate `existsNoRetry == 1` for object "health-summary-tdee" Button`
-18571-    t =    12.84s         Checking existence of `"health-summary-tdee" Button`
-18572-    t =    13.07s Waiting 10.0s for "health-summary-weight" Button to exist
-18573-    t =    14.10s     Checking `Expect predicate `existsNoRetry == 1` for object "health-summary-weight" Button`
-18574-    t =    14.10s         Checking existence of `"health-summary-weight" Button`
-18575-    t =    14.21s Waiting 10.0s for "health-summary-calories" Button to exist
-18576-    t =    15.24s     Checking `Expect predicate `existsNoRetry == 1` for object "health-summary-calories" Button`
-18577-    t =    15.24s         Checking existence of `"health-summary-calories" Button`
-18578-    t =    15.39s Waiting 10.0s for "health-summary-simulation" Button to exist
-18579-    t =    16.44s     Checking `Expect predicate `existsNoRetry == 1` for object "health-summary-simulation" Button`
-18580-    t =    16.44s         Checking existence of `"health-summary-simulation" Button`
-18581-    t =    16.55s Find the "health-summary-tdee" Button
-18582-    t =    16.70s Find the "health-summary-tdee" Button
-18583-    t =    16.86s Find the "health-summary-simulation" Button
-18584-    t =    16.99s Find the "health-summary-weight" Button
-18585-    t =    17.12s Find the "health-summary-simulation" Button
-18586-    t =    17.42s Find the "health-summary-weight" Button
-18587-    t =    17.57s Find the "health-summary-tdee" Button
-18588-    t =    17.77s Find the "health-summary-weight" Button
-18589:/Users/runner/work/LifeOS/LifeOS/app/UITests/NativeRevision78UITests.swift:66: error: -[LifeOSProbeUITests.NativeRevision78UITests testHealthUniformRowsAndCompactActions] : XCTAssertLessThan failed: ("333.3333333333333") is not less than ("333.3333333333
---
-18854-    t =    15.54s Find the "health-micronutrients" Button
-18855-    t =    15.67s Find the Target Application 'com.nas.lifeos.probe'
-18856-    t =    15.92s Added attachment named 'Review 02 Health pinned nutrients and diary'
-18857-    t =    15.95s Tap "health-micronutrients" Button
-18858-    t =    15.96s     Wait for com.nas.lifeos.probe to idle
-18859-    t =    15.96s     Find the "health-micronutrients" Button
-18860-    t =    16.12s     Check for interrupting elements affecting "health-micronutrients" Button
-18861-    t =    16.28s     Synthesize event
-18862-    t =    16.63s     Wait for com.nas.lifeos.probe to idle
-18863-    t =    17.11s Waiting 10.0s for "Micronutrienti" NavigationBar to exist
-18864-    t =    18.13s     Checking `Expect predicate `existsNoRetry == 1` for object "Micronutrienti" NavigationBar`
-18865-    t =    18.13s         Checking existence of `"Micronutrienti" NavigationBar`
-18866-    t =    19.45s         Capturing element debug description
-18867-    t =    20.11s     Checking `Expect predicate `existsNoRetry == 1` for object "Micronutrienti" NavigationBar`
-18868-    t =    20.11s         Checking existence of `"Micronutrienti" NavigationBar`
-18869-    t =    20.50s         Capturing element debug description
-18870-    t =    21.11s     Checking `Expect predicate `existsNoRetry == 1` for object "Micronutrienti" NavigationBar`
-18871-    t =    21.12s         Checking existence of `"Micronutrienti" NavigationBar`
-18872-    t =    21.36s         Capturing element debug description
-18873-    t =    22.18s     Checking `Expect predicate `existsNoRetry == 1` for object "Micronutrienti" NavigationBar`
-18874-    t =    22.18s         Checking existence of `"Micronutrienti" NavigationBar`
-18875-    t =    22.36s         Capturing element debug description
-18876-    t =    23.11s     Checking `Expect predicate `existsNoRetry == 1` for object "Micronutrienti" NavigationBar`
-18877-    t =    23.12s         Checking existence of `"Micronutrienti" NavigationBar`
-18878-    t =    23.26s         Capturing element debug description
-18879-    t =    24.12s     Checking `Expect predicate `existsNoRetry == 1` for object "Micronutrienti" NavigationBar`
-18880-    t =    24.12s         Checking existence of `"Micronutrienti" NavigationBar`
-18881-    t =    24.27s         Capturing element debug description
-18882-    t =    25.11s     Checking `Expect predicate `existsNoRetry == 1` for object "Micronutrienti" NavigationBar`
-18883-    t =    25.11s         Checking existence of `"Micronutrienti" NavigationBar`
-18884-    t =    25.30s         Capturing element debug description
-18885-    t =    26.14s     Checking `Expect predicate `existsNoRetry == 1` for object "Micronutrienti" NavigationBar`
-18886-    t =    26.14s         Checking existence of `"Micronutrienti" NavigationBar`
-18887-    t =    26.31s         Capturing element debug description
-18888-    t =    27.12s     Checking `Expect predicate `existsNoRetry == 1` for object "Micronutrienti" NavigationBar`
-18889-    t =    27.12s         Checking existence of `"Micronutrienti" NavigationBar`
-18890-    t =    27.29s         Capturing element debug description
-18891-    t =    27.29s     Checking existence of `"Micronutrienti" NavigationBar`
-18892-    t =    27.42s Collecting debug information to assist test failure triage
-18893-    t =    27.43s     Requesting snapshot of accessibility hierarchy for app with pid 24378
-18894:/Users/runner/work/LifeOS/LifeOS/app/UITests/NativeRevision78UITests.swift:170: error: -[LifeOSProbeUITests.NativeRevision78UITests testRenderHealthWeekAndDashboardAndBloom] : XCTAssertTrue failed
---
-20862-    t =    52.89s         Checking existence of `"Attività" NavigationBar`
-20863-    t =    53.04s Checking existence of `"Salute" Button`
-20864-    t =    53.12s Find the "Salute" Button
-20865-    t =    53.22s Checking existence of `Image (First Match)`
-20866-    t =    53.32s Tap Image (First Match)[0.50, 0.50]
-20867-    t =    53.32s     Wait for com.nas.lifeos.probe to idle
-20868-    t =    53.33s     Find the Image (First Match)
-20869-    t =    53.43s     Check for interrupting elements affecting "heart.fill" Image
-20870-    t =    53.56s     Synthesize event
-20871-    t =    53.56s         Find the "heart.fill" Image
-20872-    t =    53.70s         Find the "heart.fill" Image
-20873-    t =    53.85s         Find the "heart.fill" Image
-20874-    t =    54.27s     Wait for com.nas.lifeos.probe to idle
-20875-    t =    56.97s Checking `Expect predicate `BLOCKPREDICATE(0x600000e2dd10)` for object "heart" Button`
-20876-    t =    56.97s     Find the "heart" Button
-20877-    t =    57.04s Waiting 15.0s for "health-detail-scroll" ScrollView to exist
-20878-    t =    58.06s     Checking `Expect predicate `existsNoRetry == 1` for object "health-detail-scroll" ScrollView`
-20879-    t =    58.06s         Checking existence of `"health-detail-scroll" ScrollView`
-20880-    t =    58.14s Checking existence of `"Bloom" Button`
-20881-    t =    58.18s Find the "Bloom" Button
-20882-    t =    58.23s Checking existence of `Image (First Match)`
-20883-    t =    58.33s Tap Image (First Match)[0.50, 0.50]
-20884-    t =    58.33s     Wait for com.nas.lifeos.probe to idle
-20885-    t =    58.34s     Find the Image (First Match)
-20886-    t =    58.42s     Check for interrupting elements affecting "books.vertical.fill" Image
-20887-    t =    58.51s     Synthesize event
-20888-    t =    58.51s         Find the "books.vertical.fill" Image
-20889-    t =    58.59s         Find the "books.vertical.fill" Image
-20890-    t =    58.68s         Find the "books.vertical.fill" Image
-20891-    t =    59.03s     Wait for com.nas.lifeos.probe to idle
-20892-    t =    61.70s Checking `Expect predicate `BLOCKPREDICATE(0x600000d32cd0)` for object "books.vertical" Button`
-20893-    t =    61.70s     Find the "books.vertical" Button
-20894-    t =    61.74s Waiting 15.0s for "Bloom" NavigationBar to exist
-20895-    t =    62.75s     Checking `Expect predicate `existsNoRetry == 1` for object "Bloom" NavigationBar`
-20896-    t =    62.75s         Checking existence of `"Bloom" NavigationBar`
-20897-    t =    62.81s Find the Target Application 'com.nas.lifeos.probe'
-20898-    t =    63.04s Added attachment named 'Five tab hit regions icon standard'
-20899-    t =    63.04s Checking existence of `"Calendario" Button`
-20900-    t =    63.06s Find the "Calendario" Button
-20901-    t =    63.11s Checking existence of `"Calendario" StaticText`
-20902:/Users/runner/work/LifeOS/LifeOS/app/UITests/NativeTabHitRegionUITests.swift:33: error: -[LifeOSProbeUITests.NativeTabHitRegionUITests testEveryTabRespondsAtCenterIconAndCaption] : XCTAssertTrue failed - Missing caption for Calendario
-=== art/lifeos-full92-4a10bc8f95ef19c50210a973848910616ef10145/failures.txt
-1:NativeCatalogNavigationTests.swift:29: error: -[LifeOSProbeTests.NativeCatalogNavigationTests testCoopSupplementsUseMassOrVolumeWithoutInventingCapsuleComposition] : XCTAssertEqual failed: ("0") is not equal to ("32")
-2:NativeCatalogNavigationTests.swift:31: error: -[LifeOSProbeTests.NativeCatalogNavigationTests testCoopSupplementsUseMassOrVolumeWithoutInventingCapsuleComposition] : XCTUnwrap failed: expected non-nil value of type "NativeGenericFood"
-3:NativeInterfaceTests.swift:1111: error: -[LifeOSProbeUITests.NativeInterfaceTests testFinanceHasOpenOverviewAndDirectMovements] : XCTAssertGreaterThan failed: ("110.33333333333333") is not greater than ("110.33333333333333")
-4:NativeNavigationUITests.swift:107: error: -[LifeOSProbeUITests.NativeNavigationUITests testSixVisibleTabsWithLargeTextAndKeyboard] : XCTAssertEqual failed: ("XCTWaiterResult(rawValue: 2)") is not equal to ("XCTWaiterResult(rawValue: 1)") - The navigation bar
-5:NativePersonalFoodUITests.swift:135: error: -[LifeOSProbeUITests.NativePersonalFoodUITests testSupplementTabSeparatesFoodsAndSearchesKnownBrands] : XCTAssertFalse failed - Preset supplement for vit4ever
-6:NativeRevision78UITests.swift:170: error: -[LifeOSProbeUITests.NativeRevision78UITests testRenderHealthWeekAndDashboardAndBloom] : XCTAssertTrue failed
-7:NativeRevision78UITests.swift:364: error: -[LifeOSProbeUITests.NativeRevision78UITests testBloomSystemFilesSelectionReachesPreviewAndPersists] : XCTAssertGreaterThanOrEqual failed: ("36.0") is less than ("44.0")
-8:NativeRevision78UITests.swift:399: error: -[LifeOSProbeUITests.NativeRevision78UITests testBloomSectionRespondsAtLowerEdgeOf44PointTouchTarget] : XCTAssertTrue failed - The section button should respond at the lower edge of its 44 pt target.
-9:NativeRevision78UITests.swift:66: error: -[LifeOSProbeUITests.NativeRevision78UITests testHealthUniformRowsAndCompactActions] : XCTAssertLessThan failed: ("333.3333333333333") is not less than ("333.3333333333333")
-10:NativeTabHitRegionUITests.swift:33: error: -[LifeOSProbeUITests.NativeTabHitRegionUITests testEveryTabRespondsAtCenterIconAndCaption] : XCTAssertTrue failed - Missing caption for Calendario
-=== art/lifeos-full92-4a10bc8f95ef19c50210a973848910616ef10145/full-compile.log
+=== art/lifeos-candidate92-diagnostics-0660eddb323823a534b482cad27236219bdbafdd-1/failures-and-counts.txt
+14-	 Executed 2 tests, with 0 failures (0 unexpected) in 0.099 (0.100) seconds
+15-	 Executed 4 tests, with 0 failures (0 unexpected) in 0.051 (0.052) seconds
+16-	 Executed 6 tests, with 0 failures (0 unexpected) in 0.006 (0.008) seconds
+17-	 Executed 9 tests, with 0 failures (0 unexpected) in 0.071 (0.075) seconds
+18-	 Executed 4 tests, with 0 failures (0 unexpected) in 0.003 (0.004) seconds
+19-	 Executed 8 tests, with 0 failures (0 unexpected) in 1.961 (1.967) seconds
+20-	 Executed 6 tests, with 0 failures (0 unexpected) in 0.043 (0.046) seconds
+21-	 Executed 13 tests, with 0 failures (0 unexpected) in 0.191 (0.197) seconds
+22-	 Executed 5 tests, with 0 failures (0 unexpected) in 0.124 (0.127) seconds
+23-	 Executed 3 tests, with 0 failures (0 unexpected) in 0.303 (0.306) seconds
+24-	 Executed 8 tests, with 0 failures (0 unexpected) in 0.050 (0.097) seconds
+25-	 Executed 2 tests, with 0 failures (0 unexpected) in 0.005 (0.006) seconds
+26-	 Executed 23 tests, with 0 failures (0 unexpected) in 0.101 (0.113) seconds
+27-	 Executed 2 tests, with 0 failures (0 unexpected) in 0.003 (0.004) seconds
+28-	 Executed 13 tests, with 0 failures (0 unexpected) in 0.051 (0.069) seconds
+29-	 Executed 21 tests, with 0 failures (0 unexpected) in 0.195 (0.207) seconds
+30-	 Executed 2 tests, with 0 failures (0 unexpected) in 0.003 (0.005) seconds
+31-	 Executed 3 tests, with 0 failures (0 unexpected) in 0.018 (0.021) seconds
+32-	 Executed 14 tests, with 0 failures (0 unexpected) in 0.259 (0.287) seconds
+33-	 Executed 6 tests, with 0 failures (0 unexpected) in 0.025 (0.103) seconds
+34-	 Executed 3 tests, with 0 failures (0 unexpected) in 0.010 (0.023) seconds
+35-	 Executed 9 tests, with 0 failures (0 unexpected) in 0.049 (0.123) seconds
+36-	 Executed 16 tests, with 0 failures (0 unexpected) in 0.134 (0.140) seconds
+37-	 Executed 9 tests, with 0 failures (0 unexpected) in 0.131 (0.135) seconds
+38-	 Executed 1 test, with 0 failures (0 unexpected) in 0.005 (0.007) seconds
+39-	 Executed 7 tests, with 0 failures (0 unexpected) in 0.057 (0.060) seconds
+40-	 Executed 8 tests, with 0 failures (0 unexpected) in 0.044 (0.060) seconds
+41-	 Executed 7 tests, with 0 failures (0 unexpected) in 0.006 (0.015) seconds
+42-	 Executed 2 tests, with 0 failures (0 unexpected) in 0.005 (0.006) seconds
+43-	 Executed 3 tests, with 0 failures (0 unexpected) in 0.008 (0.009) seconds
+44-	 Executed 2 tests, with 0 failures (0 unexpected) in 0.032 (0.034) seconds
+45-	 Executed 2 tests, with 0 failures (0 unexpected) in 0.035 (0.036) seconds
+46-	 Executed 19 tests, with 0 failures (0 unexpected) in 0.679 (0.688) seconds
+47-	 Executed 4 tests, with 0 failures (0 unexpected) in 0.011 (0.014) seconds
+48-	 Executed 5 tests, with 0 failures (0 unexpected) in 0.007 (0.029) seconds
+49-	 Executed 2 tests, with 0 failures (0 unexpected) in 0.003 (0.004) seconds
+50-	 Executed 3 tests, with 0 failures (0 unexpected) in 0.015 (0.017) seconds
+51-	 Executed 2 tests, with 0 failures (0 unexpected) in 0.010 (0.010) seconds
+52-	 Executed 328 tests, with 0 failures (0 unexpected) in 7.713 (8.468) seconds
+53-	 Executed 328 tests, with 0 failures (0 unexpected) in 7.713 (8.470) seconds
+54:/Users/runner/work/LifeOS/LifeOS/app/UITests/NativeRevision78UITests.swift:575: error: -[LifeOSProbeUITests.NativeAppleHealthReferenceUITests testCaptureAppleHealthReference] : XCTAssertNotNil failed - The seeded Health metric must be visible: HKQuantityTyp
+55:/Users/runner/work/LifeOS/LifeOS/app/UITests/NativeRevision78UITests.swift:582: error: -[LifeOSProbeUITests.NativeAppleHealthReferenceUITests testCaptureAppleHealthReference] : XCTAssertTrue failed - Expected seeded 80 kg (or its pound equivalent): 
+=== art/lifeos-candidate92-diagnostics-0660eddb323823a534b482cad27236219bdbafdd-1/final-tests.log
+1762-    t =   195.04s         Find the Application 'com.apple.Health'
+1763-    t =   195.94s     Wait for com.apple.Health to idle
+1764-    t =   196.40s Checking existence of `"UIA.Health.Snippet.HKQuantityTypeIdentifierBodyMass" Cell`
+1765-    t =   196.47s Find the "UIA.Health.SummaryFeedViewController.CollectionView" CollectionView
+1766-    t =   196.52s Find the Application 'com.apple.Health'
+1767-    t =   196.55s Find the "UIA.Health.SummaryFeedViewController.CollectionView" CollectionView
+1768-    t =   196.59s Find the TabBar (First Match)
+1769-    t =   196.61s Find the "UIA.Health.SummaryFeedViewController.CollectionView" CollectionView
+1770-    t =   196.64s Find the "UIA.Health.SummaryFeedViewController.CollectionView" CollectionView
+1771-    t =   196.68s Press Application 'com.apple.Health'[0.00, 0.00] -> (196.5, 745.0) for 0.1 seconds, then drag to Application 'com.apple.Health'[0.00, 0.00] -> (196.5, 445.0) with velocity of 500.00 pixels per second, and then hold for 0.0 seconds 
+1772-    t =   196.68s     Wait for com.apple.Health to idle
+1773-    t =   196.68s     Find the Application 'com.apple.Health'
+1774-    t =   196.70s     Check for interrupting elements affecting "Salute" Application
+1775-    t =   196.73s     Synthesize event
+1776-    t =   196.73s         Find the Application 'com.apple.Health'
+1777-    t =   196.75s         Find the Application 'com.apple.Health'
+1778-    t =   196.78s         Find the Application 'com.apple.Health'
+1779-    t =   196.81s         Find the Application 'com.apple.Health'
+1780-    t =   196.83s         Find the Application 'com.apple.Health'
+1781-    t =   197.75s     Wait for com.apple.Health to idle
+1782-    t =   198.18s Checking existence of `"UIA.Health.Snippet.HKQuantityTypeIdentifierBodyMass" Cell`
+1783-    t =   198.27s Find the "UIA.Health.SummaryFeedViewController.CollectionView" CollectionView
+1784-    t =   198.33s Find the Application 'com.apple.Health'
+1785-    t =   198.38s Find the "UIA.Health.SummaryFeedViewController.CollectionView" CollectionView
+1786-    t =   198.45s Find the TabBar (First Match)
+1787-    t =   198.48s Find the "UIA.Health.SummaryFeedViewController.CollectionView" CollectionView
+1788-    t =   198.53s Find the "UIA.Health.SummaryFeedViewController.CollectionView" CollectionView
+1789-    t =   198.61s Press Application 'com.apple.Health'[0.00, 0.00] -> (196.5, 745.0) for 0.1 seconds, then drag to Application 'com.apple.Health'[0.00, 0.00] -> (196.5, 445.0) with velocity of 500.00 pixels per second, and then hold for 0.0 seconds 
+1790-    t =   198.61s     Wait for com.apple.Health to idle
+1791-    t =   198.62s     Find the Application 'com.apple.Health'
+1792-    t =   198.65s     Check for interrupting elements affecting "Salute" Application
+1793-    t =   198.68s     Synthesize event
+1794-    t =   198.68s         Find the Application 'com.apple.Health'
+1795-    t =   198.71s         Find the Application 'com.apple.Health'
+1796-    t =   198.73s         Find the Application 'com.apple.Health'
+1797-    t =   198.75s         Find the Application 'com.apple.Health'
+1798-    t =   198.77s         Find the Application 'com.apple.Health'
+1799-    t =   199.70s     Wait for com.apple.Health to idle
+1800-    t =   200.13s Find the Application 'com.apple.Health'
+1801-    t =   200.45s Added attachment named 'reference-missing-metrics'
+1802:/Users/runner/work/LifeOS/LifeOS/app/UITests/NativeRevision78UITests.swift:575: error: -[LifeOSProbeUITests.NativeAppleHealthReferenceUITests testCaptureAppleHealthReference] : XCTAssertNotNil failed - The seeded Health metric must be visible: HKQuantityT
+1803:/Users/runner/work/LifeOS/LifeOS/app/UITests/NativeRevision78UITests.swift:582: error: -[LifeOSProbeUITests.NativeAppleHealthReferenceUITests testCaptureAppleHealthReference] : XCTAssertTrue failed - Expected seeded 80 kg (or its pound equivalent): 
+=== art/lifeos-candidate92-diagnostics-0660eddb323823a534b482cad27236219bdbafdd-1/preflight-tests.log
+=== art/lifeos-candidate92-diagnostics-0660eddb323823a534b482cad27236219bdbafdd-1/regression-tests.log
+=== art/lifeos-candidate92-validation-0660eddb323823a534b482cad27236219bdbafdd-1/final-compile.log
+=== art/lifeos-candidate92-validation-0660eddb323823a534b482cad27236219bdbafdd-1/final-tests.log
+1762-    t =   195.04s         Find the Application 'com.apple.Health'
+1763-    t =   195.94s     Wait for com.apple.Health to idle
+1764-    t =   196.40s Checking existence of `"UIA.Health.Snippet.HKQuantityTypeIdentifierBodyMass" Cell`
+1765-    t =   196.47s Find the "UIA.Health.SummaryFeedViewController.CollectionView" CollectionView
+1766-    t =   196.52s Find the Application 'com.apple.Health'
+1767-    t =   196.55s Find the "UIA.Health.SummaryFeedViewController.CollectionView" CollectionView
+1768-    t =   196.59s Find the TabBar (First Match)
+1769-    t =   196.61s Find the "UIA.Health.SummaryFeedViewController.CollectionView" CollectionView
+1770-    t =   196.64s Find the "UIA.Health.SummaryFeedViewController.CollectionView" CollectionView
+1771-    t =   196.68s Press Application 'com.apple.Health'[0.00, 0.00] -> (196.5, 745.0) for 0.1 seconds, then drag to Application 'com.apple.Health'[0.00, 0.00] -> (196.5, 445.0) with velocity of 500.00 pixels per second, and then hold for 0.0 seconds 
+1772-    t =   196.68s     Wait for com.apple.Health to idle
+1773-    t =   196.68s     Find the Application 'com.apple.Health'
+1774-    t =   196.70s     Check for interrupting elements affecting "Salute" Application
+1775-    t =   196.73s     Synthesize event
+1776-    t =   196.73s         Find the Application 'com.apple.Health'
+1777-    t =   196.75s         Find the Application 'com.apple.Health'
+1778-    t =   196.78s         Find the Application 'com.apple.Health'
+1779-    t =   196.81s         Find the Application 'com.apple.Health'
+1780-    t =   196.83s         Find the Application 'com.apple.Health'
+1781-    t =   197.75s     Wait for com.apple.Health to idle
+1782-    t =   198.18s Checking existence of `"UIA.Health.Snippet.HKQuantityTypeIdentifierBodyMass" Cell`
+1783-    t =   198.27s Find the "UIA.Health.SummaryFeedViewController.CollectionView" CollectionView
+1784-    t =   198.33s Find the Application 'com.apple.Health'
+1785-    t =   198.38s Find the "UIA.Health.SummaryFeedViewController.CollectionView" CollectionView
+1786-    t =   198.45s Find the TabBar (First Match)
+1787-    t =   198.48s Find the "UIA.Health.SummaryFeedViewController.CollectionView" CollectionView
+1788-    t =   198.53s Find the "UIA.Health.SummaryFeedViewController.CollectionView" CollectionView
+1789-    t =   198.61s Press Application 'com.apple.Health'[0.00, 0.00] -> (196.5, 745.0) for 0.1 seconds, then drag to Application 'com.apple.Health'[0.00, 0.00] -> (196.5, 445.0) with velocity of 500.00 pixels per second, and then hold for 0.0 seconds 
+1790-    t =   198.61s     Wait for com.apple.Health to idle
+1791-    t =   198.62s     Find the Application 'com.apple.Health'
+1792-    t =   198.65s     Check for interrupting elements affecting "Salute" Application
+1793-    t =   198.68s     Synthesize event
+1794-    t =   198.68s         Find the Application 'com.apple.Health'
+1795-    t =   198.71s         Find the Application 'com.apple.Health'
+1796-    t =   198.73s         Find the Application 'com.apple.Health'
+1797-    t =   198.75s         Find the Application 'com.apple.Health'
+1798-    t =   198.77s         Find the Application 'com.apple.Health'
+1799-    t =   199.70s     Wait for com.apple.Health to idle
+1800-    t =   200.13s Find the Application 'com.apple.Health'
+1801-    t =   200.45s Added attachment named 'reference-missing-metrics'
+1802:/Users/runner/work/LifeOS/LifeOS/app/UITests/NativeRevision78UITests.swift:575: error: -[LifeOSProbeUITests.NativeAppleHealthReferenceUITests testCaptureAppleHealthReference] : XCTAssertNotNil failed - The seeded Health metric must be visible: HKQuantityT
+1803:/Users/runner/work/LifeOS/LifeOS/app/UITests/NativeRevision78UITests.swift:582: error: -[LifeOSProbeUITests.NativeAppleHealthReferenceUITests testCaptureAppleHealthReference] : XCTAssertTrue failed - Expected seeded 80 kg (or its pound equivalent): 
+=== art/lifeos-candidate92-validation-0660eddb323823a534b482cad27236219bdbafdd-1/regression-tests.log

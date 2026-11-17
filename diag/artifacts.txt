@@ -1,1 +1,2 @@
-lifeos-full92-4a10bc8f95ef19c50210a973848910616ef10145
+lifeos-candidate92-validation-0660eddb323823a534b482cad27236219bdbafdd-1
+lifeos-candidate92-diagnostics-0660eddb323823a534b482cad27236219bdbafdd-1
