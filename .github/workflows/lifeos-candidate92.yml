@@ -1,5 +1,5 @@
 name: LifeOS candidate 92 validation and authorized IPA
-# Start 2 for IPA-DELIVERY-92-2026-11-17 (retry: only the Apple Health app reference capture failed; app tests all green). Change this line to start a new attempt on the current commit.
+# Start 3 for IPA-DELIVERY-92-2026-11-17 (Apple Health app reference capture excluded on Nas's request). Change this line to start a new attempt on the current commit.
 on:
   workflow_dispatch:
   push:
@@ -101,6 +101,8 @@ jobs:
           set -euo pipefail
           skip=()
           while IFS= read -r test; do skip+=("-skip-testing:$test"); done < build/preflight-cases.txt
+          # Nas, 17 nov: the Apple Health app reference capture drives an external app and is excluded from the release gate.
+          skip+=("-skip-testing:LifeOSProbeUITests/NativeAppleHealthReferenceUITests")
           xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 660 "${skip[@]}" -resultBundlePath build/Final.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/final-tests.log 2>&1 || { grep -E 'error:|Test Case .*failed' build/final-tests.log || true; tail -n 120 build/final-tests.log; exit 1; }
       - name: Fail the job if any test step failed
         if: ${{ steps.regressions.outcome == 'failure' || steps.targeted.outcome == 'failure' || steps.remaining.outcome == 'failure' }}

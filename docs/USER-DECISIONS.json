@@ -1099,6 +1099,15 @@
       "provenance": "Richiesta diretta utente in chat Claude",
       "original_quote": "make the ipa",
       "rule": "IPA di produzione 0.10.30 build 92 con rework GUI (tab bar nativa, framework di design, Dashboard/Salute/Finanza/Bloom), catalogo alimenti completo e nessun integratore preimpostato. Pubblicazione solo a gate verdi sullo stesso commit; prova su iPhone e accettazione distinte."
+    },
+    {
+      "id": "GATE-NO-APPLE-HEALTH-REF-92",
+      "status": "ACTIVE",
+      "scope": "Gate build 92",
+      "recorded_on": "2026-11-17",
+      "provenance": "Richiesta diretta utente in chat Claude",
+      "original_quote": "just drop it idc",
+      "rule": "Il test NativeAppleHealthReferenceUITests (cattura di riferimento dall'app Salute di Apple) non blocca il gate IPA."
     }
   ],
   "pending_confirmations": [
