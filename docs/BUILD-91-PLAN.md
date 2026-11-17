@@ -52,4 +52,25 @@ Il test fallisce oggi anche sul sorgente della build 90 e sulla stessa immagine 
 
 `testCaptureAppleHealthReference`: fallito nel gate 43957165264 su `codex/build91`, passato sulla base nel run 43990368405. Un solo campione per parte: non concludente.
 
-Nessun test è stato escluso o indebolito. Gate fermo in attesa della decisione dell'utente: riprovare più tardi, escludere i due test dal gate 91, oppure correggere la lentezza del Calendario con testo grande. Nessuna IPA 91, nessun deploy del Worker.
+Nessun test è stato escluso o indebolito. Decisione utente (17 novembre, 01:50): soluzione permanente, IPA al risveglio. Seguito nella sezione successiva. Nessuna IPA 91, nessun deploy del Worker.
+## Gate 91, notte del 17 novembre 2026
+
+Il test `testPaintingPaletteFullNamesWithLargeText` falliva 4 volte su 4 anche sul sorgente esatto della 90 (run 43987674222). Lo spindump del timeout (stampato dal run 43991497657) mostra il thread principale occupato al 100% nel layout del calendario: `LazyStack.measureEstimates`, `LazyLayoutViewCache.updateItemPhases`, transazioni SwiftUI continue. Non era carico del runner: con modalità Dipingi e testo accessibile l'app non tornava mai inattiva.
+
+Prove focused con la stessa selezione di 10 casi calendario/turni (`shift-render` estesa), tre test di NativeRevision71:
+
+| Variante | Run | Esito | Tempo dei 3 test |
+| --- | --- | --- | --- |
+| Sorgente 91 invariato | 43992189293 | verde, al limite | 274 s |
+| Geometria solo per la settimana da posizionare | 43992100054 | rosso, stesso timeout | 274 s |
+| VStack al posto di LazyVStack | 43992193382 | 5 casi oltre i 3 minuti | scartata |
+| Tavolozza Dipingi limitata a xxxLarge come la griglia | 43997293913 | verde | 173 s |
+| Altezze esatte delle righe settimana | 43997295909 | verde | 220 s |
+
+Correzioni portate nella 91, entrambe senza cambi di funzione:
+- `brushPanel` (Oggi, Dipingi, frecce mese, tavolozza turni) usa lo stesso tetto di testo `xxxLarge` già applicato alla griglia del mese. Con testo standard nulla cambia; con le taglie accessibili i nomi restano interi.
+- Ogni riga settimana ha altezza esatta (riga giorni 88 pt; intestazione mese con altezza della riga `title3` al massimo `xxxLarge`), così le stime del LazyVStack coincidono con le righe reali.
+
+Apple Salute (`testCaptureAppleHealthReference`): l'app Salute esponeva righe con frame vuoto e `isHittable` sollevava «Activation point invalid» invece di restituire falso. Gli accessi nella parte preferiti, già non bloccante per decisione del 15 novembre, passano da un controllo di raggiungibilità; gli assert finali sui valori seminati sono invariati. Verde nel run 43992314220.
+
+Il gate non è stato indebolito: nessun test escluso, nessun nuovo tentativo automatico, verificatore invariato.

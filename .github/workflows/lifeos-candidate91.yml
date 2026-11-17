@@ -1,5 +1,5 @@
 name: LifeOS candidate 91 validation and authorized IPA
-# Start 4 for IPA-DELIVERY-91-2026-11-16. Change this line to start a new attempt on the current commit.
+# Start 5 for IPA-DELIVERY-91-2026-11-16 (calendar paint layout and Apple Health reachability fixes). Change this line to start a new attempt on the current commit.
 on:
   workflow_dispatch:
   push:
