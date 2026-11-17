@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "LifeOS",
-  "updated_on": "2026-11-16",
+  "updated_on": "2026-11-17",
   "policy": {
     "id": "META-01",
     "status": "ACTIVE",
@@ -968,12 +968,13 @@
     },
     {
       "id": "BLOOM-REDESIGN-2026-11-16",
-      "status": "ACTIVE",
+      "status": "SUPERSEDED",
       "scope": "Sezione Bloom",
       "recorded_on": "2026-11-16",
       "provenance": "Richiesta diretta utente; due varianti mostrate in Claude Design; risposta «approvo fai te»",
       "original_quote": "Fare tutte le cose dal web, dai social eccetera, e poterle ritrovare velocemente con manutenzione comunque minima, quindi evitare di stare a salvare roba e modificare titoli eccetera. C'è anche il problema che le categorie possono sovrapporsi molto facilmente",
-      "rule": "Obiettivo: salvataggio da web e social con attrito minimo e ritrovamento veloce senza manutenzione. La scelta tra le due varianti è stata delegata all'assistente: variante B, sola ricerca con filtri automatici per fonte e tipo, senza categorie da assegnare. Scelta dell'assistente su delega, non preferenza espressa dall'utente. Non implementata."
+      "rule": "Obiettivo: salvataggio da web e social con attrito minimo e ritrovamento veloce senza manutenzione. La scelta tra le due varianti è stata delegata all'assistente: variante B, sola ricerca con filtri automatici per fonte e tipo, senza categorie da assegnare. Scelta dell'assistente su delega, non preferenza espressa dall'utente. Non implementata.",
+      "superseded_by": "BLOOM-CATEGORIES-92"
     },
     {
       "id": "FINANCE-SAVINGS-RESTORE-2026-11-16",
@@ -1010,6 +1011,85 @@
       "provenance": "Richiesta diretta utente in chat Claude",
       "original_quote": "approvo, voglio l'ipa, manda tutto in produzione",
       "rule": "IPA di produzione 0.10.29 build 91 con efficienza, barra a cinque voci, Finanza, pagamento dai risparmi e Bloom. Consegna unica («non un pezzo alla volta, tutto in 1 senza errori»). Pubblicazione solo a gate verdi sullo stesso commit; prova su iPhone e accettazione distinte."
+    },
+    {
+      "id": "UI-FRAMEWORK-92",
+      "status": "ACTIVE",
+      "scope": "Tutta l'app, build 92",
+      "recorded_on": "2026-11-17",
+      "provenance": "Richiesta diretta utente in chat Claude",
+      "original_quote": "approvo ciò che mi hai detto, l'unico dubbio che mi rimane sono non solo i pulsanti della barra, ma i pulsanti in generale ovunque nell'app ... tutto deve seguire un framework (personalizzabile si, ma cmq delle linee guida) per mantenere la stabilità dell'app e la semplicità",
+      "rule": "Rework grafico senza cambiare struttura e posizioni generali. Barra di navigazione nativa iOS. Pulsanti e schede da un unico framework (design system LifeOS, https://claude.ai/artifact/6CtaaD5n3hffmLWL1KSsXs) con regole verificate in CI."
+    },
+    {
+      "id": "UI-LOOK-92",
+      "status": "ACTIVE",
+      "scope": "Aspetto, build 92",
+      "recorded_on": "2026-11-17",
+      "provenance": "Richiesta diretta utente in chat Claude",
+      "original_quote": "troppi colori accentati, e sembra troppo un app web invece di un app ios / preferisco graficamente lo stile apple del titolo e icona colorato dei colori attuali che abbiamo, e i pulsanti liquid glass / usa il blu come accent non ci sta ... usiamo il liquid glass quindi grigio/bianco / ok implementiamo questo",
+      "rule": "Aspetto iOS nativo. Nessun colore d'accento: stati selezionati e pulsanti neutri in Liquid Glass (grigio/bianco). Titolo e icona delle schede colorati stile Salute di Apple con i colori di produzione (calendario, finanza, nutrizione, peso). Colori dei turni identici a quelli in produzione. Mockup approvato: https://claude.ai/artifact/STKXfKFGybuub97eq9iPyb"
+    },
+    {
+      "id": "DASHBOARD-ORDER-92",
+      "status": "ACTIVE",
+      "scope": "Dashboard",
+      "recorded_on": "2026-11-17",
+      "provenance": "Richiesta diretta utente in chat Claude",
+      "original_quote": "per dashboard mantieni la struttura attuale in prod, ovvero settimana, cose da fare, nutrizione e finanza",
+      "rule": "Ordine Dashboard: Settimana, Cose da fare, Nutrizione (scheda intera con Aggiungi alimento), Finanza compatta. Dati più importanti nelle zone più viste."
+    },
+    {
+      "id": "MACRO-NO-GOALS-92",
+      "status": "ACTIVE",
+      "scope": "Nutrizione",
+      "recorded_on": "2026-11-17",
+      "provenance": "Richiesta diretta utente in chat Claude",
+      "original_quote": "non abbiamo inoltre un sistema di obiettivo totale per i macro, e non lo voglio sincero, quindi va cambiata la scheda nutrizione attuale",
+      "rule": "Nessun obiettivo totale per calorie e macro: si mostrano i totali del giorno. Restano i riferimenti di vitamina C e zinco (decisione dell'8 novembre)."
+    },
+    {
+      "id": "HEALTH-GRID-3X2-92",
+      "status": "ACTIVE",
+      "scope": "Riepilogo Salute",
+      "recorded_on": "2026-11-17",
+      "provenance": "Richiesta diretta utente in chat Claude",
+      "original_quote": "il grid 2 colonne e 3 righe va cambiato in 3 colonne per 2 righe. in una riga tdee, peso previsto e peso, e sotto le calorie la media calorie e la media proteine",
+      "rule": "Riepilogo Salute 3×2: TDEE, Peso previsto, Peso / Calorie, Media calorie, Media proteine, in un'unica scheda poco affollata."
+    },
+    {
+      "id": "SUPPLEMENTS-PERSONAL-ONLY-92",
+      "status": "ACTIVE",
+      "scope": "Catalogo integratori",
+      "recorded_on": "2026-11-17",
+      "provenance": "Richiesta diretta utente in chat Claude",
+      "original_quote": "integratori non so se gli hai aggiunti te o chat gpt ma ci sono dei integratori preimpostati e non li voglio, gli integratori gli aggiungo solo io. Conferma META-01: «Sì, togli tutti»",
+      "rule": "Nessun integratore preimpostato (generico o di marca); la scheda Integratori mostra solo voci personali.",
+      "supersedes": [
+        "CATALOG-BRANDS-UNITS-HISTORY-2026-11-12 (parte integratori con marca)",
+        "CATALOG-NAVIGATION-2026-11-13 (parte integratori preimpostati)"
+      ]
+    },
+    {
+      "id": "BLOOM-CATEGORIES-92",
+      "status": "ACTIVE",
+      "scope": "Bloom",
+      "recorded_on": "2026-11-17",
+      "provenance": "Richiesta diretta utente in chat Claude",
+      "original_quote": "non trovo le categorie precedenti. Conferma META-01: «Si rimetti le categorie e la possibilità di cambiarle modificarle ecc»",
+      "rule": "Categorie di nuovo visibili come filtro accanto alla fonte, con creazione, rinomina, eliminazione e assegnazione. Mappa a tutto schermo, ricerca non coperta dalla barra.",
+      "supersedes": [
+        "BLOOM-REDESIGN-2026-11-16 (variante B senza categorie)"
+      ]
+    },
+    {
+      "id": "FOOD-CATALOG-92",
+      "status": "ACTIVE",
+      "scope": "Catalogo alimenti",
+      "recorded_on": "2026-11-17",
+      "provenance": "Richiesta diretta utente in chat Claude",
+      "original_quote": "per gli alimenti controlla anche tutti quelli attuali e aggiungi i micronutrienti (anche stimati) ove non ci sono. inoltre per alcuni alimenti vanno pensati al pezzo, e non ai 100g, come uova ad esempio.",
+      "rule": "Micronutrienti completati anche con stime marcate; porzioni a pezzo dove naturale; nuovi generici secondo lo schema concordato."
     }
   ],
   "pending_confirmations": [
