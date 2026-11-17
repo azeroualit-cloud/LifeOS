@@ -136,6 +136,13 @@ struct LOStatGrid: View {
         .background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.cardRadius, style: .continuous))
     }
 
+    private func spokenLabel(_ stat: LOStat) -> String {
+        var parts: [String] = [stat.title]
+        parts.append(stat.unit.isEmpty ? stat.value : stat.value + " " + stat.unit)
+        if let context = stat.accessibilityContext { parts.append(context) }
+        return parts.joined(separator: ", ")
+    }
+
     @ViewBuilder private func cell(_ stat: LOStat) -> some View {
         let content = VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
             Text(stat.title).font(.footnote.weight(.medium)).foregroundStyle(NativeDesign.secondary)
@@ -151,7 +158,7 @@ struct LOStatGrid: View {
         .padding(.vertical, NativeDesign.Space.small)
         .contentShape(Rectangle())
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(stat.title + ", " + stat.value + (stat.unit.isEmpty ? "" : " " + stat.unit) + (stat.accessibilityContext.map { ", " + $0 } ?? ""))
+        .accessibilityLabel(spokenLabel(stat))
         // The caller's id is used as-is (e.g. "health-summary-tdee") so existing
         // identifiers survive the move to the grid.
         if let onSelect {
