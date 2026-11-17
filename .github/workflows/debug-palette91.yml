@@ -19,18 +19,8 @@ jobs:
           set -euo pipefail
           name=$(gh api "repos/${{ github.repository }}/actions/runs/$RUN/artifacts" --jq '.artifacts[] | select(.name | startswith("lifeos-candidate91-diagnostics")) | .name' | head -1)
           gh run download "$RUN" -R "${{ github.repository }}" -n "$name" -D d
-          find d -type f | head -50
-          for f in $(find d -name '*.json' -o -name '*.txt'); do
-            if grep -q -E "failureText|error:|failed" "$f"; then echo "=== $f"; python3 - "$f" <<'PY'
-          import json,sys
-          p=sys.argv[1]
-          try:
-              s=json.load(open(p))
-          except Exception:
-              print(open(p).read()[:6000]); sys.exit()
-          if isinstance(s,dict) and "testFailures" in s:
-              for t in s["testFailures"]: print("FAIL", t.get("testIdentifierString"), "|", (t.get("failureText") or "")[:1500])
-          PY
-            fi
+          for f in d/regression-tests.log d/preflight-tests.log; do
+            echo "=================== $f"
+            grep -n -E "error: -\[|Test Case .*(failed|started)|Tap \"home-finance|finance-scroll|other-back|Movimenti|primary-add|all-movements|Assertion Failure" "$f" | cut -c1-600 | grep -B3 -A25 -E "testCalendarReturnsToDashboardAndFinanceOpens\]' started|testFinanceOverviewSupportsLargeTextAndEmptySnapshot\]' started" | head -120 || true
           done
-          grep -rhoE "(Movimenti irraggiungibili|Spesa irraggiungibile|home-finance)[^\"]{0,400}" d | sort -u | head -20 || true
+          grep -n -E "error: -\[" d/preflight-tests.log | head || true
