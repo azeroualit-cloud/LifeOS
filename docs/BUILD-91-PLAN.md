@@ -30,3 +30,26 @@ Ramo: `codex/build91`, da `codex/perf-efficiency-01`, a sua volta da `codex/revi
 2. `lifeos-candidate91.yml` su `main`, poi avvio su `codex/build91`: 5 casi compatti, regressioni, suite restante, 4 avvii Release, IPA e pubblicazione solo se tutto è verde sullo stesso commit.
 3. Deploy del Worker con `scripts/deploy-savings-91.py` (rollback automatico se la verifica dell'upload fallisce). È retrocompatibile: le app precedenti non inviano mai `savings`.
 4. Aggiornare `BUILD-STATE.json`, `AI-HANDOFF.md` e questo file con SHA, run e hash dell'IPA.
+
+## Gate 91: stato al 17 novembre, notte
+
+- Start 1 e 2 (43917229527, 43952296245): nessun runner macOS assegnato, nessun test eseguito.
+- Start 3 (43957165264, `ece7f35`): 122 test UI eseguiti, 7 falliti. Cinque erano asserzioni rimaste a sei destinazioni o un controllo Finanza cercato dietro la barra fissa «Aggiungi spesa»: corretti in `0cc583e`. Restano `testPaintingPaletteFullNamesWithLargeText` e `testCaptureAppleHealthReference`.
+- Start 4 (43980458282): annullato dopo la conferma che il primo dei due fallisce in modo ripetibile.
+
+### Bisezione di `testPaintingPaletteFullNamesWithLargeText` (NativeRevision71UITests.swift:199, timeout della query)
+
+| Sorgente | Run | Immagine runner | Esito |
+| --- | --- | --- | --- |
+| `codex/build91` (gate) | 43957165264 | 20261104.0514 | fallito |
+| `codex/build91` | 43980450408 | non rilevata | fallito |
+| `codex/perf-efficiency-01` | 43984901395 | non rilevata | fallito |
+| `codex/revision77` `04ad889`, sorgente della build 90 | 43987674222 | 20261112.0539 | fallito |
+| `codex/revision77` `04ad889` | 43990368405 | 20261104.0514 | fallito |
+| `codex/revision77` `04ad889`, gate 90 del 15 novembre | 43762258716 | 20261104.0514 | passato |
+
+Il test fallisce oggi anche sul sorgente della build 90 e sulla stessa immagine con cui ieri passava: non è attribuibile alle modifiche della build 91. Causa non dimostrata; l'ipotesi è che la schermata con testo grande sia al limite del tempo della query e dipenda dal carico del runner.
+
+`testCaptureAppleHealthReference`: fallito nel gate 43957165264 su `codex/build91`, passato sulla base nel run 43990368405. Un solo campione per parte: non concludente.
+
+Nessun test è stato escluso o indebolito. Gate fermo in attesa della decisione dell'utente: riprovare più tardi, escludere i due test dal gate 91, oppure correggere la lentezza del Calendario con testo grande. Nessuna IPA 91, nessun deploy del Worker.
