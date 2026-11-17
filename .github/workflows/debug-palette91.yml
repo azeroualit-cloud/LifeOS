@@ -7,20 +7,24 @@ permissions:
   actions: read
   contents: read
 jobs:
-  summary:
+  tree:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
-      - name: Print gate failure details
+      - name: Print finance diagnostic tree
         env:
           GH_TOKEN: ${{ github.token }}
-          RUN: "43999971306"
+          RUN: "44024746135"
         run: |
-          set -euo pipefail
-          name=$(gh api "repos/${{ github.repository }}/actions/runs/$RUN/artifacts" --jq '.artifacts[] | select(.name | startswith("lifeos-candidate91-diagnostics")) | .name' | head -1)
-          gh run download "$RUN" -R "${{ github.repository }}" -n "$name" -D d
-          for f in d/regression-tests.log d/preflight-tests.log; do
-            echo "=================== $f"
-            grep -n -E "error: -\[|Test Case .*(failed|started)|Tap \"home-finance|finance-scroll|other-back|Movimenti|primary-add|all-movements|Assertion Failure" "$f" | cut -c1-600 | grep -B3 -A25 -E "testCalendarReturnsToDashboardAndFinanceOpens\]' started|testFinanceOverviewSupportsLargeTextAndEmptySnapshot\]' started" | head -120 || true
+          set -u
+          sudo apt-get install -y zstd >/dev/null
+          name=$(gh api "repos/${{ github.repository }}/actions/runs/$RUN/artifacts" --jq '.artifacts[] | select(.name | startswith("lifeos-development-shift-render")) | .name' | head -1)
+          gh run download "$RUN" -R "${{ github.repository }}" -n "$name" -D art
+          for f in $(find art -path '*xcresult/Data/data.*' -type f); do
+            if head -c 4 "$f" | od -An -tx1 | grep -q "28 b5 2f fd"; then zstd -dqc "$f" > t 2>/dev/null || continue; else cp "$f" t; fi
+            if grep -aq "FINANCE_DIAG_TREE" t; then
+              echo "=== $f"
+              grep -a -A400 "FINANCE_DIAG_TREE" t | cut -c1-260 | grep -a -v -E "^\s*$" | head -400
+              break
+            fi
           done
-          grep -n -E "error: -\[" d/preflight-tests.log | head || true
