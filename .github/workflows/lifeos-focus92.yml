@@ -1,5 +1,5 @@
 name: LifeOS build 92 focused case (no IPA)
-# Start 1. Change this line to rerun the focused case on the current commit. Never packages or releases (IPA-GATE-01).
+# Start 2. Change this line to rerun the focused case on the current commit. Never packages or releases (IPA-GATE-01).
 on:
   push:
     branches: ['codex/build92']

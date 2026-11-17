@@ -165,8 +165,12 @@ final class NativeRevision78UITests: XCTestCase {
 
         let scroll = app.scrollViews["health-detail-scroll"]
         let micro = app.buttons["health-micronutrients"]
-        for _ in 0..<5 where !micro.isHittable { scroll.swipeUp(velocity: .slow) }
+        // Build 92: the glass bottom actions sit above the scroll content; reveal the
+        // link fully above them before tapping (a hittable centre can still be under the bar).
+        let food = app.buttons["health-add-nutrition"]
+        for _ in 0..<6 where !(micro.isHittable && micro.frame.maxY <= food.frame.minY) { scroll.swipeUp(velocity: .slow) }
         XCTAssertTrue(micro.isHittable)
+        XCTAssertLessThanOrEqual(micro.frame.maxY, food.frame.minY)
         capture("Review 02 Health pinned nutrients and diary", app)
         micro.tap()
         XCTAssertTrue(app.navigationBars["Micronutrienti"].waitForExistence(timeout: 10))
