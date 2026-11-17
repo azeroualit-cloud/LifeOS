@@ -1,5 +1,7 @@
 # LifeOS — punto di ingresso per qualsiasi IA
 
+**LifeOS 0.10.29 build 91 consegnata (17 novembre 2026).** [IPA](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.29-build91/LifeOS-91.ipa), SHA-256 a779c3e04b750c46ed174754d2cf1f7c8f85760e960d08332eb4caaf04d1ef8f. Sorgente 27ff631c06d8d81616a52e1d77162273adf25d86, ramo `codex/build91`, [gate 44026757613](https://github.com/azeroualit-cloud/LifeOS/actions/runs/44026757613). Dettagli e correzioni della notte in [BUILD-91-PLAN.md](BUILD-91-PLAN.md). Restano firma Signulous, prova su iPhone, accettazione e deploy del Worker Risparmi (in attesa del via in chat).
+
 **Run avviato:** [43684175590](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43684175590) sul commit `74c95d0aa60d5185a95510cf8c54b2c067582516` (solo scheda selezionata montata, stato Dipingi turni nel router). Gate invariato: 5 compatti, 14 regressioni, suite restante, 4 Release, IPA90 solo a gate verdi. Esito da acquisire; nessun polling; nessuna IPA90, nessun deploy backend.
 
 **Correzione successiva (15 novembre):** contenitore che monta soltanto la scheda selezionata, con lo stato di Dipingi turni nel router (`NativeSixTabBar.swift`, `CalendarScreen.swift`, `App.swift`). Non compilato né provato in locale; esito CI da acquisire. Nessuna IPA90, nessun deploy backend.

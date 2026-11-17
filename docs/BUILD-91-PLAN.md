@@ -88,3 +88,9 @@ Start 6 sullo stesso gate, invariato.
 Verdi: preflight compatto, `testCalendarReturnsToDashboardAndFinanceOpens`, suite restante (palette con testo grande e Apple Salute compresi). Rosso solo `testFinanceOverviewSupportsLargeTextAndEmptySnapshot`. L'albero di accessibilità stampato nel run 44024746135 mostra la causa: con testo accessibile «Movimenti» (y 699–771) sta sotto la barra fissa «Aggiungi spesa» (y 706–750) quando la schermata è in cima; XCTest lo dichiarava `isHittable`, il tocco colpiva la barra e apriva «Nuovo movimento». Comportamento dell'app corretto (il contenuto scorre sotto la barra fissa come previsto da UX-REACH-01); l'helper del test ora scorre finché il controllo è interamente tra intestazione e barra fissa prima di toccarlo. Assert invariati.
 
 Start 7 sullo stesso gate.
+
+### Start 7 (44026757613, `27ff631`) — IPA 91 pubblicata
+
+Tutto verde sullo stesso commit: preflight compatto, regressioni mirate, suite restante, quattro avvii Release, confezionamento e pubblicazione. [Release](https://github.com/azeroualit-cloud/LifeOS/releases/tag/ios-0.10.29-build91), IPA SHA-256 `a779c3e04b750c46ed174754d2cf1f7c8f85760e960d08332eb4caaf04d1ef8f`.
+
+Restano: firma Signulous, prova su iPhone, accettazione. Deploy del Worker per Risparmi non eseguito: da avviare con conferma esplicita in chat (finché non è distribuito, l'opzione Risparmi nella nuova spesa resta nascosta perché il server non dichiara `savingsDestination`).
