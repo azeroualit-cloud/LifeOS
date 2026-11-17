@@ -18,7 +18,7 @@ jobs:
         run: |
           set -u
           sudo apt-get install -y zstd >/dev/null
-          name=$(gh api "repos/${{ github.repository }}/actions/runs/$RUN/artifacts" --jq '.artifacts[] | select(.name | startswith("lifeos-development-shift-render")) | .name' | head -1)
+          name=$(gh api "repos/${{ github.repository }}/actions/runs/$RUN/artifacts" --jq '.artifacts[] | select(.name | startswith("lifeos-development-preview")) | .name' | head -1)
           gh run download "$RUN" -R "${{ github.repository }}" -n "$name" -D art
           for f in $(find art -path '*xcresult/Data/data.*' -type f); do
             if head -c 4 "$f" | od -An -tx1 | grep -q "28 b5 2f fd"; then zstd -dqc "$f" > t 2>/dev/null || continue; else cp "$f" t; fi
