@@ -168,6 +168,14 @@ if __name__ == "__main__":
         tests = [
             "LifeOSProbeUITests/NativeRevision71UITests/testPaintingHasGlassPaletteAndRapidEditsPreserveLastIntentAndUndo",
             "LifeOSProbeUITests/NativeRevision71UITests/testPaintingPaletteFullNamesWithLargeText",
+            "LifeOSProbeUITests/NativeInterfaceTests/testVisibleShiftBrushPaintsAndUndoRestoresDay",
+            "LifeOSProbeUITests/NativeInterfaceTests/testStandardizedHealthAndCompactShiftPalette",
+            "LifeOSProbeUITests/NativeInterfaceTests/testLargeTextAndSixWeekCalendar",
+            "LifeOSProbeUITests/NativeInterfaceTests/testCalendarRepeatedScrollingKeepsMonthAnchorsAndReturnsToToday",
+            "LifeOSProbeUITests/NativeInterfaceTests/testCalendarEventCanBeCreatedAfterBoundaryScroll",
+            "LifeOSProbeUITests/NativeRevision71UITests/testMonthUsesScreenAndTapOpensDayThenReturns",
+            "LifeOSProbeUITests/NativeRevision73UITests",
+            "LifeOSProbeTests/NativeCalendarPerformanceTests",
         ]
     elif a.mode == "health-reference":
         areas = ["health"]
