@@ -118,7 +118,10 @@ struct CalendarScreen: View {
             Divider()
             ScrollViewReader { proxy in
                 ScrollView {
-                    LazyVStack(alignment: .leading, spacing: NativeDesign.Space.none) {
+                    // A plain stack: the window is bounded (NativeCalendarWindow.capacity) and
+                    // week rows have two heights, so lazy size estimates kept correcting the
+                    // anchored offset and the main thread never idled (paint mode, large text).
+                    VStack(alignment: .leading, spacing: NativeDesign.Space.none) {
                         ForEach(calendarWeeks) { week in
                             weekGrid(week.month, week: week.index).id(week.id)
                                 .background {
