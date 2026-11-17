@@ -519,7 +519,7 @@ struct CalendarScreen: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityIdentifier("shift-brush-scroll")
             }
-        }.buttonStyle(NativePressStyle())
+        }.buttonStyle(NativePressStyle()).dynamicTypeSize(...DynamicTypeSize.xxxLarge)
     }
 
 }
