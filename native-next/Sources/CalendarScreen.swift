@@ -10,6 +10,8 @@ struct CalendarScreen: View {
     /// safe-area modifier around this screen (safeAreaInset or safeAreaPadding)
     /// makes SwiftUI measure every lazy week on each animation frame and the
     /// main thread never idles (spindumps of runs 43708179109 and 43722940589).
+    /// Build 92: the month ignores the system tab bar's bottom safe area for
+    /// the same reason and keeps a fixed clearance instead.
     @State private var showingDay = false
     @State private var monthReturnDay: String?
     private var selected: String {
@@ -127,8 +129,9 @@ struct CalendarScreen: View {
                                 }
                         }
                     }.scrollTargetLayout().padding(.horizontal, NativeDesign.Layout.screenInset)
-                        .padding(.vertical, NativeDesign.Space.large).padding(.bottom, NativeDesign.Layout.scrollClearance)
+                        .padding(.vertical, NativeDesign.Space.large).padding(.bottom, NativeDesign.Layout.scrollClearance + NativeDesign.Layout.tabBarClearance)
                 }.scrollPosition(id: $scrollWeek, anchor: .top)
+                .ignoresSafeArea(.container, edges: .bottom)
                 .onChange(of: scrollWeek) { _, week in
                     guard monthPositionReady, !restoringWindow, !showingDay, let week else { return }
                     updateVisibleMonth(for: week)
@@ -139,7 +142,7 @@ struct CalendarScreen: View {
                 .onPreferenceChange(NativeCalendarMonthFrames.self) { frames in
                     if let target = requestedWeek {
                         guard let frame = frames[target], frame.maxY > 0,
-                              frame.minY < viewportHeight else { return }
+                              frame.minY < viewportHeight - NativeDesign.Layout.tabBarClearance else { return }
                         requestedWeek = nil; restoringWindow = false; monthPositionReady = true
                         if let anchoredMonth { visibleMonth = anchoredMonth }
                     }

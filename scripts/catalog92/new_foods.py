@@ -18,13 +18,9 @@ NEW = [
  ("bevanda-avena", "Bevanda d'avena", "drink", ["latte d'avena"], "Beverages, almond milk, unsweetened, shelf stable", None, "Bevanda d'avena assente in USDA SR: micronutrienti della bevanda di mandorla non zuccherata"),
  ("panna", "Panna da cucina", "dairy", ["panna"], "Cream, fluid, light (coffee cream or table cream)", None, None),
  # Carne e salumi
- ("prosciutto-crudo", "Prosciutto crudo", "meat", ["crudo", "prosciutto di parma"], "Pork, cured, ham, whole, separable lean only, unheated", [("fetta", 12)], "Prosciutto crudo assente in USDA SR: valori del prosciutto stagionato magro, sodio sottostimato"),
- ("prosciutto-cotto", "Prosciutto cotto", "meat", ["cotto"], "Ham, sliced, regular (approximately 11% fat)", [("fetta", 15)], None),
  ("fesa-tacchino-affettato", "Fesa di tacchino affettata", "poultry", ["affettato di tacchino"], "Turkey breast, sliced, prepackaged", [("fetta", 12)], None),
  ("manzo-magro", "Manzo magro (girello)", "meat", ["girello", "magatello", "fettina di manzo"], "Beef, round, eye of round roast, boneless, separable lean and fat, trimmed to 0\" fat, select, raw", None, None),
  ("vitello", "Fettina di vitello", "meat", ["vitello", "scaloppina"], "Veal, leg (top round), separable lean only, raw", None, None),
- ("lonza-maiale", "Lonza di maiale", "meat", ["maiale", "braciola di maiale"], "Pork, fresh, loin, center loin (chops), bone-in, separable lean only, raw", None, None),
- ("salsiccia", "Salsiccia di maiale", "meat", ["salsiccia"], "Sausage, Italian, pork, mild, raw", [("salsiccia", 80)], None),
  ("hamburger-manzo", "Hamburger di manzo", "meat", ["burger", "polpetta di manzo"], "Beef, ground, 85% lean meat / 15% fat, patty, cooked, broiled", [("hamburger", 100)], None),
  ("coniglio", "Coniglio", "meat", [], "Game meat, rabbit, domesticated, composite of cuts, raw", None, None),
  ("petto-anatra", "Petto d'anatra", "poultry", ["anatra"], "Duck, domesticated, meat only, raw", None, None),

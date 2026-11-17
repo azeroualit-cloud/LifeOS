@@ -212,7 +212,10 @@ final class NativeNutritionQuickUITests: XCTestCase {
         capture("Generic food search for Biscotti", app)
         biscuits.tap()
         XCTAssertTrue(app.staticTexts["Generic"].waitForExistence(timeout: 5))
-        XCTAssertEqual(app.staticTexts["quick-nutrition-calories"].label, "438 kcal")
+        // FOOD-CATALOG-92: biscuits open by the piece (1 biscotto, 8 g of 438 kcal/100 g).
+        XCTAssertTrue(app.descendants(matching: .any)["quick-nutrition-unit"].exists)
+        XCTAssertEqual(app.textFields["quick-nutrition-Pezzi"].value as? String, "1")
+        XCTAssertEqual(app.staticTexts["quick-nutrition-calories"].label, "35 kcal")
     }
     func testQuickSheetCalculatesAndSavesThenResets() {
         let app = open()

@@ -91,6 +91,16 @@ struct NativeHealthDetail: View {
             .background(NativeDesign.healthCanvas)
             .navigationTitle("Salute")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                // History in the navigation bar: always reachable, never under the bottom actions.
+                ToolbarItem(placement: .topBarTrailing) {
+                    NavigationLink { NativeNutritionScreen() } label: {
+                        Label("Cronologia", systemImage: "clock.arrow.circlepath")
+                    }
+                    .accessibilityLabel("Cronologia nutrizione")
+                    .accessibilityIdentifier("health-nutrition-history")
+                }
+            }
             .sheet(isPresented: $addingWeight) { NativeAddWeightSheet(health: health) }
             .sheet(isPresented: $showingNutrition) { NavigationStack { NativeNutritionQuickSheet(initialDate: selectedDate) }.environmentObject(health) }
             .confirmationDialog("Eliminare questa registrazione e i suoi campioni LifeOS da Apple Salute?", isPresented: Binding(get: { deletingFood != nil }, set: { if !$0 { deletingFood = nil } })) {
@@ -109,7 +119,8 @@ struct NativeHealthDetail: View {
         let order: [NativeHealthMetric] = [.tdee, .simulation, .weight, .calories, .weeklyCalories, .weeklyProtein]
         return order.map { metric in
             LOStat(id: "health-summary-" + metric.rawValue, title: metric.title, value: value(metric), unit: metric.unit,
-                   accessibilityHint: metric == .weeklyCalories || metric == .weeklyProtein ? "" : "Apre il dettaglio")
+                   accessibilityHint: metric == .weeklyCalories || metric == .weeklyProtein ? "" : "Apre il dettaglio",
+                   accessibilityContext: context(metric))
         }
     }
 
@@ -212,11 +223,6 @@ struct NativeHealthDetail: View {
             HStack {
                 Text("Diario").font(.headline)
                 Spacer(minLength: NativeDesign.Space.small)
-                NavigationLink { NativeNutritionScreen() } label: {
-                    Text("Cronologia").frame(minHeight: NativeDesign.Layout.touchTarget)
-                }
-                .accessibilityLabel("Cronologia nutrizione")
-                .accessibilityIdentifier("health-nutrition-history")
             }
             let rows = diaryRows
             if rows.isEmpty {

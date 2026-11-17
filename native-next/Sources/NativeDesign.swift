@@ -94,6 +94,9 @@ enum NativeDesign {
         static let segmentHeight: CGFloat = 36
         static let bloomSectionSwitch: CGFloat = 200
         static let bloomRowThumbnail: CGFloat = 60
+        /// Fixed room for the floating system tab bar where a screen must not
+        /// depend on the bottom safe area (Calendar month).
+        static let tabBarClearance: CGFloat = 88
         static let bloomRowHeight: CGFloat = 76
         static let bloomListDivider: CGFloat = 88
         static let touchTarget: CGFloat = 44

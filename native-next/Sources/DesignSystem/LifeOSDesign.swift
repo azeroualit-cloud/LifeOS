@@ -106,6 +106,8 @@ struct LOStat: Identifiable {
     let value: String
     let unit: String
     var accessibilityHint: String? = nil
+    /// Extra spoken context (e.g. the date of the value), not shown on screen.
+    var accessibilityContext: String? = nil
 }
 
 /// Up to six values in one card, three per row, separated by hairlines.
@@ -149,7 +151,7 @@ struct LOStatGrid: View {
         .padding(.vertical, NativeDesign.Space.small)
         .contentShape(Rectangle())
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(stat.title + ", " + stat.value + (stat.unit.isEmpty ? "" : " " + stat.unit))
+        .accessibilityLabel(stat.title + ", " + stat.value + (stat.unit.isEmpty ? "" : " " + stat.unit) + (stat.accessibilityContext.map { ", " + $0 } ?? ""))
         // The caller's id is used as-is (e.g. "health-summary-tdee") so existing
         // identifiers survive the move to the grid.
         if let onSelect {
