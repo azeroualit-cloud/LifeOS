@@ -1090,6 +1090,15 @@
       "provenance": "Richiesta diretta utente in chat Claude",
       "original_quote": "per gli alimenti controlla anche tutti quelli attuali e aggiungi i micronutrienti (anche stimati) ove non ci sono. inoltre per alcuni alimenti vanno pensati al pezzo, e non ai 100g, come uova ad esempio.",
       "rule": "Micronutrienti completati anche con stime marcate; porzioni a pezzo dove naturale; nuovi generici secondo lo schema concordato."
+    },
+    {
+      "id": "IPA-DELIVERY-92-2026-11-17",
+      "status": "ACTIVE",
+      "scope": "Build 92 (0.10.30)",
+      "recorded_on": "2026-11-17",
+      "provenance": "Richiesta diretta utente in chat Claude",
+      "original_quote": "make the ipa",
+      "rule": "IPA di produzione 0.10.30 build 92 con rework GUI (tab bar nativa, framework di design, Dashboard/Salute/Finanza/Bloom), catalogo alimenti completo e nessun integratore preimpostato. Pubblicazione solo a gate verdi sullo stesso commit; prova su iPhone e accettazione distinte."
     }
   ],
   "pending_confirmations": [

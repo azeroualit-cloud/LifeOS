@@ -418,3 +418,7 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 - **SUPPLEMENTS-PERSONAL-ONLY-92 — ACTIVE.** Nessun integratore preimpostato (generico o di marca); la scheda Integratori mostra solo voci personali. Fonte: «integratori non so se gli hai aggiunti te o chat gpt ma ci sono dei integratori preimpostati e non li voglio, gli integratori gli aggiungo solo io. Conferma META-01: «Sì, togli tutti»». Sostituisce: CATALOG-BRANDS-UNITS-HISTORY-2026-11-12 (parte integratori con marca), CATALOG-NAVIGATION-2026-11-13 (parte integratori preimpostati).
 - **BLOOM-CATEGORIES-92 — ACTIVE.** Categorie di nuovo visibili come filtro accanto alla fonte, con creazione, rinomina, eliminazione e assegnazione. Mappa a tutto schermo, ricerca non coperta dalla barra. Fonte: «non trovo le categorie precedenti. Conferma META-01: «Si rimetti le categorie e la possibilità di cambiarle modificarle ecc»». Sostituisce: BLOOM-REDESIGN-2026-11-16 (variante B senza categorie).
 - **FOOD-CATALOG-92 — ACTIVE.** Micronutrienti completati anche con stime marcate; porzioni a pezzo dove naturale; nuovi generici secondo lo schema concordato. Fonte: «per gli alimenti controlla anche tutti quelli attuali e aggiungi i micronutrienti (anche stimati) ove non ci sono. inoltre per alcuni alimenti vanno pensati al pezzo, e non ai 100g, come uova ad esempio.».
+
+## IPA-DELIVERY-92-2026-11-17 (ACTIVE)
+- Richiesta utente: "make the ipa".
+- IPA 0.10.30 build 92 solo a gate verdi sullo stesso commit; prova su iPhone e accettazione restano distinte.
