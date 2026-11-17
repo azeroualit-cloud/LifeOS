@@ -1,5 +1,5 @@
 name: LifeOS candidate 92 validation and authorized IPA
-# Start 1 for IPA-DELIVERY-92-2026-11-17. Change this line to start a new attempt on the current commit.
+# Start 2 for IPA-DELIVERY-92-2026-11-17 (retry: only the Apple Health app reference capture failed; app tests all green). Change this line to start a new attempt on the current commit.
 on:
   workflow_dispatch:
   push:
