@@ -174,7 +174,9 @@ struct DashboardScreen: View {
     }
     private var financeOverview: some View {
         NativeCard(density: .compact, topInset: NativeDesign.Space.xs) {
-            NavigationLink(value: NativeDashboardDestination.finance) {
+            // Explicit path write, like the Calendar entry: a value link did not push
+            // after a programmatic Calendar visit (gate 91 run 43999971306).
+            Button { router.dashboardPath = [.finance] } label: {
                 HStack {
                     Label("Finanza", systemImage: "chart.bar").font(.headline).foregroundStyle(NativeDesign.financeTitle)
                     Spacer()

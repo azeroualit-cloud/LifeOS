@@ -74,3 +74,11 @@ Correzioni portate nella 91, entrambe senza cambi di funzione:
 Apple Salute (`testCaptureAppleHealthReference`): l'app Salute esponeva righe con frame vuoto e `isHittable` sollevava «Activation point invalid» invece di restituire falso. Gli accessi nella parte preferiti, già non bloccante per decisione del 15 novembre, passano da un controllo di raggiungibilità; gli assert finali sui valori seminati sono invariati. Verde nel run 43992314220.
 
 Il gate non è stato indebolito: nessun test escluso, nessun nuovo tentativo automatico, verificatore invariato.
+
+### Start 5 (43999971306, `47c7cb4`)
+
+Suite restante verde, compresi `testPaintingPaletteFullNamesWithLargeText` e `testCaptureAppleHealthReference`. Fallite due regressioni Finanza, entrambe navigazioni che non partivano:
+- `testCalendarReturnsToDashboardAndFinanceOpens`: dopo una visita al Calendario aperta dal giorno in Dashboard, il tocco su «Finanza» non apriva la schermata. La scheda usa ora una scrittura esplicita del percorso (`dashboardPath = [.finance]`), come l'ingresso al Calendario.
+- `testFinanceOverviewSupportsLargeTextAndEmptySnapshot`: con testo accessibile «Movimenti», nella seconda riga della griglia lazy, non apriva l'elenco. Le quattro azioni sono ora due pile semplici (una riga con testo standard, due righe con testo accessibile): stessa disposizione, nessun contenitore lazy.
+
+Start 6 sullo stesso gate, invariato.

@@ -92,15 +92,25 @@ struct FinanceScreen: View {
     private var presentation: NativeFinanceOverview { NativeFinanceOverview(summary: store.summary, month: store.financeMonth) }
     // FINANCE-SCREEN-REDESIGN-2026-11-16: four visible actions of equal weight, no overflow menu.
     private var actions: some View {
-        let columns = Array(repeating: GridItem(.flexible(), spacing: NativeDesign.Space.small), count: typeSize.isAccessibilitySize ? 2 : 4)
-        return LazyVGrid(columns: columns, spacing: NativeDesign.Space.small) {
-            NavigationLink { NativePlansScreen().toolbar(.visible, for: .navigationBar) } label: { financeTile("Budget", symbol: "wallet.bifold") }.accessibilityIdentifier("finance-budget")
-            NavigationLink { FinanceAnalysisScreen().toolbar(.visible, for: .navigationBar) } label: { financeTile("Analisi", symbol: "chart.xyaxis.line") }.accessibilityIdentifier("finance-analysis")
-            Button { router.sheet = .financePlan } label: { financeTile("Nuovo piano", symbol: "folder.badge.plus") }.accessibilityIdentifier("finance-new-plan")
-            NavigationLink {
-                List { movements }.modifier(NativeListAppearance()).navigationTitle("Movimenti").navigationBarTitleDisplayMode(.inline).toolbar(.visible, for: .navigationBar)
-            } label: { financeTile("Movimenti", symbol: "list.bullet") }
-                .accessibilityLabel("Mostra tutti i movimenti").accessibilityIdentifier("all-movements")
+        // Four fixed tiles in plain stacks: a lazy grid did not push «Movimenti» from its
+        // second row with accessibility text (gate 91 run 43999971306).
+        let spacing = NativeDesign.Space.small
+        let budget = NavigationLink { NativePlansScreen().toolbar(.visible, for: .navigationBar) } label: { financeTile("Budget", symbol: "wallet.bifold") }.accessibilityIdentifier("finance-budget")
+        let analysis = NavigationLink { FinanceAnalysisScreen().toolbar(.visible, for: .navigationBar) } label: { financeTile("Analisi", symbol: "chart.xyaxis.line") }.accessibilityIdentifier("finance-analysis")
+        let plan = Button { router.sheet = .financePlan } label: { financeTile("Nuovo piano", symbol: "folder.badge.plus") }.accessibilityIdentifier("finance-new-plan")
+        let all = NavigationLink {
+            List { movements }.modifier(NativeListAppearance()).navigationTitle("Movimenti").navigationBarTitleDisplayMode(.inline).toolbar(.visible, for: .navigationBar)
+        } label: { financeTile("Movimenti", symbol: "list.bullet") }
+            .accessibilityLabel("Mostra tutti i movimenti").accessibilityIdentifier("all-movements")
+        return Group {
+            if typeSize.isAccessibilitySize {
+                VStack(spacing: spacing) {
+                    HStack(alignment: .top, spacing: spacing) { budget; analysis }
+                    HStack(alignment: .top, spacing: spacing) { plan; all }
+                }
+            } else {
+                HStack(alignment: .top, spacing: spacing) { budget; analysis; plan; all }
+            }
         }.buttonStyle(.plain).foregroundStyle(Color.primary)
     }
     private func financeTile(_ title: String, symbol: String) -> some View {
