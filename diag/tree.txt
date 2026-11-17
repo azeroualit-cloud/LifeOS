@@ -1,6 +1,5 @@
 art
-art/lifeos-development-preview-ad01e15e3b10ff888b644df2f0d10d623af4dd43
-art/lifeos-development-preview-ad01e15e3b10ff888b644df2f0d10d623af4dd43/build
-art/lifeos-development-preview-ad01e15e3b10ff888b644df2f0d10d623af4dd43/build/development-selection.args
-art/lifeos-development-preview-ad01e15e3b10ff888b644df2f0d10d623af4dd43/build/development-build.log
-art/lifeos-development-preview-ad01e15e3b10ff888b644df2f0d10d623af4dd43/build/development-selection.json
+art/lifeos-full92-4a10bc8f95ef19c50210a973848910616ef10145
+art/lifeos-full92-4a10bc8f95ef19c50210a973848910616ef10145/full-tests.log
+art/lifeos-full92-4a10bc8f95ef19c50210a973848910616ef10145/failures.txt
+art/lifeos-full92-4a10bc8f95ef19c50210a973848910616ef10145/full-compile.log
