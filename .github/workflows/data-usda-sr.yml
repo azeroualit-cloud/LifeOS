@@ -1,0 +1,57 @@
+name: Fetch USDA SR Legacy subset (FOOD-CATALOG-92)
+on:
+  push:
+    branches: [data/usda-sr]
+    paths: [.github/workflows/data-usda-sr.yml]
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Download and reduce
+        run: |
+          set -euo pipefail
+          for url in \
+            https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_csv_2018-04.zip \
+            https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_csv_%202019-04-02.zip; do
+            if curl -fLsS "$url" -o sr.zip; then echo "OK $url"; break; fi
+          done
+          unzip -q -o sr.zip -d sr
+          find sr -name '*.csv' | head -30
+          python3 - <<'PY'
+          import csv, json, glob, os
+          base = os.path.dirname(glob.glob('sr/**/food.csv', recursive=True)[0])
+          keep = {1008,1003,1004,1005,1079,1087,1088,1089,1090,1091,1092,1093,1095,1098,1100,1101,1103,1106,1109,1114,1162,1165,1166,1167,1170,1175,1177,1178,1180,1183,1185,1190,1272,1278,1404,1057,1018}
+          foods = {}
+          with open(base + '/food.csv', newline='', encoding='utf-8') as f:
+              for r in csv.DictReader(f):
+                  foods[r['fdc_id']] = {'d': r['description'], 'c': r.get('food_category_id', ''), 'n': {}}
+          with open(base + '/food_nutrient.csv', newline='', encoding='utf-8') as f:
+              for r in csv.DictReader(f):
+                  nid = int(r['nutrient_id'])
+                  if nid in keep and r['fdc_id'] in foods and r['amount'] not in ('', None):
+                      foods[r['fdc_id']]['n'][nid] = float(r['amount'])
+          units = {}
+          with open(base + '/nutrient.csv', newline='', encoding='utf-8') as f:
+              for r in csv.DictReader(f):
+                  if int(r['id']) in keep: units[r['id']] = [r['name'], r['unit_name']]
+          portions = {}
+          pf = base + '/food_portion.csv'
+          if os.path.exists(pf):
+              with open(pf, newline='', encoding='utf-8') as f:
+                  for r in csv.DictReader(f):
+                      portions.setdefault(r['fdc_id'], []).append([r.get('modifier') or r.get('portion_description') or '', r.get('amount',''), r['gram_weight']])
+          for k, v in foods.items():
+              if k in portions: v['p'] = portions[k][:6]
+          os.makedirs('data', exist_ok=True)
+          json.dump({'nutrients': units, 'foods': foods}, open('data/usda-sr-legacy-subset.json', 'w'), separators=(',', ':'))
+          print(len(foods), 'foods')
+          PY
+          gzip -9 -k data/usda-sr-legacy-subset.json
+          git config user.name "lifeos-data"; git config user.email "data@lifeos.invalid"
+          git add data/usda-sr-legacy-subset.json.gz
+          git commit -m "USDA SR Legacy subset (public domain) for catalog estimates"
+          git push origin HEAD:data/usda-sr
