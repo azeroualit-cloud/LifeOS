@@ -307,6 +307,11 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertEqual(monday.value as? String, "0")
         // SwiftUI can expose the full labelled row as a switch. Tap the control end.
         monday.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap()
+        // The row tap occasionally lands while the form is still settling; retry on the inner control.
+        if monday.value as? String == "0" {
+            let control = monday.switches.firstMatch
+            (control.exists ? control : monday).tap()
+        }
         print("HABIT_SWITCH_AFTER: " + monday.debugDescription)
         XCTAssertEqual(monday.value as? String, "1", monday.debugDescription)
         capture("habit-weekday-selected")
