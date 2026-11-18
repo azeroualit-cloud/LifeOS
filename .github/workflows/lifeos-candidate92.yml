@@ -1,5 +1,5 @@
 name: LifeOS candidate 92 validation and authorized IPA
-# Start 7 for IPA-DELIVERY-92-2026-11-17 (Bloom grid test pinned to the grid layout after it exceeded its time on the new list default; retry after the regression step stopped mid safe-area Bloom capture with no assertion; habits show the next occurrence; habit switch tap retried; Apple Health reference excluded). Change this line to start a new attempt on the current commit.
+# Start 8 for IPA-DELIVERY-92-2026-11-17 (Bloom grid test passed in 188 s but exceeded the 180 s default allowance; now 480 s; Bloom grid test pinned to the grid layout after it exceeded its time on the new list default; retry after the regression step stopped mid safe-area Bloom capture with no assertion; habits show the next occurrence; habit switch tap retried; Apple Health reference excluded). Change this line to start a new attempt on the current commit.
 on:
   workflow_dispatch:
   push:

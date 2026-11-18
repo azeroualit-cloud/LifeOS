@@ -1,6 +1,8 @@
 import XCTest
 
 final class NativeBloomGridUITests: XCTestCase {
+    // The two-column check scrolls the whole mixed library (~190 s on CI); give it room under the 660 s cap.
+    override func setUp() { super.setUp(); executionTimeAllowance = 480 }
     func testMixedLibraryStaysInTwoColumnsAndShowsLinkPreviews() {
         checkGrid(large: false)
     }
