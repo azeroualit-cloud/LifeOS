@@ -1,7 +1,7 @@
+=== art/lifeos-candidate92-diagnostics-69b1f792045564c02a92c6918331ba227a813fa4-1/final-tests.log
+=== art/lifeos-candidate92-diagnostics-69b1f792045564c02a92c6918331ba227a813fa4-1/regression-tests.log
+=== art/lifeos-candidate92-diagnostics-69b1f792045564c02a92c6918331ba227a813fa4-1/failures-and-counts.txt
+=== art/lifeos-candidate92-diagnostics-69b1f792045564c02a92c6918331ba227a813fa4-1/preflight-tests.log
 === art/lifeos-candidate92-validation-69b1f792045564c02a92c6918331ba227a813fa4-1/final-compile.log
 === art/lifeos-candidate92-validation-69b1f792045564c02a92c6918331ba227a813fa4-1/final-tests.log
 === art/lifeos-candidate92-validation-69b1f792045564c02a92c6918331ba227a813fa4-1/regression-tests.log
-=== art/lifeos-candidate92-diagnostics-69b1f792045564c02a92c6918331ba227a813fa4-1/failures-and-counts.txt
-=== art/lifeos-candidate92-diagnostics-69b1f792045564c02a92c6918331ba227a813fa4-1/final-tests.log
-=== art/lifeos-candidate92-diagnostics-69b1f792045564c02a92c6918331ba227a813fa4-1/preflight-tests.log
-=== art/lifeos-candidate92-diagnostics-69b1f792045564c02a92c6918331ba227a813fa4-1/regression-tests.log

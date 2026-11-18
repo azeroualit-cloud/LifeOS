@@ -1,126 +1,40 @@
-=== TAIL art/lifeos-candidate92-validation-69b1f792045564c02a92c6918331ba227a813fa4-1/final-tests.log
-    t =     9.91s Find the "home-next-time" Button
-    t =    10.03s Find the Target Application 'com.nas.lifeos.probe'
-    t =    10.12s Find the "home-next-time" Button
-    t =    10.24s Find the "home-today" StaticText
-    t =    10.35s Find the "home-next-time" Button
-    t =    10.45s Find the "home-today" StaticText
-    t =    10.56s Find the "home-next-time" Button
-    t =    10.66s Find the Target Application 'com.nas.lifeos.probe'
-    t =    10.72s Tap "home-next-time" Button
-    t =    10.72s     Wait for com.nas.lifeos.probe to idle
-    t =    10.73s     Find the "home-next-time" Button
-    t =    10.83s     Check for interrupting elements affecting "home-next-time" Button
-    t =    10.93s     Synthesize event
-    t =    11.24s     Wait for com.nas.lifeos.probe to idle
-    t =    11.51s Waiting 10.0s for "Orari" NavigationBar to exist
-    t =    12.59s     Checking `Expect predicate `existsNoRetry == 1` for object "Orari" NavigationBar`
-    t =    12.59s         Checking existence of `"Orari" NavigationBar`
-    t =    12.78s Find the Target Application 'com.nas.lifeos.probe'
-    t =    13.03s Added attachment named '78-prayers'
-    t =    13.03s Tear Down
-Test Case '-[LifeOSProbeUITests.NativeRevision78UITests testPrayerSharesDateRowAndOpensAllTimes]' passed (13.257 seconds).
-Test Suite 'NativeRevision78UITests' passed at 2026-11-18 06:06:14.871.
-	 Executed 5 tests, with 0 failures (0 unexpected) in 121.098 (121.107) seconds
-Test Suite 'NativeTabHitRegionUITests' started at 2026-11-18 06:06:14.872.
-Test Suite 'NativeTabHitRegionUITests' passed at 2026-11-18 06:06:14.873.
-	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
-Test Suite 'LifeOSProbeUITests.xctest' passed at 2026-11-18 06:06:14.874.
-	 Executed 67 tests, with 0 failures (0 unexpected) in 2532.357 (2532.431) seconds
-Test Suite 'Selected tests' passed at 2026-11-18 06:06:14.877.
-	 Executed 67 tests, with 0 failures (0 unexpected) in 2532.357 (2532.435) seconds
-2026-11-18 06:06:58.697 xcodebuild[45157:372630] [MT] IDETestOperationsObserverDebug: 2626.975 elapsed -- Testing started completed.
-2026-11-18 06:06:58.698 xcodebuild[45157:372630] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
-2026-11-18 06:06:58.698 xcodebuild[45157:372630] [MT] IDETestOperationsObserverDebug: 2626.975 sec, +2626.975 sec -- end
-
-Test session results, code coverage, and logs:
-	/Users/runner/work/LifeOS/LifeOS/app/build/Final.xcresult
-
-** TEST EXECUTE SUCCEEDED **
-
-Testing started
-=== TAIL art/lifeos-candidate92-validation-69b1f792045564c02a92c6918331ba227a813fa4-1/regression-tests.log
-bloom-note-BA000000-0000-4000-8000-000000000121: (20.0, 644.3333333333321, 353.0, 76.0)
-    t =   140.71s Requesting snapshot of accessibility hierarchy for app with pid 37854
-    t =   141.09s Requesting snapshot of accessibility hierarchy for app with pid 37854
-    t =   141.25s Added attachment named 'safe-area-bloom-standard-step-24 hierarchy'
-    t =   141.25s Find the Target Application 'com.nas.lifeos.probe'
-    t =   141.55s Added attachment named 'safe-area-bloom-standard-step-24'
-    t =   141.55s Checking existence of `"bloom-note-BA000000-0000-4000-8000-000000000121" Button`
-    t =   141.62s Find the "bloom-note-BA000000-0000-4000-8000-000000000121" Button
-    t =   141.71s Find the "bloom-note-BA000000-0000-4000-8000-000000000121" Button
-    t =   141.79s Find the "bloom-library-scroll" ScrollView
-    t =   141.87s Find the "Barra pannelli" TabBar
-    t =   141.89s Find the Target Application 'com.nas.lifeos.probe'
-    t =   142.07s Added attachment named 'safe-area-bloom-standard'
-    t =   142.07s Tap "bloom-note-BA000000-0000-4000-8000-000000000121" Button
-    t =   142.07s     Wait for com.nas.lifeos.probe to idle
-    t =   142.08s     Find the "bloom-note-BA000000-0000-4000-8000-000000000121" Button
-    t =   142.16s     Check for interrupting elements affecting "bloom-note-BA000000-0000-4000-8000-000000000121" Button
-    t =   142.22s     Synthesize event
-    t =   142.53s     Wait for com.nas.lifeos.probe to idle
-    t =   143.68s Waiting 10.0s for "Nota" NavigationBar to exist
-    t =   144.68s     Checking `Expect predicate `existsNoRetry == 1` for object "Nota" NavigationBar`
-    t =   144.68s         Checking existence of `"Nota" NavigationBar`
-    t =   144.78s Tear Down
-Test Case '-[LifeOSProbeUITests.NativeRevision78UITests testSafeAreaLastContentStandard]' passed (145.245 seconds).
-Test Suite 'NativeRevision78UITests' passed at 2026-11-18 05:22:10.916.
-	 Executed 8 tests, with 0 failures (0 unexpected) in 580.678 (580.687) seconds
-Test Suite 'LifeOSProbeUITests.xctest' passed at 2026-11-18 05:22:10.916.
-	 Executed 39 tests, with 0 failures (0 unexpected) in 2453.815 (2453.880) seconds
-Test Suite 'Selected tests' passed at 2026-11-18 05:22:10.917.
-	 Executed 39 tests, with 0 failures (0 unexpected) in 2453.815 (2453.883) seconds
-2026-11-18 05:22:49.905 xcodebuild[38811:108986] [MT] IDETestOperationsObserverDebug: 3285.816 elapsed -- Testing started completed.
-2026-11-18 05:22:49.906 xcodebuild[38811:108986] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
-2026-11-18 05:22:49.906 xcodebuild[38811:108986] [MT] IDETestOperationsObserverDebug: 3285.817 sec, +3285.817 sec -- end
-
-Test session results, code coverage, and logs:
-	/Users/runner/work/LifeOS/LifeOS/app/build/Regressions.xcresult
-
-** TEST EXECUTE FAILED **
-
-Testing started
-=== TAIL art/lifeos-candidate92-diagnostics-69b1f792045564c02a92c6918331ba227a813fa4-1/failures-and-counts.txt
-	 Executed 14 tests, with 0 failures (0 unexpected) in 0.207 (0.299) seconds
-	 Executed 6 tests, with 0 failures (0 unexpected) in 0.013 (0.089) seconds
-	 Executed 3 tests, with 0 failures (0 unexpected) in 0.009 (0.045) seconds
-	 Executed 9 tests, with 0 failures (0 unexpected) in 0.066 (0.126) seconds
-	 Executed 16 tests, with 0 failures (0 unexpected) in 0.132 (0.143) seconds
-	 Executed 9 tests, with 0 failures (0 unexpected) in 0.233 (0.236) seconds
-	 Executed 1 test, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
-	 Executed 7 tests, with 0 failures (0 unexpected) in 0.079 (0.081) seconds
-	 Executed 8 tests, with 0 failures (0 unexpected) in 0.057 (0.184) seconds
-	 Executed 7 tests, with 0 failures (0 unexpected) in 0.052 (0.126) seconds
-	 Executed 2 tests, with 0 failures (0 unexpected) in 0.001 (0.002) seconds
-	 Executed 2 tests, with 0 failures (0 unexpected) in 0.005 (0.006) seconds
-	 Executed 3 tests, with 0 failures (0 unexpected) in 0.008 (0.009) seconds
-	 Executed 2 tests, with 0 failures (0 unexpected) in 0.002 (0.122) seconds
-	 Executed 2 tests, with 0 failures (0 unexpected) in 0.066 (0.067) seconds
-	 Executed 19 tests, with 0 failures (0 unexpected) in 0.638 (0.705) seconds
-	 Executed 4 tests, with 0 failures (0 unexpected) in 0.006 (0.010) seconds
-	 Executed 5 tests, with 0 failures (0 unexpected) in 0.010 (0.029) seconds
-	 Executed 2 tests, with 0 failures (0 unexpected) in 0.002 (0.003) seconds
-	 Executed 3 tests, with 0 failures (0 unexpected) in 0.019 (0.021) seconds
-	 Executed 2 tests, with 0 failures (0 unexpected) in 0.013 (0.014) seconds
-	 Executed 330 tests, with 0 failures (0 unexpected) in 8.641 (10.801) seconds
-	 Executed 330 tests, with 0 failures (0 unexpected) in 8.641 (10.804) seconds
-	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
-	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
-	 Executed 35 tests, with 0 failures (0 unexpected) in 1312.440 (1312.466) seconds
-	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
-	 Executed 1 test, with 0 failures (0 unexpected) in 33.239 (33.240) seconds
-	 Executed 7 tests, with 0 failures (0 unexpected) in 313.995 (314.000) seconds
-	 Executed 3 tests, with 0 failures (0 unexpected) in 179.020 (179.027) seconds
-	 Executed 8 tests, with 0 failures (0 unexpected) in 288.568 (288.573) seconds
-	 Executed 2 tests, with 0 failures (0 unexpected) in 50.615 (50.617) seconds
-	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
-	 Executed 1 test, with 0 failures (0 unexpected) in 31.558 (31.559) seconds
-	 Executed 2 tests, with 0 failures (0 unexpected) in 137.604 (137.607) seconds
-	 Executed 3 tests, with 0 failures (0 unexpected) in 64.220 (64.222) seconds
-	 Executed 5 tests, with 0 failures (0 unexpected) in 121.098 (121.107) seconds
-	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
-	 Executed 67 tests, with 0 failures (0 unexpected) in 2532.357 (2532.431) seconds
-	 Executed 67 tests, with 0 failures (0 unexpected) in 2532.357 (2532.435) seconds
+=== TAIL art/lifeos-candidate92-diagnostics-69b1f792045564c02a92c6918331ba227a813fa4-1/preflight-summary.json
+{
+  "devicesAndConfigurations": [
+    {
+      "device": {
+        "architecture": "arm64",
+        "deviceId": "533F03F8-DDFA-449D-BCC4-2D3C26A26A86",
+        "deviceName": "LifeOS 92 compact preflight",
+        "modelName": "iPhone SE (3rd generation)",
+        "osBuildNumber": "23C54",
+        "osVersion": "26.2",
+        "platform": "iOS Simulator"
+      },
+      "expectedFailures": 0,
+      "failedTests": 0,
+      "passedTests": 5,
+      "skippedTests": 0,
+      "testPlanConfiguration": {
+        "configurationId": "1",
+        "configurationName": "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription": "LifeOSProbe · Built with macOS 15.8.2",
+  "expectedFailures": 0,
+  "failedTests": 0,
+  "finishTime": 1794975954.218,
+  "passedTests": 5,
+  "result": "Passed",
+  "skippedTests": 0,
+  "startTime": 1794975435.608,
+  "statistics": [],
+  "testFailures": [],
+  "title": "Test - LifeOSProbe",
+  "topInsights": [],
+  "totalTestCount": 5
+}
 === TAIL art/lifeos-candidate92-diagnostics-69b1f792045564c02a92c6918331ba227a813fa4-1/final-tests.log
     t =     9.91s Find the "home-next-time" Button
     t =    10.03s Find the Target Application 'com.nas.lifeos.probe'
@@ -203,40 +117,126 @@ Test session results, code coverage, and logs:
 ** TEST EXECUTE FAILED **
 
 Testing started
-=== TAIL art/lifeos-candidate92-diagnostics-69b1f792045564c02a92c6918331ba227a813fa4-1/preflight-summary.json
-{
-  "devicesAndConfigurations": [
-    {
-      "device": {
-        "architecture": "arm64",
-        "deviceId": "533F03F8-DDFA-449D-BCC4-2D3C26A26A86",
-        "deviceName": "LifeOS 92 compact preflight",
-        "modelName": "iPhone SE (3rd generation)",
-        "osBuildNumber": "23C54",
-        "osVersion": "26.2",
-        "platform": "iOS Simulator"
-      },
-      "expectedFailures": 0,
-      "failedTests": 0,
-      "passedTests": 5,
-      "skippedTests": 0,
-      "testPlanConfiguration": {
-        "configurationId": "1",
-        "configurationName": "Test Scheme Action"
-      }
-    }
-  ],
-  "environmentDescription": "LifeOSProbe · Built with macOS 15.8.2",
-  "expectedFailures": 0,
-  "failedTests": 0,
-  "finishTime": 1794975954.218,
-  "passedTests": 5,
-  "result": "Passed",
-  "skippedTests": 0,
-  "startTime": 1794975435.608,
-  "statistics": [],
-  "testFailures": [],
-  "title": "Test - LifeOSProbe",
-  "topInsights": [],
-  "totalTestCount": 5
-}
+=== TAIL art/lifeos-candidate92-diagnostics-69b1f792045564c02a92c6918331ba227a813fa4-1/failures-and-counts.txt
+	 Executed 14 tests, with 0 failures (0 unexpected) in 0.207 (0.299) seconds
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.013 (0.089) seconds
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.009 (0.045) seconds
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.066 (0.126) seconds
+	 Executed 16 tests, with 0 failures (0 unexpected) in 0.132 (0.143) seconds
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.233 (0.236) seconds
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.079 (0.081) seconds
+	 Executed 8 tests, with 0 failures (0 unexpected) in 0.057 (0.184) seconds
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.052 (0.126) seconds
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.001 (0.002) seconds
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.005 (0.006) seconds
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.008 (0.009) seconds
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.002 (0.122) seconds
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.066 (0.067) seconds
+	 Executed 19 tests, with 0 failures (0 unexpected) in 0.638 (0.705) seconds
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.006 (0.010) seconds
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.010 (0.029) seconds
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.002 (0.003) seconds
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.019 (0.021) seconds
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.013 (0.014) seconds
+	 Executed 330 tests, with 0 failures (0 unexpected) in 8.641 (10.801) seconds
+	 Executed 330 tests, with 0 failures (0 unexpected) in 8.641 (10.804) seconds
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+	 Executed 35 tests, with 0 failures (0 unexpected) in 1312.440 (1312.466) seconds
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+	 Executed 1 test, with 0 failures (0 unexpected) in 33.239 (33.240) seconds
+	 Executed 7 tests, with 0 failures (0 unexpected) in 313.995 (314.000) seconds
+	 Executed 3 tests, with 0 failures (0 unexpected) in 179.020 (179.027) seconds
+	 Executed 8 tests, with 0 failures (0 unexpected) in 288.568 (288.573) seconds
+	 Executed 2 tests, with 0 failures (0 unexpected) in 50.615 (50.617) seconds
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+	 Executed 1 test, with 0 failures (0 unexpected) in 31.558 (31.559) seconds
+	 Executed 2 tests, with 0 failures (0 unexpected) in 137.604 (137.607) seconds
+	 Executed 3 tests, with 0 failures (0 unexpected) in 64.220 (64.222) seconds
+	 Executed 5 tests, with 0 failures (0 unexpected) in 121.098 (121.107) seconds
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+	 Executed 67 tests, with 0 failures (0 unexpected) in 2532.357 (2532.431) seconds
+	 Executed 67 tests, with 0 failures (0 unexpected) in 2532.357 (2532.435) seconds
+=== TAIL art/lifeos-candidate92-validation-69b1f792045564c02a92c6918331ba227a813fa4-1/final-tests.log
+    t =     9.91s Find the "home-next-time" Button
+    t =    10.03s Find the Target Application 'com.nas.lifeos.probe'
+    t =    10.12s Find the "home-next-time" Button
+    t =    10.24s Find the "home-today" StaticText
+    t =    10.35s Find the "home-next-time" Button
+    t =    10.45s Find the "home-today" StaticText
+    t =    10.56s Find the "home-next-time" Button
+    t =    10.66s Find the Target Application 'com.nas.lifeos.probe'
+    t =    10.72s Tap "home-next-time" Button
+    t =    10.72s     Wait for com.nas.lifeos.probe to idle
+    t =    10.73s     Find the "home-next-time" Button
+    t =    10.83s     Check for interrupting elements affecting "home-next-time" Button
+    t =    10.93s     Synthesize event
+    t =    11.24s     Wait for com.nas.lifeos.probe to idle
+    t =    11.51s Waiting 10.0s for "Orari" NavigationBar to exist
+    t =    12.59s     Checking `Expect predicate `existsNoRetry == 1` for object "Orari" NavigationBar`
+    t =    12.59s         Checking existence of `"Orari" NavigationBar`
+    t =    12.78s Find the Target Application 'com.nas.lifeos.probe'
+    t =    13.03s Added attachment named '78-prayers'
+    t =    13.03s Tear Down
+Test Case '-[LifeOSProbeUITests.NativeRevision78UITests testPrayerSharesDateRowAndOpensAllTimes]' passed (13.257 seconds).
+Test Suite 'NativeRevision78UITests' passed at 2026-11-18 06:06:14.871.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 121.098 (121.107) seconds
+Test Suite 'NativeTabHitRegionUITests' started at 2026-11-18 06:06:14.872.
+Test Suite 'NativeTabHitRegionUITests' passed at 2026-11-18 06:06:14.873.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'LifeOSProbeUITests.xctest' passed at 2026-11-18 06:06:14.874.
+	 Executed 67 tests, with 0 failures (0 unexpected) in 2532.357 (2532.431) seconds
+Test Suite 'Selected tests' passed at 2026-11-18 06:06:14.877.
+	 Executed 67 tests, with 0 failures (0 unexpected) in 2532.357 (2532.435) seconds
+2026-11-18 06:06:58.697 xcodebuild[45157:372630] [MT] IDETestOperationsObserverDebug: 2626.975 elapsed -- Testing started completed.
+2026-11-18 06:06:58.698 xcodebuild[45157:372630] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-11-18 06:06:58.698 xcodebuild[45157:372630] [MT] IDETestOperationsObserverDebug: 2626.975 sec, +2626.975 sec -- end
+
+Test session results, code coverage, and logs:
+	/Users/runner/work/LifeOS/LifeOS/app/build/Final.xcresult
+
+** TEST EXECUTE SUCCEEDED **
+
+Testing started
+=== TAIL art/lifeos-candidate92-validation-69b1f792045564c02a92c6918331ba227a813fa4-1/regression-tests.log
+bloom-note-BA000000-0000-4000-8000-000000000121: (20.0, 644.3333333333321, 353.0, 76.0)
+    t =   140.71s Requesting snapshot of accessibility hierarchy for app with pid 37854
+    t =   141.09s Requesting snapshot of accessibility hierarchy for app with pid 37854
+    t =   141.25s Added attachment named 'safe-area-bloom-standard-step-24 hierarchy'
+    t =   141.25s Find the Target Application 'com.nas.lifeos.probe'
+    t =   141.55s Added attachment named 'safe-area-bloom-standard-step-24'
+    t =   141.55s Checking existence of `"bloom-note-BA000000-0000-4000-8000-000000000121" Button`
+    t =   141.62s Find the "bloom-note-BA000000-0000-4000-8000-000000000121" Button
+    t =   141.71s Find the "bloom-note-BA000000-0000-4000-8000-000000000121" Button
+    t =   141.79s Find the "bloom-library-scroll" ScrollView
+    t =   141.87s Find the "Barra pannelli" TabBar
+    t =   141.89s Find the Target Application 'com.nas.lifeos.probe'
+    t =   142.07s Added attachment named 'safe-area-bloom-standard'
+    t =   142.07s Tap "bloom-note-BA000000-0000-4000-8000-000000000121" Button
+    t =   142.07s     Wait for com.nas.lifeos.probe to idle
+    t =   142.08s     Find the "bloom-note-BA000000-0000-4000-8000-000000000121" Button
+    t =   142.16s     Check for interrupting elements affecting "bloom-note-BA000000-0000-4000-8000-000000000121" Button
+    t =   142.22s     Synthesize event
+    t =   142.53s     Wait for com.nas.lifeos.probe to idle
+    t =   143.68s Waiting 10.0s for "Nota" NavigationBar to exist
+    t =   144.68s     Checking `Expect predicate `existsNoRetry == 1` for object "Nota" NavigationBar`
+    t =   144.68s         Checking existence of `"Nota" NavigationBar`
+    t =   144.78s Tear Down
+Test Case '-[LifeOSProbeUITests.NativeRevision78UITests testSafeAreaLastContentStandard]' passed (145.245 seconds).
+Test Suite 'NativeRevision78UITests' passed at 2026-11-18 05:22:10.916.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 580.678 (580.687) seconds
+Test Suite 'LifeOSProbeUITests.xctest' passed at 2026-11-18 05:22:10.916.
+	 Executed 39 tests, with 0 failures (0 unexpected) in 2453.815 (2453.880) seconds
+Test Suite 'Selected tests' passed at 2026-11-18 05:22:10.917.
+	 Executed 39 tests, with 0 failures (0 unexpected) in 2453.815 (2453.883) seconds
+2026-11-18 05:22:49.905 xcodebuild[38811:108986] [MT] IDETestOperationsObserverDebug: 3285.816 elapsed -- Testing started completed.
+2026-11-18 05:22:49.906 xcodebuild[38811:108986] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-11-18 05:22:49.906 xcodebuild[38811:108986] [MT] IDETestOperationsObserverDebug: 3285.817 sec, +3285.817 sec -- end
+
+Test session results, code coverage, and logs:
+	/Users/runner/work/LifeOS/LifeOS/app/build/Regressions.xcresult
+
+** TEST EXECUTE FAILED **
+
+Testing started
