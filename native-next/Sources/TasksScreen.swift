@@ -171,7 +171,8 @@ struct RoutinesEditor: View {
                         VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
                             Text(item.value.text("title")).foregroundStyle(Color.primary)
                             Text((try? NativeRoutineSchedule(item.value["schedule"]).summary) ?? "Programmazione non valida").font(.caption).foregroundStyle(NativeDesign.secondary)
-                            if let value = try? NativeRoutineSchedule(item.value["schedule"]), !value.startDate.isEmpty { Text("Dal " + CivilDate.label(value.startDate)).font(.caption).foregroundStyle(NativeDesign.secondary) }
+                            Text(NativeRoutineSchedule.nextLabel(item.value)).font(.caption).foregroundStyle(NativeDesign.secondary)
+                                .accessibilityIdentifier("routine-next-\(item.value.integer("id"))")
                         }
                     }.accessibilityIdentifier("routine-edit-\(item.value.integer("id"))")
                         .swipeActions { Button("Elimina", role: .destructive) { Task { await store.run("deleteRoutine", args: [.int(item.value.integer("id"))]) } } }
