@@ -10,7 +10,7 @@ final class NativeBloomGridUITests: XCTestCase {
     private func checkGrid(large: Bool) {
         continueAfterFailure = false
         let app = XCUIApplication()
-        app.launchArguments = ["--visual-test", "--bloom-grid-fixture", "--dark", "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"] + (large ? ["--large-text"] : [])
+        app.launchArguments = ["--visual-test", "--bloom-grid-fixture", "--dark", "-AppleLanguages", "(it)", "-AppleLocale", "it_IT", "-lifeos.bloom.library.layout", "grid"] + (large ? ["--large-text"] : [])
         app.launch()
         app.openMainTab("Bloom")
         let first = app.buttons["bloom-note-BA000000-0000-4000-8000-000000000000"]
