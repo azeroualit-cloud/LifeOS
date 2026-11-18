@@ -1,2 +1,2 @@
-lifeos-candidate92-validation-0660eddb323823a534b482cad27236219bdbafdd-1
-lifeos-candidate92-diagnostics-0660eddb323823a534b482cad27236219bdbafdd-1
+lifeos-candidate92-diagnostics-8937527c4a5f7f00799b3c92d7a33d5c9ecba591-1
+lifeos-candidate92-validation-8937527c4a5f7f00799b3c92d7a33d5c9ecba591-1
