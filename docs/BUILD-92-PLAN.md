@@ -43,3 +43,4 @@ Utente: «troppi colori accentati, e sembra troppo un app web invece di un app i
 - Run mirato 44125695043: verde. Suite completa 44102729812: 110/111 prima della correzione del test Micronutrienti (ora verde).
 - 17 nov 19:24: Nas chiede l'IPA ("make the ipa", IPA-DELIVERY-92-2026-11-17). Gate `lifeos-candidate92.yml` + `scripts/verify-candidate92.py`: test mirati, restante suite, quattro avvii Release, controllo catalogo nel pacchetto (nessun integratore preimpostato), release `ios-0.10.30-build92` solo a gate verdi.
 - 18 nov 02:19: Nas chiede che le abitudini mostrino la prossima occorrenza invece della data di inizio ("Prossima: oggi/domani/<data>"), incluso nel build 92.
+- 18 nov 12:26: le abitudini mostrano anche i giorni mancanti ("Prossima: <data> · tra N giorni").

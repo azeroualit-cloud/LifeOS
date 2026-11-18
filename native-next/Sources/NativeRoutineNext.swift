@@ -16,6 +16,7 @@ extension NativeRoutineSchedule {
         guard let day = nextDue(routine, today: today) else { return "Nessuna prossima data" }
         if day == today { return "Prossima: oggi" }
         if day == CivilDate.adding(1, to: today) { return "Prossima: domani" }
-        return "Prossima: " + CivilDate.label(day)
+        let days = (0...400).first { CivilDate.adding($0, to: today) == day } ?? 0
+        return "Prossima: " + CivilDate.label(day) + " · tra \(days) giorni"
     }
 }

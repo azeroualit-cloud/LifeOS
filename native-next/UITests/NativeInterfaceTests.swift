@@ -372,7 +372,9 @@ final class NativeInterfaceTests: XCTestCase {
             app.buttons["Annulla"].tap()
             let host = page == "Calendario" || page == "Finanza" ? "Dashboard" : page
             XCTAssertTrue(app.isMainTabSelected(host))
-            XCTAssertTrue(app.buttons["primary-add"].isHittable)
+            // Wait for the editor sheet to finish dismissing before checking the action again.
+            let hittable = XCTNSPredicateExpectation(predicate: NSPredicate(format: "isHittable == true"), object: app.buttons["primary-add"])
+            XCTAssertEqual(XCTWaiter.wait(for: [hittable], timeout: 5), .completed)
             XCTAssertTrue(app.mainTabBar.exists)
             if page == "Finanza" { XCTAssertTrue(app.staticTexts["finance-budget-value"].exists) }
             capture((dark ? "dark-" : "light-") + page)

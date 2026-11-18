@@ -13,6 +13,12 @@ final class NativeRoutineNextTests: XCTestCase {
         XCTAssertEqual(NativeRoutineSchedule.nextLabel(routine("interval", interval: 3, start: "2026-11-16", checked: false), today: today), "Prossima: domani")
     }
 
+    func testLaterOccurrenceShowsDaysLeft() {
+        let label = NativeRoutineSchedule.nextLabel(routine("interval", interval: 5, start: "2026-11-18", checked: true), today: "2026-11-18")
+        XCTAssertTrue(label.hasPrefix("Prossima: "), label)
+        XCTAssertTrue(label.hasSuffix(" · tra 5 giorni"), label)
+    }
+
     func testDoneTodayMovesToTheFollowingOccurrence() {
         let today = "2026-11-18"
         XCTAssertEqual(NativeRoutineSchedule.nextLabel(routine("daily", start: "", checked: false), today: today), "Prossima: oggi")
