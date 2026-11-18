@@ -1,7 +1,89 @@
-=== art/lifeos-candidate92-validation-b859de77ef2f2f0c8d882096dd4bb67740a47026-1/final-compile.log
-=== art/lifeos-candidate92-validation-b859de77ef2f2f0c8d882096dd4bb67740a47026-1/final-tests.log
-=== art/lifeos-candidate92-validation-b859de77ef2f2f0c8d882096dd4bb67740a47026-1/regression-tests.log
-=== art/lifeos-candidate92-diagnostics-b859de77ef2f2f0c8d882096dd4bb67740a47026-1/failures-and-counts.txt
-=== art/lifeos-candidate92-diagnostics-b859de77ef2f2f0c8d882096dd4bb67740a47026-1/final-tests.log
-=== art/lifeos-candidate92-diagnostics-b859de77ef2f2f0c8d882096dd4bb67740a47026-1/preflight-tests.log
-=== art/lifeos-candidate92-diagnostics-b859de77ef2f2f0c8d882096dd4bb67740a47026-1/regression-tests.log
+=== art/lifeos-candidate92-diagnostics-0fb152a43725618aea9c60031862ba0429c9cfe3-1/final-tests.log
+=== art/lifeos-candidate92-diagnostics-0fb152a43725618aea9c60031862ba0429c9cfe3-1/regression-tests.log
+3863-    t =    43.04s     Wait for com.nas.lifeos.probe to idle
+3864-    t =    44.07s Find the "Dashboard" Button
+3865-    t =    44.49s Find the "primary-add" Button
+3866-    t =    44.77s Checking existence of `TabBar (First Match)`
+3867-    t =    45.10s Added attachment named 'dark-Dashboard'
+3868-    t =    45.10s Waiting 10.0s for "Attività" Button to exist
+3869-    t =    46.14s     Checking `Expect predicate `existsNoRetry == 1` for object "Attività" Button`
+3870-    t =    46.14s         Checking existence of `"Attività" Button`
+3871-    t =    46.25s Find the "Attività" Button
+3872-    t =    46.38s Tap "checklist" Button
+3873-    t =    46.38s     Wait for com.nas.lifeos.probe to idle
+3874-    t =    46.39s     Find the "checklist" Button
+3875-    t =    46.56s     Check for interrupting elements affecting "checklist" Button
+3876-    t =    46.70s     Synthesize event
+3877-    t =    47.03s     Wait for com.nas.lifeos.probe to idle
+3878-    t =    49.84s Checking `Expect predicate `BLOCKPREDICATE(0x600000d626d0)` for object "checklist" Button`
+3879-    t =    49.85s     Find the "checklist" Button
+3880-    t =    50.01s Waiting 10.0s for "primary-add" Button to exist
+3881-    t =    51.04s     Checking `Expect predicate `existsNoRetry == 1` for object "primary-add" Button`
+3882-    t =    51.05s         Checking existence of `"primary-add" Button`
+3883-    t =    51.18s Find the "primary-add" Button
+3884-    t =    51.33s Find the "primary-add" Button
+3885-    t =    51.45s Find the "primary-add" Button
+3886-    t =    51.58s Tap "primary-add" Button
+3887-    t =    51.58s     Wait for com.nas.lifeos.probe to idle
+3888-    t =    51.58s     Find the "primary-add" Button
+3889-    t =    51.66s     Check for interrupting elements affecting "primary-add" Button
+3890-    t =    51.75s     Synthesize event
+3891-    t =    52.13s     Wait for com.nas.lifeos.probe to idle
+3892-    t =    54.04s Waiting 10.0s for "Nuova attività" NavigationBar to exist
+3893-    t =    55.06s     Checking `Expect predicate `existsNoRetry == 1` for object "Nuova attività" NavigationBar`
+3894-    t =    55.06s         Checking existence of `"Nuova attività" NavigationBar`
+3895-    t =    55.28s Tap "Annulla" Button
+3896-    t =    55.28s     Wait for com.nas.lifeos.probe to idle
+3897-    t =    55.28s     Find the "Annulla" Button
+3898-    t =    55.43s     Check for interrupting elements affecting "Annulla" Button
+3899-    t =    55.64s     Synthesize event
+3900-    t =    56.00s     Wait for com.nas.lifeos.probe to idle
+3901-    t =    56.94s Find the "Attività" Button
+3902-    t =    57.00s Find the "primary-add" Button
+3903:/Users/runner/work/LifeOS/LifeOS/app/UITests/NativeInterfaceTests.swift:375: error: -[LifeOSProbeUITests.NativeInterfaceTests testFourSectionsInDarkTheme] : XCTAssertTrue failed
+=== art/lifeos-candidate92-diagnostics-0fb152a43725618aea9c60031862ba0429c9cfe3-1/failures-and-counts.txt
+=== art/lifeos-candidate92-diagnostics-0fb152a43725618aea9c60031862ba0429c9cfe3-1/preflight-tests.log
+=== art/lifeos-candidate92-validation-0fb152a43725618aea9c60031862ba0429c9cfe3-1/final-compile.log
+=== art/lifeos-candidate92-validation-0fb152a43725618aea9c60031862ba0429c9cfe3-1/final-tests.log
+=== art/lifeos-candidate92-validation-0fb152a43725618aea9c60031862ba0429c9cfe3-1/regression-tests.log
+3863-    t =    43.04s     Wait for com.nas.lifeos.probe to idle
+3864-    t =    44.07s Find the "Dashboard" Button
+3865-    t =    44.49s Find the "primary-add" Button
+3866-    t =    44.77s Checking existence of `TabBar (First Match)`
+3867-    t =    45.10s Added attachment named 'dark-Dashboard'
+3868-    t =    45.10s Waiting 10.0s for "Attività" Button to exist
+3869-    t =    46.14s     Checking `Expect predicate `existsNoRetry == 1` for object "Attività" Button`
+3870-    t =    46.14s         Checking existence of `"Attività" Button`
+3871-    t =    46.25s Find the "Attività" Button
+3872-    t =    46.38s Tap "checklist" Button
+3873-    t =    46.38s     Wait for com.nas.lifeos.probe to idle
+3874-    t =    46.39s     Find the "checklist" Button
+3875-    t =    46.56s     Check for interrupting elements affecting "checklist" Button
+3876-    t =    46.70s     Synthesize event
+3877-    t =    47.03s     Wait for com.nas.lifeos.probe to idle
+3878-    t =    49.84s Checking `Expect predicate `BLOCKPREDICATE(0x600000d626d0)` for object "checklist" Button`
+3879-    t =    49.85s     Find the "checklist" Button
+3880-    t =    50.01s Waiting 10.0s for "primary-add" Button to exist
+3881-    t =    51.04s     Checking `Expect predicate `existsNoRetry == 1` for object "primary-add" Button`
+3882-    t =    51.05s         Checking existence of `"primary-add" Button`
+3883-    t =    51.18s Find the "primary-add" Button
+3884-    t =    51.33s Find the "primary-add" Button
+3885-    t =    51.45s Find the "primary-add" Button
+3886-    t =    51.58s Tap "primary-add" Button
+3887-    t =    51.58s     Wait for com.nas.lifeos.probe to idle
+3888-    t =    51.58s     Find the "primary-add" Button
+3889-    t =    51.66s     Check for interrupting elements affecting "primary-add" Button
+3890-    t =    51.75s     Synthesize event
+3891-    t =    52.13s     Wait for com.nas.lifeos.probe to idle
+3892-    t =    54.04s Waiting 10.0s for "Nuova attività" NavigationBar to exist
+3893-    t =    55.06s     Checking `Expect predicate `existsNoRetry == 1` for object "Nuova attività" NavigationBar`
+3894-    t =    55.06s         Checking existence of `"Nuova attività" NavigationBar`
+3895-    t =    55.28s Tap "Annulla" Button
+3896-    t =    55.28s     Wait for com.nas.lifeos.probe to idle
+3897-    t =    55.28s     Find the "Annulla" Button
+3898-    t =    55.43s     Check for interrupting elements affecting "Annulla" Button
+3899-    t =    55.64s     Synthesize event
+3900-    t =    56.00s     Wait for com.nas.lifeos.probe to idle
+3901-    t =    56.94s Find the "Attività" Button
+3902-    t =    57.00s Find the "primary-add" Button
+3903:/Users/runner/work/LifeOS/LifeOS/app/UITests/NativeInterfaceTests.swift:375: error: -[LifeOSProbeUITests.NativeInterfaceTests testFourSectionsInDarkTheme] : XCTAssertTrue failed
