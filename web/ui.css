@@ -624,3 +624,43 @@ circle.fx-seg{background:none}
 .fx-trend.t-in{stroke:var(--pos)}.fx-trend.t-out{stroke:var(--neg)}
 .fx-dot{stroke:var(--surface);stroke-width:2;pointer-events:none}.fx-dot.t-in{fill:var(--pos)}.fx-dot.t-out{fill:var(--neg)}
 .oc-legend i.k-trend{width:16px;height:0;border-top:3px solid var(--ink-2);border-radius:2px;background:none}
+
+/* Calendario: celle leggibili, turni come etichette, pannello giorno */
+#calendar .os-day{height:104px;min-height:104px;grid-template-rows:28px 26px 14px;gap:6px;padding:8px 4px;align-content:start;border-radius:var(--r-md);transition:background .15s}
+#calendar .os-calendar-week{border-top:0;gap:4px;margin-bottom:4px}
+#calendar .os-weekdays{font-size:13px;font-weight:600;letter-spacing:.3px;margin-bottom:var(--s3)}
+#calendar .os-day b{width:30px;height:30px;font-size:16px;font-weight:650}
+#calendar .os-day{background:var(--surface)}
+#calendar .os-day:hover:not(:disabled){background:var(--surface-2)}
+#calendar .os-day.selected{background:var(--surface-3);box-shadow:inset 0 0 0 1.5px var(--accent)}
+#calendar .os-day.selected b{background:var(--accent);color:var(--on-accent)}
+#calendar .os-day.today:not(.selected) b{outline:0;background:var(--surface-3)}
+#calendar .os-day.other{opacity:.35}
+#calendar .os-day .os-shift{width:calc(100% - 4px);max-width:none;height:26px;gap:6px;font-size:13px;border-radius:8px;padding:0 6px;font-weight:700;justify-content:center}
+#calendar .os-day .os-shift i{font-style:normal}.os-shift .sh-t{font-weight:600;font-size:12px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#calendar .os-day-mark{display:flex;gap:4px;justify-content:center;align-items:center;height:14px;min-height:14px;min-width:0}
+#calendar .os-day-mark i{width:7px;height:7px;border-radius:50%;background:var(--ink)}
+#calendar .os-day-mark i.t{border-radius:2px;background:var(--warn)}
+#calendar .os-day-mark::after{content:none!important}
+.os-calendar-details>h3{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);flex-wrap:wrap;font-size:20px;letter-spacing:-.3px;text-transform:capitalize}
+.os-day-shift{font-size:13px;font-weight:700;padding:4px 10px;border-radius:var(--r-pill);background:var(--shift-color);color:#101215;text-transform:none}
+.os-day-shift[data-kind=night]{color:#fff}
+.os-calendar-details .os-mini{padding:var(--s4);margin-bottom:var(--s2);border:0;border-radius:var(--r-md);background:var(--surface-2)}
+.os-calendar-details .os-mini strong{font-size:15px}.os-calendar-details .os-mini small{font-size:13px;margin-top:2px}
+.os-calendar-details .os-empty{padding:var(--s5);border-radius:var(--r-md);background:var(--surface);text-align:center;color:var(--ink-3)}
+.os-calendar-details .os-section-label{margin:var(--s4) 0 var(--s2);font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-3)}
+@media(min-width:1100px){#calendar>.os-card{grid-template-columns:minmax(0,1.75fr) minmax(320px,1fr)}#calendar .os-calendar-details{position:sticky;top:var(--s6);border-left:0;padding:var(--s5);border-radius:var(--r-lg);background:var(--surface);border:1px solid var(--line-soft)}}
+@media(max-width:760px){
+  #calendar .os-day{height:72px;min-height:72px;grid-template-rows:26px 24px 10px;gap:3px;padding:5px 1px}
+  #calendar .os-calendar-week{gap:2px}
+  #calendar .os-day .os-shift{height:24px;padding:0;font-size:14px}#calendar .os-day .os-shift .sh-t{display:none}
+  #calendar .os-day b{width:26px;height:26px;font-size:15px}
+  #calendar .os-day-mark i{width:5px;height:5px}
+  .os-calendar-details{margin-top:var(--s4)}
+}
+@media(min-width:761px) and (max-width:1099px){#calendar .os-day{height:92px;min-height:92px}}
+#calendar .os-day .os-shift{gap:4px;padding:0 3px}
+#calendar .os-day[data-kind=rest] .sh-t,#calendar .os-day[data-kind=holiday] .sh-t{display:none}
+#calendar .os-day .os-shift .sh-t{font-size:11px;letter-spacing:-.2px;text-overflow:clip}
+#calendar .os-day .os-shift{gap:3px;padding:0 2px}
+#calendar .os-day{justify-items:stretch}#calendar .os-day b{justify-self:center}#calendar .os-day .os-shift{width:auto}
