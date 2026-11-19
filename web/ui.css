@@ -247,8 +247,9 @@ body:not(.dashboard-mode) .header-meta:has(.top-right.hidden){display:none}
 .dash-kpi small{font-size:12px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--ink-3)}
 .dash-kpi strong{font-size:32px;font-weight:700;letter-spacing:-1px;line-height:1.1;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
 .dash-kpi span{font-size:13px;color:var(--ink-2);line-height:1.3}
-.dash-kpi.k-shift{border-top:3px solid var(--sh-morning,#6b9ac4)}.dash-kpi.k-money{border-top:3px solid var(--sec-finance)}.dash-kpi.k-tasks{border-top:3px solid var(--sec-tasks,var(--ink-3))}.dash-kpi.k-habits{border-top:3px solid var(--sec-habits,var(--ink-3))}
-.dash-kpi:hover:not(:disabled){background:var(--surface-2)}
+.dash-kpi.k-shift{border-top:3px solid var(--sh-morning,#6b9ac4)}.dash-kpi.k-money{border-top:3px solid var(--sec-finance)}.dash-kpi.k-tasks{border-top:3px solid var(--sec-tasks,var(--ink-3))}.dash-kpi.k-sun{border-top:3px solid var(--sh-afternoon,#659b72)}.dash-kpi.k-weather{border-top:3px solid var(--sh-holiday,#d7bf52)}.dash-kpi.k-habits{border-top:3px solid var(--sec-habits,var(--ink-3))}
+.dash-kpi:hover:not(:disabled):not([aria-disabled]){background:var(--surface-2)}
+.dash-kpi[aria-disabled]{cursor:default}
 /* recap */
 .home-recap-card .hint{margin:0;font-size:13px}
 .home-recap-card .card-title .hint{color:var(--ink-3)}
@@ -272,6 +273,9 @@ body:not(.dashboard-mode) .header-meta:has(.top-right.hidden){display:none}
 .home-habit{min-height:48px}
 .home-habit span{font-size:20px;width:24px;text-align:center}
 .home-habits{grid-column:1/-1}
+main:has(#today.active) .home-context{display:none}
+.home-head{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:var(--s4)}
+.home-head .home-recap{font-size:18px;margin:0}.home-head .home-solar{margin:0;flex:0 0 auto}
 .home-habits .home-habit{display:inline-flex;margin:0 var(--s2) var(--s2) 0}
 .home-native .os-empty{margin:var(--s3) 0;color:var(--ink-3)}
 @media(max-width:1000px){.dash-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.dash-kpi strong{font-size:28px}}
