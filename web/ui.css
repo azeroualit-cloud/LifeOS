@@ -778,3 +778,6 @@ html[data-theme="light"]{--sec-home:#6a45c9;--sec-tasks:#146647}
 .nav button[data-view=today].active{color:var(--sec-home);background:color-mix(in srgb,var(--sec-home) 14%,transparent)}
 .nav button[data-view=tasks].active{color:var(--sec-tasks);background:color-mix(in srgb,var(--sec-tasks) 14%,transparent)}
 .nav button[data-view=today].active .nav-symbol,.nav button[data-view=tasks].active .nav-symbol,.nav button[data-view=calendar].active .nav-symbol,.nav button[data-view=overview].active .nav-symbol{color:inherit}
+:root{--sec-admin:#7fd3e8}html[data-theme="light"]{--sec-admin:#0d6a85}
+#admin-link.active,.nav #admin-link.active{color:var(--sec-admin);background:color-mix(in srgb,var(--sec-admin) 14%,transparent)}
+#admin-link.active .nav-symbol{color:inherit}
