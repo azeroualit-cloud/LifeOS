@@ -763,3 +763,9 @@ button.wf-row:hover{background:var(--surface-2)}
 .os-event-options[open]{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s4);align-items:center}
 .os-event-options[open]>summary{flex:1 1 100%}
 .os-event-options[open] .os-row-action{padding:var(--s2) var(--s3);background:var(--surface-2);border-radius:var(--r-pill);min-height:32px}
+
+.dw-row .dw-shift,.dw-row .dw-shift.no-shift{min-width:60px;font-size:12px;font-weight:700;letter-spacing:.2px}
+
+.dw-row{grid-template-columns:76px 72px 1fr}.dw-row .dw-ev{justify-self:end}
+@media(max-width:760px){.dw-row{grid-template-columns:44px auto 1fr}}
+@media(max-width:760px){.dw-row{grid-template-columns:66px 60px 1fr}.dw-row .dw-shift{min-width:52px}}
