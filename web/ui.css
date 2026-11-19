@@ -12,16 +12,16 @@
   color-scheme:dark;
   --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
   /* superfici */
-  --canvas:#0f1013;--surface:#16171b;--surface-2:#1c1d22;--surface-3:#282a30;
-  --line:#25272d;--line-soft:#1d1f24;
+  --canvas:#070708;--surface:#0e0e10;--surface-2:#141416;--surface-3:#1d1d21;
+  --line:#1f1f23;--line-soft:#151518;
   /* testo */
-  --ink:#e6e6ea;--ink-2:#a2a4ae;--ink-3:#6e707b;
+  --ink:#e4e4e7;--ink-2:#a1a1a8;--ink-3:#6b6b73;
   /* interazione */
-  --accent:#cfcfd6;--on-accent:#15161b;--focus:#8fb0ff;
+  --accent:#cfcfd3;--on-accent:#111113;--focus:#8fb0ff;
   /* semantica finanziaria (solo direzione) */
   --pos:#8cbaa1;--neg:#d4928f;--warn:#e0b574;
   /* colore di sezione */
-  --sec-finance:#9db2d0;--sec-nutrition:#8de1b5;--sec-calendar:#f2ba87;--sec-neutral:var(--ink);
+  --sec-finance:#a3adbd;--sec-nutrition:#8de1b5;--sec-calendar:#f2ba87;--sec-neutral:var(--ink);
   --section:var(--sec-neutral);
   /* misure */
   --r-sm:8px;--r-md:10px;--r-lg:14px;--r-pill:999px;
@@ -49,7 +49,7 @@ html[data-theme="light"]{
 }
 /* i colori dei turni mantengono il loro significato */
 [data-kind="morning"]{--shift-color:#6191bd}[data-kind="afternoon"]{--shift-color:#659b72}
-[data-kind="night"]{--shift-color:#666b7a}[data-kind="rest"]{--shift-color:#ce916d}
+[data-kind="night"]{--shift-color:#666870}[data-kind="rest"]{--shift-color:#ce916d}
 [data-kind="holiday"]{--shift-color:#d7bf52}
 html[data-theme="light"] [data-kind="morning"]{--shift-color:#b4c6e7}
 html[data-theme="light"] [data-kind="afternoon"]{--shift-color:#c6e0b4}
@@ -823,7 +823,7 @@ h1,h2,h3,.dash-kpi strong,.dw-day b,.os-agenda-date b{line-height:var(--lh-tight
 /* calendario: marcatori tutti tondi, colore del turno */
 #calendar .os-day-mark i,#calendar .os-day-mark i.t{width:6px;height:6px;border-radius:50%;background:var(--shift-color,var(--ink-3))}
 @media(max-width:760px){#calendar .os-day-mark i,#calendar .os-day-mark i.t{width:5px;height:5px}}
-#calendar .os-day[data-kind="night"] .os-day-mark i{background:#9a9eab}
+#calendar .os-day[data-kind="night"] .os-day-mark i{background:#9a9ba3}
 /* editor evento: popup come gli altri fogli */
 .os-inline-event#os-event-editor{position:fixed;z-index:100;top:50%;left:50%;transform:translate(-50%,-50%);width:min(620px,calc(100vw - 32px));max-height:calc(100svh - 48px);overflow-y:auto;margin:0;padding:var(--s6);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:0 0 0 100vmax rgba(0,0,0,.66),0 30px 80px rgba(0,0,0,.5)}
 @media(max-width:760px){.os-inline-event#os-event-editor{top:auto;bottom:0;left:0;transform:none;width:100%;max-height:calc(100svh - 12px - var(--safe-top,0px));padding:var(--s5) var(--s5) calc(var(--s5) + var(--safe-bottom,0px));border-radius:var(--r-lg) var(--r-lg) 0 0;border-bottom:0}}
@@ -832,7 +832,7 @@ body:has(#os-event-editor) .page-fab{visibility:hidden}
 .os-palette button[data-life-tool]{border-radius:var(--r-pill);border:1px solid var(--line);background:transparent;color:var(--ink-2)}
 .os-palette button[data-life-tool="morning"]{--shift-color:#6191bd}
 .os-palette button[data-life-tool="afternoon"]{--shift-color:#659b72}
-.os-palette button[data-life-tool="night"]{--shift-color:#666b7a}
+.os-palette button[data-life-tool="night"]{--shift-color:#666870}
 .os-palette button[data-life-tool="rest"]{--shift-color:#ce916d}
 .os-palette button[data-life-tool="holiday"]{--shift-color:#d7bf52}
 .os-palette button[data-life-tool="morning"],.os-palette button[data-life-tool="afternoon"],.os-palette button[data-life-tool="night"],.os-palette button[data-life-tool="rest"],.os-palette button[data-life-tool="holiday"]{background:color-mix(in srgb,var(--shift-color) 20%,transparent);border-color:color-mix(in srgb,var(--shift-color) 55%,transparent);color:var(--ink)}
