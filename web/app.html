@@ -831,6 +831,11 @@ button[data-life-category] svg{width:18px;height:18px}
 .os-check.checked::after{font-size:12px}
 /* Prossimi giorni: eventi vicini alla pill */
 .dw-row .dw-ev{justify-self:start;justify-content:flex-start;margin-left:var(--s2)}
+/* badge scadenza a pillola */
+.due-badge{display:inline-flex;align-items:center;height:20px;padding:0 var(--s2);border-radius:var(--r-pill);font-size:11px;font-weight:700;letter-spacing:.2px;margin-left:var(--s2);vertical-align:middle;background:var(--surface-3);color:var(--ink-2)}
+.due-badge.due-overdue,.due-badge.overdue{background:var(--neg);color:#2a0d0c}
+.due-badge.due-today{background:var(--warn);color:#2b1d05}
+.due-badge.due-tomorrow{background:var(--surface-3);color:var(--ink-2)}
 </style>
 </head>
   <body class="dashboard-mode">

@@ -2,7 +2,7 @@
 
 Stato: preparata, NON eseguita. Nessun deploy senza conferma esplicita di Nas.
 File da distribuire: `web/dist/worker-release.mjs` (generato da `python web/build-release.py`, non versionato).
-SHA256 del file preparato il 2026-11-19 (dashboard recap, grafici Finanza, cascata Budget): 8AD0F6313E60E3F3FE3390361565E9F5A5A7C9BB74D4D74670767241CEA686E3
+SHA256 del file preparato il 2026-11-19 (dashboard recap, grafici Finanza, cascata Budget): 983FAB9D24D885E8E58B58B5DA07EFCD4459989BA2DFFF899C1D24C11382D4C4
 
 Il Worker contiene backend build-75 (lo stesso dell'app), UI web aggiornata e i metodi Admin in sola lettura.
 Sito e app usano lo stesso D1 (confermato da Nas il 2026-11-19).
