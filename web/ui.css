@@ -738,3 +738,19 @@ button.wf-row:hover{background:var(--surface-2)}
 .an-svg text.an-ytick,.an-svg text.an-xtick{font-size:13px}
 #analysis .budget-flow>.card{width:100%;box-sizing:border-box}
 @media(max-width:760px){.an-svg text.an-ytick,.an-svg text.an-xtick{font-size:17px}.an-svg text.an-last{font-size:19px}}
+
+/* Calendario: badge a pillola */
+#calendar .os-day .os-shift,#calendar .os-day[data-kind] .os-shift{background:var(--shift-color)!important;color:#101215;border-radius:999px;height:26px;padding:0 10px;width:auto;min-width:0;justify-self:center;font-weight:700;font-size:12px;letter-spacing:.1px}
+#calendar .os-day[data-kind=night] .os-shift{color:#fff}
+#calendar .os-day .os-shift.no-shift{background:transparent!important}
+#calendar .os-day .os-shift .sh-i{display:none}
+#calendar .os-day[data-kind=rest] .sh-t,#calendar .os-day[data-kind=holiday] .sh-t{display:inline}
+#calendar .os-day .os-shift .sh-t{display:inline;font-size:12px;font-weight:700;opacity:1;letter-spacing:0}
+.os-day-shift{background:var(--shift-color);color:#101215;padding:4px 12px;border-radius:999px;font-size:13px;font-weight:700}
+.os-day-shift[data-kind=night]{color:#fff}.os-day-shift::before{content:none}
+@media(max-width:760px){
+  #calendar .os-day .os-shift{width:28px;height:28px;padding:0;font-size:14px;border-radius:50%}
+  #calendar .os-day .os-shift .sh-i{display:inline}#calendar .os-day .os-shift .sh-t,#calendar .os-day[data-kind] .os-shift .sh-t{display:none}
+  #calendar .os-day{grid-template-rows:26px 28px 10px}
+}
+@media(max-width:760px){#calendar .os-day{height:74px;min-height:74px}}
