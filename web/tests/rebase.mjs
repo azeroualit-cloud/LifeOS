@@ -22,7 +22,7 @@ await page.goto('http://lifeos.local');await page.waitForTimeout(300);
 await page.evaluate(f=>{document.getElementById('error').classList.add('hidden');
  const d=eval('('+f+')');state.year=2026;state.month=10;state.data=d;state.loadedDetail=true;
  life.data={today:'2026-10-17',shifts:[],events:[],tasks:[],categories:[],routines:[]};life.month='2026-10';document.getElementById('loading').classList.add('hidden');},fixture);
-for(const [w,h] of [[320,568],[375,812],[1280,900]]){
+for(const [w,h] of [[320,568],[375,812],[768,1024],[1024,768],[1280,900],[1600,900]]){
  await page.setViewportSize({width:w,height:h});
  for(const v of ['overview','budget','analysis','extras','admin']){
   await page.evaluate(v=>setView(v),v);await page.waitForTimeout(200);
