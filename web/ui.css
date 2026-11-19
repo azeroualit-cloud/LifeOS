@@ -769,3 +769,6 @@ button.wf-row:hover{background:var(--surface-2)}
 .dw-row{grid-template-columns:76px 72px 1fr}.dw-row .dw-ev{justify-self:end}
 @media(max-width:760px){.dw-row{grid-template-columns:44px auto 1fr}}
 @media(max-width:760px){.dw-row{grid-template-columns:66px 60px 1fr}.dw-row .dw-shift{min-width:52px}}
+
+.dash-kpi.k-shift{border-top:3px solid var(--shift-color,var(--ink-3))}
+.dash-kpi.k-money,.dash-kpi.k-sun,.dash-kpi.k-weather,.dash-kpi.k-tasks,.dash-kpi.k-habits{border-top:3px solid var(--line)}
