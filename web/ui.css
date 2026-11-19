@@ -820,3 +820,7 @@ button[data-life-category] svg{width:18px;height:18px}
 :root{--fs-1:12px;--fs-2:14px;--fs-3:16px;--fs-4:19px;--fs-5:22px;--fs-6:26px;--fs-7:31px;--fs-8:36px;--fs-9:42px;--fw-regular:400;--fw-strong:650;--lh-body:1.618;--lh-tight:1.2}
 body{line-height:var(--lh-body)}
 h1,h2,h3,.dash-kpi strong,.dw-day b,.os-agenda-date b{line-height:var(--lh-tight)}
+/* calendario: marcatori tutti tondi, colore del turno */
+#calendar .os-day-mark i,#calendar .os-day-mark i.t{width:6px;height:6px;border-radius:50%;background:var(--shift-color,var(--ink-3))}
+@media(max-width:760px){#calendar .os-day-mark i,#calendar .os-day-mark i.t{width:5px;height:5px}}
+#calendar .os-day[data-kind="night"] .os-day-mark i{background:#8d949e}
