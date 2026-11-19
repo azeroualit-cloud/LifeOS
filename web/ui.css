@@ -811,3 +811,8 @@ button[data-life-category] svg{width:18px;height:18px}
 .home-week .dw-row:hover:not(:disabled){background:color-mix(in srgb,var(--shift-color,var(--ink-3)) 20%,transparent)}
 .home-week .dw-row.today{box-shadow:inset 3px 0 0 var(--shift-color,var(--ink))}
 .home-week .dw-row .dw-ev{margin-left:var(--s3)}
+/* segmented: chip separati, attivo pieno ad alto contrasto */
+.finance-tabs,.os-category-tabs,.chart-range,.wealth-series{background:transparent;padding:0;gap:var(--s2);border-radius:0}
+.chart-range button,.wealth-series button,.os-category-tabs button,.finance-tabs button{border-radius:var(--r-pill);border:1px solid var(--line);background:transparent;color:var(--ink-2);padding:0 var(--s4)}
+.chart-range button:hover,.wealth-series button:hover,.os-category-tabs button:hover,.finance-tabs button:hover{background:var(--surface-2);color:var(--ink)}
+.chart-range button.active,.wealth-series button.active,.os-category-tabs button.active,.finance-tabs button.active{background:var(--accent);border-color:var(--accent);color:var(--on-accent);box-shadow:none;font-weight:650}
