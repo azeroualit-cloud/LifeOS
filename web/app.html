@@ -793,6 +793,15 @@ button.wf-row:hover{background:var(--surface-2)}
   #calendar .os-day{grid-template-rows:26px 28px 10px}
 }
 @media(max-width:760px){#calendar .os-day{height:74px;min-height:74px}}
+/* Opzioni evento: apertura senza sovrapposizioni */
+.os-calendar-details .os-mini{flex-wrap:wrap;row-gap:var(--s2)}
+.os-calendar-details .os-mini>div:first-child{flex:1 1 140px}
+.os-event-options{flex:0 0 auto}
+.os-event-options[open]{flex:1 1 100%;order:3;padding-top:var(--s2);border-top:1px dashed var(--line-soft)}
+.os-event-options[open]>summary{display:inline-block}
+.os-event-options[open]{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s4);align-items:center}
+.os-event-options[open]>summary{flex:1 1 100%}
+.os-event-options[open] .os-row-action{padding:var(--s2) var(--s3);background:var(--surface-2);border-radius:var(--r-pill);min-height:32px}
 </style>
 </head>
   <body class="dashboard-mode">
