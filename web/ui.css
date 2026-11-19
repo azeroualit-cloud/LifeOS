@@ -688,3 +688,20 @@ circle.fx-seg{background:none}
 #calendar .os-day .os-shift:not(.no-shift)::before{content:none}
 #calendar .os-day{height:88px;min-height:88px;grid-template-rows:30px 24px 12px}
 @media(max-width:760px){#calendar .os-day{height:68px;min-height:68px;grid-template-rows:26px 22px 10px}}
+
+/* titolo bianco, colore nella sidebar */
+main:has(#overview.active,#budget.active,#analysis.active,#extras.active,#movements.active) h1,main:has(#calendar.active) h1{color:var(--ink)}
+.nav button[data-view=overview].active{color:var(--sec-finance);background:color-mix(in srgb,var(--sec-finance) 14%,transparent)}
+.nav button[data-view=calendar].active{color:var(--sec-calendar);background:color-mix(in srgb,var(--sec-calendar) 14%,transparent)}
+/* budget a cascata grafico */
+.budget-waterfall{display:grid;gap:2px}
+.wf-row{display:grid;grid-template-columns:minmax(120px,220px) minmax(0,1fr) 96px;align-items:center;gap:var(--s4);padding:var(--s3) 0;background:transparent;border:0;border-radius:0;text-align:left;width:100%;color:var(--ink);font:inherit}
+.wf-lab{display:grid;gap:1px;min-width:0}.wf-lab strong{font-size:15px;font-weight:600;overflow-wrap:anywhere}.wf-lab small{font-size:12px;color:var(--ink-3)}
+.wf-track{position:relative;height:18px;border-radius:9px;background:var(--surface-2)}
+.wf-track i{position:absolute;top:0;bottom:0;border-radius:9px;background:var(--neg)}
+.wf-in .wf-track i{background:var(--pos)}
+.wf-row>b{text-align:right;font-size:15px;font-variant-numeric:tabular-nums}
+.wf-out>b{color:var(--neg)}.wf-in>b{color:var(--pos)}
+.wf-final{margin-top:var(--s2);padding-top:var(--s4);border-top:1px solid var(--line-soft)}.wf-final .wf-lab strong{font-size:17px}.wf-final>b{font-size:18px}
+button.wf-row:hover{background:var(--surface-2)}
+@media(max-width:760px){.wf-row{grid-template-columns:minmax(0,1fr) auto;gap:var(--s2) var(--s3)}.wf-track{grid-column:1/-1;grid-row:2}}
