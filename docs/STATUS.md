@@ -390,3 +390,5 @@ Aggiornamento 4 novembre: risultato visivo H-GRID-01 accettato tramite «ok, pro
 ## Quick add nutrizione approvato
 
 Render approvato, implementazione del pulsante + Nutrizione → pannello con quattro totali in grammi e kcal automatiche completata per la verifica. Storico mantenuto; nuovo inserimento per 100 g sospeso anche nell’editor Salute. Stato: compilazione/QA pending. Dettagli in [NUTRITION-QUICK-REVIEW.md](NUTRITION-QUICK-REVIEW.md). Nessuna nuova IPA o deploy.
+
+- 2026-11-19 Web: rebase su UI build-75 (Piani gia presenti). Aggiunti v2 CSS, Admin, destinazione spesa Budget/Piano, selettore mese. Analisi estesa rimossa (build-75 ha la sua). Release worker: web/build-release.py (NON distribuito). Nessun deploy, nessun push.

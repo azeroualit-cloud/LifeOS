@@ -18,7 +18,7 @@ for(const [width,height] of [[375,812],[320,568],[1280,900]]) {
  await page.setViewportSize({width,height});
  await page.evaluate(()=>setView('overview'));
  const actions=await page.locator('.finance-actions button').allTextContents();
- if(!actions[2].includes('Spesa'))throw Error('Spesa order');
+ if(!/spesa/i.test(actions[2]))throw Error('Spesa order');
  if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw Error('Overflow '+width);
 
  await page.locator('.finance-actions [data-view=budget]').click();await page.locator('#budget .planning-card').waitFor();
