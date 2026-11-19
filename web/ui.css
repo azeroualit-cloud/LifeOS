@@ -265,7 +265,10 @@ body:not(.dashboard-mode) .header-meta:has(.top-right.hidden){display:none}
 .home-agenda .card-title,.home-tasks .card-title,.home-habits .card-title{margin-bottom:var(--s2)}
 .home-native>.os-card{min-width:0}
 @media(min-width:1100px){
-  .home-native{max-width:none;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+  .home-native{max-width:none;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto 1fr 1fr;align-items:stretch}
+  .home-native>.home-week{grid-row:1;grid-column:1/-1}
+  .home-native>.os-card{display:flex;flex-direction:column;min-height:200px}
+  .home-recap-card{justify-content:flex-start}.home-solar{align-self:flex-start;margin-top:auto}
   .home-week{grid-column:1/-1}
   .home-recap-card{grid-column:1;grid-row:2}.home-habits{grid-column:1;grid-row:3}
   .home-agenda{grid-column:2;grid-row:2}.home-tasks{grid-column:2;grid-row:3}
@@ -482,7 +485,10 @@ body:not(.dashboard-mode) .header-meta:has(.top-right.hidden){display:none}
 
 /* 7. RESPONSIVE ------------------------------------------------------ */
 @media(min-width:1100px){
-  .home-native{max-width:none;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+  .home-native{max-width:none;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:1fr;align-items:stretch}
+  .home-native>.home-week{grid-row:1;grid-column:1/-1}
+  .home-native>.os-card{display:flex;flex-direction:column;min-height:200px}
+  .home-recap-card{justify-content:flex-start}.home-solar{align-self:flex-start;margin-top:auto}
   .home-week,.home-native>section:not(.os-card):not(.home-week){grid-column:1/-1}
   .home-native>section:not(.os-card):not(.home-week){grid-column:1}
   .home-native>.home-next-time{grid-column:2;align-self:stretch}
