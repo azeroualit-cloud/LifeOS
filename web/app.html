@@ -620,6 +620,30 @@ circle.fx-seg{background:none}
 @media(max-width:760px){.fx-donut{grid-template-columns:minmax(0,1fr);justify-items:center}.fx-donut ul{width:100%}.fx-seg{stroke-width:16}}
 .fx-donut>*{min-width:0}.fx-donut li b{white-space:nowrap}
 @media(max-width:1100px){.finance-charts{grid-template-columns:minmax(0,1fr)}}
+
+/* Sankey budget */
+.sankey{grid-column:1/-1;display:block!important;padding:var(--s5)}
+.finance-open>.sankey{grid-column:1/-1}
+.sk-seg{display:flex;height:14px;gap:3px;border-radius:7px;overflow:hidden;margin:var(--s3) 0 var(--s3)}
+.sk-seg i{display:block;min-width:4px;border-radius:4px}
+.sk-legend{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s5);list-style:none;margin:0 0 var(--s4);padding:0;font-size:13px;color:var(--ink-2)}
+.sk-legend li{display:flex;align-items:center;gap:var(--s2)}.sk-legend i{width:10px;height:10px;border-radius:3px}.sk-legend b{color:var(--ink);font-variant-numeric:tabular-nums}
+.sankey svg{width:100%;height:auto;display:block;overflow:visible}
+.sk-r{opacity:.32;transition:opacity .2s}
+.sk-sal{fill:var(--surface-3)}
+.sk-sl,.sk-ml{fill:var(--ink);font-size:19px;font-weight:650}.sk-sv{fill:var(--ink);font-size:28px;font-weight:700}
+.sk-mv{fill:var(--ink);font-size:16px;opacity:.85}.sk-card{opacity:.95}
+.sk-card~.sk-ml,.sk-card~.sk-mv{fill:#0b0b0b}
+.sk-dl{fill:var(--ink-2);font-size:17px}.sk-dv{fill:var(--ink);font-size:17px;font-weight:600}
+.sankey svg:has([data-g="save"]:hover) [data-g]:not([data-g="save"]),.sankey svg:has([data-g="fixed"]:hover) [data-g]:not([data-g="fixed"]),.sankey svg:has([data-g="spent"]:hover) [data-g]:not([data-g="spent"]),.sankey svg:has([data-g="free"]:hover) [data-g]:not([data-g="free"]){opacity:.15}
+.sankey svg:has([data-g]:hover) .sk-r{transition:opacity .2s}
+.sankey [data-g]:hover .sk-r,.sankey .sk-g:hover .sk-r{opacity:.6}
+.sk-detail{display:grid;gap:var(--s4);margin-top:var(--s4)}
+.sk-detail h4{margin:0 0 var(--s2);font-size:13px;text-transform:uppercase;letter-spacing:.4px}
+.sk-row{display:grid;grid-template-columns:minmax(80px,1fr) 1.2fr auto;gap:var(--s3);align-items:center;padding:5px 0;font-size:13px}
+.sk-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-2)}.sk-row div{height:7px;border-radius:4px;background:var(--surface-2);overflow:hidden}.sk-row div i{display:block;height:100%;border-radius:4px}.sk-row b{font-variant-numeric:tabular-nums}
+.sk-warn{color:var(--warn)}
+@media(max-width:760px){.sankey{padding:var(--s4)}.sk-sl,.sk-ml{font-size:17px}.sk-sv{font-size:22px}.sk-mv{font-size:15px}}
 </style>
 </head>
   <body class="dashboard-mode">
@@ -3130,8 +3154,55 @@ circle.fx-seg{background:none}
         <section class="finance-hero"><h2>Budget rimanente</h2><strong class="finance-value ${amountClass(s.monthlyRemaining)}">${state.assetsVisible ? exactEuro(s.monthlyRemaining) : "•••• €"}</strong><p class="muted">${daily.days ? (state.assetsVisible ? exactEuro(daily.low) : "•••• €")+" al giorno" : "Mese concluso · riepilogo del budget"}</p>${daily.days?`<small>${daily.days} giorni${d.key===todayIso().slice(0,7)?", incluso oggi":" del mese selezionato"}</small>`:""}</section>
         <section class="finance-account"><div><h2>Saldo attuale</h2><strong>${state.assetsVisible ? exactEuro(s.budget) : "•••• €"}</strong></div>${privacyButton()}<small>Saldo dell’ultima sincronizzazione, distinto dal mese selezionato.</small></section>
         <div class="finance-actions"><button data-new-transaction="Spesa" class="primary-pill"><span aria-hidden="true">+</span>Nuova spesa</button><button data-new-extra><span aria-hidden="true">+</span>Nuovo piano</button><button data-view="budget"><span aria-hidden="true">◔</span>Budget</button><button data-view="analysis"><span aria-hidden="true">≋</span>Analisi</button></div>
+        ${budgetSankey(d)}
         <section class="finance-recent"><div class="finance-heading"><h2>Ultimi movimenti</h2><button data-view="movements">Vedi tutti</button></div>${recent.length ? recent.map(t => `<button class="finance-movement" data-edit-movement="${Number(t.row)}"><span><strong>${escapeHtml(t.name)}</strong><small>${escapeHtml(t.date || '')} · ${escapeHtml(t.category || t.type || '')}</small></span><b class="${amountClass(t.amount)}">${state.assetsVisible ? exactEuro(t.amount) : '•••• €'}</b></button>`).join('') : '<p class="empty">Nessun movimento nel mese.</p>'}</section>${overviewCharts(d)}</div>`;
       }
+
+      /** Cascata dello stipendio del mese (Sankey in SVG puro): stipendio, messo da parte, impegni, speso, libero. */
+      function budgetSankey(d) {
+        const sm = d.summary || {}, hide = state.assetsVisible === false, fmt = v => hide ? "•••• €" : exactEuro(v);
+        const S = Number(sm.monthlySalary) || 0; if (!S) return "";
+        const spent = Math.max(0, Number(sm.monthlySpent) || 0), rem = Number(sm.monthlyRemaining) || 0;
+        const plans = (d.plansV2?.plans || []).filter(p => Number(p.contributionCents) > 0).map(p => ({ name: p.name, value: p.contributionCents / 100 }));
+        const fixedRaw = (sm.monthlyBudgetBreakdown || []).filter(x => !x.planId && Number(x.amount) > 0).map(x => ({ name: x.name, value: Number(x.amount) }));
+        const planSum = plans.reduce((n, x) => n + x.value, 0), fixedSum = fixedRaw.reduce((n, x) => n + x.value, 0);
+        const other = Math.round((S - spent - rem - planSum - fixedSum) * 100) / 100;
+        const fixed = other > 0.5 ? [...fixedRaw, { name: "Altri impegni del mese", value: other }] : fixedRaw;
+        const cat = new Map(); for (const t of d.transactions || []) if (t.type === "Spesa" && t.amount < 0) cat.set(t.category || "Altro", (cat.get(t.category || "Altro") || 0) - t.amount);
+        let sp = [...cat].sort((a, b) => b[1] - a[1]).map(([name, value]) => ({ name, value })); const top = sp.slice(0, 4), tail = sp.slice(4).reduce((n, x) => n + x.value, 0) + Math.max(0, spent - sp.reduce((n, x) => n + x.value, 0));
+        const spItems = tail > 0.5 ? [...top, { name: "Altre spese", value: tail }] : top;
+        const free = Math.max(0, rem), over = rem < 0 ? -rem : 0;
+        const groups = [
+          { k: "save", label: "Messo da parte", color: "var(--sec-finance)", value: planSum, items: plans },
+          { k: "fixed", label: "Impegni del mese", color: "#c59ad4", value: fixedSum + (other > 0.5 ? other : 0), items: fixed },
+          { k: "spent", label: "Speso", color: "var(--neg)", value: spent, items: spItems },
+          { k: "free", label: over ? "Sforamento" : "Libero", color: over ? "var(--warn)" : "var(--pos)", value: over || free, items: [{ name: over ? "Oltre lo stipendio" : "Ancora disponibile", value: over || free }] }
+        ].filter(g => g.value > 0.005);
+        const total = groups.reduce((n, g) => n + g.value, 0) || 1, pct = v => Math.round(v / total * 100);
+        const mob = window.matchMedia("(max-width:760px)").matches, reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const W = mob ? 420 : 960, Hs = mob ? 280 : 320, gap = 14, X1 = 0, W1 = mob ? 96 : 150, X2 = mob ? 170 : 330, W2 = mob ? 250 : 190, X3 = 700, W3 = 14;
+        let y = 0; const mid = groups.map(g => { const h = Math.max(mob ? 58 : 62, g.value / total * Hs); const n = { ...g, y, h }; y += h + gap; return n; });
+        const M = y - gap; let yd = 0;
+        if (!mob) for (const g of mid) { g.det = g.items.map(it => { const h = Math.max(26, it.value / total * Hs), n = { ...it, y: yd, h }; yd += h + 6; return n; }); yd += 8; }
+        const H = Math.max(Hs, M, yd) + 6;
+        let ys = 0; const rib = [], nodes = [];
+        const band = (x1, a1, b1, x2, a2, b2, g, tip, delay) => { const xm = (x1 + x2) / 2; return `<path class="sk-r" data-g="${g}" style="fill:${g === "salary" ? "var(--ink-3)" : "currentColor"};--d:${delay}ms" d="M${x1} ${a1} C${xm} ${a1},${xm} ${a2},${x2} ${a2} L${x2} ${b2} C${xm} ${b2},${xm} ${b1},${x1} ${b1} Z"><title>${tip}</title></path>`; };
+        mid.forEach((g, i) => {
+          const hs = g.value / total * Hs;
+          rib.push(`<g class="sk-g" style="color:${g.color}" data-g="${g.k}">${band(X1 + W1, ys, ys + hs, X2, g.y, g.y + g.h, g.k, `${g.label}: ${fmt(g.value)}`, i * 120)}</g>`);
+          ys += hs;
+          if (!mob) { let yy = g.y; g.det.forEach(it => { const hh = g.items.length ? (it.value / g.value) * g.h : g.h; rib.push(`<g class="sk-g" style="color:${g.color}" data-g="${g.k}">${band(X2 + W2, yy, yy + hh, X3, it.y, it.y + it.h, g.k, `${escapeHtml(it.name)}: ${fmt(it.value)}`, 400 + i * 120)}</g>`); yy += hh; });
+            g.det.forEach(it => nodes.push(`<g data-g="${g.k}" class="sk-n"><rect x="${X3}" y="${it.y}" width="${W3}" height="${it.h}" rx="3" style="fill:${g.color}"/><text class="sk-dl" x="${X3 + W3 + 12}" y="${it.y + it.h / 2 + 6}">${escapeHtml(it.name.length > 22 ? it.name.slice(0, 21) + "…" : it.name)}</text><text class="sk-dv" x="${W + 236}" y="${it.y + it.h / 2 + 6}" text-anchor="end">${fmt(it.value)}</text></g>`)); }
+          nodes.push(`<g data-g="${g.k}" class="sk-n"><rect x="${X2}" y="${g.y}" width="${W2}" height="${g.h}" rx="10" style="fill:${g.color}" class="sk-card"/><text class="sk-ml" x="${X2 + 16}" y="${g.y + g.h / 2 - 2}">${g.label}</text><text class="sk-mv" x="${X2 + 16}" y="${g.y + g.h / 2 + 20}">${fmt(g.value)} · ${pct(g.value)}%</text></g>`);
+        });
+        const salary = `<g class="sk-n"><rect x="${X1}" y="0" width="${W1}" height="${Hs}" rx="10" class="sk-sal"/><text class="sk-sl" x="${X1 + 16}" y="${Hs / 2 - 12}">Stipendio</text><text class="sk-sv" x="${X1 + 16}" y="${Hs / 2 + 20}">${fmt(S)}</text></g>`;
+        const seg = groups.map(g => `<i style="flex:${g.value};background:${g.color}" title="${g.label}: ${fmt(g.value)}"></i>`).join("");
+        const legend = groups.map(g => `<li><i style="background:${g.color}"></i><span>${g.label}</span><b>${pct(g.value)}%</b></li>`).join("");
+        const detMob = mob ? `<div class="sk-detail">${groups.map(g => `<div><h4 style="color:${g.color}">${g.label}</h4>${g.items.map(it => `<div class="sk-row"><span>${escapeHtml(it.name)}</span><div><i style="width:${Math.max(3, it.value / g.value * 100).toFixed(0)}%;background:${g.color}"></i></div><b>${fmt(it.value)}</b></div>`).join("")}</div>`).join("")}</div>` : "";
+        const clip = reduce ? "" : `<clipPath id="skc"><rect x="0" y="-4" width="0" height="${H + 8}"><animate attributeName="width" from="0" to="${W + 240}" dur="1.1s" fill="freeze" calcMode="spline" keySplines=".2 .7 .2 1" keyTimes="0;1"/></rect></clipPath>`;
+        return `<section class="card pad sankey"><div class="card-title"><h2>Come si divide lo stipendio del mese</h2></div><div class="sk-seg" role="img" aria-label="Divisione dello stipendio in percentuale">${seg}</div><ul class="sk-legend">${legend}</ul>${over ? `<p class="hint sk-warn">Hai speso ${fmt(over)} più del budget del mese.</p>` : ""}<svg viewBox="0 0 ${W + (mob ? 0 : 240)} ${H}" role="img" aria-label="Cascata dello stipendio">${clip}<g ${reduce ? "" : 'clip-path="url(#skc)"'}>${rib.join("")}</g>${salary}${nodes.join("")}</svg>${detMob}</section>`;
+      }
+      globalThis.lifeOSSankey = budgetSankey;
 
       /** Grafici della Panoramica: SVG puro, senza librerie. */
       function overviewCharts(d) {
@@ -5078,7 +5149,7 @@ circle.fx-seg{background:none}
       const value = (c) => state.assetsVisible ? money(c) : "\u2022\u2022\u2022\u2022 \u20AC";
       const line = (name, c) => `<div class="kv"><span>${safe(name)}</span><strong>${value(c)}</strong></div>`;
       const legacy = [...new Map((d.extraPlan?.allocations || []).map((r) => [r.cycle_id, r])).values()];
-      return `<div class="plans-web"><div class="card-title"><div><h2>Budget di ${safe(titleMonth(state.year, state.month))}</h2><p class="hint">Stipendio, piani e budget disponibile</p></div><div class="actions"><button data-plans-info aria-label="Come funzionano i piani">\u24D8</button><button class="save" data-new-extra>Nuovo piano</button></div></div>${flowChart(flow,value)}<section class="card pad budget-waterfall">${line("Stipendio di riferimento", flow.salaryCents)}${flow.rows.map((r) => `<${r.planId ? "button" : "div"} class="plan-list-row" ${r.planId ? `data-plans-detail="${safe(r.planId)}"` : ""}><span><strong>${safe(r.name)}</strong><small>Rimane ${value(r.remainingCents)}</small></span><strong>${value(-r.amountCents)}</strong></${r.planId ? "button" : "div"}>`).join("") || '<p class="empty">Nessun piano per questo mese.</p>'}${line("Spese non gi\xE0 coperte dai piani", -flow.spentCents)}<div data-budget-final>${line("Budget finale", flow.remainingCents)}</div><p class="hint">Le quote dei piani riducono il budget. I pagamenti gi\xE0 coperti da un piano non vengono sottratti una seconda volta.</p></section><details class="card pad"><summary>Altri piani \xB7 futuri e conclusi</summary>${v.plans.filter((p2) => !currentIDs.has(p2.id)).map((p2) => `<button class="plan-list-row" data-plans-detail="${safe(p2.id)}"><span>${safe(p2.name)}<small>${safe(statuses[p2.status] || p2.status)} \xB7 da ${safe(p2.startMonth)}</small></span><span aria-hidden="true">\u203A</span></button>`).join("") || '<p class="empty">Nessun altro piano</p>'}</details>${legacy.length ? `<section class="card pad"><h2>Piani precedenti</h2><p class="hint">Le voci storiche non adottate sono conservate. Non duplicarle con un nuovo piano.</p>${legacy.map((r) => `<button class="plan-list-row" data-plans-legacy="${Number(r.extraordinary_source_row)}"><span>${safe(r.name)}<small>${safe(NativeExtraTitle(r.status))}</small></span><span aria-hidden="true">\u203A</span></button>`).join("")}</section>` : ""}${planningCard(d)}</div>`;
+      return `<div class="plans-web"><div class="card-title"><div><h2>Budget di ${safe(titleMonth(state.year, state.month))}</h2><p class="hint">Stipendio, piani e budget disponibile</p></div><div class="actions"><button data-plans-info aria-label="Come funzionano i piani">\u24D8</button><button class="save" data-new-extra>Nuovo piano</button></div></div>${globalThis.lifeOSSankey?globalThis.lifeOSSankey(d):flowChart(flow,value)}<section class="card pad budget-waterfall">${line("Stipendio di riferimento", flow.salaryCents)}${flow.rows.map((r) => `<${r.planId ? "button" : "div"} class="plan-list-row" ${r.planId ? `data-plans-detail="${safe(r.planId)}"` : ""}><span><strong>${safe(r.name)}</strong><small>Rimane ${value(r.remainingCents)}</small></span><strong>${value(-r.amountCents)}</strong></${r.planId ? "button" : "div"}>`).join("") || '<p class="empty">Nessun piano per questo mese.</p>'}${line("Spese non gi\xE0 coperte dai piani", -flow.spentCents)}<div data-budget-final>${line("Budget finale", flow.remainingCents)}</div><p class="hint">Le quote dei piani riducono il budget. I pagamenti gi\xE0 coperti da un piano non vengono sottratti una seconda volta.</p></section><details class="card pad"><summary>Altri piani \xB7 futuri e conclusi</summary>${v.plans.filter((p2) => !currentIDs.has(p2.id)).map((p2) => `<button class="plan-list-row" data-plans-detail="${safe(p2.id)}"><span>${safe(p2.name)}<small>${safe(statuses[p2.status] || p2.status)} \xB7 da ${safe(p2.startMonth)}</small></span><span aria-hidden="true">\u203A</span></button>`).join("") || '<p class="empty">Nessun altro piano</p>'}</details>${legacy.length ? `<section class="card pad"><h2>Piani precedenti</h2><p class="hint">Le voci storiche non adottate sono conservate. Non duplicarle con un nuovo piano.</p>${legacy.map((r) => `<button class="plan-list-row" data-plans-legacy="${Number(r.extraordinary_source_row)}"><span>${safe(r.name)}<small>${safe(NativeExtraTitle(r.status))}</small></span><span aria-hidden="true">\u203A</span></button>`).join("")}</section>` : ""}${planningCard(d)}</div>`;
     };
     function flowChart(flow, value) {
       const salary = flow.salaryCents, rows = flow.rows.filter((r) => r.amountCents);
