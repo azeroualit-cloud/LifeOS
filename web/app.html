@@ -296,6 +296,7 @@ body:not(.dashboard-mode) .header-meta:has(.top-right.hidden){display:none}
 .home-recap b{color:var(--ink);font-weight:700}
 .home-recap p.cur::after{content:"";display:inline-block;width:2px;height:1.05em;margin-left:2px;vertical-align:-.15em;background:var(--ink);animation:caret 1s steps(2,start) infinite}
 @keyframes caret{50%{opacity:0}}
+.next-up{display:grid;gap:var(--s2);margin-top:var(--s4);padding-top:var(--s4);border-top:1px solid var(--line-soft)}.next-up>small{font-size:12px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--ink-3)}
 .home-solar{align-self:flex-start;margin-top:auto;min-height:32px;padding:0 var(--s3);font-size:13px;background:var(--surface-2);color:var(--ink-2);border-radius:var(--r-pill)}
 .home-solar b{color:var(--ink)}
 /* 7 giorni */
@@ -4554,26 +4555,22 @@ body:not(.dashboard-mode) .header-meta:has(.top-right.hidden){display:none}
     const lines=[];
     if(life.weather){const w=life.weather,c=w.code===0?'sereno':w.code<=3?'cielo nuvoloso':w.code<50?'nebbia':w.code<70?'pioggia':w.code<80?'neve':w.code<95?'rovesci':'temporali';lines.push(`A Empoli ci sono ${B(Math.round(w.temp)+'°')} e ${c}.`);}
     if(shifts.get(addDay(today,-1))==='night'&&hour<6)lines.push(`Stai ${B('terminando il turno di notte')}.`);
-    if(shift&&shift===next)lines.push(`Oggi e domani ${verb(shift)} ${B(shiftNames[shift])}${hours(shift)}.`);
-    else{
-      if(shift)lines.push(`Oggi ${verb(shift)} ${B(shiftNames[shift])}${hours(shift)}.`);
-      if(next)lines.push(`Domani ${verb(next)} ${B(shiftNames[next])}${hours(next)}.`);
-    }
-    if(!shift&&!next)lines.push('Turni non disponibili.');
-    if(agenda.length){
-      const e=agenda[0],when=e.day===today?'oggi':e.day===tomorrow?'domani':osDate(e.day),t=String(e.title||'Appuntamento').replace(/\s+/g,' ').slice(0,60);
-      lines.push(`${agenda.length===1?'Hai '+B('1 appuntamento'):'Hai '+B(agenda.length+' appuntamenti')} nei prossimi 7 giorni, il primo ${B(when)}${e.start_time?' alle '+B(e.start_time):''}: ${B(t)}.`);
-    }else lines.push('Nessun appuntamento nei prossimi 7 giorni.');
     const open=(d.tasks||[]).filter(t=>t.status==='todo'&&t.list_kind==='action');
     const dueOf=t=>t.due_date||t.scheduled_date||'';
     const late=open.filter(t=>dueOf(t)&&dueOf(t)<today),dueToday=open.filter(t=>dueOf(t)===today);
-    if(open.length){
-      let x=`Hai ${B(open.length+(open.length===1?' attività aperta':' attività aperte'))}`;
-      const extra=[];if(late.length)extra.push(B(late.length+(late.length===1?' in ritardo':' in ritardo')));if(dueToday.length)extra.push(B(dueToday.length+' per oggi'));
-      lines.push(x+(extra.length?', di cui '+extra.join(' e '):'')+'.');
-    }else lines.push('Nessuna attività aperta.');
     const habits=(d.routines||[]).filter(h=>lifeOSHabits.due(h,today)),doneH=habits.filter(h=>h.checked).length;
-    if(habits.length)lines.push(doneH===habits.length?`Abitudini di oggi: ${B('tutte completate')}.`:`Abitudini di oggi: ${B(doneH+' su '+habits.length)} completate.`);
+    {
+      const e=agenda[0];
+      if(!e)lines.push('Nessun appuntamento nei prossimi 7 giorni.');
+      else{
+        const t=String(e.title||'Appuntamento').replace(/\s+/g,' ').slice(0,50);
+        if(e.day===today&&e.start_time){
+          const [hh,mm]=e.start_time.split(':').map(Number),now=new Date(new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Rome',dateStyle:'short',timeStyle:'short'}).format(new Date()).replace(' ','T')),mins=Math.max(0,hh*60+mm-(now.getHours()*60+now.getMinutes()));
+          const f=mins<60?mins+(mins===1?' minuto':' minuti'):Math.round(mins/60)+(Math.round(mins/60)===1?' ora':' ore');
+          lines.push(`Fra ${B(f)} hai ${B(t)}.`);
+        }else lines.push(`Prossimo appuntamento: ${B(t)}, ${B(e.day===today?'oggi':e.day===tomorrow?'domani':osDate(e.day))}${e.start_time?' alle '+B(e.start_time):''}.`);
+      }
+    }
     const greet=hour<12?'Buongiorno':hour<18?'Buon pomeriggio':'Buonasera';
     const plain=[greet+', Anass.',...lines.map(l=>l.replace(/<[^>]+>/g,''))].join(' ');
     const nextSolar=nextTime();
@@ -4581,6 +4578,8 @@ body:not(.dashboard-mode) .header-meta:has(.top-right.hidden){display:none}
     const agendaRows=agenda.slice(0,5).map(ev=>`<div class="os-agenda-entry"><button class="os-agenda-row" data-life-event="${ev.id}"><span class="os-agenda-date"><b>${ev.day.slice(8)}</b><small>${mon(ev.day)}</small></span><span class="os-agenda-title">${safe(ev.title)}<small>${safe(ev.start_time||'Tutto il giorno')}</small></span></button><button class="ghost" data-life-occurrence="${ev.id}:${ev.day}:done" aria-label="Segna fatto ${safe(ev.title)}">Fatto</button></div>`).join('')||'<p class="os-empty">Nessun appuntamento nei prossimi 7 giorni.</p>';
     const taskRows=open.slice(0,6).map(t=>`<div class="os-home-task"><button class="os-check" data-life-complete="${t.id}" aria-label="Completa ${safe(t.title)}"></button><button class="os-home-task-title" data-life-task="${t.id}">${safe(t.title)}${osDueBadge(t.due_date||t.scheduled_date,t.status)}</button></div>`).join('')||'<p class="os-empty">Nessuna attività aperta.</p>';
     const habitRows=habits.map(h=>`<button class="home-habit" data-life-routine="${h.id}" aria-pressed="${!!h.checked}"><span aria-hidden="true">${h.checked?'✓':'○'}</span>${safe(h.title)}</button>`).join('')||(d.routines?.length?'<p class="os-empty">Nessuna abitudine prevista per oggi.</p>':'<button data-life-routine-manage>Aggiungi la prima abitudine</button>');
+    const nx=agenda[0],nt=open.slice().sort((a,b)=>(dueOf(a)||'9999').localeCompare(dueOf(b)||'9999'))[0];
+    const nextUp=nx?`<div class="next-up"><small>Prossima cosa</small><div class="os-agenda-entry"><button class="os-agenda-row" data-life-event="${nx.id}"><span class="os-agenda-date"><b>${nx.day.slice(8)}</b><small>${mon(nx.day)}</small></span><span class="os-agenda-title">${safe(nx.title)}<small>${safe(nx.start_time||'Tutto il giorno')}</small></span></button><button class="ghost" data-life-occurrence="${nx.id}:${nx.day}:done" aria-label="Segna fatto ${safe(nx.title)}">Fatto</button></div></div>`:nt?`<div class="next-up"><small>Prossima cosa</small><div class="os-home-task"><button class="os-check" data-life-complete="${nt.id}" aria-label="Completa ${safe(nt.title)}"></button><button class="os-home-task-title" data-life-task="${nt.id}">${safe(nt.title)}${osDueBadge(nt.due_date||nt.scheduled_date,nt.status)}</button></div></div>`:'';
     const key=today+'|'+plain;
     requestAnimationFrame(()=>requestAnimationFrame(()=>startTyping(document.querySelector('#today .home-recap'))));
     const short={morning:'Mattina',afternoon:'Pomeriggio',night:'Notte',rest:'Riposo',holiday:'Ferie'};
@@ -4604,7 +4603,7 @@ body:not(.dashboard-mode) .header-meta:has(.top-right.hidden){display:none}
       return `<button class="dw-row ${day===today?'today':''}" data-home-day="${day}" aria-label="${safe(osDate(day))}${kind?' · '+safe(short[kind]):''}"><span class="dw-day"><small>${['dom','lun','mar','mer','gio','ven','sab'][dt.getUTCDay()]}</small><b>${dt.getUTCDate()}</b></span><span class="dw-shift os-shift ${kind?'':'no-shift'}" data-kind="${kind||''}">${kind?short[kind]:'—'}</span><span class="dw-meta">${kind&&/\d/.test(osShift[kind])?osShift[kind]:''}</span><span class="dw-ev">${n?n+(n===1?' evento':' eventi'):''}</span></button>`;
     }).join('');
     return `<div class="home-native"><div class="dash-kpis">${kpis}</div>
-<section class="os-card home-recap-card"><div class="card-title"><h2>Oggi</h2><span class="hint">${safe(osDate(today))}</span></div><p class="hint">${greet}, Anass.</p><div class="home-recap" data-key="${safe(key)}" aria-label="${safe(plain)}">${lines.map(l=>`<p>${l}</p>`).join('')}</div><button class="ghost home-solar" data-home-times-sheet aria-label="Prossimo orario, ${safe(nextSolar.label)}, ${safe(nextSolar.time)}">${safe(nextSolar.label)} · <b>${safe(nextSolar.time)}</b></button></section>
+<section class="os-card home-recap-card"><div class="card-title"><h2>Oggi</h2><span class="hint">${safe(osDate(today))}</span></div><p class="hint">${greet}, Anass.</p><div class="home-recap" data-key="${safe(key)}" aria-label="${safe(plain)}">${lines.map(l=>`<p>${l}</p>`).join('')}</div>${nextUp}<button class="ghost home-solar" data-home-times-sheet aria-label="Prossimo orario, ${safe(nextSolar.label)}, ${safe(nextSolar.time)}">${safe(nextSolar.label)} · <b>${safe(nextSolar.time)}</b></button></section>
 <section class="os-card home-week"><div class="card-title"><h2>Prossimi 7 giorni</h2><button class="ghost" data-home-day="${today}" aria-label="Apri calendario">Calendario</button></div><div class="dw-list">${weekRows}</div></section>
 <section class="os-card home-agenda"><div class="card-title"><h2>Appuntamenti</h2>${agenda.length>5?`<button class="ghost" data-home-agenda>Tutti (${agenda.length})</button>`:''}</div>${agendaRows}</section>
 <section class="os-card home-tasks"><div class="card-title"><h2>Attività</h2><button class="ghost" data-view="tasks">Apri${open.length>6?' ('+open.length+')':''}</button></div>${taskRows}</section>

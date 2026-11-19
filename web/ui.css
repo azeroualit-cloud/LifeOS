@@ -257,6 +257,7 @@ body:not(.dashboard-mode) .header-meta:has(.top-right.hidden){display:none}
 .home-recap b{color:var(--ink);font-weight:700}
 .home-recap p.cur::after{content:"";display:inline-block;width:2px;height:1.05em;margin-left:2px;vertical-align:-.15em;background:var(--ink);animation:caret 1s steps(2,start) infinite}
 @keyframes caret{50%{opacity:0}}
+.next-up{display:grid;gap:var(--s2);margin-top:var(--s4);padding-top:var(--s4);border-top:1px solid var(--line-soft)}.next-up>small{font-size:12px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--ink-3)}
 .home-solar{align-self:flex-start;margin-top:auto;min-height:32px;padding:0 var(--s3);font-size:13px;background:var(--surface-2);color:var(--ink-2);border-radius:var(--r-pill)}
 .home-solar b{color:var(--ink)}
 /* 7 giorni */
