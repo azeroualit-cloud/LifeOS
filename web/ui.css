@@ -667,3 +667,24 @@ circle.fx-seg{background:none}
 
 #calendar .os-day .os-shift .sh-t{display:none}
 #calendar .os-day .os-shift{height:28px;font-size:15px}
+/* Calendario: meno scatole nelle scatole */
+#calendar .os-day{background:transparent;border-radius:var(--r-md)}
+#calendar .os-day:hover:not(:disabled){background:var(--surface-2)}
+#calendar .os-day.selected{background:var(--surface-2);box-shadow:none}
+#calendar .os-day.selected b{background:transparent;color:var(--accent);outline:0}
+#calendar .os-day.today:not(.selected) b{background:var(--accent);color:var(--on-accent)}
+#calendar .os-day.today.selected b{background:var(--accent);color:var(--on-accent)}
+#calendar .os-calendar-week{gap:0;margin:0;border-top:1px solid var(--line-soft)}
+#calendar .os-day{border-radius:0}
+#calendar .os-day .os-shift{background:transparent!important;color:var(--shift-color);font-size:15px;font-weight:800;height:24px;padding:0;justify-self:center;width:auto}
+#calendar .os-day[data-kind=night] .os-shift{color:var(--ink-2)}
+#calendar .os-day .os-shift:not(.no-shift)::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--shift-color);margin-right:5px}
+@media(min-width:1100px){#calendar .os-calendar-details{background:transparent;border:0;border-left:1px solid var(--line-soft);border-radius:0;padding:0 0 0 var(--s6)}}
+.os-calendar-details .os-mini{background:transparent;border-radius:0;padding:var(--s3) 0;margin:0;border-bottom:1px solid var(--line-soft)}
+.os-calendar-details .os-empty{background:transparent;padding:var(--s4) 0;text-align:left}
+.os-day-shift{background:transparent;color:var(--shift-color);padding:0;font-size:14px}
+.os-day-shift::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--shift-color);margin-right:6px}
+@media(max-width:760px){#calendar .os-day .os-shift{font-size:14px}}
+#calendar .os-day .os-shift:not(.no-shift)::before{content:none}
+#calendar .os-day{height:88px;min-height:88px;grid-template-rows:30px 24px 12px}
+@media(max-width:760px){#calendar .os-day{height:68px;min-height:68px;grid-template-rows:26px 22px 10px}}
