@@ -836,6 +836,13 @@ button[data-life-category] svg{width:18px;height:18px}
 .due-badge.due-overdue,.due-badge.overdue{background:var(--neg);color:#2a0d0c}
 .due-badge.due-today{background:var(--warn);color:#2b1d05}
 .due-badge.due-tomorrow{background:var(--surface-3);color:var(--ink-2)}
+/* Prossimi giorni: stesso sistema di righe di "Da fare", riempie l'altezza */
+.home-week{display:flex;flex-direction:column}
+.home-week .dw-list{flex:1;display:flex;flex-direction:column;gap:0}
+.home-week .dw-row{flex:1;min-height:52px;border-radius:0;box-shadow:none;padding:0;background:transparent}
+.home-week .dw-row+.dw-row{border-top:1px solid var(--line-soft)}
+.home-week .dw-row:hover:not(:disabled){background:transparent}
+.home-week .dw-row.today .dw-day b{color:var(--sec-home)}
 </style>
 </head>
   <body class="dashboard-mode">
