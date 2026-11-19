@@ -281,8 +281,20 @@ body:not(.dashboard-mode) .header-meta:has(.top-right.hidden){display:none}
 .home-next-time{width:100%}
 .home-native>section:not(.os-card):not(.home-week) .hint{margin:0 0 var(--s2)}
 .home-week .card-title{margin-bottom:var(--s3)}
-.home-week-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:var(--s1);text-align:center}
-.home-week-grid small{display:block;margin-bottom:var(--s1)}
+.home-week .card-title span{font-size:16px;font-weight:650;text-transform:capitalize}
+.home-week-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:var(--s2);text-align:center}
+.home-week-grid>div{display:grid;align-content:start;gap:var(--s2);padding:var(--s3) var(--s2);border-radius:var(--r-md);background:var(--surface-2);border:1px solid transparent;min-width:0}
+.home-week-grid>div:has(.os-day.today){border-color:var(--ink-3);background:var(--surface-3)}
+.home-week-grid small{display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.home-week-grid .os-day{height:auto;min-height:0;padding:0;gap:var(--s2);grid-template-rows:auto auto auto auto;justify-items:stretch;justify-content:stretch;grid-template-columns:minmax(0,1fr);background:transparent;border-radius:0}
+.home-week-grid .os-day b{width:auto;height:auto;font-size:22px;font-weight:650;letter-spacing:-.5px;outline:0!important;background:transparent!important;color:var(--ink)!important}
+.home-week-grid .os-day .os-shift{width:100%;max-width:none;height:30px;font-size:14px;border-radius:var(--r-sm)}
+.home-week-grid .os-day .os-shift.no-shift,.shift-name:empty{display:none}
+.home-week-grid .os-day .os-day-mark{display:none}
+.home-week-grid .os-day.today .os-day-mark{display:none}
+.shift-name{display:none;font-style:normal;font-size:12px;color:var(--ink-2);line-height:1.2}
+@media(min-width:761px){.home-week-grid .shift-name{display:block}}
+@media(max-width:760px){.home-week-grid{gap:var(--s1)}.home-week-grid>div{padding:var(--s2) 2px}.home-week-grid .os-day b{font-size:18px}.home-week-grid .os-day .os-shift{height:26px;font-size:13px}}
 .home-summary{font-size:18px;line-height:1.5;letter-spacing:-.2px}
 .home-next-time{min-height:56px}
 .home-habit span{font-size:22px}
@@ -4468,7 +4480,7 @@ body:not(.dashboard-mode) .header-meta:has(.top-right.hidden){display:none}
     const mark=new Set([...(d.events||[]).map(e=>e.day),...(d.tasks||[]).map(t=>t.scheduled_date)]);
     const week=Array.from({length:7},(_,i)=>addDay(today,i-3)).map(day=>{
       const date=new Date(day+'T12:00:00Z'),kind=shifts.get(day);
-      return `<div><small>${['D','L','M','M','G','V','S'][date.getUTCDay()]}</small><button class="os-day ${day===today?'today selected':''}" data-home-day="${day}" data-kind="${kind||''}" aria-label="${safe(osDate(day))}${kind?' · '+safe(osShift[kind]):''}"><b>${date.getUTCDate()}</b><span class="os-shift ${kind?'':'no-shift'}">${kind?osShiftInitial[kind]:''}</span><span class="os-day-mark ${mark.has(day)?'dot':''}"></span></button></div>`;
+      return `<div><small>${['D','L','M','M','G','V','S'][date.getUTCDay()]}</small><button class="os-day ${day===today?'today selected':''}" data-home-day="${day}" data-kind="${kind||''}" aria-label="${safe(osDate(day))}${kind?' · '+safe(osShift[kind]):''}"><b>${date.getUTCDate()}</b><span class="os-shift ${kind?'':'no-shift'}">${kind?osShiftInitial[kind]:''}</span><em class="shift-name">${kind?safe(osShift[kind]):''}</em><span class="os-day-mark ${mark.has(day)?'dot':''}"></span></button></div>`;
     }).join('');
     const parts=[];
     if(life.weather){const w=life.weather,c=w.code===0?'sereno':w.code<=3?'cielo nuvoloso':w.code<50?'nebbia':w.code<70?'pioggia':w.code<80?'neve':w.code<95?'rovesci':'temporali';parts.push(`A Empoli, ${Math.round(w.temp)}° e ${c}.`);}
