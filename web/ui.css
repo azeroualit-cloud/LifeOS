@@ -664,3 +664,6 @@ circle.fx-seg{background:none}
 #calendar .os-day .os-shift .sh-t{font-size:11px;letter-spacing:-.2px;text-overflow:clip}
 #calendar .os-day .os-shift{gap:3px;padding:0 2px}
 #calendar .os-day{justify-items:stretch}#calendar .os-day b{justify-self:center}#calendar .os-day .os-shift{width:auto}
+
+#calendar .os-day .os-shift .sh-t{display:none}
+#calendar .os-day .os-shift{height:28px;font-size:15px}
