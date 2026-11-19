@@ -828,3 +828,13 @@ h1,h2,h3,.dash-kpi strong,.dw-day b,.os-agenda-date b{line-height:var(--lh-tight
 .os-inline-event#os-event-editor{position:fixed;z-index:100;top:50%;left:50%;transform:translate(-50%,-50%);width:min(620px,calc(100vw - 32px));max-height:calc(100svh - 48px);overflow-y:auto;margin:0;padding:var(--s6);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:0 0 0 100vmax rgba(0,0,0,.66),0 30px 80px rgba(0,0,0,.5)}
 @media(max-width:760px){.os-inline-event#os-event-editor{top:auto;bottom:0;left:0;transform:none;width:100%;max-height:calc(100svh - 12px - var(--safe-top,0px));padding:var(--s5) var(--s5) calc(var(--s5) + var(--safe-bottom,0px));border-radius:var(--r-lg) var(--r-lg) 0 0;border-bottom:0}}
 body:has(#os-event-editor) .page-fab{visibility:hidden}
+/* pennello turni: colore del turno */
+.os-palette button[data-life-tool]{border-radius:var(--r-pill);border:1px solid var(--line);background:transparent;color:var(--ink-2)}
+.os-palette button[data-life-tool="morning"]{--shift-color:#6191bd}
+.os-palette button[data-life-tool="afternoon"]{--shift-color:#659b72}
+.os-palette button[data-life-tool="night"]{--shift-color:#50545b}
+.os-palette button[data-life-tool="rest"]{--shift-color:#ce916d}
+.os-palette button[data-life-tool="holiday"]{--shift-color:#d7bf52}
+.os-palette button[data-life-tool="morning"],.os-palette button[data-life-tool="afternoon"],.os-palette button[data-life-tool="night"],.os-palette button[data-life-tool="rest"],.os-palette button[data-life-tool="holiday"]{background:color-mix(in srgb,var(--shift-color) 20%,transparent);border-color:color-mix(in srgb,var(--shift-color) 55%,transparent);color:var(--ink)}
+.os-palette button[data-life-tool="morning"].active,.os-palette button[data-life-tool="afternoon"].active,.os-palette button[data-life-tool="night"].active,.os-palette button[data-life-tool="rest"].active,.os-palette button[data-life-tool="holiday"].active{background:var(--shift-color);border-color:var(--shift-color);color:#0b0b0b;font-weight:650}
+.os-palette button[data-life-tool="night"].active{color:#fff}
