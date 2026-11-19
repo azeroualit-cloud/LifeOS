@@ -820,6 +820,10 @@ html[data-theme="light"]{--sec-home:#6a45c9;--sec-tasks:#146647}
 :root{--sec-admin:#7fd3e8}html[data-theme="light"]{--sec-admin:#0d6a85}
 #admin-link.active,.nav #admin-link.active{color:var(--sec-admin);background:color-mix(in srgb,var(--sec-admin) 14%,transparent)}
 #admin-link.active .nav-symbol{color:inherit}
+/* Prossimi giorni: pill piu vicina al giorno */
+.dw-row{grid-template-columns:60px 60px 1fr;gap:var(--s2)}
+.dw-day small{width:28px}
+@media(max-width:760px){.dw-row{grid-template-columns:54px 52px 1fr}.dw-day small{width:26px}}
 </style>
 </head>
   <body class="dashboard-mode">
