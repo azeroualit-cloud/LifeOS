@@ -269,7 +269,8 @@ body:not(.dashboard-mode) .header-meta:has(.top-right.hidden){display:none}
 .dw-day{display:flex;align-items:baseline;gap:6px}.dw-day small{font-size:12px;text-transform:uppercase;color:var(--ink-3);width:32px}.dw-day b{font-size:18px;font-weight:650}
 .dw-row .dw-shift{display:inline-flex;align-items:center;justify-content:center;justify-self:start;width:auto;min-width:92px;max-width:none;height:28px;padding:0 var(--s3);font-size:13px;font-weight:600;border-radius:var(--r-pill);background:var(--shift-color);color:#0b0b0b}
 .dw-row .dw-shift.no-shift{background:transparent;color:var(--ink-3);min-width:92px}
-.dw-meta,.dw-ev{font-size:13px;color:var(--ink-2)}.dw-ev{text-align:right;color:var(--ink-3)}
+.dw-meta{font-size:13px;color:var(--ink-2)}.dw-ev{display:inline-flex;align-items:center;justify-content:flex-end;gap:var(--s2);font-size:13px;color:var(--ink-2)}
+.dw-dot{width:8px;height:8px;border-radius:50%;background:var(--sec-finance,var(--ink));flex:0 0 auto}
 .home-habit{min-height:48px}
 .home-habit span{font-size:20px;width:24px;text-align:center}
 .home-habits{grid-column:1/-1}
@@ -283,7 +284,7 @@ main:has(#today.active) .home-context{display:none}
   .home-native{grid-template-columns:minmax(0,1fr);gap:var(--s3)}
   .dash-kpis{gap:var(--s3)}.dash-kpi{min-height:96px;padding:var(--s3) var(--s4)}.dash-kpi strong{font-size:26px}
   .home-native>.os-card{padding:var(--s4)}.home-recap{font-size:17px}
-  .dw-row{grid-template-columns:44px auto 1fr auto;gap:var(--s2);padding:0 var(--s2)}.dw-ev{display:none}
+  .dw-row{grid-template-columns:44px auto 1fr auto;gap:var(--s2);padding:0 var(--s2)}.dw-ev{font-size:0;gap:0}.dw-ev .dw-dot{width:10px;height:10px}
 }
 .os-home{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4)}
 .os-home-prayer{grid-column:1/-1}
@@ -558,3 +559,21 @@ main:has(#today.active) .home-context{display:none}
   .os-sunline-meta{flex-direction:column}
   .budget-equation{font-size:12px;gap:var(--s1)}
 }
+
+/* Finanza: grafici moderni */
+.fx-grid{stroke:var(--line-soft);stroke-width:1}.fx-ytick,.fx-xtick{fill:var(--ink-3);font-size:11px}
+.fx-in{fill:var(--pos)}.fx-out{fill:var(--neg)}
+.oc-legend i.k-in,.oc-legend i.k-out{width:10px;height:10px;border:0;border-radius:3px}.oc-legend i.k-in{background:var(--pos)}.oc-legend i.k-out{background:var(--neg)}
+.finance-chart small.pos{color:var(--pos)}.finance-chart small.neg{color:var(--neg)}
+.fx-donut svg{width:100%;max-width:170px;height:auto}.fx-donut{display:grid;grid-template-columns:150px minmax(0,1fr);align-items:center;gap:var(--s5)}
+.fx-seg{fill:none;stroke-width:16;stroke-linecap:butt}
+.fx-dt{fill:var(--ink);font-size:15px;font-weight:700}.fx-ds{fill:var(--ink-3);font-size:10px}
+.fx-donut ul{list-style:none;margin:0;padding:0;display:grid;gap:var(--s2)}
+.fx-donut li{display:grid;grid-template-columns:10px minmax(0,1fr) auto;align-items:center;gap:var(--s3);font-size:13px}
+.fx-donut li span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-2)}.fx-donut li b{font-variant-numeric:tabular-nums}
+.fx-donut li i{width:10px;height:10px;border-radius:3px}
+.fx-c0{stroke:#7fa6d6;background:#7fa6d6}.fx-c1{stroke:#8cbaa1;background:#8cbaa1}.fx-c2{stroke:#e0b574;background:#e0b574}.fx-c3{stroke:#c59ad4;background:#c59ad4}.fx-c4{stroke:#d4928f;background:#d4928f}.fx-c5{stroke:#7a7f87;background:#7a7f87}
+circle.fx-seg{background:none}
+@media(max-width:760px){.fx-donut{grid-template-columns:minmax(0,1fr);justify-items:center}.fx-donut ul{width:100%}.fx-seg{stroke-width:16}}
+.fx-donut>*{min-width:0}.fx-donut li b{white-space:nowrap}
+@media(max-width:1100px){.finance-charts{grid-template-columns:minmax(0,1fr)}}

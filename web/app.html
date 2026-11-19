@@ -308,7 +308,8 @@ body:not(.dashboard-mode) .header-meta:has(.top-right.hidden){display:none}
 .dw-day{display:flex;align-items:baseline;gap:6px}.dw-day small{font-size:12px;text-transform:uppercase;color:var(--ink-3);width:32px}.dw-day b{font-size:18px;font-weight:650}
 .dw-row .dw-shift{display:inline-flex;align-items:center;justify-content:center;justify-self:start;width:auto;min-width:92px;max-width:none;height:28px;padding:0 var(--s3);font-size:13px;font-weight:600;border-radius:var(--r-pill);background:var(--shift-color);color:#0b0b0b}
 .dw-row .dw-shift.no-shift{background:transparent;color:var(--ink-3);min-width:92px}
-.dw-meta,.dw-ev{font-size:13px;color:var(--ink-2)}.dw-ev{text-align:right;color:var(--ink-3)}
+.dw-meta{font-size:13px;color:var(--ink-2)}.dw-ev{display:inline-flex;align-items:center;justify-content:flex-end;gap:var(--s2);font-size:13px;color:var(--ink-2)}
+.dw-dot{width:8px;height:8px;border-radius:50%;background:var(--sec-finance,var(--ink));flex:0 0 auto}
 .home-habit{min-height:48px}
 .home-habit span{font-size:20px;width:24px;text-align:center}
 .home-habits{grid-column:1/-1}
@@ -322,7 +323,7 @@ main:has(#today.active) .home-context{display:none}
   .home-native{grid-template-columns:minmax(0,1fr);gap:var(--s3)}
   .dash-kpis{gap:var(--s3)}.dash-kpi{min-height:96px;padding:var(--s3) var(--s4)}.dash-kpi strong{font-size:26px}
   .home-native>.os-card{padding:var(--s4)}.home-recap{font-size:17px}
-  .dw-row{grid-template-columns:44px auto 1fr auto;gap:var(--s2);padding:0 var(--s2)}.dw-ev{display:none}
+  .dw-row{grid-template-columns:44px auto 1fr auto;gap:var(--s2);padding:0 var(--s2)}.dw-ev{font-size:0;gap:0}.dw-ev .dw-dot{width:10px;height:10px}
 }
 .os-home{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4)}
 .os-home-prayer{grid-column:1/-1}
@@ -597,6 +598,24 @@ main:has(#today.active) .home-context{display:none}
   .os-sunline-meta{flex-direction:column}
   .budget-equation{font-size:12px;gap:var(--s1)}
 }
+
+/* Finanza: grafici moderni */
+.fx-grid{stroke:var(--line-soft);stroke-width:1}.fx-ytick,.fx-xtick{fill:var(--ink-3);font-size:11px}
+.fx-in{fill:var(--pos)}.fx-out{fill:var(--neg)}
+.oc-legend i.k-in,.oc-legend i.k-out{width:10px;height:10px;border:0;border-radius:3px}.oc-legend i.k-in{background:var(--pos)}.oc-legend i.k-out{background:var(--neg)}
+.finance-chart small.pos{color:var(--pos)}.finance-chart small.neg{color:var(--neg)}
+.fx-donut svg{width:100%;max-width:170px;height:auto}.fx-donut{display:grid;grid-template-columns:150px minmax(0,1fr);align-items:center;gap:var(--s5)}
+.fx-seg{fill:none;stroke-width:16;stroke-linecap:butt}
+.fx-dt{fill:var(--ink);font-size:15px;font-weight:700}.fx-ds{fill:var(--ink-3);font-size:10px}
+.fx-donut ul{list-style:none;margin:0;padding:0;display:grid;gap:var(--s2)}
+.fx-donut li{display:grid;grid-template-columns:10px minmax(0,1fr) auto;align-items:center;gap:var(--s3);font-size:13px}
+.fx-donut li span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-2)}.fx-donut li b{font-variant-numeric:tabular-nums}
+.fx-donut li i{width:10px;height:10px;border-radius:3px}
+.fx-c0{stroke:#7fa6d6;background:#7fa6d6}.fx-c1{stroke:#8cbaa1;background:#8cbaa1}.fx-c2{stroke:#e0b574;background:#e0b574}.fx-c3{stroke:#c59ad4;background:#c59ad4}.fx-c4{stroke:#d4928f;background:#d4928f}.fx-c5{stroke:#7a7f87;background:#7a7f87}
+circle.fx-seg{background:none}
+@media(max-width:760px){.fx-donut{grid-template-columns:minmax(0,1fr);justify-items:center}.fx-donut ul{width:100%}.fx-seg{stroke-width:16}}
+.fx-donut>*{min-width:0}.fx-donut li b{white-space:nowrap}
+@media(max-width:1100px){.finance-charts{grid-template-columns:minmax(0,1fr)}}
 </style>
 </head>
   <body class="dashboard-mode">
@@ -3110,29 +3129,57 @@ main:has(#today.active) .home-context{display:none}
         <section class="finance-recent"><div class="finance-heading"><h2>Ultimi movimenti</h2><button data-view="movements">Vedi tutti</button></div>${recent.length ? recent.map(t => `<button class="finance-movement" data-edit-movement="${Number(t.row)}"><span><strong>${escapeHtml(t.name)}</strong><small>${escapeHtml(t.date || '')} · ${escapeHtml(t.category || t.type || '')}</small></span><b class="${amountClass(t.amount)}">${state.assetsVisible ? exactEuro(t.amount) : '•••• €'}</b></button>`).join('') : '<p class="empty">Nessun movimento nel mese.</p>'}</section>${overviewCharts(d)}</div>`;
       }
 
-      /** Grafici della Panoramica: ritmo di spesa, categorie del mese, entrate/uscite. Solo SVG, nessuna libreria. */
+      /** Grafici della Panoramica: SVG puro, senza librerie. */
       function overviewCharts(d) {
-        const hide = !state.assetsVisible, fmt = v => hide ? "•••• €" : exactEuro(v);
-        const tx = (d.transactions || []).filter(t => t.type === "Spesa" && t.amount < 0 && t.date);
-        const days = new Date(Date.UTC(d.year, d.month, 0)).getUTCDate();
-        const per = Array(days + 1).fill(0);
-        for (const t of tx) { const n = Number(String(t.date).slice(8, 10)); if (n >= 1 && n <= days) per[n] += -t.amount; }
-        const nowKey = todayIso(), isCur = nowKey.slice(0, 7) === d.key, last = isCur ? Number(nowKey.slice(8)) : (d.key < nowKey.slice(0, 7) ? days : 0);
-        const cap = Math.max(1, (d.summary.monthlySalary || 0) - ((d.summary.monthlyCommitted || 0)) || d.summary.monthlySpent + Math.max(0, d.summary.monthlyRemaining));
+        const hide = !state.assetsVisible, fmt = v => hide ? "•••• €" : exactEuro(v), compact = v => hide ? "••" : (Math.abs(v) >= 1000 ? (v / 1000).toFixed(1).replace(".0", "").replace(".", ",") + "k" : String(Math.round(v)));
+        const mob = window.matchMedia("(max-width:760px)").matches, series = (d.lifetime?.series || []).slice(mob ? -6 : -12);
+        const mlabel = m => new Date(m + "-15T12:00:00Z").toLocaleDateString("it-IT", { month: "short", timeZone: "UTC" }).replace(".", "");
+        // 1) entrate e uscite per mese: barre accoppiate arrotondate
+        const flowRows = series.filter(m => Number.isFinite(m.income) || Number.isFinite(m.spent));
+        let flow = "";
+        if (flowRows.length) {
+          const W = mob ? 420 : 960, H = mob ? 230 : 240, L = 40, R = W - 8, T = 14, B = H - 28, mx = Math.max(100, ...flowRows.flatMap(m => [m.income || 0, m.spent || 0])) * 1.12;
+          const Y = v => B - v / mx * (B - T), slot = (R - L) / flowRows.length, bw = Math.min(mob ? 12 : 18, slot * 0.3);
+          const grid = [0, .5, 1].map(f => `<line class="fx-grid" x1="${L}" x2="${R}" y1="${Y(mx / 1.12 * f)}" y2="${Y(mx / 1.12 * f)}"/><text class="fx-ytick" x="${L - 8}" y="${Y(mx / 1.12 * f) + 4}" text-anchor="end">${compact(mx / 1.12 * f)}</text>`).join("");
+          const bars = flowRows.map((m, i) => {
+            const cx = L + slot * (i + .5), inc = m.income || 0, sp = m.spent || 0;
+            return `<g><title>${mlabel(m.month)}: entrate ${fmt(inc)}, uscite ${fmt(sp)}</title><rect class="fx-in" x="${cx - bw - 2}" y="${Y(inc)}" width="${bw}" height="${Math.max(0, B - Y(inc))}" rx="4"/><rect class="fx-out" x="${cx + 2}" y="${Y(sp)}" width="${bw}" height="${Math.max(0, B - Y(sp))}" rx="4"/><text class="fx-xtick" x="${cx}" y="${H - 8}" text-anchor="middle">${mlabel(m.month)}</text></g>`;
+          }).join("");
+          flow = `<section class="finance-chart wide"><div class="finance-heading"><h2>Entrate e uscite</h2><p class="oc-legend"><i class="k-in"></i>Entrate<i class="k-out"></i>Uscite</p></div><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Entrate e uscite per mese">${grid}${bars}</svg></section>`;
+        }
+        // 2) patrimonio: area con gradiente
+        const wr = series.filter(m => Number.isFinite(m.wealth));
+        let wealth = "";
+        if (wr.length > 1) {
+          const W = mob ? 420 : 960, H = mob ? 200 : 200, L = 8, R = W - 8, T = 18, B = H - 28, lo = Math.min(...wr.map(m => m.wealth)), hi = Math.max(...wr.map(m => m.wealth)), span = Math.max(1, hi - lo);
+          const X = i => L + i / (wr.length - 1) * (R - L), Y = v => B - (v - lo + span * .1) / (span * 1.2) * (B - T);
+          const pts = wr.map((m, i) => [X(i), Y(m.wealth)]);
+          const line = pts.map((q, i) => (i ? "L" : "M") + q[0].toFixed(1) + " " + q[1].toFixed(1)).join(" ");
+          const delta = wr.at(-1).wealth - wr[0].wealth;
+          wealth = `<section class="finance-chart wide"><div class="finance-heading"><h2>Patrimonio</h2><small class="${delta >= 0 ? "pos" : "neg"}">${delta >= 0 ? "+" : "−"}${fmt(Math.abs(delta))} in ${wr.length - 1} mesi</small></div><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Andamento del patrimonio"><defs><linearGradient id="fxw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--sec-finance)" stop-opacity=".35"/><stop offset="1" stop-color="var(--sec-finance)" stop-opacity="0"/></linearGradient></defs><path d="${line} L${R} ${B} L${L} ${B} Z" fill="url(#fxw)"/><path class="oc-line" d="${line}"/><circle class="oc-dot" cx="${pts.at(-1)[0].toFixed(1)}" cy="${pts.at(-1)[1].toFixed(1)}" r="4.5"/>${[0, wr.length - 1].map(i => `<text class="fx-xtick" x="${X(i)}" y="${H - 8}" text-anchor="${i ? "end" : "start"}">${mlabel(wr[i].month)}</text>`).join("")}</svg></section>`;
+        }
+        // 3) categorie: ciambella + legenda
+        const tx = (d.transactions || []).filter(t => t.type === "Spesa" && t.amount < 0);
+        const cat = new Map(); for (const t of tx) cat.set(t.category || "Altro", (cat.get(t.category || "Altro") || 0) - t.amount);
+        const rows = [...cat].sort((a, b) => b[1] - a[1]), top = rows.slice(0, 5), rest = rows.slice(5).reduce((n, r) => n + r[1], 0); if (rest) top.push(["Altre", rest]);
+        const tot = rows.reduce((n, r) => n + r[1], 0);
+        let catCard;
+        if (!tot) catCard = `<section class="finance-chart"><div class="finance-heading"><h2>Spese per categoria</h2></div><p class="empty">Nessuna spesa nel mese.</p></section>`;
+        else {
+          const Rr = 54, C = 2 * Math.PI * Rr; let off = 0;
+          const arcs = top.map(([n, v], i) => { const len = v / tot * C, el = `<circle class="fx-seg fx-c${i}" cx="70" cy="70" r="${Rr}" stroke-dasharray="${Math.max(0, len - 3)} ${C}" stroke-dashoffset="${-off}"><title>${escapeHtml(n)}: ${fmt(v)}</title></circle>`; off += len; return el; }).join("");
+          catCard = `<section class="finance-chart"><div class="finance-heading"><h2>Spese per categoria</h2></div><div class="fx-donut"><svg viewBox="0 0 140 140" role="img" aria-label="Spese per categoria"><g transform="rotate(-90 70 70)">${arcs}</g><text x="70" y="66" text-anchor="middle" class="fx-dt">${fmt(tot)}</text><text x="70" y="84" text-anchor="middle" class="fx-ds">spesi</text></svg><ul>${top.map(([n, v], i) => `<li><i class="fx-c${i}"></i><span>${escapeHtml(n)}</span><b>${fmt(v)}</b></li>`).join("")}</ul></div></section>`;
+        }
+        // 4) ritmo di spesa
+        const days = new Date(Date.UTC(d.year, d.month, 0)).getUTCDate(), per = Array(days + 1).fill(0);
+        for (const t of tx) { const n = Number(String(t.date || "").slice(8, 10)); if (n >= 1 && n <= days) per[n] -= t.amount; }
+        const nowKey = todayIso(), last = nowKey.slice(0, 7) === d.key ? Number(nowKey.slice(8)) : (d.key < nowKey.slice(0, 7) ? days : 0);
+        const cap = Math.max(1, (d.summary.monthlySalary || 0) - (d.summary.monthlyCommitted || 0)) || Math.max(1, d.summary.monthlySpent + Math.max(0, d.summary.monthlyRemaining));
         let acc = 0; const pts = []; for (let i = 1; i <= last; i++) { acc += per[i]; pts.push([i, acc]); }
-        const W = 640, H = 220, L = 8, R = W - 8, T = 16, B = H - 26, mx = Math.max(cap, acc) * 1.08;
-        const X = i => L + (i - 1) / Math.max(1, days - 1) * (R - L), Y = v => B - v / mx * (B - T);
-        const pace = `<line class="oc-pace" x1="${X(1)}" y1="${Y(0)}" x2="${X(days)}" y2="${Y(cap)}"/>`;
-        const line = pts.length ? `<path class="oc-line" d="${pts.map((q, k) => (k ? "L" : "M") + X(q[0]).toFixed(1) + " " + Y(q[1]).toFixed(1)).join(" ")}"/>` + `<circle class="oc-dot" cx="${X(pts.at(-1)[0]).toFixed(1)}" cy="${Y(pts.at(-1)[1]).toFixed(1)}" r="4"/>` : "";
-        const ticks = [1, Math.ceil(days / 2), days].map(i => `<text class="oc-tick" x="${X(i)}" y="${H - 6}" text-anchor="${i === 1 ? "start" : i === days ? "end" : "middle"}">${i}</text>`).join("");
-        const ahead = acc - (cap * last / days);
-        const paceCard = `<section class="finance-chart"><div class="finance-heading"><h2>Ritmo di spesa</h2><small>${last ? (ahead > 0 ? "sopra" : "sotto") + " il ritmo di " + fmt(Math.abs(ahead)) : "mese non iniziato"}</small></div><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Spesa cumulata del mese contro il ritmo ideale"><line class="oc-axis" x1="${L}" x2="${R}" y1="${B}" y2="${B}"/>${pace}${line}${ticks}</svg><p class="oc-legend"><i class="k-line"></i>Spesa cumulata <i class="k-pace"></i>Ritmo ideale (${fmt(cap)} nel mese)</p></section>`;
-        const cat = new Map(); for (const t of tx) cat.set(t.category || "Altro", (cat.get(t.category || "Altro") || 0) + -t.amount);
-        const rows = [...cat].sort((a, b) => b[1] - a[1]); const top = rows.slice(0, 6), rest = rows.slice(6).reduce((n, r) => n + r[1], 0); if (rest) top.push(["Altre", rest]);
-        const tot = rows.reduce((n, r) => n + r[1], 0) || 1;
-        const catCard = `<section class="finance-chart"><div class="finance-heading"><h2>Spese per categoria</h2><small>${fmt(tot)}</small></div>${top.length ? top.map(([n, v]) => `<div class="oc-bar"><span>${escapeHtml(n)}</span><div><i style="width:${Math.max(2, v / top[0][1] * 100).toFixed(1)}%"></i></div><b>${fmt(v)}</b><small>${Math.round(v / tot * 100)}%</small></div>`).join("") : '<p class="empty">Nessuna spesa nel mese.</p>'}</section>`;
-        const flow = d.lifetime?.series?.length ? `<section class="finance-chart wide"><div class="finance-heading"><h2>Entrate e uscite</h2></div><div class="integrated-chart">${cashFlowChart(d)}</div></section>` : "";
-        return `<div class="finance-charts">${paceCard}${catCard}${flow}</div>`;
+        const W2 = 640, H2 = 220, L2 = 8, R2 = W2 - 8, T2 = 16, B2 = H2 - 26, mx2 = Math.max(cap, acc) * 1.08, X2 = i => L2 + (i - 1) / Math.max(1, days - 1) * (R2 - L2), Y2 = v => B2 - v / mx2 * (B2 - T2);
+        const ahead = acc - cap * last / days;
+        const pace = `<section class="finance-chart"><div class="finance-heading"><h2>Ritmo di spesa</h2><small class="${last && ahead > 0 ? "neg" : "pos"}">${last ? (ahead > 0 ? "sopra" : "sotto") + " il ritmo di " + fmt(Math.abs(ahead)) : "mese non iniziato"}</small></div><svg viewBox="0 0 ${W2} ${H2}" role="img" aria-label="Spesa cumulata contro ritmo ideale"><line class="fx-grid" x1="${L2}" x2="${R2}" y1="${B2}" y2="${B2}"/><line class="oc-pace" x1="${X2(1)}" y1="${Y2(0)}" x2="${X2(days)}" y2="${Y2(cap)}"/>${pts.length ? `<path class="oc-line" d="${pts.map((q, k) => (k ? "L" : "M") + X2(q[0]).toFixed(1) + " " + Y2(q[1]).toFixed(1)).join(" ")}"/><circle class="oc-dot" cx="${X2(pts.at(-1)[0]).toFixed(1)}" cy="${Y2(pts.at(-1)[1]).toFixed(1)}" r="4.5"/>` : ""}${[1, Math.ceil(days / 2), days].map(i => `<text class="fx-xtick" x="${X2(i)}" y="${H2 - 6}" text-anchor="${i === 1 ? "start" : i === days ? "end" : "middle"}">${i}</text>`).join("")}</svg><p class="oc-legend"><i class="k-line"></i>Spesa cumulata<i class="k-pace"></i>Ritmo ideale (${fmt(cap)})</p></section>`;
+        return `<div class="finance-charts">${flow}${pace}${catCard}${wealth}</div>`;
       }
 
       /** Riga chiave/importo; la linea di confine appartiene a una sola riga. */
@@ -4579,19 +4626,20 @@ main:has(#today.active) .home-context{display:none}
     const fs=life.finance?.summary;
     if(fs&&Number.isFinite(Number(fs.monthlyRemaining))){
       const y=Number(today.slice(0,4)),m=Number(today.slice(5,7)),dim=new Date(Date.UTC(y,m,0)).getUTCDate(),left=Math.max(1,dim-Number(today.slice(8))+1);
-      perDay=state.assetsVisible===false?'••• €':eur(fs.monthlyRemaining/left);perDaySub=state.assetsVisible===false?'al giorno':`al giorno · ${left} giorni`;
+      const hide=state.assetsVisible===false;
+      perDay=hide?'••• €':eur(fs.monthlyRemaining);perDaySub=hide?'rimanente nel mese':`${eur(fs.monthlyRemaining/left)} al giorno · ${left} giorni`;
     }
     const kpi=(cls,label,value,sub,attr)=>`<button class="dash-kpi ${cls}" ${attr}><small>${label}</small><strong>${value}</strong><span>${sub}</span></button>`;
     
     const kpis=[
       kpi('k-shift','Turno oggi',shift?short[shift]:'—',shift&&/\d/.test(osShift[shift])?osShift[shift]:'turno di riposo','data-home-day="'+today+'"'),
-      kpi('k-money','Budget oggi',perDay,perDaySub,'data-view="overview"'),
+      kpi('k-money','Budget del mese',perDay,perDaySub,'data-view="overview"'),
       kpi('k-sun','Prossimo orario',safe(nextSolar.time),safe(nextSolar.label),'data-home-times-sheet'),
       kpi('k-weather','Meteo',wx?wx.t:'—',wx?wx.c+' · Empoli':'Non disponibile','aria-disabled="true" tabindex="-1"')
     ].join('');
     const weekRows=Array.from({length:7},(_,i)=>addDay(today,i+1)).map(day=>{
-      const dt=new Date(day+'T12:00:00Z'),kind=shifts.get(day),n=(d.events||[]).filter(e=>e.day===day).length;
-      return `<button class="dw-row ${day===today?'today':''}" data-home-day="${day}" aria-label="${safe(osDate(day))}${kind?' · '+safe(short[kind]):''}"><span class="dw-day"><small>${['dom','lun','mar','mer','gio','ven','sab'][dt.getUTCDay()]}</small><b>${dt.getUTCDate()}</b></span><span class="dw-shift os-shift ${kind?'':'no-shift'}" data-kind="${kind||''}">${kind?short[kind]:'—'}</span><span class="dw-meta">${kind&&/\d/.test(osShift[kind])?osShift[kind]:''}</span><span class="dw-ev"></span></button>`;
+      const dt=new Date(day+'T12:00:00Z'),kind=shifts.get(day),n=(d.events||[]).filter(e=>e.day===day).length,m2=open.filter(t=>dueOf(t)===day).length;
+      return `<button class="dw-row ${day===today?'today':''}" data-home-day="${day}" aria-label="${safe(osDate(day))}${kind?' · '+safe(short[kind]):''}"><span class="dw-day"><small>${['dom','lun','mar','mer','gio','ven','sab'][dt.getUTCDay()]}</small><b>${dt.getUTCDate()}</b></span><span class="dw-shift os-shift ${kind?'':'no-shift'}" data-kind="${kind||''}">${kind?short[kind]:'—'}</span><span class="dw-meta">${kind&&/\d/.test(osShift[kind])?osShift[kind]:''}</span><span class="dw-ev">${n+m2?`<i class="dw-dot" aria-hidden="true"></i>${n?n+(n===1?' evento':' eventi'):''}${n&&m2?' · ':''}${m2?m2+(m2===1?' attività':' attività'):''}`:''}</span></button>`;
     }).join('');
     return `<div class="home-native"><div class="home-head"><div class="home-recap" data-key="${safe(key)}" aria-label="${safe(plain)}"><p>${lines.map(l=>l).join(' ')}</p></div></div>
 <div class="dash-kpis">${kpis}</div>
