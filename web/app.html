@@ -863,6 +863,10 @@ h1,h2,h3,.dash-kpi strong,.dw-day b,.os-agenda-date b{line-height:var(--lh-tight
 #calendar .os-day-mark i,#calendar .os-day-mark i.t{width:6px;height:6px;border-radius:50%;background:var(--shift-color,var(--ink-3))}
 @media(max-width:760px){#calendar .os-day-mark i,#calendar .os-day-mark i.t{width:5px;height:5px}}
 #calendar .os-day[data-kind="night"] .os-day-mark i{background:#8d949e}
+/* editor evento: popup come gli altri fogli */
+.os-inline-event#os-event-editor{position:fixed;z-index:100;top:50%;left:50%;transform:translate(-50%,-50%);width:min(620px,calc(100vw - 32px));max-height:calc(100svh - 48px);overflow-y:auto;margin:0;padding:var(--s6);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:0 0 0 100vmax rgba(0,0,0,.66),0 30px 80px rgba(0,0,0,.5)}
+@media(max-width:760px){.os-inline-event#os-event-editor{top:auto;bottom:0;left:0;transform:none;width:100%;max-height:calc(100svh - 12px - var(--safe-top,0px));padding:var(--s5) var(--s5) calc(var(--s5) + var(--safe-bottom,0px));border-radius:var(--r-lg) var(--r-lg) 0 0;border-bottom:0}}
+body:has(#os-event-editor) .page-fab{visibility:hidden}
 </style>
 </head>
   <body class="dashboard-mode">
@@ -4577,6 +4581,7 @@ h1,h2,h3,.dash-kpi strong,.dw-day b,.os-agenda-date b{line-height:var(--lh-tight
           observer.observe(w, { attributes: true, attributeFilter: ["class"] }),
         );
         document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape" && !activeSheet) document.querySelector("#os-event-editor [data-life-close]")?.click();
           if (!activeSheet) return;
           if (e.key === "Escape") {
             e.preventDefault();
