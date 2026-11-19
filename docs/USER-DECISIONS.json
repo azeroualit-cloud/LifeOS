@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "LifeOS",
-  "updated_on": "2026-11-13",
+  "updated_on": "2026-11-19",
   "policy": {
     "id": "META-01",
     "status": "ACTIVE",
@@ -928,6 +928,16 @@
       "original_quote": "facciamo il calcolo sulle ultime 2 settimane dall'ultima pesata ma senza limiti minimi di numero di pesate",
       "rule": "Finestra di 14 giorni a ritroso dall’ultima pesata disponibile, inclusa. Rimuovere i minimi arbitrari di numero pesate, durata e numero/distanza dei confronti. Due date distinte sono necessarie per misurare una variazione. Conservare il requisito esistente di copertura calorica 90%, non oggetto della richiesta. Nessuna nuova IPA o deploy autorizzati.",
       "relationship": "Precisa HEALTH-WEEK-REVIEW-01, che approva 14 giorni senza ancoraggio o soglie esplicite. Nessun conflitto con una regola utente attiva."
+    },
+    {
+      "id": "WEB-REVAMP-2026-11-19",
+      "status": "ACTIVE",
+      "scope": "Sito web LifeOS e Worker: rework grafico, Admin, analisi Finanza; editor alimenti e Bloom web in attesa di app/IPA",
+      "recorded_on": "2026-11-19",
+      "provenance": "Richiesta diretta utente",
+      "original_quote": "procedi all'implementazione completa",
+      "rule": "Autorizza implementazione locale lato sito/Worker. Non autorizza IPA, deploy Cloudflare, nuovi binding in produzione né modifiche all'app. Editor catalogo alimenti e Bloom web restano da decidere perché richiedono sync dall'app.",
+      "conflict_check": "Nessun conflitto con regole ACTIVE."
     }
   ],
   "pending_confirmations": [

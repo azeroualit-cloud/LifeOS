@@ -384,3 +384,12 @@ Richiesta diretta: «produci l’ipa». Autorizzata nuova produzione delle modif
 ## SIX-TABS-KEYBOARD-REPAIR-2026-11-13 — ACTIVE
 
 Utente: «confermo» alla richiesta approvazione della correzione radici stabili e verifica prima dell’IPA già autorizzata. Autorizzata implementazione della proposta descritta e successive prove/confezionamento0.10.28build90. Non chiedere nuovamente conferma correzione oIPA per questo stesso ambito. Nessun deploybackend;installazione/accettazione separate.
+
+## WEB-REVAMP-2026-11-19 — ACTIVE
+
+Fonte diretta: «allora stato dell'ipa fantastico, super soddisfatto, ma mi sembra che il sito sia rimasto molto indietro, funziona ma graficamente fa schifo, inoltre volevo revamparlo per aggiungerci funzionalità specifico che non ci sono nell'app» e «iniziamo concretamente con le cose più semplici, ovvero rework grafico, sezione admin, sezione editor catalogo alimenti, finanza con analisi vera, e poi se mi dici che bloom è fattibile senza rallentamenti estremi potremmo anche farlo»; poi «procedi all'implementazione completa». Ambito: solo sito web/Worker. Nessuna IPA e nessun deploy autorizzati da questo input (IPA-GATE-01 e regole deploy invariate). Nessun conflitto con regole ACTIVE.
+
+Fatto in locale il 19 novembre: layer grafico web v2, sezione Admin (stato D1, spazio, backup JSON, export CSV), analisi Finanza estesa (trend 3/6/12 mesi, storico movimenti, CSV). Nuovi metodi Worker di sola lettura getAdminStatus e getAdminExport, nessun nuovo binding.
+
+NON eseguiti, richiedono modifiche all'app e quindi IPA, da decidere: editor catalogo alimenti (il catalogo è un JSON incluso nell'app, le voci personali sono locali) e Bloom sul sito (dati e file solo locali nell'app; servirebbe sync verso D1 e R2, con un nuovo binding R2 nel Worker). L'utente ha indicato circa 50 immagini Bloom, limiti Cloudflare gratuiti verificati compatibili.
+

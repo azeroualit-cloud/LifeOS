@@ -136,7 +136,62 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
 .os-task.done {background:transparent;opacity:1;}.os-task.done .os-task-title {color:var(--muted);text-decoration:none;}.os-task.done .os-check {background:var(--os-accent);border-color:var(--os-accent);color:var(--os-bg);}
 .os-task-section .os-task {grid-template-columns:26px minmax(0,1fr) 44px;}.os-task-section .os-task:has(.os-drag-handle) {grid-template-columns:28px 26px minmax(0,1fr) 44px;}.os-wait,.os-task-delete {width:44px;min-height:44px;padding:0;}
 @media(prefers-reduced-motion:reduce) {*,*::before,*::after {animation:none!important;transition:none!important;scroll-behavior:auto!important;}}
-</style></head>
+</style>
+<style id="lifeos-web-v2">
+/* Web v2: stessa struttura e stessi dati, superfici e tipografia riallineate all'app nativa. */
+:root{--os-bg:#09090b;--os-panel:#121214;--os-panel-2:#1b1b1f;--line:#26262b;--ink:#f5f5f7;--muted:#9c9ca5;--os-accent:#4aa8ff;--os-focus:#4aa8ff;--card-radius:20px;--shadow:0 1px 0 #ffffff0a inset,0 10px 28px #0007;font-feature-settings:"tnum" 1,"cv11" 1;-webkit-font-smoothing:antialiased;}
+html[data-theme="light"]{--os-bg:#f4f4f6;--os-panel:#fff;--os-panel-2:#ececf0;--line:#e1e1e6;--shadow:0 1px 2px #0000000d,0 10px 28px #0000000d;}
+button{border-color:color-mix(in srgb,var(--line) 85%,transparent);font-weight:550;transition:background-color .15s,border-color .15s,transform .15s,opacity .15s;}
+button:hover:not(:disabled){border-color:color-mix(in srgb,var(--os-accent) 40%,var(--line));}
+.save,.os-button.primary{border-color:transparent;box-shadow:0 4px 14px color-mix(in srgb,var(--os-accent) 30%,transparent);}
+input,select,textarea{border-radius:12px;transition:border-color .15s,box-shadow .15s;}
+input:focus,select:focus,textarea:focus{border-color:var(--os-accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--os-accent) 22%,transparent);outline:0;}
+.card,.os-card,.extra-card,.overview-essential>section:not(.overview-flow),.overview-flow>div{box-shadow:var(--shadow);}
+:is(#budget,#analysis,#extras,#movements) .card{box-shadow:none;}
+.sidebar-foot{display:grid;gap:10px;}
+.sidebar-foot>span{font-size:11px;}
+#admin-link{justify-content:flex-start;min-height:40px;border:0;color:var(--muted);font-size:13px;gap:10px;}
+#admin-link.active{color:var(--ink);background:var(--os-panel-2);}
+@media(min-width:761px){
+ .shell{grid-template-columns:248px minmax(0,1fr);}
+ .sidebar{padding:28px 14px 20px;background:color-mix(in srgb,var(--os-panel) 55%,var(--os-bg));}
+ .brand{padding:0 12px;margin-bottom:30px;font-size:18px;letter-spacing:-.3px;}
+ .nav{gap:4px;}
+ .nav button{position:relative;min-height:44px;padding:0 12px;border-radius:12px;font-size:14px;}
+ .nav button:hover{background:var(--os-panel-2);color:var(--ink);}
+ .nav button.active{background:var(--os-panel-2);color:var(--ink);}
+ .nav button.active::before{content:"";position:absolute;left:-14px;top:11px;bottom:11px;width:3px;border-radius:0 3px 3px 0;background:var(--os-accent);}
+ .nav button.active .nav-symbol{color:var(--os-accent);}
+ main{max-width:1240px;padding:40px 48px 96px;}
+ .top{margin-bottom:28px;}
+ h1{font-size:30px;letter-spacing:-.9px;}
+ .finance-open{max-width:960px;}
+ .overview-essential,.overview-analysis-grid{gap:20px;}
+ .os-home{gap:20px;}
+}
+/* Admin */
+.adm-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;max-width:1000px;}
+.adm-wide{grid-column:1/-1;}
+.adm-big{font-size:40px;font-weight:700;letter-spacing:-1.2px;margin:4px 0 14px;}
+.adm-meter{height:8px;border-radius:8px;background:var(--os-panel-2);overflow:hidden;margin-bottom:10px;}
+.adm-meter i{display:block;height:100%;background:var(--os-accent);border-radius:8px;}
+.adm-actions{display:flex;gap:10px;flex-wrap:wrap;}
+.adm-note{margin:0 0 16px;}
+.adm-progress{min-height:20px;margin-top:14px;color:var(--muted);font-size:13px;}
+.adm-tables{display:grid;}
+.adm-row{display:grid;grid-template-columns:minmax(120px,240px) minmax(0,1fr) auto;gap:14px;align-items:center;padding:10px 0;border-top:1px solid var(--line);font-size:13px;}
+.adm-row i{height:6px;width:var(--w);border-radius:6px;background:color-mix(in srgb,var(--os-accent) 55%,var(--os-panel-2));}
+.adm-row b{text-align:right;min-width:48px;}
+/* Analisi estesa */
+.apl{margin-top:20px;}
+.apl-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:20px;}
+.apl-kpis>div{display:flex;flex-direction:column;justify-content:space-between;gap:6px;}.apl-kpis small{display:block;}
+.apl-kpis strong{font-size:20px;letter-spacing:-.4px;}
+.apl-chart{width:100%;height:auto;max-height:240px;}
+.apl-chart text{fill:var(--muted);font-size:11px;}
+@media(max-width:760px){.adm-grid{grid-template-columns:minmax(0,1fr);}.apl-kpis{grid-template-columns:repeat(2,minmax(0,1fr));}.adm-row{grid-template-columns:minmax(0,1fr) auto;}.adm-row i{display:none;}#admin-link{display:none;}}
+</style>
+</head>
   <body class="dashboard-mode">
     <div class="shell">
       <aside class="sidebar">
@@ -207,6 +262,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
           </button>
         </nav>
         <div class="sidebar-foot">
+          <button id="admin-link" type="button" data-view="admin"><svg class="nav-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>Admin</button>
           <span id="sync-side">Caricamento...</span
           ><span id="version-side" hidden></span>
         </div>
@@ -241,9 +297,184 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
         <section id="overview" class="view"></section>
         <section id="movements" class="view"></section>
 
-        <section id="budget" class="view"></section><section id="analysis" class="view"></section><section id="extras" class="view"></section>
+        <section id="admin" class="view"></section><section id="budget" class="view"></section><section id="analysis" class="view"></section><section id="extras" class="view"></section>
       </main>
     </div>
+    <script id="lifeos-admin-analysis">
+      /* Admin e analisi estesa. Solo letture; le esportazioni restano nel browser. */
+      const adm = { status: null, busy: "", error: "", progress: "" };
+      const apl = { rows: null, range: 6, query: "", busy: false, error: "" };
+      const fmtBytes = (n) =>
+        n == null ? "—" : n > 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
+      const fmtNum = (n) => new Intl.NumberFormat("it-IT").format(n || 0);
+      const csvCell = (v) => {
+        const t = v == null ? "" : String(v);
+        return /[";\n\r]/.test(t) ? '"' + t.replaceAll('"', '""') + '"' : t;
+      };
+      function downloadFile(name, text, type) {
+        const url = URL.createObjectURL(new Blob([text], { type }));
+        const a = Object.assign(document.createElement("a"), { href: url, download: name });
+        document.body.append(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 4000);
+      }
+      async function exportTable(table, onPage) {
+        const rows = [];
+        for (let offset = 0; ; offset += 200) {
+          const page = await workerRequest("getAdminExport", [table, offset]);
+          rows.push(...page.rows);
+          if (onPage) onPage(rows.length);
+          if (page.done) return rows;
+        }
+      }
+      async function renderAdmin() {
+        const root = document.getElementById("admin");
+        if (!root) return;
+        if (!adm.status && !adm.busy) {
+          adm.busy = "status"; adm.error = "";
+          const started = performance.now();
+          try {
+            adm.status = await workerRequest("getAdminStatus", []);
+            adm.latency = Math.round(performance.now() - started);
+          } catch (e) { adm.error = String(e.message || e); }
+          adm.busy = "";
+        }
+        const s = adm.status;
+        const used = s?.bytes ? Math.min(100, (s.bytes / s.limits.storageBytes) * 100) : 0;
+        const tables = (s?.tables || []).slice().sort((a, b) => b.rows - a.rows);
+        const maxRows = Math.max(1, ...tables.map((t) => t.rows));
+        root.innerHTML = `<div class="adm-grid">
+          ${adm.error ? `<div class="errorbox adm-wide">${escapeHtml(adm.error)}</div>` : ""}
+          <section class="card pad"><div class="card-title"><h2>Stato</h2><button data-adm="refresh">Aggiorna</button></div>
+            <div class="kv"><span>Accesso</span><strong>${escapeHtml(s?.auth || "—")}</strong></div>
+            <div class="kv"><span>Ultimo movimento</span><strong>${escapeHtml(s?.lastMovement || "—")}</strong></div>
+            <div class="kv"><span>Latenza Worker</span><strong>${adm.latency ? adm.latency + " ms" : "—"}</strong></div>
+            <div class="kv"><span>Controllo</span><strong>${s ? escapeHtml(new Date(s.time).toLocaleString("it-IT")) : "—"}</strong></div>
+          </section>
+          <section class="card pad"><div class="card-title"><h2>Spazio database</h2></div>
+            <div class="adm-big">${fmtBytes(s?.bytes)}</div>
+            <div class="adm-meter" role="img" aria-label="Spazio usato ${used.toFixed(1)}%"><i style="width:${Math.max(used, s?.bytes ? 1 : 0)}%"></i></div>
+            <small>${used.toFixed(2)}% di 500 MB (limite per database, piano gratuito). Scritture e letture giornaliere: 100.000 / 5 milioni.</small>
+          </section>
+          <section class="card pad adm-wide"><div class="card-title"><h2>Backup ed esportazione</h2></div>
+            <p class="hint adm-note">I file vengono generati nel browser e scaricati sul tuo computer. Contengono dati personali: non condividerli.</p>
+            <div class="adm-actions">
+              <button class="save" data-adm="backup" ${adm.busy ? "disabled" : ""}>Backup completo (JSON)</button>
+              <button data-adm="csv" ${adm.busy ? "disabled" : ""}>Movimenti (CSV)</button>
+            </div>
+            <div class="adm-progress" role="status" aria-live="polite">${escapeHtml(adm.progress)}</div>
+          </section>
+          <section class="card pad adm-wide"><div class="card-title"><h2>Tabelle</h2><small>${tables.length} tabelle · ${fmtNum(tables.reduce((n, t) => n + t.rows, 0))} righe</small></div>
+            <div class="adm-tables">${tables.map((t) => `<div class="adm-row"><span>${escapeHtml(t.name)}</span><i style="--w:${Math.max(1, (t.rows / maxRows) * 100)}%"></i><b>${fmtNum(t.rows)}</b></div>`).join("") || '<p class="empty">Nessun dato.</p>'}</div>
+          </section>
+        </div>`;
+      }
+      async function adminAction(kind) {
+        if (kind === "refresh") { adm.status = null; return renderAdmin(); }
+        adm.busy = kind; adm.error = ""; renderAdmin();
+        const day = new Date().toISOString().slice(0, 10);
+        try {
+          if (kind === "csv") {
+            const rows = await exportTable("movements", (n) => { adm.progress = "Movimenti letti: " + n; document.querySelector(".adm-progress").textContent = adm.progress; });
+            const cols = ["actual_date", "description", "amount", "account", "category", "movement_type", "status", "merchant", "notes"];
+            const body = rows.map((r) => cols.map((c) => csvCell(c === "amount" ? String(r[c]).replace(".", ",") : r[c])).join(";"));
+            downloadFile("lifeos-movimenti-" + day + ".csv", "﻿" + [cols.join(";"), ...body].join("\r\n"), "text/csv;charset=utf-8");
+            adm.progress = rows.length + " movimenti esportati.";
+          } else {
+            const names = (adm.status || (adm.status = await workerRequest("getAdminStatus", []))).tables.map((t) => t.name);
+            const out = { app: "Life OS", exportedAt: new Date().toISOString(), tables: {} };
+            for (const name of names) {
+              out.tables[name] = await exportTable(name, (n) => { document.querySelector(".adm-progress").textContent = name + ": " + n + " righe"; });
+            }
+            downloadFile("lifeos-backup-" + day + ".json", JSON.stringify(out), "application/json");
+            adm.progress = names.length + " tabelle esportate.";
+          }
+        } catch (e) { adm.error = String(e.message || e); adm.progress = ""; }
+        adm.busy = ""; renderAdmin();
+      }
+      /* ---- Analisi estesa: trend per categoria su 3/6/12 mesi dai movimenti reali ---- */
+      const monthOf = (r) => String(r.actual_month || r.actual_date || r.budget_date || "").slice(0, 7);
+      function aplCompute() {
+        const rows = apl.rows || [];
+        const months = [...new Set(rows.map(monthOf).filter((m) => /^\d{4}-\d{2}$/.test(m)))].sort();
+        const upto = state.data?.key || months.at(-1);
+        const pool = months.filter((m) => m <= (upto || "9999")).slice(-apl.range);
+        const prev = months.filter((m) => m < (pool[0] || "")).slice(-apl.range);
+        const spend = (r) => (r.movement_type === "Spesa" && Number(r.amount) < 0 ? -Number(r.amount) : 0);
+        const income = (r) => (r.movement_type === "Entrata" && Number(r.amount) > 0 ? Number(r.amount) : 0);
+        const perMonth = pool.map((m) => ({ m, spend: 0, income: 0 }));
+        const cats = new Map();
+        for (const r of rows) {
+          const m = monthOf(r), i = pool.indexOf(m);
+          const isPrev = prev.includes(m);
+          if (i < 0 && !isPrev) continue;
+          const c = String(r.category || "Senza categoria");
+          const e = cats.get(c) || { name: c, total: 0, before: 0 };
+          if (i >= 0) { perMonth[i].spend += spend(r); perMonth[i].income += income(r); e.total += spend(r); } else e.before += spend(r);
+          cats.set(c, e);
+        }
+        const list = [...cats.values()].filter((c) => c.total > 0 || c.before > 0).sort((a, b) => b.total - a.total);
+        const inRange = rows.filter((r) => pool.includes(monthOf(r)) && r.movement_type !== "Trasferimento");
+        return { pool, perMonth, list, inRange };
+      }
+      function aplChart(perMonth) {
+        const w = 640, h = 200, pad = 28, max = Math.max(1, ...perMonth.flatMap((p) => [p.spend, p.income]));
+        const slot = (w - pad * 2) / Math.max(1, perMonth.length), bw = Math.min(26, slot / 3);
+        const y = (v) => h - 26 - (v / max) * (h - 50);
+        return `<svg class="apl-chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="Entrate e spese per mese">
+          <line class="axis" x1="${pad}" x2="${w - pad}" y1="${h - 26}" y2="${h - 26}"/>
+          ${perMonth.map((p, i) => { const x = pad + slot * i + slot / 2; return `<rect x="${x - bw - 2}" y="${y(p.income)}" width="${bw}" height="${h - 26 - y(p.income)}" rx="4" fill="var(--green)"><title>${p.m} entrate ${euro(p.income)}</title></rect><rect x="${x + 2}" y="${y(p.spend)}" width="${bw}" height="${h - 26 - y(p.spend)}" rx="4" fill="var(--red)"><title>${p.m} spese ${euro(p.spend)}</title></rect><text x="${x}" y="${h - 8}" text-anchor="middle">${p.m.slice(5)}/${p.m.slice(2, 4)}</text>`; }).join("")}
+        </svg>`;
+      }
+      async function renderAnalysisPlus() {
+        const root = document.getElementById("analysis-plus");
+        if (!root) return;
+        if (!apl.rows && !apl.busy) {
+          apl.busy = true; root.innerHTML = '<section class="card pad"><p class="empty">Carico lo storico dei movimenti…</p></section>';
+          try { apl.rows = await exportTable("movements"); apl.error = ""; } catch (e) { apl.error = String(e.message || e); }
+          apl.busy = false;
+          if (state.view !== "analysis") return;
+        }
+        if (apl.error) { root.innerHTML = `<div class="errorbox">${escapeHtml(apl.error)}</div>`; return; }
+        if (!apl.rows) return;
+        const { pool, perMonth, list, inRange } = aplCompute();
+        const spent = perMonth.reduce((n, p) => n + p.spend, 0), earned = perMonth.reduce((n, p) => n + p.income, 0);
+        const q = apl.query.trim().toLowerCase();
+        const shown = inRange.filter((r) => !q || [r.description, r.category, r.merchant].some((v) => String(v || "").toLowerCase().includes(q))).sort((a, b) => String(b.actual_date).localeCompare(String(a.actual_date)));
+        const top = list.slice(0, 12), maxTotal = Math.max(1, ...top.map((c) => c.total));
+        root.innerHTML = `<section class="card pad apl"><div class="card-title"><h2>Storico e tendenze</h2>
+          <div class="chart-range" role="group" aria-label="Periodo">${[3, 6, 12].map((n) => `<button data-apl-range="${n}" class="${apl.range === n ? "active" : ""}">${n} mesi</button>`).join("")}</div></div>
+          <div class="apl-kpis"><div><small>Spese</small><strong class="negative">${euro(spent)}</strong></div><div><small>Entrate</small><strong class="positive">${euro(earned)}</strong></div>
+          <div><small>Media mensile spese</small><strong>${euro(spent / Math.max(1, pool.length))}</strong></div>
+          <div><small>Tasso di risparmio</small><strong>${earned > 0 ? Math.round(((earned - spent) / earned) * 100) + "%" : "—"}</strong></div></div>
+          <div class="chart-scroll">${aplChart(perMonth)}</div>
+          <div class="flow-legend"><span><i style="background:var(--green)"></i>Entrate</span><span><i style="background:var(--red)"></i>Spese</span></div>
+          <h3 class="details-label">Categorie di spesa</h3>
+          ${top.map((c) => { const d = c.before > 0 ? Math.round(((c.total - c.before) / c.before) * 100) : null; return `<div class="bar-row"><span>${escapeHtml(c.name)}</span><span>${euro(c.total)}${d == null ? "" : ` <small class="${d > 0 ? "negative" : "positive"}">${d > 0 ? "+" : ""}${d}%</small>`}</span><div class="bar"><i style="width:${(c.total / maxTotal) * 100}%;background:var(--os-accent)"></i></div></div>`; }).join("") || '<p class="empty">Nessuna spesa nel periodo.</p>'}
+          <small class="hint">La variazione confronta con i ${apl.range} mesi precedenti. I trasferimenti tra conti sono esclusi.</small>
+        </section>
+        <section class="card pad apl"><div class="card-title"><h2>Movimenti del periodo</h2><button data-apl-csv>Esporta CSV</button></div>
+          <div class="filters"><input class="search" id="apl-search" type="search" placeholder="Cerca descrizione, categoria, esercente" value="${escapeHtml(apl.query)}" aria-label="Cerca movimenti"></div>
+          <div class="table-scroll"><table class="tabular"><thead><tr><th>Data</th><th>Descrizione</th><th>Categoria</th><th class="num">Importo</th></tr></thead><tbody>
+          ${shown.slice(0, 200).map((r) => `<tr><td>${escapeHtml(String(r.actual_date || "").slice(0, 10))}</td><td>${escapeHtml(r.description)}</td><td>${escapeHtml(r.category || "")}</td><td class="num ${amountClass(Number(r.amount))}">${exactEuro(Number(r.amount))}</td></tr>`).join("")}
+          </tbody></table></div><small class="hint">${shown.length > 200 ? "Mostrati i 200 più recenti su " + fmtNum(shown.length) + "; l’esportazione include tutto." : fmtNum(shown.length) + " movimenti."}</small>
+        </section>`;
+      }
+      document.addEventListener("click", (e) => {
+        const a = e.target.closest("[data-adm]"); if (a) return adminAction(a.dataset.adm);
+        const r = e.target.closest("[data-apl-range]"); if (r) { apl.range = Number(r.dataset.aplRange); return renderAnalysisPlus(); }
+        if (e.target.closest("[data-apl-csv]")) {
+          const { inRange } = aplCompute(), cols = ["actual_date", "description", "amount", "category", "account", "movement_type"];
+          const q = apl.query.trim().toLowerCase();
+          const rows = inRange.filter((x) => !q || [x.description, x.category, x.merchant].some((v) => String(v || "").toLowerCase().includes(q)));
+          downloadFile("lifeos-analisi-" + new Date().toISOString().slice(0, 10) + ".csv", "﻿" + [cols.join(";"), ...rows.map((x) => cols.map((c) => csvCell(c === "amount" ? String(x[c]).replace(".", ",") : x[c])).join(";"))].join("\r\n"), "text/csv;charset=utf-8");
+        }
+      });
+      document.addEventListener("input", (e) => {
+        if (e.target.id !== "apl-search") return;
+        apl.query = e.target.value; clearTimeout(apl.timer);
+        apl.timer = setTimeout(() => { renderAnalysisPlus(); const i = document.getElementById("apl-search"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 180);
+      });
+    </script>
     <div id="dialog" class="modal-wrap hidden"></div>
     <div id="life-dialog" class="modal-wrap hidden"></div>
     <script>
@@ -1604,6 +1835,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
             "budget",
             "analysis",
             "extras",
+            "admin",
           ].includes(view)
         )
           return;
@@ -1632,6 +1864,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
           budget: "Budget",
           analysis: "Analisi",
           extras: "Straordinarie",
+          admin: "Admin",
         }[view];
         document
           .getElementById("finance-tabs")
@@ -1671,6 +1904,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
               button.classList.contains("active") ? "page" : "false",
             ),
           );
+        if (view === "admin" && typeof renderAdmin === "function") renderAdmin();
         if (view !== "calendar") life.tool = null;
         if (["today", "tasks", "calendar"].includes(view)) {
           renderLifeOS();
@@ -1699,7 +1933,7 @@ button,input,select,summary {min-height:44px;}small,.hint {font-size:13px;}h2 {f
           document.getElementById("budget").innerHTML = monthlyBudgetDetails(d.summary) + overviewAnalysis(d);
           updateProjection();
         }
-        if (state.view === "analysis" && state.loadedDetail) document.getElementById("analysis").innerHTML = categoryCard(d) + cashFlowChart(d);
+        if (state.view === "analysis" && state.loadedDetail) { document.getElementById("analysis").innerHTML = categoryCard(d) + cashFlowChart(d) + '<div id="analysis-plus"></div>'; if (typeof renderAnalysisPlus === "function") renderAnalysisPlus(); }
         if (state.view === "extras")
           document.getElementById("extras").innerHTML = extrasView(d);
         if (state.view === "movements" && state.loadedDetail) renderMovements();

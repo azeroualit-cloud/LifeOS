@@ -1,5 +1,10 @@
 # LifeOS — stato corrente
 
+**19 novembre — sito web, incremento locale (nessun deploy, nessuna IPA):** layer grafico web v2, sezione Admin (stato e spazio D1, backup JSON completo, export CSV movimenti) e analisi Finanza estesa (trend 3/6/12 mesi per categoria, tasso di risparmio, storico movimenti con ricerca e CSV). Worker: nuovi metodi di sola lettura `getAdminStatus` e `getAdminExport` (tabelle validate su sqlite_master), nessun nuovo binding. Verifica locale: `tests/interface.mjs` e nuovo `tests/admin-analysis.mjs` passati con Chrome (320–1600 px, nessun overflow, export scaricati e controllati); `task-retention` passato; `activity-agenda-63` fallisce già sul sorgente precedente perché legge `manual/build-63/worker.js`, assente. Non verificato sul Worker live né su D1 reale. Editor catalogo alimenti e Bloom web NON fatti: richiedono sync dall'app (catalogo e Bloom sono locali) e quindi IPA. Vedi WEB-REVAMP-2026-11-19 nel registro.
+
+---
+Stato precedente:
+
 **15 novembre — verifica avviata:** [43651934566](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43651934566), sorgente `64b31355cebe3297cb09df2f48d5bf6a8804a42b`. Solo ottimizzazione del test geometrico: asserzioni e timeout invariati, prodotto invariato rispetto a c64430e. Prima 5 UI compatti puliti dopo timeout/riavvio del runner, poi 14 regressioni, restante suite, 4 Release e IPA90 soltanto a gate verdi. Esito ancora da acquisire. Utente monitora; nessun polling attivo. Nessuna nuova IPA verificata, nessun deploy backend. Il precedente tentativo di push/dispatch era rimasto ineseguito per limite temporaneo del revisore automatico; ripresa ora riuscita.
 
 ## Run 43628175869 analizzato — 14 novembre 2026
