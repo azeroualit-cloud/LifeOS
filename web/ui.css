@@ -12,12 +12,12 @@
   color-scheme:dark;
   --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
   /* superfici */
-  --canvas:#0d0f17;--surface:#141824;--surface-2:#1a1f2e;--surface-3:#262c3f;
-  --line:#252b3d;--line-soft:#1d2232;
+  --canvas:#0e0f14;--surface:#15171d;--surface-2:#1b1d25;--surface-3:#272a34;
+  --line:#262933;--line-soft:#1e2028;
   /* testo */
-  --ink:#e4e7f2;--ink-2:#9ea5bd;--ink-3:#697089;
+  --ink:#e5e6ec;--ink-2:#a0a3b1;--ink-3:#6c6f7e;
   /* interazione */
-  --accent:#c2c8ee;--on-accent:#12142a;--focus:#8fb0ff;
+  --accent:#c4c7da;--on-accent:#14151f;--focus:#8fb0ff;
   /* semantica finanziaria (solo direzione) */
   --pos:#8cbaa1;--neg:#d4928f;--warn:#e0b574;
   /* colore di sezione */
@@ -49,7 +49,7 @@ html[data-theme="light"]{
 }
 /* i colori dei turni mantengono il loro significato */
 [data-kind="morning"]{--shift-color:#6191bd}[data-kind="afternoon"]{--shift-color:#659b72}
-[data-kind="night"]{--shift-color:#6b7499}[data-kind="rest"]{--shift-color:#ce916d}
+[data-kind="night"]{--shift-color:#656c8a}[data-kind="rest"]{--shift-color:#ce916d}
 [data-kind="holiday"]{--shift-color:#d7bf52}
 html[data-theme="light"] [data-kind="morning"]{--shift-color:#b4c6e7}
 html[data-theme="light"] [data-kind="afternoon"]{--shift-color:#c6e0b4}
@@ -806,7 +806,7 @@ button[data-life-category] svg{width:18px;height:18px}
 .home-week .dw-row.today .dw-day b{color:var(--sec-home)}
 /* Prossimi giorni: barre tinte che riempiono la larghezza */
 .home-week .dw-list{gap:6px}
-.home-week .dw-row{flex:1;border-top:0!important;border-radius:var(--r-md);padding:0 var(--s3);background:color-mix(in srgb,var(--shift-color,var(--ink-3)) 12%,transparent);grid-template-columns:64px 60px 1fr}
+.home-week .dw-row{flex:1;border-top:0!important;border-radius:var(--r-md);padding:0 var(--s3);background:color-mix(in srgb,var(--shift-color,var(--ink-3)) 9%,transparent);grid-template-columns:64px 60px 1fr}
 .home-week .dw-row[data-kind=""]{background:var(--surface-2)}
 .home-week .dw-row:hover:not(:disabled){background:color-mix(in srgb,var(--shift-color,var(--ink-3)) 20%,transparent)}
 .home-week .dw-row.today{box-shadow:inset 3px 0 0 var(--shift-color,var(--ink))}
@@ -823,7 +823,7 @@ h1,h2,h3,.dash-kpi strong,.dw-day b,.os-agenda-date b{line-height:var(--lh-tight
 /* calendario: marcatori tutti tondi, colore del turno */
 #calendar .os-day-mark i,#calendar .os-day-mark i.t{width:6px;height:6px;border-radius:50%;background:var(--shift-color,var(--ink-3))}
 @media(max-width:760px){#calendar .os-day-mark i,#calendar .os-day-mark i.t{width:5px;height:5px}}
-#calendar .os-day[data-kind="night"] .os-day-mark i{background:#a3abd0}
+#calendar .os-day[data-kind="night"] .os-day-mark i{background:#9aa0bb}
 /* editor evento: popup come gli altri fogli */
 .os-inline-event#os-event-editor{position:fixed;z-index:100;top:50%;left:50%;transform:translate(-50%,-50%);width:min(620px,calc(100vw - 32px));max-height:calc(100svh - 48px);overflow-y:auto;margin:0;padding:var(--s6);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:0 0 0 100vmax rgba(0,0,0,.66),0 30px 80px rgba(0,0,0,.5)}
 @media(max-width:760px){.os-inline-event#os-event-editor{top:auto;bottom:0;left:0;transform:none;width:100%;max-height:calc(100svh - 12px - var(--safe-top,0px));padding:var(--s5) var(--s5) calc(var(--s5) + var(--safe-bottom,0px));border-radius:var(--r-lg) var(--r-lg) 0 0;border-bottom:0}}
@@ -832,7 +832,7 @@ body:has(#os-event-editor) .page-fab{visibility:hidden}
 .os-palette button[data-life-tool]{border-radius:var(--r-pill);border:1px solid var(--line);background:transparent;color:var(--ink-2)}
 .os-palette button[data-life-tool="morning"]{--shift-color:#6191bd}
 .os-palette button[data-life-tool="afternoon"]{--shift-color:#659b72}
-.os-palette button[data-life-tool="night"]{--shift-color:#6b7499}
+.os-palette button[data-life-tool="night"]{--shift-color:#656c8a}
 .os-palette button[data-life-tool="rest"]{--shift-color:#ce916d}
 .os-palette button[data-life-tool="holiday"]{--shift-color:#d7bf52}
 .os-palette button[data-life-tool="morning"],.os-palette button[data-life-tool="afternoon"],.os-palette button[data-life-tool="night"],.os-palette button[data-life-tool="rest"],.os-palette button[data-life-tool="holiday"]{background:color-mix(in srgb,var(--shift-color) 20%,transparent);border-color:color-mix(in srgb,var(--shift-color) 55%,transparent);color:var(--ink)}
