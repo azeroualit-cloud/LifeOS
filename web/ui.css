@@ -785,3 +785,5 @@ html[data-theme="light"]{--sec-home:#6a45c9;--sec-tasks:#146647}
 .dw-row{grid-template-columns:60px 60px 1fr;gap:var(--s2)}
 .dw-day small{width:28px}
 @media(max-width:760px){.dw-row{grid-template-columns:54px 52px 1fr}.dw-day small{width:26px}}
+button[data-life-category]{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;padding:0;border-radius:var(--r-pill)}
+button[data-life-category] svg{width:18px;height:18px}
