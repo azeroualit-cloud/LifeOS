@@ -772,3 +772,9 @@ button.wf-row:hover{background:var(--surface-2)}
 
 .dash-kpi.k-shift{border-top:3px solid var(--shift-color,var(--ink-3))}
 .dash-kpi.k-money,.dash-kpi.k-sun,.dash-kpi.k-weather,.dash-kpi.k-tasks,.dash-kpi.k-habits{border-top:3px solid var(--line)}
+/* sidebar: ogni sezione ha il suo colore, uguale per icona, testo e sfondo */
+:root{--sec-home:#c3a6ff;--sec-tasks:#8de1b5}
+html[data-theme="light"]{--sec-home:#6a45c9;--sec-tasks:#146647}
+.nav button[data-view=today].active{color:var(--sec-home);background:color-mix(in srgb,var(--sec-home) 14%,transparent)}
+.nav button[data-view=tasks].active{color:var(--sec-tasks);background:color-mix(in srgb,var(--sec-tasks) 14%,transparent)}
+.nav button[data-view=today].active .nav-symbol,.nav button[data-view=tasks].active .nav-symbol,.nav button[data-view=calendar].active .nav-symbol,.nav button[data-view=overview].active .nav-symbol{color:inherit}
