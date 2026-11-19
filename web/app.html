@@ -277,9 +277,7 @@ body:not(.dashboard-mode) .header-meta:has(.top-right.hidden){display:none}
 /* 5. VISTE ----------------------------------------------------------- */
 /* 5.1 Dashboard */
 .home-native{display:grid;gap:var(--s4);max-width:760px}
-.home-week,.home-native>section:not(.os-card):not(.home-week),.home-next-time{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r-lg);padding:var(--s5)}
-.home-next-time{width:100%}
-.home-native>section:not(.os-card):not(.home-week) .hint{margin:0 0 var(--s2)}
+.home-week{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r-lg);padding:var(--s5)}
 .home-week .card-title{margin-bottom:var(--s3)}
 .home-week .card-title span{font-size:16px;font-weight:650;text-transform:capitalize}
 .home-week-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:var(--s2);text-align:center}
@@ -289,15 +287,29 @@ body:not(.dashboard-mode) .header-meta:has(.top-right.hidden){display:none}
 .home-week-grid .os-day{height:auto;min-height:0;padding:0;gap:var(--s2);grid-template-rows:auto auto auto auto;justify-items:stretch;justify-content:stretch;grid-template-columns:minmax(0,1fr);background:transparent;border-radius:0}
 .home-week-grid .os-day b{width:auto;height:auto;font-size:22px;font-weight:650;letter-spacing:-.5px;outline:0!important;background:transparent!important;color:var(--ink)!important}
 .home-week-grid .os-day .os-shift{width:100%;max-width:none;height:30px;font-size:14px;border-radius:var(--r-sm)}
-.home-week-grid .os-day .os-shift.no-shift,.shift-name:empty{display:none}
-.home-week-grid .os-day .os-day-mark{display:none}
-.home-week-grid .os-day.today .os-day-mark{display:none}
+.home-week-grid .os-day .os-shift.no-shift,.shift-name:empty,.home-week-grid .os-day .os-day-mark{display:none}
 .shift-name{display:none;font-style:normal;font-size:12px;color:var(--ink-2);line-height:1.2}
 @media(min-width:761px){.home-week-grid .shift-name{display:block}}
-@media(max-width:760px){.home-week-grid{gap:var(--s1)}.home-week-grid>div{padding:var(--s2) 2px}.home-week-grid .os-day b{font-size:18px}.home-week-grid .os-day .os-shift{height:26px;font-size:13px}}
-.home-summary{font-size:18px;line-height:1.5;letter-spacing:-.2px}
-.home-next-time{min-height:56px}
-.home-habit span{font-size:22px}
+/* recap testuale */
+.home-recap-card .hint{margin:0 0 var(--s3);font-size:13px}
+.home-recap{font-size:19px;line-height:1.55;letter-spacing:-.2px;color:var(--ink-2)}
+.home-recap p+p{margin-top:var(--s2)}
+.home-recap b{color:var(--ink);font-weight:700}
+.home-recap p.cur::after{content:"";display:inline-block;width:2px;height:1.05em;margin-left:2px;vertical-align:-.15em;background:var(--section,var(--ink));animation:caret 1s steps(2,start) infinite}
+@keyframes caret{50%{opacity:0}}
+.home-solar{margin-top:var(--s4);min-height:32px;padding:0 var(--s3);font-size:13px;background:var(--surface-2);color:var(--ink-2);border-radius:var(--r-pill)}
+.home-solar b{color:var(--ink)}
+.home-habit{min-height:48px}
+.home-habit span{font-size:20px;width:24px;text-align:center}
+.home-agenda .card-title,.home-tasks .card-title,.home-habits .card-title{margin-bottom:var(--s2)}
+.home-native>.os-card{min-width:0}
+@media(min-width:1100px){
+  .home-native{max-width:none;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+  .home-week{grid-column:1/-1}
+  .home-recap-card{grid-column:1;grid-row:2}.home-habits{grid-column:1;grid-row:3}
+  .home-agenda{grid-column:2;grid-row:2}.home-tasks{grid-column:2;grid-row:3}
+}
+@media(max-width:760px){.home-recap{font-size:17px}.home-week{padding:var(--s4)}.home-week-grid{gap:var(--s1)}.home-week-grid>div{padding:var(--s2) 2px}.home-week-grid .os-day b{font-size:18px}.home-week-grid .os-day .os-shift{height:26px;font-size:13px}}
 .os-home{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4)}
 .os-home-prayer{grid-column:1/-1}
 .os-routine{display:flex;gap:var(--s4);align-items:center;margin-top:var(--s4);padding-top:var(--s4);border-top:1px solid var(--line-soft)}
@@ -352,6 +364,8 @@ body:not(.dashboard-mode) .header-meta:has(.top-right.hidden){display:none}
 .os-day-mark{display:grid;place-items:center;min-height:10px;height:12px;font-size:10px;font-weight:600;color:var(--shift-color,var(--ink-2))}
 .os-day-mark.dot::after{content:"";width:4px;height:4px;border-radius:50%;background:currentColor}
 .os-day-mark.event-count{min-width:18px;border-radius:4px;color:var(--ink)}
+.os-day:hover:not(:disabled){background:transparent}.os-day:active:not(:disabled){transform:none;opacity:1}
+.os-day:hover:not(.selected):not(:disabled) b{background:var(--surface-3)}
 .os-day.today b{outline:1px solid var(--ink-3)}
 .os-day.selected b{background:var(--accent);color:var(--on-accent);outline:0}
 .os-day.other{opacity:.4}
@@ -380,10 +394,33 @@ body:not(.dashboard-mode) .header-meta:has(.top-right.hidden){display:none}
 .finance-account h2{color:var(--ink-2);font-size:14px;font-weight:500}
 .finance-account strong{font-size:clamp(22px,2.6vw,26px);letter-spacing:-.6px;white-space:nowrap}
 .finance-account>small{flex-basis:100%}
-.finance-actions{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s3)}
-.finance-actions button{flex-direction:column;gap:var(--s2);min-height:72px;padding:var(--s3) var(--s2);background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r-lg);font-size:13px;min-width:0;text-align:center}
+.finance-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:var(--s2)}
+.finance-actions button{flex:0 0 auto;gap:var(--s2);min-height:36px;padding:0 var(--s4);background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r-pill);font-size:13px}
 .finance-actions button:hover:not(:disabled){background:var(--surface-2)}
-.finance-actions span{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--surface-2);font-size:18px;color:var(--sec-finance)}
+.finance-actions .primary-pill{background:var(--sec-finance);color:var(--on-accent,#0b0b0b);border-color:transparent;font-weight:650}
+.finance-actions span{font-size:16px;line-height:1}
+.budget-flow{grid-column:1/-1;display:block!important;margin-bottom:var(--s4)}.budget-flow h3{margin:0 0 var(--s2);font-size:16px}.budget-flow .hint{margin:0 0 var(--s3)}
+.budget-flow svg{width:100%;height:auto;display:block;margin:var(--s3) 0}
+.bf-name{fill:var(--ink-2);font-size:13px}.bf-val{fill:var(--ink);font-size:13px;font-weight:600}
+.bf-in rect,.bf-total rect{fill:var(--sec-finance)}.bf-fix rect{fill:var(--ink-3)}.bf-out rect{fill:var(--negative,#d98a80)}.bf-neg rect{fill:var(--negative,#d98a80)}
+.bf-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s3)}
+.bf-kpis>div{display:grid;gap:2px;padding:var(--s3);border-radius:var(--r-md);background:var(--surface-2)}
+.bf-kpis small{font-size:12px;color:var(--ink-3)}.bf-kpis b{font-size:20px;font-weight:650;letter-spacing:-.4px}.bf-kpis span{font-size:12px;color:var(--ink-2)}
+@media(max-width:760px){.bf-name,.bf-val{font-size:18px}.oc-tick{font-size:16px}.bf-kpis b{font-size:16px}.bf-kpis>div{padding:var(--s2)}}
+.finance-charts{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4)}
+.finance-chart{padding:var(--s5);background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r-lg);min-width:0}
+.finance-chart.wide{grid-column:1/-1}
+.finance-chart small{color:var(--ink-3);font-size:12px}
+.finance-chart svg{width:100%;height:auto;display:block}
+.oc-axis{stroke:var(--line);stroke-width:1}.oc-pace{stroke:var(--ink-3);stroke-width:1.5;stroke-dasharray:5 5}
+.oc-line{fill:none;stroke:var(--sec-finance);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}.oc-dot{fill:var(--sec-finance)}
+.oc-tick{fill:var(--ink-3);font-size:11px}
+.oc-legend{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2) var(--s4);margin-top:var(--s2);font-size:12px;color:var(--ink-2)}
+.oc-legend i{display:inline-block;width:16px;height:0;border-top:2.5px solid var(--sec-finance);margin-right:6px;vertical-align:middle}.oc-legend i.k-pace{border-top:2px dashed var(--ink-3)}
+.oc-bar{display:grid;grid-template-columns:minmax(70px,.9fr) 2fr auto 38px;align-items:center;gap:var(--s3);padding:7px 0;font-size:13px}
+.oc-bar span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-2)}
+.oc-bar div{height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden}.oc-bar i{display:block;height:100%;border-radius:4px;background:var(--sec-finance)}
+.oc-bar b{font-variant-numeric:tabular-nums;font-weight:600}.oc-bar small{text-align:right}
 .finance-recent{grid-column:1/-1;padding:var(--s5);background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r-lg)}
 .finance-heading{display:flex;align-items:center;justify-content:space-between;gap:var(--s4);margin-bottom:var(--s2)}
 .finance-heading>button{background:transparent;color:var(--sec-finance);padding:0 var(--s2)}
@@ -523,8 +560,7 @@ body:not(.dashboard-mode) .header-meta:has(.top-right.hidden){display:none}
   .finance-open{grid-template-columns:minmax(0,1fr)}
   .finance-hero,.finance-account{grid-column:1}
   .finance-hero{padding:var(--s6) var(--s4)}
-  .finance-actions{gap:var(--s2)}.finance-actions button{min-height:84px;font-size:12px;padding:var(--s2) 2px}
-  .finance-actions span{width:36px;height:36px;font-size:20px}
+  .finance-charts{grid-template-columns:minmax(0,1fr)}.finance-chart{padding:var(--s4)}.oc-bar{grid-template-columns:minmax(60px,1fr) 1.4fr auto}.oc-bar small{display:none}
   .overview-essential,.overview-analysis-grid,.chart-pair,.budget-charts,.overview-flow,.planning-inputs,.budget-settings,.projection-result,.adm-grid{grid-template-columns:minmax(0,1fr)}
   .overview-analysis-grid>.annual-card,.overview-analysis-grid>.integrated-chart{grid-column:auto}
   .annual-row,.annual-head{min-width:480px;grid-template-columns:1fr repeat(5,minmax(0,1fr))}
@@ -546,7 +582,6 @@ body:not(.dashboard-mode) .header-meta:has(.top-right.hidden){display:none}
   input,select,textarea{font-size:16px}
 }
 @media(max-width:420px){
-  .finance-actions button{font-size:11px}
   .os-form,.form-grid{grid-template-columns:1fr}.os-form label,.form-grid label{grid-column:1/-1}
   .breakdown{grid-template-columns:1fr}.category-ring{justify-self:center}
   .os-sunline-meta{flex-direction:column}
@@ -622,9 +657,9 @@ body:not(.dashboard-mode) .header-meta:has(.top-right.hidden){display:none}
               <path d="M3 10h18M7 15h4" /></svg
             >Finanza
           </button>
+          <button id="admin-link" type="button" data-view="admin"><svg class="nav-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>Admin</button>
         </nav>
         <div class="sidebar-foot">
-          <button id="admin-link" type="button" data-view="admin"><svg class="nav-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>Admin</button>
           <span id="sync-side">Caricamento...</span
           ><span id="version-side" hidden></span>
         </div>
@@ -3061,8 +3096,33 @@ body:not(.dashboard-mode) .header-meta:has(.top-right.hidden){display:none}
         return `<div class="finance-open">
         <section class="finance-hero"><h2>Budget rimanente</h2><strong class="finance-value ${amountClass(s.monthlyRemaining)}">${state.assetsVisible ? exactEuro(s.monthlyRemaining) : "•••• €"}</strong><p class="muted">${daily.days ? (state.assetsVisible ? exactEuro(daily.low) : "•••• €")+" al giorno" : "Mese concluso · riepilogo del budget"}</p>${daily.days?`<small>${daily.days} giorni${d.key===todayIso().slice(0,7)?", incluso oggi":" del mese selezionato"}</small>`:""}</section>
         <section class="finance-account"><div><h2>Saldo attuale</h2><strong>${state.assetsVisible ? exactEuro(s.budget) : "•••• €"}</strong></div>${privacyButton()}<small>Saldo dell’ultima sincronizzazione, distinto dal mese selezionato.</small></section>
-        <div class="finance-actions"><button data-view="budget"><span aria-hidden="true">◷</span>Budget</button><button data-new-extra><span aria-hidden="true">＋</span>Nuovo piano</button><button data-new-transaction="Spesa"><span aria-hidden="true">−</span>Nuova spesa</button><button data-view="analysis"><span aria-hidden="true">◷</span>Analisi</button></div>
-        <section class="finance-recent"><div class="finance-heading"><h2>Ultimi movimenti</h2><button data-view="movements">Vedi tutti</button></div>${recent.length ? recent.map(t => `<button class="finance-movement" data-edit-movement="${Number(t.row)}"><span><strong>${escapeHtml(t.name)}</strong><small>${escapeHtml(t.date || '')} · ${escapeHtml(t.category || t.type || '')}</small></span><b class="${amountClass(t.amount)}">${state.assetsVisible ? exactEuro(t.amount) : '•••• €'}</b></button>`).join('') : '<p class="empty">Nessun movimento nel mese.</p>'}</section></div>`;
+        <div class="finance-actions"><button data-new-transaction="Spesa" class="primary-pill"><span aria-hidden="true">+</span>Nuova spesa</button><button data-new-extra><span aria-hidden="true">+</span>Nuovo piano</button><button data-view="budget"><span aria-hidden="true">◔</span>Budget</button><button data-view="analysis"><span aria-hidden="true">≋</span>Analisi</button></div>
+        <section class="finance-recent"><div class="finance-heading"><h2>Ultimi movimenti</h2><button data-view="movements">Vedi tutti</button></div>${recent.length ? recent.map(t => `<button class="finance-movement" data-edit-movement="${Number(t.row)}"><span><strong>${escapeHtml(t.name)}</strong><small>${escapeHtml(t.date || '')} · ${escapeHtml(t.category || t.type || '')}</small></span><b class="${amountClass(t.amount)}">${state.assetsVisible ? exactEuro(t.amount) : '•••• €'}</b></button>`).join('') : '<p class="empty">Nessun movimento nel mese.</p>'}</section>${overviewCharts(d)}</div>`;
+      }
+
+      /** Grafici della Panoramica: ritmo di spesa, categorie del mese, entrate/uscite. Solo SVG, nessuna libreria. */
+      function overviewCharts(d) {
+        const hide = !state.assetsVisible, fmt = v => hide ? "•••• €" : exactEuro(v);
+        const tx = (d.transactions || []).filter(t => t.type === "Spesa" && t.amount < 0 && t.date);
+        const days = new Date(Date.UTC(d.year, d.month, 0)).getUTCDate();
+        const per = Array(days + 1).fill(0);
+        for (const t of tx) { const n = Number(String(t.date).slice(8, 10)); if (n >= 1 && n <= days) per[n] += -t.amount; }
+        const nowKey = todayIso(), isCur = nowKey.slice(0, 7) === d.key, last = isCur ? Number(nowKey.slice(8)) : (d.key < nowKey.slice(0, 7) ? days : 0);
+        const cap = Math.max(1, (d.summary.monthlySalary || 0) - ((d.summary.monthlyCommitted || 0)) || d.summary.monthlySpent + Math.max(0, d.summary.monthlyRemaining));
+        let acc = 0; const pts = []; for (let i = 1; i <= last; i++) { acc += per[i]; pts.push([i, acc]); }
+        const W = 640, H = 220, L = 8, R = W - 8, T = 16, B = H - 26, mx = Math.max(cap, acc) * 1.08;
+        const X = i => L + (i - 1) / Math.max(1, days - 1) * (R - L), Y = v => B - v / mx * (B - T);
+        const pace = `<line class="oc-pace" x1="${X(1)}" y1="${Y(0)}" x2="${X(days)}" y2="${Y(cap)}"/>`;
+        const line = pts.length ? `<path class="oc-line" d="${pts.map((q, k) => (k ? "L" : "M") + X(q[0]).toFixed(1) + " " + Y(q[1]).toFixed(1)).join(" ")}"/>` + `<circle class="oc-dot" cx="${X(pts.at(-1)[0]).toFixed(1)}" cy="${Y(pts.at(-1)[1]).toFixed(1)}" r="4"/>` : "";
+        const ticks = [1, Math.ceil(days / 2), days].map(i => `<text class="oc-tick" x="${X(i)}" y="${H - 6}" text-anchor="${i === 1 ? "start" : i === days ? "end" : "middle"}">${i}</text>`).join("");
+        const ahead = acc - (cap * last / days);
+        const paceCard = `<section class="finance-chart"><div class="finance-heading"><h2>Ritmo di spesa</h2><small>${last ? (ahead > 0 ? "sopra" : "sotto") + " il ritmo di " + fmt(Math.abs(ahead)) : "mese non iniziato"}</small></div><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Spesa cumulata del mese contro il ritmo ideale"><line class="oc-axis" x1="${L}" x2="${R}" y1="${B}" y2="${B}"/>${pace}${line}${ticks}</svg><p class="oc-legend"><i class="k-line"></i>Spesa cumulata <i class="k-pace"></i>Ritmo ideale (${fmt(cap)} nel mese)</p></section>`;
+        const cat = new Map(); for (const t of tx) cat.set(t.category || "Altro", (cat.get(t.category || "Altro") || 0) + -t.amount);
+        const rows = [...cat].sort((a, b) => b[1] - a[1]); const top = rows.slice(0, 6), rest = rows.slice(6).reduce((n, r) => n + r[1], 0); if (rest) top.push(["Altre", rest]);
+        const tot = rows.reduce((n, r) => n + r[1], 0) || 1;
+        const catCard = `<section class="finance-chart"><div class="finance-heading"><h2>Spese per categoria</h2><small>${fmt(tot)}</small></div>${top.length ? top.map(([n, v]) => `<div class="oc-bar"><span>${escapeHtml(n)}</span><div><i style="width:${Math.max(2, v / top[0][1] * 100).toFixed(1)}%"></i></div><b>${fmt(v)}</b><small>${Math.round(v / tot * 100)}%</small></div>`).join("") : '<p class="empty">Nessuna spesa nel mese.</p>'}</section>`;
+        const flow = d.lifetime?.series?.length ? `<section class="finance-chart wide"><div class="finance-heading"><h2>Entrate e uscite</h2></div><div class="integrated-chart">${cashFlowChart(d)}</div></section>` : "";
+        return `<div class="finance-charts">${paceCard}${catCard}${flow}</div>`;
       }
 
       /** Riga chiave/importo; la linea di confine appartiene a una sola riga. */
@@ -4482,19 +4542,65 @@ body:not(.dashboard-mode) .header-meta:has(.top-right.hidden){display:none}
       const date=new Date(day+'T12:00:00Z'),kind=shifts.get(day);
       return `<div><small>${['D','L','M','M','G','V','S'][date.getUTCDay()]}</small><button class="os-day ${day===today?'today selected':''}" data-home-day="${day}" data-kind="${kind||''}" aria-label="${safe(osDate(day))}${kind?' · '+safe(osShift[kind]):''}"><b>${date.getUTCDate()}</b><span class="os-shift ${kind?'':'no-shift'}">${kind?osShiftInitial[kind]:''}</span><em class="shift-name">${kind?safe(osShift[kind]):''}</em><span class="os-day-mark ${mark.has(day)?'dot':''}"></span></button></div>`;
     }).join('');
-    const parts=[];
-    if(life.weather){const w=life.weather,c=w.code===0?'sereno':w.code<=3?'cielo nuvoloso':w.code<50?'nebbia':w.code<70?'pioggia':w.code<80?'neve':w.code<95?'rovesci':'temporali';parts.push(`A Empoli, ${Math.round(w.temp)}° e ${c}.`);}
+    const B=t=>`<b>${safe(t)}</b>`;
     const shift=shifts.get(today),next=shifts.get(tomorrow);
-    if(shifts.get(addDay(today,-1))==='night'&&hour<6)parts.push('Stai terminando il turno di notte.');
-    const phrase=(kind,when)=>`${when} ${['rest','holiday'].includes(kind)?'sei':'lavori'} ${shiftNames[kind]}.`;
-    if(shift&&shift===next)parts.push(phrase(shift,'Oggi e domani'));
-    else {if(shift)parts.push(phrase(shift,'Oggi'));if(next)parts.push(phrase(next,'Domani'));}
-    if(!shift&&!next)parts.push('Turni non disponibili.');
-    if(agenda.length){const e=agenda[0],when=e.day===today?'Oggi':e.day===tomorrow?'Domani':osDate(e.day);parts.push(`${when}: ${String(e.title||'Appuntamento').replace(/\s+/g,' ').slice(0,70)}${e.start_time?' alle '+e.start_time:''}.`);}
-    else parts.push('Nessun appuntamento nei prossimi 7 giorni.');
-    const nextSolar=nextTime(),habits=(d.routines||[]).filter(h=>lifeOSHabits.due(h,today));
-    return `<div class="home-native"><section class="home-week"><div class="card-title"><span>${safe(titleMonth(Number(today.slice(0,4)),Number(today.slice(5,7))))}</span><button data-home-day="${today}" aria-label="Apri calendario">▦</button></div><div class="home-week-grid">${week}</div></section><section><p class="hint">${hour<12?'Buongiorno':hour<18?'Buon pomeriggio':'Buonasera'}, Anass.</p><p class="home-summary">${safe(parts.join(' '))}</p>${agenda.length?`<button data-home-agenda>${agenda.length===1?'Dettagli appuntamento':'Tutti i '+agenda.length+' appuntamenti'}</button>`:''}</section><button class="home-next-time" data-home-times-sheet aria-label="Prossimo orario, ${safe(nextSolar.label)}, ${safe(nextSolar.time)}"><span>${safe(nextSolar.label)}</span><strong>${safe(nextSolar.time)}</strong></button><section class="os-card"><div class="card-title"><h2>Abitudini</h2><button data-life-routine-manage>Gestisci</button></div>${habits.map(h=>`<button class="home-habit" data-life-routine="${h.id}" aria-pressed="${!!h.checked}"><span aria-hidden="true">${h.checked?'✓':'○'}</span>${safe(h.title)}</button>`).join('')||(d.routines?.length?'<p class="hint">Nessuna abitudine prevista per oggi.</p>':'<button data-life-routine-manage>Aggiungi la prima abitudine</button>')}</section></div>`;
+    const hours=k=>{const t=String(osShift[k]||'');return /\d/.test(t)?` (${safe(t)})`:'';};
+    const verb=k=>['rest','holiday'].includes(k)?'sei':'lavori';
+    const lines=[];
+    if(life.weather){const w=life.weather,c=w.code===0?'sereno':w.code<=3?'cielo nuvoloso':w.code<50?'nebbia':w.code<70?'pioggia':w.code<80?'neve':w.code<95?'rovesci':'temporali';lines.push(`A Empoli ci sono ${B(Math.round(w.temp)+'°')} e ${c}.`);}
+    if(shifts.get(addDay(today,-1))==='night'&&hour<6)lines.push(`Stai ${B('terminando il turno di notte')}.`);
+    if(shift&&shift===next)lines.push(`Oggi e domani ${verb(shift)} ${B(shiftNames[shift])}${hours(shift)}.`);
+    else{
+      if(shift)lines.push(`Oggi ${verb(shift)} ${B(shiftNames[shift])}${hours(shift)}.`);
+      if(next)lines.push(`Domani ${verb(next)} ${B(shiftNames[next])}${hours(next)}.`);
+    }
+    if(!shift&&!next)lines.push('Turni non disponibili.');
+    if(agenda.length){
+      const e=agenda[0],when=e.day===today?'oggi':e.day===tomorrow?'domani':osDate(e.day),t=String(e.title||'Appuntamento').replace(/\s+/g,' ').slice(0,60);
+      lines.push(`${agenda.length===1?'Hai '+B('1 appuntamento'):'Hai '+B(agenda.length+' appuntamenti')} nei prossimi 7 giorni, il primo ${B(when)}${e.start_time?' alle '+B(e.start_time):''}: ${B(t)}.`);
+    }else lines.push('Nessun appuntamento nei prossimi 7 giorni.');
+    const open=(d.tasks||[]).filter(t=>t.status==='todo'&&t.list_kind==='action');
+    const dueOf=t=>t.due_date||t.scheduled_date||'';
+    const late=open.filter(t=>dueOf(t)&&dueOf(t)<today),dueToday=open.filter(t=>dueOf(t)===today);
+    if(open.length){
+      let x=`Hai ${B(open.length+(open.length===1?' attività aperta':' attività aperte'))}`;
+      const extra=[];if(late.length)extra.push(B(late.length+(late.length===1?' in ritardo':' in ritardo')));if(dueToday.length)extra.push(B(dueToday.length+' per oggi'));
+      lines.push(x+(extra.length?', di cui '+extra.join(' e '):'')+'.');
+    }else lines.push('Nessuna attività aperta.');
+    const habits=(d.routines||[]).filter(h=>lifeOSHabits.due(h,today)),doneH=habits.filter(h=>h.checked).length;
+    if(habits.length)lines.push(doneH===habits.length?`Abitudini di oggi: ${B('tutte completate')}.`:`Abitudini di oggi: ${B(doneH+' su '+habits.length)} completate.`);
+    const greet=hour<12?'Buongiorno':hour<18?'Buon pomeriggio':'Buonasera';
+    const plain=[greet+', Anass.',...lines.map(l=>l.replace(/<[^>]+>/g,''))].join(' ');
+    const nextSolar=nextTime();
+    const mon=day=>new Date(day+'T12:00:00Z').toLocaleDateString('it-IT',{month:'short',timeZone:'UTC'});
+    const agendaRows=agenda.slice(0,4).map(ev=>`<div class="os-agenda-entry"><button class="os-agenda-row" data-life-event="${ev.id}"><span class="os-agenda-date"><b>${ev.day.slice(8)}</b><small>${mon(ev.day)}</small></span><span class="os-agenda-title">${safe(ev.title)}<small>${safe(ev.start_time||'Tutto il giorno')}</small></span></button><button class="ghost" data-life-occurrence="${ev.id}:${ev.day}:done" aria-label="Segna fatto ${safe(ev.title)}">Fatto</button></div>`).join('')||'<p class="os-empty">Nessun appuntamento nei prossimi 7 giorni.</p>';
+    const taskRows=open.slice(0,6).map(t=>`<div class="os-home-task"><button class="os-check" data-life-complete="${t.id}" aria-label="Completa ${safe(t.title)}"></button><button class="os-home-task-title" data-life-task="${t.id}">${safe(t.title)}${osDueBadge(t.due_date||t.scheduled_date,t.status)}</button></div>`).join('')||'<p class="os-empty">Nessuna attività aperta.</p>';
+    const habitRows=habits.map(h=>`<button class="home-habit" data-life-routine="${h.id}" aria-pressed="${!!h.checked}"><span aria-hidden="true">${h.checked?'✓':'○'}</span>${safe(h.title)}</button>`).join('')||(d.routines?.length?'<p class="os-empty">Nessuna abitudine prevista per oggi.</p>':'<button data-life-routine-manage>Aggiungi la prima abitudine</button>');
+    const key=today+'|'+plain;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>startTyping(document.querySelector('#today .home-recap'))));
+    return `<div class="home-native"><section class="home-week"><div class="card-title"><span>${safe(titleMonth(Number(today.slice(0,4)),Number(today.slice(5,7))))}</span><button data-home-day="${today}" aria-label="Apri calendario">▦</button></div><div class="home-week-grid">${week}</div></section>
+<section class="os-card home-recap-card"><p class="hint">${greet}, Anass.</p><div class="home-recap" data-key="${safe(key)}" aria-label="${safe(plain)}">${lines.map(l=>`<p>${l}</p>`).join('')}</div><button class="ghost home-solar" data-home-times-sheet aria-label="Prossimo orario, ${safe(nextSolar.label)}, ${safe(nextSolar.time)}">${safe(nextSolar.label)} · <b>${safe(nextSolar.time)}</b></button></section>
+<section class="os-card home-agenda"><div class="card-title"><h2>Prossimi appuntamenti</h2>${agenda.length>4?`<button class="ghost" data-home-agenda>Tutti (${agenda.length})</button>`:''}</div>${agendaRows}</section>
+<section class="os-card home-tasks"><div class="card-title"><h2>Attività</h2><button class="ghost" data-view="tasks">Apri${open.length>6?' ('+open.length+')':''}</button></div>${taskRows}</section>
+<section class="os-card home-habits"><div class="card-title"><h2>Abitudini</h2><button class="ghost" data-life-routine-manage>Gestisci</button></div>${habitRows}</section></div>`;
   };
+  const typing={key:'',count:0,done:false,timer:0};
+  function startTyping(root){
+    if(!root)return;
+    const key=root.dataset.key,nodes=[],w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+    while(w.nextNode())nodes.push([w.currentNode,w.currentNode.textContent]);
+    const total=nodes.reduce((a,[,t])=>a+t.length,0);
+    if(typing.key!==key){typing.key=key;typing.count=0;typing.done=matchMedia('(prefers-reduced-motion: reduce)').matches;}
+    clearInterval(typing.timer);
+    if(typing.done)return;
+    const paint=()=>{let left=typing.count,last=null;root.querySelectorAll('p.cur').forEach(x=>x.classList.remove('cur'));for(const [n,t] of nodes){n.textContent=t.slice(0,Math.max(0,left));if(left>0)last=n;left-=t.length;}if(last)last.parentElement.closest('p')?.classList.add('cur');};
+    root.style.minHeight=root.offsetHeight+'px';root.classList.add('typing');paint();
+    typing.timer=setInterval(()=>{
+      if(!root.isConnected){clearInterval(typing.timer);return;}
+      typing.count=Math.min(total,typing.count+2);paint();
+      if(typing.count>=total){clearInterval(typing.timer);typing.done=true;root.classList.remove('typing');root.style.minHeight='';root.querySelectorAll('p.cur').forEach(x=>x.classList.remove('cur'));}
+    },22);
+  }
   document.addEventListener('click',async e=>{
     const b=e.target.closest('[data-home-day],[data-home-times-sheet],[data-home-agenda]');if(!b)return;
     if(b.hasAttribute('data-home-day')){
@@ -4905,8 +5011,22 @@ body:not(.dashboard-mode) .header-meta:has(.top-right.hidden){display:none}
       const value = (c) => state.assetsVisible ? money(c) : "\u2022\u2022\u2022\u2022 \u20AC";
       const line = (name, c) => `<div class="kv"><span>${safe(name)}</span><strong>${value(c)}</strong></div>`;
       const legacy = [...new Map((d.extraPlan?.allocations || []).map((r) => [r.cycle_id, r])).values()];
-      return `<div class="plans-web"><div class="card-title"><div><h2>Budget di ${safe(titleMonth(state.year, state.month))}</h2><p class="hint">Stipendio, piani e budget disponibile</p></div><div class="actions"><button data-plans-info aria-label="Come funzionano i piani">\u24D8</button><button class="save" data-new-extra>Nuovo piano</button></div></div><section class="card pad budget-waterfall">${line("Stipendio di riferimento", flow.salaryCents)}${flow.rows.map((r) => `<${r.planId ? "button" : "div"} class="plan-list-row" ${r.planId ? `data-plans-detail="${safe(r.planId)}"` : ""}><span><strong>${safe(r.name)}</strong><small>Rimane ${value(r.remainingCents)}</small></span><strong>${value(-r.amountCents)}</strong></${r.planId ? "button" : "div"}>`).join("") || '<p class="empty">Nessun piano per questo mese.</p>'}${line("Spese non gi\xE0 coperte dai piani", -flow.spentCents)}<div data-budget-final>${line("Budget finale", flow.remainingCents)}</div><p class="hint">Le quote dei piani riducono il budget. I pagamenti gi\xE0 coperti da un piano non vengono sottratti una seconda volta.</p></section><details class="card pad"><summary>Altri piani \xB7 futuri e conclusi</summary>${v.plans.filter((p2) => !currentIDs.has(p2.id)).map((p2) => `<button class="plan-list-row" data-plans-detail="${safe(p2.id)}"><span>${safe(p2.name)}<small>${safe(statuses[p2.status] || p2.status)} \xB7 da ${safe(p2.startMonth)}</small></span><span aria-hidden="true">\u203A</span></button>`).join("") || '<p class="empty">Nessun altro piano</p>'}</details>${legacy.length ? `<section class="card pad"><h2>Piani precedenti</h2><p class="hint">Le voci storiche non adottate sono conservate. Non duplicarle con un nuovo piano.</p>${legacy.map((r) => `<button class="plan-list-row" data-plans-legacy="${Number(r.extraordinary_source_row)}"><span>${safe(r.name)}<small>${safe(NativeExtraTitle(r.status))}</small></span><span aria-hidden="true">\u203A</span></button>`).join("")}</section>` : ""}${planningCard(d)}</div>`;
+      return `<div class="plans-web"><div class="card-title"><div><h2>Budget di ${safe(titleMonth(state.year, state.month))}</h2><p class="hint">Stipendio, piani e budget disponibile</p></div><div class="actions"><button data-plans-info aria-label="Come funzionano i piani">\u24D8</button><button class="save" data-new-extra>Nuovo piano</button></div></div>${flowChart(flow,value)}<section class="card pad budget-waterfall">${line("Stipendio di riferimento", flow.salaryCents)}${flow.rows.map((r) => `<${r.planId ? "button" : "div"} class="plan-list-row" ${r.planId ? `data-plans-detail="${safe(r.planId)}"` : ""}><span><strong>${safe(r.name)}</strong><small>Rimane ${value(r.remainingCents)}</small></span><strong>${value(-r.amountCents)}</strong></${r.planId ? "button" : "div"}>`).join("") || '<p class="empty">Nessun piano per questo mese.</p>'}${line("Spese non gi\xE0 coperte dai piani", -flow.spentCents)}<div data-budget-final>${line("Budget finale", flow.remainingCents)}</div><p class="hint">Le quote dei piani riducono il budget. I pagamenti gi\xE0 coperti da un piano non vengono sottratti una seconda volta.</p></section><details class="card pad"><summary>Altri piani \xB7 futuri e conclusi</summary>${v.plans.filter((p2) => !currentIDs.has(p2.id)).map((p2) => `<button class="plan-list-row" data-plans-detail="${safe(p2.id)}"><span>${safe(p2.name)}<small>${safe(statuses[p2.status] || p2.status)} \xB7 da ${safe(p2.startMonth)}</small></span><span aria-hidden="true">\u203A</span></button>`).join("") || '<p class="empty">Nessun altro piano</p>'}</details>${legacy.length ? `<section class="card pad"><h2>Piani precedenti</h2><p class="hint">Le voci storiche non adottate sono conservate. Non duplicarle con un nuovo piano.</p>${legacy.map((r) => `<button class="plan-list-row" data-plans-legacy="${Number(r.extraordinary_source_row)}"><span>${safe(r.name)}<small>${safe(NativeExtraTitle(r.status))}</small></span><span aria-hidden="true">\u203A</span></button>`).join("")}</section>` : ""}${planningCard(d)}</div>`;
     };
+    function flowChart(flow, value) {
+      const salary = flow.salaryCents, rows = flow.rows.filter((r) => r.amountCents);
+      const steps = [{ n: "Stipendio", c: salary, k: "in" }, ...rows.map((r) => ({ n: r.name, c: -r.amountCents, k: "fix" })), { n: "Spese del mese", c: -flow.spentCents, k: "out" }, { n: "Budget finale", c: flow.remainingCents, k: flow.remainingCents < 0 ? "neg" : "total" }];
+      const max = Math.max(1, salary) * 1.02, rowH = 34, W = 640, L = 150, R = W - 92, H = steps.length * rowH + 8, X = (c) => L + Math.max(0, c) / max * (R - L);
+      let run = 0;
+      const bars = steps.map((st, i) => {
+        let a, b;
+        if (st.k === "in" || st.k === "total") { a = 0; b = Math.max(0, st.c); run = st.c; } else if (st.k === "neg") { a = 0; b = 0; } else { b = run; a = run + st.c; run = a; }
+        const lo = Math.max(0, Math.min(a, b)), hi = Math.max(0, Math.max(a, b)), x = X(lo), w = Math.max(st.k === "neg" ? 0 : 2, X(hi) - X(lo)), y = i * rowH + 6;
+        return `<g class="bf-${st.k}"><text class="bf-name" x="${L - 10}" y="${y + 15}" text-anchor="end">${safe(st.n.length > 22 ? st.n.slice(0, 21) + "…" : st.n)}</text><rect x="${x.toFixed(1)}" y="${y}" width="${w.toFixed(1)}" height="20" rx="4"/><text class="bf-val" x="${R + 10}" y="${y + 15}">${st.c < 0 && st.k !== "neg" ? "−" : ""}${value(Math.abs(st.c))}</text></g>`;
+      }).join("");
+      const committed = rows.reduce((n, r) => n + r.amountCents, 0), free = salary - committed;
+      return `<section class="card pad budget-flow"><h3>Dove vanno i soldi del mese</h3><p class="hint">Dallo stipendio togli le quote dei piani e gli altri impegni: resta il budget libero. Le spese lo consumano, quello che avanza è il budget finale.</p><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Cascata del budget mensile">${bars}</svg><div class="bf-kpis"><div><small>Impegnato</small><b>${salary ? Math.round(committed / salary * 100) : 0}%</b><span>dello stipendio</span></div><div><small>Libero</small><b>${value(free)}</b><span>prima delle spese</span></div><div><small>Speso</small><b>${free > 0 ? Math.round(flow.spentCents / free * 100) : 0}%</b><span>del libero</span></div></div></section>`;
+    }
     function NativeExtraTitle(status) {
       return { Pagato: "Pagata", Programmato: "In corso", Previsto: "Da valutare", Annullato: "Annullata" }[status] || status;
     }
@@ -6520,7 +6640,7 @@ body:not(.dashboard-mode) .header-meta:has(.top-right.hidden){display:none}
     const renderHome = osToday;
     osToday = function() {
       const html = renderHome();
-      return html.slice(0, -6) + `<section class="os-card"><div class="card-title"><h2>Peso e calorie</h2><button data-web-weight aria-label="Aggiungi peso">+</button></div><p class="hint">La lettura di Apple Health \xE8 disponibile nell\u2019app. Puoi preparare una pesata da confermare su iPhone.</p></section></div>`;
+      return html;
     };
     document.addEventListener("click", (e) => {
       if (!e.target.closest("[data-web-weight]")) return;
