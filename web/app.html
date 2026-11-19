@@ -843,6 +843,13 @@ button[data-life-category] svg{width:18px;height:18px}
 .home-week .dw-row+.dw-row{border-top:1px solid var(--line-soft)}
 .home-week .dw-row:hover:not(:disabled){background:transparent}
 .home-week .dw-row.today .dw-day b{color:var(--sec-home)}
+/* Prossimi giorni: barre tinte che riempiono la larghezza */
+.home-week .dw-list{gap:6px}
+.home-week .dw-row{flex:1;border-top:0!important;border-radius:var(--r-md);padding:0 var(--s3);background:color-mix(in srgb,var(--shift-color,var(--ink-3)) 12%,transparent);grid-template-columns:64px 60px 1fr}
+.home-week .dw-row[data-kind=""]{background:var(--surface-2)}
+.home-week .dw-row:hover:not(:disabled){background:color-mix(in srgb,var(--shift-color,var(--ink-3)) 20%,transparent)}
+.home-week .dw-row.today{box-shadow:inset 3px 0 0 var(--shift-color,var(--ink))}
+.home-week .dw-row .dw-ev{margin-left:var(--s3)}
 </style>
 </head>
   <body class="dashboard-mode">
@@ -4931,7 +4938,7 @@ button[data-life-category] svg{width:18px;height:18px}
     ].join('');
     const weekRows=Array.from({length:7},(_,i)=>addDay(today,i+1)).map(day=>{
       const dt=new Date(day+'T12:00:00Z'),kind=shifts.get(day),n=(d.events||[]).filter(e=>e.day===day).length,m2=open.filter(t=>dueOf(t)===day).length;
-      return `<button class="dw-row ${day===today?'today':''}" data-home-day="${day}" aria-label="${safe(osDate(day))}${kind?' · '+safe(short[kind]):''}"><span class="dw-day"><small>${['dom','lun','mar','mer','gio','ven','sab'][dt.getUTCDay()]}</small><b>${dt.getUTCDate()}</b></span><span class="dw-shift os-shift ${kind?'':'no-shift'}" data-kind="${kind||''}">${kind?osShiftAbbr[kind]:'—'}</span><span class="dw-ev">${n+m2?`<i class="dw-dot" aria-hidden="true"></i>${n?n+(n===1?' evento':' eventi'):''}${n&&m2?' · ':''}${m2?m2+(m2===1?' attività':' attività'):''}`:''}</span></button>`;
+      return `<button class="dw-row ${day===today?'today':''}" data-kind="${kind||''}" data-home-day="${day}" aria-label="${safe(osDate(day))}${kind?' · '+safe(short[kind]):''}"><span class="dw-day"><small>${['dom','lun','mar','mer','gio','ven','sab'][dt.getUTCDay()]}</small><b>${dt.getUTCDate()}</b></span><span class="dw-shift os-shift ${kind?'':'no-shift'}" data-kind="${kind||''}">${kind?osShiftAbbr[kind]:'—'}</span><span class="dw-ev">${n+m2?`<i class="dw-dot" aria-hidden="true"></i>${n?n+(n===1?' evento':' eventi'):''}${n&&m2?' · ':''}${m2?m2+(m2===1?' attività':' attività'):''}`:''}</span></button>`;
     }).join('');
     return `<div class="home-native"><div class="home-head"><div class="home-recap" data-key="${safe(key)}" aria-label="${safe(plain)}"><p>${lines.map(l=>l).join(' ')}</p></div></div>
 <div class="dash-kpis">${kpis}</div>

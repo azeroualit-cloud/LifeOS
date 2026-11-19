@@ -804,3 +804,10 @@ button[data-life-category] svg{width:18px;height:18px}
 .home-week .dw-row+.dw-row{border-top:1px solid var(--line-soft)}
 .home-week .dw-row:hover:not(:disabled){background:transparent}
 .home-week .dw-row.today .dw-day b{color:var(--sec-home)}
+/* Prossimi giorni: barre tinte che riempiono la larghezza */
+.home-week .dw-list{gap:6px}
+.home-week .dw-row{flex:1;border-top:0!important;border-radius:var(--r-md);padding:0 var(--s3);background:color-mix(in srgb,var(--shift-color,var(--ink-3)) 12%,transparent);grid-template-columns:64px 60px 1fr}
+.home-week .dw-row[data-kind=""]{background:var(--surface-2)}
+.home-week .dw-row:hover:not(:disabled){background:color-mix(in srgb,var(--shift-color,var(--ink-3)) 20%,transparent)}
+.home-week .dw-row.today{box-shadow:inset 3px 0 0 var(--shift-color,var(--ink))}
+.home-week .dw-row .dw-ev{margin-left:var(--s3)}
