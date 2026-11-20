@@ -1130,3 +1130,51 @@ body .nav button[data-view].active .nav-symbol,body .nav #admin-link.active .nav
 .sc-dinfo{margin:0;font-size:var(--fs-1);color:var(--ink-3)}
 @media(max-width:620px){.sc-chips{grid-template-columns:repeat(2,minmax(0,1fr))}.sc-chip span{white-space:normal;line-height:1.2}.sc-tile.sm b{font-size:var(--fs-1);white-space:nowrap}.sc-tm{aspect-ratio:1/1.1}}
 .sc-note{margin:var(--s2) 0 0;font-size:var(--fs-1);color:var(--ink-3)}
+
+/* 10. POPUP ------------------------------------------------------------
+   Finestre piu moderne: scheda sospesa, angoli ampi, niente bordo duro,
+   header pulito, campi morbidi, azioni chiare. Sul telefono diventano
+   fogli dal basso con la maniglia. Vale per tutti i popup. */
+.modal-wrap{background:color-mix(in srgb,#050508 52%,transparent);backdrop-filter:blur(14px) saturate(1.1);-webkit-backdrop-filter:blur(14px) saturate(1.1)}
+.modal,.os-inline-event#os-event-editor{
+  border:0;border-radius:28px;padding:var(--s6) var(--s6) var(--s5);
+  background:var(--surface);
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--ink) 8%,transparent),0 2px 6px #0003,0 28px 80px #0008;
+}
+.os-inline-event#os-event-editor{box-shadow:0 0 0 100vmax color-mix(in srgb,#050508 52%,transparent),0 0 0 1px color-mix(in srgb,var(--ink) 8%,transparent),0 28px 80px #0008}
+.modal-top,.modal .os-topline{margin-bottom:var(--s5);align-items:center}
+.modal-top h2,.modal .os-topline h2,.modal .os-topline h3,#os-event-editor .os-topline h3{font-size:var(--fs-6,22px);font-weight:700;letter-spacing:-.2px;line-height:1.2}
+.modal-top .os-icon-button,.modal .os-topline .os-icon-button,#os-event-editor .os-topline .os-icon-button{
+  flex:none;width:34px;height:34px;min-height:0;padding:0;border-radius:50%;
+  display:grid;place-items:center;font-size:20px;line-height:1;
+  background:var(--surface-2);color:var(--ink-2);border:0;
+}
+.modal-top .os-icon-button:hover,.modal .os-topline .os-icon-button:hover{background:var(--surface-3);color:var(--ink)}
+.modal label,#os-event-editor label{font-size:var(--fs-2);font-weight:600;color:var(--ink-2);display:grid;gap:6px;margin-top:var(--s3)}
+.modal form>label:first-child,#os-event-editor form>label:first-child{margin-top:0}
+.modal input,.modal select,.modal textarea,#os-event-editor input,#os-event-editor select,#os-event-editor textarea{
+  background:var(--surface-2);border:1px solid transparent;border-radius:14px;padding:12px var(--s4);
+  font-weight:400;transition:background var(--m1) var(--ease),box-shadow var(--m1) var(--ease)}
+.modal input:not([type=checkbox]):not([type=radio]),.modal select,#os-event-editor input:not([type=checkbox]):not([type=radio]),#os-event-editor select{height:48px;min-height:48px}
+.modal input:hover,.modal select:hover,.modal textarea:hover{background:var(--surface-3)}
+.modal input:focus-visible,.modal select:focus-visible,.modal textarea:focus-visible,
+#os-event-editor input:focus-visible,#os-event-editor select:focus-visible,#os-event-editor textarea:focus-visible{
+  outline:0;background:var(--surface);box-shadow:0 0 0 2px var(--focus)}
+.modal input[type=checkbox],.modal input[type=radio],#os-event-editor input[type=checkbox],#os-event-editor input[type=radio]{width:auto;min-height:0;display:inline-block}
+.modal .form-actions,.modal .os-form-actions,#os-event-editor .os-form-actions{gap:var(--s3);margin-top:var(--s5);padding-top:var(--s4)}
+.modal .form-actions button,.modal .os-form-actions button,#os-event-editor .os-form-actions button{
+  height:44px;padding:0 var(--s5);border:0;border-radius:var(--r-pill);font-weight:650;background:var(--surface-2);color:var(--ink);
+  transition:transform var(--m1) var(--ease),background var(--m1) var(--ease)}
+.modal .form-actions button:hover,.modal .os-form-actions button:hover{background:var(--surface-3)}
+.modal .form-actions button:active,.modal .os-form-actions button:active{transform:scale(.97)}
+.modal .form-actions .save,.modal .form-actions button[type=submit],.modal .os-form-actions .primary,.modal .os-form-actions button[type=submit],#os-event-editor .os-form-actions button[type=submit]{
+  background:var(--accent);color:var(--on-accent)}
+.modal .form-actions .save:hover,.modal .form-actions button[type=submit]:hover{background:color-mix(in srgb,var(--accent) 88%,var(--ink))}
+.modal .form-actions .danger,.modal .os-form-actions .danger{background:color-mix(in srgb,var(--neg) 16%,transparent);color:var(--neg-t);margin-right:auto}
+.modal p{line-height:1.55}
+.modal-top+p,.modal>p{margin:0 0 var(--s4)}
+@media(max-width:760px){
+  .modal,.os-inline-event#os-event-editor{border-radius:28px 28px 0 0;padding:var(--s3) var(--s5) calc(var(--s5) + var(--safe-bottom,0px));position:relative}
+  .modal::before,#os-event-editor::before{content:"";display:block;width:38px;height:5px;border-radius:99px;background:var(--surface-3);margin:0 auto var(--s4)}
+  .modal-wrap{backdrop-filter:blur(8px)}
+}
