@@ -1153,7 +1153,8 @@ body .nav button[data-view].active .nav-symbol,body .nav #admin-link.active .nav
 @media(hover:hover){.sc-tile:hover>div{transform:scale(1.03)}}
 .sc-detail{margin-top:var(--s4)}
 .sc-hint{margin:0;font-size:var(--fs-1);color:var(--ink-3)}
-.sc-dbox{border-radius:var(--r-md);background:var(--surface-2);padding:var(--s4);display:grid;gap:var(--s3);animation:m-pop var(--m2) var(--ease) both}
+.sc-dbox{border-radius:var(--r-md);background:var(--surface-2);padding:var(--s4);display:grid;gap:var(--s3)}
+.sc-dbox>*{animation:fx-fade .16s ease-out both}
 .sc-dbox header{display:grid;grid-template-columns:10px minmax(0,1fr) auto 44px;gap:var(--s3);align-items:center}
 .sc-dbox header>i{width:10px;height:10px;border-radius:50%}
 .sc-dbox header span{display:flex;flex-direction:column;min-width:0}
@@ -1225,12 +1226,13 @@ body .nav button[data-view].active .nav-symbol,body .nav #admin-link.active .nav
 .fx-avgl{fill:var(--ink-3);font-size:12px}
 .fx-col{cursor:pointer;outline:0}
 .fx-hit{fill:transparent}
-.fx-col .fx-hl{opacity:0;transition:opacity var(--m1) var(--ease)}.fx-col.on .fx-hl{opacity:.7}
+.fx-col .fx-hl{opacity:0;transition:opacity .12s ease-out}.fx-col.on .fx-hl{opacity:.7}
 .fx-guide{stroke:var(--ink-3);stroke-width:1;stroke-dasharray:3 4;opacity:0;pointer-events:none;transition:opacity var(--m1) var(--ease)}.fx-col.on .fx-guide{opacity:.6}
 .fx-col:focus-visible .fx-hl{opacity:1;stroke:var(--focus);stroke-width:2}
 .fx-col:not(.on) .fx-xtick{opacity:.8}.fx-col.on .fx-xtick{fill:var(--ink);font-weight:650}
 .fx-detail{margin-top:var(--s3)}
-.fx-dbox{border-radius:var(--r-md);background:var(--surface-2);padding:var(--s4);display:grid;gap:var(--s3);animation:m-pop var(--m2) var(--ease) both}
+.fx-dbox{border-radius:var(--r-md);background:var(--surface-2);padding:var(--s4);display:grid;gap:var(--s3);align-content:start;min-height:9.6rem}
+.fx-dbox>*{animation:fx-fade .16s ease-out both}@keyframes fx-fade{from{opacity:.35}to{opacity:1}}
 .fx-dbox header b{font-size:var(--fs-3);font-weight:650;text-transform:capitalize}
 .fx-dgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s3)}
 .fx-dgrid small{display:flex;align-items:center;gap:6px;font-size:var(--fs-1);color:var(--ink-3)}
@@ -1239,6 +1241,7 @@ body .nav button[data-view].active .nav-symbol,body .nav #admin-link.active .nav
 .fx-dbox p{margin:0;font-size:var(--fs-2);color:var(--ink-2)}
 .fx-area,.fx-avg,.fx-avgl,.fx-dot{pointer-events:none}
 @media(max-width:760px){.fx-dgrid{gap:var(--s2)}.fx-dgrid strong{font-size:var(--fs-3);white-space:nowrap}.fx-dbox{padding:var(--s3) var(--s4)}}
+@media(prefers-reduced-motion:reduce){.fx-dbox>*,.sc-dbox>*{animation:none}}
 </style>
 </head>
   <body class="dashboard-mode">
