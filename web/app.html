@@ -1140,7 +1140,9 @@ body .nav button[data-view].active .nav-symbol,body .nav #admin-link.active .nav
 .sc-tm{position:relative;width:100%;aspect-ratio:2.4/1;min-height:240px}
 .sc-grp{position:absolute;padding:3px;min-width:0}
 .sc-gi{position:relative;width:100%;height:100%}
-.sc-tile{position:absolute;padding:1.5px;min-width:0}
+.sc-tile{position:absolute;padding:1.5px;min-width:0;border:0;background:none;font:inherit;text-align:left;cursor:pointer;color:inherit;display:block}
+.sc-tile:focus-visible{outline:2px solid var(--focus);outline-offset:-1px;z-index:2}
+.sc-tile.on>div{box-shadow:0 0 0 2px var(--ink) inset}
 .sc-tile>div{height:100%;box-sizing:border-box;border-radius:var(--r-md);padding:var(--s2) var(--s3);display:flex;flex-direction:column;justify-content:space-between;gap:2px;overflow:hidden;background:color-mix(in srgb,var(--c) calc(var(--k) * 1%),#000);color:#141416;transition:transform var(--m2) var(--ease)}
 .sc-tile span{font-size:var(--fs-1);line-height:1.2;color:inherit;opacity:.92;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sc-tile b{font-size:var(--fs-3);font-weight:650;font-variant-numeric:tabular-nums;line-height:1.15}
@@ -1149,6 +1151,22 @@ body .nav button[data-view].active .nav-symbol,body .nav #admin-link.active .nav
 .sc-tile.xs span,.sc-tile.xs b,.sc-tile.xs em{display:none}
 .sc-tm .sc-tile{animation:m-pop var(--m3) var(--ease) both;animation-delay:calc(var(--n) * 28ms)}
 @media(hover:hover){.sc-tile:hover>div{transform:scale(1.03)}}
+.sc-detail{margin-top:var(--s4)}
+.sc-hint{margin:0;font-size:var(--fs-1);color:var(--ink-3)}
+.sc-dbox{border-radius:var(--r-md);background:var(--surface-2);padding:var(--s4);display:grid;gap:var(--s3);animation:m-pop var(--m2) var(--ease) both}
+.sc-dbox header{display:grid;grid-template-columns:10px minmax(0,1fr) auto 44px;gap:var(--s3);align-items:center}
+.sc-dbox header>i{width:10px;height:10px;border-radius:50%}
+.sc-dbox header span{display:flex;flex-direction:column;min-width:0}
+.sc-dbox header b{font-size:var(--fs-3);font-weight:650}
+.sc-dbox small{font-size:var(--fs-1);color:var(--ink-3);font-weight:400}
+.sc-dbox header strong{font-size:var(--fs-4);font-weight:650;font-variant-numeric:tabular-nums}
+.sc-dbox header em{font-style:normal;font-size:var(--fs-2);color:var(--ink-3);text-align:right}
+.sc-dr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px var(--s3);font-size:var(--fs-2);align-items:baseline}
+.sc-dr>span{display:flex;flex-direction:column;overflow:hidden;color:var(--ink-2)}
+.sc-dr>b{font-weight:600;font-variant-numeric:tabular-nums}
+.sc-dr>b.neg{color:var(--neg-t)}
+.sc-dr>i{display:block;grid-column:1/-1;height:4px;border-radius:var(--r-pill);background:var(--c);opacity:.9;transform-origin:left;animation:sc-bar .6s cubic-bezier(.2,.7,.2,1) both}
+.sc-dinfo{margin:0;font-size:var(--fs-1);color:var(--ink-3)}
 @media(max-width:620px){.sc-chips{grid-template-columns:repeat(2,minmax(0,1fr))}.sc-chip span{white-space:normal;line-height:1.2}.sc-tile.sm b{font-size:var(--fs-1);white-space:nowrap}.sc-tm{aspect-ratio:1/1.1}}
 .sc-note{margin:var(--s2) 0 0;font-size:var(--fs-1);color:var(--ink-3)}
 </style>
@@ -3997,7 +4015,7 @@ document.addEventListener("keydown", (e) => {
         const pol = new Map((d.extraPlan?.budgetPolicies || []).map((p) => [Number(p.movement_source_row), p.treatment]));
         const linked = new Map();
         for (const l of d.extraPlan?.links || []) if (l.role === "payment") linked.set(Number(l.movement_source_row), (linked.get(Number(l.movement_source_row)) || 0) + Number(l.attributed_cents || 0) / 100);
-        const by = new Map();
+        const by = new Map(), rowsBy = new Map();
         for (const t of d.transactions || []) {
           if (t.type !== "Spesa" || !(t.amount < 0) || t.status && t.status !== "Eseguito") continue;
           const cat = t.category || "Altro", mode = pol.get(Number(t.row)) || "auto";
@@ -4006,13 +4024,14 @@ document.addEventListener("keydown", (e) => {
           if (v <= 0.004) continue;
           const key = norm(t.displayCategory || cat);
           by.set(key, (by.get(key) || 0) + v);
+          (rowsBy.get(key) || rowsBy.set(key, []).get(key)).push({ label: t.name || cat, sub: /^\d{4}-\d{2}-\d{2}/.test(t.date || "") ? `${t.date.slice(8, 10)}/${t.date.slice(5, 7)}` : "", value: v });
         }
-        let items = [...by].map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+        let items = [...by].map(([name, value]) => ({ name, value, rows: (rowsBy.get(name) || []).sort((p, q) => q.value - p.value) })).sort((a, b) => b.value - a.value);
         const sum = items.reduce((n, x) => n + x.value, 0);
-        if (sum > 0 && Math.abs(sum - spent) > 0.5) items = items.map((x) => ({ ...x, value: x.value * spent / sum }));
+        if (sum > 0 && Math.abs(sum - spent) > 0.5) { const k = spent / sum; items = items.map((x) => ({ ...x, value: x.value * k, rows: x.rows.map((r) => ({ ...r, value: r.value * k })) })); }
         else if (!sum && spent > 0.5) items = [{ name: "Altre spese", value: spent }];
         const top = items.slice(0, 5), rest = items.slice(5).reduce((n, x) => n + x.value, 0);
-        return rest > 0.5 ? [...top, { name: "Altre", value: rest }] : top;
+        return rest > 0.5 ? [...top, { name: "Altre", value: rest, rows: items.slice(5).map((x) => ({ label: x.name, sub: "", value: x.value })) }] : top;
       }
       /** Parte alta di Finanza: due card simmetriche. */
       function finHero(d, daily) {
@@ -4059,7 +4078,9 @@ document.addEventListener("keydown", (e) => {
           const tiles = lay.map((t) => {
             const it = t.r, big = t.w > 44 && t.h > 44, mid = t.w > 36 && t.h > 30, cls = big ? "" : mid ? " sm" : " xs", k = Math.round(86 + 14 * it.value / max);
             const label = `${g.label} · ${it.name}: ${fmt(it.value)}${salary > 0 ? ", " + pctS(it.value) + " dello stipendio" : ""}`;
-            return `<div class="sc-tile${cls}" style="left:${(t.x / gr.w * 100).toFixed(2)}%;top:${(t.y / gr.h * 100).toFixed(2)}%;width:${(t.w / gr.w * 100).toFixed(2)}%;height:${(t.h / gr.h * 100).toFixed(2)}%;--k:${k};--n:${n++}" role="img" aria-label="${escapeHtml(label)}" title="${escapeHtml(label)}"><div><span>${escapeHtml(it.name)}</span><b>${fmt0(it.value)}</b><em>${pctS(it.value)}</em></div></div>`;
+            const rows = (it.rows && it.rows.length ? it.rows : (its.length ? [{ label: it.name, sub: g.label, value: it.value }] : (g.rows || []))), shown = rows.slice(0, 8), more = rows.slice(8), rmax = Math.max(...rows.map((r) => Math.abs(r.value)), 1);
+            const dp = `<header><i style="background:${g.color}"></i><span><b>${escapeHtml(it.name)}</b><small>${escapeHtml(g.label)}</small></span><strong>${fmt0(it.value)}</strong><em>${pctS(it.value)}</em></header>${shown.map((r) => `<div class="sc-dr"><span>${escapeHtml(r.label)}${r.sub ? `<small>${escapeHtml(r.sub)}</small>` : ""}</span><b class="${r.value < 0 ? "neg" : ""}">${r.value < 0 ? "−" : ""}${fmt(Math.abs(r.value))}</b><i style="width:${(Math.abs(r.value) / rmax * 100).toFixed(1)}%"></i></div>`).join("")}${more.length ? `<div class="sc-dr"><span>+ altre ${more.length} voci</span><b>${fmt(more.reduce((n, r) => n + r.value, 0))}</b></div>` : ""}${it.info ? `<p class="sc-dinfo">${escapeHtml(it.info)}</p>` : ""}`;
+            return `<button type="button" class="sc-tile${cls}" style="left:${(t.x / gr.w * 100).toFixed(2)}%;top:${(t.y / gr.h * 100).toFixed(2)}%;width:${(t.w / gr.w * 100).toFixed(2)}%;height:${(t.h / gr.h * 100).toFixed(2)}%;--k:${k};--n:${n++};--c:${g.color}" aria-label="${escapeHtml(label)}. Mostra i dettagli" title="${escapeHtml(label)}"><div><span>${escapeHtml(it.name)}</span><b>${fmt0(it.value)}</b><em>${pctS(it.value)}</em></div><template class="sc-dp">${dp}</template></button>`;
           }).join("");
           return `<div class="sc-grp" style="--c:${g.color};left:${(gr.x / W * 100).toFixed(2)}%;top:${(gr.y / H * 100).toFixed(2)}%;width:${(gr.w / W * 100).toFixed(2)}%;height:${(gr.h / H * 100).toFixed(2)}%"><div class="sc-gi">${tiles}</div></div>`;
         }).join("");
@@ -4077,17 +4098,18 @@ document.addEventListener("keydown", (e) => {
           const v = Number(p.contributionCents) / 100;
           if (!(v > 0)) continue;
           const monthly = ["estimated", "advance", "recovery"].includes(p.kind) || p.kind === "fixed" && !(Number(p.intervalMonths) > 1);
-          (monthly ? fixed : save).push({ name: p.name, value: v });
+          const kindLbl = { estimated: "Stima mensile", advance: "Anticipo", recovery: "Recupero", fixed: "Spesa fissa" }[p.kind] || "Accantonamento", tot = Number(p.amountCents) / 100, im = Number(p.intervalMonths) || 0;
+          (monthly ? fixed : save).push({ name: p.name, value: v, rows: [{ label: "Quota di questo mese", sub: kindLbl, value: v }], info: [im > 1 ? `Si ripete ogni ${im} mesi` : "", tot > 0 && im > 1 ? `Importo da coprire ${exactEuro(tot)}` : "", p.startMonth ? `Da ${p.startMonth}${p.endMonth ? " a " + p.endMonth : ""}` : ""].filter(Boolean).join(" · ") });
         }
-        for (const x of sm.monthlyBudgetBreakdown || []) if (!x.planId && Number(x.amount) > 0) (/^Accantonament/i.test(x.name) ? save : fixed).push({ name: x.name, value: Number(x.amount) });
+        for (const x of sm.monthlyBudgetBreakdown || []) if (!x.planId && Number(x.amount) > 0) (/^Accantonament/i.test(x.name) ? save : fixed).push({ name: x.name, value: Number(x.amount), rows: [{ label: x.name, sub: /^Accantonament/i.test(x.name) ? "Messo da parte" : "Impegno del mese", value: Number(x.amount) }] });
         const diff = committed - [...save, ...fixed].reduce((n, x) => n + x.value, 0);
-        if (Math.abs(diff) > 0.5) fixed.push({ name: diff > 0 ? "Altri impegni del mese" : "Quote già coperte", value: diff });
+        if (Math.abs(diff) > 0.5) fixed.push({ name: diff > 0 ? "Altri impegni del mese" : "Quote già coperte", value: diff, rows: [], info: "Differenza tra stipendio, speso e rimanente non attribuita a un singolo piano" });
         const free = Math.max(0, rem), over = rem < 0 ? -rem : 0, sp = spentBreakdown(d, spent);
         const groups = [
           { k: "fixed", label: "Impegni del mese", hint: "affitto, utenze, rate", color: "#a97be0", items: fixed },
           { k: "save", label: "Messo da parte", hint: "accantonamenti per spese future", color: "var(--warn)", items: save },
           { k: "spent", label: "Speso", hint: "spese del mese", color: "var(--neg)", items: sp },
-          { k: "free", label: over ? "Sforamento" : "Libero", hint: over ? "oltre lo stipendio" : "ancora da spendere", color: over ? "#ee6f8b" : "var(--pos)", items: [] }
+          { k: "free", label: over ? "Sforamento" : "Libero", hint: over ? "oltre lo stipendio" : "ancora da spendere", color: over ? "#ee6f8b" : "var(--pos)", items: [], rows: [{ label: "Stipendio di riferimento", sub: "", value: S }, { label: "Impegni del mese", sub: "meno", value: -fixed.reduce((n, x) => n + x.value, 0) }, { label: "Messo da parte", sub: "meno", value: -save.reduce((n, x) => n + x.value, 0) }, { label: "Speso", sub: "meno", value: -spent }] }
         ].map((g) => ({ ...g, value: g.k === "free" ? over || free : g.items.reduce((n, x) => n + x.value, 0) })).filter((g) => g.value > 0.005);
         const total = groups.reduce((n, g) => n + g.value, 0) || 1, pct = (v) => Math.round(v / total * 100);
         const chips = groups.map((g) => `<div class="sc-chip" style="--c:${g.color}"><i></i><span>${g.label}</span><b>${fmt0(g.value)}</b><em>${pct(g.value)}%</em></div>`).join("");
@@ -4099,9 +4121,23 @@ document.addEventListener("keydown", (e) => {
           const proj = day >= 4 ? spent / mp : null, end = proj === null ? null : spendable - proj;
           pace = `<div class="sc-pace"><div class="sc-pace-bars"><label><span>Mese trascorso</span><div class="sc-track"><i style="width:${(mp * 100).toFixed(0)}%"></i></div><b>${day}/${dim}</b></label><label><span>Budget speso</span><div class="sc-track ${fast ? "warn" : ""}"><i style="width:${Math.min(100, bp * 100).toFixed(0)}%"></i></div><b>${Math.round(bp * 100)}%</b></label></div>${end === null ? "" : `<p class="sc-msg ${end >= 0 ? "ok" : "bad"}">${end >= 0 ? `Di questo passo chiudi il mese con circa ${fmt0(end)} liberi.` : `Di questo passo sfori il budget di circa ${fmt0(-end)}.`}</p>`}</div>`;
         }
-        return `<section class="card pad sankey"><div class="card-title"><h2>Dove va lo stipendio</h2><span class="sk-total">Stipendio <b>${fmt0(S)}</b></span></div><div class="sc-chips">${chips}</div>${map}<p class="sc-note">Ogni riquadro è una voce: area = importo, colore = categoria, % = quota dello stipendio di riferimento.</p>${pace}</section>`;
+        return `<section class="card pad sankey"><div class="card-title"><h2>Dove va lo stipendio</h2><span class="sk-total">Stipendio <b>${fmt0(S)}</b></span></div><div class="sc-chips">${chips}</div>${map}<div class="sc-detail" aria-live="polite"><p class="sc-hint">Tocca un riquadro per vedere da cosa è composto. Area = importo, colore = categoria, % = quota dello stipendio di riferimento.</p></div>${pace}</section>`;
       }
       globalThis.lifeOSSankey = budgetSankey;
+      if (!globalThis.__scTmBound) {
+        globalThis.__scTmBound = true;
+        document.addEventListener("click", (ev) => {
+          const tile = ev.target.closest && ev.target.closest(".sc-tile");
+          if (!tile) return;
+          const sec = tile.closest(".sankey"), box = sec && sec.querySelector(".sc-detail"), tpl = tile.querySelector("template.sc-dp");
+          if (!box || !tpl) return;
+          const was = tile.classList.contains("on");
+          sec.querySelectorAll(".sc-tile.on").forEach((x) => x.classList.remove("on"));
+          if (was) { box.innerHTML = '<p class="sc-hint">Tocca un riquadro per vedere da cosa è composto. Area = importo, colore = categoria, % = quota dello stipendio di riferimento.</p>'; return; }
+          tile.classList.add("on");
+          box.innerHTML = `<div class="sc-dbox" style="--c:${tile.style.getPropertyValue("--c")}">${tpl.innerHTML}</div>`;
+        });
+      }
 
 
       /** Grafici della Panoramica: SVG puro, senza librerie. */
