@@ -864,3 +864,48 @@ html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
 @media(max-width:1000px){.sk-cols{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}}
 .sk-cols,.sankey .sk-cols{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))!important}
 @media(max-width:560px){.sk-cols,.sankey .sk-cols{grid-template-columns:1fr!important}}
+/* riepilogo stipendio: voci nascoste, aperte a richiesta */
+.sk-more{margin-top:var(--s4);border-top:1px solid var(--line-soft);padding-top:var(--s3)}
+.sk-more summary{cursor:pointer;color:var(--ink-2);font-size:var(--fs-2)}
+.sk-more .sk-cols{margin-top:var(--s4)}
+.sk-head{margin-bottom:0}
+/* previsione patrimonio interattiva */
+.budget-flow>section:has([data-fc-root]){grid-column:1/-1;order:-1}
+[data-fc-root]{display:grid;gap:var(--s4)}
+.fc-lead{margin:0;font-size:var(--fs-5);line-height:1.4;color:var(--ink)}
+.fc-lead b{font-weight:650}.fc-lead b.pos{color:var(--pos)}.fc-lead b.neg{color:var(--neg)}
+.fc-warn,.fc-lever{margin:0;font-size:var(--fs-2);color:var(--ink-2)}.fc-warn{color:var(--warn)}.fc-lever b{color:var(--ink)}
+.fc-ctrl{display:flex;flex-wrap:wrap;gap:var(--s3) var(--s5);align-items:center}
+.fc-slider{display:flex;align-items:center;gap:var(--s3);flex:1 1 320px;min-width:0}
+.fc-slider>span{font-size:var(--fs-2);color:var(--ink-2);white-space:nowrap}
+.fc-slider input[type=range]{flex:1;min-width:80px;accent-color:var(--accent)}
+.fc-slider input[type=number],.fc-bonus input[type=number]{width:92px;min-height:36px;padding:0 var(--s3);border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface-2);color:var(--ink);font:inherit;text-align:right}
+.fc-slider em,.fc-bonus em{font-style:normal;color:var(--ink-3)}
+.fc-svg .fc-base{fill:none;stroke:var(--ink-3);stroke-width:2;stroke-dasharray:6 5;stroke-linecap:round}
+.fc-svg .fc-pick{fill:none;stroke:var(--sec-finance);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.fc-ev line{stroke:var(--line);stroke-width:1;stroke-dasharray:2 4}
+.fc-ev circle{stroke:var(--surface);stroke-width:2}.fc-ev.out circle{fill:var(--neg)}.fc-ev.in circle{fill:var(--pos)}
+.fc-legend{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s5);font-size:var(--fs-1);color:var(--ink-2)}
+.fc-legend i{display:inline-block;width:16px;height:0;margin-right:var(--s2);vertical-align:middle;border-top:3px solid var(--sec-finance)}
+.fc-legend i.b{border-top:2px dashed var(--ink-3)}.fc-legend i.e{width:9px;height:9px;border:0;border-radius:50%;background:var(--neg)}
+.fc-table{display:grid;gap:0;font-size:var(--fs-2)}
+.fc-row{display:grid;grid-template-columns:minmax(130px,1.5fr) repeat(4,minmax(0,1fr));gap:var(--s3);align-items:center;padding:var(--s2) 0;border-bottom:1px solid var(--line-soft)}
+.fc-row span{display:flex;flex-direction:column;color:var(--ink)}.fc-row span small{color:var(--ink-3);font-size:var(--fs-1)}
+.fc-row b{font-weight:400;text-align:right;font-variant-numeric:tabular-nums}.fc-row.pick b,.fc-row.pick span{color:var(--sec-finance);font-weight:650}
+.fc-row.fc-h{border-bottom:1px solid var(--line)}.fc-row.fc-h b{color:var(--ink-3);font-size:var(--fs-1);text-transform:uppercase;letter-spacing:.4px}
+.fc-events h3{margin:0 0 var(--s2);font-size:var(--fs-3)}
+.fc-e{display:grid;grid-template-columns:110px minmax(0,1fr) auto;gap:var(--s3);padding:var(--s2) 0;border-bottom:1px solid var(--line-soft);font-size:var(--fs-2)}
+.fc-e span:first-child{text-transform:capitalize;color:var(--ink-2)}.fc-e b.pos{color:var(--pos)}.fc-e b.neg{color:var(--neg)}
+.fc-bonus{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2) var(--s3);font-size:var(--fs-2);color:var(--ink-2)}
+.fc-bonus label{display:flex;align-items:center;gap:var(--s2)}.fc-bonus small{flex-basis:100%;color:var(--ink-3)}
+@media(max-width:560px){.fc-row{grid-template-columns:minmax(90px,1.2fr) repeat(4,minmax(0,1fr));gap:var(--s2);font-size:var(--fs-1)}.fc-e{grid-template-columns:80px minmax(0,1fr) auto}}
+[data-fc-root]{margin-top:var(--s3)}
+[data-fc-root]>*{min-width:0}
+.fc-ctrl .chart-range{flex-wrap:wrap}
+@media(max-width:560px){
+ .fc-row{grid-template-columns:minmax(0,1.3fr) repeat(3,minmax(0,1fr))}
+ .fc-row>b:nth-of-type(1){display:none}
+ .fc-slider{flex-basis:100%}
+ .fc-lead{font-size:var(--fs-4)}
+ .fc-e{grid-template-columns:72px minmax(0,1fr) auto}
+}
