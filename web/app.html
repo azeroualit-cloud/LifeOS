@@ -1217,6 +1217,28 @@ body .nav button[data-view].active .nav-symbol,body .nav #admin-link.active .nav
   .modal::before,#os-event-editor::before{content:"";display:block;width:38px;height:5px;border-radius:99px;background:var(--surface-3);margin:0 auto var(--s4)}
   .modal-wrap{backdrop-filter:blur(8px)}
 }
+
+/* Entrate e uscite: linee morbide con area, mese selezionabile e dettaglio */
+.fx-area{stroke:none;opacity:1}.fx-area.t-in{fill:url(#fxg-in)}.fx-area.t-out{fill:url(#fxg-out)}
+.fx-trend{stroke-width:2.75}
+.fx-dot.cur{stroke-width:3}
+.fx-avgl{fill:var(--ink-3);font-size:12px}
+.fx-col{cursor:pointer;outline:0}
+.fx-hit{fill:transparent}
+.fx-col .fx-hl{opacity:0;transition:opacity var(--m1) var(--ease)}.fx-col.on .fx-hl{opacity:.7}
+.fx-guide{stroke:var(--ink-3);stroke-width:1;stroke-dasharray:3 4;opacity:0;pointer-events:none;transition:opacity var(--m1) var(--ease)}.fx-col.on .fx-guide{opacity:.6}
+.fx-col:focus-visible .fx-hl{opacity:1;stroke:var(--focus);stroke-width:2}
+.fx-col:not(.on) .fx-xtick{opacity:.8}.fx-col.on .fx-xtick{fill:var(--ink);font-weight:650}
+.fx-detail{margin-top:var(--s3)}
+.fx-dbox{border-radius:var(--r-md);background:var(--surface-2);padding:var(--s4);display:grid;gap:var(--s3);animation:m-pop var(--m2) var(--ease) both}
+.fx-dbox header b{font-size:var(--fs-3);font-weight:650;text-transform:capitalize}
+.fx-dgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s3)}
+.fx-dgrid small{display:flex;align-items:center;gap:6px;font-size:var(--fs-1);color:var(--ink-3)}
+.fx-dgrid small i{width:8px;height:8px;border-radius:50%}.fx-dgrid small i.k-in{background:var(--pos)}.fx-dgrid small i.k-out{background:var(--neg)}
+.fx-dgrid strong{display:block;font-size:var(--fs-4);font-weight:650;font-variant-numeric:tabular-nums}.fx-dgrid strong.pos{color:var(--pos-t)}.fx-dgrid strong.neg{color:var(--neg-t)}
+.fx-dbox p{margin:0;font-size:var(--fs-2);color:var(--ink-2)}
+.fx-area,.fx-avg,.fx-avgl,.fx-dot{pointer-events:none}
+@media(max-width:760px){.fx-dgrid{gap:var(--s2)}.fx-dgrid strong{font-size:var(--fs-3);white-space:nowrap}.fx-dbox{padding:var(--s3) var(--s4)}}
 </style>
 </head>
   <body class="dashboard-mode">
@@ -4188,6 +4210,22 @@ document.addEventListener("keydown", (e) => {
       }
 
 
+      if (!globalThis.__fxBound) {
+        globalThis.__fxBound = true;
+        const pick = (ev) => {
+          const col = ev.target.closest && ev.target.closest(".fx-col");
+          if (!col) return;
+          const sec = col.closest(".finance-chart"), tpl = sec && sec.querySelector(`template.fx-dp[data-i="${col.dataset.i}"]`), box = sec && sec.querySelector(".fx-detail");
+          if (!tpl || !box || col.classList.contains("on")) return;
+          sec.querySelectorAll(".fx-col.on").forEach((x) => x.classList.remove("on"));
+          col.classList.add("on");
+          box.innerHTML = `<div class="fx-dbox">${tpl.innerHTML}</div>`;
+        };
+        document.addEventListener("click", pick);
+        document.addEventListener("mouseover", (ev) => { if (window.matchMedia("(hover:hover)").matches) pick(ev); });
+        document.addEventListener("focusin", pick);
+      }
+
       /** Grafici della Panoramica: SVG puro, senza librerie. */
       function overviewCharts(d) {
         const hide = !state.assetsVisible, fmt = v => hide ? "•••• €" : exactEuro(v), compact = v => hide ? "••" : (Math.abs(v) >= 1000 ? (v / 1000).toFixed(1).replace(".0", "").replace(".", ",") + "k" : String(Math.round(v)));
@@ -4204,14 +4242,14 @@ document.addEventListener("keydown", (e) => {
           const W = mob ? 420 : 960, H = mob ? 270 : 300, L = 40, R = W - 8, T = 22, B = H - 56, mx = Math.max(100, ...flowRows.flatMap(m => [inc(m), sp(m)])) * 1.12;
           const Y = v => B - v / mx * (B - T), slot = (R - L) / n, bw = Math.min(mob ? 12 : 18, slot * 0.3), sgn = v => (v >= 0 ? "+" : "−") + compact(Math.abs(v));
           const grid = [0, .5, 1].map(f => `<line class="fx-grid" x1="${L}" x2="${R}" y1="${Y(mx / 1.12 * f)}" y2="${Y(mx / 1.12 * f)}"/><text class="fx-ytick" x="${L - 8}" y="${Y(mx / 1.12 * f) + 4}" text-anchor="end">${compact(mx / 1.12 * f)}</text>`).join("");
-          const avg = `<line class="fx-avg fx-avg-in" x1="${L}" x2="${R}" y1="${Y(avgI)}" y2="${Y(avgI)}"/><line class="fx-avg fx-avg-out" x1="${L}" x2="${R}" y1="${Y(avgS)}" y2="${Y(avgS)}"/>`;
-          const bars = flowRows.map((m, i) => {
-            const cx = L + slot * (i + .5), cur = i === n - 1, nv = net(m);
-            return `<g class="${cur ? "fx-cur" : ""}"><title>${mlabel(m.month)}: entrate ${fmt(inc(m))}, uscite ${fmt(sp(m))}, netto ${fmt(nv)}</title>${cur ? `<rect class="fx-hl" x="${cx - slot / 2 + 2}" y="${T - 14}" width="${slot - 4}" height="${H - T + 6}" rx="8"/>` : ""}<rect class="fx-in" x="${cx - bw - 2}" y="${Y(inc(m))}" width="${bw}" height="${Math.max(0, B - Y(inc(m)))}" rx="4"/><rect class="fx-out" x="${cx + 2}" y="${Y(sp(m))}" width="${bw}" height="${Math.max(0, B - Y(sp(m)))}" rx="4"/>${mob ? "" : `<text class="fx-val" x="${cx - bw / 2 - 2}" y="${Y(inc(m)) - 5}" text-anchor="middle">${compact(inc(m))}</text><text class="fx-val" x="${cx + bw / 2 + 2}" y="${Y(sp(m)) - 5}" text-anchor="middle">${compact(sp(m))}</text>`}<text class="fx-xtick" x="${cx}" y="${H - 32}" text-anchor="middle">${mlabel(m.month)}</text><text class="fx-net ${nv >= 0 ? "pos" : "neg"}" x="${cx}" y="${H - 10}" text-anchor="middle">${sgn(nv)}</text></g>`;
-          }).join("");
-          const pts = f => flowRows.map((m, i) => [L + slot * (i + .5) + (f === inc ? -bw / 2 - 2 : bw / 2 + 2), Y(f(m))]);
-          const trendLine = (f, cls) => { const q = pts(f); return `<polyline class="fx-trend ${cls}" points="${q.map(a => a[0].toFixed(1) + "," + a[1].toFixed(1)).join(" ")}"/>` + q.map(a => `<circle class="fx-dot ${cls}" cx="${a[0].toFixed(1)}" cy="${a[1].toFixed(1)}" r="${mob ? 3 : 4}"/>`).join(""); };
-          const trend = n > 1 ? trendLine(inc, "t-in") + trendLine(sp, "t-out") : "";
+          const avg = `<line class="fx-avg fx-avg-out" x1="${L}" x2="${R}" y1="${Y(avgS)}" y2="${Y(avgS)}"/><text class="fx-avgl" x="${R}" y="${Y(avgS) - 6}" text-anchor="end">Media uscite ${compact(avgS)}</text>`;
+          const X = (i) => L + slot * (i + .5), mfull = (m) => new Date(m + "-15T12:00:00Z").toLocaleDateString("it-IT", { month: "long", year: "numeric", timeZone: "UTC" });
+          const smooth = (q) => { let s = `M${q[0][0].toFixed(1)},${q[0][1].toFixed(1)}`; for (let i = 0; i < q.length - 1; i++) { const p0 = q[i - 1] || q[i], p1 = q[i], p2 = q[i + 1], p3 = q[i + 2] || p2, c = (v) => Math.min(B, Math.max(T, v)); s += ` C${(p1[0] + (p2[0] - p0[0]) / 6).toFixed(1)},${c(p1[1] + (p2[1] - p0[1]) / 6).toFixed(1)} ${(p2[0] - (p3[0] - p1[0]) / 6).toFixed(1)},${c(p2[1] - (p3[1] - p1[1]) / 6).toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`; } return s; };
+          const lineOf = (f, cls) => { const q = flowRows.map((m, i) => [X(i), Y(f(m))]); if (q.length < 2) return q.map((a) => `<circle class="fx-dot ${cls}" cx="${a[0]}" cy="${a[1]}" r="5"/>`).join(""); const d = smooth(q); return `<path class="fx-area ${cls}" d="${d} L${q[q.length - 1][0].toFixed(1)},${B} L${q[0][0].toFixed(1)},${B} Z"/><path class="fx-trend ${cls}" d="${d}"/>` + q.map((a, i) => `<circle class="fx-dot ${cls}${i === n - 1 ? " cur" : ""}" cx="${a[0].toFixed(1)}" cy="${a[1].toFixed(1)}" r="${i === n - 1 ? 5 : (mob ? 2.5 : 3)}"/>`).join(""); };
+          const lines = lineOf(sp, "t-out") + lineOf(inc, "t-in");
+          const dp = (m) => { const nv = net(m), r = inc(m) ? Math.round(nv / inc(m) * 100) : 0, vsA = sp(m) - avgS; return `<header><b>${mfull(m.month)}</b></header><div class="fx-dgrid"><div><small><i class="k-in"></i>Entrate</small><strong>${fmt(inc(m))}</strong></div><div><small><i class="k-out"></i>Uscite</small><strong>${fmt(sp(m))}</strong></div><div><small>Netto</small><strong class="${nv >= 0 ? "pos" : "neg"}">${(nv >= 0 ? "+" : "−") + fmt(Math.abs(nv))}</strong></div></div><p>${inc(m) ? `Risparmi il ${r}% delle entrate · ` : ""}uscite ${vsA > 0 ? "+" : "−"}${fmt(Math.abs(vsA))} rispetto alla media</p>`; };
+          const cols = flowRows.map((m, i) => { const cx = X(i), cur = i === n - 1, nv = net(m); return `<g class="fx-col${cur ? " on" : ""}" data-i="${i}" tabindex="0" role="button" aria-label="${mfull(m.month)}: entrate ${fmt(inc(m))}, uscite ${fmt(sp(m))}, netto ${fmt(nv)}"><rect class="fx-hl" x="${cx - slot / 2 + 2}" y="${T - 14}" width="${slot - 4}" height="${H - T + 6}" rx="10"/><line class="fx-guide" x1="${cx}" x2="${cx}" y1="${T - 6}" y2="${B}"/><rect class="fx-hit" x="${cx - slot / 2}" y="${T - 14}" width="${slot}" height="${H - T + 6}"/><text class="fx-xtick" x="${cx}" y="${H - 32}" text-anchor="middle">${mlabel(m.month)}</text><text class="fx-net ${nv >= 0 ? "pos" : "neg"}" x="${cx}" y="${H - 10}" text-anchor="middle">${sgn(nv)}</text></g>`; }).join("");
+          const tpls = flowRows.map((m, i) => `<template class="fx-dp" data-i="${i}">${dp(m)}</template>`).join("");
           const stat = (l, v, sub, cls) => `<div class="fx-stat"><small>${l}</small><strong class="${cls || ""}">${v}</strong><span>${sub}</span></div>`;
           const vs = avgPrevS ? sp(last) - avgPrevS : null;
           const stats = [
@@ -4220,7 +4258,7 @@ document.addEventListener("keydown", (e) => {
             stat("Uscite medie", fmt(avgS), vs === null ? "al mese" : `${mlabel(last.month)}: ${vs > 0 ? "+" : "−"}${fmt(Math.abs(vs))} vs media`, vs !== null && vs > 0 ? "neg" : ""),
             stat("Mese migliore", mlabel(best.month), sgn(net(best)) + " €" + (n > 1 ? ` · peggiore ${mlabel(worst.month)} ${sgn(net(worst))} €` : ""))
           ].join("");
-          flow = `<section class="finance-chart wide"><div class="finance-heading"><h2>Entrate e uscite</h2><p class="oc-legend"><i class="k-in"></i>Entrate<i class="k-out"></i>Uscite<i class="k-trend"></i>Andamento<i class="k-avg"></i>Media</p></div><div class="fx-stats">${stats}</div><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Entrate, uscite e netto per mese">${grid}${avg}${bars}${trend}</svg></section>`;
+          flow = `<section class="finance-chart wide"><div class="finance-heading"><h2>Entrate e uscite</h2><p class="oc-legend"><i class="k-in"></i>Entrate<i class="k-out"></i>Uscite<i class="k-avg"></i>Media uscite</p></div><div class="fx-stats">${stats}</div><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Entrate, uscite e netto per mese"><defs><linearGradient id="fxg-in" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--pos)" stop-opacity=".30"/><stop offset="1" stop-color="var(--pos)" stop-opacity="0"/></linearGradient><linearGradient id="fxg-out" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--neg)" stop-opacity=".26"/><stop offset="1" stop-color="var(--neg)" stop-opacity="0"/></linearGradient></defs>${grid}${cols}${avg}${lines}</svg><div class="fx-detail" aria-live="polite"><div class="fx-dbox">${dp(last)}</div></div>${tpls}</section>`;
         }
         // 2) patrimonio: area con gradiente
         const wr = series.filter(m => Number.isFinite(m.wealth));
