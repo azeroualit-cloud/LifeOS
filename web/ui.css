@@ -909,3 +909,7 @@ html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
  .fc-lead{font-size:var(--fs-4)}
  .fc-e{grid-template-columns:72px minmax(0,1fr) auto}
 }
+.fc-from{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2) var(--s3);font-size:var(--fs-2);color:var(--ink-2)}
+.fc-from input{min-height:36px;padding:0 var(--s3);border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface-2);color:var(--ink);font:inherit;color-scheme:dark light}
+.fc-from small{flex-basis:100%;color:var(--ink-3)}
+.fc-from input[type=month]{width:auto;min-width:150px}

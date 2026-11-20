@@ -948,6 +948,10 @@ html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
  .fc-lead{font-size:var(--fs-4)}
  .fc-e{grid-template-columns:72px minmax(0,1fr) auto}
 }
+.fc-from{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2) var(--s3);font-size:var(--fs-2);color:var(--ink-2)}
+.fc-from input{min-height:36px;padding:0 var(--s3);border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface-2);color:var(--ink);font:inherit;color-scheme:dark light}
+.fc-from small{flex-basis:100%;color:var(--ink-3)}
+.fc-from input[type=month]{width:auto;min-width:150px}
 </style>
 </head>
   <body class="dashboard-mode">
@@ -5103,8 +5107,8 @@ html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
   var sum = (rows) => rows.reduce((a, b) => a + b, 0);
   var median = (rows) => rows.length ? (rows[Math.floor((rows.length - 1) / 2)] + rows[Math.floor(rows.length / 2)]) / 2 : 0;
   var monthDelta = (a, b) => (Number(a.slice(0, 4)) - Number(b.slice(0, 4))) * 12 + Number(a.slice(5, 7)) - Number(b.slice(5, 7));
-  function wealthForecast(finance, plan = {}, day, span = 6) {
-    const month = day.slice(0, 7), earliest = addMonth(month, -6);
+  function wealthForecast(finance, plan = {}, day, span = 6, from = "") {
+    const month = day.slice(0, 7), earliest = [addMonth(month, -6), from].sort().at(-1);
     const source = (finance.forecastHistory || []).filter((r) => r.month >= earliest && r.month < month && r.observed).sort((a, b) => a.month.localeCompare(b.month));
     const grouped = /* @__PURE__ */ new Map(), actual = {};
     for (const link of plan.links || []) if (link.role === "payment" && link.account === "Trade Republic") {
@@ -5230,17 +5234,30 @@ html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
 
     /* ---- Previsione interattiva: scenari di risparmio, piani, tredicesima e quattordicesima ---- */
     const FC_KEY = "lifeos.forecast.v1";
-    const fcs = (() => { let o = {}; try { o = JSON.parse(localStorage.getItem(FC_KEY) || "{}"); } catch {} const n = (v) => Number.isFinite(v) ? v : null; return { saving: n(o.saving), horizon: [6, 12, 24].includes(o.horizon) ? o.horizon : 12, b13: o.b13 !== false, b14: o.b14 !== false, a13: n(o.a13), a14: n(o.a14) }; })();
-    const fcPersist = () => { try { localStorage.setItem(FC_KEY, JSON.stringify(fcs)); } catch {} };
+    const fcs = (() => { let o = {}; try { o = JSON.parse(localStorage.getItem(FC_KEY) || "{}"); } catch {} const n = (v) => Number.isFinite(v) ? v : null; return { saving: n(o.saving), horizon: [6, 12, 24].includes(o.horizon) ? o.horizon : 12, b13: o.b13 !== false, b14: o.b14 !== false, a13: n(o.a13), a14: n(o.a14), from: /^20\d\d-\d\d$/.test(o.from || "") ? o.from : "2026-07" }; })();
+    let fcLoaded = false, fcTimer = 0, fcStatus = "";
+    const fcHadLocal = (() => { try { return !!localStorage.getItem(FC_KEY); } catch { return false; } })();
+    const fcPush = async () => { fcStatus = "Salvataggio…"; fcPaintStatus(); try { await workerRequest("saveForecastSettings", [{ ...fcs }]); fcStatus = "Salvato nel database"; } catch (e) { fcStatus = "Non salvato nel database: " + (e && e.message || "errore") + ". Resta su questo browser."; } fcPaintStatus(); };
+    const fcPaintStatus = () => { const el = document.querySelector("[data-fc-status]"); if (el) el.textContent = fcStatus; };
+    const fcPersist = () => { try { localStorage.setItem(FC_KEY, JSON.stringify(fcs)); } catch {} clearTimeout(fcTimer); fcTimer = setTimeout(fcPush, 500); };
+    async function fcLoad() {
+      if (fcLoaded) return;
+      try {
+        const r = await workerRequest("getForecastSettings", []);
+        fcLoaded = true;
+        if (r && typeof r === "object") { Object.assign(fcs, { saving: r.saving ?? null, horizon: r.horizon || 12, b13: r.b13 !== false, b14: r.b14 !== false, a13: r.a13 ?? null, a14: r.a14 ?? null, from: r.from || fcs.from }); try { localStorage.setItem(FC_KEY, JSON.stringify(fcs)); } catch {} fcStatus = "Salvato nel database"; fcRefresh(); }
+        else if (fcHadLocal) fcPush();
+      } catch { /* resta il valore locale */ }
+    }
     const fcMed = (arr) => { const a = arr.filter(Number.isFinite).sort((x, y) => x - y); return a.length ? (a[Math.floor((a.length - 1) / 2)] + a[Math.floor(a.length / 2)]) / 2 : 0; };
     function fcInputs(d) {
-      const day = todayIso(), month = day.slice(0, 7), model = wealthForecast(d, d.forecastPlan || d.extraPlan, day, 24);
-      const rows = (d.lifetime?.series || []).filter((r) => r.month < month && Number.isFinite(r.income) && Number.isFinite(r.spent)).sort((a, b) => a.month.localeCompare(b.month));
+      const day = todayIso(), month = day.slice(0, 7), model = wealthForecast(d, d.forecastPlan || d.extraPlan, day, 24, fcs.from);
+      const all = (d.lifetime?.series || []).filter((r) => r.month < month && Number.isFinite(r.income) && Number.isFinite(r.spent)).sort((a, b) => a.month.localeCompare(b.month)), rows = all.filter((r) => r.month >= fcs.from);
       const last6 = rows.slice(-6), nets = last6.map((r) => r.income - r.spent), incomes = last6.map((r) => r.income);
-      const salary = Number(d.summary?.monthlySalary) || fcMed(incomes) || 0, medIncome = fcMed(rows.map((r) => r.income));
-      const spike = (suffixes) => { const r = rows.filter((x) => suffixes.includes(x.month.slice(5)) && medIncome && x.income > medIncome * 1.5).pop(); return r ? Math.round(r.income - medIncome) : null; };
-      const base = model.samples >= 4 ? model.normalizedNet : nets.length >= 3 ? fcMed(nets) : null;
-      return { day, assets: model.assets, base, months: Math.max(model.samples, nets.length), salary, d13: spike(["12"]), d14: spike(["06", "07"]), payments: model.payments, spentAvg: last6.length ? fcMed(last6.map((r) => r.spent)) : null, incomeAvg: last6.length ? fcMed(incomes) : null };
+      const salary = Number(d.summary?.monthlySalary) || fcMed(incomes) || 0, medIncome = fcMed(all.map((r) => r.income));
+      const spike = (suffixes) => { const r = all.filter((x) => suffixes.includes(x.month.slice(5)) && medIncome && x.income > medIncome * 1.5).pop(); return r ? Math.round(r.income - medIncome) : null; };
+      const base = model.samples >= 4 ? model.normalizedNet : nets.length >= 3 ? fcMed(nets) : null, since = new Date(fcs.from + "-15T12:00:00Z").toLocaleDateString("it-IT", { month: "long", year: "numeric", timeZone: "UTC" });
+      return { day, since, assets: model.assets, base, months: Math.max(model.samples, nets.length), salary, d13: spike(["12"]), d14: spike(["06", "07"]), payments: model.payments, spentAvg: last6.length ? fcMed(last6.map((r) => r.spent)) : null, incomeAvg: last6.length ? fcMed(incomes) : null };
     }
     function fcRun(inp, saving, steps) {
       const a13 = fcs.a13 ?? inp.d13 ?? Math.round(inp.salary), a14 = fcs.a14 ?? inp.d14 ?? Math.round(inp.salary);
@@ -5256,9 +5273,10 @@ html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
       }
       return out;
     }
+    const fcFrom = (inp) => `<label class="fc-from"><span>Statistica dal mese</span><input type="month" value="${fcs.from}" data-fc-from aria-label="Mese di inizio statistica"><small>La stima usa solo i mesi da qui in poi.</small></label>`;
     function fcPanel(d) {
       const hide = !state.assetsVisible, fmt = (v) => hide ? "•••• €" : Math.round(v).toLocaleString("it-IT", { useGrouping: "always" }) + " €", inp = fcInputs(d);
-      if (inp.base === null || !Number.isFinite(inp.assets)) return `<p class="empty">Servono almeno 3 mesi con entrate e spese per stimare il risparmio mensile.</p>`;
+      if (inp.base === null || !Number.isFinite(inp.assets)) return `<div data-fc-root><p class="empty">Servono almeno 3 mesi completi con entrate e spese dal mese di inizio statistica (${inp.since}) per stimare il risparmio mensile.</p>${fcFrom(inp)}</div>`;
       const base = Math.round(inp.base), z = fcs.saving ?? base, H = fcs.horizon;
       const sc = [{ k: "base", name: "Come ora", sv: base }, { k: "pick", name: "Il tuo scenario", sv: z }];
       const runs = sc.map((s) => ({ ...s, rows: fcRun(inp, s.sv, 24) }));
@@ -5279,14 +5297,14 @@ html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
       const endB = rowsB[H].value, endP = rowsP[H].value, diff = endP - endB;
       const worst = rowsB.slice(1).sort((a, b) => b.spend - a.spend)[0];
       const next = runs[0].rows.slice(1, H + 1).filter((r) => r.spend > 0.5 || r.inflow > 0.5);
-      const head = `<p class="fc-lead">${z === base ? `Se continui come negli ultimi ${inp.months} mesi, risparmiando circa <b>${fmt(base)}</b> al mese, tra ${H} mesi (${mn(rowsB[H].day)}) avrai <b>${fmt(endB)}</b>.` : `Con <b>${fmt(z)}</b> al mese, tra ${H} mesi (${mn(rowsP[H].day)}) avrai <b class="${diff >= 0 ? "pos" : "neg"}">${fmt(endP)}</b>, ${diff >= 0 ? "" : "−"}${fmt(Math.abs(diff))} ${diff >= 0 ? "in più" : "in meno"} rispetto a continuare come ora (${fmt(endB)}).`}</p>${base < 100 ? `<p class="fc-warn">Negli ultimi mesi hai messo da parte quasi niente: il patrimonio cresce solo con tredicesima e quattordicesima.</p>` : ""}`;
+      const head = `<p class="fc-lead">${z === base ? `Se continui come da ${inp.since} (${inp.months} mesi), risparmiando circa <b>${fmt(base)}</b> al mese, tra ${H} mesi (${mn(rowsB[H].day)}) avrai <b>${fmt(endB)}</b>.` : `Con <b>${fmt(z)}</b> al mese, tra ${H} mesi (${mn(rowsP[H].day)}) avrai <b class="${diff >= 0 ? "pos" : "neg"}">${fmt(endP)}</b>, ${diff >= 0 ? "" : "−"}${fmt(Math.abs(diff))} ${diff >= 0 ? "in più" : "in meno"} rispetto a continuare come ora (${fmt(endB)}).`}</p>${base < 100 ? `<p class="fc-warn">Negli ultimi mesi hai messo da parte quasi niente: il patrimonio cresce solo con tredicesima e quattordicesima.</p>` : ""}`;
       const budgetCap = inp.incomeAvg !== null ? inp.incomeAvg - z : null;
       const lever = z < 0 && inp.incomeAvg !== null ? `<p class="fc-lever">Questo scenario vuol dire spendere circa <b>${fmt(inp.incomeAvg - z)}</b> al mese, ${fmt(-z)} più delle tue entrate medie (${fmt(inp.incomeAvg)}).</p>` : budgetCap !== null && inp.spentAvg !== null ? `<p class="fc-lever">Per risparmiare ${fmt(z)} al mese puoi spendere circa <b>${fmt(Math.max(0, budgetCap))}</b> al mese (oggi ${fmt(inp.spentAvg)}), cioè ${fmt(Math.max(0, budgetCap) / 30)} al giorno.${budgetCap < inp.spentAvg ? ` Servono <b>${fmt(inp.spentAvg - Math.max(0, budgetCap))}</b> in meno di spese.` : ""}</p>` : "";
       const presets = [-200, 0, 200, 500].map((dv) => ({ dv, v: base + dv }));
       const chips = presets.map((p) => `<button data-fc-set="${p.v}" class="${p.v === z ? "active" : ""}" aria-pressed="${p.v === z}">${p.dv === 0 ? "Come ora" : (p.dv > 0 ? "+" : "−") + Math.abs(p.dv) + " €"}</button>`).join("");
       const ctrl = `<div class="fc-ctrl"><label class="fc-slider"><span>Risparmio al mese</span><input type="range" min="${Math.min(-500, Math.floor((base - 600) / 50) * 50)}" max="${Math.max(1500, Math.ceil((base + 1000) / 50) * 50)}" step="25" value="${z}" data-fc-range aria-label="Risparmio mensile"><input type="number" step="25" value="${z}" data-fc-num aria-label="Risparmio mensile in euro"><em>€</em></label><div class="chart-range" role="group" aria-label="Scenari">${chips}</div><div class="chart-range" role="group" aria-label="Orizzonte">${[6, 12, 24].map((n) => `<button data-fc-h="${n}" class="${n === H ? "active" : ""}" aria-pressed="${n === H}">${n} mesi</button>`).join("")}</div></div>`;
       const a13 = fcs.a13 ?? inp.d13 ?? Math.round(inp.salary), a14 = fcs.a14 ?? inp.d14 ?? Math.round(inp.salary);
-      const bonus = `<div class="fc-bonus"><label><input type="checkbox" data-fc-b="b13" ${fcs.b13 ? "checked" : ""}> Tredicesima (dicembre)</label><input type="number" step="50" value="${a13}" data-fc-a="a13" aria-label="Importo tredicesima"><em>€</em><label><input type="checkbox" data-fc-b="b14" ${fcs.b14 ? "checked" : ""}> Quattordicesima (giugno)</label><input type="number" step="50" value="${a14}" data-fc-a="a14" aria-label="Importo quattordicesima"><em>€</em><small>${inp.d13 || inp.d14 ? "Importi rilevati dai tuoi stipendi passati, modificabili." : "Stima: circa uno stipendio netto. Cambiala con l'importo vero."}</small></div>`;
+      const bonus = `${fcFrom(inp)}<div class="fc-bonus"><label><input type="checkbox" data-fc-b="b13" ${fcs.b13 ? "checked" : ""}> Tredicesima (dicembre)</label><input type="number" step="50" value="${a13}" data-fc-a="a13" aria-label="Importo tredicesima"><em>€</em><label><input type="checkbox" data-fc-b="b14" ${fcs.b14 ? "checked" : ""}> Quattordicesima (giugno)</label><input type="number" step="50" value="${a14}" data-fc-a="a14" aria-label="Importo quattordicesima"><em>€</em><small>${inp.d13 || inp.d14 ? "Importi rilevati dai tuoi stipendi passati, modificabili." : "Stima: circa uno stipendio netto. Cambiala con l'importo vero."}</small><small data-fc-status>${safe(fcStatus)}</small></div>`;
       const table = [{ n: "Spendi di più", sv: base - 200 }, { n: "Come ora", sv: base }, { n: "Risparmi +200 €", sv: base + 200 }, { n: "Risparmi +500 €", sv: base + 500 }, { n: "Il tuo scenario", sv: z }].map((s) => { const r = fcRun(inp, s.sv, 24); return `<div class="fc-row${s.n === "Il tuo scenario" ? " pick" : ""}"><span>${s.n}<small>${fmt(s.sv)}/mese</small></span>${[3, 6, 12, 24].map((n) => `<b>${fmt(at(r, n))}</b>`).join("")}</div>`; }).join("");
       const tbl = `<div class="fc-table"><div class="fc-row fc-h"><span></span><b>3 mesi</b><b>6 mesi</b><b>12 mesi</b><b>24 mesi</b></div>${table}</div>`;
       const evl = next.length ? `<div class="fc-events"><h3>Cosa ti aspetta</h3>${next.map((r) => `<div class="fc-e"><span>${mn(r.day)}</span><span>${[r.inflow > 0.5 ? (r.label13 ? "Tredicesima" : "") + (r.label13 && r.label14 ? " + " : "") + (r.label14 ? "Quattordicesima" : "") : "", ...r.pay.map((p) => p.label)].filter(Boolean).map(safe).join(", ")}</span><b class="${r.inflow - r.spend >= 0 ? "pos" : "neg"}">${r.inflow - r.spend >= 0 ? "+" : "−"}${fmt(Math.abs(r.inflow - r.spend))}</b></div>`).join("")}</div>` : "";
@@ -5301,6 +5319,8 @@ html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
     document.addEventListener("change", (e) => {
       const n = e.target.closest("[data-fc-num]"), r = e.target.closest("[data-fc-range]"), b = e.target.closest("[data-fc-b]"), a = e.target.closest("[data-fc-a]");
       if (n || r) { const v = Number((n || r).value); if (Number.isFinite(v)) { fcs.saving = Math.round(v); fcPersist(); fcRefresh(); } }
+      const f = e.target.closest("[data-fc-from]");
+      if (f && /^20\d\d-\d\d$/.test(f.value)) { fcs.from = f.value; fcPersist(); fcRefresh(); }
       if (b) { fcs[b.dataset.fcB] = b.checked; fcPersist(); fcRefresh(); }
       if (a) { const v = Number(a.value); if (Number.isFinite(v) && v >= 0) { fcs[a.dataset.fcA] = Math.round(v); fcPersist(); fcRefresh(); } }
     });
@@ -5319,7 +5339,7 @@ html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
       const forecast = model.prediction.length ? chart([...model.history.slice(0, -1), ...model.prediction].map((p) => ({ ...p, label: p.day.slice(0, 7) })), "Previsione patrimonio") : `<p class="empty">Servono almeno 4 mesi completi osservati sui 6 precedenti. Disponibili: ${model.samples}.</p>`;
       const html = `<div class="budget-flow">${card("Spese per categoria", `<div class="chart-range" role="group" aria-label="Periodo categorie">${[3, 6, 12].map((n) => `<button data-category-period="${n}" class="${n === range ? "active" : ""}" aria-pressed="${n === range}">${n} mesi</button>`).join("")}</div><p class="hint" data-category-interval></p><div data-period-categories role="status">Caricamento categorie\u2026</div><button data-refresh-categories>Aggiorna categorie</button>`)}${card("Previsione del patrimonio", fcPanel(d))}${card("Fascia probabile (simulazione)", `<p class="hint">6 mesi precedenti \xB7 6 mesi successivi</p>${forecast}<details><summary>Come viene calcolata</summary><p>Fascia centrale dell\u201980% di 2.000 simulazioni dei flussi osservati, con valori anomali limitati tramite mediana e deviazione assoluta mediana. Sono sottratti i pagamenti futuri pianificati, senza sottrarre gli accantonamenti una seconda volta.</p><p>Pagamenti noti nei prossimi 6 mesi: ${state.assetsVisible ? exactEuro(model.knownExtra) : "\u2022\u2022\u2022\u2022"}</p><p>Scenario indicativo sul conto principale, non garantito.</p></details>`)}${card("Patrimonio", `<p class="hint">12 mesi fino a ${safe(titleMonth(state.year, state.month))}</p>${chart(wealthRows, "Patrimonio", false, true)}`)}${card("Stipendi per competenza", `<p class="hint">12 mesi fino a ${safe(titleMonth(state.year, state.month))}</p>${chart(salary.map((r) => ({ label: shortMonth(r.month), value: (r.base || 0) + (r.additional || 0), base: r.base || 0, additional: r.additional || 0 })), "Stipendi per competenza", true)}${salary.length ? `<details><summary>Base e aggiuntive</summary>${salary.map((r) => `<div class="kv"><span>${safe(shortMonth(r.month))}</span><strong>${state.assetsVisible ? `Base ${exactEuro(r.base || 0)} \xB7 Aggiuntive ${exactEuro(r.additional || 0)}` : "\u2022\u2022\u2022\u2022"}</strong></div>`).join("")}</details>` : ""}`)}</div>`;
       if (Array.isArray(d.categories)) cache.set(month, d.categories);
-      queueMicrotask(() => loadCategories(d));
+      queueMicrotask(() => { fcLoad(); loadCategories(d); });
       return html;
     };
     async function loadCategories(d) {
