@@ -1102,7 +1102,7 @@ body .nav button[data-view].active .nav-symbol,body .nav #admin-link.active .nav
 /* mappa ad aree (treemap) delle voci di un gruppo */
 .sc-tm{position:relative;width:100%;aspect-ratio:2.6/1;min-height:150px}
 .sc-tile{position:absolute;padding:2px;min-width:0}
-.sc-tile>div{height:100%;box-sizing:border-box;border-radius:var(--r-md);padding:var(--s2) var(--s3);display:flex;flex-direction:column;justify-content:space-between;gap:2px;overflow:hidden;background:color-mix(in srgb,var(--c) calc(var(--k) * 1%),var(--surface-2));color:var(--ink);transition:transform var(--m2) var(--ease)}
+.sc-tile>div{height:100%;box-sizing:border-box;border-radius:var(--r-md);padding:var(--s2) var(--s3);display:flex;flex-direction:column;justify-content:space-between;gap:2px;overflow:hidden;background:color-mix(in srgb,var(--c) calc(var(--k) * 1%),var(--surface-2));color:#111114;transition:transform var(--m2) var(--ease)}
 .sc-tile span{font-size:var(--fs-1);line-height:1.2;color:inherit;opacity:.9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sc-tile b{font-size:var(--fs-3);font-weight:650;font-variant-numeric:tabular-nums;line-height:1.15}
 .sc-tile em{font-style:normal;font-size:var(--fs-1);opacity:.85;font-variant-numeric:tabular-nums}

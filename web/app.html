@@ -1141,7 +1141,7 @@ body .nav button[data-view].active .nav-symbol,body .nav #admin-link.active .nav
 /* mappa ad aree (treemap) delle voci di un gruppo */
 .sc-tm{position:relative;width:100%;aspect-ratio:2.6/1;min-height:150px}
 .sc-tile{position:absolute;padding:2px;min-width:0}
-.sc-tile>div{height:100%;box-sizing:border-box;border-radius:var(--r-md);padding:var(--s2) var(--s3);display:flex;flex-direction:column;justify-content:space-between;gap:2px;overflow:hidden;background:color-mix(in srgb,var(--c) calc(var(--k) * 1%),var(--surface-2));color:var(--ink);transition:transform var(--m2) var(--ease)}
+.sc-tile>div{height:100%;box-sizing:border-box;border-radius:var(--r-md);padding:var(--s2) var(--s3);display:flex;flex-direction:column;justify-content:space-between;gap:2px;overflow:hidden;background:color-mix(in srgb,var(--c) calc(var(--k) * 1%),var(--surface-2));color:#111114;transition:transform var(--m2) var(--ease)}
 .sc-tile span{font-size:var(--fs-1);line-height:1.2;color:inherit;opacity:.9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sc-tile b{font-size:var(--fs-3);font-weight:650;font-variant-numeric:tabular-nums;line-height:1.15}
 .sc-tile em{font-style:normal;font-size:var(--fs-1);opacity:.85;font-variant-numeric:tabular-nums}
@@ -4049,7 +4049,7 @@ document.addEventListener("keydown", (e) => {
         if (row.length) lay();
         const max = pos[0].value, pctS = (v) => salary > 0 ? (v / salary * 100 >= 10 ? Math.round(v / salary * 100) : (v / salary * 100).toFixed(1).replace(".", ",")) + "%" : "";
         const tiles = rects.map((t, i) => {
-          const it = t.r, big = t.w > 46 && t.h > 46, mid = t.w > 40 && t.h > 34, cls = big ? "" : mid ? " sm" : " xs", k = Math.round(30 + 40 * it.value / max);
+          const it = t.r, big = t.w > 46 && t.h > 46, mid = t.w > 40 && t.h > 34, cls = big ? "" : mid ? " sm" : " xs", k = Math.round(78 + 22 * it.value / max);
           const label = `${it.name}: ${fmt(it.value)}${salary > 0 ? ", " + pctS(it.value) + " dello stipendio" : ""}`;
           return `<div class="sc-tile${cls}" style="left:${(t.x / W * 100).toFixed(2)}%;top:${(t.y / H * 100).toFixed(2)}%;width:${(t.w / W * 100).toFixed(2)}%;height:${(t.h / H * 100).toFixed(2)}%;--k:${k};--n:${i}" role="img" aria-label="${escapeHtml(label)}" title="${escapeHtml(label)}"><div><span>${escapeHtml(it.name)}</span><b>${fmt0(it.value)}</b><em>${pctS(it.value)}</em></div></div>`;
         }).join("");
