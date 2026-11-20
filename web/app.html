@@ -966,6 +966,85 @@ html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
 .sf-rec{display:grid;gap:var(--s2);padding-top:var(--s3);border-top:1px dashed var(--line);font-size:var(--fs-2);color:var(--ink-2)}
 .sf-months{display:flex;gap:3px}.sf-months i{flex:1;max-width:36px;height:8px;border-radius:4px;background:var(--pos);opacity:.7}
 .sf-note{margin:0;font-size:var(--fs-1);color:var(--ink-3)}
+/* ===== Finanza: hero simmetrico e ciclo dello stipendio ===== */
+.fin-hero{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4)}
+.fh-card{position:relative;display:grid;align-content:start;gap:var(--s2);padding:var(--s5);border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);text-align:left;min-height:190px}
+.fh-card h2{margin:0;font-size:var(--fs-2);font-weight:400;color:var(--ink-2)}
+.fh-val{font-size:var(--fs-8);line-height:1.1;font-weight:650;letter-spacing:-.01em}
+.fh-card p{margin:0;font-size:var(--fs-2);color:var(--ink-2)}
+.fh-card small{font-size:var(--fs-1);color:var(--ink-3)}
+.fh-card>button{position:absolute;top:var(--s4);right:var(--s4)}
+.fh-bar{height:10px;margin-top:var(--s3);border-radius:var(--r-pill);background:var(--surface-3);overflow:hidden}
+.fh-bar i{display:block;height:100%;border-radius:var(--r-pill);background:var(--pos);transform-origin:left;animation:sc-bar .8s cubic-bezier(.2,.7,.2,1) both}
+.fh-spark{width:100%;height:40px;margin-top:var(--s3);overflow:visible}
+.fh-spark polyline{fill:none;stroke:var(--sec-finance);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.fh-spark-empty{height:40px;margin-top:var(--s3)}
+@keyframes sc-bar{from{transform:scaleX(0)}}
+@keyframes sc-grow{from{stroke-dasharray:0 100}}
+.sc-main{display:grid;grid-template-columns:minmax(200px,260px) minmax(0,1fr);gap:var(--s6);align-items:center;margin-top:var(--s4)}
+.sc-donut{position:relative;width:100%;max-width:260px;aspect-ratio:1;margin:0 auto}
+.sc-donut svg{width:100%;height:100%;display:block}
+.sc-seg{animation:sc-grow .9s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i) * .09s)}
+.sc-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.sc-center small{font-size:var(--fs-1);text-transform:uppercase;letter-spacing:.6px;color:var(--ink-3)}
+.sc-center strong{font-size:var(--fs-7);line-height:1.15;font-weight:650}
+.sc-legend{display:grid;gap:var(--s2);min-width:0}
+.sc-row{border-radius:var(--r-md);background:var(--surface-2)}
+.sc-row[open]{background:var(--surface-2)}
+.sc-sum{display:grid;grid-template-columns:12px minmax(0,1fr) auto 44px;gap:var(--s3);align-items:center;padding:var(--s3) var(--s4);cursor:pointer;list-style:none}
+.sc-sum::-webkit-details-marker{display:none}
+.sc-plain .sc-sum{cursor:default}
+.sc-sum>i{width:12px;height:12px;border-radius:4px;background:var(--c)}
+.sc-name{display:flex;flex-direction:column;font-size:var(--fs-3);font-weight:650;color:var(--ink)}
+.sc-name small{font-size:var(--fs-1);font-weight:400;color:var(--ink-3)}
+.sc-sum b{font-size:var(--fs-4);font-weight:650;font-variant-numeric:tabular-nums}
+.sc-sum em{font-style:normal;font-size:var(--fs-2);color:var(--ink-3);text-align:right}
+details.sc-row>summary::after{content:none}
+.sc-items{display:grid;gap:var(--s3);padding:0 var(--s4) var(--s4) calc(var(--s4) + 12px + var(--s3))}
+.sc-it{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px var(--s3);font-size:var(--fs-2)}
+.sc-it span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-2)}
+.sc-it b{font-weight:400}.sc-it b.neg{color:var(--pos)}
+.sc-it i{grid-column:1/-1;height:4px;border-radius:var(--r-pill);background:var(--c);opacity:.85;transform-origin:left;animation:sc-bar .7s cubic-bezier(.2,.7,.2,1) both}
+.sc-pace{display:grid;gap:var(--s3);margin-top:var(--s5);padding-top:var(--s4);border-top:1px solid var(--line-soft)}
+.sc-pace-bars{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s5)}
+.sc-pace label{display:grid;grid-template-columns:1fr auto;gap:var(--s2) var(--s3);font-size:var(--fs-2);color:var(--ink-2)}
+.sc-track{grid-column:1/-1;height:8px;border-radius:var(--r-pill);background:var(--surface-3);overflow:hidden;order:3}
+.sc-track i{display:block;height:100%;border-radius:var(--r-pill);background:var(--ink-3);transform-origin:left;animation:sc-bar .8s cubic-bezier(.2,.7,.2,1) both}
+.sc-track.warn i{background:var(--warn)}
+.sc-pace b{font-weight:650;color:var(--ink)}
+.sc-msg{margin:0;font-size:var(--fs-3)}.sc-msg.ok{color:var(--pos)}.sc-msg.bad{color:var(--warn)}
+@media(max-width:900px){.sc-main{grid-template-columns:1fr}.sc-donut{max-width:220px}}
+@media(max-width:620px){.fin-hero{grid-template-columns:1fr}.fh-card{min-height:0}.sc-pace-bars{grid-template-columns:1fr}.sc-sum{grid-template-columns:12px minmax(0,1fr) auto 38px;padding:var(--s3)}}
+@media(prefers-reduced-motion:reduce){.sc-seg,.fh-bar i,.sc-it i,.sc-track i{animation:none}}
+/* ===== Analisi: previsione, categorie ===== */
+.fc-lead b.neg{color:var(--neg)}
+.fc-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s3)}
+.fc-card{display:grid;gap:2px;padding:var(--s3) var(--s4);text-align:left;border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface-2);color:var(--ink);cursor:pointer;font:inherit}
+.fc-card small{font-size:var(--fs-1);color:var(--ink-3)}.fc-card strong{font-size:var(--fs-5);font-weight:650}
+.fc-card span{font-size:var(--fs-1);color:var(--ink-3)}.fc-card span.pos{color:var(--pos)}.fc-card span.neg{color:var(--neg)}
+.fc-card.active{border-color:var(--sec-finance);background:var(--surface-3)}
+.fc-chips{display:flex;flex-wrap:wrap;gap:var(--s2)}
+.fc-chip{display:inline-flex;align-items:baseline;gap:var(--s2);padding:var(--s2) var(--s3);border-radius:var(--r-pill);background:var(--surface-2);font-size:var(--fs-1);color:var(--ink-2)}
+.fc-chip small{color:var(--ink-3);text-transform:capitalize}.fc-chip b{font-weight:650}.fc-chip.in b{color:var(--pos)}.fc-chip.out b{color:var(--neg)}
+.fc-set{display:grid;gap:var(--s3);padding:var(--s4);border:1px solid var(--line-soft);border-radius:var(--r-lg)}
+.fc-set h3{margin:0;font-size:var(--fs-3)}.fc-basis{margin:0;font-size:var(--fs-2);color:var(--ink-2)}.fc-basis b{color:var(--ink)}
+.fc-set small{color:var(--ink-3);font-size:var(--fs-1)}
+@media(max-width:700px){.fc-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.cat-wrap{display:grid;gap:var(--s4)}
+.cat-top{display:flex;justify-content:space-between;align-items:baseline;color:var(--ink-2);font-size:var(--fs-2)}.cat-top strong{font-size:var(--fs-6);color:var(--ink)}
+.cat-stack{display:flex;gap:3px;height:16px;border-radius:var(--r-sm);overflow:hidden}
+.cat-stack i{display:block;min-width:6px;border-radius:4px;background:var(--c);transform-origin:left;animation:sc-bar .8s cubic-bezier(.2,.7,.2,1) both}
+.cat-groups{display:grid;gap:var(--s2)}
+.cat-g{border-radius:var(--r-md);background:var(--surface-2)}
+.cat-g summary{display:grid;grid-template-columns:12px minmax(0,1fr) auto 44px;gap:var(--s3);align-items:center;padding:var(--s3) var(--s4);cursor:pointer;list-style:none}
+.cat-g summary::-webkit-details-marker{display:none}.cat-g summary>i{width:12px;height:12px;border-radius:4px;background:var(--c)}
+.cat-gn{display:flex;flex-direction:column;font-weight:650;font-size:var(--fs-3)}.cat-gn small{font-weight:400;color:var(--ink-3);font-size:var(--fs-1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cat-g summary b{font-size:var(--fs-4);font-weight:650;font-variant-numeric:tabular-nums}.cat-g summary em{font-style:normal;color:var(--ink-3);font-size:var(--fs-2);text-align:right}
+.cat-items{display:grid;gap:var(--s3);padding:0 var(--s4) var(--s4) calc(var(--s4) + 12px + var(--s3))}
+.cat-it{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px var(--s3);font-size:var(--fs-2)}.cat-it span{color:var(--ink-2)}
+.cat-it i{grid-column:1/-1;height:4px;border-radius:var(--r-pill);background:var(--c);opacity:.85;transform-origin:left;animation:sc-bar .7s cubic-bezier(.2,.7,.2,1) both}
+.budget-flow>section:has(.cat-wrap){grid-column:1/-1}
+.cat-g summary::after,.sc-row summary::after{content:none!important;display:none!important}
 </style>
 </head>
   <body class="dashboard-mode">
@@ -3517,40 +3596,104 @@ html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
         const s = d.summary, daily = dailyBudgetRange(s);
         const recent = (d.transactions || []).slice(0, 3);
         return `<div class="finance-open">
-        <section class="finance-hero"><h2>Budget rimanente</h2><strong class="finance-value ${amountClass(s.monthlyRemaining)}">${state.assetsVisible ? exactEuro(s.monthlyRemaining) : "•••• €"}</strong><p class="muted">${daily.days ? (state.assetsVisible ? exactEuro(daily.low) : "•••• €")+" al giorno" : "Mese concluso · riepilogo del budget"}</p>${daily.days?`<small>${daily.days} giorni${d.key===todayIso().slice(0,7)?", incluso oggi":" del mese selezionato"}</small>`:""}</section>
-        <section class="finance-account"><div><h2>Saldo attuale</h2><strong>${state.assetsVisible ? exactEuro(s.budget) : "•••• €"}</strong></div>${privacyButton()}<small>Saldo dell’ultima sincronizzazione, distinto dal mese selezionato.</small></section>
+        ${finHero(d, daily)}
         <div class="finance-actions"><button data-new-transaction="Spesa" class="primary-pill"><span aria-hidden="true">+</span>Nuova spesa</button><button data-new-extra><span aria-hidden="true">+</span>Nuovo piano</button><button data-view="budget"><span aria-hidden="true">◔</span>Budget</button><button data-view="analysis"><span aria-hidden="true">≋</span>Analisi</button></div>
         ${budgetSankey(d)}
         <section class="finance-recent"><div class="finance-heading"><h2>Ultimi movimenti</h2><button data-view="movements">Vedi tutti</button></div>${recent.length ? recent.map(t => `<button class="finance-movement" data-edit-movement="${Number(t.row)}"><span><strong>${escapeHtml(t.name)}</strong><small>${escapeHtml(t.date || '')} · ${escapeHtml(t.category || t.type || '')}</small></span><b class="${amountClass(t.amount)}">${state.assetsVisible ? exactEuro(t.amount) : '•••• €'}</b></button>`).join('') : '<p class="empty">Nessun movimento nel mese.</p>'}</section>${overviewCharts(d)}</div>`;
       }
 
-      /** Cascata dello stipendio del mese (Sankey in SVG puro): stipendio, messo da parte, impegni, speso, libero. */
+      /** Nome categoria allineato all'elenco attuale (le vecchie categorie dello storico vengono ricondotte). */
+      const CAT_RULES = [[/affitt/i, "Affitto"], [/condomin/i, "Condominio"], [/elettric|\bluce\b/i, "Elettricità"], [/\bgas\b/i, "Gas"], [/acqua/i, "Acqua"], [/abbonam|netflix|spotify|stream/i, "Abbonamenti"], [/utenz|bolletta|internet|telefon/i, "Utenze"], [/alimentar|supermerc|grocer|^spesa/i, "Alimentari"], [/ristor|\bbar\b|pizz|caff/i, "Ristorazione"], [/assicur/i, "Assicurazione"], [/manutenz|officina|gomme|tagliando/i, "Manutenzione auto"], [/benzin|carburant|diesel/i, "Benzina"], [/\bbollo/i, "Bollo"], [/pedagg|parcheggi|telepass|\bauto\b/i, "Auto"], [/dentist|ortodon|devitaliz/i, "Dentista"], [/farmac|visit|integrator|medic/i, "Farmaci e visite"], [/salute|sanit/i, "Salute"], [/palestra|fitness|sport/i, "Palestra"], [/svago|cinema|gioch|intratten/i, "Svago"], [/viagg|vacanz|hotel|volo|treno/i, "Viaggi"], [/shopping|abbigl|amazon|vestit/i, "Shopping"], [/arredament|casa/i, "Arredamento e casa"]];
+      globalThis.lifeOSNormCategory = function (name) {
+        const list = lifeOSContract.expenseCategories, raw = String(name || "").trim();
+        const exact = list.find((c) => c.toLowerCase() === raw.toLowerCase());
+        if (exact) return exact;
+        const hit = CAT_RULES.find(([re]) => re.test(raw));
+        return hit ? hit[1] : "Altro";
+      };
+      /** Spese che il Worker conta davvero in "Speso": esclude impegni fissi, accantonamenti, recuperi e quote coperte da un piano. */
+      function spentBreakdown(d, spent) {
+        const norm = globalThis.lifeOSNormCategory, fixedCats = new Set(financialCommittedCategories());
+        for (const p of d.plansV2?.plans || []) if (p.category && (p.kind === "estimated" || p.kind === "fixed" && !(Number(p.intervalMonths) > 1))) fixedCats.add(p.category);
+        const SAV = ["Assicurazione", "Bollo", "Manutenzione auto", "Dentista", "Straordinarie"];
+        const pol = new Map((d.extraPlan?.budgetPolicies || []).map((p) => [Number(p.movement_source_row), p.treatment]));
+        const linked = new Map();
+        for (const l of d.extraPlan?.links || []) if (l.role === "payment") linked.set(Number(l.movement_source_row), (linked.get(Number(l.movement_source_row)) || 0) + Number(l.attributed_cents || 0) / 100);
+        const by = new Map();
+        for (const t of d.transactions || []) {
+          if (t.type !== "Spesa" || !(t.amount < 0) || t.status && t.status !== "Eseguito") continue;
+          const cat = t.category || "Altro", mode = pol.get(Number(t.row)) || "auto";
+          if (["planned", "savings", "recovery"].includes(mode) || mode === "auto" && (fixedCats.has(cat) || SAV.includes(cat))) continue;
+          const v = -t.amount - Math.min(-t.amount, linked.get(Number(t.row)) || 0);
+          if (v <= 0.004) continue;
+          const key = norm(t.displayCategory || cat);
+          by.set(key, (by.get(key) || 0) + v);
+        }
+        let items = [...by].map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+        const sum = items.reduce((n, x) => n + x.value, 0);
+        if (sum > 0 && Math.abs(sum - spent) > 0.5) items = items.map((x) => ({ ...x, value: x.value * spent / sum }));
+        else if (!sum && spent > 0.5) items = [{ name: "Altre spese", value: spent }];
+        const top = items.slice(0, 5), rest = items.slice(5).reduce((n, x) => n + x.value, 0);
+        return rest > 0.5 ? [...top, { name: "Altre", value: rest }] : top;
+      }
+      /** Parte alta di Finanza: due card simmetriche. */
+      function finHero(d, daily) {
+        const s = d.summary, hide = !state.assetsVisible, fmt = (v) => hide ? "•••• €" : exactEuro(v);
+        const spent = Math.max(0, Number(s.monthlySpent) || 0), rem = Number(s.monthlyRemaining) || 0, spendable = spent + Math.max(0, rem);
+        const left = spendable > 0 ? Math.max(0, Math.min(100, Math.round(Math.max(0, rem) / spendable * 100))) : 0;
+        const ser = (d.lifetime?.series || []).map((r) => [r.measured, r.estimated, r.wealth].find(Number.isFinite)).filter(Number.isFinite).slice(-7);
+        let spark = "";
+        if (ser.length >= 2) {
+          const lo = Math.min(...ser), hi = Math.max(...ser), W = 200, H = 40, y = (v) => hi === lo ? H / 2 : H - 4 - (v - lo) / (hi - lo) * (H - 8), x = (i) => 2 + i * (W - 4) / (ser.length - 1);
+          const delta = ser.at(-1) - ser[0];
+          spark = `<svg class="fh-spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Andamento del saldo"><polyline points="${ser.map((v, i) => `${x(i)},${y(v)}`).join(" ")}"/></svg><small>${hide ? "••••" : (delta >= 0 ? "+" : "−") + exactEuro(Math.abs(delta))} in ${ser.length - 1} mesi</small>`;
+        } else spark = `<div class="fh-spark-empty"></div><small>Andamento non ancora disponibile</small>`;
+        const per = daily.days ? `${fmt(daily.low)} al giorno · ${daily.days} giorni${`${state.year}-${String(state.month).padStart(2, "0")}` === todayIso().slice(0, 7) ? ", incluso oggi" : ""}` : "Mese concluso";
+        return `<div class="fin-hero"><section class="fh-card"><h2>Budget rimanente</h2><strong class="fh-val ${amountClass(rem)}">${fmt(rem)}</strong><p>${per}</p><div class="fh-bar" role="img" aria-label="${left}% del budget spendibile ancora disponibile"><i style="width:${left}%"></i></div><small>${left}% del budget spendibile ancora disponibile</small></section><section class="fh-card"><h2>Saldo attuale</h2>${privacyButton()}<strong class="fh-val">${fmt(s.budget)}</strong><p>Ultima sincronizzazione, non legato al mese scelto</p>${spark}</section></div>`;
+      }
+      /** Come si divide lo stipendio del mese: ciambella animata + righe espandibili + ritmo del mese. */
       function budgetSankey(d) {
-        const sm = d.summary || {}, hide = state.assetsVisible === false, fmt = v => hide ? "•••• €" : exactEuro(v);
-        const S = Number(sm.monthlySalary) || 0; if (!S) return "";
-        const spent = Math.max(0, Number(sm.monthlySpent) || 0), rem = Number(sm.monthlyRemaining) || 0;
-        const plans = (d.plansV2?.plans || []).filter(p => Number(p.contributionCents) > 0).map(p => ({ name: p.name, value: p.contributionCents / 100 }));
-        const fixedRaw = (sm.monthlyBudgetBreakdown || []).filter(x => !x.planId && Number(x.amount) > 0).map(x => ({ name: x.name, value: Number(x.amount) }));
-        const planSum = plans.reduce((n, x) => n + x.value, 0), fixedSum = fixedRaw.reduce((n, x) => n + x.value, 0);
-        const other = Math.round((S - spent - rem - planSum - fixedSum) * 100) / 100;
-        const fixed = other > 0.5 ? [...fixedRaw, { name: "Altri impegni del mese", value: other }] : fixedRaw;
-        const cat = new Map(); for (const t of d.transactions || []) if (t.type === "Spesa" && t.amount < 0) cat.set(t.category || "Altro", (cat.get(t.category || "Altro") || 0) - t.amount);
-        let sp = [...cat].sort((a, b) => b[1] - a[1]).map(([name, value]) => ({ name, value })); const top = sp.slice(0, 4), tail = sp.slice(4).reduce((n, x) => n + x.value, 0) + Math.max(0, spent - sp.reduce((n, x) => n + x.value, 0));
-        const spItems = tail > 0.5 ? [...top, { name: "Altre spese", value: tail }] : top;
-        const free = Math.max(0, rem), over = rem < 0 ? -rem : 0;
+        const sm = d.summary || {}, hide = state.assetsVisible === false, fmt = (v) => hide ? "•••• €" : exactEuro(v), fmt0 = (v) => hide ? "•••• €" : Math.round(v).toLocaleString("it-IT", { useGrouping: "always" }) + " €";
+        const S = Number(sm.monthlySalary) || 0;
+        if (!S) return "";
+        const spent = Math.max(0, Number(sm.monthlySpent) || 0), rem = Number(sm.monthlyRemaining) || 0, committed = Math.max(0, S - spent - rem);
+        const save = [], fixed = [];
+        for (const p of d.plansV2?.plans || []) {
+          const v = Number(p.contributionCents) / 100;
+          if (!(v > 0)) continue;
+          const monthly = ["estimated", "advance", "recovery"].includes(p.kind) || p.kind === "fixed" && !(Number(p.intervalMonths) > 1);
+          (monthly ? fixed : save).push({ name: p.name, value: v });
+        }
+        for (const x of sm.monthlyBudgetBreakdown || []) if (!x.planId && Number(x.amount) > 0) (/^Accantonament/i.test(x.name) ? save : fixed).push({ name: x.name, value: Number(x.amount) });
+        const diff = committed - [...save, ...fixed].reduce((n, x) => n + x.value, 0);
+        if (Math.abs(diff) > 0.5) fixed.push({ name: diff > 0 ? "Altri impegni del mese" : "Quote già coperte", value: diff });
+        const free = Math.max(0, rem), over = rem < 0 ? -rem : 0, sp = spentBreakdown(d, spent);
         const groups = [
-          { k: "save", label: "Messo da parte", color: "var(--sec-finance)", value: planSum, items: plans },
-          { k: "fixed", label: "Impegni del mese", color: "#c59ad4", value: fixedSum + (other > 0.5 ? other : 0), items: fixed },
-          { k: "spent", label: "Speso", color: "var(--neg)", value: spent, items: spItems },
-          { k: "free", label: over ? "Sforamento" : "Libero", color: over ? "var(--warn)" : "var(--pos)", value: over || free, items: [{ name: over ? "Oltre lo stipendio" : "Ancora disponibile", value: over || free }] }
-        ].filter(g => g.value > 0.005);
-        const total = groups.reduce((n, g) => n + g.value, 0) || 1, pct = v => Math.round(v / total * 100);
-        const seg = groups.map(g => `<i style="flex:${g.value};background:${g.color}" title="${g.label}: ${fmt(g.value)}"></i>`).join("");
-        const cols = groups.map(g => `<div class="sk-col" style="--c:${g.color}"><div class="sk-head"><small>${g.label}</small><strong>${fmt(g.value)}</strong><span>${pct(g.value)}% dello stipendio</span></div></div>`).join("");
-        const colsDetail = groups.map(g => `<div class="sk-col" style="--c:${g.color}"><div class="sk-items">${[...g.items].sort((a, b) => b.value - a.value).map(it => `<div class="sk-ci"><span>${escapeHtml(it.name)}</span><b>${fmt(it.value)}</b><i style="width:${Math.max(3, it.value / g.value * 100).toFixed(0)}%"></i></div>`).join("")}</div></div>`).join("");
-        return `<section class="card pad sankey"><div class="card-title"><h2>Come si divide lo stipendio del mese</h2><span class="sk-total">Stipendio <b>${fmt(S)}</b></span></div><div class="sk-seg" role="img" aria-label="Divisione dello stipendio in percentuale">${seg}</div>${over ? `<p class="hint sk-warn">Hai speso ${fmt(over)} più del budget del mese.</p>` : ""}<div class="sk-cols">${cols}</div><details class="sk-more"><summary>Dettaglio voci</summary><div class="sk-cols">${colsDetail}</div></details></section>`;
+          { k: "fixed", label: "Impegni del mese", hint: "affitto, utenze, rate", color: "#c59ad4", items: fixed },
+          { k: "save", label: "Messo da parte", hint: "accantonamenti per spese future", color: "var(--sec-finance)", items: save },
+          { k: "spent", label: "Speso", hint: "spese del mese", color: "var(--neg)", items: sp },
+          { k: "free", label: over ? "Sforamento" : "Libero", hint: over ? "oltre lo stipendio" : "ancora da spendere", color: over ? "var(--warn)" : "var(--pos)", items: [] }
+        ].map((g) => ({ ...g, value: g.k === "free" ? over || free : g.items.reduce((n, x) => n + x.value, 0) })).filter((g) => g.value > 0.005);
+        const total = groups.reduce((n, g) => n + g.value, 0) || 1, pct = (v) => Math.round(v / total * 100);
+        let off = 0;
+        const segs = groups.map((g, i) => { const share = g.value / total * 100, len = Math.max(.4, share - (groups.length > 1 ? 1.2 : 0)), el = `<circle class="sc-seg" style="--i:${i}" cx="70" cy="70" r="52" pathLength="100" fill="none" stroke="${g.color}" stroke-width="16" stroke-dasharray="${len} ${100 - len}" stroke-dashoffset="${-off}" transform="rotate(-90 70 70)"><title>${g.label}: ${fmt(g.value)}</title></circle>`; off += share; return el; }).join("");
+        const rows = groups.map((g) => {
+          const head = `<i></i><span class="sc-name">${g.label}<small>${g.hint}</small></span><b>${fmt0(g.value)}</b><em>${pct(g.value)}%</em>`;
+          if (!g.items.length) return `<div class="sc-row sc-plain" style="--c:${g.color}"><div class="sc-sum">${head}</div></div>`;
+          const list = [...g.items].sort((a, b) => b.value - a.value).map((it) => `<div class="sc-it"><span>${escapeHtml(it.name)}</span><b class="${it.value < 0 ? "neg" : ""}">${it.value < 0 ? "−" : ""}${fmt(Math.abs(it.value))}</b>${it.value > 0 ? `<i style="width:${Math.max(3, it.value / Math.max(1, ...g.items.map((x) => x.value)) * 100).toFixed(0)}%"></i>` : ""}</div>`).join("");
+          return `<details class="sc-row" style="--c:${g.color}"><summary class="sc-sum">${head}</summary><div class="sc-items">${list}</div></details>`;
+        }).join("");
+        const isNow = `${state.year}-${String(state.month).padStart(2, "0")}` === todayIso().slice(0, 7), dim = new Date(Date.UTC(state.year, state.month, 0)).getUTCDate(), day = Number(todayIso().slice(8));
+        let pace = "";
+        if (isNow && !hide) {
+          const spendable = spent + Math.max(0, rem), mp = Math.min(1, day / dim), bp = spendable > 0 ? Math.min(1.5, spent / spendable) : 1, fast = bp > mp + .08;
+          const proj = day >= 4 ? spent / mp : null, end = proj === null ? null : spendable - proj;
+          pace = `<div class="sc-pace"><div class="sc-pace-bars"><label><span>Mese trascorso</span><div class="sc-track"><i style="width:${(mp * 100).toFixed(0)}%"></i></div><b>${day}/${dim}</b></label><label><span>Budget speso</span><div class="sc-track ${fast ? "warn" : ""}"><i style="width:${Math.min(100, bp * 100).toFixed(0)}%"></i></div><b>${Math.round(bp * 100)}%</b></label></div>${end === null ? "" : `<p class="sc-msg ${end >= 0 ? "ok" : "bad"}">${end >= 0 ? `Di questo passo chiudi il mese con circa ${fmt0(end)} liberi.` : `Di questo passo sfori il budget di circa ${fmt0(-end)}.`}</p>`}</div>`;
+        }
+        return `<section class="card pad sankey"><div class="card-title"><h2>Dove va lo stipendio</h2><span class="sk-total">Stipendio <b>${fmt0(S)}</b></span></div><div class="sc-main"><div class="sc-donut"><svg viewBox="0 0 140 140" role="img" aria-label="Divisione dello stipendio">${segs}</svg><div class="sc-center"><small>${over ? "Sforamento" : "Libero"}</small><strong>${fmt0(over || free)}</strong></div></div><div class="sc-legend">${rows}</div></div>${pace}</section>`;
       }
       globalThis.lifeOSSankey = budgetSankey;
+
 
       /** Grafici della Panoramica: SVG puro, senza librerie. */
       function overviewCharts(d) {
@@ -5257,7 +5400,7 @@ html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
     const safe = escapeHtml;
     const selectedMonth = () => `${state.year}-${String(state.month).padStart(2, "0")}`;
     const monthList = (last, count) => Array.from({ length: count }, (_, i) => addMonth(last, i - count + 1));
-    function chart(rows, label, bar = false, directional = false) {
+    function chart(rows, label, bar = false, directional = false, noStats = false) {
       if (!rows.length) return '<p class="empty">Nessun dato disponibile nel periodo.</p>';
       if (!state.assetsVisible) return "<button data-toggle-assets>Mostra importi</button>";
       const n = rows.length, nums = rows.flatMap((p) => [p.value, p.lower, p.upper, p.base, p.additional].filter(Number.isFinite));
@@ -5286,8 +5429,8 @@ html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
       const st = (l, v, sub, cls) => `<div class="an-stat"><small>${l}</small><strong class="${cls || ""}">${v}</strong><span>${sub}</span></div>`;
       const stats = bar
         ? st("Ultimo", exactEuro(last), safe(lastRow.label)) + st("Media", exactEuro(avg), `su ${n} mesi`) + st("Massimo", exactEuro(Math.max(...vals)), safe(rows[vals.indexOf(Math.max(...vals))].label)) + st("Minimo", exactEuro(Math.min(...vals)), safe(rows[vals.indexOf(Math.min(...vals))].label))
-        : st("Ultimo", exactEuro(last), safe(lastRow.label)) + st("Variazione", sgn(delta), first ? `${delta >= 0 ? "+" : "−"}${Math.abs(delta / first * 100).toFixed(1).replace(".", ",")}% dal ${safe(rows[0].label)}` : safe(rows[0].label), delta >= 0 ? "pos" : "neg") + st("Massimo", exactEuro(Math.max(...vals)), safe(rows[vals.indexOf(Math.max(...vals))].label)) + st("Minimo", exactEuro(Math.min(...vals)), safe(rows[vals.indexOf(Math.min(...vals))].label));
-      return `<div class="an-stats">${stats}</div><svg class="trend-svg an-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="${safe(label)}">${grid}${shapes}${lastTag}${xl}</svg><details><summary>Valori del grafico</summary>${rows.map((p) => `<div class="kv"><span>${safe(p.label)}</span><strong>${safe(exactEuro(p.value))}${Number.isFinite(p.lower) ? `<small> ${safe(exactEuro(p.lower))} – ${safe(exactEuro(p.upper))}</small>` : ""}</strong></div>`).join("")}</details>`;
+        : st("Ultimo", exactEuro(last), safe(lastRow.label)) + st("Variazione", sgn(delta), first >= 100 ? `${delta >= 0 ? "+" : "−"}${Math.abs(delta / first * 100).toFixed(1).replace(".", ",")}% dal ${safe(rows[0].label)}` : safe(rows[0].label), delta >= 0 ? "pos" : "neg") + st("Massimo", exactEuro(Math.max(...vals)), safe(rows[vals.indexOf(Math.max(...vals))].label)) + st("Minimo", exactEuro(Math.min(...vals)), safe(rows[vals.indexOf(Math.min(...vals))].label));
+      return `${noStats ? "" : `<div class="an-stats">${stats}</div>`}<svg class="trend-svg an-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="${safe(label)}">${grid}${shapes}${lastTag}${xl}</svg><details><summary>Valori del grafico</summary>${rows.map((p) => `<div class="kv"><span>${safe(p.label)}</span><strong>${safe(exactEuro(p.value))}${Number.isFinite(p.lower) ? `<small> ${safe(exactEuro(p.lower))} – ${safe(exactEuro(p.upper))}</small>` : ""}</strong></div>`).join("")}</details>`;
     }
     const card = (title, body) => `<section class="card pad"><h2>${title}</h2>${body}</section>`;
 
@@ -5312,11 +5455,12 @@ html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
     function fcInputs(d) {
       const day = todayIso(), month = day.slice(0, 7), model = wealthForecast(d, d.forecastPlan || d.extraPlan, day, 24, fcs.from);
       const all = (d.lifetime?.series || []).filter((r) => r.month < month && Number.isFinite(r.income) && Number.isFinite(r.spent)).sort((a, b) => a.month.localeCompare(b.month)), rows = all.filter((r) => r.month >= fcs.from);
-      const last6 = rows.slice(-6), nets = last6.map((r) => r.income - r.spent), incomes = last6.map((r) => r.income);
-      const salary = Number(d.summary?.monthlySalary) || fcMed(incomes) || 0, medIncome = fcMed(all.map((r) => r.income));
-      const spike = (suffixes) => { const r = all.filter((x) => suffixes.includes(x.month.slice(5)) && medIncome && x.income > medIncome * 1.5).pop(); return r ? Math.round(r.income - medIncome) : null; };
-      const base = model.samples >= 4 ? model.normalizedNet : nets.length >= 3 ? fcMed(nets) : null, since = new Date(fcs.from + "-15T12:00:00Z").toLocaleDateString("it-IT", { month: "long", year: "numeric", timeZone: "UTC" });
-      return { day, since, assets: model.assets, base, months: Math.max(model.samples, nets.length), salary, d13: spike(["12"]), d14: spike(["06", "07"]), payments: model.payments, spentAvg: last6.length ? fcMed(last6.map((r) => r.spent)) : null, incomeAvg: last6.length ? fcMed(incomes) : null };
+      const medAll = fcMed(all.map((r) => r.income)), adj = (r) => medAll && r.income > medAll * 1.5 ? medAll : r.income;
+      const n = rows.length, inc = n ? rows.reduce((t, r) => t + adj(r), 0) / n : 0, out = n ? rows.reduce((t, r) => t + r.spent, 0) / n : 0;
+      const salary = Number(d.summary?.monthlySalary) || inc || 0;
+      const spike = (suffixes) => { const r = all.filter((x) => suffixes.includes(x.month.slice(5)) && medAll && x.income > medAll * 1.5).pop(); return r ? Math.round(r.income - medAll) : null; };
+      const since = new Date(fcs.from + "-15T12:00:00Z").toLocaleDateString("it-IT", { month: "long", year: "numeric", timeZone: "UTC" });
+      return { day, since, assets: model.assets, base: n >= 2 ? inc - out : null, n, salary, d13: spike(["12"]), d14: spike(["06", "07"]), payments: model.payments, spentAvg: out, incomeAvg: inc };
     }
     function fcRun(inp, saving, steps) {
       const a13 = fcs.a13 ?? inp.d13 ?? Math.round(inp.salary), a14 = fcs.a14 ?? inp.d14 ?? Math.round(inp.salary);
@@ -5332,42 +5476,37 @@ html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
       }
       return out;
     }
-    const fcFrom = (inp) => `<label class="fc-from"><span>Statistica dal mese</span><input type="month" value="${fcs.from}" data-fc-from aria-label="Mese di inizio statistica"><small>La stima usa solo i mesi da qui in poi.</small></label>`;
+    const fcMoney = (hide, v) => hide ? "•••• €" : Math.round(v).toLocaleString("it-IT", { useGrouping: "always" }) + " €";
+    function fcSettings(inp, hide) {
+      const a13 = fcs.a13 ?? inp.d13 ?? Math.round(inp.salary), a14 = fcs.a14 ?? inp.d14 ?? Math.round(inp.salary);
+      const basis = inp.base === null ? "" : `<p class="fc-basis">Da ${inp.since} (${inp.n} ${inp.n === 1 ? "mese" : "mesi"}): entrate medie ${fcMoney(hide, inp.incomeAvg)} meno uscite medie ${fcMoney(hide, inp.spentAvg)} = <b>${fcMoney(hide, inp.base)}</b> al mese, senza tredicesima e quattordicesima.</p>`;
+      return `<div class="fc-set"><h3>Impostazioni</h3><label class="fc-from"><span>Statistica dal mese</span><input type="month" value="${fcs.from}" data-fc-from aria-label="Mese di inizio statistica"></label>${basis}<div class="fc-bonus"><label><input type="checkbox" data-fc-b="b13" ${fcs.b13 ? "checked" : ""}> Tredicesima, dicembre</label><input type="number" step="50" value="${a13}" data-fc-a="a13" aria-label="Importo tredicesima"><em>€</em><label><input type="checkbox" data-fc-b="b14" ${fcs.b14 ? "checked" : ""}> Quattordicesima, giugno</label><input type="number" step="50" value="${a14}" data-fc-a="a14" aria-label="Importo quattordicesima"><em>€</em></div><small>${inp.d13 || inp.d14 ? "Importi rilevati dai tuoi stipendi passati, modificabili." : "Stima: circa uno stipendio netto. Cambiala con l'importo vero."}</small><small data-fc-status>${safe(fcStatus)}</small></div>`;
+    }
     function fcPanel(d) {
-      const hide = !state.assetsVisible, fmt = (v) => hide ? "•••• €" : Math.round(v).toLocaleString("it-IT", { useGrouping: "always" }) + " €", inp = fcInputs(d);
-      if (inp.base === null || !Number.isFinite(inp.assets)) return `<div data-fc-root><p class="empty">Servono almeno 3 mesi completi con entrate e spese dal mese di inizio statistica (${inp.since}) per stimare il risparmio mensile.</p>${fcFrom(inp)}</div>`;
+      const hide = !state.assetsVisible, fmt = (v) => fcMoney(hide, v), inp = fcInputs(d);
+      if (inp.base === null || !Number.isFinite(inp.assets)) return `<div data-fc-root><p class="empty">Servono almeno 2 mesi completi dal mese di inizio statistica (${inp.since}) per stimare quanto risparmi.</p>${fcSettings(inp, hide)}</div>`;
       const base = Math.round(inp.base), z = fcs.saving ?? base, H = fcs.horizon;
-      const sc = [{ k: "base", name: "Come ora", sv: base }, { k: "pick", name: "Il tuo scenario", sv: z }];
-      const runs = sc.map((s) => ({ ...s, rows: fcRun(inp, s.sv, 24) }));
-      const at = (rows, n) => rows[Math.min(n, rows.length - 1)].value;
+      const rB = fcRun(inp, base, 24), rP = fcRun(inp, z, 24), rowsB = rB.slice(0, H + 1), rowsP = rP.slice(0, H + 1);
       const mn = (iso) => new Date(iso.slice(0, 7) + "-15T12:00:00Z").toLocaleDateString("it-IT", { month: "long", year: "numeric", timeZone: "UTC" });
       const ms = (iso) => new Date(iso.slice(0, 7) + "-15T12:00:00Z").toLocaleDateString("it-IT", { month: "short", timeZone: "UTC" }).replace(".", "");
-      const rowsB = runs[0].rows.slice(0, H + 1), rowsP = runs[1].rows.slice(0, H + 1);
       const all = [...rowsB, ...rowsP].map((r) => r.value), lo = Math.min(...all), hi = Math.max(...all), pad = Math.max(50, (hi - lo) * 0.14);
-      const mob = matchMedia("(max-width:760px)").matches, W = mob ? 480 : 960, Ht = 280, L = mob ? 50 : 62, R = W - 16, T = 20, B = Ht - 32, y0 = lo - pad, y1 = hi + pad;
+      const mob = matchMedia("(max-width:760px)").matches, W = mob ? 480 : 960, Ht = 260, L = mob ? 50 : 62, R = W - 16, T = 20, B = Ht - 32, y0 = lo - pad, y1 = hi + pad;
       const X = (i) => L + i * (R - L) / H, Y = (v) => B - (v - y0) / (y1 - y0) * (B - T);
-      const cmp = (v) => { const a = Math.abs(v); const t = a >= 1e4 ? Math.round(a / 1e3) + "k" : a >= 1e3 ? (a / 1e3).toFixed(1).replace(".", ",") + "k" : String(Math.round(a)); return (v < 0 ? "−" : "") + t; };
+      const cmp = (v) => { const a = Math.abs(v), t = a >= 1e4 ? Math.round(a / 1e3) + "k" : a >= 1e3 ? (a / 1e3).toFixed(1).replace(".", ",") + "k" : String(Math.round(a)); return (v < 0 ? "−" : "") + t; };
       const grid = [0, 1, 2, 3].map((k) => { const v = y0 + (y1 - y0) * k / 3; return `<line class="an-grid" x1="${L}" x2="${R}" y1="${Y(v)}" y2="${Y(v)}"/><text class="an-ytick" x="${L - 10}" y="${Y(v) + 4}" text-anchor="end">${cmp(v)}</text>`; }).join("");
       const line = (rows, cls) => `<polyline class="${cls}" points="${rows.map((r, i) => `${X(i)},${Y(r.value)}`).join(" ")}"/>`;
-      const ev = rowsP.filter((r) => r.step && (r.spend > 0.5 || r.inflow > 0.5)).map((r) => `<g class="fc-ev ${r.inflow > r.spend ? "in" : "out"}"><line x1="${X(r.step)}" x2="${X(r.step)}" y1="${T}" y2="${B}"/><circle cx="${X(r.step)}" cy="${Y(r.value)}" r="5"><title>${mn(r.day)}: ${r.inflow ? "+" + exactEuro(r.inflow) + " (tredicesima/quattordicesima) " : ""}${r.spend ? "−" + exactEuro(r.spend) + " " + r.pay.map((p) => p.label).join(", ") : ""}</title></circle></g>`).join("");
+      const ev = rowsP.filter((r) => r.step && (r.spend > 0.5 || r.inflow > 0.5)).map((r) => `<g class="fc-ev ${r.inflow > r.spend ? "in" : "out"}"><line x1="${X(r.step)}" x2="${X(r.step)}" y1="${T}" y2="${B}"/><circle cx="${X(r.step)}" cy="${Y(r.value)}" r="5"><title>${mn(r.day)}</title></circle></g>`).join("");
       const step = Math.max(1, Math.ceil(H / (mob ? 4 : 8)));
       const xl = rowsP.map((r, i) => i % step === 0 || i === H ? `<text class="an-xtick" x="${X(i)}" y="${Ht - 10}" text-anchor="${i === H ? "end" : i === 0 ? "start" : "middle"}">${i === 0 ? "oggi" : ms(r.day) + (H > 12 ? " " + r.day.slice(2, 4) : "")}</text>` : "").join("");
       const svg = `<svg class="trend-svg an-svg fc-svg" viewBox="0 0 ${W} ${Ht}" role="img" aria-label="Previsione patrimonio">${grid}${ev}${line(rowsB, "fc-base")}${line(rowsP, "fc-pick")}<circle class="an-dot last" cx="${X(H)}" cy="${Y(rowsP[H].value)}" r="6"/><text class="an-last" x="${R - 4}" y="${Y(rowsP[H].value) - 14}" text-anchor="end">${hide ? "" : cmp(rowsP[H].value) + " €"}</text>${xl}</svg>`;
-      const endB = rowsB[H].value, endP = rowsP[H].value, diff = endP - endB;
-      const worst = rowsB.slice(1).sort((a, b) => b.spend - a.spend)[0];
-      const next = runs[0].rows.slice(1, H + 1).filter((r) => r.spend > 0.5 || r.inflow > 0.5);
-      const head = `<p class="fc-lead">${z === base ? `Se continui come da ${inp.since} (${inp.months} mesi), risparmiando circa <b>${fmt(base)}</b> al mese, tra ${H} mesi (${mn(rowsB[H].day)}) avrai <b>${fmt(endB)}</b>.` : `Con <b>${fmt(z)}</b> al mese, tra ${H} mesi (${mn(rowsP[H].day)}) avrai <b class="${diff >= 0 ? "pos" : "neg"}">${fmt(endP)}</b>, ${diff >= 0 ? "" : "−"}${fmt(Math.abs(diff))} ${diff >= 0 ? "in più" : "in meno"} rispetto a continuare come ora (${fmt(endB)}).`}</p>${base < 100 ? `<p class="fc-warn">Negli ultimi mesi hai messo da parte quasi niente: il patrimonio cresce solo con tredicesima e quattordicesima.</p>` : ""}`;
-      const budgetCap = inp.incomeAvg !== null ? inp.incomeAvg - z : null;
-      const lever = z < 0 && inp.incomeAvg !== null ? `<p class="fc-lever">Questo scenario vuol dire spendere circa <b>${fmt(inp.incomeAvg - z)}</b> al mese, ${fmt(-z)} più delle tue entrate medie (${fmt(inp.incomeAvg)}).</p>` : budgetCap !== null && inp.spentAvg !== null ? `<p class="fc-lever">Per risparmiare ${fmt(z)} al mese puoi spendere circa <b>${fmt(Math.max(0, budgetCap))}</b> al mese (oggi ${fmt(inp.spentAvg)}), cioè ${fmt(Math.max(0, budgetCap) / 30)} al giorno.${budgetCap < inp.spentAvg ? ` Servono <b>${fmt(inp.spentAvg - Math.max(0, budgetCap))}</b> in meno di spese.` : ""}</p>` : "";
-      const presets = [-200, 0, 200, 500].map((dv) => ({ dv, v: base + dv }));
-      const chips = presets.map((p) => `<button data-fc-set="${p.v}" class="${p.v === z ? "active" : ""}" aria-pressed="${p.v === z}">${p.dv === 0 ? "Come ora" : (p.dv > 0 ? "+" : "−") + Math.abs(p.dv) + " €"}</button>`).join("");
-      const ctrl = `<div class="fc-ctrl"><label class="fc-slider"><span>Risparmio al mese</span><input type="range" min="${Math.min(-500, Math.floor((base - 600) / 50) * 50)}" max="${Math.max(1500, Math.ceil((base + 1000) / 50) * 50)}" step="25" value="${z}" data-fc-range aria-label="Risparmio mensile"><input type="number" step="25" value="${z}" data-fc-num aria-label="Risparmio mensile in euro"><em>€</em></label><div class="chart-range" role="group" aria-label="Scenari">${chips}</div><div class="chart-range" role="group" aria-label="Orizzonte">${[6, 12, 24].map((n) => `<button data-fc-h="${n}" class="${n === H ? "active" : ""}" aria-pressed="${n === H}">${n} mesi</button>`).join("")}</div></div>`;
-      const a13 = fcs.a13 ?? inp.d13 ?? Math.round(inp.salary), a14 = fcs.a14 ?? inp.d14 ?? Math.round(inp.salary);
-      const bonus = `${fcFrom(inp)}<div class="fc-bonus"><label><input type="checkbox" data-fc-b="b13" ${fcs.b13 ? "checked" : ""}> Tredicesima (dicembre)</label><input type="number" step="50" value="${a13}" data-fc-a="a13" aria-label="Importo tredicesima"><em>€</em><label><input type="checkbox" data-fc-b="b14" ${fcs.b14 ? "checked" : ""}> Quattordicesima (giugno)</label><input type="number" step="50" value="${a14}" data-fc-a="a14" aria-label="Importo quattordicesima"><em>€</em><small>${inp.d13 || inp.d14 ? "Importi rilevati dai tuoi stipendi passati, modificabili." : "Stima: circa uno stipendio netto. Cambiala con l'importo vero."}</small><small data-fc-status>${safe(fcStatus)}</small></div>`;
-      const table = [{ n: "Spendi di più", sv: base - 200 }, { n: "Come ora", sv: base }, { n: "Risparmi +200 €", sv: base + 200 }, { n: "Risparmi +500 €", sv: base + 500 }, { n: "Il tuo scenario", sv: z }].map((s) => { const r = fcRun(inp, s.sv, 24); return `<div class="fc-row${s.n === "Il tuo scenario" ? " pick" : ""}"><span>${s.n}<small>${fmt(s.sv)}/mese</small></span>${[3, 6, 12, 24].map((n) => `<b>${fmt(at(r, n))}</b>`).join("")}</div>`; }).join("");
-      const tbl = `<div class="fc-table"><div class="fc-row fc-h"><span></span><b>3 mesi</b><b>6 mesi</b><b>12 mesi</b><b>24 mesi</b></div>${table}</div>`;
-      const evl = next.length ? `<div class="fc-events"><h3>Cosa ti aspetta</h3>${next.map((r) => `<div class="fc-e"><span>${mn(r.day)}</span><span>${[r.inflow > 0.5 ? (r.label13 ? "Tredicesima" : "") + (r.label13 && r.label14 ? " + " : "") + (r.label14 ? "Quattordicesima" : "") : "", ...r.pay.map((p) => p.label)].filter(Boolean).map(safe).join(", ")}</span><b class="${r.inflow - r.spend >= 0 ? "pos" : "neg"}">${r.inflow - r.spend >= 0 ? "+" : "−"}${fmt(Math.abs(r.inflow - r.spend))}</b></div>`).join("")}</div>` : "";
-      return `<div data-fc-root>${head}${ctrl}${svg}<div class="fc-legend"><span><i class="b"></i>Come ora</span><span><i class="p"></i>Il tuo scenario</span><span><i class="e"></i>Spese e entrate extra</span></div>${lever}${tbl}${evl}${bonus}<details><summary>Come viene calcolata</summary><p>Il risparmio "come ora" è la mediana di entrate meno spese degli ultimi mesi, che non si fa influenzare da un mese anomalo. Da ogni mese si sottraggono i pagamenti già pianificati (assicurazione, obiettivi, piani periodici) e si sommano tredicesima e quattordicesima se attive. Non è una garanzia: è una proiezione, le impostazioni restano su questo browser.</p></details></div>`;
+      const endB = rowsB[H].value, endP = rowsP[H].value, diff = endP - endB, when = `${H} mesi (${mn(rowsB[H].day)})`;
+      const lead = z === base ? (base >= 0 ? `Se continui a spendere come da ${inp.since}, risparmi circa <b>${fmt(base)}</b> al mese e tra ${when} avrai <b>${fmt(endB)}</b>.` : `Se continui a spendere come da ${inp.since}, ogni mese perdi circa <b class="neg">${fmt(-base)}</b> e tra ${when} avrai <b>${fmt(endB)}</b>.`) : `Con <b>${fmt(z)}</b> al mese tra ${when} avrai <b class="${diff >= 0 ? "pos" : "neg"}">${fmt(endP)}</b>: ${fmt(Math.abs(diff))} ${diff >= 0 ? "in più" : "in meno"} di continuare come ora (${fmt(endB)}).`;
+      const presets = [{ n: "Spendi 200 € in più", v: base - 200 }, { n: "Come ora", v: base }, { n: "Risparmi 200 € in più", v: base + 200 }, { n: "Risparmi 500 € in più", v: base + 500 }];
+      const cards = presets.map((p) => { const end = fcRun(inp, p.v, H).at(-1).value, dl = end - endB; return `<button class="fc-card${p.v === z ? " active" : ""}" data-fc-set="${p.v}" aria-pressed="${p.v === z}"><small>${p.n}</small><strong>${fmt(end)}</strong><span class="${dl > 0.5 ? "pos" : dl < -0.5 ? "neg" : ""}">${Math.abs(dl) < 0.5 ? "come ora" : (dl > 0 ? "+" : "−") + fmt(Math.abs(dl))}</span></button>`; }).join("");
+      const ctrl = `<div class="fc-ctrl"><label class="fc-slider"><span>Risparmio al mese</span><input type="range" min="${Math.min(-1000, Math.floor((base - 600) / 50) * 50)}" max="${Math.max(1500, Math.ceil((base + 1000) / 50) * 50)}" step="25" value="${z}" data-fc-range aria-label="Risparmio mensile"><input type="number" step="25" value="${z}" data-fc-num aria-label="Risparmio mensile in euro"><em>€</em></label><div class="chart-range" role="group" aria-label="Orizzonte">${[6, 12, 24].map((n) => `<button data-fc-h="${n}" class="${n === H ? "active" : ""}" aria-pressed="${n === H}">${n} mesi</button>`).join("")}</div></div>`;
+      const chips = rB.slice(1, H + 1).filter((r) => r.spend > 0.5 || r.inflow > 0.5).map((r) => { const net = r.inflow - r.spend, lab = [r.label13 ? "Tredicesima" : "", r.label14 ? "Quattordicesima" : "", ...r.pay.map((p) => p.label)].filter(Boolean).map(safe).join(" + "); return `<span class="fc-chip ${net >= 0 ? "in" : "out"}"><small>${ms(r.day)} ${r.day.slice(2, 4)}</small>${lab}<b>${net >= 0 ? "+" : "−"}${fmt(Math.abs(net))}</b></span>`; }).join("");
+      const target = inp.incomeAvg - z, lever = z < 0 ? `Questo scenario vuol dire spendere circa <b>${fmt(target)}</b> al mese, più delle entrate medie (${fmt(inp.incomeAvg)}).` : `Per risparmiare ${fmt(z)} al mese puoi spendere circa <b>${fmt(Math.max(0, target))}</b> al mese, ${fmt(Math.max(0, target) / 30)} al giorno (oggi in media ${fmt(inp.spentAvg)}).${target < inp.spentAvg ? ` Servono <b>${fmt(inp.spentAvg - Math.max(0, target))}</b> in meno di spese.` : ""}`;
+      return `<div data-fc-root><p class="fc-lead">${lead}</p>${ctrl}${svg}<div class="fc-legend"><span><i class="b"></i>Come ora</span><span><i class="p"></i>Il tuo scenario</span><span><i class="e"></i>Spese e entrate extra</span></div><div class="fc-cards">${cards}</div>${chips ? `<div class="fc-chips">${chips}</div>` : ""}<p class="fc-lever">${lever}</p>${fcSettings(inp, hide)}<details><summary>Come viene calcolata</summary><p>Il risparmio "come ora" è la media mensile di entrate meno uscite dal mese scelto, senza tredicesima e quattordicesima. Da ogni mese si sottraggono i pagamenti già pianificati (assicurazione, obiettivi, piani periodici) e si sommano tredicesima e quattordicesima se attive. È una proiezione, non una garanzia.</p></details></div>`;
     }
     function fcRefresh() { const root = document.querySelector("[data-fc-root]"); if (!root || !state.data) return; const tmp = document.createElement("div"); tmp.innerHTML = fcPanel(state.data); root.replaceWith(tmp.firstElementChild); }
     document.addEventListener("click", (e) => {
@@ -5393,10 +5532,14 @@ html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
       const model = wealthForecast(d, d.forecastPlan || d.extraPlan, todayIso());
       const wealth = /* @__PURE__ */ new Map();
       for (const row of [...d.lifetime?.series || [], ...d.wealthHistory || []]) wealth.set(row.month, { ...wealth.get(row.month), ...row });
-      const wealthRows = [...wealth.values()].filter((r) => r.month >= first && r.month <= month).sort((a, b) => a.month.localeCompare(b.month)).map((r) => ({ label: shortMonth(r.month), value: [r.measured, r.estimated, r.wealth].find(Number.isFinite) })).filter((r) => Number.isFinite(r.value));
+      const wealthRows = [...wealth.values()].filter((r) => r.month >= first && r.month <= month).sort((a, b) => a.month.localeCompare(b.month)).filter((r) => r.month >= fcs.from).map((r) => ({ label: shortMonth(r.month), value: [r.measured, r.estimated, r.wealth].find(Number.isFinite) })).filter((r) => Number.isFinite(r.value) && r.value >= 1);
       const salary = (d.lifetime?.salaryHistory || []).filter((r) => r.month >= first && r.month <= month).sort((a, b) => a.month.localeCompare(b.month));
       const forecast = model.prediction.length ? chart([...model.history.slice(0, -1), ...model.prediction].map((p) => ({ ...p, label: p.day.slice(0, 7) })), "Previsione patrimonio") : `<p class="empty">Servono almeno 4 mesi completi osservati sui 6 precedenti. Disponibili: ${model.samples}.</p>`;
-      const html = `<div class="budget-flow">${card("Spese per categoria", `<div class="chart-range" role="group" aria-label="Periodo categorie">${[3, 6, 12].map((n) => `<button data-category-period="${n}" class="${n === range ? "active" : ""}" aria-pressed="${n === range}">${n} mesi</button>`).join("")}</div><p class="hint" data-category-interval></p><div data-period-categories role="status">Caricamento categorie\u2026</div><button data-refresh-categories>Aggiorna categorie</button>`)}${card("Previsione del patrimonio", fcPanel(d))}${card("Fascia probabile (simulazione)", `<p class="hint">6 mesi precedenti \xB7 6 mesi successivi</p>${forecast}<details><summary>Come viene calcolata</summary><p>Fascia centrale dell\u201980% di 2.000 simulazioni dei flussi osservati, con valori anomali limitati tramite mediana e deviazione assoluta mediana. Sono sottratti i pagamenti futuri pianificati, senza sottrarre gli accantonamenti una seconda volta.</p><p>Pagamenti noti nei prossimi 6 mesi: ${state.assetsVisible ? exactEuro(model.knownExtra) : "\u2022\u2022\u2022\u2022"}</p><p>Scenario indicativo sul conto principale, non garantito.</p></details>`)}${card("Patrimonio", `<p class="hint">12 mesi fino a ${safe(titleMonth(state.year, state.month))}</p>${chart(wealthRows, "Patrimonio", false, true)}`)}${card("Stipendi per competenza", `<p class="hint">12 mesi fino a ${safe(titleMonth(state.year, state.month))}</p>${chart(salary.map((r) => ({ label: shortMonth(r.month), value: (r.base || 0) + (r.additional || 0), base: r.base || 0, additional: r.additional || 0 })), "Stipendi per competenza", true)}${salary.length ? `<details><summary>Base e aggiuntive</summary>${salary.map((r) => `<div class="kv"><span>${safe(shortMonth(r.month))}</span><strong>${state.assetsVisible ? `Base ${exactEuro(r.base || 0)} \xB7 Aggiuntive ${exactEuro(r.additional || 0)}` : "\u2022\u2022\u2022\u2022"}</strong></div>`).join("")}</details>` : ""}`)}</div>`;
+      const salAll = (d.lifetime?.salaryHistory || []).slice().sort((a, b) => a.month.localeCompare(b.month));
+      let salYear = String(state.year), salRows = salAll.filter((r) => r.month.startsWith(salYear + "-")), salFallback = false;
+      if (!salRows.length) { const prev = [...new Set(salAll.map((r) => r.month.slice(0, 4)))].filter((y) => y < salYear).pop(); if (prev) { salYear = prev; salRows = salAll.filter((r) => r.month.startsWith(prev + "-")); salFallback = true; } }
+      const salSum = (f) => salRows.reduce((n, r) => n + (Number(r[f]) || 0), 0), salAvgBase = salRows.length ? salSum("base") / salRows.length : 0, salExtra = salSum("additional"), salAvgAll = salRows.length ? (salSum("base") + salExtra) / salRows.length : 0;
+      const html = `<div class="budget-flow">${card("Spese per categoria", `<div class="chart-range" role="group" aria-label="Periodo categorie">${[3, 6, 12].map((n) => `<button data-category-period="${n}" class="${n === range ? "active" : ""}" aria-pressed="${n === range}">${n} mesi</button>`).join("")}</div><p class="hint" data-category-interval></p><div data-period-categories role="status">Caricamento categorie\u2026</div><button data-refresh-categories>Aggiorna categorie</button>`)}${card("Previsione del patrimonio", fcPanel(d))}${card("Patrimonio", `<p class="hint">Dal mese di inizio statistica fino a ${safe(titleMonth(state.year, state.month))}</p>${chart(wealthRows, "Patrimonio", false, true)}`)}${card("Stipendi per competenza", `<p class="hint">Anno solare ${safe(salYear)}${salFallback ? " (ultimo anno con dati)" : ""}</p>${salRows.length ? `<div class="an-stats">${[["Media senza 13ª/14ª", salAvgBase, "stipendio base"], ["Media con 13ª/14ª", salAvgAll, `su ${salRows.length} ${salRows.length === 1 ? "mese" : "mesi"}`], ["13ª e 14ª incassate", salExtra, "totale aggiuntive"], ["Ultimo stipendio", (salRows.at(-1).base || 0) + (salRows.at(-1).additional || 0), safe(shortMonth(salRows.at(-1).month))]].map(([l, v, sub]) => `<div class="an-stat"><small>${l}</small><strong>${state.assetsVisible ? exactEuro(v) : "\u2022\u2022\u2022\u2022"}</strong><span>${sub}</span></div>`).join("")}</div>` : ""}${chart(salRows.map((r) => ({ label: shortMonth(r.month), value: (r.base || 0) + (r.additional || 0), base: r.base || 0, additional: r.additional || 0 })), "Stipendi per competenza", true, false, true)}${salRows.length ? `<details><summary>Base e aggiuntive</summary>${salRows.map((r) => `<div class="kv"><span>${safe(shortMonth(r.month))}</span><strong>${state.assetsVisible ? `Base ${exactEuro(r.base || 0)} \xB7 Aggiuntive ${exactEuro(r.additional || 0)}` : "\u2022\u2022\u2022\u2022"}</strong></div>`).join("")}</details>` : ""}`)}</div>`;
       if (Array.isArray(d.categories)) cache.set(month, d.categories);
       queueMicrotask(() => { fcLoad(); loadCategories(d); });
       return html;
@@ -5434,14 +5577,15 @@ html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
         }
         if (!current()) return;
         const rows = aggregateCategories(cache, requested);
-        const colors = ["var(--os-accent)", "#6e9cc1", "#c79a58", "#a788b8", "#b9777b", "#8b929b"], total = rows.reduce((s, r) => s + r.amount, 0);
-        let offset = 0;
-        const segments = rows.map((r, i) => {
-          const share = r.amount / total * 100, shape = `<circle cx="60" cy="60" r="48" pathLength="100" fill="none" stroke="${colors[i % colors.length]}" stroke-width="12" stroke-dasharray="${share} ${100 - share}" stroke-dashoffset="${-offset}" transform="rotate(-90 60 60)"/>`;
-          offset += share;
-          return shape;
-        }).join("");
-        target.innerHTML = rows.length ? `<div class="breakdown"><div class="category-ring"><svg viewBox="0 0 120 120" role="img" aria-label="Spese per categoria">${segments}</svg><div class="category-ring-label"><small>Spese</small><strong>${state.assetsVisible ? exactEuro(total) : "\u2022\u2022\u2022\u2022"}</strong></div></div><div>${rows.map((r, i) => `<div class="kv"><span><i class="category-swatch" style="background:${colors[i % colors.length]}"></i>${safe(r.name)}</span><strong>${state.assetsVisible ? exactEuro(r.amount) : "\u2022\u2022\u2022\u2022"}</strong></div>`).join("")}</div></div>` : '<p class="empty">Nessuna spesa nel periodo</p>';
+        const merged = new Map();
+        for (const r of aggregateCategories(cache, requested)) { const k = globalThis.lifeOSNormCategory(r.name); merged.set(k, (merged.get(k) || 0) + r.amount); }
+        const catRows = [...merged].map(([name, amount]) => ({ name, amount })).sort((x, y) => y.amount - x.amount), total = catRows.reduce((n, r) => n + r.amount, 0);
+        const hideC = !state.assetsVisible, m2 = (v) => hideC ? "\u2022\u2022\u2022\u2022 €" : exactEuro(v), m0 = (v) => hideC ? "\u2022\u2022\u2022\u2022 €" : Math.round(v).toLocaleString("it-IT", { useGrouping: "always" }) + " €";
+        const GROUPS = [["Casa", "var(--sec-finance)", ["Casa", "Affitto", "Condominio", "Arredamento e casa", "Utenze", "Elettricità", "Gas", "Acqua", "Abbonamenti"]], ["Auto", "#c79a58", ["Auto", "Assicurazione", "Bollo", "Manutenzione auto", "Benzina"]], ["Vita quotidiana", "#6e9cc1", ["Alimentari", "Ristorazione", "Shopping", "Svago", "Viaggi", "Palestra"]], ["Salute", "#b9777b", ["Salute", "Dentista", "Farmaci e visite"]], ["Altro", "#8b929b", ["Altro"]]];
+        const groups = GROUPS.map(([name, color, list]) => { const items = catRows.filter((r) => list.includes(r.name)); return { name, color, items, value: items.reduce((n, r) => n + r.amount, 0) }; }).filter((g) => g.value > 0).sort((x, y) => y.value - x.value);
+        const stack = groups.map((g) => `<i style="flex:${g.value};--c:${g.color}" title="${safe(g.name)}: ${m2(g.value)}"></i>`).join("");
+        const list = groups.map((g, i) => `<details class="cat-g" style="--c:${g.color}"${i === 0 ? " open" : ""}><summary><i></i><span class="cat-gn">${safe(g.name)}<small>${g.items.slice(0, 3).map((x) => safe(x.name)).join(", ")}</small></span><b>${m0(g.value)}</b><em>${Math.round(g.value / total * 100)}%</em></summary><div class="cat-items">${g.items.map((x) => `<div class="cat-it"><span>${safe(x.name)}</span><b>${m2(x.amount)}</b><i style="width:${Math.max(3, x.amount / g.value * 100).toFixed(0)}%"></i></div>`).join("")}</div></details>`).join("");
+        target.innerHTML = catRows.length ? `<div class="cat-wrap"><div class="cat-top"><span>Totale del periodo</span><strong>${m0(total)}</strong></div><div class="cat-stack">${stack}</div><div class="cat-groups">${list}</div></div>` : '<p class="empty">Nessuna spesa nel periodo</p>';
         refresh.textContent = "Aggiorna categorie";
       } catch (error) {
         if (current()) {
