@@ -422,3 +422,6 @@ Render approvato, implementazione del pulsante + Nutrizione → pannello con qua
 ## 2026-11-20 - movimento web (Claude)
 - Solo front-end (app.html, ui.css): ingresso a cascata al cambio vista, barre macro che crescono, finestre con dissolvenza, sollevamento al passaggio su card, scorciatoia "/" per la ricerca in Nutrizione e Bloom. Durate 160/260/420 ms, rispetta prefers-reduced-motion. Backend e Worker invariati.
 - Build web B7416C5C744226F6, non distribuita.
+
+## 2026-11-20 - colori Apple e speso nel riepilogo (Claude)
+- Palette accesa stile Apple (token + colori dei grafici), barra Speso/Rimane nel riquadro Budget rimanente, riquadri hero allineati. Solo front-end. Build web 3FF32DA66F612496, non distribuita.

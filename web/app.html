@@ -56,11 +56,11 @@ One design system owns layout and components. Finance and Life OS logic are pres
   /* testo */
   --ink:#e4e4e7;--ink-2:#a1a1a8;--ink-3:#6b6b73;
   /* interazione */
-  --accent:#cfcfd3;--on-accent:#111113;--focus:#8fb0ff;
+  --accent:#cfcfd3;--on-accent:#111113;--focus:#0a84ff;
   /* semantica finanziaria (solo direzione) */
-  --pos:#8cbaa1;--neg:#d4928f;--warn:#e0b574;
+  --pos:#30d158;--neg:#ff453a;--warn:#ff9f0a;
   /* colore di sezione */
-  --sec-finance:#a3adbd;--sec-nutrition:#8de1b5;--sec-calendar:#f2ba87;--sec-neutral:var(--ink);
+  --sec-finance:#0a84ff;--sec-nutrition:#30d158;--sec-calendar:#ff9f0a;--sec-neutral:var(--ink);
   --section:var(--sec-neutral);
   /* misure */
   --r-sm:6px;--r-md:10px;--r-lg:16px;--r-pill:999px;
@@ -81,15 +81,15 @@ html[data-theme="light"]{
   --canvas:#f2f2f7;--surface:#ffffff;--surface-2:#f0f0f4;--surface-3:#e4e4ea;
   --line:#dcdce2;--line-soft:#e9e9ee;
   --ink:#1b1b1f;--ink-2:#5e5e66;--ink-3:#8b8b93;
-  --accent:#3b3b3b;--on-accent:#ffffff;--focus:#1a5fd1;
-  --pos:#387354;--neg:#a14947;--warn:#9a6a1c;
-  --sec-finance:#174dab;--sec-nutrition:#146647;--sec-calendar:#9a5a1f;
+  --accent:#3b3b3b;--on-accent:#ffffff;--focus:#0060df;
+  --pos:#248a3d;--neg:#d70015;--warn:#b25000;
+  --sec-finance:#0060df;--sec-nutrition:#248a3d;--sec-calendar:#c93400;
   --shadow:0 1px 2px #0000000a;
 }
 /* i colori dei turni mantengono il loro significato */
-[data-kind="morning"]{--shift-color:#6191bd}[data-kind="afternoon"]{--shift-color:#659b72}
-[data-kind="night"]{--shift-color:#666870}[data-kind="rest"]{--shift-color:#ce916d}
-[data-kind="holiday"]{--shift-color:#d7bf52}
+[data-kind="morning"]{--shift-color:#0a84ff}[data-kind="afternoon"]{--shift-color:#30d158}
+[data-kind="night"]{--shift-color:#666870}[data-kind="rest"]{--shift-color:#ff9f0a}
+[data-kind="holiday"]{--shift-color:#ffd60a}
 html[data-theme="light"] [data-kind="morning"]{--shift-color:#b4c6e7}
 html[data-theme="light"] [data-kind="afternoon"]{--shift-color:#c6e0b4}
 html[data-theme="light"] [data-kind="night"]{--shift-color:#8a8e9c}
@@ -286,7 +286,7 @@ body:not(.dashboard-mode) .header-meta:has(.top-right.hidden){display:none}
 .dash-kpi small{font-size:12px;font-weight:650;letter-spacing:.4px;text-transform:uppercase;color:var(--ink-3)}
 .dash-kpi strong{font-size:31px;font-weight:650;letter-spacing:-1px;line-height:1.1;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
 .dash-kpi span{font-size:14px;color:var(--ink-2);line-height:1.3}
-.dash-kpi.k-shift{border-top:3px solid var(--sh-morning,#6b9ac4)}.dash-kpi.k-money{border-top:3px solid var(--sec-finance)}.dash-kpi.k-tasks{border-top:3px solid var(--sec-tasks,var(--ink-3))}.dash-kpi.k-sun{border-top:3px solid var(--sh-afternoon,#659b72)}.dash-kpi.k-weather{border-top:3px solid var(--sh-holiday,#d7bf52)}.dash-kpi.k-habits{border-top:3px solid var(--sec-habits,var(--ink-3))}
+.dash-kpi.k-shift{border-top:3px solid var(--sh-morning,#6b9ac4)}.dash-kpi.k-money{border-top:3px solid var(--sec-finance)}.dash-kpi.k-tasks{border-top:3px solid var(--sec-tasks,var(--ink-3))}.dash-kpi.k-sun{border-top:3px solid var(--sh-afternoon,#30d158)}.dash-kpi.k-weather{border-top:3px solid var(--sh-holiday,#ffd60a)}.dash-kpi.k-habits{border-top:3px solid var(--sec-habits,var(--ink-3))}
 .dash-kpi:hover:not(:disabled):not([aria-disabled]){background:var(--surface-2)}
 .dash-kpi[aria-disabled]{cursor:default}
 /* recap */
@@ -421,7 +421,7 @@ main:has(#today.active) .home-context{display:none}
 .budget-flow{grid-column:1/-1;display:block!important;margin-bottom:var(--s4)}.budget-flow h3{margin:0 0 var(--s2);font-size:16px}.budget-flow .hint{margin:0 0 var(--s3)}
 .budget-flow svg{width:100%;height:auto;display:block;margin:var(--s3) 0}
 .bf-name{fill:var(--ink-2);font-size:14px}.bf-val{fill:var(--ink);font-size:14px;font-weight:650}
-.bf-in rect,.bf-total rect{fill:var(--sec-finance)}.bf-fix rect{fill:var(--ink-3)}.bf-out rect{fill:var(--negative,#d98a80)}.bf-neg rect{fill:var(--negative,#d98a80)}
+.bf-in rect,.bf-total rect{fill:var(--sec-finance)}.bf-fix rect{fill:var(--ink-3)}.bf-out rect{fill:var(--negative,#ff453a)}.bf-neg rect{fill:var(--negative,#ff453a)}
 .bf-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s3)}
 .bf-kpis>div{display:grid;gap:2px;padding:var(--s3);border-radius:var(--r-md);background:var(--surface-2)}
 .bf-kpis small{font-size:12px;color:var(--ink-3)}.bf-kpis b{font-size:19px;font-weight:650;letter-spacing:-.4px}.bf-kpis span{font-size:12px;color:var(--ink-2)}
@@ -615,7 +615,7 @@ main:has(#today.active) .home-context{display:none}
 .fx-donut li{display:grid;grid-template-columns:10px minmax(0,1fr) auto;align-items:center;gap:var(--s3);font-size:14px}
 .fx-donut li span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-2)}.fx-donut li b{font-variant-numeric:tabular-nums}
 .fx-donut li i{width:10px;height:10px;border-radius:3px}
-.fx-c0{stroke:#7fa6d6;background:#7fa6d6}.fx-c1{stroke:#8cbaa1;background:#8cbaa1}.fx-c2{stroke:#e0b574;background:#e0b574}.fx-c3{stroke:#c59ad4;background:#c59ad4}.fx-c4{stroke:#d4928f;background:#d4928f}.fx-c5{stroke:#7a7f87;background:#7a7f87}
+.fx-c0{stroke:#0a84ff;background:#0a84ff}.fx-c1{stroke:#30d158;background:#30d158}.fx-c2{stroke:#ff9f0a;background:#ff9f0a}.fx-c3{stroke:#bf5af2;background:#bf5af2}.fx-c4{stroke:#ff453a;background:#ff453a}.fx-c5{stroke:#7a7f87;background:#7a7f87}
 circle.fx-seg{background:none}
 @media(max-width:760px){.fx-donut{grid-template-columns:minmax(0,1fr);justify-items:center}.fx-donut ul{width:100%}.fx-seg{stroke-width:16}}
 .fx-donut>*{min-width:0}.fx-donut li b{white-space:nowrap}
@@ -812,12 +812,12 @@ button.wf-row:hover{background:var(--surface-2)}
 .dash-kpi.k-shift{border-top:3px solid var(--shift-color,var(--ink-3))}
 .dash-kpi.k-money,.dash-kpi.k-sun,.dash-kpi.k-weather,.dash-kpi.k-tasks,.dash-kpi.k-habits{border-top:3px solid var(--line)}
 /* sidebar: ogni sezione ha il suo colore, uguale per icona, testo e sfondo */
-:root{--sec-home:#c3a6ff;--sec-tasks:#8de1b5}
+:root{--sec-home:#bf5af2;--sec-tasks:#30d158}
 html[data-theme="light"]{--sec-home:#6a45c9;--sec-tasks:#146647}
 .nav button[data-view=today].active{color:var(--sec-home);background:color-mix(in srgb,var(--sec-home) 10%,transparent)}
 .nav button[data-view=tasks].active{color:var(--sec-tasks);background:color-mix(in srgb,var(--sec-tasks) 10%,transparent)}
 .nav button[data-view=today].active .nav-symbol,.nav button[data-view=tasks].active .nav-symbol,.nav button[data-view=calendar].active .nav-symbol,.nav button[data-view=overview].active .nav-symbol{color:inherit}
-:root{--sec-admin:#7fd3e8}html[data-theme="light"]{--sec-admin:#0d6a85}
+:root{--sec-admin:#64d2ff}html[data-theme="light"]{--sec-admin:#0d6a85}
 #admin-link.active,.nav #admin-link.active{color:var(--sec-admin);background:color-mix(in srgb,var(--sec-admin) 10%,transparent)}
 #admin-link.active .nav-symbol{color:inherit}
 /* Prossimi giorni: pill piu vicina al giorno */
@@ -869,11 +869,11 @@ h1,h2,h3,.dash-kpi strong,.dw-day b,.os-agenda-date b{line-height:var(--lh-tight
 body:has(#os-event-editor) .page-fab{visibility:hidden}
 /* pennello turni: colore del turno */
 .os-palette button[data-life-tool]{border-radius:var(--r-pill);border:1px solid var(--line);background:transparent;color:var(--ink-2)}
-.os-palette button[data-life-tool="morning"]{--shift-color:#6191bd}
-.os-palette button[data-life-tool="afternoon"]{--shift-color:#659b72}
+.os-palette button[data-life-tool="morning"]{--shift-color:#0a84ff}
+.os-palette button[data-life-tool="afternoon"]{--shift-color:#30d158}
 .os-palette button[data-life-tool="night"]{--shift-color:#666870}
-.os-palette button[data-life-tool="rest"]{--shift-color:#ce916d}
-.os-palette button[data-life-tool="holiday"]{--shift-color:#d7bf52}
+.os-palette button[data-life-tool="rest"]{--shift-color:#ff9f0a}
+.os-palette button[data-life-tool="holiday"]{--shift-color:#ffd60a}
 .os-palette button[data-life-tool="morning"],.os-palette button[data-life-tool="afternoon"],.os-palette button[data-life-tool="night"],.os-palette button[data-life-tool="rest"],.os-palette button[data-life-tool="holiday"]{background:color-mix(in srgb,var(--shift-color) 20%,transparent);border-color:color-mix(in srgb,var(--shift-color) 55%,transparent);color:var(--ink)}
 .os-palette button[data-life-tool="morning"].active,.os-palette button[data-life-tool="afternoon"].active,.os-palette button[data-life-tool="night"].active,.os-palette button[data-life-tool="rest"].active,.os-palette button[data-life-tool="holiday"].active{background:var(--shift-color);border-color:var(--shift-color);color:#0b0b0b;font-weight:650}
 .os-palette button[data-life-tool="night"].active{color:#fff}
@@ -968,17 +968,24 @@ html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
 .sf-note{margin:0;font-size:var(--fs-1);color:var(--ink-3)}
 /* ===== Finanza: hero simmetrico e ciclo dello stipendio ===== */
 .fin-hero{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4)}
-.fh-card{position:relative;display:grid;align-content:start;gap:var(--s2);padding:var(--s5);border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);text-align:left;min-height:190px}
+.fh-card{position:relative;display:flex;flex-direction:column;gap:var(--s2);padding:var(--s5);border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);text-align:left;min-height:190px}
 .fh-card h2{margin:0;font-size:var(--fs-2);font-weight:400;color:var(--ink-2)}
 .fh-val{font-size:var(--fs-8);line-height:1.1;font-weight:650;letter-spacing:-.01em}
 .fh-card p{margin:0;font-size:var(--fs-2);color:var(--ink-2)}
 .fh-card small{font-size:var(--fs-1);color:var(--ink-3)}
 .fh-card>button{position:absolute;top:var(--s4);right:var(--s4)}
-.fh-bar{height:10px;margin-top:var(--s3);border-radius:var(--r-pill);background:var(--surface-3);overflow:hidden}
+.fh-g{margin-top:auto;display:grid;gap:var(--s2);padding-top:var(--s3)}
+.fh-bar{display:flex;gap:2px;height:12px;margin:14px 0;border-radius:var(--r-pill);background:var(--surface-3);overflow:hidden}
 .fh-bar i{display:block;height:100%;border-radius:var(--r-pill);background:var(--pos);transform-origin:left;animation:sc-bar .8s cubic-bezier(.2,.7,.2,1) both}
-.fh-spark{width:100%;height:40px;margin-top:var(--s3);overflow:visible}
+.fh-bar i.s{background:var(--neg)}.fh-bar i.r{background:var(--pos)}
+.fh-legend{display:flex;justify-content:space-between;gap:var(--s3);font-size:var(--fs-1);color:var(--ink-2)}
+.fh-legend span{display:inline-flex;align-items:center;gap:var(--s2);font-variant-numeric:tabular-nums}
+.fh-legend b{width:8px;height:8px;border-radius:50%;background:var(--ink-3);flex:none}
+.fh-legend .s b{background:var(--neg)}.fh-legend .r b{background:var(--pos)}.fh-legend .o b{background:var(--warn)}
+.fh-g>small{font-size:var(--fs-1);color:var(--ink-2)}
+.fh-spark{width:100%;height:40px;overflow:visible}
 .fh-spark polyline{fill:none;stroke:var(--sec-finance);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
-.fh-spark-empty{height:40px;margin-top:var(--s3)}
+.fh-spark-empty{height:40px}
 @keyframes sc-bar{from{transform:scaleX(0)}}
 @keyframes sc-grow{from{stroke-dasharray:0 100}}
 .sc-main{display:grid;grid-template-columns:minmax(200px,260px) minmax(0,1fr);gap:var(--s6);align-items:center;margin-top:var(--s4)}
@@ -1011,6 +1018,7 @@ details.sc-row>summary::after{content:none}
 .sc-track{grid-column:1/-1;height:8px;border-radius:var(--r-pill);background:var(--surface-3);overflow:hidden;order:3}
 .sc-track i{display:block;height:100%;border-radius:var(--r-pill);background:var(--ink-3);transform-origin:left;animation:sc-bar .8s cubic-bezier(.2,.7,.2,1) both}
 .sc-track.warn i{background:var(--warn)}
+.sc-pace-bars label:first-child .sc-track i{background:var(--sec-finance)}.sc-pace-bars label:last-child .sc-track:not(.warn) i{background:var(--neg)}
 .sc-pace b{font-weight:650;color:var(--ink)}
 .sc-msg{margin:0;font-size:var(--fs-3)}.sc-msg.ok{color:var(--pos)}.sc-msg.bad{color:var(--warn)}
 @media(max-width:900px){.sc-main{grid-template-columns:1fr}.sc-donut{max-width:220px}}
@@ -1612,7 +1620,7 @@ document.addEventListener("keydown", (e) => {
         const r = o.recovery, rec = r && r.months > 0 ? `<div class="sf-rec"><div class="sf-months" aria-hidden="true">${Array.from({ length: Math.min(r.months, 12) }, () => "<i></i>").join("")}</div><span>Poi rientrano ${fmt(r.total)}: ${fmt(r.total / r.months)} al mese per ${r.months} ${r.months === 1 ? "mese" : "mesi"}${r.labels ? " (" + escapeHtml(r.labels) + ")" : ""}</span></div>` : "";
         return `<div class="sf" role="group" aria-label="Da dove vengono i soldi"><div class="sf-head"><strong>Da dove vengono i soldi</strong><b>${fmt(o.amount)}</b></div>${bar ? `<div class="sf-bar">${bar}</div>` : ""}<ul class="sf-legend">${legend}</ul>${rec}${o.note ? `<p class="sf-note">${escapeHtml(o.note)}</p>` : ""}</div>`;
       }
-      const SF = { month: "var(--pos)", plan: "var(--sec-finance)", fixed: "#c59ad4", savings: "var(--warn)" };
+      const SF = { month: "var(--pos)", plan: "var(--sec-finance)", fixed: "#bf5af2", savings: "var(--warn)" };
       function spendFlowModel(f) {
         const type = f.elements.type?.value, cents = toCents(f.elements.amount?.value);
         if (type !== "Spesa" || !(cents > 0)) return null;
@@ -3563,7 +3571,7 @@ document.addEventListener("keydown", (e) => {
         const centralTop = cy;
         src.forEach(([name, amount], i) => {
           const h = (amount / total) * body,
-            color = name === "Altre risorse nette" ? "#9aa9bd" : "#aeaeb2";
+            color = name === "Altre risorse nette" ? "#64d2ff" : "#aeaeb2";
           paths += ribbon(sx, sy, cx, cy, h, color);
           nodes +=
             '<rect x="' +
@@ -3603,7 +3611,7 @@ document.addEventListener("keydown", (e) => {
           const h = (amount / total) * body,
             color =
               name === "Da riconciliare"
-                ? "#9aa9bd"
+                ? "#64d2ff"
                 : colors[i % colors.length];
           paths += ribbon(cx + 8, cy, dx, dy, h, color);
           nodes +=
@@ -3894,7 +3902,7 @@ document.addEventListener("keydown", (e) => {
         const data = d.monthlyBreakdowns?.[key] || {};
         const top = (Array.isArray(data.items) ? data.items : []).map(x => ({...x, amount:Number(x.amount)})).filter(x => Number.isFinite(x.amount) && x.amount > 0);
         const total = top.reduce((sum,x) => sum + x.amount,0);
-        const colors = ['var(--os-accent)','#6e9cc1','#c79a58','#a788b8','#b9777b','#8b929b'];
+        const colors = ['var(--os-accent)','#64d2ff','#ff9f0a','#bf5af2','#ff6482','#98989d'];
         let offset = 0;
         const segments = top.map((x,i) => {
           const share = x.amount / total * 100;
@@ -3998,6 +4006,7 @@ document.addEventListener("keydown", (e) => {
         const s = d.summary, hide = !state.assetsVisible, fmt = (v) => hide ? "•••• €" : exactEuro(v);
         const spent = Math.max(0, Number(s.monthlySpent) || 0), rem = Number(s.monthlyRemaining) || 0, spendable = spent + Math.max(0, rem);
         const left = spendable > 0 ? Math.max(0, Math.min(100, Math.round(Math.max(0, rem) / spendable * 100))) : 0;
+        const spentPct = spendable > 0 ? 100 - left : 0;
         const ser = (d.lifetime?.series || []).map((r) => [r.measured, r.estimated, r.wealth].find(Number.isFinite)).filter(Number.isFinite).slice(-7);
         let spark = "";
         if (ser.length >= 2) {
@@ -4006,7 +4015,7 @@ document.addEventListener("keydown", (e) => {
           spark = `<svg class="fh-spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Andamento del saldo"><polyline points="${ser.map((v, i) => `${x(i)},${y(v)}`).join(" ")}"/></svg><small>${hide ? "••••" : (delta >= 0 ? "+" : "−") + exactEuro(Math.abs(delta))} in ${ser.length - 1} mesi</small>`;
         } else spark = `<div class="fh-spark-empty"></div><small>Andamento non ancora disponibile</small>`;
         const per = daily.days ? `${fmt(daily.low)} al giorno · ${daily.days} giorni${`${state.year}-${String(state.month).padStart(2, "0")}` === todayIso().slice(0, 7) ? ", incluso oggi" : ""}` : "Mese concluso";
-        return `<div class="fin-hero"><section class="fh-card"><h2>Budget rimanente</h2><strong class="fh-val ${amountClass(rem)}">${fmt(rem)}</strong><p>${per}</p><div class="fh-bar" role="img" aria-label="${left}% del budget spendibile ancora disponibile"><i style="width:${left}%"></i></div><small>${left}% del budget spendibile ancora disponibile</small></section><section class="fh-card"><h2>Saldo attuale</h2>${privacyButton()}<strong class="fh-val">${fmt(s.budget)}</strong><p>Ultima sincronizzazione, non legato al mese scelto</p>${spark}</section></div>`;
+        return `<div class="fin-hero"><section class="fh-card"><h2>Budget rimanente</h2><strong class="fh-val ${amountClass(rem)}">${fmt(rem)}</strong><p>${per}</p><div class="fh-g"><div class="fh-bar" role="img" aria-label="Speso ${spentPct}% e rimanente ${left}% del budget spendibile"><i class="s" style="width:${spentPct}%"></i><i class="r" style="width:${left}%"></i></div><div class="fh-legend"><span class="s"><b></b>Speso ${fmt(spent)} · ${spentPct}%</span>${rem < 0 ? `<span class="o"><b></b>Sforato ${fmt(-rem)}</span>` : `<span class="r"><b></b>Rimane ${fmt(rem)} · ${left}%</span>`}</div></div></section><section class="fh-card"><h2>Saldo attuale</h2>${privacyButton()}<strong class="fh-val">${fmt(s.budget)}</strong><p>Ultima sincronizzazione, non legato al mese scelto</p><div class="fh-g">${spark}</div></section></div>`;
       }
       /** Come si divide lo stipendio del mese: ciambella animata + righe espandibili + ritmo del mese. */
       function budgetSankey(d) {
@@ -4026,7 +4035,7 @@ document.addEventListener("keydown", (e) => {
         if (Math.abs(diff) > 0.5) fixed.push({ name: diff > 0 ? "Altri impegni del mese" : "Quote già coperte", value: diff });
         const free = Math.max(0, rem), over = rem < 0 ? -rem : 0, sp = spentBreakdown(d, spent);
         const groups = [
-          { k: "fixed", label: "Impegni del mese", hint: "affitto, utenze, rate", color: "#c59ad4", items: fixed },
+          { k: "fixed", label: "Impegni del mese", hint: "affitto, utenze, rate", color: "#bf5af2", items: fixed },
           { k: "save", label: "Messo da parte", hint: "accantonamenti per spese future", color: "var(--sec-finance)", items: save },
           { k: "spent", label: "Speso", hint: "spese del mese", color: "var(--neg)", items: sp },
           { k: "free", label: over ? "Sforamento" : "Libero", hint: over ? "oltre lo stipendio" : "ancora da spendere", color: over ? "var(--warn)" : "var(--pos)", items: [] }
@@ -5938,7 +5947,7 @@ document.addEventListener("keydown", (e) => {
         for (const r of aggregateCategories(cache, requested)) { const k = globalThis.lifeOSNormCategory(r.name); merged.set(k, (merged.get(k) || 0) + r.amount); }
         const catRows = [...merged].map(([name, amount]) => ({ name, amount })).sort((x, y) => y.amount - x.amount), total = catRows.reduce((n, r) => n + r.amount, 0);
         const hideC = !state.assetsVisible, m2 = (v) => hideC ? "\u2022\u2022\u2022\u2022 €" : exactEuro(v), m0 = (v) => hideC ? "\u2022\u2022\u2022\u2022 €" : Math.round(v).toLocaleString("it-IT", { useGrouping: "always" }) + " €";
-        const GROUPS = [["Casa", "var(--sec-finance)", ["Casa", "Affitto", "Condominio", "Arredamento e casa", "Utenze", "Elettricità", "Gas", "Acqua", "Abbonamenti"]], ["Auto", "#c79a58", ["Auto", "Assicurazione", "Bollo", "Manutenzione auto", "Benzina"]], ["Vita quotidiana", "#6e9cc1", ["Alimentari", "Ristorazione", "Shopping", "Svago", "Viaggi", "Palestra"]], ["Salute", "#b9777b", ["Salute", "Dentista", "Farmaci e visite"]], ["Altro", "#8b929b", ["Altro"]]];
+        const GROUPS = [["Casa", "var(--sec-finance)", ["Casa", "Affitto", "Condominio", "Arredamento e casa", "Utenze", "Elettricità", "Gas", "Acqua", "Abbonamenti"]], ["Auto", "#ff9f0a", ["Auto", "Assicurazione", "Bollo", "Manutenzione auto", "Benzina"]], ["Vita quotidiana", "#64d2ff", ["Alimentari", "Ristorazione", "Shopping", "Svago", "Viaggi", "Palestra"]], ["Salute", "#ff6482", ["Salute", "Dentista", "Farmaci e visite"]], ["Altro", "#98989d", ["Altro"]]];
         const groups = GROUPS.map(([name, color, list]) => { const items = catRows.filter((r) => list.includes(r.name)); return { name, color, items, value: items.reduce((n, r) => n + r.amount, 0) }; }).filter((g) => g.value > 0).sort((x, y) => y.value - x.value);
         const stack = groups.map((g) => `<i style="flex:${g.value};--c:${g.color}" title="${safe(g.name)}: ${m2(g.value)}"></i>`).join("");
         const list = groups.map((g, i) => `<details class="cat-g" style="--c:${g.color}"${i === 0 ? " open" : ""}><summary><i></i><span class="cat-gn">${safe(g.name)}<small>${g.items.slice(0, 3).map((x) => safe(x.name)).join(", ")}</small></span><b>${m0(g.value)}</b><em>${Math.round(g.value / total * 100)}%</em></summary><div class="cat-items">${g.items.map((x) => `<div class="cat-it"><span>${safe(x.name)}</span><b>${m2(x.amount)}</b><i style="width:${Math.max(3, x.amount / g.value * 100).toFixed(0)}%"></i></div>`).join("")}</div></details>`).join("");
