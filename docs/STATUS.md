@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**19 novembre — sito web, incremento locale (nessun deploy, nessuna IPA):** layer grafico web v2, sezione Admin (stato e spazio D1, backup JSON completo, export CSV movimenti) e analisi Finanza estesa (trend 3/6/12 mesi per categoria, tasso di risparmio, storico movimenti con ricerca e CSV). Worker: nuovi metodi di sola lettura `getAdminStatus` e `getAdminExport` (tabelle validate su sqlite_master), nessun nuovo binding. Verifica locale: `tests/interface.mjs` e nuovo `tests/admin-analysis.mjs` passati con Chrome (320–1600 px, nessun overflow, export scaricati e controllati); `task-retention` passato; `activity-agenda-63` fallisce già sul sorgente precedente perché legge `manual/build-63/worker.js`, assente. Non verificato sul Worker live né su D1 reale. Editor catalogo alimenti e Bloom web NON fatti: richiedono sync dall'app (catalogo e Bloom sono locali) e quindi IPA. Vedi WEB-REVAMP-2026-11-19 nel registro.
+
 **Run avviato:** [43684175590](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43684175590) sul commit `74c95d0aa60d5185a95510cf8c54b2c067582516` (solo scheda selezionata montata, stato Dipingi turni nel router). Gate invariato: 5 compatti, 14 regressioni, suite restante, 4 Release, IPA90 solo a gate verdi. Esito da acquisire; nessun polling; nessuna IPA90, nessun deploy backend.
 
 **Correzione successiva (15 novembre):** contenitore che monta soltanto la scheda selezionata, con lo stato di Dipingi turni nel router (`NativeSixTabBar.swift`, `CalendarScreen.swift`, `App.swift`). Non compilato né provato in locale; esito CI da acquisire. Nessuna IPA90, nessun deploy backend.
@@ -395,3 +397,6 @@ Aggiornamento 4 novembre: risultato visivo H-GRID-01 accettato tramite «ok, pro
 ## Quick add nutrizione approvato
 
 Render approvato, implementazione del pulsante + Nutrizione → pannello con quattro totali in grammi e kcal automatiche completata per la verifica. Storico mantenuto; nuovo inserimento per 100 g sospeso anche nell’editor Salute. Stato: compilazione/QA pending. Dettagli in [NUTRITION-QUICK-REVIEW.md](NUTRITION-QUICK-REVIEW.md). Nessuna nuova IPA o deploy.
+
+- 2026-11-19 Web: rebase su UI build-75 (Piani gia presenti). Aggiunti v2 CSS, Admin, destinazione spesa Budget/Piano, selettore mese. Analisi estesa rimossa (build-75 ha la sua). Release worker: web/build-release.py (NON distribuito). Nessun deploy, nessun push.
+- 2026-11-19 Web: design system v3 (web/ui.css, un solo foglio di stile applicato da web/apply-ui.py). Corretto un CSS rotto introdotto dal layer v2 (selettore #analysis-plus non chiuso). Nessun deploy, nessun push.

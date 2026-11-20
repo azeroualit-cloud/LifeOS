@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "LifeOS",
-  "updated_on": "2026-11-15",
+  "updated_on": "2026-11-19",
   "policy": {
     "id": "META-01",
     "status": "ACTIVE",
@@ -938,6 +938,16 @@
       "original_quote": "intendevo l'ipa 90 dopo che correggi gli errori te",
       "rule": "Dopo il run 43651934566 (11 regressioni UI fallite su 14) l'utente chiede di correggere gli errori e poi produrre IPA90. Scelta esplicita: contenitore SwiftUI puro al posto degli UIHostingController annidati, mantenendo la barra a sei voci in vetro. Sostituisce soltanto il dettaglio implementativo delle radici UIKit stabili di SIX-TABS-KEYBOARD-REPAIR-2026-11-13 (stesso ambito, già confermato). IPA consentita solo dopo mirati, suite restante e quattro avvii Release verdi sullo stesso SHA. Nessun deploy backend. Aggiornamento 15 novembre dopo il run 43681244774: le schede nascoste montate duplicavano elementi di accessibilità (4/5 compatti). L'utente chiede la strada più affidabile («voglio solo un run che non fallisca e l'app che funzioni»): il contenitore monta solo la scheda selezionata; lo stato da conservare (Dipingi turni del Calendario, pennello) passa da @State a NativeRouter; mese di Finanza e percorso Dashboard erano già in NativeStore/NativeRouter. Effetto visibile: la posizione di scorrimento locale delle altre schede non è conservata al cambio scheda. Raccomandazione di Claude, scelta delegata dall'utente.",
       "readiness": "Implementato in NativeSixTabBar.swift, CalendarScreen.swift e App.swift; non compilato né provato in locale (nessun Mac). Esito runtime da acquisire dalla CI."
+    },
+    {
+      "id": "WEB-REVAMP-2026-11-19",
+      "status": "ACTIVE",
+      "scope": "Sito web LifeOS e Worker: rework grafico, Admin, analisi Finanza; editor alimenti e Bloom web in attesa di app/IPA",
+      "recorded_on": "2026-11-19",
+      "provenance": "Richiesta diretta utente",
+      "original_quote": "procedi all'implementazione completa",
+      "rule": "Autorizza implementazione locale lato sito/Worker. Non autorizza IPA, deploy Cloudflare, nuovi binding in produzione né modifiche all'app. Editor catalogo alimenti e Bloom web restano da decidere perché richiedono sync dall'app.",
+      "conflict_check": "Nessun conflitto con regole ACTIVE."
     }
   ],
   "pending_confirmations": [
