@@ -1,0 +1,46 @@
+commit 1de0e489a4868e7e1dd763ca77a81ebcb2fde069
+Author: Claude <noreply@anthropic.com>
+Date:   Fri Nov 20 16:34:37 2026 +0000
+
+    utenze: con quota attiva il budget porta sempre la quota, la bolletta esce dai risparmi
+    
+    Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_0161SEtREBoU3dwy7emBz95w
+
+diff --git a/backend/utilities/competence.mjs b/backend/utilities/competence.mjs
+index 73a719a..2fd09ae 100644
+--- a/backend/utilities/competence.mjs
++++ b/backend/utilities/competence.mjs
+@@ -58,11 +58,13 @@ export function utilityCompetenceContext(state, movements) {
+ export function utilityMonthlyCost(context, category, month, fallbackCents, contribution) {
+   const shares = (context?.bills || []).filter(b => b.category === category)
+     .flatMap(b => b.shares.filter(s => s.month === month));
+-  if (shares.length) return { amountCents: shares.reduce((n, s) => n + s.amountCents, 0), source: 'actual' };
+   const profiles = (context?.profiles || []).filter(p => p.category === category && p.status !== 'cancelled'
+     && month >= p.startMonth && (!p.stopAfter || month <= p.stopAfter) && (!p.closedMonth || month <= p.closedMonth));
+-  const estimate = profiles.reduce((n, p) => n + (p.budgetEstimates?.[month] ?? contribution(p, month)), 0);
+-  return { amountCents: profiles.length ? estimate : fallbackCents, source: 'estimate' };
++  // With an active quota the budget always carries the quota: the bill is paid from savings,
++  // the excess is not charged to the month and a smaller bill does not return the difference to Libero.
++  if (profiles.length) return { amountCents: profiles.reduce((n, p) => n + (p.budgetEstimates?.[month] ?? contribution(p, month)), 0), source: 'estimate' };
++  if (shares.length) return { amountCents: shares.reduce((n, s) => n + s.amountCents, 0), source: 'actual' };
++  return { amountCents: fallbackCents, source: 'estimate' };
+ }
+ 
+ export function hasUtilityBill(context, movementId) {
+diff --git a/backend/utilities/tests/competence.test.mjs b/backend/utilities/tests/competence.test.mjs
+index 14da648..97dda12 100644
+--- a/backend/utilities/tests/competence.test.mjs
++++ b/backend/utilities/tests/competence.test.mjs
+@@ -13,8 +13,10 @@ test('221.79 August–October allocates exactly 73.93 each, independent of payme
+   const bank = movement(), before = structuredClone(bank);
+   const state = { plans: { water: plan }, payments: { bill: { status: 'posted', movementId: 2, utilityPeriod: period } } };
+   const context = utilityCompetenceContext(state, [bank]);
+-  for (const month of ['2026-08', '2026-09', '2026-10'])
++  for (const month of ['2026-08', '2026-09'])
+     assert.deepEqual(utilityMonthlyCost(context, 'Acqua', month, 4000, contribution), { amountCents: 7393, source: 'actual' });
++  // Month with an active quota: the budget carries the quota, the bill is paid from savings.
++  assert.deepEqual(utilityMonthlyCost(context, 'Acqua', '2026-10', 4000, contribution), { amountCents: 5000, source: 'estimate' });
+   assert.deepEqual(utilityMonthlyCost(context, 'Acqua', '2026-11', 4000, contribution), { amountCents: 5000, source: 'estimate' });
+   assert.deepEqual(bank, before); assert.equal(context.bills.length, 1);
+   assert.equal(contribution(plan, '2026-10'), 5000, 'The fund contribution is not replaced by the cost');
