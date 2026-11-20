@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "LifeOS",
-  "updated_on": "2026-11-19",
+  "updated_on": "2026-11-20",
   "policy": {
     "id": "META-01",
     "status": "ACTIVE",
@@ -948,6 +948,16 @@
       "original_quote": "procedi all'implementazione completa",
       "rule": "Autorizza implementazione locale lato sito/Worker. Non autorizza IPA, deploy Cloudflare, nuovi binding in produzione né modifiche all'app. Editor catalogo alimenti e Bloom web restano da decidere perché richiedono sync dall'app.",
       "conflict_check": "Nessun conflitto con regole ACTIVE."
+    },
+    {
+      "id": "IPA-DELIVERY-2026-11-20",
+      "status": "ACTIVE",
+      "scope": "LifeOS - produzione IPA 0.10.29 build 91 (export alimenti personali, quota utenze lato app)",
+      "recorded_on": "2026-11-20",
+      "provenance": "Richiesta diretta utente",
+      "original_quote": "si ipa, no te che stai a controllarlo di contiinuo, imposta le routine",
+      "rule": "Autorizzata la produzione della IPA 0.10.29 build 91 delle modifiche correnti (commit bd425c7 e successivi) dopo gate mirato, suite restante e 4 avvii Release sullo stesso SHA. Il workflow lifeos-candidate91 si avvia solo manualmente da codex/revision77. Il monitoraggio dei run avviene con routine pianificate, non con controlli continui in conversazione. Nessun deploy backend ulteriore: sito e Worker gia distribuiti dall'utente il 20 novembre 2026.",
+      "conflict_check": "Soddisfa IPA-GATE-01 (richiesta esplicita). Non sostituisce IPA-DELIVERY-2026-11-13 (build 90 gia prodotta, resta storica). Nessuna regola attiva sostituita."
     }
   ],
   "pending_confirmations": [
