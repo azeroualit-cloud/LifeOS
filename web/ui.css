@@ -24,8 +24,8 @@
   --sec-finance:#a3adbd;--sec-nutrition:#8de1b5;--sec-calendar:#f2ba87;--sec-neutral:var(--ink);
   --section:var(--sec-neutral);
   /* misure */
-  --r-sm:8px;--r-md:10px;--r-lg:14px;--r-pill:999px;
-  --s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:20px;--s6:24px;--s7:32px;--s8:48px;
+  --r-sm:6px;--r-md:10px;--r-lg:16px;--r-pill:999px;
+  --s1:4px;--s2:6px;--s3:10px;--s4:16px;--s5:16px;--s6:26px;--s7:26px;--s8:42px;--s9:68px;
   --tap:36px;--gutter:20px;--sidebar:224px;--nav-h:68px;
   --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
   --shadow:0 1px 0 #ffffff08 inset;
@@ -53,9 +53,9 @@ html[data-theme="light"]{
 [data-kind="holiday"]{--shift-color:#d7bf52}
 html[data-theme="light"] [data-kind="morning"]{--shift-color:#b4c6e7}
 html[data-theme="light"] [data-kind="afternoon"]{--shift-color:#c6e0b4}
-html[data-theme="light"] [data-kind="night"]{--shift-color:#808080}
+html[data-theme="light"] [data-kind="night"]{--shift-color:#8a8e9c}
 html[data-theme="light"] [data-kind="rest"]{--shift-color:#f4b084}
-html[data-theme="light"] [data-kind="holiday"]{--shift-color:#ffe600}
+html[data-theme="light"] [data-kind="holiday"]{--shift-color:#efd96a}
 
 /* 2. BASE ------------------------------------------------------------ */
 *,*::before,*::after{box-sizing:border-box}
@@ -145,7 +145,7 @@ label{font-size:14px;color:var(--ink-2)}
 .plan-list-row>span:first-child,.finance-movement>span{min-width:0;overflow-wrap:anywhere}
 .plan-list-row small,.finance-movement small{display:block;margin-top:2px}
 .plan-list-row strong,.finance-movement>b{flex:none;white-space:nowrap}
-.state-tag{font-size:12px;border-radius:var(--r-sm);background:var(--surface-2);padding:4px 8px;color:var(--ink-2)}
+.state-tag{font-size:12px;border-radius:var(--r-sm);background:var(--surface-2);padding:4px 10px;color:var(--ink-2)}
 .errorbox{background:color-mix(in srgb,var(--neg) 12%,var(--surface));border:1px solid var(--neg);color:var(--neg);padding:var(--s3) var(--s4);border-radius:var(--r-md);margin-bottom:var(--s4)}
 .due-badge{display:inline-block;font-size:12px;color:var(--ink-2);margin-left:var(--s2)}.due-badge.overdue{color:var(--neg)}
 
@@ -206,7 +206,7 @@ details[open]>summary::after{content:"−"}
 .sidebar-foot{margin-top:auto;display:grid;gap:var(--s2)}
 .sidebar-foot>span{padding:0 var(--s3);font-size:12px;color:var(--ink-3)}
 #admin-link{font-size:14px}
-main{width:100%;max-width:1240px;margin:0 auto;padding:var(--s7) var(--s8) 96px;min-width:0}
+main{width:100%;max-width:1240px;margin:0 auto;padding:var(--s7) var(--s8) 68px;min-width:0}
 /* sezione corrente -> colore del titolo, come nell'app */
 main:has(#overview.active,#budget.active,#analysis.active,#extras.active,#movements.active){--section:var(--sec-finance)}
 main:has(#calendar.active){--section:var(--sec-calendar)}
@@ -295,7 +295,7 @@ main:has(#today.active) .home-context{display:none}
 .os-routine{display:flex;gap:var(--s4);align-items:center;margin-top:var(--s4);padding-top:var(--s4);border-top:1px solid var(--line-soft)}
 .os-routine-items{display:flex;gap:var(--s2);flex-wrap:wrap}
 .os-routine-check{min-height:40px;padding:0 var(--s3);font-size:14px;background:var(--surface-2)}
-.os-routine-tick{display:grid;place-items:center;width:18px;height:18px;border:1.5px solid var(--ink-3);border-radius:5px;flex:none}
+.os-routine-tick{display:grid;place-items:center;width:18px;height:18px;border:1.5px solid var(--ink-3);border-radius:4px;flex:none}
 .os-routine-check.checked .os-routine-tick{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 .os-home-task{display:flex;align-items:center;gap:var(--s3);min-height:52px;padding:var(--s2) 0}
 .os-home-task+.os-home-task{border-top:1px solid var(--line-soft)}
@@ -336,7 +336,7 @@ main:has(#today.active) .home-context{display:none}
 .os-weekdays{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));text-align:center;font-size:12px;color:var(--ink-2);margin-bottom:var(--s2)}
 .os-days{display:grid;gap:0}
 .os-calendar-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:1px solid var(--line-soft)}
-.os-day{display:grid;grid-template-rows:26px 20px 12px;justify-items:center;align-items:center;align-content:center;gap:3px;width:100%;height:72px;min-height:72px;padding:5px 0;background:transparent;border-radius:0;font-weight:400}
+.os-day{display:grid;grid-template-rows:26px 20px 12px;justify-items:center;align-items:center;align-content:center;gap:3px;width:100%;height:72px;min-height:72px;padding:4px 0;background:transparent;border-radius:0;font-weight:400}
 .os-day b{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;font-size:14px;color:var(--ink)}
 .os-day .os-shift{font-size:12px;font-weight:650;width:calc(100% - 10px);max-width:48px;height:20px;display:flex;align-items:center;justify-content:center;border-radius:6px;color:#101215}
 .os-day .os-shift:not(.no-shift){background:var(--shift-color)}.os-day .os-shift.no-shift{background:transparent}
@@ -397,7 +397,7 @@ main:has(#today.active) .home-context{display:none}
 .oc-tick{fill:var(--ink-3);font-size:12px}
 .oc-legend{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2) var(--s4);margin-top:var(--s2);font-size:12px;color:var(--ink-2)}
 .oc-legend i{display:inline-block;width:16px;height:0;border-top:2.5px solid var(--sec-finance);margin-right:6px;vertical-align:middle}.oc-legend i.k-pace{border-top:2px dashed var(--ink-3)}
-.oc-bar{display:grid;grid-template-columns:minmax(70px,.9fr) 2fr auto 38px;align-items:center;gap:var(--s3);padding:7px 0;font-size:14px}
+.oc-bar{display:grid;grid-template-columns:minmax(70px,.9fr) 2fr auto 38px;align-items:center;gap:var(--s3);padding:6px 0;font-size:14px}
 .oc-bar span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-2)}
 .oc-bar div{height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden}.oc-bar i{display:block;height:100%;border-radius:4px;background:var(--sec-finance)}
 .oc-bar b{font-variant-numeric:tabular-nums;font-weight:650}.oc-bar small{text-align:right}
@@ -430,7 +430,7 @@ main:has(#today.active) .home-context{display:none}
 .extra-metadata{display:flex;justify-content:space-between;color:var(--ink-2);font-size:14px;gap:var(--s2);margin-bottom:var(--s4)}
 .extra-card-controls{display:flex;gap:var(--s2);flex-wrap:wrap}
 .extra-state-row{display:flex;align-items:center;gap:var(--s2);flex:1}
-.fund-meter{display:flex;height:8px;background:var(--surface-2);border-radius:8px;overflow:hidden;margin:var(--s4) 0 var(--s2)}
+.fund-meter{display:flex;height:8px;background:var(--surface-2);border-radius:10px;overflow:hidden;margin:var(--s4) 0 var(--s2)}
 .fund-meter i{display:block;height:100%;background:var(--accent)}
 #fund-surplus{background:color-mix(in srgb,var(--accent) 40%,var(--surface-2))}
 .fund-labels{display:flex;justify-content:space-between;color:var(--ink-2);font-size:14px}
@@ -469,7 +469,7 @@ main:has(#today.active) .home-context{display:none}
 .wealth-estimate-line{stroke-dasharray:4 4}.wealth-dot{fill:var(--sec-finance)}
 .flow-legend,.chart-values,.trend-values,.sankey-totals,.wealth-series{color:var(--ink-2);font-size:14px}
 .flow-legend,.chart-values,.trend-values,.sankey-totals{display:flex;gap:var(--s3);flex-wrap:wrap}
-.flow-legend{margin-top:var(--s3)}.flow-legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.flow-legend{margin-top:var(--s3)}.flow-legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
 .income-key,.spent-key{display:inline-flex;align-items:center;gap:6px;background:none}
 .income-key::before,.spent-key::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--pos)}.spent-key::before{background:var(--neg)}
 .liquid-chart-heading{display:flex;justify-content:space-between;gap:var(--s2);margin-bottom:var(--s3)}
@@ -492,7 +492,7 @@ main:has(#today.active) .home-context{display:none}
 #admin{max-width:1000px}
 .adm-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4)}.adm-wide{grid-column:1/-1}
 .adm-big{font-size:42px;font-weight:650;letter-spacing:-1.2px;margin:4px 0 var(--s4)}
-.adm-meter{height:8px;border-radius:8px;background:var(--surface-2);overflow:hidden;margin-bottom:var(--s2)}.adm-meter i{display:block;height:100%;background:var(--accent);border-radius:8px}
+.adm-meter{height:8px;border-radius:10px;background:var(--surface-2);overflow:hidden;margin-bottom:var(--s2)}.adm-meter i{display:block;height:100%;background:var(--accent);border-radius:10px}
 .adm-actions{display:flex;gap:var(--s3);flex-wrap:wrap}.adm-note{margin:0 0 var(--s4)}.adm-progress{min-height:20px;margin-top:var(--s4);color:var(--ink-2);font-size:14px}
 .adm-tables{display:grid}
 .adm-row{display:grid;grid-template-columns:minmax(120px,240px) minmax(0,1fr) auto;gap:var(--s4);align-items:center;padding:var(--s3) 0;border-top:1px solid var(--line-soft);font-size:14px}
@@ -506,7 +506,7 @@ main:has(#today.active) .home-context{display:none}
   #calendar .os-calendar-details{grid-column:2;grid-row:1/span 3;margin-top:0;border-top:0;padding-top:0;border-left:1px solid var(--line-soft);padding-left:var(--s6)}
 }
 @media(max-width:1100px){
-  main{padding:var(--s6) var(--s6) 96px}
+  main{padding:var(--s6) var(--s6) 68px}
   .finance-open{grid-template-columns:minmax(0,1fr)}.finance-hero,.finance-account{grid-column:1}
   .budget-flow,.extra-grid{grid-template-columns:minmax(0,1fr)}
 }
@@ -515,13 +515,13 @@ main:has(#today.active) .home-context{display:none}
   html,body{font-size:14px}
   .shell{display:block}
   /* barra in basso fluttuante */
-  .sidebar{position:fixed;inset:auto var(--s3) calc(var(--s3) + var(--safe-bottom));height:var(--nav-h);width:auto;max-width:520px;margin:0 auto;padding:5px;flex-direction:row;z-index:50;
+  .sidebar{position:fixed;inset:auto var(--s3) calc(var(--s3) + var(--safe-bottom));height:var(--nav-h);width:auto;max-width:520px;margin:0 auto;padding:4px;flex-direction:row;z-index:50;
     background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--line);border-radius:34px;box-shadow:0 12px 34px #0006}
   .brand,.sidebar-foot{display:none}
   .nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px;width:100%;height:100%}
-  .nav button{flex-direction:column;justify-content:center;gap:4px;padding:4px 2px;min-height:0;border-radius:28px;font-size:12px;line-height:1.2;font-weight:650}
+  .nav button{flex-direction:column;justify-content:center;gap:4px;padding:4px 2px;min-height:0;border-radius:26px;font-size:12px;line-height:1.2;font-weight:650}
   .nav button.active{background:var(--surface-3)}
-  main{padding:calc(var(--s5) + var(--safe-top)) var(--gutter) calc(var(--nav-h) + 52px + var(--safe-bottom));max-width:620px}
+  main{padding:calc(var(--s5) + var(--safe-top)) var(--gutter) calc(var(--nav-h) + 42px + var(--safe-bottom));max-width:620px}
   h1{font-size:26px}
   :root{font-size:14px}
   .top{margin-bottom:var(--s4)}
@@ -585,7 +585,7 @@ circle.fx-seg{background:none}
 /* Sankey budget */
 .sankey{grid-column:1/-1;display:block!important;padding:var(--s5)}
 .finance-open>.sankey{grid-column:1/-1}
-.sk-seg{display:flex;height:14px;gap:3px;border-radius:7px;overflow:hidden;margin:var(--s3) 0 var(--s3)}
+.sk-seg{display:flex;height:14px;gap:3px;border-radius:6px;overflow:hidden;margin:var(--s3) 0 var(--s3)}
 .sk-seg i{display:block;min-width:4px;border-radius:4px}
 .sk-legend{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s5);list-style:none;margin:0 0 var(--s4);padding:0;font-size:14px;color:var(--ink-2)}
 .sk-legend li{display:flex;align-items:center;gap:var(--s2)}.sk-legend i{width:10px;height:10px;border-radius:3px}.sk-legend b{color:var(--ink);font-variant-numeric:tabular-nums}
@@ -601,7 +601,7 @@ circle.fx-seg{background:none}
 .sankey [data-g]:hover .sk-r,.sankey .sk-g:hover .sk-r{opacity:.6}
 .sk-detail{display:grid;gap:var(--s4);margin-top:var(--s4)}
 .sk-detail h4{margin:0 0 var(--s2);font-size:14px;text-transform:uppercase;letter-spacing:.4px}
-.sk-row{display:grid;grid-template-columns:minmax(80px,1fr) 1.2fr auto;gap:var(--s3);align-items:center;padding:5px 0;font-size:14px}
+.sk-row{display:grid;grid-template-columns:minmax(80px,1fr) 1.2fr auto;gap:var(--s3);align-items:center;padding:4px 0;font-size:14px}
 .sk-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-2)}.sk-row div{height:7px;border-radius:4px;background:var(--surface-2);overflow:hidden}.sk-row div i{display:block;height:100%;border-radius:4px}.sk-row b{font-variant-numeric:tabular-nums}
 .sk-warn{color:var(--warn)}
 @media(max-width:760px){.sankey{padding:var(--s4)}.sk-sl,.sk-ml{font-size:16px}.sk-sv{font-size:22px}.sk-mv{font-size:14px}}
@@ -626,7 +626,7 @@ circle.fx-seg{background:none}
 .oc-legend i.k-trend{width:16px;height:0;border-top:3px solid var(--ink-2);border-radius:2px;background:none}
 
 /* Calendario: celle leggibili, turni come etichette, pannello giorno */
-#calendar .os-day{height:104px;min-height:104px;grid-template-rows:28px 26px 14px;gap:6px;padding:8px 4px;align-content:start;border-radius:var(--r-md);transition:background .15s}
+#calendar .os-day{height:104px;min-height:104px;grid-template-rows:28px 26px 14px;gap:6px;padding:10px 4px;align-content:start;border-radius:var(--r-md);transition:background .15s}
 #calendar .os-calendar-week{border-top:0;gap:4px;margin-bottom:4px}
 #calendar .os-weekdays{font-size:14px;font-weight:650;letter-spacing:.3px;margin-bottom:var(--s3)}
 #calendar .os-day b{width:30px;height:30px;font-size:16px;font-weight:650}
@@ -636,7 +636,7 @@ circle.fx-seg{background:none}
 #calendar .os-day.selected b{background:var(--accent);color:var(--on-accent)}
 #calendar .os-day.today:not(.selected) b{outline:0;background:var(--surface-3)}
 #calendar .os-day.other{opacity:.35}
-#calendar .os-day .os-shift{width:calc(100% - 4px);max-width:none;height:26px;gap:6px;font-size:14px;border-radius:8px;padding:0 6px;font-weight:650;justify-content:center}
+#calendar .os-day .os-shift{width:calc(100% - 4px);max-width:none;height:26px;gap:6px;font-size:14px;border-radius:10px;padding:0 6px;font-weight:650;justify-content:center}
 #calendar .os-day .os-shift i{font-style:normal}.os-shift .sh-t{font-weight:650;font-size:12px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #calendar .os-day-mark{display:flex;gap:4px;justify-content:center;align-items:center;height:14px;min-height:14px;min-width:0}
 #calendar .os-day-mark i{width:7px;height:7px;border-radius:50%;background:var(--ink)}
@@ -651,7 +651,7 @@ circle.fx-seg{background:none}
 .os-calendar-details .os-section-label{margin:var(--s4) 0 var(--s2);font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-3)}
 @media(min-width:1100px){#calendar>.os-card{grid-template-columns:minmax(0,1.75fr) minmax(320px,1fr)}#calendar .os-calendar-details{position:sticky;top:var(--s6);border-left:0;padding:var(--s5);border-radius:var(--r-lg);background:var(--surface);border:1px solid var(--line-soft)}}
 @media(max-width:760px){
-  #calendar .os-day{height:72px;min-height:72px;grid-template-rows:26px 24px 10px;gap:3px;padding:5px 1px}
+  #calendar .os-day{height:72px;min-height:72px;grid-template-rows:26px 24px 10px;gap:3px;padding:4px 1px}
   #calendar .os-calendar-week{gap:2px}
   #calendar .os-day .os-shift{height:24px;padding:0;font-size:14px}#calendar .os-day .os-shift .sh-t{display:none}
   #calendar .os-day b{width:26px;height:26px;font-size:14px}
@@ -678,7 +678,7 @@ circle.fx-seg{background:none}
 #calendar .os-day{border-radius:0}
 #calendar .os-day .os-shift{background:transparent!important;color:var(--shift-color);font-size:14px;font-weight:650;height:24px;padding:0;justify-self:center;width:auto}
 #calendar .os-day[data-kind=night] .os-shift{color:var(--ink-2)}
-#calendar .os-day .os-shift:not(.no-shift)::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--shift-color);margin-right:5px}
+#calendar .os-day .os-shift:not(.no-shift)::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--shift-color);margin-right:4px}
 @media(min-width:1100px){#calendar .os-calendar-details{background:transparent;border:0;border-left:1px solid var(--line-soft);border-radius:0;padding:0 0 0 var(--s6)}}
 .os-calendar-details .os-mini{background:transparent;border-radius:0;padding:var(--s3) 0;margin:0;border-bottom:1px solid var(--line-soft)}
 .os-calendar-details .os-empty{background:transparent;padding:var(--s4) 0;text-align:left}
@@ -697,8 +697,8 @@ main:has(#overview.active,#budget.active,#analysis.active,#extras.active,#moveme
 .budget-waterfall{display:grid;gap:2px}
 .wf-row{display:grid;grid-template-columns:minmax(120px,220px) minmax(0,1fr) 96px;align-items:center;gap:var(--s4);padding:var(--s3) 0;background:transparent;border:0;border-radius:0;text-align:left;width:100%;color:var(--ink);font:inherit}
 .wf-lab{display:grid;gap:1px;min-width:0}.wf-lab strong{font-size:14px;font-weight:650;overflow-wrap:anywhere}.wf-lab small{font-size:12px;color:var(--ink-3)}
-.wf-track{position:relative;height:18px;border-radius:9px;background:var(--surface-2)}
-.wf-track i{position:absolute;top:0;bottom:0;border-radius:9px;background:var(--neg)}
+.wf-track{position:relative;height:18px;border-radius:10px;background:var(--surface-2)}
+.wf-track i{position:absolute;top:0;bottom:0;border-radius:10px;background:var(--neg)}
 .wf-in .wf-track i{background:var(--pos)}
 .wf-row>b{text-align:right;font-size:14px;font-variant-numeric:tabular-nums}
 .wf-out>b{color:var(--neg)}.wf-in>b{color:var(--pos)}
@@ -746,7 +746,7 @@ button.wf-row:hover{background:var(--surface-2)}
 #calendar .os-day .os-shift .sh-i{display:none}
 #calendar .os-day[data-kind=rest] .sh-t,#calendar .os-day[data-kind=holiday] .sh-t{display:inline}
 #calendar .os-day .os-shift .sh-t{display:inline;font-size:12px;font-weight:650;opacity:1;letter-spacing:0}
-.os-day-shift{background:var(--shift-color);color:#101215;padding:4px 12px;border-radius:999px;font-size:14px;font-weight:650}
+.os-day-shift{background:var(--shift-color);color:#101215;padding:4px 10px;border-radius:999px;font-size:14px;font-weight:650}
 .os-day-shift[data-kind=night]{color:#fff}.os-day-shift::before{content:none}
 @media(max-width:760px){
   #calendar .os-day .os-shift{width:28px;height:28px;padding:0;font-size:14px;border-radius:50%}
@@ -853,3 +853,14 @@ body:has(#os-event-editor) .page-fab{visibility:hidden}
 .sk-ci i{grid-column:1/-1;height:4px;border-radius:var(--r-pill);background:var(--c);opacity:.85}
 @media(max-width:1000px){.sk-cols{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.sk-cols{grid-template-columns:1fr;gap:var(--s5)}}
+/* badge scadenza: tema chiaro leggibile */
+html[data-theme="light"] .due-badge.due-overdue,html[data-theme="light"] .due-badge.overdue{background:#f3cfcc;color:#7a2320}
+html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
+html[data-theme="light"] .due-badge,html[data-theme="light"] .due-badge.due-tomorrow{background:var(--surface-3);color:var(--ink-2)}
+html[data-theme="light"] .due-badge.due-overdue,html[data-theme="light"] .due-badge.overdue{background:#f3cfcc;color:#7a2320}
+html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
+/* colonne stipendio: si adattano alla larghezza del contenitore */
+.sk-cols{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+@media(max-width:1000px){.sk-cols{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}}
+.sk-cols,.sankey .sk-cols{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))!important}
+@media(max-width:560px){.sk-cols,.sankey .sk-cols{grid-template-columns:1fr!important}}
