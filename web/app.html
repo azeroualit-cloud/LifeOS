@@ -4069,7 +4069,7 @@ document.addEventListener("keydown", (e) => {
       /** Mappa unica dello stipendio: un riquadro per gruppo (colore della categoria), dentro un riquadro per voce. Area = importo, % = quota dello stipendio. */
       function scMap(groups, salary, fmt, fmt0) {
         const W = 260, H = 110, pctS = (v) => salary > 0 ? (v / salary * 100 >= 10 ? Math.round(v / salary * 100) : (v / salary * 100).toFixed(1).replace(".", ",")) + "%" : "";
-        const gl = tmLayout(groups.map((g) => ({ ...g, value: g.value })).sort((p, q) => q.value - p.value), W, H);
+        const posSum = (g) => g.items.reduce((n, x) => n + Math.max(0, x.value), 0), gl = tmLayout(groups.map((g) => ({ ...g, value: g.items.length && posSum(g) > 0 ? posSum(g) : g.value })).sort((p, q) => q.value - p.value), W, H);
         let n = 0;
         const out = gl.map((gr) => {
           const g = gr.r, its = g.items.filter((x) => x.value > 0.005).sort((p, q) => q.value - p.value);
