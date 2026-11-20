@@ -428,3 +428,6 @@ Render approvato, implementazione del pulsante + Nutrizione → pannello con qua
 
 ## 2026-11-20 - mappa ad aree nei gruppi (Claude)
 - Dove va lo stipendio: le voci dei gruppi sono una treemap (area = importo, intensita = peso, % dello stipendio di riferimento). Solo front-end. Build web D4E7610A7BEC282E, non distribuita.
+
+## 2026-11-20 - palette stile Apple Salute (Claude)
+- Palette morbida luminosa al posto dei colori di sistema saturi: viola a97be0, rosso f2546b, arancio f5a03c, verde 66cc70, blu 4f9be6. Solo front-end. Build web CAE8D4103FBA1A24, non distribuita.
