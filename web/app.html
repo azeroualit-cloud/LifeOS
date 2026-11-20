@@ -4085,9 +4085,9 @@ document.addEventListener("keydown", (e) => {
         const free = Math.max(0, rem), over = rem < 0 ? -rem : 0, sp = spentBreakdown(d, spent);
         const groups = [
           { k: "fixed", label: "Impegni del mese", hint: "affitto, utenze, rate", color: "#a97be0", items: fixed },
-          { k: "save", label: "Messo da parte", hint: "accantonamenti per spese future", color: "var(--sec-finance)", items: save },
+          { k: "save", label: "Messo da parte", hint: "accantonamenti per spese future", color: "var(--warn)", items: save },
           { k: "spent", label: "Speso", hint: "spese del mese", color: "var(--neg)", items: sp },
-          { k: "free", label: over ? "Sforamento" : "Libero", hint: over ? "oltre lo stipendio" : "ancora da spendere", color: over ? "var(--warn)" : "var(--pos)", items: [] }
+          { k: "free", label: over ? "Sforamento" : "Libero", hint: over ? "oltre lo stipendio" : "ancora da spendere", color: over ? "#ee6f8b" : "var(--pos)", items: [] }
         ].map((g) => ({ ...g, value: g.k === "free" ? over || free : g.items.reduce((n, x) => n + x.value, 0) })).filter((g) => g.value > 0.005);
         const total = groups.reduce((n, g) => n + g.value, 0) || 1, pct = (v) => Math.round(v / total * 100);
         const chips = groups.map((g) => `<div class="sc-chip" style="--c:${g.color}"><i></i><span>${g.label}</span><b>${fmt0(g.value)}</b><em>${pct(g.value)}%</em></div>`).join("");
