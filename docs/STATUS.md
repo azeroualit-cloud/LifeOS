@@ -410,3 +410,4 @@ Render approvato, implementazione del pulsante + Nutrizione → pannello con qua
 ## In coda per dopo (app/Worker)
 - Utenze con quota attiva: il budget porta sempre la quota, la bolletta esce dai risparmi, nessun rientro in Libero. Patch pronta: docs/QUEUE-utenze-quota.patch (toccherebbe anche l'app iOS, da fare con test su mesi di competenza multi-mese).
 - 2026-11-20: web - sezioni Nutrizione (alimenti personali, modifica, import) e Bloom (libreria, categorie, import copia app senza allegati); nuove tabelle D1 web_foods, web_bloom_collections, web_bloom_items create al primo uso; sincronia con l'app in coda (build A00A1347AB24A56D)
+- 2026-11-20: requisito GOLDEN-01 (proporzione aurea in tutta l'app) in DESIGN-SYSTEM.md e CLAUDE.md; Nutrizione/Bloom: pesi e dimensioni riallineati alla scala (build 5D01F22B2F513153)

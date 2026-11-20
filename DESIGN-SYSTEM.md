@@ -51,3 +51,14 @@ Navigazione0.8.2: GlassEffectContainer coordina barra e azione separata su iOS26
 ## Revisione build 52 — prevale sulle indicazioni storiche
 
 Accento blu per controlli e completamento, contrasto distinto nei due temi. Superfici scure opache condivise; righe completate con sfondo invariato e testo secondario senza barratura. Attivo/In attesa sono le sole sezioni delle attività. Espansione contestuale sotto la riga; calendario a mesi consecutivi con scroll verticale nativo e controlli persistenti. Motion locale 160 ms per selezioni, 260 ms per layout, disattivato con Riduci movimento. Frequenza dei fotogrammi da misurare su iPhone.
+
+## Requisito GOLDEN-01: proporzione aurea (1,618) in tutta l'app
+
+Richiesto dall'utente il 2026-11-20. Vale per ogni schermata nuova o modificata.
+
+- Dimensioni del testo, spaziature, raggi e pesi seguono la scala aurea, mai valori a occhio. Sito: testo 12/14/16/19/22/26/31/36/42 px, spaziature 4/6/10/16/26/42/68 px, raggi 6/10/16 px, pesi 400 e 650. Usare solo i token (`--fs-*`, `--s*`, `--r-*`).
+- Gerarchia: ogni livello è circa 1,618 volte il successivo (esempio: nome 16 px, valore principale 26 px, dettagli 12 px).
+- Il peso 650 solo per titolo e valore principale; il resto 400. I pulsanti ereditano 650 per default: i testi secondari dentro schede e chip vanno forzati a 400. Grassetto ovunque è un difetto.
+- Nessun valore fuori scala (es. 10,5 px, 20 px, 40 px) senza motivo scritto.
+- App iOS: richiesto per tutta l'app, ma entra in conflitto con la regola attuale (scala 4 pt, testi Body 17 e Footnote 13, Dynamic Type). Prima di applicarlo all'app serve la conferma dell'utente su come riconciliarle (META-01). Nel frattempo vale per il sito.
+- Verifica: controllo automatico dei valori fuori scala in `web/ui.css` e screenshot prima della consegna.

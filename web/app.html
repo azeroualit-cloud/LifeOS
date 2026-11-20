@@ -1045,6 +1045,59 @@ details.sc-row>summary::after{content:none}
 .cat-it i{grid-column:1/-1;height:4px;border-radius:var(--r-pill);background:var(--c);opacity:.85;transform-origin:left;animation:sc-bar .7s cubic-bezier(.2,.7,.2,1) both}
 .budget-flow>section:has(.cat-wrap){grid-column:1/-1}
 .cat-g summary::after,.sc-row summary::after{content:none!important;display:none!important}
+/* ===== Nutrizione e Bloom ===== */
+:root{--sec-bloom:#c4b5e0}html[data-theme="light"]{--sec-bloom:#5f4b8f}
+.nav button[data-view=nutrition].active{color:var(--sec-nutrition);background:color-mix(in srgb,var(--sec-nutrition) 10%,transparent)}
+.nav button[data-view=bloom].active{color:var(--sec-bloom);background:color-mix(in srgb,var(--sec-bloom) 10%,transparent)}
+.nav button[data-view=nutrition].active .nav-symbol,.nav button[data-view=bloom].active .nav-symbol{color:inherit}
+#nutrition,#bloom{max-width:1000px}
+.nb-wrap{display:grid;gap:var(--s4)}
+.nb-head{display:grid;gap:var(--s4)}.nb-head .card-title{margin:0}.nb-head small{display:block;margin-top:2px}
+.nb-chips{display:flex;flex-wrap:wrap;gap:var(--s2)}.nb-chips.sub{padding-top:var(--s2);border-top:1px solid var(--line-soft)}
+.nb-chip{min-height:32px;padding:0 var(--s3);border-radius:var(--r-pill,999px);border:1px solid var(--line);background:var(--surface-2);color:var(--ink-2);font-size:var(--fs-1);gap:var(--s2)}
+.nb-chip b{font-weight:650;color:var(--ink-3)}.nb-chip.on{background:var(--surface-3);color:var(--ink);border-color:var(--ink-3)}.nb-chip.ghost{border-style:dashed;background:transparent}
+.nb-chip.pick{display:inline-flex;align-items:center;gap:var(--s2);cursor:pointer;color:var(--ink)}.nb-chip.pick input{width:16px;min-height:16px}
+.nb-stack{display:flex;gap:var(--s1);height:12px}
+.nb-seg{flex:1 1 0;min-width:6px;min-height:0;height:12px;padding:0;border:0;border-radius:4px;background:color-mix(in srgb,var(--sec-nutrition) 55%,var(--surface-3));opacity:.55;transform-origin:left;animation:sc-bar .7s cubic-bezier(.2,.7,.2,1) both}
+.nb-seg:nth-child(3n+2){opacity:.75}.nb-seg:nth-child(3n){opacity:.4}.nb-seg.on,.nb-seg:hover{opacity:1}
+.nb-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s3)}
+.nb-food{display:grid;grid-template-columns:var(--s8) minmax(0,1fr) auto;grid-template-areas:"i m k" "b b b";gap:var(--s2) var(--s3);padding:var(--s4);text-align:left;align-items:center;color:var(--ink);min-height:0;height:auto}
+.nb-ico{grid-area:i;display:grid;place-items:center;width:var(--s8);height:var(--s8);border-radius:var(--r-md);background:var(--surface-2);font-size:var(--fs-6)}
+.nb-main{grid-area:m;display:grid;min-width:0}.nb-main strong{font-size:var(--fs-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.nb-main small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nb-kcal{grid-area:k;text-align:right;display:grid}.nb-kcal b{font-size:var(--fs-6)}
+.nb-bar{grid-area:b;display:grid;gap:4px}.nb-bar small b.p{color:var(--pos)}.nb-bar small b.c{color:var(--warn)}.nb-bar small b.g{color:var(--neg)}
+.nb-macro{display:flex;height:6px;gap:2px;border-radius:3px;overflow:hidden}.nb-macro i{display:block;min-width:2px}.nb-macro i.p{background:var(--pos)}.nb-macro i.c{background:var(--warn)}.nb-macro i.g{background:var(--neg)}.nb-macro.none i{flex:1;background:var(--surface-3)}
+.nb-empty{display:grid;gap:var(--s4);justify-items:start;color:var(--ink-2)}
+.nb-wide{width:min(760px,100%)}
+.nb-form .nb-nums{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--s3)}.nb-calc{grid-column:1/-1;display:flex;align-items:center;gap:var(--s3);flex-wrap:wrap;font-size:var(--fs-1);color:var(--ink-2);min-height:0}.nb-calc:empty{display:none}
+.nb-unit{display:flex;align-items:center;gap:var(--s2)}.nb-unit em{font-style:normal;color:var(--ink-3);font-size:var(--fs-1)}
+.nb-check{display:flex!important;align-items:center;gap:var(--s2);grid-template-columns:none}
+.nb-micro summary{font-weight:650;padding:var(--s2) 0}.nb-micro-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s3);padding-top:var(--s3)}
+.nb-form .danger{margin-right:auto;color:var(--neg)}
+.nb-item{display:grid;gap:var(--s3);padding:var(--s4);align-content:start}.nb-item.trashed{opacity:.7}
+.nb-item-main{display:grid;grid-template-columns:var(--s8) minmax(0,1fr);gap:var(--s3);align-items:center;text-align:left;border:0;padding:0;min-height:0;justify-content:start;color:var(--ink)}
+.nb-item p{color:var(--ink-2);font-size:var(--fs-2);overflow-wrap:anywhere}
+.nb-tags{display:flex;flex-wrap:wrap;gap:var(--s2)}.nb-tags:empty{display:none}.nb-tags span{padding:2px var(--s3);border-radius:999px;background:var(--surface-2);font-size:var(--fs-1);color:var(--ink-2)}
+.nb-item-act{display:flex;flex-wrap:wrap;gap:var(--s2);margin-top:auto}.nb-item-act button,.nb-item-act .nb-open{min-height:32px;padding:0 var(--s3);font-size:var(--fs-1);border:1px solid var(--line);border-radius:var(--r-md);display:inline-flex;align-items:center;color:var(--ink);text-decoration:none}.nb-item-act .danger{color:var(--neg)}
+.nb-tagpick{border:0;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:var(--s2)}.nb-tagpick legend{font-size:12px;color:var(--ink-3);padding:0 0 var(--s2)}
+.nb-manage{display:grid;gap:var(--s3)}.nb-manage-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:var(--s2);align-items:center}.nb-manage-row .os-form-error{grid-column:1/-1}.nb-manage-row .danger{color:var(--neg)}
+.nb-import{display:grid;gap:var(--s4)}.nb-import-out{min-height:1.4em;color:var(--ink-2);font-size:var(--fs-2)}
+@media(max-width:760px){
+  .nav{grid-template-columns:repeat(6,minmax(0,1fr))}.nav button{font-size:var(--fs-1);letter-spacing:-.01em}
+  .nb-grid{grid-template-columns:1fr}
+  .nb-form .nb-nums{grid-template-columns:repeat(2,minmax(0,1fr))}.nb-micro-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .nb-head .card-title{align-items:flex-start;flex-direction:column}
+}
+.nb-item-main .nb-ico,.nb-item-main .nb-main{grid-area:auto}
+.nb-item-main .nb-main strong{white-space:normal;overflow:visible}
+.nb-item-main,.nb-item-main:hover{background:transparent!important}.nb-food{border-radius:var(--r-lg)}
+/* Pesi: 650 solo per titolo e valore; il resto 400 (i pulsanti ereditano 650 di default). Scala aurea: 16 -> 26 per nome e kcal, 12 per i dettagli. */
+.nb-food,.nb-item-main,.nb-chip,.nb-seg,.nb-item-act button,.nb-item-act .nb-open,.nb-manage-row button.danger{font-weight:400}
+.nb-main strong,.nb-kcal b,.nb-chip.pick,.nb-item-act .nb-open{font-weight:inherit}
+.nb-main strong,.nb-kcal b{font-weight:650}
+.nb-main small,.nb-kcal small,.nb-bar small,.nb-chip b{font-weight:400;font-size:var(--fs-1)}
+.nb-bar small b{font-weight:650}.nb-chip b{color:var(--ink-3)}
+.nb-kcal{gap:0;line-height:1.1}.nb-kcal small{color:var(--ink-3)}
 </style>
 </head>
   <body class="dashboard-mode">
@@ -1115,6 +1168,8 @@ details.sc-row>summary::after{content:none}
               <path d="M3 10h18M7 15h4" /></svg
             >Finanza
           </button>
+          <button data-view="nutrition"><svg class="nav-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7c-2-2-6-1-6 4 0 5 3 9 6 9s6-4 6-9c0-5-4-6-6-4Z"/><path d="M12 7c0-2 1-3 3-4"/></svg><span>Nutrizione</span></button>
+          <button data-view="bloom"><svg class="nav-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h10a1 1 0 0 1 1 1v17l-6-4-6 4V4a1 1 0 0 1 1-1Z"/></svg><span>Bloom</span></button>
           <button id="admin-link" type="button" data-view="admin"><svg class="nav-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>Admin</button>
         </nav>
         <div class="sidebar-foot">
@@ -1152,7 +1207,7 @@ details.sc-row>summary::after{content:none}
         <section id="overview" class="view"></section>
         <section id="movements" class="view"></section>
 
-        <section id="budget" class="view"></section><section id="analysis" class="view"></section><section id="admin" class="view"></section><section id="extras" class="view"></section>
+        <section id="budget" class="view"></section><section id="analysis" class="view"></section><section id="admin" class="view"></section><section id="nutrition" class="view"></section><section id="bloom" class="view"></section><section id="extras" class="view"></section>
       </main>
     </div>
     <script id="lifeos-admin">
@@ -1249,6 +1304,256 @@ details.sc-row>summary::after{content:none}
         const a = e.target.closest("[data-adm]"); if (a) return adminAction(a.dataset.adm);
       });
     </script>
+    <script id="lifeos-nb">
+/* Nutrizione (alimenti personali) e Bloom (libreria). Dati nel D1 del Worker; modifica e importazione dal sito. */
+const NB_FAM = { bakery: ["🍞", "Pane e forno"], grain: ["🌾", "Cereali"], egg: ["🥚", "Uova"], dairy: ["🥛", "Latte e yogurt"], cheese: ["🧀", "Formaggi"], fat: ["🫗", "Oli e burri"], legume: ["🫘", "Legumi"], fruit: ["🍎", "Frutta"], nut: ["🥜", "Frutta secca"], poultry: ["🍗", "Pollame"], meat: ["🥩", "Carne"], fish: ["🐟", "Pesce"], meal: ["🍽️", "Piatti pronti"], pantry: ["🫙", "Dispensa"], drink: ["🥤", "Bevande"], sweet: ["🍫", "Dolci"], vegetable: ["🥦", "Verdure"], supplement: ["💊", "Integratori"] };
+const NB_MICRO = [["vitaminC", "Vitamina C", "mg"], ["vitaminA", "Vitamina A", "µg"], ["vitaminD", "Vitamina D", "µg"], ["vitaminE", "Vitamina E", "mg"], ["vitaminK", "Vitamina K", "µg"], ["vitaminK1", "Vitamina K1", "µg"], ["vitaminK2", "Vitamina K2", "µg"], ["vitaminB1", "Vitamina B1", "mg"], ["vitaminB2", "Vitamina B2", "mg"], ["vitaminB3", "Vitamina B3", "mg"], ["vitaminB5", "Vitamina B5", "mg"], ["vitaminB6", "Vitamina B6", "mg"], ["folate", "Folati", "µg"], ["vitaminB12", "Vitamina B12", "µg"], ["calcium", "Calcio", "mg"], ["chloride", "Cloro", "mg"], ["copper", "Rame", "mg"], ["iron", "Ferro", "mg"], ["iodine", "Iodio", "µg"], ["magnesium", "Magnesio", "mg"], ["manganese", "Manganese", "mg"], ["phosphorus", "Fosforo", "mg"], ["potassium", "Potassio", "mg"], ["selenium", "Selenio", "µg"], ["sodium", "Sodio", "mg"], ["zinc", "Zinco", "mg"], ["ala", "ALA", "mg"], ["epa", "EPA", "mg"], ["dha", "DHA", "mg"], ["caffeine", "Caffeina", "mg"]];
+const nb = { foods: null, bloom: null, loading: "", error: "", fq: "", fam: "", bq: "", btag: "", bmode: "all", dialog: null, busy: false, msg: "" };
+const nbE = (v) => escapeHtml(String(v ?? ""));
+const nbN = (v, d = 0) => (v == null || !Number.isFinite(Number(v)) ? "–" : Number(v).toLocaleString("it-IT", { maximumFractionDigits: d, useGrouping: "always" }));
+const nbDate = (s) => { let t = Number(s); if (!t) return ""; if (t < 1.5e9) t += 978307200; return new Date(t * 1000).toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "numeric" }); };
+const nbHost = (u) => { try { return new URL(u).host.replace(/^www\./, ""); } catch { return ""; } };
+function nbMacroBar(f) {
+  if (f.notDeclared || f.protein == null) return '<div class="nb-macro none"><i></i></div><small>Macro non dichiarati</small>';
+  const p = (f.protein || 0) * 4, c = (f.carbs || 0) * 4, g = (f.fat || 0) * 9, t = p + c + g || 1;
+  return `<div class="nb-macro" role="img" aria-label="Proteine ${nbN(f.protein, 1)} g, carboidrati ${nbN(f.carbs, 1)} g, grassi ${nbN(f.fat, 1)} g"><i style="flex:${p / t}" class="p"></i><i style="flex:${c / t}" class="c"></i><i style="flex:${g / t}" class="g"></i></div><small><b class="p">P</b> ${nbN(f.protein, 1)} · <b class="c">C</b> ${nbN(f.carbs, 1)} · <b class="g">G</b> ${nbN(f.fat, 1)}</small>`;
+}
+async function nbLoad(kind) {
+  if (nb.loading) return;
+  nb.loading = kind; nb.error = "";
+  try {
+    if (kind === "foods") nb.foods = (await workerRequest("listFoods", [])).foods;
+    else nb.bloom = await workerRequest("getBloom", []);
+  } catch (e) { nb.error = String(e.message || e); }
+  nb.loading = "";
+  if (state.view === "nutrition") renderNutrition();
+  if (state.view === "bloom") renderBloom();
+}
+/* ---------------- Nutrizione ---------------- */
+function renderNutrition() {
+  const root = document.getElementById("nutrition");
+  if (!root) return;
+  if (!nb.foods && !nb.loading) { nbLoad("foods"); }
+  const foods = nb.foods || [];
+  const q = nb.fq.trim().toLowerCase();
+  const shown = foods.filter((f) => (!nb.fam || f.family === nb.fam) && (!q || (f.name + " " + f.brand + " " + f.aliases.join(" ")).toLowerCase().includes(q)));
+  const fams = Object.entries(foods.reduce((m, f) => ((m[f.family] = (m[f.family] || 0) + 1), m), {})).sort((a, b) => b[1] - a[1]);
+  const total = foods.length || 1;
+  const stack = fams.map(([k, n]) => `<button class="nb-seg${nb.fam === k ? " on" : ""}" style="flex:${n}" data-nb-fam="${k}" title="${nbE(NB_FAM[k][1])}: ${n}" aria-pressed="${nb.fam === k}"></button>`).join("");
+  const chips = fams.map(([k, n]) => `<button class="nb-chip${nb.fam === k ? " on" : ""}" data-nb-fam="${k}" aria-pressed="${nb.fam === k}">${NB_FAM[k][0]} ${nbE(NB_FAM[k][1])} <b>${n}</b></button>`).join("");
+  root.innerHTML = `<div class="nb-wrap">
+    ${nb.error ? `<div class="errorbox">${nbE(nb.error)} <button data-nb-act="retry-foods">Riprova</button></div>` : ""}
+    <section class="card pad nb-head"><div class="card-title"><div><h2>Alimenti personali</h2><small>${foods.length ? foods.length + " alimenti nel catalogo del sito" : nb.loading ? "Caricamento..." : "Nessun alimento ancora"}</small></div><div class="actions"><button data-nb-act="import-foods">Importa</button><button class="save" data-nb-act="new-food">+ Nuovo alimento</button></div></div>
+      <input type="search" class="search" placeholder="Cerca per nome, marca o alias" value="${nbE(nb.fq)}" data-nb-q="food" aria-label="Cerca alimenti">
+      ${fams.length ? `<div class="nb-stack" role="group" aria-label="Catalogo per famiglia">${stack}</div><div class="nb-chips"><button class="nb-chip${nb.fam ? "" : " on"}" data-nb-fam="" aria-pressed="${!nb.fam}">Tutti <b>${foods.length}</b></button>${chips}</div>` : ""}
+    </section>
+    ${shown.length ? `<div class="nb-grid">${shown.map((f) => `<button class="card nb-food" data-nb-food="${nbE(f.id)}"><span class="nb-ico" aria-hidden="true">${NB_FAM[f.family]?.[0] || "🍽️"}</span><span class="nb-main"><strong>${nbE(f.name)}</strong><small>${nbE(f.brand || (NB_FAM[f.family]?.[1] !== f.name ? NB_FAM[f.family]?.[1] : "") || "")}${f.brand || NB_FAM[f.family]?.[1] !== f.name ? " · " : ""}${f.basis === "ml" ? "per 100 ml" : "per 100 g"}</small></span><span class="nb-kcal"><b>${f.notDeclared ? "–" : nbN(f.kcal)}</b><small>kcal</small></span><span class="nb-bar">${nbMacroBar(f)}</span></button>`).join("")}</div>`
+      : `<section class="card pad nb-empty"><p>${foods.length ? "Nessun alimento corrisponde alla ricerca." : "Qui gestisci gli alimenti che aggiungi tu: valori per 100 g o 100 ml, macro e micronutrienti."}</p>${foods.length ? "" : '<div class="actions"><button class="save" data-nb-act="new-food">+ Nuovo alimento</button><button data-nb-act="import-foods">Importa da file</button></div>'}</section>`}
+  </div>`;
+}
+function nbFoodForm(f) {
+  const x = f || { family: "meal", basis: "g", micro: {}, aliases: [] };
+  const num = (k, label, unit = "g") => `<label>${label}<span class="nb-unit"><input type="number" inputmode="decimal" step="0.1" min="0" name="${k}" value="${x[k] ?? ""}" data-nb-calc><em>${unit}</em></span></label>`;
+  return `<form class="os-form nb-form" data-nb-form="food" autocomplete="off">
+    <label class="wide">Nome<input name="name" value="${nbE(x.name)}" maxlength="120" required autofocus></label>
+    <label>Marca<input name="brand" value="${nbE(x.brand)}" maxlength="80" placeholder="Facoltativa"></label>
+    <label>Famiglia<select name="family">${Object.entries(NB_FAM).map(([k, [i, t]]) => `<option value="${k}"${k === x.family ? " selected" : ""}>${i} ${nbE(t)}</option>`).join("")}</select></label>
+    <label>Valori per<select name="basis"><option value="g"${x.basis === "g" ? " selected" : ""}>100 g</option><option value="ml"${x.basis === "ml" ? " selected" : ""}>100 ml</option></select></label>
+    <label class="nb-check"><input type="checkbox" name="notDeclared" ${x.notDeclared ? "checked" : ""} data-nb-calc> Energia e macro non dichiarati</label>
+    <div class="nb-nums wide" data-nb-nums>${num("kcal", "Energia", "kcal")}${num("protein", "Proteine")}${num("carbs", "Carboidrati")}${num("fat", "Grassi")}${num("fibre", "Fibre")}
+      <div class="nb-calc" data-nb-calcout></div></div>
+    <label class="wide">Alias<input name="aliases" value="${nbE((x.aliases || []).join(", "))}" placeholder="Altri nomi, separati da virgola"></label>
+    <label class="wide">Note<textarea name="note" maxlength="500" rows="2">${nbE(x.note)}</textarea></label>
+    <details class="wide nb-micro"><summary>Micronutrienti <small>per 100 ${x.basis === "ml" ? "ml" : "g"}, solo quelli che conosci</small></summary><div class="nb-micro-grid">${NB_MICRO.map(([k, t, u]) => `<label>${t}<span class="nb-unit"><input type="number" inputmode="decimal" step="any" min="0" name="m_${k}" value="${x.micro?.[k] ?? ""}"><em>${u}</em></span></label>`).join("")}</div></details>
+    <div class="os-form-error" data-nb-err role="alert"></div>
+    <div class="form-actions">${f ? '<button type="button" class="danger" data-nb-act="del-food">Elimina</button>' : ""}<button type="button" data-nb-act="close">Annulla</button><button class="save" type="submit">Salva</button></div></form>`;
+}
+function nbCalcHint(form) {
+  const out = form.querySelector("[data-nb-calcout]"), nd = form.elements.notDeclared.checked;
+  form.querySelectorAll("[data-nb-nums] input").forEach((i) => (i.disabled = nd));
+  if (!out) return;
+  const v = (n) => Number(String(form.elements[n].value).replace(",", ".")) || 0;
+  const kcal = v("protein") * 4 + v("carbs") * 4 + v("fat") * 9 + v("fibre") * 2, has = form.elements.protein.value || form.elements.carbs.value || form.elements.fat.value;
+  out.innerHTML = nd || !has ? "" : `<span>Dai macro (4P + 4C + 9G + 2 fibre): <b>${Math.round(kcal)} kcal</b></span>${Math.abs(kcal - v("kcal")) > 1 ? '<button type="button" data-nb-act="use-calc" data-v="' + Math.round(kcal) + '">Usa questo valore</button>' : ""}`;
+}
+function nbFoodPayload(form) {
+  const f = form.elements, nd = f.notDeclared.checked, micro = {};
+  for (const [k] of NB_MICRO) if (f["m_" + k]?.value !== "") micro[k] = f["m_" + k].value;
+  return { id: nb.dialog?.id, name: f.name.value, brand: f.brand.value, family: f.family.value, basis: f.basis.value, notDeclared: nd, kcal: f.kcal.value, protein: f.protein.value, carbs: f.carbs.value, fat: f.fat.value, fibre: f.fibre.value, aliases: f.aliases.value.split(",").map((s) => s.trim()).filter(Boolean), note: f.note.value, micro };
+}
+/* ---------------- Dialog comune ---------------- */
+function nbOpen(title, body, wide) {
+  const w = document.getElementById("nb-dialog");
+  w.innerHTML = `<div class="modal${wide ? " nb-wide" : ""}" role="dialog" aria-modal="true" aria-label="${nbE(title)}"><div class="modal-top"><h2>${nbE(title)}</h2><button class="os-icon-button" data-nb-act="close" aria-label="Chiudi">×</button></div>${body}</div>`;
+  w.classList.remove("hidden");
+  const form = w.querySelector("form[data-nb-form=food]"); if (form) nbCalcHint(form);
+}
+function nbClose() { const w = document.getElementById("nb-dialog"); w.classList.add("hidden"); w.innerHTML = ""; nb.dialog = null; }
+async function nbSubmit(form) {
+  const err = form.querySelector("[data-nb-err]"), btn = form.querySelector("button.save");
+  err.textContent = ""; btn.disabled = true;
+  try {
+    const kind = form.dataset.nbForm;
+    if (kind === "food") { await workerRequest("saveFood", [nbFoodPayload(form)]); nb.foods = null; nbClose(); renderNutrition(); }
+    else if (kind === "item") { await nbSaveItem(form); }
+    else if (kind === "collection") { await workerRequest("saveBloomCollection", [{ id: form.elements.id.value || undefined, name: form.elements.name.value }]); nb.bloom = null; nbClose(); renderBloom(); }
+  } catch (e) { err.textContent = String(e.message || e); btn.disabled = false; }
+}
+/* ---------------- Importazione ---------------- */
+function nbImportDialog(kind) {
+  nb.dialog = { kind };
+  const what = kind === "foods" ? "il file JSON con l'elenco degli alimenti personali" : "il file JSON della copia di Bloom (la stessa che si importa nell'app)";
+  nbOpen(kind === "foods" ? "Importa alimenti" : "Importa Bloom", `<div class="nb-import"><p class="hint">Scegli ${what}. Il file resta nel browser: vengono inviati solo testo, link, categorie e nomi degli allegati. ${kind === "bloom" ? "I file e le immagini allegati non vengono caricati." : ""}</p><input type="file" accept=".json,application/json" data-nb-file="${kind}"><div class="nb-import-out" role="status" aria-live="polite"></div></div>`);
+}
+async function nbRunImport(kind, file) {
+  const out = document.querySelector(".nb-import-out");
+  const say = (t) => (out.textContent = t);
+  try {
+    say("Lettura del file...");
+    const data = JSON.parse(await file.text());
+    if (kind === "foods") {
+      const list = Array.isArray(data) ? data : data.foods || data.items;
+      if (!Array.isArray(list) || !list.length) throw Error("Non trovo alimenti nel file.");
+      let n = 0;
+      for (let i = 0; i < list.length; i += 100) { n += (await workerRequest("importFoods", [list.slice(i, i + 100)])).imported; say(n + " di " + list.length + " alimenti importati..."); }
+      nb.foods = null; say(n + " alimenti importati."); renderNutrition(); return;
+    }
+    if (!data || !Array.isArray(data.items)) throw Error("Il file non sembra una copia di Bloom.");
+    let files = 0;
+    const items = data.items.map((it) => {
+      const c = { ...it }; delete c.data;
+      if (Array.isArray(c.noteFiles)) c.noteFiles = c.noteFiles.map((f) => { files++; return { name: f.name ?? f.fileName, type: f.type }; });
+      else if (c.fileName) files++;
+      return c;
+    });
+    const cols = Array.isArray(data.collections) ? data.collections : [];
+    const total = { added: 0, updated: 0, skipped: 0 };
+    for (let i = 0; i < items.length || i === 0; i += 50) {
+      const chunk = items.slice(i, i + 50), payload = { collections: i === 0 ? cols : [], items: chunk };
+      if (!payload.collections.length && !chunk.length) break;
+      const r = await workerRequest("importBloom", [payload]);
+      total.added += r.added; total.updated += r.updated; total.skipped += r.skipped;
+      say(Math.min(i + 50, items.length) + " di " + items.length + " elementi elaborati...");
+    }
+    nb.bloom = null;
+    say(`Fatto: ${total.added} nuovi, ${total.updated} aggiornati, ${total.skipped} già presenti.${files ? " " + files + " allegati non caricati (restano nell'app)." : ""}`);
+    renderBloom();
+  } catch (e) { say("Importazione non riuscita: " + String(e.message || e)); }
+}
+/* ---------------- Bloom ---------------- */
+const NB_KIND = { link: "🔗", note: "📝", file: "📎", image: "🖼️", place: "📍" };
+function nbBloomView() {
+  const b = nb.bloom || { collections: [], items: [] }, q = nb.bq.trim().toLowerCase();
+  const cname = new Map(b.collections.map((c) => [c.id, c.name]));
+  const live = b.items.filter((i) => !i.trashedAt), counts = new Map();
+  for (const i of live.filter((x) => !x.archived)) for (const t of i.tags) counts.set(t, (counts.get(t) || 0) + 1);
+  const base = nb.bmode === "trash" ? b.items.filter((i) => i.trashedAt) : nb.bmode === "archive" ? live.filter((i) => i.archived) : live.filter((i) => !i.archived);
+  const hit = (i) => !q || (i.title + " " + i.url + " " + i.body + " " + i.notes + " " + i.tags.map((t) => cname.get(t) || "").join(" ")).toLowerCase().includes(q);
+  const shown = base.filter((i) => (!nb.btag || i.tags.includes(nb.btag)) && hit(i));
+  return { b, cname, counts, shown, live, trash: b.items.filter((i) => i.trashedAt).length, archive: live.filter((i) => i.archived).length };
+}
+function renderBloom() {
+  const root = document.getElementById("bloom");
+  if (!root) return;
+  if (!nb.bloom && !nb.loading) nbLoad("bloom");
+  const v = nbBloomView();
+  const tagChips = v.b.collections.map((c) => ({ c, n: v.counts.get(c.id) || 0 })).sort((a, z) => z.n - a.n || a.c.name.localeCompare(z.c.name, "it")).map(({ c, n }) => `<button class="nb-chip${nb.btag === c.id ? " on" : ""}" data-nb-tag="${nbE(c.id)}" aria-pressed="${nb.btag === c.id}">${nbE(c.name)} <b>${n}</b></button>`).join("");
+  const card = (i) => `<article class="card nb-item${i.trashedAt ? " trashed" : ""}"><button class="nb-item-main" data-nb-item="${nbE(i.id)}"><span class="nb-ico" aria-hidden="true">${NB_KIND[i.kind] || "📝"}</span><span class="nb-main"><strong>${nbE(i.title || nbHost(i.url) || (i.body || i.notes || "Nota").slice(0, 70))}</strong><small>${nbE([nbHost(i.url), nbDate(i.modifiedAt)].filter(Boolean).join(" · "))}${i.files.length ? " · 📎 " + i.files.length : ""}</small></span></button>${i.body || i.notes ? `<p>${nbE((i.body || i.notes).replace(/\s+/g, " ").slice(0, 160))}</p>` : ""}<div class="nb-tags">${i.tags.map((t) => `<span>${nbE(v.cname.get(t) || "?")}</span>`).join("")}</div><div class="nb-item-act">${i.url ? `<a class="nb-open" href="${nbE(i.url)}" target="_blank" rel="noopener noreferrer">Apri</a>` : ""}${i.trashedAt ? `<button data-nb-act="restore" data-id="${nbE(i.id)}">Ripristina</button><button class="danger" data-nb-act="purge" data-id="${nbE(i.id)}">Elimina</button>` : `<button data-nb-item="${nbE(i.id)}">Modifica</button><button data-nb-act="${i.archived ? "unarchive" : "archive"}" data-id="${nbE(i.id)}">${i.archived ? "Ripristina" : "Archivia"}</button><button data-nb-act="trash" data-id="${nbE(i.id)}">Cestino</button>`}</div></article>`;
+  root.innerHTML = `<div class="nb-wrap">
+    ${nb.error ? `<div class="errorbox">${nbE(nb.error)} <button data-nb-act="retry-bloom">Riprova</button></div>` : ""}
+    <section class="card pad nb-head"><div class="card-title"><div><h2>Libreria</h2><small>${v.live.length ? v.live.length + " elementi · " + v.b.collections.length + " categorie" : nb.loading ? "Caricamento..." : "Ancora vuota"}</small></div><div class="actions"><button data-nb-act="import-bloom">Importa dall'app</button><button class="save" data-nb-act="new-item">+ Aggiungi</button></div></div>
+      <input type="search" class="search" placeholder="Cerca in titoli, link, testi e categorie" value="${nbE(nb.bq)}" data-nb-q="bloom" aria-label="Cerca in Bloom">
+      <div class="nb-chips"><button class="nb-chip${nb.bmode === "all" && !nb.btag ? " on" : ""}" data-nb-mode="all">Tutti <b>${v.live.filter((i) => !i.archived).length}</b></button>${tagChips}<button class="nb-chip ghost" data-nb-act="new-collection">+ Categoria</button>${v.b.collections.length ? '<button class="nb-chip ghost" data-nb-act="manage-collections">Gestisci</button>' : ""}</div>
+      <div class="nb-chips sub"><button class="nb-chip${nb.bmode === "archive" ? " on" : ""}" data-nb-mode="archive">Archivio <b>${v.archive}</b></button><button class="nb-chip${nb.bmode === "trash" ? " on" : ""}" data-nb-mode="trash">Cestino <b>${v.trash}</b></button></div>
+    </section>
+    ${v.shown.length ? `<div class="nb-grid">${v.shown.map(card).join("")}</div>` : `<section class="card pad nb-empty"><p>${v.live.length || v.trash ? "Niente da mostrare con questi filtri." : "Importa la copia di Bloom dall'app oppure aggiungi il primo elemento."}</p></section>`}
+  </div>`;
+}
+function nbItemForm(i, full) {
+  const x = full || { tags: [], files: [], kind: "note" }, cols = nb.bloom?.collections || [];
+  return `<form class="os-form nb-form" data-nb-form="item" autocomplete="off"><input type="hidden" name="id" value="${nbE(x.id)}">
+    <label class="wide">Titolo<input name="title" value="${nbE(x.title)}" maxlength="300" autofocus placeholder="Facoltativo"></label>
+    <label class="wide">Link<input type="url" name="url" value="${nbE(x.url)}" maxlength="2000" placeholder="https://"></label>
+    <label class="wide">Testo<textarea name="body" rows="5" maxlength="40000">${nbE(x.body)}</textarea></label>
+    <label class="wide">Appunti<textarea name="notes" rows="3" maxlength="40000">${nbE(x.notes)}</textarea></label>
+    <fieldset class="wide nb-tagpick"><legend>Categorie</legend>${cols.length ? cols.map((c) => `<label class="nb-chip pick"><input type="checkbox" name="tag" value="${nbE(c.id)}" ${x.tags.includes(c.id) ? "checked" : ""}>${nbE(c.name)}</label>`).join("") : "<small>Nessuna categoria: creane una dalla libreria.</small>"}</fieldset>
+    ${x.place ? `<div class="wide hint">📍 Luogo salvato: ${nbE(x.place.name || x.place.title || x.place.address || "posizione")}</div>` : ""}
+    ${x.files?.length ? `<div class="wide hint">📎 Allegati nell'app: ${x.files.map((f) => nbE(f.name)).join(", ")}. I file restano sul telefono.</div>` : ""}
+    <div class="os-form-error" data-nb-err role="alert"></div>
+    <div class="form-actions"><button type="button" data-nb-act="close">Annulla</button><button class="save" type="submit">Salva</button></div></form>`;
+}
+async function nbSaveItem(form) {
+  const f = form.elements, orig = nb.dialog?.item || {};
+  const tags = [...form.querySelectorAll("input[name=tag]:checked")].map((c) => c.value);
+  const payload = { ...orig, id: f.id.value || undefined, title: f.title.value, urlString: f.url.value, text: f.body.value, notes: f.notes.value, tagIDs: tags, kind: orig.kind && orig.kind !== "note" ? orig.kind : f.url.value ? "link" : "note", noteFiles: orig.files, place: orig.place, archived: orig.archived, trashedAt: orig.trashedAt };
+  delete payload.files; delete payload.body; delete payload.url; delete payload.tags; delete payload.bodyLength;
+  await workerRequest("saveBloomItem", [payload]);
+  nb.bloom = null; nbClose(); renderBloom();
+}
+async function nbOpenItem(id) {
+  nbOpen("Elemento", '<p class="hint">Caricamento...</p>', true);
+  try { const full = await workerRequest("getBloomItem", [id]); nb.dialog = { item: full }; nbOpen(full.title || "Elemento", nbItemForm(full, full), true); }
+  catch (e) { nbOpen("Elemento", `<div class="errorbox">${nbE(e.message || e)}</div>`); }
+}
+function nbCollectionsDialog() {
+  const cols = nb.bloom?.collections || [];
+  nbOpen("Categorie", `<div class="nb-manage">${cols.map((c) => `<form class="nb-manage-row" data-nb-form="collection"><input type="hidden" name="id" value="${nbE(c.id)}"><input name="name" value="${nbE(c.name)}" maxlength="80" aria-label="Nome categoria"><button class="save" type="submit">Rinomina</button><button type="button" class="danger" data-nb-act="del-collection" data-id="${nbE(c.id)}">Elimina</button><span class="os-form-error" data-nb-err></span></form>`).join("")}</div><p class="hint">Eliminare una categoria non elimina gli elementi: perdono solo quell'etichetta.</p>`);
+}
+async function nbItemAction(act, id) {
+  try {
+    if (act === "trash" || act === "restore") await workerRequest("trashBloomItem", [id, act === "trash"]);
+    else if (act === "purge") await workerRequest("deleteBloomItem", [id]);
+    else { const it = await workerRequest("getBloomItem", [id]); await workerRequest("saveBloomItem", [{ ...it, urlString: it.url, text: it.body, tagIDs: it.tags, noteFiles: it.files, archived: act === "archive" }]); }
+    nb.bloom = null; renderBloom();
+  } catch (e) { nb.error = String(e.message || e); renderBloom(); }
+}
+/* ---------------- Eventi ---------------- */
+document.addEventListener("click", async (e) => {
+  const t = e.target;
+  const fam = t.closest("[data-nb-fam]"); if (fam) { nb.fam = nb.fam === fam.dataset.nbFam ? "" : fam.dataset.nbFam; return renderNutrition(); }
+  const fd = t.closest("[data-nb-food]"); if (fd) { const f = nb.foods.find((x) => x.id === fd.dataset.nbFood); nb.dialog = { id: f.id }; return nbOpen("Modifica alimento", nbFoodForm(f), true); }
+  const tag = t.closest("[data-nb-tag]"); if (tag) { nb.btag = nb.btag === tag.dataset.nbTag ? "" : tag.dataset.nbTag; if (nb.bmode !== "all") nb.bmode = "all"; return renderBloom(); }
+  const mode = t.closest("[data-nb-mode]"); if (mode) { nb.bmode = nb.bmode === mode.dataset.nbMode && mode.dataset.nbMode !== "all" ? "all" : mode.dataset.nbMode; if (mode.dataset.nbMode === "all") nb.btag = ""; return renderBloom(); }
+  const it = t.closest("[data-nb-item]"); if (it) return nbOpenItem(it.dataset.nbItem);
+  const a = t.closest("[data-nb-act]"); if (!a) return;
+  const act = a.dataset.nbAct, id = a.dataset.id;
+  if (act === "close") return nbClose();
+  if (act === "new-food") { nb.dialog = {}; return nbOpen("Nuovo alimento", nbFoodForm(null), true); }
+  if (act === "import-foods") return nbImportDialog("foods");
+  if (act === "import-bloom") return nbImportDialog("bloom");
+  if (act === "retry-foods") { nb.error = ""; return nbLoad("foods"); }
+  if (act === "retry-bloom") { nb.error = ""; return nbLoad("bloom"); }
+  if (act === "use-calc") { const form = a.closest("form"); form.elements.kcal.value = a.dataset.v; return nbCalcHint(form); }
+  if (act === "del-food") {
+    if (a.dataset.confirm !== "1") { a.dataset.confirm = "1"; a.textContent = "Confermi?"; return; }
+    try { await workerRequest("deleteFood", [nb.dialog.id]); nb.foods = null; nbClose(); renderNutrition(); } catch (err) { a.closest("form").querySelector("[data-nb-err]").textContent = String(err.message || err); }
+    return;
+  }
+  if (act === "new-item") { nb.dialog = { item: {} }; return nbOpen("Nuovo elemento", nbItemForm(null, null), true); }
+  if (act === "new-collection") { nbOpen("Nuova categoria", '<form class="os-form nb-form" data-nb-form="collection"><input type="hidden" name="id" value=""><label class="wide">Nome<input name="name" maxlength="80" required autofocus></label><div class="os-form-error" data-nb-err role="alert"></div><div class="form-actions"><button type="button" data-nb-act="close">Annulla</button><button class="save" type="submit">Crea</button></div></form>'); return; }
+  if (act === "manage-collections") return nbCollectionsDialog();
+  if (act === "del-collection") {
+    if (a.dataset.confirm !== "1") { a.dataset.confirm = "1"; a.textContent = "Confermi?"; return; }
+    try { await workerRequest("deleteBloomCollection", [id]); nb.bloom = null; if (nb.btag === id) nb.btag = ""; nbClose(); renderBloom(); } catch (err) { a.closest("form").querySelector("[data-nb-err]").textContent = String(err.message || err); }
+    return;
+  }
+  if (["trash", "restore", "purge", "archive", "unarchive"].includes(act)) {
+    if (act === "purge" && a.dataset.confirm !== "1") { a.dataset.confirm = "1"; a.textContent = "Confermi?"; return; }
+    return nbItemAction(act, id);
+  }
+});
+document.addEventListener("submit", (e) => { const f = e.target.closest("form[data-nb-form]"); if (f) { e.preventDefault(); nbSubmit(f); } });
+document.addEventListener("input", (e) => {
+  const q = e.target.closest("[data-nb-q]");
+  if (q) { const kind = q.dataset.nbQ; if (kind === "food") nb.fq = q.value; else nb.bq = q.value; const pos = q.selectionStart; (kind === "food" ? renderNutrition : renderBloom)(); const n = document.querySelector(`[data-nb-q=${kind}]`); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch {} } return; }
+  const c = e.target.closest("[data-nb-calc]"); if (c) nbCalcHint(c.form);
+});
+document.addEventListener("change", (e) => {
+  const c = e.target.closest("[data-nb-calc]"); if (c) nbCalcHint(c.form);
+  const file = e.target.closest("[data-nb-file]"); if (file && file.files[0]) nbRunImport(file.dataset.nbFile, file.files[0]);
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !document.getElementById("nb-dialog").classList.contains("hidden")) nbClose(); });
+    </script>
     <script id="lifeos-routing">
       /* Destinazione della spesa (Budget o Piano) e selettore diretto del mese. */
       const planMonthKey = () => state.year + "-" + String(state.month).padStart(2, "0");
@@ -1342,6 +1647,7 @@ details.sc-row>summary::after{content:none}
     </script>
     <div id="dialog" class="modal-wrap hidden"></div>
     <div id="life-dialog" class="modal-wrap hidden"></div>
+    <div id="nb-dialog" class="modal-wrap hidden"></div>
     <script>
       /** Trasporto JSON same-origin con timeout; nessun retry automatico delle scritture. */
       async function workerRequest(method, args) {
@@ -2706,6 +3012,8 @@ details.sc-row>summary::after{content:none}
             "analysis",
             "extras",
             "admin",
+            "nutrition",
+            "bloom",
           ].includes(view)
         )
           return;
@@ -2735,6 +3043,8 @@ details.sc-row>summary::after{content:none}
           analysis: "Analisi",
           extras: "Piani",
           admin: "Admin",
+          nutrition: "Nutrizione",
+          bloom: "Bloom",
         }[view];
         document
           .getElementById("finance-tabs")
@@ -2775,6 +3085,8 @@ details.sc-row>summary::after{content:none}
             ),
           );
         if (view === "admin" && typeof renderAdmin === "function") renderAdmin();
+        if (view === "nutrition" && typeof renderNutrition === "function") renderNutrition();
+        if (view === "bloom" && typeof renderBloom === "function") renderBloom();
         if (view !== "calendar") life.tool = null;
         if (["today", "tasks", "calendar"].includes(view)) {
           renderLifeOS();
