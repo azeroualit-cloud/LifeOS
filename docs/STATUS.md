@@ -418,3 +418,7 @@ Render approvato, implementazione del pulsante + Nutrizione → pannello con qua
 - Patch utenze con quota attiva applicata a backend/utilities/competence.mjs e al bundle manual/build-75 (gitignored): il budget porta sempre la quota, la bolletta esce dai risparmi. Test competence 7/7.
 - App: aggiunto "Esporta alimenti personali" (fileExporter JSON, formato NativeGenericFood) in NativeFoodPicker. Non compilato qui (Swift): verifica solo via CI su richiesta.
 - Build web 6A6F1DE70C12276C, non distribuita.
+
+## 2026-11-20 - movimento web (Claude)
+- Solo front-end (app.html, ui.css): ingresso a cascata al cambio vista, barre macro che crescono, finestre con dissolvenza, sollevamento al passaggio su card, scorciatoia "/" per la ricerca in Nutrizione e Bloom. Durate 160/260/420 ms, rispetta prefers-reduced-motion. Backend e Worker invariati.
+- Build web B7416C5C744226F6, non distribuita.

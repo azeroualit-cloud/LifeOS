@@ -1102,6 +1102,34 @@ details.sc-row>summary::after{content:none}
 :root{--nav-accent:#bcc4f3}html[data-theme="light"]{--nav-accent:#5560b0}
 body .nav button[data-view].active,body .nav #admin-link.active{color:var(--nav-accent);background:color-mix(in srgb,var(--nav-accent) 12%,transparent)}
 body .nav button[data-view].active .nav-symbol,body .nav #admin-link.active .nav-symbol{color:inherit}
+
+/* 9. MOVIMENTO ------------------------------------------------------
+   Durate sulla scala aurea (160 / 260 / 420 ms), curva unica, solo transform e opacity.
+   L'ingresso si attiva solo al cambio vista (.enter) e non a ogni render, cosi la ricerca non sfarfalla. */
+:root{--ease:cubic-bezier(.2,.7,.2,1);--m1:.16s;--m2:.26s;--m3:.42s}
+@keyframes m-rise{from{opacity:0;transform:translateY(10px)}}
+@keyframes m-fade{from{opacity:0}}
+@keyframes m-pop{from{opacity:0;transform:translateY(8px) scale(.975)}}
+@keyframes m-grow{from{transform:scaleX(0)}}
+@keyframes m-pulse{50%{opacity:.45}}
+.view.enter>*{animation:m-rise var(--m3) var(--ease) both}
+.view.enter>*:nth-child(2){animation-delay:42ms}.view.enter>*:nth-child(3){animation-delay:84ms}
+.view.enter>*:nth-child(4){animation-delay:126ms}.view.enter>*:nth-child(5){animation-delay:168ms}
+.view.enter>*:nth-child(6){animation-delay:210ms}.view.enter>*:nth-child(n+7){animation-delay:252ms}
+.view.enter .nb-macro{transform-origin:left center;animation:m-grow var(--m3) var(--ease) .16s both}
+.view.enter .nb-grid>*{animation:m-rise var(--m3) var(--ease) both}
+.view.enter .nb-grid>*:nth-child(2){animation-delay:42ms}.view.enter .nb-grid>*:nth-child(3){animation-delay:84ms}
+.view.enter .nb-grid>*:nth-child(4){animation-delay:126ms}.view.enter .nb-grid>*:nth-child(n+5){animation-delay:168ms}
+.modal-wrap:not(.hidden){animation:m-fade var(--m2) var(--ease)}
+.modal-wrap:not(.hidden)>*{animation:m-pop var(--m2) var(--ease) both}
+#loading:not(.hidden) strong{animation:m-pulse 1.6s ease-in-out infinite}
+.nb-chip,.nb-food,.nb-grid>*{transition:background-color var(--m1),border-color var(--m1),box-shadow var(--m2) var(--ease),transform var(--m2) var(--ease)}
+.nb-chip:active:not(:disabled){transform:scale(.96)}
+@media(hover:hover){
+  .nb-food:hover,.nb-grid>article:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.14)}
+  .nav button[data-view]:hover:not(.active) svg{transform:translateY(-1px)}
+}
+.nav button[data-view] svg{transition:transform var(--m2) var(--ease)}
 </style>
 </head>
   <body class="dashboard-mode">
@@ -1431,16 +1459,16 @@ async function nbRunImport(kind, file) {
       return c;
     });
     const cols = Array.isArray(data.collections) ? data.collections : [];
-    const total = { added: 0, updated: 0, skipped: 0 };
+    const total = { added: 0, updated: 0, skipped: 0, rejected: 0 };
     for (let i = 0; i < items.length || i === 0; i += 50) {
       const chunk = items.slice(i, i + 50), payload = { collections: i === 0 ? cols : [], items: chunk };
       if (!payload.collections.length && !chunk.length) break;
       const r = await workerRequest("importBloom", [payload]);
-      total.added += r.added; total.updated += r.updated; total.skipped += r.skipped;
+      total.added += r.added; total.updated += r.updated; total.skipped += r.skipped; total.rejected += r.rejectedCount || 0;
       say(Math.min(i + 50, items.length) + " di " + items.length + " elementi elaborati...");
     }
     nb.bloom = null;
-    say(`Fatto: ${total.added} nuovi, ${total.updated} aggiornati, ${total.skipped} già presenti.${files ? " " + files + " allegati non caricati (restano nell'app)." : ""}`);
+    say(`Fatto: ${total.added} nuovi, ${total.updated} aggiornati, ${total.skipped} già presenti.${total.rejected ? " " + total.rejected + " non importati perché non validi." : ""}${files ? " " + files + " allegati non caricati (restano nell'app)." : ""}`);
     renderBloom();
   } catch (e) { say("Importazione non riuscita: " + String(e.message || e)); }
 }
@@ -1557,6 +1585,15 @@ document.addEventListener("change", (e) => {
   const file = e.target.closest("[data-nb-file]"); if (file && file.files[0]) nbRunImport(file.dataset.nbFile, file.files[0]);
 });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !document.getElementById("nb-dialog").classList.contains("hidden")) nbClose(); });
+/* "/" porta il cursore sulla ricerca di Nutrizione e Bloom */
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "/" || e.ctrlKey || e.metaKey || e.altKey || !["nutrition", "bloom"].includes(state.view)) return;
+  const t = e.target;
+  if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+  if (!document.getElementById("nb-dialog").classList.contains("hidden")) return;
+  const q = document.querySelector("#" + state.view + " [data-nb-q]");
+  if (q) { e.preventDefault(); q.focus(); q.select(); }
+});
     </script>
     <script id="lifeos-routing">
       /* Destinazione della spesa (Budget o Piano) e selettore diretto del mese. */
@@ -3028,6 +3065,10 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !documen
           document.getElementById("loading").classList.add("hidden");
         }
         state.view = view;
+        if (previousView !== view) {
+          const el = document.getElementById(view);
+          if (el) { el.classList.remove("enter"); void el.offsetWidth; el.classList.add("enter"); setTimeout(() => el.classList.remove("enter"), 900); }
+        }
         document.body.classList.toggle("dashboard-mode", view === "today");
         document
           .querySelectorAll(".view")
