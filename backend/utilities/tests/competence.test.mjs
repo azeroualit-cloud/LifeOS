@@ -13,8 +13,10 @@ test('221.79 August–October allocates exactly 73.93 each, independent of payme
   const bank = movement(), before = structuredClone(bank);
   const state = { plans: { water: plan }, payments: { bill: { status: 'posted', movementId: 2, utilityPeriod: period } } };
   const context = utilityCompetenceContext(state, [bank]);
-  for (const month of ['2026-08', '2026-09', '2026-10'])
+  for (const month of ['2026-08', '2026-09'])
     assert.deepEqual(utilityMonthlyCost(context, 'Acqua', month, 4000, contribution), { amountCents: 7393, source: 'actual' });
+  // Month with an active quota: the budget carries the quota, the bill is paid from savings.
+  assert.deepEqual(utilityMonthlyCost(context, 'Acqua', '2026-10', 4000, contribution), { amountCents: 5000, source: 'estimate' });
   assert.deepEqual(utilityMonthlyCost(context, 'Acqua', '2026-11', 4000, contribution), { amountCents: 5000, source: 'estimate' });
   assert.deepEqual(bank, before); assert.equal(context.bills.length, 1);
   assert.equal(contribution(plan, '2026-10'), 5000, 'The fund contribution is not replaced by the cost');

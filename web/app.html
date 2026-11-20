@@ -1098,6 +1098,10 @@ details.sc-row>summary::after{content:none}
 .nb-main small,.nb-kcal small,.nb-bar small,.nb-chip b{font-weight:400;font-size:var(--fs-1)}
 .nb-bar small b{font-weight:650}.nb-chip b{color:var(--ink-3)}
 .nb-kcal{gap:0;line-height:1.1}.nb-kcal small{color:var(--ink-3)}
+/* Navigazione: un solo colore attivo per tutte le voci, versione più chiara del periwinkle del logo */
+:root{--nav-accent:#bcc4f3}html[data-theme="light"]{--nav-accent:#5560b0}
+body .nav button[data-view].active,body .nav #admin-link.active{color:var(--nav-accent);background:color-mix(in srgb,var(--nav-accent) 12%,transparent)}
+body .nav button[data-view].active .nav-symbol,body .nav #admin-link.active .nav-symbol{color:inherit}
 </style>
 </head>
   <body class="dashboard-mode">

@@ -58,11 +58,13 @@ export function utilityCompetenceContext(state, movements) {
 export function utilityMonthlyCost(context, category, month, fallbackCents, contribution) {
   const shares = (context?.bills || []).filter(b => b.category === category)
     .flatMap(b => b.shares.filter(s => s.month === month));
-  if (shares.length) return { amountCents: shares.reduce((n, s) => n + s.amountCents, 0), source: 'actual' };
   const profiles = (context?.profiles || []).filter(p => p.category === category && p.status !== 'cancelled'
     && month >= p.startMonth && (!p.stopAfter || month <= p.stopAfter) && (!p.closedMonth || month <= p.closedMonth));
-  const estimate = profiles.reduce((n, p) => n + (p.budgetEstimates?.[month] ?? contribution(p, month)), 0);
-  return { amountCents: profiles.length ? estimate : fallbackCents, source: 'estimate' };
+  // With an active quota the budget always carries the quota: the bill is paid from savings,
+  // the excess is not charged to the month and a smaller bill does not return the difference to Libero.
+  if (profiles.length) return { amountCents: profiles.reduce((n, p) => n + (p.budgetEstimates?.[month] ?? contribution(p, month)), 0), source: 'estimate' };
+  if (shares.length) return { amountCents: shares.reduce((n, s) => n + s.amountCents, 0), source: 'actual' };
+  return { amountCents: fallbackCents, source: 'estimate' };
 }
 
 export function hasUtilityBill(context, movementId) {

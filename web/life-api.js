@@ -11,10 +11,11 @@ async function nbTables(env) {
   }
   await nbReady;
 }
+let nbLenient = false;
 const nbText = (v, max, required) => {
   const t = String(v ?? "").trim();
   if (required && !t) throw Error(required);
-  if (t.length > max) throw Error("Testo troppo lungo (massimo " + max + " caratteri).");
+  if (t.length > max) { if (nbLenient) return t.slice(0, max); throw Error("Testo troppo lungo (massimo " + max + " caratteri)."); }
   return t;
 };
 const nbNum = (v, max) => {
@@ -102,8 +103,12 @@ async function importFoods(env, list) {
 /* ---------- Bloom ---------- */
 function nbCleanItem(input) {
   const o = input && typeof input === "object" ? input : {};
-  const url = nbText(o.urlString ?? o.url, 2000);
-  if (url && !/^https?:\/\/[^\s]+$/i.test(url)) throw Error("Il link deve iniziare con http:// o https://");
+  let url = nbText(o.urlString ?? o.url, 2000);
+  let linkNote = "";
+  if (url && !/^https?:\/\/[^\s]+$/i.test(url)) {
+    if (!nbLenient) throw Error("Il link deve iniziare con http:// o https://");
+    linkNote = url.slice(0, 500); url = "";
+  }
   const tags = [...new Set((Array.isArray(o.tagIDs ?? o.tags) ? (o.tagIDs ?? o.tags) : o.collectionID ? [o.collectionID] : []).map((t) => nbText(t, 64)).filter(Boolean))].slice(0, 40);
   const files = (Array.isArray(o.noteFiles) ? o.noteFiles : []).slice(0, 40).map((f) => ({ name: nbText(f?.name ?? f?.fileName, 160), type: nbText(f?.type, 80) })).filter((f) => f.name);
   if (o.fileName && !files.length) files.push({ name: nbText(o.fileName, 160), type: nbText(o.type, 80) });
@@ -113,12 +118,13 @@ function nbCleanItem(input) {
   if (doc.length > 8000) doc = "{}";
   let place = "";
   if (o.place && typeof o.place === "object") { place = JSON.stringify(o.place); if (place.length > 4000) place = ""; }
-  const modified = Number(o.modifiedAt);
+  let modified = Number(o.modifiedAt);
+  if (modified > 0 && modified < 1.5e9) modified += 978307200; // date di riferimento Apple (2001) in secondi unix
   return {
     id: nbId(o.id, ""),
     kind: /^[a-z]{2,20}$/.test(String(o.kind || "")) ? String(o.kind) : url ? "link" : "note",
     title: nbText(o.title, 300), url,
-    body: nbText(o.text ?? o.body, 40000), notes: nbText(o.notes, 40000),
+    body: nbText(o.text ?? o.body, 200000), notes: nbText([linkNote, o.notes].filter(Boolean).join("\n"), 200000),
     tags, place, archived: o.archived ? 1 : 0,
     trashedAt: o.trashedAt == null || o.trashedAt === "" ? null : Number(o.trashedAt) || null,
     modifiedAt: Number.isFinite(modified) && modified > 0 ? modified : Math.floor(Date.now() / 1000),
@@ -188,7 +194,12 @@ async function importBloom(env, payload) {
   const collections = Array.isArray(payload?.collections) ? payload.collections : [];
   const items = Array.isArray(payload?.items) ? payload.items : [];
   if (collections.length > 300 || items.length > 60 || !(collections.length + items.length)) throw Error("Invia al massimo 60 elementi e 300 categorie per volta.");
-  const cleanC = collections.map(nbCleanCollection), cleanI = items.map(nbCleanItem);
+  const cleanC = [], cleanI = [], rejected = [];
+  nbLenient = true;
+  try {
+    for (const c of collections) { try { cleanC.push(nbCleanCollection(c)); } catch (e) { rejected.push({ id: String(c?.id ?? ""), reason: String(e.message || e) }); } }
+    for (const i of items) { try { cleanI.push(nbCleanItem(i)); } catch (e) { rejected.push({ id: String(i?.id ?? ""), reason: String(e.message || e) }); } }
+  } finally { nbLenient = false; }
   const existing = new Map();
   if (cleanI.length) {
     const { results } = await env.DB.prepare("SELECT id,modified_at FROM web_bloom_items WHERE id IN (" + cleanI.map(() => "?").join(",") + ")").bind(...cleanI.map((i) => i.id)).all();
@@ -198,8 +209,8 @@ async function importBloom(env, payload) {
     ...cleanC.map((c) => env.DB.prepare("INSERT INTO web_bloom_collections(id,name,doc,updated_at) VALUES (?,?,?,?) ON CONFLICT(id) DO NOTHING").bind(c.id, c.name, c.doc, new Date().toISOString())),
     ...cleanI.map((i) => nbItemStatement(env, i, true)),
   ];
-  await env.DB.batch(stmts);
+  if (stmts.length) await env.DB.batch(stmts);
   const added = cleanI.filter((i) => !existing.has(i.id)).length;
   const updated = cleanI.filter((i) => existing.has(i.id) && i.modifiedAt > existing.get(i.id)).length;
-  return { added, updated, skipped: cleanI.length - added - updated, collections: cleanC.length };
+  return { added, updated, skipped: cleanI.length - added - updated, collections: cleanC.length, rejected: rejected.slice(0, 20), rejectedCount: rejected.length };
 }

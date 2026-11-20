@@ -412,3 +412,9 @@ Render approvato, implementazione del pulsante + Nutrizione → pannello con qua
 - 2026-11-20: web - sezioni Nutrizione (alimenti personali, modifica, import) e Bloom (libreria, categorie, import copia app senza allegati); nuove tabelle D1 web_foods, web_bloom_collections, web_bloom_items create al primo uso; sincronia con l'app in coda (build A00A1347AB24A56D)
 - 2026-11-20: requisito GOLDEN-01 (proporzione aurea in tutta l'app) in DESIGN-SYSTEM.md e CLAUDE.md; Nutrizione/Bloom: pesi e dimensioni riallineati alla scala (build 5D01F22B2F513153)
 - 2026-11-20: navigazione con un solo colore attivo (periwinkle chiaro del logo) (build 7CD62B6F77066BB5)
+
+## 2026-11-20 - controlli locali pre-push (Claude)
+- Worker reale (wrangler locale + D1 locale): 19 controlli E2E passati su alimenti/Bloom/admin; import Bloom ora tollerante (link non http, testi lunghi, date Apple) con elenco scartati.
+- Patch utenze con quota attiva applicata a backend/utilities/competence.mjs e al bundle manual/build-75 (gitignored): il budget porta sempre la quota, la bolletta esce dai risparmi. Test competence 7/7.
+- App: aggiunto "Esporta alimenti personali" (fileExporter JSON, formato NativeGenericFood) in NativeFoodPicker. Non compilato qui (Swift): verifica solo via CI su richiesta.
+- Build web 6A6F1DE70C12276C, non distribuita.

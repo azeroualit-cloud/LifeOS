@@ -1,4 +1,13 @@
 import SwiftUI
+import UniformTypeIdentifiers
+
+private struct NativeFoodsDocument: FileDocument {
+    static var readableContentTypes: [UTType] { [.json] }
+    var data: Data
+    init(data: Data) { self.data = data }
+    init(configuration: ReadConfiguration) throws { data = configuration.file.regularFileContents ?? Data() }
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper { FileWrapper(regularFileWithContents: data) }
+}
 
 struct NativeGenericFood: Codable, Identifiable {
     let id: String
@@ -220,6 +229,7 @@ struct NativeFoodPicker: View {
     @State private var editingFood: NativeGenericFood?
     @State private var copyingFood = false
     @State private var storageError = false
+    @State private var exportingFoods = false
     @AppStorage("lifeos-personal-foods-v1") private var personalData = Data()
 
     enum Scope: String, CaseIterable, Identifiable {
@@ -284,6 +294,14 @@ struct NativeFoodPicker: View {
                 }
                 .accessibilityIdentifier("generic-food-create")
                 .listRowBackground(NativeDesign.nutritionInput)
+                if scope == .personal, !personalData.isEmpty {
+                    Button { exportingFoods = true } label: {
+                        Label("Esporta alimenti personali", systemImage: "square.and.arrow.up")
+                            .frame(minHeight: NativeDesign.Layout.touchTarget)
+                    }
+                    .accessibilityIdentifier("generic-food-export")
+                    .listRowBackground(NativeDesign.nutritionInput)
+                }
                 Section {
                     ForEach(matches) { food in
                         Button {
@@ -366,6 +384,9 @@ struct NativeFoodPicker: View {
                     if persist(updated) { editingFood = nil; scope = .personal; query = "" }
                 }
             }
+        }
+        .fileExporter(isPresented: $exportingFoods, document: NativeFoodsDocument(data: personalData), contentType: .json, defaultFilename: "LifeOS-alimenti-personali") { result in
+            if case .failure = result { storageError = true }
         }
         .alert("Archivio alimenti personali non disponibile", isPresented: $storageError) {
             Button("OK", role: .cancel) {}
