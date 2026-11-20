@@ -1007,7 +1007,7 @@ html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
 .sc-sum b{font-size:var(--fs-4);font-weight:650;font-variant-numeric:tabular-nums}
 .sc-sum em{font-style:normal;font-size:var(--fs-2);color:var(--ink-3);text-align:right}
 details.sc-row>summary::after{content:none}
-.sc-items{display:grid;gap:var(--s3);padding:0 var(--s4) var(--s4) calc(var(--s4) + 12px + var(--s3))}
+.sc-items{display:grid;gap:var(--s3);padding:0 var(--s4) var(--s4)}
 .sc-it{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px var(--s3);font-size:var(--fs-2)}
 .sc-it span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-2)}
 .sc-it b{font-weight:400}.sc-it b.neg{color:var(--pos)}
@@ -1138,6 +1138,19 @@ body .nav button[data-view].active .nav-symbol,body .nav #admin-link.active .nav
   .nav button[data-view]:hover:not(.active) svg{transform:translateY(-1px)}
 }
 .nav button[data-view] svg{transition:transform var(--m2) var(--ease)}
+/* mappa ad aree (treemap) delle voci di un gruppo */
+.sc-tm{position:relative;width:100%;aspect-ratio:2.6/1;min-height:150px}
+.sc-tile{position:absolute;padding:2px;min-width:0}
+.sc-tile>div{height:100%;box-sizing:border-box;border-radius:var(--r-md);padding:var(--s2) var(--s3);display:flex;flex-direction:column;justify-content:space-between;gap:2px;overflow:hidden;background:color-mix(in srgb,var(--c) calc(var(--k) * 1%),var(--surface-2));color:var(--ink);transition:transform var(--m2) var(--ease)}
+.sc-tile span{font-size:var(--fs-1);line-height:1.2;color:inherit;opacity:.9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sc-tile b{font-size:var(--fs-3);font-weight:650;font-variant-numeric:tabular-nums;line-height:1.15}
+.sc-tile em{font-style:normal;font-size:var(--fs-1);opacity:.85;font-variant-numeric:tabular-nums}
+.sc-tile.sm b{font-size:var(--fs-2)}
+.sc-tile.xs span,.sc-tile.xs b,.sc-tile.xs em{display:none}
+details[open] .sc-tile{animation:m-pop var(--m2) var(--ease) both;animation-delay:calc(var(--n) * 34ms)}
+@media(hover:hover){.sc-tile:hover>div{transform:scale(1.03)}}
+.sc-note{margin:var(--s2) 0 0;font-size:var(--fs-1);color:var(--ink-3)}
+@media(max-width:620px){.sc-tm{aspect-ratio:1/.95}}
 </style>
 </head>
   <body class="dashboard-mode">
@@ -4017,6 +4030,32 @@ document.addEventListener("keydown", (e) => {
         const per = daily.days ? `${fmt(daily.low)} al giorno · ${daily.days} giorni${`${state.year}-${String(state.month).padStart(2, "0")}` === todayIso().slice(0, 7) ? ", incluso oggi" : ""}` : "Mese concluso";
         return `<div class="fin-hero"><section class="fh-card"><h2>Budget rimanente</h2><strong class="fh-val ${amountClass(rem)}">${fmt(rem)}</strong><p>${per}</p><div class="fh-g"><div class="fh-bar" role="img" aria-label="Speso ${spentPct}% e rimanente ${left}% del budget spendibile"><i class="s" style="width:${spentPct}%"></i><i class="r" style="width:${left}%"></i></div><div class="fh-legend"><span class="s"><b></b>Speso ${fmt(spent)} · ${spentPct}%</span>${rem < 0 ? `<span class="o"><b></b>Sforato ${fmt(-rem)}</span>` : `<span class="r"><b></b>Rimane ${fmt(rem)} · ${left}%</span>`}</div></div></section><section class="fh-card"><h2>Saldo attuale</h2>${privacyButton()}<strong class="fh-val">${fmt(s.budget)}</strong><p>Ultima sincronizzazione, non legato al mese scelto</p><div class="fh-g">${spark}</div></section></div>`;
       }
+      /** Mappa ad aree proporzionali (treemap squarified): ogni riquadro e una voce, area = importo, intensita = peso, con % dello stipendio di riferimento. */
+      function scTreemap(items, salary, fmt, fmt0) {
+        const pos = items.filter((x) => x.value > 0.005).sort((p, q) => q.value - p.value), neg = items.filter((x) => x.value < -0.005);
+        const tot = pos.reduce((n, x) => n + x.value, 0), W = 260, H = 100;
+        if (!(tot > 0)) return "";
+        const rects = [];
+        let x0 = 0, y0 = 0, w = W, h = H, row = [];
+        const area = (r) => r.value / tot * W * H;
+        const lay = () => {
+          const s = row.reduce((n, r) => n + area(r), 0);
+          if (w >= h) { const rw = s / h; let yy = y0; row.forEach((r) => { const rh = area(r) / rw; rects.push({ r, x: x0, y: yy, w: rw, h: rh }); yy += rh; }); x0 += rw; w -= rw; }
+          else { const rh = s / w; let xx = x0; row.forEach((r) => { const rw = area(r) / rh; rects.push({ r, x: xx, y: y0, w: rw, h: rh }); xx += rw; }); y0 += rh; h -= rh; }
+          row = [];
+        };
+        const worst = (rr, side) => { const s = rr.reduce((n, r) => n + area(r), 0), ar = rr.map(area); return Math.max(side * side * Math.max(...ar) / (s * s), s * s / (side * side * Math.min(...ar))); };
+        for (const it of pos) { const side = Math.min(w, h); if (!row.length || worst([...row, it], side) <= worst(row, side)) row.push(it); else { lay(); row.push(it); } }
+        if (row.length) lay();
+        const max = pos[0].value, pctS = (v) => salary > 0 ? (v / salary * 100 >= 10 ? Math.round(v / salary * 100) : (v / salary * 100).toFixed(1).replace(".", ",")) + "%" : "";
+        const tiles = rects.map((t, i) => {
+          const it = t.r, big = t.w > 46 && t.h > 46, mid = t.w > 40 && t.h > 34, cls = big ? "" : mid ? " sm" : " xs", k = Math.round(30 + 40 * it.value / max);
+          const label = `${it.name}: ${fmt(it.value)}${salary > 0 ? ", " + pctS(it.value) + " dello stipendio" : ""}`;
+          return `<div class="sc-tile${cls}" style="left:${(t.x / W * 100).toFixed(2)}%;top:${(t.y / H * 100).toFixed(2)}%;width:${(t.w / W * 100).toFixed(2)}%;height:${(t.h / H * 100).toFixed(2)}%;--k:${k};--n:${i}" role="img" aria-label="${escapeHtml(label)}" title="${escapeHtml(label)}"><div><span>${escapeHtml(it.name)}</span><b>${fmt0(it.value)}</b><em>${pctS(it.value)}</em></div></div>`;
+        }).join("");
+        const note = neg.length ? `<p class="sc-note">${neg.map((x) => `${escapeHtml(x.name)} −${fmt(Math.abs(x.value))}`).join(" · ")}</p>` : "";
+        return `<div class="sc-tm">${tiles}</div>${note}`;
+      }
       /** Come si divide lo stipendio del mese: ciambella animata + righe espandibili + ritmo del mese. */
       function budgetSankey(d) {
         const sm = d.summary || {}, hide = state.assetsVisible === false, fmt = (v) => hide ? "•••• €" : exactEuro(v), fmt0 = (v) => hide ? "•••• €" : Math.round(v).toLocaleString("it-IT", { useGrouping: "always" }) + " €";
@@ -4046,7 +4085,7 @@ document.addEventListener("keydown", (e) => {
         const rows = groups.map((g) => {
           const head = `<i></i><span class="sc-name">${g.label}<small>${g.hint}</small></span><b>${fmt0(g.value)}</b><em>${pct(g.value)}%</em>`;
           if (!g.items.length) return `<div class="sc-row sc-plain" style="--c:${g.color}"><div class="sc-sum">${head}</div></div>`;
-          const list = [...g.items].sort((a, b) => b.value - a.value).map((it) => `<div class="sc-it"><span>${escapeHtml(it.name)}</span><b class="${it.value < 0 ? "neg" : ""}">${it.value < 0 ? "−" : ""}${fmt(Math.abs(it.value))}</b>${it.value > 0 ? `<i style="width:${Math.max(3, it.value / Math.max(1, ...g.items.map((x) => x.value)) * 100).toFixed(0)}%"></i>` : ""}</div>`).join("");
+          const list = scTreemap(g.items, S, fmt, fmt0);
           return `<details class="sc-row" style="--c:${g.color}"><summary class="sc-sum">${head}</summary><div class="sc-items">${list}</div></details>`;
         }).join("");
         const isNow = `${state.year}-${String(state.month).padStart(2, "0")}` === todayIso().slice(0, 7), dim = new Date(Date.UTC(state.year, state.month, 0)).getUTCDate(), day = Number(todayIso().slice(8));
@@ -4056,7 +4095,7 @@ document.addEventListener("keydown", (e) => {
           const proj = day >= 4 ? spent / mp : null, end = proj === null ? null : spendable - proj;
           pace = `<div class="sc-pace"><div class="sc-pace-bars"><label><span>Mese trascorso</span><div class="sc-track"><i style="width:${(mp * 100).toFixed(0)}%"></i></div><b>${day}/${dim}</b></label><label><span>Budget speso</span><div class="sc-track ${fast ? "warn" : ""}"><i style="width:${Math.min(100, bp * 100).toFixed(0)}%"></i></div><b>${Math.round(bp * 100)}%</b></label></div>${end === null ? "" : `<p class="sc-msg ${end >= 0 ? "ok" : "bad"}">${end >= 0 ? `Di questo passo chiudi il mese con circa ${fmt0(end)} liberi.` : `Di questo passo sfori il budget di circa ${fmt0(-end)}.`}</p>`}</div>`;
         }
-        return `<section class="card pad sankey"><div class="card-title"><h2>Dove va lo stipendio</h2><span class="sk-total">Stipendio <b>${fmt0(S)}</b></span></div><div class="sc-main"><div class="sc-donut"><svg viewBox="0 0 140 140" role="img" aria-label="Divisione dello stipendio">${segs}</svg><div class="sc-center"><small>${over ? "Sforamento" : "Libero"}</small><strong>${fmt0(over || free)}</strong></div></div><div class="sc-legend">${rows}</div></div>${pace}</section>`;
+        return `<section class="card pad sankey"><div class="card-title"><h2>Dove va lo stipendio</h2><span class="sk-total">Stipendio <b>${fmt0(S)}</b></span></div><div class="sc-main"><div class="sc-donut"><svg viewBox="0 0 140 140" role="img" aria-label="Divisione dello stipendio">${segs}</svg><div class="sc-center"><small>${over ? "Sforamento" : "Libero"}</small><strong>${fmt0(over || free)}</strong></div></div><div class="sc-legend">${rows}<p class="sc-note">Apri un gruppo per vedere le voci come mappa: area = importo, % = quota dello stipendio di riferimento.</p></div></div>${pace}</section>`;
       }
       globalThis.lifeOSSankey = budgetSankey;
 

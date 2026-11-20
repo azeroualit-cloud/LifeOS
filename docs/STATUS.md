@@ -425,3 +425,6 @@ Render approvato, implementazione del pulsante + Nutrizione → pannello con qua
 
 ## 2026-11-20 - colori Apple e speso nel riepilogo (Claude)
 - Palette accesa stile Apple (token + colori dei grafici), barra Speso/Rimane nel riquadro Budget rimanente, riquadri hero allineati. Solo front-end. Build web 3FF32DA66F612496, non distribuita.
+
+## 2026-11-20 - mappa ad aree nei gruppi (Claude)
+- Dove va lo stipendio: le voci dei gruppi sono una treemap (area = importo, intensita = peso, % dello stipendio di riferimento). Solo front-end. Build web D4E7610A7BEC282E, non distribuita.
