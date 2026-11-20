@@ -1091,16 +1091,24 @@ body .nav button[data-view].active .nav-symbol,body .nav #admin-link.active .nav
   .nav button[data-view]:hover:not(.active) svg{transform:translateY(-1px)}
 }
 .nav button[data-view] svg{transition:transform var(--m2) var(--ease)}
-/* mappa ad aree (treemap) delle voci di un gruppo */
-.sc-tm{position:relative;width:100%;aspect-ratio:2.6/1;min-height:150px}
-.sc-tile{position:absolute;padding:2px;min-width:0}
-.sc-tile>div{height:100%;box-sizing:border-box;border-radius:var(--r-md);padding:var(--s2) var(--s3);display:flex;flex-direction:column;justify-content:space-between;gap:2px;overflow:hidden;background:color-mix(in srgb,var(--c) calc(var(--k) * 1%),var(--surface-2));color:#111114;transition:transform var(--m2) var(--ease)}
-.sc-tile span{font-size:var(--fs-1);line-height:1.2;color:inherit;opacity:.9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* mappa unica dello stipendio (heatmap ad aree) */
+.sc-chips{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s3);margin:var(--s4) 0 var(--s3)}
+.sc-chip{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:2px var(--s2);align-items:center;padding:var(--s3);border-radius:var(--r-md);background:var(--surface-2)}
+.sc-chip i{width:10px;height:10px;border-radius:50%;background:var(--c)}
+.sc-chip span{font-size:var(--fs-2);color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sc-chip b{grid-column:2;font-size:var(--fs-4);font-weight:650;font-variant-numeric:tabular-nums}
+.sc-chip em{grid-column:3;grid-row:2;font-style:normal;font-size:var(--fs-2);color:var(--ink-3)}
+.sc-tm{position:relative;width:100%;aspect-ratio:2.4/1;min-height:240px}
+.sc-grp{position:absolute;padding:3px;min-width:0}
+.sc-gi{position:relative;width:100%;height:100%}
+.sc-tile{position:absolute;padding:1.5px;min-width:0}
+.sc-tile>div{height:100%;box-sizing:border-box;border-radius:var(--r-md);padding:var(--s2) var(--s3);display:flex;flex-direction:column;justify-content:space-between;gap:2px;overflow:hidden;background:color-mix(in srgb,var(--c) calc(var(--k) * 1%),#000);color:#141416;transition:transform var(--m2) var(--ease)}
+.sc-tile span{font-size:var(--fs-1);line-height:1.2;color:inherit;opacity:.92;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sc-tile b{font-size:var(--fs-3);font-weight:650;font-variant-numeric:tabular-nums;line-height:1.15}
 .sc-tile em{font-style:normal;font-size:var(--fs-1);opacity:.85;font-variant-numeric:tabular-nums}
 .sc-tile.sm b{font-size:var(--fs-2)}
 .sc-tile.xs span,.sc-tile.xs b,.sc-tile.xs em{display:none}
-details[open] .sc-tile{animation:m-pop var(--m2) var(--ease) both;animation-delay:calc(var(--n) * 34ms)}
+.sc-tm .sc-tile{animation:m-pop var(--m3) var(--ease) both;animation-delay:calc(var(--n) * 28ms)}
 @media(hover:hover){.sc-tile:hover>div{transform:scale(1.03)}}
+@media(max-width:620px){.sc-chips{grid-template-columns:repeat(2,minmax(0,1fr))}.sc-chip span{white-space:normal;line-height:1.2}.sc-tile.sm b{font-size:var(--fs-1);white-space:nowrap}.sc-tm{aspect-ratio:1/1.1}}
 .sc-note{margin:var(--s2) 0 0;font-size:var(--fs-1);color:var(--ink-3)}
-@media(max-width:620px){.sc-tm{aspect-ratio:1/.95}}
