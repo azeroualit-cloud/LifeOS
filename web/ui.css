@@ -913,3 +913,17 @@ html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
 .fc-from input{min-height:36px;padding:0 var(--s3);border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface-2);color:var(--ink);font:inherit;color-scheme:dark light}
 .fc-from small{flex-basis:100%;color:var(--ink-3)}
 .fc-from input[type=month]{width:auto;min-width:150px}
+/* grafico: da dove vengono i soldi di una spesa */
+.sf{display:grid;gap:var(--s3);padding:var(--s4);border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface-2)}
+.sf-head{display:flex;justify-content:space-between;align-items:baseline;gap:var(--s3)}
+.sf-head strong{font-size:var(--fs-2);color:var(--ink-2);font-weight:650}.sf-head b{font-size:var(--fs-5)}
+.sf-bar{display:flex;gap:3px;height:14px;border-radius:var(--r-sm);overflow:hidden}
+.sf-bar i{display:block;min-width:6px;border-radius:4px;background:var(--c)}
+.sf-legend{list-style:none;margin:0;padding:0;display:grid;gap:var(--s2)}
+.sf-legend li{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:var(--s3);align-items:start;font-size:var(--fs-2)}
+.sf-legend li>i{width:10px;height:10px;margin-top:5px;border-radius:3px;background:var(--c)}
+.sf-legend span{display:flex;flex-direction:column;color:var(--ink)}.sf-legend small{color:var(--ink-3);font-size:var(--fs-1)}
+.sf-legend b{font-weight:650;font-variant-numeric:tabular-nums}
+.sf-rec{display:grid;gap:var(--s2);padding-top:var(--s3);border-top:1px dashed var(--line);font-size:var(--fs-2);color:var(--ink-2)}
+.sf-months{display:flex;gap:3px}.sf-months i{flex:1;max-width:36px;height:8px;border-radius:4px;background:var(--pos);opacity:.7}
+.sf-note{margin:0;font-size:var(--fs-1);color:var(--ink-3)}

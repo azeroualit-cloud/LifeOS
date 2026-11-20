@@ -952,6 +952,20 @@ html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
 .fc-from input{min-height:36px;padding:0 var(--s3);border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface-2);color:var(--ink);font:inherit;color-scheme:dark light}
 .fc-from small{flex-basis:100%;color:var(--ink-3)}
 .fc-from input[type=month]{width:auto;min-width:150px}
+/* grafico: da dove vengono i soldi di una spesa */
+.sf{display:grid;gap:var(--s3);padding:var(--s4);border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface-2)}
+.sf-head{display:flex;justify-content:space-between;align-items:baseline;gap:var(--s3)}
+.sf-head strong{font-size:var(--fs-2);color:var(--ink-2);font-weight:650}.sf-head b{font-size:var(--fs-5)}
+.sf-bar{display:flex;gap:3px;height:14px;border-radius:var(--r-sm);overflow:hidden}
+.sf-bar i{display:block;min-width:6px;border-radius:4px;background:var(--c)}
+.sf-legend{list-style:none;margin:0;padding:0;display:grid;gap:var(--s2)}
+.sf-legend li{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:var(--s3);align-items:start;font-size:var(--fs-2)}
+.sf-legend li>i{width:10px;height:10px;margin-top:5px;border-radius:3px;background:var(--c)}
+.sf-legend span{display:flex;flex-direction:column;color:var(--ink)}.sf-legend small{color:var(--ink-3);font-size:var(--fs-1)}
+.sf-legend b{font-weight:650;font-variant-numeric:tabular-nums}
+.sf-rec{display:grid;gap:var(--s2);padding-top:var(--s3);border-top:1px dashed var(--line);font-size:var(--fs-2);color:var(--ink-2)}
+.sf-months{display:flex;gap:3px}.sf-months i{flex:1;max-width:36px;height:8px;border-radius:4px;background:var(--pos);opacity:.7}
+.sf-note{margin:0;font-size:var(--fs-1);color:var(--ink-3)}
 </style>
 </head>
   <body class="dashboard-mode">
@@ -1162,7 +1176,47 @@ html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
       const planEuro = (cents) => exactEuro((Number(cents) || 0) / 100);
       const toCents = (v) => Math.round(Number(String(v).replace(",", ".")) * 100);
       /* ---- Destinazione della spesa: Budget oppure uno dei piani compatibili ---- */
-      const rt = { timer: null, seq: 0 };
+      const rt = { timer: null, seq: 0, plans: [] };
+      /* ---- Grafico "da dove vengono i soldi" per una spesa ---- */
+      function spendFlowHtml(o) {
+        const hide = state.assetsVisible === false, fmt = (v) => hide ? "•••• €" : exactEuro(v);
+        const parts = (o.parts || []).filter((p) => p.value > 0.004), total = parts.reduce((n, p) => n + p.value, 0);
+        if (!parts.length && !o.recovery) return "";
+        const bar = parts.map((p) => `<i style="flex:${p.value};--c:${p.c}" title="${escapeHtml(p.label)}: ${fmt(p.value)}"></i>`).join("");
+        const legend = parts.map((p) => `<li style="--c:${p.c}"><i></i><span>${escapeHtml(p.label)}${p.detail ? `<small>${escapeHtml(p.detail)}</small>` : ""}</span><b>${fmt(p.value)}</b></li>`).join("");
+        const r = o.recovery, rec = r && r.months > 0 ? `<div class="sf-rec"><div class="sf-months" aria-hidden="true">${Array.from({ length: Math.min(r.months, 12) }, () => "<i></i>").join("")}</div><span>Poi rientrano ${fmt(r.total)}: ${fmt(r.total / r.months)} al mese per ${r.months} ${r.months === 1 ? "mese" : "mesi"}${r.labels ? " (" + escapeHtml(r.labels) + ")" : ""}</span></div>` : "";
+        return `<div class="sf" role="group" aria-label="Da dove vengono i soldi"><div class="sf-head"><strong>Da dove vengono i soldi</strong><b>${fmt(o.amount)}</b></div>${bar ? `<div class="sf-bar">${bar}</div>` : ""}<ul class="sf-legend">${legend}</ul>${rec}${o.note ? `<p class="sf-note">${escapeHtml(o.note)}</p>` : ""}</div>`;
+      }
+      const SF = { month: "var(--pos)", plan: "var(--sec-finance)", fixed: "#c59ad4", savings: "var(--warn)" };
+      function spendFlowModel(f) {
+        const type = f.elements.type?.value, cents = toCents(f.elements.amount?.value);
+        if (type !== "Spesa" || !(cents > 0)) return null;
+        const amount = cents / 100, category = f.elements.category?.value || "", edit = f.dataset.kind === "movement-edit";
+        const treat = edit ? (f.elements.budgetTreatment?.value || "auto") : "auto", libero = Number(state.data?.summary?.monthlyRemaining);
+        const after = (v, lbl) => !edit && Number.isFinite(libero) ? `${lbl}: ${exactEuro(libero)} → ${exactEuro(libero - v)}` : "";
+        if (treat === "recovery") {
+          const list = String(f.elements.recoveryMonths?.value || "").split(",").map((v) => v.trim()).filter(Boolean), total = Number(f.elements.recoveryAmount?.value) || amount;
+          const lab = list.slice(0, 3).map((m) => shortMonth(m)).join(", ") + (list.length > 3 ? "…" : "");
+          return { amount, parts: [{ label: "Anticipata dal budget del mese", value: amount, c: SF.month, detail: "poi viene recuperata" }], recovery: { months: list.length || 1, total, labels: list.length ? lab : "" } };
+        }
+        if (treat === "savings") return { amount, parts: [{ label: "Dai risparmi", value: amount, c: SF.savings, detail: "non pesa sul budget del mese" }] };
+        if (treat === "planned" || treat === "auto" && financialCommittedCategories().includes(category) || typeof isUtilityCategory === "function" && isUtilityCategory(category))
+          return { amount, parts: [{ label: "Impegno del mese", value: amount, c: SF.fixed, detail: "già prenotato nel budget con la stima" }], note: "Se spendi meno della stima, la differenza non torna nel Libero: conta come risparmio." };
+        const choice = f.elements.routingChoice?.value;
+        if (!edit && choice && choice !== "__ordinary") {
+          const plan = (rt.plans || []).find((p) => p.id === choice), avail = Number(plan?.availableCents ?? plan?.fundCents ?? 0) / 100, fromPlan = Math.min(amount, Math.max(0, avail)), extra = amount - fromPlan;
+          return { amount, parts: [{ label: "Piano · " + (plan?.name || ""), value: fromPlan, c: SF.plan, detail: `fondo: ${exactEuro(avail)} → ${exactEuro(Math.max(0, avail - fromPlan))}` }, { label: "Risparmi generali", value: extra, c: SF.savings, detail: "oltre il fondo del piano" }] };
+        }
+        const mv = globalThis.__sfMovement, links = edit && mv ? (state.data?.extraPlan?.links || []).filter((l) => l.role === "payment" && Number(l.movement_source_row) === Number(mv.source_row)) : [], linked = Math.min(amount, links.reduce((n, l) => n + Number(l.attributed_cents || 0), 0) / 100);
+        if (linked > 0) return { amount, parts: [{ label: "Piano straordinarie", value: linked, c: SF.plan, detail: "coperta da un accantonamento" }, { label: "Budget del mese", value: amount - linked, c: SF.month, detail: "pesa sul Libero" }] };
+        return { amount, parts: [{ label: "Budget del mese", value: amount, c: SF.month, detail: after(amount, "Libero") || "pesa sul Libero" }] };
+      }
+      function renderSpendFlow() {
+        const f = document.getElementById("entry-form"), host = document.getElementById("spend-flow");
+        if (!f || !host) return;
+        const m = spendFlowModel(f);
+        host.innerHTML = m ? spendFlowHtml(m) : "";
+      }
       function syncRouting() {
         clearTimeout(rt.timer);
         rt.timer = setTimeout(async () => {
@@ -1170,18 +1224,19 @@ html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
           if (!f || !box || f.dataset.kind !== "transaction") return;
           const type = f.elements.type.value, cents = toCents(f.elements.amount.value);
           f.classList.remove("routing-on");
-          if (type !== "Spesa" || !(cents > 0) || (typeof isUtilityCategory === "function" && isUtilityCategory(f.elements.category.value))) { box.innerHTML = ""; return; }
+          if (type !== "Spesa" || !(cents > 0) || (typeof isUtilityCategory === "function" && isUtilityCategory(f.elements.category.value))) { box.innerHTML = ""; rt.plans = []; renderSpendFlow(); return; }
           const my = ++rt.seq;
           try {
             const r = await workerRequest("getExpenseRouting", [{ category: f.elements.category.value, date: f.elements.date.value, amountCents: cents }]);
             if (my !== rt.seq || !document.getElementById("routing-box")) return;
-            if (r.version !== 1) { box.innerHTML = ""; return; }
-            const plans = r.plans || [], keep = f.elements.routingChoice?.value;
+            if (r.version !== 1) { box.innerHTML = ""; rt.plans = []; renderSpendFlow(); return; }
+            const plans = r.plans || [], keep = f.elements.routingChoice?.value; rt.plans = plans;
             const suggested = plans.length === 1 ? plans[0].id : "__ordinary";
             box.innerHTML = `<label>Da dove viene pagata *<select name="routingChoice"><option value="__ordinary">Budget del mese</option>${plans.map((p) => `<option value="${escapeHtml(p.id)}">Piano · ${escapeHtml(p.name)}${p.availableCents != null || p.fundCents != null ? " (disponibile " + planEuro(p.availableCents ?? p.fundCents) + ")" : ""}</option>`).join("")}</select></label>`;
             f.elements.routingChoice.value = [...f.elements.routingChoice.options].some((o) => o.value === keep) ? keep : suggested;
             f.classList.add("routing-on");
-          } catch { box.innerHTML = ""; }
+            renderSpendFlow();
+          } catch { box.innerHTML = ""; rt.plans = []; renderSpendFlow(); }
         }, 250);
       }
       function applyRouting(d, f) {
@@ -1202,7 +1257,8 @@ html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
         if (e.target.id === "period-pick") pickMonth(e.target.value);
         if (e.target.closest("#entry-form") && ["type", "category", "date"].includes(e.target.name)) syncRouting();
       });
-      document.addEventListener("input", (e) => { if (e.target.closest("#entry-form") && e.target.name === "amount") syncRouting(); });
+      document.addEventListener("input", (e) => { if (e.target.closest("#entry-form") && e.target.name === "amount") { renderSpendFlow(); syncRouting(); } });
+      document.addEventListener("change", (e) => { if (e.target.closest("#entry-form") && ["routingChoice", "category", "type"].includes(e.target.name)) renderSpendFlow(); });
       new MutationObserver(() => { const i = document.getElementById("period-pick"); if (i && state.year) i.value = planMonthKey(); }).observe(document.getElementById("period-label"), { childList: true, characterData: true, subtree: true });
     </script>
     <div id="dialog" class="modal-wrap hidden"></div>
@@ -3852,7 +3908,7 @@ html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
               "Altro",
             ) +
             field("Data effettiva", "date", "date", chosen, 'max="'+todayIso()+'"') +
-            '<div id="routing-box" class="full"></div>' +
+            '<div id="routing-box" class="full"></div><div id="spend-flow" class="full"></div>' +
             field("Note", "note", "text", "", 'maxlength="1000"', "full") +
 
             '<label id="counterpart-box" class="' +
@@ -3940,6 +3996,7 @@ html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
                 select("Conto", "account", accounts, r.account) +
                 select("Categoria", "category", categories, r.category) +
                 movementPolicyMetadata(r) +
+                '<div id="spend-flow" class="full"></div>' +
                 field(
                   "Data effettiva",
                   "date",
@@ -3967,6 +4024,8 @@ html[data-theme="light"] .due-badge.due-today{background:#f5e3b5;color:#6a4a08}
               "movement-edit",
             );
             syncUtilityFields();
+            globalThis.__sfMovement = r;
+            renderSpendFlow();
           })
           .withFailureHandler((err) => {
             const box = document.getElementById("error");

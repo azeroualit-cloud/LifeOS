@@ -2,7 +2,7 @@
 
 Stato: preparata, NON eseguita. Nessun deploy senza conferma esplicita di Nas.
 File da distribuire: `web/dist/worker-release.mjs` (generato da `python web/build-release.py`, non versionato).
-SHA256 del file preparato il 2026-11-20 (scala aurea tipografia e spaziature, palette, tema chiaro; il build 3E580C32 e online dal 2026-11-20): A0385690BAA69F1EDE48D8305E47E58CC5F346DCEB29882DA4656D0F22D78579
+SHA256 del file preparato il 2026-11-20 (scala aurea tipografia e spaziature, palette, tema chiaro; il build 3E580C32 e online dal 2026-11-20): 592419FD2AE8CF7710AFE992EC5E7EAD7265F671E6670887052D5E98E608DD3D
 
 Il Worker contiene backend build-75 (lo stesso dell'app), UI web aggiornata e i metodi Admin in sola lettura.
 Sito e app usano lo stesso D1 (confermato da Nas il 2026-11-19).
