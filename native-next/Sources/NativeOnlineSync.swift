@@ -242,9 +242,16 @@ import Foundation
             var body = Self.payload(item)
             if let known = modified[id] { body["expectModifiedAt"] = .number(known) }
             try await attempt({
-                let result = try await read("saveBloomItem", [.object(body)]).object
-                if result.flag("conflict") { conflicts.append(result.record("current")) }
-                else if result.amount("modifiedAt") > 0 { modified[id] = result.amount("modifiedAt") }
+                var result = try await read("saveBloomItem", [.object(body)]).object
+                if result.flag("conflict") {
+                    let current = result.record("current")
+                    // The most recent edit wins: the device edit time against the site's.
+                    if Self.unix(item.amount("modifiedAt")) > current.amount("modifiedAt") {
+                        body.removeValue(forKey: "expectModifiedAt")
+                        result = try await read("saveBloomItem", [.object(body)]).object
+                    } else { conflicts.append(current); return }
+                }
+                if result.amount("modifiedAt") > 0 { modified[id] = result.amount("modifiedAt") }
             }, failed: { failedItems.insert(id) })
         }
         for id in snapshot.lifeosDeletedItems ?? [] {
@@ -268,7 +275,7 @@ import Foundation
         next.lifeosDeletedItems = keep(next.lifeosDeletedItems, snapshot.lifeosDeletedItems, failedDeletes)
         next.lifeosPendingCollections = keep(next.lifeosPendingCollections, snapshot.lifeosPendingCollections, failedCollections)
         next.lifeosDeletedCollections = keep(next.lifeosDeletedCollections, snapshot.lifeosDeletedCollections, failedCollectionDeletes)
-        // The server wins a conflict: the site copy replaces the device copy.
+        // A more recent site edit replaces the device copy.
         for current in conflicts where !current.text("id").isEmpty {
             let id = current.text("id")
             let local = next.items.first { $0.text("id") == id }
