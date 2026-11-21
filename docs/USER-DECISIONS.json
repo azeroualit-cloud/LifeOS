@@ -207,7 +207,7 @@
     },
     {
       "id": "UTILITY-CURRENT-BUDGET-01",
-      "status": "ACTIVE",
+      "status": "SUPERSEDED",
       "scope": "Budget utenze LifeOS",
       "rule": "Ricalcolare la stima di budget del mese corrente quando si corregge il periodo di competenza di una bolletta collegata a un piano stimato.",
       "recorded_on": "2026-11-07",
@@ -215,7 +215,8 @@
       "deployment_authorized": [
         "lifeos",
         "lifeos-native-test"
-      ]
+      ],
+      "superseded_by": "FUNDING-BLOCK-2026-11-21"
     },
     {
       "id": "UX-REACH-01",
@@ -1138,6 +1139,59 @@
       "original_quote": "ricordami alle 15:00 ri rivalutare la sezione finanza, il resto è top",
       "rule": "Approvate le schermate non di Finanza dell'anteprima https://claude.ai/artifact/QAanqSYRowbYWgUKV8n271 (Dashboard, Attività, Calendario, Agenda, Dipingi turni, Salute, Cronologia, Simulazione peso, TDEE, Bloom, Impostazioni e relativi fogli). Approvato anche il foglio Nuovo piano. Finanza da rivalutare alle 15:00.",
       "conflict_check": "Nessuna regola sostituita. IPA build 93 ancora non autorizzata (IPA-GATE-01)."
+    },
+    {
+      "id": "BUILD93-PREVIEW-FINAL-2026-11-21",
+      "status": "ACTIVE",
+      "scope": "Anteprima build 93 completa, Finanza inclusa",
+      "recorded_on": "2026-11-21",
+      "provenance": "Messaggio diretto utente in chat Claude",
+      "original_quote": "vai finito",
+      "rule": "L'anteprima https://claude.ai/artifact/QAanqSYRowbYWgUKV8n271 è il riferimento per la build 93, Finanza compresa (Panoramica, Analisi interattiva nell'ordine Ritmo, Quanto dura il fondo con € al mese modificabili, Stima patrimonio che sottrae le uscite programmate dei piani, Spese per categoria, Entrate e uscite, Stipendi, Giorno per giorno con media da luglio; Avvisi; Budget; Movimenti; fogli spesa/piano/pagamento con blocco «Da dove arrivano i soldi»; mappa Bloom). Tolti: spesa straordinaria, prossimi 30 giorni, tetti per categoria, categoria negli eventi, foglio Obiettivo. Gestione categorie sul sito; menu a tendina invece di popup.",
+      "supersedes": [
+        "BUILD93-PREVIEW-2026-11-21"
+      ]
+    },
+    {
+      "id": "FINANCE-ALERTS-2026-11-21",
+      "status": "ACTIVE",
+      "scope": "Avvisi di Finanza build 93",
+      "recorded_on": "2026-11-21",
+      "provenance": "Commenti utente sull'anteprima («troppo rigido», «togliamo questa opzione che mi confonde») e «vai finito»",
+      "rule": "Tre avvisi, ciascuno con interruttore e parametri regolabili: Ritmo sopra la norma (media 90 giorni, soglia 5-30%, predefinita 10%, norma da luglio); Spese ricorrenti fuori norma (+10..+60%, predefinito +25%, e almeno 5..50 €, predefinito 15 €); Riepilogo del lunedì (ora 6-21, predefinita 9). Limiti: al massimo 1 a settimana / 1 per voce al mese (predefinito) / 1 al mese in tutto; silenzio 22-8. Nessun avviso di spesa straordinaria né di tetti.",
+      "supersedes": [
+        "PROACTIVE-FINANCE-2026-11-21"
+      ]
+    },
+    {
+      "id": "FUNDING-BLOCK-2026-11-21",
+      "status": "ACTIVE",
+      "scope": "Spesa, rata, bolletta, piano e pagamento in Finanza",
+      "recorded_on": "2026-11-21",
+      "provenance": "Risposta diretta utente in chat Claude (domanda a scelta) dopo «vai finito», 2026-11-21 18:06",
+      "original_quote": "Sì, sostituisci",
+      "rule": "Ogni spesa, rateizzazione, bolletta, piano o pagamento mostra il blocco «Da dove arrivano i soldi»: i mesi del piano restituiscono quanto avevano accantonato (prestito), l'eccedenza la divide l'utente tra risparmi e budget, scegliendo i mesi di budget. Cambiare il periodo di competenza ricalcola i mesi toccati. Sostituisce UTILITY-CURRENT-BUDGET-01 (conferma META-01).",
+      "supersedes": [
+        "UTILITY-CURRENT-BUDGET-01"
+      ]
+    },
+    {
+      "id": "FINANCE-PALETTE-2026-11-21",
+      "status": "ACTIVE",
+      "scope": "Colori Finanza build 93",
+      "recorded_on": "2026-11-21",
+      "provenance": "Risposta diretta utente in chat Claude (domanda a scelta) dopo «vai finito», 2026-11-21 18:06",
+      "original_quote": "quello nella preview",
+      "rule": "Palette Monocromo (predefinita dell'anteprima) su tutte le schermate di Finanza; ciano #5cc4e0 per le stime."
+    },
+    {
+      "id": "IPA-DELIVERY-93-2026-11-21",
+      "status": "ACTIVE",
+      "scope": "Una IPA LifeOS 0.10.31 build 93 da codex/build93",
+      "recorded_on": "2026-11-21",
+      "provenance": "Risposta diretta utente in chat Claude (domanda a scelta) dopo «vai finito», 2026-11-21 18:06",
+      "original_quote": "Sì IPA 93",
+      "rule": "Autorizzati implementazione della build 93 secondo l'anteprima e confezionamento/pubblicazione di una IPA 0.10.31 build 93 soltanto a gate verdi sullo stesso commit. Soddisfa IPA-GATE-01 solo per questa IPA. Prova su iPhone e accettazione restano distinte; nessun deploy backend automatico (i Worker li distribuisce l'utente)."
     }
   ],
   "pending_confirmations": [
@@ -1156,20 +1210,6 @@
       "rule": "Griglia 2x2 e mini grafici sotto il valore modificano altezza/posizione e trattamento delle schede; conferma specifica necessaria prima del codice coinvolto.",
       "confirmation_quote": "va bene 2x2 e 1x4, ma voglio i pulsanti come quelli nella versione 2 (nel senso di disposizione, non di colore design ecc)",
       "confirmation_date": "2026-11-04"
-    },
-    {
-      "id": "BUILD93-PREVIEW-2026-11-21",
-      "status": "PENDING_CONFIRMATION",
-      "recorded_on": "2026-11-21",
-      "item": "Anteprima build 93 (Finanza come il sito, Impostazioni > Dati con trasferimento automatico una tantum ed Esporta backup completo permanente) e autorizzazione IPA build 93",
-      "preview": "https://claude.ai/artifact/QAanqSYRowbYWgUKV8n271"
-    },
-    {
-      "id": "PROACTIVE-FINANCE-2026-11-21",
-      "status": "PENDING_CONFIRMATION",
-      "recorded_on": "2026-11-21",
-      "item": "Avvisi proattivi di Finanza nella build 93: ritmo su 90 giorni da agosto, spese straordinarie fuori norma, prossimi 30 giorni (approvato), tetti per categoria (da valutare sul mockup), ricorrenti fuori norma (+25% e +15 euro), durata del fondo con e senza stipendio, riepilogo del lunedi (approvato); limite un avviso per voce al mese, mai 22-8. Soglie proposte da confermare.",
-      "source_quote": "2 approvato, 3 non saprei proviamo il mockup ... 6 bello, mi piace"
     }
   ],
   "history": [
@@ -1264,6 +1304,10 @@
       "approval_quote": "Sì, mantieni questo aspetto",
       "source": "Risposta dopo screenshot del simulatore",
       "conflict_check": "Mantiene dimensioni visibili, corregge accessibilità; nessuna regola sostituita."
+    },
+    {
+      "date": "2026-11-21",
+      "event": "Obiettivo di risparmio: l'utente ha risposto «non capisco» alla domanda se toglierlo. Nessuna rimozione: resta il comportamento della build 92 (scheda in Budget); tolto solo il foglio Obiettivo separato già approvato in anteprima."
     }
   ],
   "historical_inventory": "decision-history/2026-11-04-inventory.json",
