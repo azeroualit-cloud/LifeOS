@@ -1,0 +1,48 @@
+name: Life OS - Bloom e alimenti nel Worker dell'app (build 93)
+# Solo avvio manuale dell'utente. Cambia lifeos-native-test aggiungendo le letture e scritture di Bloom e
+# alimenti personali sulle stesse tabelle del sito. Nessuna altra modifica backend.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Test del modulo e della trasformazione
+        run: |
+          node --test backend/bloom-foods/tests/bloomfoods.test.mjs
+          python3 backend/bloom-foods/tests/test_transform.py
+      - name: Audit del Worker attuale senza scritture
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          LIFEOS_BACKEND_AUDIT_ONLY: '1'
+        run: python3 scripts/deploy-bloom-foods-93.py
+      - name: Aggiorna lifeos-native-test
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: python3 scripts/deploy-bloom-foods-93.py
+      - name: Verifica letture reali senza scrivere dati
+        env:
+          LIFEOS_TEST_PASSWORD: ${{ secrets.LIFEOS_TEST_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import os,json,http.cookiejar,urllib.request
+          origin='https://lifeos-native-test.a-zeroual-it.workers.dev'
+          client=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+          def post(path,payload):
+              request=urllib.request.Request(origin+path,data=json.dumps(payload).encode(),method='POST',headers={'Origin':origin,'Content-Type':'application/json','User-Agent':'LifeOS-Native-Check/1.0'})
+              with client.open(request,timeout=90) as response:return json.loads(response.read())
+          stage='login'
+          try:
+              post('/auth/login',{'user':'nas','password':os.environ['LIFEOS_TEST_PASSWORD']})
+              stage='foods'; foods=post('/api/listFoods',[]); assert isinstance(foods['foods'],list)
+              stage='bloom'; bloom=post('/api/getBloom',[]); assert isinstance(bloom['items'],list) and isinstance(bloom['collections'],list)
+              print('BLOOM_FOODS_93_READ_CONTRACT_OK foods=%d items=%d collections=%d; no private content logged.'%(len(foods['foods']),len(bloom['items']),len(bloom['collections'])))
+          except Exception as error:
+              raise SystemExit('Verifica API fallita: stage='+stage+' class='+type(error).__name__+' HTTP='+str(getattr(error,'code','n/a')))
+          PY
