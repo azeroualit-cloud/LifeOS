@@ -1,5 +1,7 @@
 # LifeOS — punto di ingresso per qualsiasi IA
 
+**Build 93 in corso (21 novembre 2026), ramo `codex/build93`.** Anteprima approvata, IPA autorizzata (`IPA-DELIVERY-93-2026-11-21`) solo a gate verdi. Stato, fasi e regole in [BUILD-93-PLAN.md](BUILD-93-PLAN.md); inventario da rispettare in [BUILD-93-FEATURES.md](BUILD-93-FEATURES.md). Fase 1 (Bloom e alimenti dal server) scritta; il Worker `lifeos-native-test` va aggiornato da Nas con `lifeos-bloomfoods-deploy93.yml`. Ultima IPA pubblicata: 0.10.30 build 92.
+
 **LifeOS 0.10.29 build 91 consegnata (17 novembre 2026).** [IPA](https://github.com/azeroualit-cloud/LifeOS/releases/download/ios-0.10.29-build91/LifeOS-91.ipa), SHA-256 a779c3e04b750c46ed174754d2cf1f7c8f85760e960d08332eb4caaf04d1ef8f. Sorgente 27ff631c06d8d81616a52e1d77162273adf25d86, ramo `codex/build91`, [gate 44026757613](https://github.com/azeroualit-cloud/LifeOS/actions/runs/44026757613). Dettagli e correzioni della notte in [BUILD-91-PLAN.md](BUILD-91-PLAN.md). Worker Risparmi distribuito e verificato il 17 novembre (run 44056109992). Restano firma Signulous, prova su iPhone e accettazione.
 
 **Run avviato:** [43684175590](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43684175590) sul commit `74c95d0aa60d5185a95510cf8c54b2c067582516` (solo scheda selezionata montata, stato Dipingi turni nel router). Gate invariato: 5 compatti, 14 regressioni, suite restante, 4 Release, IPA90 solo a gate verdi. Esito da acquisire; nessun polling; nessuna IPA90, nessun deploy backend.
