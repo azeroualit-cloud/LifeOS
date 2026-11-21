@@ -9,6 +9,8 @@ async function nbTables(env) {
       env.DB.prepare("CREATE TABLE IF NOT EXISTS web_foods (id TEXT PRIMARY KEY, name TEXT NOT NULL, brand TEXT NOT NULL DEFAULT '', family TEXT NOT NULL DEFAULT 'meal', basis TEXT NOT NULL DEFAULT 'g', kcal REAL, protein REAL, carbs REAL, fat REAL, fibre REAL, not_declared INTEGER NOT NULL DEFAULT 0, micro TEXT NOT NULL DEFAULT '{}', aliases TEXT NOT NULL DEFAULT '[]', note TEXT NOT NULL DEFAULT '', updated_at TEXT NOT NULL)"),
       env.DB.prepare("CREATE TABLE IF NOT EXISTS web_bloom_collections (id TEXT PRIMARY KEY, name TEXT NOT NULL, doc TEXT NOT NULL DEFAULT '{}', updated_at TEXT NOT NULL)"),
       env.DB.prepare("CREATE TABLE IF NOT EXISTS web_bloom_items (id TEXT PRIMARY KEY, kind TEXT NOT NULL DEFAULT 'note', title TEXT NOT NULL DEFAULT '', url TEXT NOT NULL DEFAULT '', body TEXT NOT NULL DEFAULT '', notes TEXT NOT NULL DEFAULT '', tags TEXT NOT NULL DEFAULT '[]', place TEXT NOT NULL DEFAULT '', archived INTEGER NOT NULL DEFAULT 0, trashed_at REAL, modified_at REAL NOT NULL DEFAULT 0, files TEXT NOT NULL DEFAULT '[]', doc TEXT NOT NULL DEFAULT '{}')"),
+      env.DB.prepare("CREATE TABLE IF NOT EXISTS web_foods_app (id TEXT PRIMARY KEY, app TEXT NOT NULL DEFAULT '{}')"),
+      env.DB.prepare("CREATE TABLE IF NOT EXISTS web_bloom_app (id TEXT PRIMARY KEY, app TEXT NOT NULL DEFAULT '{}')"),
       // Riparazione idempotente: cestinati importati con la data di riferimento Apple (2001).
       env.DB.prepare("UPDATE web_bloom_items SET trashed_at = trashed_at + 978307200 WHERE trashed_at > 0 AND trashed_at < 1500000000"),
     ]).catch((error) => { nbReady = null; throw error; });
@@ -41,6 +43,23 @@ const nbAppleTime = (v) => {
   if (n < 1.5e9) n += 978307200;
   return Math.floor(n);
 };
+/** Campi che esistono solo nell'app (pezzi, unità integratori, categorie fissate, allegati locali...). */
+const NB_FOOD_CANONICAL = new Set(["id", "name", "brand", "family", "measurementBasis", "calories", "protein", "carbohydrate", "fat", "fibre", "nutritionNotDeclared", "nutrientValues", "aliases", "dataNote"]);
+const NB_ITEM_CANONICAL = new Set(["id", "kind", "title", "urlString", "url", "text", "body", "notes", "tagIDs", "tags", "place", "archived", "trashedAt", "modifiedAt", "expectModifiedAt", "data"]);
+function nbExtras(input, canonical) {
+  const out = {};
+  for (const [k, v] of Object.entries(input && typeof input === "object" ? input : {})) {
+    if (canonical.has(k) || !/^[A-Za-z0-9_]{1,40}$/.test(k)) continue;
+    out[k] = k === "noteFiles" && Array.isArray(v) ? v.map((f) => { if (!f || typeof f !== "object") return f; const { data, ...rest } = f; return rest; }) : v;
+  }
+  const text = JSON.stringify(out);
+  return text.length > 16000 ? "{}" : text;
+}
+const nbExtrasStatement = (env, table, id, text) => env.DB.prepare("INSERT INTO " + table + "(id,app) VALUES (?,?) ON CONFLICT(id) DO UPDATE SET app=excluded.app").bind(id, text);
+async function nbExtrasMap(env, table) {
+  const { results } = await env.DB.prepare("SELECT id,app FROM " + table + " LIMIT 10000").all();
+  return new Map(results.map((r) => [r.id, nbJson(r.app, {})]));
+}
 const nbJson = (text, fallback) => { try { const v = JSON.parse(text); return v ?? fallback; } catch { return fallback; } };
 
 /* ---------- Alimenti ---------- */
@@ -80,18 +99,20 @@ function nbFoodStatement(env, f) {
 }
 async function listFoods(env) {
   await nbTables(env);
-  const { results } = await env.DB.prepare("SELECT * FROM web_foods ORDER BY name COLLATE NOCASE LIMIT 5000").all();
-  return { foods: results.map(nbFoodRow) };
+  const [{ results }, extras] = await Promise.all([env.DB.prepare("SELECT * FROM web_foods ORDER BY name COLLATE NOCASE LIMIT 5000").all(), nbExtrasMap(env, "web_foods_app")]);
+  return { foods: results.map((r) => ({ ...nbFoodRow(r), app: extras.get(r.id) || {} })) };
 }
 async function saveFood(env, input) {
   await nbTables(env);
-  const food = nbCleanFood(input);
-  await nbFoodStatement(env, food).run();
+  const fromApp = input && input.calories !== undefined;
+  const food = nbCleanFood(fromApp ? nbFoodFromApp(input) : input);
+  await env.DB.batch([nbFoodStatement(env, food), ...(fromApp ? [nbExtrasStatement(env, "web_foods_app", food.id, nbExtras(input, NB_FOOD_CANONICAL))] : [])]);
   return food;
 }
 async function deleteFood(env, id) {
   await nbTables(env);
-  await env.DB.prepare("DELETE FROM web_foods WHERE id=?").bind(nbId(id, "x")).run();
+  const key = nbId(id, "x");
+  await env.DB.batch([env.DB.prepare("DELETE FROM web_foods WHERE id=?").bind(key), env.DB.prepare("DELETE FROM web_foods_app WHERE id=?").bind(key)]);
   return { ok: true };
 }
 /** Accetta l'elenco degli alimenti personali dell'app (stesso formato JSON) e lo converte. */
@@ -108,7 +129,8 @@ async function importFoods(env, list) {
   await nbTables(env);
   if (!Array.isArray(list) || !list.length || list.length > 200) throw Error("Invia da 1 a 200 alimenti per volta.");
   const foods = list.map((item) => nbCleanFood(item && item.calories !== undefined ? nbFoodFromApp(item) : item));
-  await env.DB.batch(foods.map((f) => nbFoodStatement(env, f)));
+  const extras = list.map((item, i) => item && item.calories !== undefined ? nbExtrasStatement(env, "web_foods_app", foods[i].id, nbExtras(item, NB_FOOD_CANONICAL)) : null).filter(Boolean);
+  await env.DB.batch([...foods.map((f) => nbFoodStatement(env, f)), ...extras]);
   return { imported: foods.length };
 }
 
@@ -156,17 +178,19 @@ function nbCleanCollection(input) {
 }
 async function getBloom(env) {
   await nbTables(env);
-  const [c, i] = await Promise.all([
+  const [c, i, extras] = await Promise.all([
     env.DB.prepare("SELECT * FROM web_bloom_collections ORDER BY name COLLATE NOCASE LIMIT 500").all(),
     env.DB.prepare("SELECT * FROM web_bloom_items ORDER BY modified_at DESC LIMIT 5000").all(),
+    nbExtrasMap(env, "web_bloom_app"),
   ]);
-  return { collections: c.results.map((r) => ({ id: r.id, name: r.name, doc: nbJson(r.doc, {}) })), items: i.results.map((r) => nbItemRow(r, false)) };
+  return { collections: c.results.map((r) => ({ id: r.id, name: r.name, doc: nbJson(r.doc, {}) })), items: i.results.map((r) => ({ ...nbItemRow(r, false), app: extras.get(r.id) || {} })) };
 }
 async function getBloomItem(env, id) {
   await nbTables(env);
   const row = await env.DB.prepare("SELECT * FROM web_bloom_items WHERE id=?").bind(nbId(id, "x")).first();
   if (!row) throw Error("Elemento non trovato.");
-  return nbItemRow(row, true);
+  const extra = await env.DB.prepare("SELECT app FROM web_bloom_app WHERE id=?").bind(row.id).first();
+  return { ...nbItemRow(row, true), app: extra ? nbJson(extra.app, {}) : {} };
 }
 async function saveBloomItem(env, input) {
   await nbTables(env);
@@ -176,7 +200,7 @@ async function saveBloomItem(env, input) {
     const row = await env.DB.prepare("SELECT modified_at FROM web_bloom_items WHERE id=?").bind(item.id).first();
     if (row && row.modified_at > expected) return { id: item.id, conflict: true, current: await getBloomItem(env, item.id) };
   }
-  await nbItemStatement(env, item, false).run();
+  await env.DB.batch([nbItemStatement(env, item, false), nbExtrasStatement(env, "web_bloom_app", item.id, nbExtras(input, NB_ITEM_CANONICAL))]);
   return { id: item.id, modifiedAt: item.modifiedAt };
 }
 async function trashBloomItem(env, id, trashed) {
@@ -186,7 +210,9 @@ async function trashBloomItem(env, id, trashed) {
 }
 async function deleteBloomItem(env, id) {
   await nbTables(env);
-  await env.DB.prepare("DELETE FROM web_bloom_items WHERE id=? AND trashed_at IS NOT NULL").bind(nbId(id, "x")).run();
+  const key = nbId(id, "x");
+  const gone = await env.DB.prepare("DELETE FROM web_bloom_items WHERE id=? AND trashed_at IS NOT NULL").bind(key).run();
+  if ((gone?.meta?.changes ?? gone?.changes ?? 0) > 0) await env.DB.prepare("DELETE FROM web_bloom_app WHERE id=?").bind(key).run();
   return { ok: true };
 }
 async function saveBloomCollection(env, input) {
@@ -224,6 +250,7 @@ async function importBloom(env, payload) {
   const stmts = [
     ...cleanC.map((c) => env.DB.prepare("INSERT INTO web_bloom_collections(id,name,doc,updated_at) VALUES (?,?,?,?) ON CONFLICT(id) DO NOTHING").bind(c.id, c.name, c.doc, new Date().toISOString())),
     ...cleanI.map((i) => nbItemStatement(env, i, true)),
+    ...cleanI.filter((i) => !existing.has(i.id) || i.modifiedAt > existing.get(i.id)).map((i) => nbExtrasStatement(env, "web_bloom_app", i.id, nbExtras(items.find((x) => String(x?.id ?? "") === i.id), NB_ITEM_CANONICAL))),
   ];
   if (stmts.length) await env.DB.batch(stmts);
   const added = cleanI.filter((i) => !existing.has(i.id)).length;

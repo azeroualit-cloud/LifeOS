@@ -71,3 +71,16 @@ test('trash and delete only remove trashed notes', async () => {
   await bloomFoodsAction(e, 'deleteBloomItem', ['n3']);
   await assert.rejects(bloomFoodsAction(e, 'getBloomItem', ['n3']));
 });
+
+test('app-only fields survive the round trip and site edits keep them', async () => {
+  const e = env();
+  await bloomFoodsAction(e, 'saveFood', [{ id: 'personal-2', name: 'Uova', family: 'egg', calories: 143, protein: 12.6, carbohydrate: 0.7, fat: 9.9, pieces: [{ name: 'Uovo', grams: 50 }], supplementUnit: null }]);
+  e.sqlite.prepare("UPDATE web_foods SET name='Uova bio' WHERE id='personal-2'").run();
+  const food = (await bloomFoodsAction(e, 'listFoods', [])).foods[0];
+  assert.equal(food.name, 'Uova bio'); assert.deepEqual(food.app.pieces, [{ name: 'Uovo', grams: 50 }]);
+  await bloomFoodsAction(e, 'saveBloomItem', [{ id: 'n4', kind: 'image', title: 'Foto', pinnedCategoryIDs: ['tag-a'], noteFiles: [{ name: 'a.jpg', type: 'public.jpeg', data: 'AAAA', lifeosFileSHA256: 'x' }] }]);
+  const item = await bloomFoodsAction(e, 'getBloomItem', ['n4']);
+  assert.deepEqual(item.app.pinnedCategoryIDs, ['tag-a']); assert.equal(item.app.noteFiles[0].data, undefined); assert.equal(item.kind, 'image');
+  await bloomFoodsAction(e, 'deleteFood', ['personal-2']);
+  assert.equal(e.sqlite.prepare('SELECT COUNT(*) n FROM web_foods_app').get().n, 0);
+});
