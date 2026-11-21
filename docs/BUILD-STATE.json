@@ -752,7 +752,7 @@
     "plan": "docs/BUILD-93-PLAN.md",
     "ipa_authorization": "IPA-DELIVERY-93-2026-11-21 (solo a gate verdi sullo stesso commit)",
     "phase1": "done: compile and unit tests green (run 44930586905); Worker lifeos-native-test not deployed",
-    "phase2": "in progress: screens rewritten per preview; CI compile and unit tests only; no simulator review yet",
+    "phase2": "in progress: screens rewritten per preview; compile and 358 unit tests green (run 44949689104, commit 9367df7); UI suite and simulator review pending",
     "phases_3_4_5": "not started",
     "ipa": "not produced",
     "backend_deployment": "none"
