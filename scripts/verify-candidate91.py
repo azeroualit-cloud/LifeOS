@@ -145,7 +145,7 @@ def package_inputs(directory):
     assert test["totalPassed"] == len(test["targetedCases"]) + len(test["remainingCases"])
     assert test["reusedTestsPassed"] == 0 and test["executedThisRun"] == test["totalPassed"]
     assert launch["launchesPassed"] == 4 and launch["releaseModes"] == RELEASE_MODES
-    return {"version": "0.10.29", "build": 91, **expected,
+    return {"version": "0.10.29", "build": 92, **expected,
             "testsPassed": test["totalPassed"], "testsExecutedThisRun": test["executedThisRun"],
             "reusedTestsPassed": test["reusedTestsPassed"], "releaseLaunchesPassed": 4,
             "preflightCoverage": test["targetedAggregate"],

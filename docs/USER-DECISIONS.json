@@ -950,6 +950,16 @@
       "conflict_check": "Nessun conflitto con regole ACTIVE."
     },
     {
+      "id": "IPA-DELIVERY-2026-11-21-BUILD92",
+      "status": "ACTIVE",
+      "scope": "LifeOS - IPA 0.10.29 build 92 al posto della build 91 (tag ios-0.10.29-build91 gia occupato dalla release del 17 novembre, commit 27ff631)",
+      "recorded_on": "2026-11-21",
+      "provenance": "Richiesta diretta utente",
+      "original_quote": "se qualcosa si ferma te devi proattivamente lavorare finche non hai l'ipa",
+      "rule": "La produzione IPA gia autorizzata il 20 novembre (IPA-DELIVERY-2026-11-20: modifiche correnti, gate mirato, suite restante, 4 avvii Release sullo stesso SHA) usa il numero di build 92 perche il tag e la release build 91 esistono gia con contenuto vecchio e non vanno sovrascritti ne cancellati. Nessun gate allentato oltre l'innesco da push del file docs/trigger-candidate91.txt autorizzato il 2026-11-21.",
+      "conflict_check": "Non sostituisce IPA-DELIVERY-2026-11-20 (resta ACTIVE). Cambia solo il numero di build. Soddisfa IPA-GATE-01."
+    },
+    {
       "id": "IPA-DELIVERY-2026-11-20",
       "status": "ACTIVE",
       "scope": "LifeOS - produzione IPA 0.10.29 build 91 (export alimenti personali, quota utenze lato app)",

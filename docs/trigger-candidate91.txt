@@ -1,1 +1,1 @@
-Innesco esplicito richiesto da Nas il 2026-11-21 per la build 91 (0.10.29). Un push che modifica questo file avvia il workflow candidate 91.
+Innesco esplicito richiesto da Nas il 2026-11-21 per la build 92 (0.10.29). Un push che modifica questo file avvia il workflow candidate 91 (build 92). Tentativo 2.
