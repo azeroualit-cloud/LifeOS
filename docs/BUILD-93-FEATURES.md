@@ -10,57 +10,57 @@ Stato nell'anteprima (https://claude.ai/artifact/QAanqSYRowbYWgUKV8n271):
 
 ## Dashboard
 - Data e turno di oggi - OK
-- Orario successivo (Empoli) con foglio "Orari" del giorno - MANCA
+- Orario successivo (Empoli) con foglio "Orari" del giorno - OK
 - Settimana con turni, tocco su giorno apre il Calendario - OK
-- Cose da fare: eventi, abitudini, attività del giorno, con menu Gestisci (Attività, Abitudini, Calendario) - MANCA il menu Gestisci e gli eventi nella lista
-- Prossimi appuntamenti - MANCA
+- Cose da fare: eventi, abitudini, attività del giorno, con menu Gestisci (Attività, Abitudini, Calendario) - OK
+- Prossimi appuntamenti - OK
 - Nutrizione rapida: kcal di oggi, Peso, Alimento (Alimento a destra) - OK
 - Finanza compatta, apre Finanza - OK
-- Stato connessione e notifiche del server - MANCA
+- Stato connessione e notifiche del server - OK
 
 ## Attività
-- Elenco attività, completate, categorie (crea, rinomina, elimina spostando le attività) - MANCA la gestione categorie
-- Abitudini: ogni giorno, ogni N giorni, giorni della settimana, data di inizio, "Prossima: tra N giorni" - OK in parte (manca giorni della settimana nel foglio)
-- Editor attività/evento: titolo, descrizione, categoria, luogo, avviso, sveglia urgente (iOS 26), ripetizione (mai, settimana, mese, anno), data finale, modifica da questa occorrenza, elimina occorrenza o serie - MANCA (il foglio Evento è parziale)
+- Elenco attività, completate, categorie (crea, rinomina, elimina spostando le attività) - OK
+- Abitudini: ogni giorno, ogni N giorni, giorni della settimana, data di inizio, "Prossima: tra N giorni" - OK
+- Editor attività/evento: titolo, descrizione, categoria, luogo, avviso, sveglia urgente (iOS 26), ripetizione (mai, settimana, mese, anno), data finale, modifica da questa occorrenza, elimina occorrenza o serie - OK
 
 ## Calendario
 - Mese a scorrimento verticale con turni e pallini eventi - OK
-- Vista Agenda e giorno, "Torna al mese", "Oggi" - MANCA Agenda e giorno
-- Dipingi turni (palette) - MANCA
-- Esporta turni su Apple (in Impostazioni) - MANCA
+- Vista Agenda e giorno, "Torna al mese", "Oggi" - OK
+- Dipingi turni (palette) - OK
+- Esporta turni su Apple (in Impostazioni) - OK
 
 ## Salute e Nutrizione
 - Settimana/giorno selezionabile, Oggi - OK
 - Calorie e macro del giorno - OK (CAMBIA: barra per macro)
-- Micronutrienti con "In evidenza" scelti con la stella - OK in parte (manca la stella / In evidenza)
-- Diario del giorno, modifica, elimina da LifeOS e Apple Salute, registrazioni in sospeso da riprovare - OK in parte (mancano azioni e stati)
-- Cronologia nutrizione - MANCA
-- Grafici peso (pesate e tendenza) e calorie per giorno con periodo - OK peso (CAMBIA: unito alla previsione), MANCA grafico calorie per giorno
-- TDEE medio dallo storico, TDEE stimato, Simulazione con calorie dello scenario - OK TDEE, MANCA Simulazione
+- Micronutrienti con "In evidenza" scelti con la stella - OK
+- Diario del giorno, modifica, elimina da LifeOS e Apple Salute, registrazioni in sospeso da riprovare - OK
+- Cronologia nutrizione - OK
+- Grafici peso (pesate e tendenza) e calorie per giorno con periodo - OK peso (CAMBIA: unito alla previsione), OK grafico calorie per giorno
+- TDEE medio dallo storico, TDEE stimato, Simulazione con calorie dello scenario - OK
 - Aggiungi peso con data, salvataggio in Apple Salute - OK
-- Aggiungi alimento: ricerca, catalogo (Open Food Facts), personali, pesatura con osso/senza osso, unità, quantità, data, nutrienti a mano - CAMBIA (ricerca subito), MANCA pesatura con/senza osso, unità e data
+- Aggiungi alimento: ricerca, catalogo (Open Food Facts), personali, pesatura con osso/senza osso, unità, quantità, data, nutrienti a mano - CAMBIA (ricerca subito), OK pesatura, unità e data (foglio Quantità)
 - Macro a mano con fibre - OK (fibre aggiunte)
-- Editor alimento personale: nome, marca, famiglia, formato integratore, unità, valori facoltativi - MANCA
-- Integratori (catalogo solo dell'utente) - MANCA
+- Editor alimento personale: nome, marca, famiglia, formato integratore, unità, valori facoltativi - OK
+- Integratori (catalogo solo dell'utente) - OK, voce in Impostazioni e formato nell'editor
 
 ## Bloom
-- Libreria con ricerca, categorie (gestione, fissa in categoria), archivio - OK in parte
-- Nuovo giro (riscoperta) - MANCA
-- Catture in sospeso (dalla condivisione) - MANCA
-- Nota: titolo, link con anteprima, luogo (Apple Maps, tipologia), categorie, allegati (file, foto), inquadratura immagine - OK in parte (mancano luogo, allegati, inquadratura)
-- Mappa dei luoghi, Apri in Mappe - MANCA
-- Importa ed esporta backup, rapporto, conflitti (mantieni, sostituisci, copia) - MANCA (in parte sostituito dal trasferimento sul server)
+- Libreria con ricerca, categorie (gestione, fissa in categoria), archivio - OK
+- Nuovo giro (riscoperta) - OK
+- Catture in sospeso (dalla condivisione) - OK
+- Nota: titolo, link con anteprima, luogo (Apple Maps, tipologia), categorie, allegati (file, foto), inquadratura immagine - OK (inquadratura immagine: invariata dalla 92, non ridisegnata)
+- Mappa dei luoghi, Apri in Mappe - OK
+- Importa ed esporta backup, rapporto, conflitti (mantieni, sostituisci, copia) - OK in Impostazioni (rapporto e conflitti invariati dalla 92)
 
 ## Finanza
 - Budget rimanente, al giorno, conto principale, nascondi importi - OK
 - Budget, Analisi, Nuovo piano, Movimenti - OK
-- Movimenti: ricerca, filtro per conto, modifica, elimina, "già inclusa nel saldo rilevato" - MANCA
+- Movimenti: ricerca, filtro per conto, modifica, elimina, "già inclusa nel saldo rilevato" - OK (modifica invariata dalla 92)
 - Destinazione della spesa: budget, risparmi, piano, periodo di competenza - OK (CAMBIA: aggiunta Rate)
-- Obiettivo di risparmio e fondo emergenza - MANCA
-- Analisi: spese per categoria (3/6/12 mesi), patrimonio 12 mesi, stipendi per competenza (cedolini), ripartizione stipendio, previsione patrimonio con fascia 80% - OK in parte (mancano patrimonio, cedolini, previsione)
-- Piani: tipi Anticipa budget, Obiettivo finito, Fondo senza scadenza, Affitto e utenze, Rateizza, Spesa rapida; registra pagamento, differenza dal previsto, recupero nei budget futuri, quote future, piani precedenti - OK in parte (CAMBIA: Rateizza passa nella spesa)
-- Modifiche sul dispositivo in sospeso (riprova, annulla, ripristina dal server) - MANCA
+- Obiettivo di risparmio e fondo emergenza - OK (in Budget)
+- Analisi: spese per categoria (3/6/12 mesi), patrimonio 12 mesi, stipendi per competenza (cedolini), ripartizione stipendio, previsione patrimonio con fascia 80% - OK
+- Piani: tipi Anticipa budget, Obiettivo finito, Fondo senza scadenza, Affitto e utenze, Rateizza, Spesa rapida; registra pagamento, differenza dal previsto, recupero nei budget futuri, quote future, piani precedenti - OK (CAMBIA: Rateizza passa nella spesa)
+- Modifiche sul dispositivo in sospeso (riprova, annulla, ripristina dal server) - OK (in Movimenti)
 
 ## Impostazioni
-- Notifiche e Siri, promemoria locali, esporta turni su Apple, widget 2x2 - MANCA
+- Notifiche e Siri, promemoria locali, esporta turni su Apple, widget 2x2 - OK
 - Dati sul server, esporta backup completo - OK (nuovo)
