@@ -17,7 +17,9 @@ final class NativeNutritionGoalsTests: XCTestCase {
         XCTAssertEqual(targets.calories, 2310)
         XCTAssertEqual(targets.protein, (2.0 * 74.6).rounded())
         XCTAssertEqual(targets.fat, (0.9 * 74.6).rounded())
-        let expectedCarbs = ((2310 - 2.0 * 74.6 * 4 - 0.9 * 74.6 * 9) / 4).rounded()
+        let protein: Double = 2.0 * 74.6, fat: Double = 0.9 * 74.6
+        let rest: Double = 2310 - protein * 4 - fat * 9
+        let expectedCarbs: Double = (rest / 4).rounded()
         XCTAssertEqual(targets.carbohydrate, expectedCarbs)
     }
 
@@ -28,7 +30,7 @@ final class NativeNutritionGoalsTests: XCTestCase {
         goals.fatUnit = .grams; goals.fat = 75
         let targets = try XCTUnwrap(goals.targets(tdee: nil, weight: nil))
         XCTAssertEqual(targets.calories, 2450)
-        XCTAssertEqual(targets.carbohydrate, ((2450 - 640 - 675) / 4).rounded())
+        XCTAssertEqual(targets.carbohydrate, 284.0, accuracy: 0.001)
     }
 
     func testNoTargetsWithoutTDEEOrWithoutWeightForPerKG() {
@@ -139,13 +141,14 @@ final class NativeNutritionGoalsTests: XCTestCase {
 
     func testIntakeNeededForTarget() throws {
         let need = try XCTUnwrap(NativeWeightSimulation.intakeNeeded(tdee: 2610, from: 74.6, to: 73.0, weeks: 4))
-        XCTAssertEqual(need, 2610 + (73.0 - 74.6) * 7700 / 28, accuracy: 0.001)
+        let expected: Double = 2610.0 + (73.0 - 74.6) * 7700.0 / 28.0
+        XCTAssertEqual(need, expected, accuracy: 0.001)
         XCTAssertNil(NativeWeightSimulation.intakeNeeded(tdee: 2610, from: 74.6, to: 73, weeks: 0))
     }
 
     func testForecastNowReachesTwentySixWeeks() throws {
         let estimate = HealthEstimate(tdee: 2500, averageIntake: 2200, startWeight: 80, lastDate: now, days: 14)
-        XCTAssertEqual(NativeHealthMath.forecast(estimate, intake: 2200, weeks: 26, calendar: calendar).count, 26 * 7 + 1)
+        XCTAssertEqual(NativeHealthMath.forecast(estimate, intake: 2200, weeks: 26, calendar: calendar).count, 183)
         XCTAssertTrue(NativeHealthMath.forecast(estimate, intake: 2200, weeks: 27, calendar: calendar).isEmpty)
     }
 
@@ -158,7 +161,7 @@ final class NativeNutritionGoalsTests: XCTestCase {
         ]
         let days = NativeNutritionBars.bars(macros, grouping: .days, selected: now, now: now, calendar: week)
         XCTAssertEqual(days.count, 7)
-        XCTAssertEqual(days[0].calories, 100 * 4 + 200 * 4 + 50 * 9)
+        XCTAssertEqual(days[0].calories, 1650.0, accuracy: 0.001)
         XCTAssertEqual(days[1].days, 0, "A day with zero macros is not a logged day")
         let weeks = NativeNutritionBars.bars(macros, grouping: .weeks, now: now, calendar: week)
         XCTAssertEqual(weeks.count, 6)
