@@ -171,7 +171,10 @@ final class NativeInterfaceTests: XCTestCase {
         capture("dashboard-weekly-structure-dark")
         app.mainTabBar.buttons["Salute"].tap()
         let health = app.buttons["health-summary-weight"]
-        XCTAssertTrue(health.waitForExistence(timeout: 10)); XCTAssertTrue(health.isHittable)
+        XCTAssertTrue(health.waitForExistence(timeout: 10))
+        // Build 93: the weight card is in Andamento, below the day (HEALTH-TREND-93-2026-11-21).
+        for _ in 0..<8 where !health.isHittable { app.scrollViews["health-detail-scroll"].swipeUp() }
+        XCTAssertTrue(health.isHittable)
         XCTAssertLessThan(health.frame.maxY, app.mainTabBar.frame.minY)
         capture("health-standardized-dark")
         app.openOtherDestination("Calendario")
@@ -561,7 +564,11 @@ final class NativeInterfaceTests: XCTestCase {
             XCTAssertTrue(weight.waitForExistence(timeout: 10)); XCTAssertFalse(app.buttons["health-connect"].exists)
             XCTAssertTrue(app.buttons["health-add-weight"].exists)
             let simulation = app.buttons["health-summary-simulation"]
+            for _ in 0..<8 where !simulation.isHittable { app.scrollViews["health-detail-scroll"].swipeUp() }
             XCTAssertTrue(simulation.isHittable); simulation.tap()
+            // Build 93 simulation opens on the real trend; the intake field belongs to "Calorie".
+            let caloriesMode = app.buttons["simulation-mode-calories"]
+            XCTAssertTrue(caloriesMode.waitForExistence(timeout: 10)); caloriesMode.tap()
             XCTAssertTrue(app.textFields["health-intake"].waitForExistence(timeout: 10))
             capture(dark ? "health-scenario-dark" : "health-scenario-light")
             app.terminate()
@@ -598,7 +605,7 @@ final class NativeInterfaceTests: XCTestCase {
         field.tap(); field.typeText("83,4")
         XCTAssertTrue(save.isEnabled); save.tap()
         let detail = app.buttons["health-summary-weight"]
-        for _ in 0..<6 where !detail.isHittable { app.scrollViews["health-detail-scroll"].swipeDown() }
+        for _ in 0..<8 where !detail.isHittable { app.scrollViews["health-detail-scroll"].swipeUp() }
         XCTAssertTrue(detail.waitForExistence(timeout: 10)); XCTAssertTrue(detail.label.contains("83,4"))
         XCTAssertEqual(app.mainTabBar.buttons.count, 5)
         add.tap(); app.buttons["Annulla"].tap()
@@ -634,7 +641,12 @@ final class NativeInterfaceTests: XCTestCase {
         }
         app.navigationBars.buttons.firstMatch.tap()
         let simulation = app.buttons["health-summary-simulation"]
-        XCTAssertTrue(simulation.waitForExistence(timeout: 10)); simulation.tap()
+        XCTAssertTrue(simulation.waitForExistence(timeout: 10))
+        for _ in 0..<8 where !simulation.isHittable { app.scrollViews["health-detail-scroll"].swipeUp() }
+        simulation.tap()
+    // Build 93 simulation opens on the real trend; the intake field belongs to "Calorie".
+        let caloriesMode = app.buttons["simulation-mode-calories"]
+        XCTAssertTrue(caloriesMode.waitForExistence(timeout: 10)); caloriesMode.tap()
         let field = app.textFields["health-intake"]
         let scroll = app.scrollViews["health-detail-scroll"]
         for _ in 0..<5 { if field.isHittable { break }; scroll.swipeUp() }

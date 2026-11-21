@@ -63,25 +63,32 @@ struct NativeHealthDetail: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     @ObservedObject private var nutrition = NativeNutritionUIFixture.current
 
+    @State private var period: NativeHealthTrendPeriod = .three
+    @State private var editingGoals = false
+
     var body: some View {
         ScrollView {
-            VStack(spacing: NativeDesign.Space.medium) {
-                weekPicker
-                if demo { Text("Dati illustrativi").font(.caption).foregroundStyle(.secondary) }
-                // HEALTH-GRID-3X2-92: TDEE, Peso previsto, Peso / Calorie, Media calorie, Media proteine.
-                LOStatGrid(stats: summaryStats) { stat in
-                    if let metric = NativeHealthMetric(rawValue: String(stat.id.dropFirst("health-summary-".count))) { openedMetric = metric }
+            VStack(alignment: .leading, spacing: NativeDesign.Space.section) {
+                // HEALTH-TREND-93-2026-11-21: day first, then the trend over months.
+                VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
+                    weekPicker
+                    Text(selectedDate.formatted(.dateTime.weekday(.wide).day()).capitalized(with: Locale(identifier: "it_IT")))
+                        .font(.title2.bold()).accessibilityAddTraits(.isHeader)
+                        .accessibilityIdentifier("health-selected-day")
+                    if demo { Text("Dati illustrativi").font(.caption).foregroundStyle(NativeDesign.secondary) }
+                    caloriesCard
+                    nutrients
                 }
-                nutrients
                 diary
+                trendSection
                 if nutrition.entries.contains(where: { !$0.confirmed || $0.deletionPending == true }) {
-                    Text("Registrazioni LifeOS in sospeso: consultale nella cronologia. I totali riportano solo i dati leggibili da Salute.")
-                        .font(.caption).foregroundStyle(.secondary)
+                    Text("Registrazioni LifeOS in sospeso: consultale nella cronologia.")
+                        .font(.caption).foregroundStyle(NativeDesign.secondary)
                 }
-                if let message = health.nutrientMessage { Text(message).font(.caption).foregroundStyle(.secondary) }
+                if let message = health.nutrientMessage { Text(message).font(.caption).foregroundStyle(NativeDesign.secondary) }
                 if health.loading { ProgressView().accessibilityLabel("Lettura Salute") }
-                if let message = health.message { Text(message).font(.caption).foregroundStyle(.secondary) }
-            }.padding(.horizontal, NativeDesign.Layout.listInset).padding(.vertical, NativeDesign.Space.large)
+                if let message = health.message { Text(message).font(.caption).foregroundStyle(NativeDesign.secondary) }
+            }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.vertical, NativeDesign.Space.large)
         }
             .accessibilityIdentifier("health-detail-scroll")
             .task { await NativeNutritionUIFixture.prepareReview() }
@@ -92,7 +99,11 @@ struct NativeHealthDetail: View {
             }
             .navigationDestination(isPresented: $showingHistory) { NativeNutritionScreen() }
             .navigationDestination(item: $openedMetric) { metric in
-                NativeHealthMetricDetail(metric: metric, health: health, demo: demo)
+                switch metric {
+                case .tdee: NativeTDEEScreen(health: health)
+                case .simulation: NativeWeightSimulationScreen(health: health)
+                default: NativeHealthMetricDetail(metric: metric, health: health, demo: demo)
+                }
             }
             .background(NativeDesign.healthCanvas)
             .navigationTitle("Salute")
@@ -101,13 +112,14 @@ struct NativeHealthDetail: View {
                 // History in the navigation bar: always reachable, never under the bottom actions.
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { showingHistory = true } label: {
-                        Label("Cronologia", systemImage: "clock.arrow.circlepath")
+                        Label("Cronologia", systemImage: "chart.bar.xaxis")
                     }
                     .accessibilityLabel("Cronologia nutrizione")
                     .accessibilityIdentifier("health-nutrition-history")
                 }
             }
             .sheet(isPresented: $addingWeight) { NativeAddWeightSheet(health: health) }
+            .sheet(isPresented: $editingGoals) { NativeNutritionGoalsSheet(health: health) }
             .sheet(isPresented: $showingNutrition) { NavigationStack { NativeNutritionQuickSheet(initialDate: selectedDate) }.environmentObject(health) }
             .confirmationDialog("Eliminare questa registrazione e i suoi campioni LifeOS da Apple Salute?", isPresented: Binding(get: { deletingFood != nil }, set: { if !$0 { deletingFood = nil } })) {
                 Button("Elimina da LifeOS e Apple Salute", role: .destructive) {
@@ -121,12 +133,112 @@ struct NativeHealthDetail: View {
             }
 
     }
-    private var summaryStats: [LOStat] {
-        let order: [NativeHealthMetric] = [.tdee, .simulation, .weight, .calories, .weeklyCalories, .weeklyProtein]
-        return order.map { metric in
-            LOStat(id: "health-summary-" + metric.rawValue, title: metric.title, value: value(metric), unit: metric.unit,
-                   accessibilityHint: metric == .weeklyCalories || metric == .weeklyProtein ? "" : "Apre il dettaglio",
-                   accessibilityContext: context(metric))
+
+    private func whole(_ value: Double) -> String { value.formatted(.number.precision(.fractionLength(0))) }
+
+    /// Calories of the selected day against the goal, split by macro (preview top card).
+    private var caloriesCard: some View {
+        let targets = health.goalTargets
+        let values = health.nutrients(on: selectedDate)
+        let protein = values[.dietaryProtein], carbohydrate = values[.dietaryCarbohydrates], fat = values[.dietaryFatTotal]
+        let calories = health.calories(on: selectedDate)
+        let kcal = calories.map(whole) ?? "—"
+        let remaining: Double? = targets.flatMap { goal in calories.map { goal.calories - $0 } }
+        let detail: String
+        if let targets {
+            if let remaining {
+                detail = "/ " + whole(targets.calories) + (remaining >= 0 ? " · restano " : " · oltre di ") + whole(abs(remaining))
+            } else { detail = "/ " + whole(targets.calories) }
+        } else { detail = "Imposta un obiettivo" }
+        let over = (remaining ?? 0) < 0
+        let split = [LOSegment(id: "p", value: (protein ?? 0) * 4, color: NativeDesign.macroProtein),
+                     LOSegment(id: "c", value: (carbohydrate ?? 0) * 4, color: NativeDesign.macroCarbohydrate),
+                     LOSegment(id: "f", value: (fat ?? 0) * 9, color: NativeDesign.macroFat)]
+        let splitTotal = split.map(\.value).reduce(0, +)
+        let spokenSplit = "Calorie divise per macro: proteine " + whole((protein ?? 0) * 4) + ", carboidrati " + whole((carbohydrate ?? 0) * 4) + ", grassi " + whole((fat ?? 0) * 9)
+        let macroLayout = typeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: NativeDesign.Space.small))
+            : AnyLayout(HStackLayout(alignment: .top, spacing: NativeDesign.Space.medium))
+        return NativeCard {
+            Button { editingGoals = true } label: {
+                VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
+                    HStack {
+                        Text("Calorie").font(.footnote.weight(.semibold)).foregroundStyle(NativeDesign.nutritionTitle)
+                        Spacer()
+                        NativeDisclosureIndicator()
+                    }
+                    HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xs) {
+                        Text(kcal).font(.title2.weight(.bold)).monospacedDigit()
+                        Text(detail).font(.footnote).foregroundStyle(over ? NativeDesign.overGoal : NativeDesign.secondary)
+                            .monospacedDigit().lineLimit(1).minimumScaleFactor(0.8)
+                    }
+                }
+                .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(NativePressStyle())
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Calorie " + kcal + (targets.map { " di " + whole($0.calories) } ?? "") + ". Apri obiettivi")
+            .accessibilityIdentifier("health-calories-goals")
+            LOSplitBar(segments: split, scale: max(targets?.calories ?? 0, splitTotal, 1), accessibilityText: spokenSplit)
+            macroLayout {
+                LOMacroValue(title: "Proteine", value: protein, goal: targets?.protein, unit: "g", color: NativeDesign.macroProtein, identifier: "health-nutrient-" + HKQuantityTypeIdentifier.dietaryProtein.rawValue)
+                LOMacroValue(title: "Carboidrati", value: carbohydrate, goal: targets?.carbohydrate, unit: "g", color: NativeDesign.macroCarbohydrate, identifier: "health-nutrient-" + HKQuantityTypeIdentifier.dietaryCarbohydrates.rawValue)
+                LOMacroValue(title: "Grassi", value: fat, goal: targets?.fat, unit: "g", color: NativeDesign.macroFat, identifier: "health-nutrient-" + HKQuantityTypeIdentifier.dietaryFatTotal.rawValue)
+            }
+        }
+    }
+
+    /// Andamento: period, four values, weight with forecast, calories of the week.
+    private var trendSection: some View {
+        let protein = health.nutrientsByDay.compactMapValues { $0[.dietaryProtein] }
+        let summary = NativeHealthTrendSummary(days: health.days, protein: protein, period: period)
+        let start = period.start()
+        let forecast = self.forecast
+        let week = NativeHealthWeek.days(containing: selectedDate)
+        let weekMean = NativeHealthMath.mean(week.compactMap { health.calories(on: $0) }.filter { $0 > 0 })
+        // Not lazy: every value exists for VoiceOver and UI tests even below the fold.
+        let rowLayout = typeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(spacing: NativeDesign.Space.medium))
+            : AnyLayout(HStackLayout(alignment: .top, spacing: NativeDesign.Space.medium))
+        let change: String? = summary.weightChange.map { ($0 >= 0 ? "+" : "−") + abs($0).formatted(.number.precision(.fractionLength(1))) + " kg in " + period.shortTitle }
+        let expected: String? = forecast.last.map { "previsto " + $0.value.formatted(.number.precision(.fractionLength(1))) + " kg al " + $0.date.formatted(.dateTime.day().month(.abbreviated)) }
+        let latest: String? = summary.latestWeight.map { $0.formatted(.number.precision(.fractionLength(1))) }
+        let simulationLabel = ["Peso e simulazione", value(.simulation) + " kg previsti", change].compactMap { $0 }.joined(separator: ", ")
+        let caloriesLabel = "Calorie per giorno, " + value(.calories) + " kcal il giorno selezionato" + (weekMean.map { ", media della settimana " + whole($0) } ?? "")
+        return VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
+            Text("Andamento").font(.title2.bold()).accessibilityAddTraits(.isHeader)
+            LOSegmented(options: NativeHealthTrendPeriod.allCases.map { (title: $0.title, id: String($0.rawValue)) }, selection: Binding(
+                get: { period.title }, set: { title in period = NativeHealthTrendPeriod.allCases.first { $0.title == title } ?? .three }),
+                identifierPrefix: "health-period-")
+            rowLayout {
+                LOStatCard(title: "Peso", value: latest ?? "—", unit: "kg",
+                    caption: summary.latestWeightDate.map { $0.formatted(.dateTime.day().month(.abbreviated)) }, color: NativeDesign.healthWeight,
+                    identifier: "health-summary-weight", action: { openedMetric = .weight })
+                LOStatCard(title: "TDEE", value: value(.tdee), unit: "kcal", caption: health.estimate.map { "ultimi \($0.days) giorni" },
+                    color: NativeDesign.macroCarbohydrate, identifier: "health-summary-tdee", action: { openedMetric = .tdee })
+            }
+            rowLayout {
+                LOStatCard(title: "Media calorie", value: summary.averageCalories.map(whole) ?? "—", unit: "kcal",
+                    caption: period.title, color: NativeDesign.nutritionTitle, identifier: "health-summary-weeklyCalories")
+                LOStatCard(title: "Media proteine", value: summary.averageProtein.map(whole) ?? "—", unit: "g",
+                    caption: period.title, color: NativeDesign.macroProtein, identifier: "health-summary-weeklyProtein")
+            }
+            LOLinkCard(title: "Peso e simulazione", trailing: latest.map { $0 + " kg" },
+                color: NativeDesign.healthWeight, identifier: "health-summary-simulation",
+                accessibilityLabel: simulationLabel, action: { openedMetric = .simulation }) {
+                NativeWeightTrendChart(days: health.days, forecast: forecast, start: start)
+                HStack {
+                    if let change { Text(change).font(.footnote).foregroundStyle(NativeDesign.secondary) }
+                    Spacer()
+                    if let expected { Text(expected).font(.footnote).foregroundStyle(NativeDesign.estimate) }
+                }.monospacedDigit()
+            }
+            LOLinkCard(title: "Calorie per giorno", trailing: weekMean.map { "media " + whole($0) },
+                color: NativeDesign.nutritionTitle, identifier: "health-summary-calories",
+                accessibilityLabel: caloriesLabel, action: { openedMetric = .calories }) {
+                NativeWeekCaloriesChart(week: week, calories: { health.calories(on: $0) }, goal: health.goalTargets?.calories, selected: selectedDate)
+            }
         }
     }
 
@@ -192,16 +304,14 @@ struct NativeHealthDetail: View {
         withAnimation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.selectionDuration)) { selectedDate = next }
     }
 
+    /// "Micronutrienti · in evidenza": fibre plus the starred micronutrients (preview card).
     private var nutrients: some View {
-        VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-            LOCardHeader(title: "Nutrienti", systemImage: NativeHealthMetric.calories.symbol, section: .nutrition)
-            NativeNutrientValues(health: health, includesFibre: true, date: selectedDate)
-            Divider().padding(.vertical, NativeDesign.Space.xs)
-            NativePinnedNutrients(entries: nutrition.entries, date: selectedDate)
+        let fibre = health.nutrients(on: selectedDate)[.dietaryFiber]
+        return NativeCard {
             // Programmatic push: closure links stop working next to navigationDestination(item:).
             Button { showingMicronutrients = true } label: {
                 HStack {
-                    Text("Micronutrienti").font(.subheadline.weight(.semibold))
+                    Text("Micronutrienti · in evidenza").font(.footnote.weight(.semibold)).foregroundStyle(NativeDesign.nutritionTitle)
                     Spacer()
                     NativeDisclosureIndicator()
                 }
@@ -209,10 +319,18 @@ struct NativeHealthDetail: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(NativePressStyle())
+            .accessibilityLabel("Tutti i micronutrienti")
             .accessibilityIdentifier("health-micronutrients")
-        }.padding(NativeDesign.Layout.compactCardInset)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(NativeDesign.healthSurface, in: RoundedRectangle(cornerRadius: NativeDesign.cardRadius, style: .continuous))
+            HStack(spacing: NativeDesign.Space.medium) {
+                Text("Fibre").font(.subheadline)
+                Spacer()
+                Text(fibre.map { $0.formatted(.number.precision(.fractionLength(0...1))) + " g" } ?? "—")
+                    .font(.subheadline.weight(.semibold)).monospacedDigit()
+            }
+            .accessibilityElement(children: .combine)
+            .accessibilityIdentifier("health-nutrient-" + HKQuantityTypeIdentifier.dietaryFiber.rawValue)
+            NativePinnedNutrients(entries: nutrition.entries, date: selectedDate)
+        }
     }
     /// Liquid Glass actions above the tab bar (G06 icons, UI-80-01 visible text).
     @ViewBuilder private var nutritionActions: some View {
@@ -223,50 +341,46 @@ struct NativeHealthDetail: View {
             LOActionLabel(title: "Peso", systemImage: NativeHealthMetric.weight.symbol, section: .weight)
         }.buttonStyle(LOGlassButtonStyle(fillsWidth: true)).accessibilityLabel("Aggiungi peso").accessibilityIdentifier("health-add-weight")
     }
+    /// DIARIO: rows in one grouped card, kcal on the right (preview list).
     private var diary: some View {
-        VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-            HStack {
-                Text("Diario").font(.headline)
-                Spacer(minLength: NativeDesign.Space.small)
-            }
-            let rows = diaryRows
-            if rows.isEmpty {
-                Text("Nessun alimento registrato per questo giorno").font(.subheadline).foregroundStyle(.secondary)
-            }
-            ForEach(rows) { row in
-                Divider()
-                HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.small) {
-                    VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-                        Text(row.name).font(.subheadline.weight(.semibold))
-                        Text(row.detail).font(.caption).foregroundStyle(.secondary)
-                        if row.deletionPending {
-                            Text("Eliminazione da completare").font(.caption).foregroundStyle(.secondary)
-                        }
-                    }
-                    Spacer(minLength: NativeDesign.Space.small)
-                    Text(row.calories.map { $0.formatted(.number.precision(.fractionLength(0))) + " kcal" } ?? "— kcal")
-                        .font(.subheadline).monospacedDigit()
-                    if let localID = row.localID {
-                        NativeIconButton(symbol: row.deletionPending ? "arrow.clockwise" : "trash", label: row.deletionPending ? "Riprova eliminazione di " + row.name : "Elimina " + row.name) {
-                            if row.deletionPending { removeFood(localID) }
-                            else { deletingFood = localID }
-                        }
-                        .disabled(nutrition.busy)
-                        .accessibilityIdentifier("health-diary-delete-" + localID.uuidString)
+        let rows = diaryRows
+        return VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+            LOSectionLabel(title: "Diario")
+            LOListCard {
+                if rows.isEmpty {
+                    LOListRow(isLast: true) {
+                        Text("Nessun alimento registrato per questo giorno").font(.subheadline).foregroundStyle(NativeDesign.secondary)
                     }
                 }
-                .accessibilityElement(children: .contain)
-                .accessibilityIdentifier("health-diary-entry-" + row.id.uuidString)
+                ForEach(rows) { row in
+                    LOListRow(isLast: row.id == rows.last?.id) {
+                        VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
+                            Text(row.name).font(.body).lineLimit(2)
+                            Text(row.detail).font(.footnote).foregroundStyle(NativeDesign.secondary)
+                            if row.deletionPending {
+                                Text("Eliminazione da completare").font(.footnote).foregroundStyle(NativeDesign.overGoal)
+                            }
+                        }
+                        Spacer(minLength: NativeDesign.Space.small)
+                        Text(row.calories.map { $0.formatted(.number.precision(.fractionLength(0))) + " kcal" } ?? "— kcal")
+                            .font(.body.weight(.semibold)).monospacedDigit()
+                        if let localID = row.localID {
+                            NativeIconButton(symbol: row.deletionPending ? "arrow.clockwise" : "trash", label: row.deletionPending ? "Riprova eliminazione di " + row.name : "Elimina " + row.name) {
+                                if row.deletionPending { removeFood(localID) }
+                                else { deletingFood = localID }
+                            }
+                            .disabled(nutrition.busy)
+                            .accessibilityIdentifier("health-diary-delete-" + localID.uuidString)
+                        }
+                    }
+                    .accessibilityElement(children: .contain)
+                    .accessibilityIdentifier("health-diary-entry-" + row.id.uuidString)
+                }
             }
             if nutrition.busy { ProgressView("Aggiornamento diario") }
-            if let diaryNotice { Text(diaryNotice).font(.caption).foregroundStyle(.secondary) }
-            if let error = nutrition.error { Text(error).font(.caption).foregroundStyle(.red) }
+            if let diaryNotice { Text(diaryNotice).font(.caption).foregroundStyle(NativeDesign.secondary) }
+            if let error = nutrition.error { Text(error).font(.caption).foregroundStyle(NativeDesign.danger) }
         }
-            .padding(.horizontal, NativeDesign.Layout.compactCardInset)
-            .padding(.bottom, NativeDesign.Layout.compactCardInset)
-            .padding(.top, NativeDesign.Space.small)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(NativeDesign.healthSurface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
     }
 
     private struct DiaryRow: Identifiable {

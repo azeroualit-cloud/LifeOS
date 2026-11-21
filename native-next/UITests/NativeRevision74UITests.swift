@@ -44,7 +44,12 @@ final class NativeRevision74UITests: XCTestCase {
         let app = launch()
         app.mainTabBar.buttons["Salute"].tap()
         XCTAssertTrue(app.navigationBars["Salute"].waitForExistence(timeout: 10))
-        app.buttons["health-summary-weight"].tap()
+        let health = app.buttons["health-summary-weight"]
+        XCTAssertTrue(health.waitForExistence(timeout: 10))
+        // Build 93: the weight card is in Andamento, below the day (HEALTH-TREND-93-2026-11-21).
+        for _ in 0..<8 where !health.isHittable { app.scrollViews["health-detail-scroll"].swipeUp() }
+        XCTAssertTrue(health.isHittable)
+        health.tap()
         // The compact metric detail fits on screen. Expand its real method
         // content to exercise vertical scrolling while dragging over the chart.
         let method = app.buttons["health-method-disclosure"]

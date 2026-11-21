@@ -26,6 +26,35 @@ struct HealthEstimate {
     var calibrationIntake: Double = 0
     /// Sensitivity to filling missing days 500 kcal higher/lower; not a confidence interval.
     var missingDaySensitivity: Double = 0
+    /// Criteria actually used (TDEE screen explanation).
+    var energyPerKG: Double = NativeHealthMath.energyPerKG
+    /// Measured change between the first and last weigh-in of the window.
+    var weightChange: Double = 0
+}
+
+/// User-adjustable TDEE criteria (TDEE screen, build 93). The defaults are the
+/// calibration used since TDEE-LAST-WEIGH-IN-2026-11-12: 14 days back from the
+/// last weigh-in, 7,700 kcal/kg, at most 10% of days without calories, median slope.
+struct NativeTDEECriteria: Codable, Equatable {
+    enum Slope: String, Codable, CaseIterable { case median, regression }
+    var days = 14
+    var energyPerKG = 7700.0
+    var maxMissingPercent = 10
+    var slope: Slope = .median
+
+    static let standard = NativeTDEECriteria()
+    static let dayRange = 7...28, dayStep = 7
+    static let energyRange = 7000.0...8500.0, energyStep = 100.0
+    static let missingRange = 0...30, missingStep = 5
+
+    /// Values outside the ranges (an old or edited store) fall back to the nearest valid one.
+    var clamped: NativeTDEECriteria {
+        var copy = self
+        copy.days = min(max(days, Self.dayRange.lowerBound), Self.dayRange.upperBound)
+        copy.energyPerKG = energyPerKG.isFinite ? min(max(energyPerKG, Self.energyRange.lowerBound), Self.energyRange.upperBound) : 7700
+        copy.maxMissingPercent = min(max(maxMissingPercent, Self.missingRange.lowerBound), Self.missingRange.upperBound)
+        return copy
+    }
 }
 
 /// Energy-balance calibration from matched cumulative intake and raw weigh-ins.
@@ -60,10 +89,12 @@ enum NativeHealthMath {
             return HealthPoint(date: day.date, value: median)
         }
     }
-    static func estimate(_ days: [HealthDay], now: Date = Date(), calendar: Calendar = .current) -> HealthEstimate? {
+    static func estimate(_ days: [HealthDay], now: Date = Date(), calendar: Calendar = .current, criteria: NativeTDEECriteria = .standard) -> HealthEstimate? {
+        let criteria = criteria.clamped
+        let energyPerKG = criteria.energyPerKG
         let today = calendar.startOfDay(for: now)
         guard let lastWeightDate = days.filter({ $0.date <= today && ($0.weight ?? 0) > 0 && ($0.weight?.isFinite ?? false) }).map(\.date).max() else { return nil }
-        let cutoff = calendar.date(byAdding: .day, value: -calibrationDays, to: lastWeightDate)!
+        let cutoff = calendar.date(byAdding: .day, value: -criteria.days, to: lastWeightDate)!
         let history = days.filter { $0.date >= cutoff && $0.date <= lastWeightDate }.sorted { $0.date < $1.date }
         // Work with aligned daily records, not a lagged moving median.
         guard Set(history.map(\.date)).count == history.count else { return nil }
@@ -75,7 +106,7 @@ enum NativeHealthMath {
         let logged = food.compactMap(\.calories).filter { $0.isFinite && $0 > 0 }
         let missing = span - logged.count
         // Small gaps can be estimated only with >=90% coverage and are always disclosed.
-        guard missing >= 0, Double(logged.count) / Double(span) >= 0.9 else { return nil }
+        guard missing >= 0, Double(missing) / Double(span) <= Double(criteria.maxMissingPercent) / 100 + 1e-9, !logged.isEmpty else { return nil }
         let calibrationIntake = logged.reduce(0, +) / Double(logged.count)
         var intakeByDay: [Int: Double] = [:]
         for day in food {
@@ -106,7 +137,14 @@ enum NativeHealthMath {
             }
         }
         guard !slopes.isEmpty else { return nil }
-        let tdee = median(slopes)
+        let tdee: Double
+        switch criteria.slope {
+        case .median: tdee = median(slopes)
+        case .regression:
+            // Least-squares slope of the same adjusted cumulative series.
+            guard let value = leastSquaresSlope(x: offsets.map(Double.init), y: adjusted) else { return nil }
+            tdee = value
+        }
         guard tdee.isFinite, (800...6000).contains(tdee) else { return nil }
         let recentScenarioIntake = recentIntake(days, now: now, calendar: calendar)
         let scenarioIntake = recentScenarioIntake ?? calibrationIntake
@@ -115,18 +153,31 @@ enum NativeHealthMath {
         result.scenarioUsesCalibrationIntake = recentScenarioIntake == nil
         result.firstDate = first.date; result.weighIns = weights.count
         result.loggedDays = logged.count; result.imputedDays = missing; result.calibrationIntake = calibrationIntake
-        result.missingDaySensitivity = max(tdee - median(lowerSlopes), median(upperSlopes) - tdee)
+        result.missingDaySensitivity = criteria.slope == .median
+            ? max(tdee - median(lowerSlopes), median(upperSlopes) - tdee)
+            : 500 * Double(missing) / Double(span)
+        result.energyPerKG = energyPerKG
+        result.weightChange = last.weight! - first.weight!
         return result
+    }
+    static func leastSquaresSlope(x: [Double], y: [Double]) -> Double? {
+        guard x.count == y.count, x.count >= 2 else { return nil }
+        let mx = x.reduce(0, +) / Double(x.count), my = y.reduce(0, +) / Double(y.count)
+        var numerator = 0.0, denominator = 0.0
+        for (xi, yi) in zip(x, y) { numerator += (xi - mx) * (yi - my); denominator += (xi - mx) * (xi - mx) }
+        guard denominator > 0 else { return nil }
+        let slope = numerator / denominator
+        return slope.isFinite ? slope : nil
     }
     private static func median(_ values: [Double]) -> Double {
         let sorted = values.sorted(), middle = values.count / 2
         return values.count % 2 == 0 ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle]
     }
     static func forecast(_ estimate: HealthEstimate, intake: Double, weeks: Int = 8, calendar: Calendar = .current) -> [HealthPoint] {
-        guard intake.isFinite, (800...6000).contains(intake), (1...12).contains(weeks) else { return [] }
+        guard intake.isFinite, (800...6000).contains(intake), (1...26).contains(weeks) else { return [] }
         // Analytic solution of dW/dt = (intake - TDEE0 - k * (W-W0)) / rho.
         return (0...(weeks * 7)).compactMap { day in
-            let change = (intake - estimate.tdee) / expenditurePerKG * (1 - exp(-expenditurePerKG * Double(day) / energyPerKG))
+            let change = (intake - estimate.tdee) / expenditurePerKG * (1 - exp(-expenditurePerKG * Double(day) / estimate.energyPerKG))
             let value = estimate.startWeight + change
             guard value > 0 else { return nil }
             guard let date = calendar.date(byAdding: .day, value: day, to: estimate.lastDate) else { return nil }

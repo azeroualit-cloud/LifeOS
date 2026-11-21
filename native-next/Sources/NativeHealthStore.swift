@@ -32,7 +32,18 @@ struct NativeHealthFoodEntry: Identifiable {
     private var food: [HKQuantitySample] = []
     private var weights: [HKQuantitySample] = []
     private let calendar = Calendar.current
-    var estimate: HealthEstimate? { NativeHealthMath.estimate(days) }
+    /// Uses the TDEE criteria chosen on the TDEE screen (defaults: build 92 calibration).
+    var estimate: HealthEstimate? { NativeHealthMath.estimate(days, criteria: NativeHealthPreferences.shared.criteria) }
+    /// 7-day average weight used by per-kg nutrition goals.
+    var goalWeight: Double? { NativeNutritionGoals.averageWeight(days) }
+    var goalTargets: NativeNutritionGoals.Targets? {
+        NativeHealthPreferences.shared.goals.targets(tdee: estimate?.tdee, weight: goalWeight)
+    }
+    private var preferenceUpdates: AnyCancellable?
+    init() {
+        // Goals and criteria change derived values: redraw every observer of the store.
+        preferenceUpdates = NativeHealthPreferences.shared.objectWillChange.sink { [weak self] _ in self?.objectWillChange.send() }
+    }
     var available: Bool { HKHealthStore.isHealthDataAvailable() }
 
     var todayCalories: Double? {

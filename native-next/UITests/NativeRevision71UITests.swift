@@ -241,7 +241,10 @@ final class NativeRevision71UITests: XCTestCase {
         XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "dashboard-day-")).count, 7)
         app.mainTabBar.buttons["Salute"].tap()
         let health = app.buttons["health-summary-weight"]
-        XCTAssertTrue(health.waitForExistence(timeout: 10)); XCTAssertTrue(health.isHittable)
+        XCTAssertTrue(health.waitForExistence(timeout: 10))
+        // Build 93: the weight card is in Andamento, below the day (HEALTH-TREND-93-2026-11-21).
+        for _ in 0..<8 where !health.isHittable { app.scrollViews["health-detail-scroll"].swipeUp() }
+        XCTAssertTrue(health.isHittable)
         capture("71-health-weight-summary")
         health.tap(); XCTAssertTrue(app.navigationBars["Peso"].waitForExistence(timeout: 10))
     }

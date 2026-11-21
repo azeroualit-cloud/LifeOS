@@ -46,6 +46,22 @@ enum NativeDesign {
         traits.userInterfaceStyle == .dark ? UIColor(red: 219 / 255, green: 52 / 255, blue: 242 / 255, alpha: 1) : .systemPurple
     })
     static let healthAccent = Color(uiColor: .systemOrange)
+    // Macro colours of the build 93 preview: protein green, carbohydrates orange, fat purple.
+    static let macroProtein = nutritionTitle
+    static let macroCarbohydrate = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark ? UIColor(red: 0.96, green: 0.63, blue: 0.24, alpha: 1) : UIColor(red: 0.66, green: 0.36, blue: 0.0, alpha: 1)
+    })
+    static let macroFat = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark ? UIColor(red: 0.66, green: 0.48, blue: 0.88, alpha: 1) : UIColor(red: 0.45, green: 0.27, blue: 0.70, alpha: 1)
+    })
+    /// Track behind progress bars (#3a3a3c in dark).
+    static let barTrack = Color(uiColor: .tertiarySystemFill)
+    /// Over a goal: orange like the preview, never red (red is for outflows).
+    static let overGoal = Color(uiColor: .systemOrange)
+    /// Estimates and forecasts (FINANCE-PALETTE-2026-11-21 cyan, also used by the weight forecast).
+    static let estimate = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark ? UIColor(red: 0.36, green: 0.77, blue: 0.88, alpha: 1) : UIColor(red: 0.0, green: 0.45, blue: 0.56, alpha: 1)
+    })
     static let healthGray = Color(uiColor: .systemGray)
     static let healthHistoricalBar = healthGray.opacity(0.28)
     static let healthTrend = Color(uiColor: .label)

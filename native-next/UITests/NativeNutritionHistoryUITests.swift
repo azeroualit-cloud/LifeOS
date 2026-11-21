@@ -45,7 +45,7 @@ final class NativeNutritionHistoryUITests: XCTestCase {
         for _ in 0..<4 where !history.isHittable { scroll.swipeDown(velocity: .slow) }
         XCTAssertTrue(history.isHittable)
         history.tap()
-        XCTAssertTrue(app.navigationBars["Nutrizione"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.navigationBars["Cronologia"].waitForExistence(timeout: 10))
         let dayHeader = app.staticTexts.matching(NSPredicate(format: "identifier BEGINSWITH %@", "nutrition-history-day-")).firstMatch
         for _ in 0..<6 where !dayHeader.isHittable { app.swipeUp(velocity: .slow) }
         XCTAssertTrue(dayHeader.isHittable)

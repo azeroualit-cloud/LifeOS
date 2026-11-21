@@ -58,18 +58,15 @@ final class NativeRevision78UITests: XCTestCase {
         app.mainTabBar.buttons["Salute"].tap()
         let rows = ["tdee", "weight", "calories", "simulation"].map { app.buttons["health-summary-" + $0] }
         for row in rows { XCTAssertTrue(row.waitForExistence(timeout: 10)) }
-        XCTAssertTrue(rows[0].label.contains("TDEE")); XCTAssertTrue(rows[0].label.contains("14 giorni dall’ultima pesata"))
-        XCTAssertTrue(rows[3].label.contains("Peso previsto"))
+        XCTAssertTrue(rows[0].label.contains("TDEE")); XCTAssertTrue(rows[0].label.contains("giorni"))
+        XCTAssertTrue(rows[3].label.contains("Peso e simulazione")); XCTAssertTrue(rows[3].label.contains("previsti"))
         XCTAssertTrue(rows[1].label.contains("Peso"))
-        XCTAssertNotNil(rows[3].label.components(separatedBy: ", ").last?.range(of: "[0-9]", options: .regularExpression), "The forecast date remains in the accessible summary")
         XCTAssertNotNil(rows[1].label.components(separatedBy: ", ").last?.range(of: "[0-9]", options: .regularExpression), "The latest weight and date remain in the accessible summary")
-        // HEALTH-GRID-3X2-92: TDEE · Peso previsto · Peso, then Calorie in the second row.
-        XCTAssertEqual(rows[0].frame.midY, rows[3].frame.midY, accuracy: 2)
-        XCTAssertEqual(rows[0].frame.midY, rows[1].frame.midY, accuracy: 2)
-        XCTAssertLessThan(rows[0].frame.midY, rows[2].frame.midY)
-        XCTAssertLessThan(rows[0].frame.midX, rows[3].frame.midX)
-        XCTAssertLessThan(rows[3].frame.midX, rows[1].frame.midX)
-        XCTAssertEqual(rows[0].frame.midX, rows[2].frame.midX, accuracy: 2)
+        // HEALTH-TREND-93-2026-11-21: Peso | TDEE side by side, then Peso e simulazione, then Calorie per giorno.
+        XCTAssertEqual(rows[1].frame.midY, rows[0].frame.midY, accuracy: 2)
+        XCTAssertLessThan(rows[1].frame.midX, rows[0].frame.midX)
+        XCTAssertLessThan(rows[0].frame.midY, rows[3].frame.midY)
+        XCTAssertLessThan(rows[3].frame.midY, rows[2].frame.midY)
         capture("78-health-summary", app)
         let surface = app.scrollViews["health-detail-scroll"]
         let food = app.buttons["health-add-nutrition"]
@@ -91,8 +88,10 @@ final class NativeRevision78UITests: XCTestCase {
         surface.swipeUp()
         XCTAssertEqual(weight.frame.minY, initialWeightFrame.minY, accuracy: 1)
         XCTAssertEqual(food.frame.minY, initialFoodFrame.minY, accuracy: 1)
-        for _ in 0..<6 where !rows[3].isHittable { surface.swipeDown() }
+        for _ in 0..<8 where !rows[3].isHittable { surface.swipeUp() }
         rows[3].tap()
+        let caloriesMode = app.buttons["simulation-mode-calories"]
+        XCTAssertTrue(caloriesMode.waitForExistence(timeout: 10)); caloriesMode.tap()
         XCTAssertTrue(app.textFields["health-intake"].waitForExistence(timeout: 10))
         capture("78-simulation-detail", app)
     }
@@ -101,7 +100,8 @@ final class NativeRevision78UITests: XCTestCase {
         app.mainTabBar.buttons["Salute"].tap()
         let rows = ["tdee", "weight", "calories", "simulation"].map { app.buttons["health-summary-" + $0] }
         for row in rows { XCTAssertTrue(row.waitForExistence(timeout: 10)) }
-        let ordered = [rows[0], rows[3], rows[1], rows[2]]
+        // HEALTH-TREND-93-2026-11-21, one column with large text: Peso, TDEE, simulation, calories.
+        let ordered = [rows[1], rows[0], rows[3], rows[2]]
         for pair in zip(ordered, ordered.dropFirst()) { XCTAssertLessThan(pair.0.frame.midY, pair.1.frame.midY) }
         capture("78-health-accessibility-top", app)
         capture("health-accessible-actions-above-navigation", app)
@@ -129,7 +129,7 @@ final class NativeRevision78UITests: XCTestCase {
         let surface = app.scrollViews["health-detail-scroll"]
         for _ in 0..<6 where !history.isHittable { surface.swipeUp() }
         XCTAssertTrue(history.isHittable); history.tap()
-        XCTAssertTrue(app.navigationBars["Nutrizione"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.navigationBars["Cronologia"].waitForExistence(timeout: 10))
         app.navigationBars.buttons.firstMatch.tap()
         XCTAssertTrue(surface.waitForExistence(timeout: 10))
     }
