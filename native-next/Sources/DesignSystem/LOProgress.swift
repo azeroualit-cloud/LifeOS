@@ -335,3 +335,12 @@ struct LOStackedColumns: View {
         }
     }
 }
+
+extension View {
+    /// Hairline under a row of a grouped card, inset like iOS lists; none after the last row.
+    func loRowSeparator(hidden: Bool, leadingInset: CGFloat = NativeDesign.Space.large) -> some View {
+        overlay(alignment: .bottom) {
+            if !hidden { Divider().padding(.leading, leadingInset) }
+        }
+    }
+}

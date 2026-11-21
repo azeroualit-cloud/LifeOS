@@ -32,8 +32,8 @@ final class NativeRevision78UITests: XCTestCase {
         capture("78-prayers", app)
     }
     func testFinanceBudgetAndThumbActionUseTheSameRow() {
-        // DASHBOARD-ORDER-92: Finanza is one compact row (title, remaining, chevron);
-        // adding an expense moved to Finanza's bottom glass action.
+        // DASHBOARD-93-2026-11-21: Finanza is one card (remaining, per day, spent/left bar);
+        // adding an expense stays in Finanza's bottom glass action.
         let app = launch()
         let row = app.buttons["home-finance"]
         for _ in 0..<15 {
@@ -43,7 +43,6 @@ final class NativeRevision78UITests: XCTestCase {
         XCTAssertTrue(row.isHittable)
         XCTAssertFalse(app.buttons["home-add-expense"].exists)
         XCTAssertTrue(row.label.contains("disponibili"), row.label)
-        XCTAssertLessThan(row.frame.height, 80, "Finance must stay one row")
         XCTAssertGreaterThanOrEqual(row.frame.height, 44 - 0.001)
         capture("92-dashboard-finance-row", app)
         row.tap()

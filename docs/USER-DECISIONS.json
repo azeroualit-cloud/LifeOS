@@ -1033,12 +1033,13 @@
     },
     {
       "id": "DASHBOARD-ORDER-92",
-      "status": "ACTIVE",
+      "status": "SUPERSEDED",
       "scope": "Dashboard",
       "recorded_on": "2026-11-17",
       "provenance": "Richiesta diretta utente in chat Claude",
       "original_quote": "per dashboard mantieni la struttura attuale in prod, ovvero settimana, cose da fare, nutrizione e finanza",
-      "rule": "Ordine Dashboard: Settimana, Cose da fare, Nutrizione (scheda intera con Aggiungi alimento), Finanza compatta. Dati più importanti nelle zone più viste."
+      "rule": "Ordine Dashboard: Settimana, Cose da fare, Nutrizione (scheda intera con Aggiungi alimento), Finanza compatta. Dati più importanti nelle zone più viste.",
+      "superseded_by": "DASHBOARD-93-2026-11-21"
     },
     {
       "id": "MACRO-NO-GOALS-92",
@@ -1220,6 +1221,19 @@
         "HEALTH-GRID-3X2-92"
       ],
       "conflict_check": "Conflitto con HEALTH-GRID-3X2-92 segnalato e confermato (META-01)."
+    },
+    {
+      "id": "DASHBOARD-93-2026-11-21",
+      "status": "ACTIVE",
+      "scope": "Dashboard build 93",
+      "recorded_on": "2026-11-21",
+      "provenance": "Risposta diretta utente in chat Claude alla domanda META-01 durante la fase 2 della build 93",
+      "original_quote": "Sì, sostituisci",
+      "rule": "Dashboard come nell'anteprima approvata: Settimana (con prossimo turno), Cose da fare, Nutrizione (calorie e macro con obiettivo, Peso e Alimento), Finanza come scheda intera (importo rimanente, euro al giorno, barra speso/rimane), poi Prossimi appuntamenti e stato di connessione.",
+      "supersedes": [
+        "DASHBOARD-ORDER-92"
+      ],
+      "conflict_check": "Conflitto con DASHBOARD-ORDER-92 (Finanza compatta) segnalato e confermato (META-01)."
     }
   ],
   "pending_confirmations": [
@@ -1344,6 +1358,10 @@
     {
       "date": "2026-11-21",
       "event": "META-01: anteprima Salute 93 (Andamento a quattro valori e grafico Peso e simulazione) in conflitto con HEALTH-GRID-3X2-92. Risposta «Sì, sostituisci». HEALTH-GRID-3X2-92 SUPERSEDED da HEALTH-TREND-93-2026-11-21."
+    },
+    {
+      "date": "2026-11-21",
+      "event": "META-01: scheda Finanza della Dashboard 93 (importo, euro al giorno, barra) in conflitto con DASHBOARD-ORDER-92 (Finanza compatta). Risposta «Sì, sostituisci». DASHBOARD-ORDER-92 SUPERSEDED da DASHBOARD-93-2026-11-21."
     }
   ],
   "historical_inventory": "decision-history/2026-11-04-inventory.json",

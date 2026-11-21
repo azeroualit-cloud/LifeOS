@@ -16,13 +16,14 @@ struct DashboardScreen: View {
         TimelineView(.periodic(from: .now, by: 60)) { context in
             let now = context.date, today = CivilDate.day(now)
             ScrollView {
-                VStack(alignment: .leading, spacing: NativeDesign.Space.large) {
+                VStack(alignment: .leading, spacing: NativeDesign.Space.section) {
                     heading(today: today, now: now)
-                    // DASHBOARD-ORDER-92: week, things to do, nutrition, finance.
-                    rollingCalendar(today)
+                    // DASHBOARD-93-2026-11-21: week, things to do, nutrition, finance, appointments.
+                    rollingCalendar(today, now: now)
                     checklist(today: today)
                     NativeNutritionQuickEntry()
                     financeOverview
+                    upcomingAppointments(today: today)
                     NativeConnectionBadge()
                     if let notice = store.notice { Text(notice).font(.caption).foregroundStyle(NativeDesign.secondary) }
                 }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.top, NativeDesign.Space.small).padding(.bottom, NativeDesign.Layout.scrollClearance)
@@ -39,7 +40,7 @@ struct DashboardScreen: View {
         .onChange(of: scenePhase) { _, phase in if phase == .active { Task { await health.refresh() } } }
     }
 
-    private func rollingCalendar(_ today: String) -> some View {
+    private func rollingCalendar(_ today: String, now: Date) -> some View {
         let days = NativeHomeSummary.rollingDays(today)
         let marked = Set(store.events.map { $0.text("day") } + store.tasks.map { $0.text("scheduled_date") })
         return NativeCard(density: .compact, topInset: NativeDesign.Space.xs) {
@@ -65,6 +66,17 @@ struct DashboardScreen: View {
                         .accessibilityAddTraits(current ? .isSelected : [])
                 }
             }.dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+            if let next = NativeDashboard93.nextShift(now: now, shift: { store.shift($0) }) {
+                HStack(spacing: NativeDesign.Space.small) {
+                    Text("Prossimo turno").foregroundStyle(NativeDesign.secondary)
+                    Circle().fill(next.kind.color).frame(width: NativeDesign.Space.small, height: NativeDesign.Space.small)
+                        .accessibilityHidden(true)
+                    Text(next.kind.title + ", " + NativeDashboard93.label(next, today: today)).lineLimit(1).minimumScaleFactor(0.8)
+                }
+                .font(.subheadline)
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier("home-next-shift")
+            }
         }
     }
     private func openCalendar(_ day: String, opensDay: Bool = false) {
@@ -118,17 +130,34 @@ struct DashboardScreen: View {
     private func checklist(today: String) -> some View {
         let items = NativeHomeChecklist.rows(events: store.dashboardEvents, routines: store.todayRoutines, today: today)
         return VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-            NativeSectionHeader("Cose da fare", titleIdentifier: "home-checklist-heading") {
-                Menu("Gestisci") {
+            HStack(spacing: NativeDesign.Space.medium) {
+                Text("Cose da fare").font(.title2.bold()).accessibilityAddTraits(.isHeader)
+                    .accessibilityIdentifier("home-checklist-heading")
+                Spacer(minLength: NativeDesign.Space.small)
+                Menu {
                     Button("Attività") { router.tab = .tasks }
                     Button("Abitudini") { router.sheet = .routines }
                     Button("Calendario") { openCalendar(today) }
-                }.frame(minHeight: NativeDesign.Layout.touchTarget)
+                } label: {
+                    Text("Gestisci").font(.subheadline.weight(.semibold)).foregroundStyle(Color.primary)
+                        .padding(.horizontal, NativeDesign.Space.medium)
+                        .frame(minHeight: NativeDesign.Layout.touchTarget)
+                        .modifier(NativeGlass())
+                }
             }
-            if items.isEmpty { Text("Nessun impegno da mostrare").font(.subheadline).foregroundStyle(NativeDesign.secondary) }
-            ForEach(items) { item in
-                checklistRow(item)
-                if item.id != items.last?.id { Divider().padding(.leading, NativeDesign.Layout.touchTarget + NativeDesign.Space.small) }
+            if items.isEmpty {
+                Text("Nessun impegno da mostrare").font(.subheadline).foregroundStyle(NativeDesign.secondary)
+            } else {
+                LOListCard {
+                    ForEach(items) { item in
+                        checklistRow(item)
+                            .padding(.leading, NativeDesign.Space.xs)
+                            .padding(.trailing, NativeDesign.Space.large)
+                            .padding(.vertical, NativeDesign.Space.xxs)
+                            .frame(minHeight: NativeDesign.Layout.rowHeight)
+                            .loRowSeparator(hidden: item.id == items.last?.id, leadingInset: NativeDesign.Layout.touchTarget + NativeDesign.Space.small)
+                    }
+                }
             }
         }
     }
@@ -168,46 +197,95 @@ struct DashboardScreen: View {
                 }
         }
     }
-    /// Finance in one row (DASHBOARD-ORDER-92): title, what is left this month, chevron.
+    /// Finance card (DASHBOARD-93-2026-11-21): what is left this month, per day, spent/left bar.
     /// Adding an expense lives in Finanza's bottom glass action.
     private var financeOverview: some View {
         let overview = NativeFinanceOverview(summary: store.summary, month: store.financeMonth)
+        let spent = store.summary.amount("monthlySpent")
+        let fraction = NativeDashboard93.spentFraction(spent: spent, remaining: overview.remaining)
+        let amount = hiddenMoney ? "•••• €" : overview.remaining.map(\.euro) ?? "—"
+        let daily = hiddenMoney ? "•••• €" : overview.daily.euro
         // Explicit path write, like the Calendar entry: a value link did not push
         // after a programmatic Calendar visit (gate 91 run 43999971306).
         return Button { router.dashboardPath = [.finance] } label: {
-            ViewThatFits(in: .horizontal) {
-                HStack(spacing: NativeDesign.Space.small) {
-                    LOCardHeader(title: "Finanza", systemImage: "chart.bar", section: .finance).fixedSize()
-                    Spacer(minLength: NativeDesign.Space.small)
-                    financeValue(overview)
-                    chevron
+            VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
+                LOCardHeader(title: "Finanza", systemImage: "chart.bar", section: .finance, showsChevron: true)
+                ViewThatFits(in: .horizontal) {
+                    HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.small) {
+                        financeAmount(amount)
+                        Spacer(minLength: NativeDesign.Space.small)
+                        financeDaily(daily, overview: overview)
+                    }
+                    VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
+                        financeAmount(amount)
+                        financeDaily(daily, overview: overview)
+                    }
                 }
-                VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-                    HStack { LOCardHeader(title: "Finanza", systemImage: "chart.bar", section: .finance); chevron }
-                    financeValue(overview)
+                if let fraction, !hiddenMoney {
+                    LOSplitBar(segments: [LOSegment(id: "spent", value: fraction, color: NativeDesign.financialRed),
+                                          LOSegment(id: "left", value: 1 - fraction, color: NativeDesign.financialGreen)],
+                               scale: 1, height: NativeDesign.Space.small,
+                               accessibilityText: "Speso \(Int((fraction * 100).rounded())) per cento, rimane \(Int(((1 - fraction) * 100).rounded())) per cento")
                 }
             }
-            .padding(.horizontal, NativeDesign.Layout.compactCardInset)
-            .padding(.vertical, NativeDesign.Space.xs)
+            .padding(NativeDesign.Layout.cardInset)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.cardRadius, style: .continuous))
             .contentShape(Rectangle())
         }
         .buttonStyle(NativePressStyle())
-        .accessibilityLabel("Finanza, " + (hiddenMoney ? "importo nascosto" : (overview.remaining.map(\.euro) ?? "nessun dato")) + " disponibili")
+        .accessibilityLabel("Finanza, " + (hiddenMoney ? "importo nascosto" : (overview.remaining.map(\.euro) ?? "nessun dato")) + " disponibili" + (hiddenMoney || overview.remaining == nil ? "" : ", " + overview.daily.euro + " al giorno"))
         .accessibilityIdentifier("home-finance")
     }
-    private func financeValue(_ overview: NativeFinanceOverview) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xs) {
-            Text(hiddenMoney ? "•••• €" : overview.remaining.map(\.euro) ?? "—")
-                .font(.body.weight(.semibold)).monospacedDigit().foregroundStyle(.primary)
-                .accessibilityIdentifier("home-budget-value")
-            Text("disponibili").font(.subheadline).foregroundStyle(NativeDesign.secondary)
-                .accessibilityIdentifier("home-budget-label")
+    private func financeAmount(_ amount: String) -> some View {
+        Text(amount).font(.title.bold()).monospacedDigit().foregroundStyle(.primary)
+            .lineLimit(1).minimumScaleFactor(0.7)
+            .accessibilityIdentifier("home-budget-value")
+    }
+    @ViewBuilder private func financeDaily(_ daily: String, overview: NativeFinanceOverview) -> some View {
+        if overview.remaining != nil && overview.days > 0 {
+            HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xs) {
+                Text(daily).font(.subheadline.weight(.semibold)).monospacedDigit()
+                Text("al giorno").font(.subheadline).foregroundStyle(NativeDesign.secondary)
+            }
+            .accessibilityElement(children: .combine)
+            .accessibilityIdentifier("home-budget-label")
         }
     }
-    private var chevron: some View {
-        Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(.tertiary).accessibilityHidden(true)
+    /// Events after the checklist window, at most three (preview "Prossimi appuntamenti").
+    @ViewBuilder private func upcomingAppointments(today: String) -> some View {
+        let source = store.isDemo ? store.events : store.life.records("upcomingEvents") + store.events
+        let rows = NativeDashboard93.upcoming(events: source, today: today)
+        if !rows.isEmpty {
+            VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
+                Text("Prossimi appuntamenti").font(.title2.bold()).accessibilityAddTraits(.isHeader)
+                LOListCard {
+                    ForEach(rows, id: \.agendaIdentity) { event in
+                        Button { router.sheet = .event(event) } label: {
+                            LOListRow(isLast: event.agendaIdentity == rows.last?.agendaIdentity, leadingInset: NativeDesign.Space.large + NativeDesign.Layout.touchTarget) {
+                                let date = CivilDate.date(event.text("day"))
+                                VStack(spacing: NativeDesign.Space.none) {
+                                    Text(date.formatted(.dateTime.day())).font(.body.weight(.bold)).monospacedDigit()
+                                    Text(date.formatted(.dateTime.month(.abbreviated).locale(Locale(identifier: "it_IT")))).font(.caption2).foregroundStyle(NativeDesign.secondary)
+                                }
+                                .frame(width: NativeDesign.Layout.touchTarget)
+                                VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
+                                    Text(event.text("title", fallback: "Appuntamento")).font(.body).foregroundStyle(.primary).lineLimit(2)
+                                    let detail = event.text("start_time")
+                                    if !detail.isEmpty { Text(detail).font(.footnote).foregroundStyle(NativeDesign.secondary) }
+                                }
+                                Spacer(minLength: NativeDesign.Space.small)
+                                NativeDisclosureIndicator()
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(NativePressStyle())
+                        .accessibilityLabel(event.text("title", fallback: "Appuntamento") + ", " + CivilDate.label(event.text("day")) + (event.text("start_time").isEmpty ? "" : ", " + event.text("start_time")))
+                        .accessibilityIdentifier("home-upcoming-" + event.agendaIdentity)
+                    }
+                }
+            }
+        }
     }
     private func checkRoutine(_ record: Record) {
         guard routineBusy == nil else { return }

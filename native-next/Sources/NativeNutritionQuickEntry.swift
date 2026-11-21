@@ -1,4 +1,5 @@
 import SwiftUI
+import HealthKit
 
 struct NativeNutritionQuickEntry: View {
     @EnvironmentObject private var health: NativeHealthStore
@@ -10,41 +11,52 @@ struct NativeNutritionQuickEntry: View {
     @ObservedObject private var nutrition = NativeNutritionUIFixture.current
 
     var body: some View {
-        NativeCard(density: .compact, topInset: NativeDesign.Space.xs) {
+        // NUTRITION-GOALS-93-2026-11-21: today's totals against the goals, as the preview.
+        let targets = health.goalTargets
+        let values = health.nutrients(on: .now)
+        let kcal = health.todayCalories
+        let kcalText = kcal.map { $0.formatted(.number.precision(.fractionLength(0))) } ?? "—"
+        let goalText = targets.map { " / " + $0.calories.formatted(.number.precision(.fractionLength(0))) } ?? ""
+        let macroLayout = typeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: NativeDesign.Space.small))
+            : AnyLayout(HStackLayout(alignment: .top, spacing: NativeDesign.Space.medium))
+        NativeCard {
             Button { router.tab = .health } label: {
-                LOCardHeader(title: "Nutrizione", systemImage: NativeHealthMetric.calories.symbol, section: .nutrition, showsChevron: true)
-                    .contentShape(Rectangle())
-            }.buttonStyle(NativePressStyle()).accessibilityIdentifier("home-nutrition")
-            // Today's totals only: no calorie or macro goals (MACRO-NO-GOALS-92).
-            let layout = typeSize >= .xxxLarge
-                ? AnyLayout(VStackLayout(alignment: .leading, spacing: NativeDesign.Space.small))
-                : AnyLayout(HStackLayout(alignment: .top, spacing: NativeDesign.Space.small))
-            layout {
-                VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-                    Text("Kcal").font(.caption).foregroundStyle(.secondary)
-                    Text(health.todayCalories?.formatted(.number.precision(.fractionLength(0))) ?? "—")
-                        .font(.subheadline.weight(.semibold)).monospacedDigit()
+                HStack(spacing: NativeDesign.Space.small) {
+                    Label { Text("Nutrizione") } icon: { LOSymbol(name: NativeHealthMetric.calories.symbol) }
+                        .font(.headline).foregroundStyle(NativeDesign.nutritionTitle)
+                    Spacer(minLength: NativeDesign.Space.small)
+                    Text(kcalText + goalText + " kcal").font(.subheadline).foregroundStyle(NativeDesign.secondary).monospacedDigit()
+                        .lineLimit(1).minimumScaleFactor(0.8)
+                    NativeDisclosureIndicator()
                 }
-                .frame(maxWidth: typeSize >= .xxxLarge ? .infinity : nil, alignment: .leading)
-                .frame(minWidth: NativeDesign.Layout.nutritionKcalColumn, alignment: .leading)
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel("Calorie di oggi, " + (health.todayCalories?.formatted(.number.precision(.fractionLength(0))) ?? "nessun dato") + " chilocalorie")
-                NativeNutrientValues(health: health, includesFibre: false)
-            }.frame(maxWidth: .infinity, alignment: .leading)
-            NativePinnedNutrients(entries: nutrition.entries)
+                .frame(minHeight: NativeDesign.Layout.touchTarget)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(NativePressStyle())
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Nutrizione, calorie di oggi " + (kcal == nil ? "nessun dato" : kcalText) + (targets.map { " di " + $0.calories.formatted(.number.precision(.fractionLength(0))) } ?? ""))
+            .accessibilityIdentifier("home-nutrition")
+            LOProgressBar(value: kcal ?? 0, total: targets?.calories, color: NativeDesign.nutritionTitle)
+            macroLayout {
+                LOMacroValue(title: "Proteine", value: values[.dietaryProtein], goal: targets?.protein, unit: "g", color: NativeDesign.macroProtein, identifier: "home-nutrient-protein")
+                LOMacroValue(title: "Carbo", value: values[.dietaryCarbohydrates], goal: targets?.carbohydrate, unit: "g", color: NativeDesign.macroCarbohydrate, identifier: "home-nutrient-carbohydrate")
+                LOMacroValue(title: "Grassi", value: values[.dietaryFatTotal], goal: targets?.fat, unit: "g", color: NativeDesign.macroFat, identifier: "home-nutrient-fat")
+            }
             let actions = typeSize.isAccessibilitySize
                 ? AnyLayout(VStackLayout(spacing: NativeDesign.Space.small))
                 : AnyLayout(HStackLayout(spacing: NativeDesign.Space.small))
             actions {
+                // Build 93 preview: Peso on the left, Alimento on the right.
+                Button { addingWeight = true } label: {
+                    LOActionLabel(title: "Peso", systemImage: NativeHealthMetric.weight.symbol, section: .weight)
+                }.buttonStyle(LOGlassButtonStyle(fillsWidth: true)).accessibilityLabel("Aggiungi peso")
                 Button { notice = nil; showing = true } label: {
                     LOActionLabel(title: "Alimento", systemImage: NativeHealthMetric.calories.symbol, section: .nutrition)
                 }.buttonStyle(LOGlassButtonStyle(fillsWidth: true)).accessibilityLabel("Aggiungi alimento")
                     .accessibilityIdentifier("quick-nutrition-open")
-                Button { addingWeight = true } label: {
-                    LOActionLabel(title: "Peso", systemImage: NativeHealthMetric.weight.symbol, section: .weight)
-                }.buttonStyle(LOGlassButtonStyle(fillsWidth: true)).accessibilityLabel("Aggiungi peso")
             }
-            if let notice { Text(notice).font(.caption).foregroundStyle(.secondary).accessibilityIdentifier("quick-nutrition-notice") }
+            if let notice { Text(notice).font(.caption).foregroundStyle(NativeDesign.secondary).accessibilityIdentifier("quick-nutrition-notice") }
         }.sheet(isPresented: $showing) {
             NavigationStack { NativeNutritionQuickSheet { notice = "Registrazione salvata." } }
                 .modifier(NativeVisualTestSize()).modifier(NativeVisualTestMotion())
