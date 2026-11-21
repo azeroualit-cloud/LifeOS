@@ -1118,6 +1118,16 @@
       "original_quote": "si facciamo una nuova build, magari applicando le versioni grafiche che abbiamo implementato nel sito (tipo budget, heatmap ecc (dammi la preview artifact), e l'importante è che non ci sia un conflitto da dati locali e dati online, e che l'app si basi sui dati online, e che il pulsante export non mi costringa a creare una nuova build 94 per toglierlo (valuta dove metterlo e il suo futuro)",
       "rule": "Nuova build sulla base della build 92 pubblicata (non su codex/revision77). Finanza riprende le grafiche del sito; Bloom e alimenti personali usano il server come fonte, senza conflitti tra copia locale e online; nessun pulsante temporaneo che richieda una build successiva per essere tolto. Prima l'anteprima, poi implementazione.",
       "conflict_check": "Supera di fatto la pipeline candidate91 su codex/revision77 (IPA-DELIVERY-2026-11-20 e IPA-DELIVERY-2026-11-21-BUILD92): quella IPA sarebbe stata build 90 + export, senza 91/92. Nessuna regola sostituita senza conferma: l'autorizzazione IPA della build 93 resta da dare sull'anteprima (IPA-GATE-01)."
+    },
+    {
+      "id": "GOLDEN-01-IOS-2026-11-21",
+      "status": "ACTIVE",
+      "scope": "LifeOS app iOS: applicazione di GOLDEN-01 (sezione aurea)",
+      "recorded_on": "2026-11-21",
+      "provenance": "Richiesta diretta utente, commento sull'anteprima build 93",
+      "original_quote": "si",
+      "rule": "Proporzioni di layout in rapporto aureo (es. altezza riga 55 pt = 34 x 1,618, spaziature 21/13); tra livelli di testo consecutivi passo circa radice di 1,618 seguendo la scala Dynamic Type di iOS (13, 17, 22, 28, 34), senza scendere sotto i minimi leggibili di iOS.",
+      "conflict_check": "Chiude la scelta pendente su come conciliare GOLDEN-01 con l'app nativa. Nessuna regola sostituita."
     }
   ],
   "pending_confirmations": [
@@ -1143,6 +1153,13 @@
       "recorded_on": "2026-11-21",
       "item": "Anteprima build 93 (Finanza come il sito, Impostazioni > Dati con trasferimento automatico una tantum ed Esporta backup completo permanente) e autorizzazione IPA build 93",
       "preview": "https://claude.ai/artifact/QAanqSYRowbYWgUKV8n271"
+    },
+    {
+      "id": "PROACTIVE-FINANCE-2026-11-21",
+      "status": "PENDING_CONFIRMATION",
+      "recorded_on": "2026-11-21",
+      "item": "Avvisi proattivi di Finanza nella build 93: ritmo su 90 giorni da agosto, spese straordinarie fuori norma, prossimi 30 giorni (approvato), tetti per categoria (da valutare sul mockup), ricorrenti fuori norma (+25% e +15 euro), durata del fondo con e senza stipendio, riepilogo del lunedi (approvato); limite un avviso per voce al mese, mai 22-8. Soglie proposte da confermare.",
+      "source_quote": "2 approvato, 3 non saprei proviamo il mockup ... 6 bello, mi piace"
     }
   ],
   "history": [
