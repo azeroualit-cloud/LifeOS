@@ -1,6 +1,9 @@
 name: LifeOS candidate 91 validation and authorized IPA
 on:
   workflow_dispatch:
+  push:
+    branches: [codex/revision77]
+    paths: [docs/trigger-candidate91.txt]
 permissions:
   contents: read
   actions: read
@@ -9,7 +12,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   full-suite:
-    if: github.event_name == 'workflow_dispatch' && github.repository == 'azeroualit-cloud/LifeOS' && github.ref == 'refs/heads/codex/revision77'
+    if: (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && github.repository == 'azeroualit-cloud/LifeOS' && github.ref == 'refs/heads/codex/revision77'
     runs-on: macos-15
     timeout-minutes: 240
     steps:
