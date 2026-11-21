@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "LifeOS",
-  "updated_on": "2026-11-17",
+  "updated_on": "2026-11-21",
   "policy": {
     "id": "META-01",
     "status": "ACTIVE",
@@ -1108,6 +1108,16 @@
       "provenance": "Richiesta diretta utente in chat Claude",
       "original_quote": "just drop it idc",
       "rule": "Il test NativeAppleHealthReferenceUITests (cattura di riferimento dall'app Salute di Apple) non blocca il gate IPA."
+    },
+    {
+      "id": "BUILD93-REQUEST-2026-11-21",
+      "status": "ACTIVE",
+      "scope": "LifeOS app iOS build 93 (base codex/build92, 0.10.31 build 93)",
+      "recorded_on": "2026-11-21",
+      "provenance": "Richiesta diretta utente in chat Claude",
+      "original_quote": "si facciamo una nuova build, magari applicando le versioni grafiche che abbiamo implementato nel sito (tipo budget, heatmap ecc (dammi la preview artifact), e l'importante è che non ci sia un conflitto da dati locali e dati online, e che l'app si basi sui dati online, e che il pulsante export non mi costringa a creare una nuova build 94 per toglierlo (valuta dove metterlo e il suo futuro)",
+      "rule": "Nuova build sulla base della build 92 pubblicata (non su codex/revision77). Finanza riprende le grafiche del sito; Bloom e alimenti personali usano il server come fonte, senza conflitti tra copia locale e online; nessun pulsante temporaneo che richieda una build successiva per essere tolto. Prima l'anteprima, poi implementazione.",
+      "conflict_check": "Supera di fatto la pipeline candidate91 su codex/revision77 (IPA-DELIVERY-2026-11-20 e IPA-DELIVERY-2026-11-21-BUILD92): quella IPA sarebbe stata build 90 + export, senza 91/92. Nessuna regola sostituita senza conferma: l'autorizzazione IPA della build 93 resta da dare sull'anteprima (IPA-GATE-01)."
     }
   ],
   "pending_confirmations": [
@@ -1126,6 +1136,13 @@
       "rule": "Griglia 2x2 e mini grafici sotto il valore modificano altezza/posizione e trattamento delle schede; conferma specifica necessaria prima del codice coinvolto.",
       "confirmation_quote": "va bene 2x2 e 1x4, ma voglio i pulsanti come quelli nella versione 2 (nel senso di disposizione, non di colore design ecc)",
       "confirmation_date": "2026-11-04"
+    },
+    {
+      "id": "BUILD93-PREVIEW-2026-11-21",
+      "status": "PENDING_CONFIRMATION",
+      "recorded_on": "2026-11-21",
+      "item": "Anteprima build 93 (Finanza come il sito, Impostazioni > Dati con trasferimento automatico una tantum ed Esporta backup completo permanente) e autorizzazione IPA build 93",
+      "preview": "https://claude.ai/artifact/QAanqSYRowbYWgUKV8n271"
     }
   ],
   "history": [
