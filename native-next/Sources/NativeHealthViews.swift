@@ -110,19 +110,34 @@ struct NativeAddWeightSheet: View {
               value.isFinite, value > 0, value <= 500 else { return nil }
         return value
     }
+    private var changeFromLast: Double? {
+        guard let weight, let last = health.days.last(where: { ($0.weight ?? 0) > 0 && $0.date <= date })?.weight else { return nil }
+        return weight - last
+    }
     var body: some View {
         NavigationStack {
             Form {
                 Section {
-                    HStack {
-                        TextField("Peso", text: $weightText).keyboardType(.decimalPad).focused($editing)
-                            .accessibilityLabel("Peso in chilogrammi").accessibilityIdentifier("health-new-weight")
-                        Text("kg").foregroundStyle(NativeDesign.secondary)
+                    VStack(spacing: NativeDesign.Space.xs) {
+                        HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xs) {
+                            TextField("0,0", text: $weightText).keyboardType(.decimalPad).focused($editing)
+                                .font(.largeTitle.bold()).monospacedDigit().multilineTextAlignment(.center)
+                                .fixedSize()
+                                .accessibilityLabel("Peso in chilogrammi").accessibilityIdentifier("health-new-weight")
+                            Text("kg").font(.title3).foregroundStyle(NativeDesign.secondary)
+                        }
+                        if let change = changeFromLast {
+                            Text((change >= 0 ? "+" : "−") + abs(change).formatted(.number.precision(.fractionLength(1))) + " kg dall’ultima pesata")
+                                .font(.footnote).foregroundStyle(NativeDesign.secondary).monospacedDigit()
+                                .accessibilityIdentifier("health-weight-change")
+                        }
                     }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, NativeDesign.Space.small)
                     DatePicker("Data", selection: $date, in: ...Date(), displayedComponents: [.date, .hourAndMinute])
                         .accessibilityIdentifier("health-weight-date")
                 } footer: {
-                    Text("La pesata viene salvata in Apple Health. Se registri più pesate nello stesso giorno, nel grafico compare la più recente.")
+                    Text("Salvato in Apple Salute.")
                 }.disabled(saving || (requestID != nil && submitted))
                 if let error { Section { Text(error).foregroundStyle(NativeDesign.warning) } }
             }.modifier(NativeListAppearance()).navigationTitle("Aggiungi peso").navigationBarTitleDisplayMode(.inline)

@@ -1,5 +1,7 @@
 # LifeOS — stato corrente
 
+**Build 93, fase 2 in corso (21 novembre 2026, ramo `codex/build93`).** Schede della fase 2 riscritte secondo l'anteprima: Salute (obiettivi, Andamento, TDEE con criteri, Simulazione peso, Cronologia a barre), Dashboard, Attività, Calendario e Agenda, fogli Peso, Nuova abitudine e Orari. Sostituite dopo conferma META-01: MACRO-NO-GOALS-92, HEALTH-GRID-3X2-92, DASHBOARD-ORDER-92. Restano i fogli alimento/quantità/macro nella forma 92. Dettagli in [BUILD-93-PLAN.md](BUILD-93-PLAN.md#fase-2---stato-21-novembre-2026-sessione-claude). Verifica: solo compilazione e test unitari in CI; nessuna prova al simulatore, nessuna IPA, nessun deploy.
+
 **Run avviato:** [43684175590](https://github.com/azeroualit-cloud/LifeOS/actions/runs/43684175590) sul commit `74c95d0aa60d5185a95510cf8c54b2c067582516` (solo scheda selezionata montata, stato Dipingi turni nel router). Gate invariato: 5 compatti, 14 regressioni, suite restante, 4 Release, IPA90 solo a gate verdi. Esito da acquisire; nessun polling; nessuna IPA90, nessun deploy backend.
 
 **Correzione successiva (15 novembre):** contenitore che monta soltanto la scheda selezionata, con lo stato di Dipingi turni nel router (`NativeSixTabBar.swift`, `CalendarScreen.swift`, `App.swift`). Non compilato né provato in locale; esito CI da acquisire. Nessuna IPA90, nessun deploy backend.

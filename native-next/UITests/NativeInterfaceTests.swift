@@ -300,23 +300,16 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertTrue(keyboard.waitForExistence(timeout: 10))
         name.typeText(XCUIKeyboardKey.return.rawValue)
         XCTAssertTrue(keyboard.waitForNonExistence(timeout: 10), "Return must dismiss the keyboard before saving the habit")
-        let repeatPicker = app.buttons["routine-repeat"]; show(repeatPicker); repeatPicker.tap(); app.buttons["Ogni N giorni"].tap()
+        // Build 93: repetition is a segmented control, weekdays are letter buttons.
+        let interval = app.buttons["routine-repeat-interval"]; show(interval); interval.tap()
         let save = app.buttons["routine-save"]; show(save); save.tap()
         let edit = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "routine-edit-", "Allenamento programmato")).firstMatch
         show(edit, towardTop: true); XCTAssertTrue(edit.waitForExistence(timeout: 10)); XCTAssertTrue(edit.label.contains("Ogni 2 giorni")); edit.tap()
-        show(repeatPicker); repeatPicker.tap(); app.buttons["Giorni della settimana"].tap()
-        let monday = app.switches["routine-weekday-1"]; show(monday); XCTAssertTrue(monday.waitForExistence(timeout: 10))
-        print("HABIT_SWITCH_BEFORE: " + monday.debugDescription)
-        XCTAssertEqual(monday.value as? String, "0")
-        // SwiftUI can expose the full labelled row as a switch. Tap the control end.
-        monday.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap()
-        // The row tap occasionally lands while the form is still settling; retry on the inner control.
-        if monday.value as? String == "0" {
-            let control = monday.switches.firstMatch
-            (control.exists ? control : monday).tap()
-        }
-        print("HABIT_SWITCH_AFTER: " + monday.debugDescription)
-        XCTAssertEqual(monday.value as? String, "1", monday.debugDescription)
+        let weekly = app.buttons["routine-repeat-weekdays"]; show(weekly); weekly.tap()
+        let monday = app.buttons["routine-weekday-1"]; show(monday); XCTAssertTrue(monday.waitForExistence(timeout: 10))
+        XCTAssertFalse(monday.isSelected)
+        monday.tap()
+        XCTAssertTrue(monday.isSelected, monday.debugDescription)
         capture("habit-weekday-selected")
         show(save); XCTAssertTrue(save.isEnabled, "Save disabled after weekday selection"); save.tap()
         show(edit, towardTop: true)
@@ -760,11 +753,16 @@ final class NativeInterfaceTests: XCTestCase {
     func testSharedRowsAndCategoryChoicesKeepAccessibleTargets() {
         let app = launch(["--dark"])
         app.openMainTab("Attività")
-        let wishes = app.buttons["task-category-wish"], actions = app.buttons["task-category-action"]
-        XCTAssertTrue(wishes.waitForExistence(timeout: 10)); wishes.tap()
-        XCTAssertTrue(wishes.isSelected)
-        actions.tap(); XCTAssertTrue(actions.isSelected)
-        assertMinimumTouchTarget(actions)
+        // Build 93: categories are a drop-down pill ("Tutte" or one category).
+        let filter = app.buttons["task-category-filter"]
+        XCTAssertTrue(filter.waitForExistence(timeout: 10))
+        filter.tap(); let wishes = app.buttons["task-category-wish"]
+        XCTAssertTrue(wishes.waitForExistence(timeout: 5)); wishes.tap()
+        XCTAssertTrue(filter.label.contains("Desideri"), filter.label)
+        filter.tap(); let actions = app.buttons["task-category-action"]
+        XCTAssertTrue(actions.waitForExistence(timeout: 5)); actions.tap()
+        XCTAssertFalse(filter.label.contains("Desideri"), filter.label)
+        assertMinimumTouchTarget(filter)
         let completion = app.buttons["Cambia completamento Organizzare la settimana"]
         XCTAssertTrue(completion.waitForExistence(timeout: 10)); XCTAssertTrue(completion.isHittable)
         assertMinimumTouchTarget(completion)
@@ -774,7 +772,7 @@ final class NativeInterfaceTests: XCTestCase {
         app.buttons["Annulla"].tap()
         capture("shared-task-rows")
         completion.tap()
-        XCTAssertTrue(app.staticTexts["Attivo"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["Oggi"].waitForExistence(timeout: 10))
         let archived = app.buttons["toggle-completed-tasks"]
         revealChecklistButton(archived, in: app)
         XCTAssertEqual(archived.value as? String, "Chiusa")
@@ -940,7 +938,7 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertTrue(assets.exists)
         capture("savings-breakdown")
         app.buttons["Attività"].tap()
-        XCTAssertTrue(app.buttons["Desideri"].exists)
+        XCTAssertTrue(app.buttons["task-category-filter"].exists)
         app.buttons["reorder-tasks"].tap()
         capture("task-categories-and-reorder")
         app.buttons["reorder-tasks"].tap()
@@ -1214,13 +1212,19 @@ final class NativeInterfaceTests: XCTestCase {
     func testReducedMotionKeepsChecklistAndFinanceActionsFunctional() {
         let app = launch(["--dark", "--reduce-motion"])
         app.openMainTab("Attività")
-        let wishes = app.buttons["task-category-wish"], actions = app.buttons["task-category-action"]
-        wishes.tap(); XCTAssertTrue(wishes.isSelected)
-        actions.tap(); XCTAssertTrue(actions.isSelected)
+        // Build 93: categories are a drop-down pill ("Tutte" or one category).
+        let filter = app.buttons["task-category-filter"]
+        XCTAssertTrue(filter.waitForExistence(timeout: 10))
+        filter.tap(); let wishes = app.buttons["task-category-wish"]
+        XCTAssertTrue(wishes.waitForExistence(timeout: 5)); wishes.tap()
+        XCTAssertTrue(filter.label.contains("Desideri"), filter.label)
+        filter.tap(); let actions = app.buttons["task-category-action"]
+        XCTAssertTrue(actions.waitForExistence(timeout: 5)); actions.tap()
+        XCTAssertFalse(filter.label.contains("Desideri"), filter.label)
         let completion = app.buttons["Cambia completamento Organizzare la settimana"]
         XCTAssertTrue(completion.waitForExistence(timeout: 10))
         completion.tap()
-        XCTAssertTrue(app.staticTexts["Attivo"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["Oggi"].waitForExistence(timeout: 10))
         let archived = app.buttons["toggle-completed-tasks"]
         revealChecklistButton(archived, in: app)
         XCTAssertEqual(archived.value as? String, "Chiusa")

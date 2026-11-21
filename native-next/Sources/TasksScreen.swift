@@ -1,109 +1,198 @@
 import SwiftUI
 
+/// Attività (build 93 preview): category drop-down with "Tutte", Da fare / Abitudini,
+/// sections Oggi, Prossimi giorni, In attesa, Completate in grouped cards.
 struct TasksScreen: View {
     @EnvironmentObject var store: NativeStore
     @EnvironmentObject var router: NativeRouter
+    /// A category key, or "all" for every category (preview "Tutte").
     @State private var category = "action"
+    @State private var view = "Da fare"
     @State private var editMode: EditMode = .inactive
     @Environment(\.nativeReduceMotion) private var reduceMotion
     @State private var completedExpanded = false
-    private func rows(_ status: String) -> [Record] { NativeTaskList.rows(store.tasks, category: category, section: status) }
-    private func activities(_ status: String) -> [NativeActivity] { NativeActivityCatalog.rows(tasks: store.tasks, events: store.activityEvents, category: category, section: status) }
+    private static let all = "all"
+    private var categoryKeys: [String] { store.categories.map { $0.text("key") } }
+    private var selectedKeys: [String] { category == Self.all ? categoryKeys : [category] }
+    private func label(_ key: String) -> String { store.categories.first { $0.text("key") == key }?.text("label") ?? key }
+    private func rows(_ status: String) -> [Record] { selectedKeys.flatMap { NativeTaskList.rows(store.tasks, category: $0, section: status) } }
+    private func activities(_ status: String) -> [NativeActivity] {
+        selectedKeys.flatMap { NativeActivityCatalog.rows(tasks: store.tasks, events: store.activityEvents, category: $0, section: status) }
+    }
+
     private var checklist: some View {
-        let active = activities("todo"), waiting = activities("waiting")
+        let today = CivilDate.day()
+        let open = activities("todo") + activities("waiting")
+        // Same data as build 92, grouped by when: today (tasks and today's events),
+        // the next days (events), waiting tasks, completed.
+        let todayItems = open.filter { $0.isEvent ? $0.record.text("day") <= today : NativeTaskList.section($0.record) != "waiting" }
+        let nextItems = open.filter { $0.isEvent && $0.record.text("day") > today }
+            .sorted { ($0.record.text("day"), $0.record.text("start_time")) < ($1.record.text("day"), $1.record.text("start_time")) }
+        let waiting = open.filter { !$0.isEvent && NativeTaskList.section($0.record) == "waiting" }
         let completed = rows("done").map { DisplayRecord($0) }
         return List {
-            Section {
-                HStack(spacing: NativeDesign.Space.small) {
-                    Text("Categorie").font(NativeDesign.heading)
-                    Spacer()
-                    Button(editMode == .active ? "Fine" : "Riordina") { editMode = editMode == .active ? .inactive : .active }.font(.subheadline).disabled(store.busy).accessibilityIdentifier("reorder-tasks")
-                    NativeIconButton(symbol: "folder", label: "Gestisci categorie") { router.sheet = .categories }
-                }.buttonStyle(.plain).listRowSeparator(.hidden)
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: NativeDesign.Space.small) {
-                        ForEach(store.categories.map { DisplayRecord($0, key: "key") }) { item in
-                            NativeCategoryChip(title: item.value.text("label"), selected: category == item.value.text("key")) { category = item.value.text("key") }.accessibilityIdentifier("task-category-" + item.value.text("key"))
-                        }
+            Section { header }
+                .listRowBackground(Color.clear).listRowInsets(EdgeInsets()).listRowSeparator(.hidden)
+            if view == "Abitudini" {
+                habits
+            } else {
+                if !todayItems.isEmpty { Section {
+                    ForEach(Array(todayItems.enumerated()), id: \.element.id) { index, item in
+                        activityRow(item, first: index == 0, last: index == todayItems.count - 1).moveDisabled(item.isEvent || item.completed || category == Self.all)
                     }
-                }.listRowSeparator(.hidden)
-            }.listRowBackground(Color.clear).listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-            if !active.isEmpty { Section {
-                ForEach(Array(active.enumerated()), id: \.element.id) { index, item in activityRow(item, first: index == 0, last: index == active.count - 1).moveDisabled(item.isEvent || item.completed) }
                     .onMove { indexes, destination in
-                        var visible = active; visible.move(fromOffsets: indexes, toOffset: destination)
+                        guard category != Self.all else { return }
+                        var visible = todayItems; visible.move(fromOffsets: indexes, toOffset: destination)
                         let ordered = visible.filter { !$0.isEvent }.map(\.record)
                         let ids = NativeTaskList.reorderIDs(tasks: store.tasks, category: category, visibleIDs: ordered.map { $0.integer("id") })
                         Task { await store.run("reorderTasks", ["category": .string(category), "ids": .array(ids.map(JSONValue.int))]) }
                     }
-            } header: { checklistHeading("Attivo") } }
-            if !waiting.isEmpty {
-                Section { ForEach(Array(waiting.enumerated()), id: \.element.id) { index, item in activityRow(item, first: index == 0, last: index == waiting.count - 1) } } header: { checklistHeading("In attesa") }
-            }
-            if !completed.isEmpty {
-                Section {
-                    if completedExpanded {
-                        ForEach(Array(completed.enumerated()), id: \.element.id) { index, item in taskRow(item.value, first: index == 0, last: index == completed.count - 1) }
-                    }
-                } header: {
-                    Button {
-                        withAnimation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration)) { completedExpanded.toggle() }
-                    } label: {
-                        NativeSectionHeader("Completate", titleIdentifier: "task-heading-Completate") {
+                } header: { checklistHeading("Oggi") } }
+                if !nextItems.isEmpty {
+                    Section { ForEach(Array(nextItems.enumerated()), id: \.element.id) { index, item in activityRow(item, first: index == 0, last: index == nextItems.count - 1) } } header: { checklistHeading("Prossimi giorni") }
+                }
+                if !waiting.isEmpty {
+                    Section { ForEach(Array(waiting.enumerated()), id: \.element.id) { index, item in activityRow(item, first: index == 0, last: index == waiting.count - 1) } } header: { checklistHeading("In attesa") }
+                }
+                if !completed.isEmpty {
+                    Section {
+                        if completedExpanded {
+                            ForEach(Array(completed.enumerated()), id: \.element.id) { index, item in taskRow(item.value, first: index == 0, last: index == completed.count - 1) }
+                        }
+                    } header: {
+                        Button {
+                            withAnimation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration)) { completedExpanded.toggle() }
+                        } label: {
                             HStack(spacing: NativeDesign.Space.small) {
-                                Text(String(completed.count))
-                                Image(systemName: completedExpanded ? "chevron.up" : "chevron.down")
+                                LOSectionLabel(title: "Completate").padding(.horizontal, -NativeDesign.Space.large)
+                                    .accessibilityIdentifier("task-heading-Completate")
+                                Spacer()
+                                Text(completedExpanded ? "Nascondi" : "Mostra \(completed.count)").font(.subheadline)
                             }
-                        }.foregroundStyle(NativeDesign.secondary).textCase(nil)
-                            .padding(.horizontal, NativeDesign.Layout.screenInset)
+                            .foregroundStyle(NativeDesign.secondary).textCase(nil)
+                            .padding(.horizontal, NativeDesign.Space.large)
                             .frame(minHeight: NativeDesign.Layout.touchTarget)
                             .contentShape(Rectangle())
-                            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                    }.buttonStyle(.plain).listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)).accessibilityIdentifier("toggle-completed-tasks")
-                        .accessibilityValue(completedExpanded ? "Aperta" : "Chiusa")
+                        }.buttonStyle(.plain).listRowInsets(EdgeInsets()).accessibilityIdentifier("toggle-completed-tasks")
+                            .accessibilityValue(completedExpanded ? "Aperta" : "Chiusa")
+                    }
                 }
-            }
-            if active.isEmpty && waiting.isEmpty && completed.isEmpty {
-                Text("Nessuna attività da mostrare").foregroundStyle(NativeDesign.secondary).listRowBackground(Color.clear)
+                if todayItems.isEmpty && nextItems.isEmpty && waiting.isEmpty && completed.isEmpty {
+                    Text("Nessuna attività da mostrare").foregroundStyle(NativeDesign.secondary).listRowBackground(Color.clear)
+                }
             }
         }
     }
+
+    /// Category drop-down (preview "Tutte"), Da fare / Abitudini, reorder for one category.
+    private var header: some View {
+        VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
+            HStack(spacing: NativeDesign.Space.small) {
+                LOFilterPill(title: "Categoria", value: category == Self.all ? "Tutte" : label(category), isActive: true, identifier: "task-category-filter") {
+                    Button { category = Self.all } label: { menuLabel("Tutte", selected: category == Self.all) }
+                        .accessibilityIdentifier("task-category-all")
+                    ForEach(store.categories.map { DisplayRecord($0, key: "key") }) { item in
+                        let key = item.value.text("key")
+                        Button { category = key } label: { menuLabel(item.value.text("label"), selected: category == key) }
+                            .accessibilityIdentifier("task-category-" + key)
+                    }
+                    Divider()
+                    Button { router.sheet = .categories } label: { Label("Gestisci categorie", systemImage: "folder") }
+                }
+                LOSegmented(options: [("Da fare", "todo"), ("Abitudini", "habits")], selection: $view, identifierPrefix: "activity-view-")
+            }
+            if view == "Da fare" && category != Self.all {
+                Button(editMode == .active ? "Fine" : "Riordina") { editMode = editMode == .active ? .inactive : .active }
+                    .font(.subheadline).foregroundStyle(NativeDesign.secondary).disabled(store.busy)
+                    .frame(minHeight: NativeDesign.Layout.touchTarget)
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("reorder-tasks")
+            }
+        }
+        .padding(.vertical, NativeDesign.Space.xs)
+    }
+
+    /// Abitudini: every habit with its schedule and next date; today's can be checked.
+    @ViewBuilder private var habits: some View {
+        let routines = store.routines
+        Section {
+            if routines.isEmpty {
+                Text("Nessuna abitudine").foregroundStyle(NativeDesign.secondary)
+            }
+            ForEach(Array(routines.enumerated()), id: \.offset) { index, routine in
+                let due = NativeRoutineSchedule.due(routine)
+                let summary = (try? NativeRoutineSchedule(routine["schedule"]).summary) ?? ""
+                NativeChecklistRow(title: routine.text("title"),
+                    subtitle: [summary, NativeRoutineSchedule.nextLabel(routine)].filter { !$0.isEmpty }.joined(separator: " · "),
+                    checked: due && routine.flag("checked"), showsDisclosure: true,
+                    completionIdentifier: "habit-check-\(routine.integer("id"))",
+                    openIdentifier: "habit-open-\(routine.integer("id"))",
+                    completionLabel: "Completa abitudine " + routine.text("title"),
+                    onComplete: { if due { checkRoutine(routine) } },
+                    onOpen: { router.sheet = .routines })
+                    .modifier(NativeChecklistListRow(first: index == 0, last: index == routines.count - 1))
+                    .disabled(store.busy || !due)
+            }
+            Button { router.sheet = .routines } label: { Label("Nuova abitudine", systemImage: "plus") }
+                .frame(minHeight: NativeDesign.Layout.touchTarget)
+                .accessibilityIdentifier("habit-add")
+        } header: { checklistHeading("Abitudini") }
+    }
+
+    @ViewBuilder private func menuLabel(_ title: String, selected: Bool) -> some View {
+        if selected { Label(title, systemImage: "checkmark") } else { Text(title) }
+    }
+    private func checkRoutine(_ record: Record) {
+        Task {
+            await store.run("setRoutineCheck", ["id": .int(record.integer("id")), "day": .string(CivilDate.day()), "checked": .bool(!record.flag("checked"))])
+        }
+    }
+
     var body: some View {
         checklist
         .modifier(NativeChecklistListAppearance())
         .environment(\.editMode, $editMode)
         .scrollDismissesKeyboard(.interactively)
         .animation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration), value: store.tasks)
-        .onChange(of: category) { _, _ in completedExpanded = false }
+        .onChange(of: category) { _, _ in completedExpanded = false; editMode = .inactive }
         .onAppear {
-            let keys = store.categories.map { $0.text("key") }
+            let keys = categoryKeys
             category = keys.contains(router.taskCategory) ? router.taskCategory : keys.first ?? "action"
-            router.taskCategory = category
         }
-        .onChange(of: category) { _, value in router.taskCategory = value }
+        // The add action needs a real category: "Tutte" keeps the last chosen one.
+        .onChange(of: category) { _, value in if value != Self.all { router.taskCategory = value } }
         .onChange(of: router.taskCategory) { _, value in
-            if store.categories.contains(where: { $0.text("key") == value }) { category = value }
+            if category != Self.all, store.categories.contains(where: { $0.text("key") == value }) { category = value }
         }
-        .onChange(of: store.categories.map { $0.text("key") }) { _, keys in if !keys.contains(category) { category = keys.first ?? "action" } }
+        .onChange(of: categoryKeys) { _, keys in if category != Self.all && !keys.contains(category) { category = keys.first ?? "action" } }
     }
     private func checklistHeading(_ title: String) -> some View {
-        NativeSectionHeader(title, titleIdentifier: "task-heading-" + title) { EmptyView() }
-            .foregroundStyle(title == "In attesa" ? NativeDesign.secondary : Color.primary)
-            .textCase(nil).padding(.vertical, NativeDesign.Space.small)
-            .padding(.horizontal, NativeDesign.Layout.screenInset)
-            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+        LOSectionLabel(title: title)
+            .padding(.horizontal, -NativeDesign.Space.large)
+            .accessibilityLabel(title)
+            .textCase(nil).padding(.top, NativeDesign.Space.small)
+            .listRowInsets(EdgeInsets(top: 0, leading: NativeDesign.Layout.screenInset, bottom: NativeDesign.Space.xs, trailing: 0))
+            .accessibilityIdentifier("task-heading-" + title)
+    }
+    private func subtitle(_ r: Record, isEvent: Bool) -> String {
+        var parts: [String] = []
+        if category == Self.all { parts.append(label(r.text("list_kind", fallback: "action"))) }
+        if isEvent {
+            parts.append(CivilDate.label(r.text("day")) + (r.text("start_time").isEmpty ? "" : " · " + r.text("start_time")))
+        } else if !r.text("notes").isEmpty { parts.append(r.text("notes")) }
+        return parts.joined(separator: " · ")
     }
     @ViewBuilder private func activityRow(_ item: NativeActivity, first: Bool, last: Bool) -> some View {
         if item.isEvent {
             let r = item.record
-            NativeChecklistRow(title: r.text("title"), subtitle: CivilDate.label(r.text("day")) + (r.text("start_time").isEmpty ? "" : " · " + r.text("start_time")), checked: item.completed, completionLabel: "Cambia completamento evento " + r.text("title"), onComplete: {
+            NativeChecklistRow(title: r.text("title"), subtitle: subtitle(r, isEvent: true), checked: item.completed, completionLabel: "Cambia completamento evento " + r.text("title"), onComplete: {
                 Task { await store.run("setEventOccurrence", ["id": .int(r.integer("id")), "day": .string(r.text("day")), "status": .string(item.completed ? "open" : "done")]) }
             }, onOpen: { router.sheet = .event(r) })
             .modifier(NativeChecklistListRow(first: first, last: last)).disabled(store.busy)
         } else { taskRow(item.record, first: first, last: last) }
     }
     private func taskRow(_ r: Record, first: Bool, last: Bool) -> some View {
-        NativeChecklistRow(title: r.text("title"), subtitle: r.text("notes"), checked: r.text("status") == "done", dueDay: r.text("due_date"), openIdentifier: "task-open-" + String(r.integer("id")), completionLabel: "Cambia completamento " + r.text("title"), onComplete: {
+        NativeChecklistRow(title: r.text("title"), subtitle: subtitle(r, isEvent: false), checked: r.text("status") == "done", dueDay: r.text("due_date"), openIdentifier: "task-open-" + String(r.integer("id")), completionLabel: "Cambia completamento " + r.text("title"), onComplete: {
             Task { await store.run("setTaskStatus", ["id": .int(r.integer("id")), "status": .string(NativeTaskList.completionStatus(r))]) }
         }, onOpen: { router.sheet = .task(r) })
         .modifier(NativeChecklistListRow(first: first, last: last)).disabled(store.busy)
@@ -180,15 +269,31 @@ struct RoutinesEditor: View {
             }
             Section(editingID == 0 ? "Aggiungi abitudine" : "Modifica abitudine") {
                 TextField("Nome", text: $name).accessibilityIdentifier("routine-name")
-                Picker("Ripetizione", selection: $mode) {
-                    Text("Ogni giorno").tag("daily")
-                    Text("Ogni N giorni").tag("interval")
-                    Text("Giorni della settimana").tag("weekdays")
-                }.accessibilityIdentifier("routine-repeat")
+                VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+                    Text("Ripetizione").font(.footnote).foregroundStyle(NativeDesign.secondary)
+                    LOSegmented(options: [("Ogni giorno", "daily"), ("Ogni N giorni", "interval"), ("Giorni", "weekdays")], selection: Binding(
+                        get: { mode == "daily" ? "Ogni giorno" : mode == "interval" ? "Ogni N giorni" : "Giorni" },
+                        set: { mode = $0 == "Ogni giorno" ? "daily" : $0 == "Ogni N giorni" ? "interval" : "weekdays" }),
+                        identifierPrefix: "routine-repeat-")
+                }
                 if mode == "interval" { Stepper("Ogni \(interval) \(interval == 1 ? "giorno" : "giorni")", value: $interval, in: 1...365).accessibilityIdentifier("routine-interval") }
                 if mode == "weekdays" {
-                    ForEach(1...7, id: \.self) { day in
-                        Toggle(NativeRoutineSchedule.weekdays[day - 1], isOn: Binding(get: { weekdays.contains(day) }, set: { selected in if selected { weekdays.insert(day) } else { weekdays.remove(day) } })).accessibilityIdentifier("routine-weekday-\(day)")
+                    HStack(spacing: NativeDesign.Space.xs) {
+                        ForEach(1...7, id: \.self) { day in
+                            let on = weekdays.contains(day)
+                            Button { if on { weekdays.remove(day) } else { weekdays.insert(day) } } label: {
+                                Text(["L", "M", "M", "G", "V", "S", "D"][day - 1]).font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(on ? NativeDesign.onAccent : Color.primary)
+                                    .frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget)
+                                    .background { Circle().fill(on ? NativeDesign.accent : NativeDesign.barTrack) }
+                                    .contentShape(Circle())
+                            }
+                            .buttonStyle(NativePressStyle())
+                            .frame(maxWidth: .infinity)
+                            .accessibilityLabel(NativeRoutineSchedule.weekdays[day - 1])
+                            .accessibilityAddTraits(on ? .isSelected : [])
+                            .accessibilityIdentifier("routine-weekday-\(day)")
+                        }
                     }
                 }
                 if mode != "daily" { DatePicker("Data di inizio", selection: $startDate, displayedComponents: .date).accessibilityIdentifier("routine-start") }

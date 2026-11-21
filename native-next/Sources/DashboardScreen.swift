@@ -191,7 +191,7 @@ struct DashboardScreen: View {
                                     }
                                 }
                             }
-                            Section { Text("Orari indicativi calcolati sul dispositivo per Empoli, nel fuso Europe/Rome.").font(.caption).foregroundStyle(NativeDesign.secondary) }
+                            Section { Text("Empoli · Europe/Rome").font(.footnote).foregroundStyle(NativeDesign.secondary) }
                         }.modifier(NativeListAppearance()).navigationTitle("Orari").navigationBarTitleDisplayMode(.inline).toolbar { DoneButton() }
                     }.presentationDetents([.medium, .large])
                 }

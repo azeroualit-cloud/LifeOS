@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "reported_on": "2026-11-17",
+  "reported_on": "2026-11-21",
   "project": "LifeOS",
   "default_branch": "main",
-  "working_branch": "codex/revision77",
+  "working_branch": "codex/build93",
   "repository_head": "Use git rev-parse HEAD or the GitHub commit currently being read; documentation commits do not create a new IPA.",
   "source_of_truth": "native-next overlay assembled through .github/actions/native-compat76/action.yml",
   "native_source_fingerprint": {
@@ -746,5 +746,15 @@
     "release_launches": 4,
     "physical_device_verified_by_agent": false,
     "accepted_for_production": false
+  },
+  "build93": {
+    "target": "0.10.31 build 93",
+    "plan": "docs/BUILD-93-PLAN.md",
+    "ipa_authorization": "IPA-DELIVERY-93-2026-11-21 (solo a gate verdi sullo stesso commit)",
+    "phase1": "done: compile and unit tests green (run 44930586905); Worker lifeos-native-test not deployed",
+    "phase2": "in progress: screens rewritten per preview; CI compile and unit tests only; no simulator review yet",
+    "phases_3_4_5": "not started",
+    "ipa": "not produced",
+    "backend_deployment": "none"
   }
 }

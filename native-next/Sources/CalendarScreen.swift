@@ -211,6 +211,7 @@ struct CalendarScreen: View {
                     NativeIconButton(symbol: "chevron.right", label: "Giorno successivo") { moveDay(by: 1) }
                         .accessibilityIdentifier("calendar-next-day")
                 }
+                viewSwitch
                 Text(CivilDate.agendaTitle(selected))
                     .font(.largeTitle.weight(.bold))
                     .fixedSize(horizontal: false, vertical: true)
@@ -262,6 +263,7 @@ struct CalendarScreen: View {
                         NativeCalendarAgendaBlock(node: node, onOpen: openAgendaEntry)
                     }
                 }
+                ForEach(followingDays, id: \.self) { day in followingDay(day) }
             }
             .padding(.horizontal, NativeDesign.Layout.screenInset)
             .padding(.vertical, NativeDesign.Space.medium)
@@ -271,6 +273,64 @@ struct CalendarScreen: View {
         .id(selected)
     }
 
+    /// The six days after the selected one, only where their month is loaded
+    /// (an unloaded month would wrongly read as "Nessun impegno").
+    private var followingDays: [String] {
+        (1...6).map { CivilDate.adding($0, to: selected) }.filter { monthDays[String($0.prefix(7))] != nil }
+    }
+    private func followingDay(_ day: String) -> some View {
+        let events = (eventsByDay[day] ?? []).filter { $0.text("occurrence_status") != "skipped" }
+            .sorted { ($0.text("start_time").isEmpty ? "00:00" : $0.text("start_time"), $0.integer("id")) < ($1.text("start_time").isEmpty ? "00:00" : $1.text("start_time"), $1.integer("id")) }
+        let tasks = tasksByDay[day] ?? []
+        let shift = shift(on: day)
+        return VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+            HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.small) {
+                Text(CivilDate.agendaTitle(day)).font(.headline)
+                if let shift {
+                    Text(shift.title).font(.subheadline.weight(.semibold)).foregroundStyle(shift.color)
+                }
+            }
+            .accessibilityElement(children: .combine)
+            .accessibilityAddTraits(.isHeader)
+            .accessibilityIdentifier("calendar-next-day-" + day)
+            LOListCard {
+                if events.isEmpty && tasks.isEmpty {
+                    LOListRow(isLast: true) { Text("Nessun impegno").font(.subheadline).foregroundStyle(NativeDesign.secondary) }
+                }
+                ForEach(Array(events.enumerated()), id: \.offset) { index, event in
+                    agendaRow(time: event.text("start_time").isEmpty ? "Tutto il giorno" : event.text("start_time"),
+                              title: event.text("title", fallback: "Evento"), detail: event.text("location"),
+                              color: shift?.color ?? NativeDesign.calendarTitle, isLast: index == events.count - 1 && tasks.isEmpty) {
+                        router.sheet = .event(event)
+                    }
+                }
+                ForEach(Array(tasks.enumerated()), id: \.offset) { index, task in
+                    agendaRow(time: task.text("scheduled_time").isEmpty ? "Attività" : task.text("scheduled_time"),
+                              title: task.text("title"), detail: "", color: NativeDesign.secondary, isLast: index == tasks.count - 1) {
+                        router.sheet = .task(task)
+                    }
+                }
+            }
+        }
+    }
+    private func agendaRow(time: String, title: String, detail: String, color: Color, isLast: Bool, open: @escaping () -> Void) -> some View {
+        Button(action: open) {
+            LOListRow(isLast: isLast) {
+                Text(time).font(.subheadline).monospacedDigit().foregroundStyle(NativeDesign.secondary)
+                    .frame(width: NativeDesign.Layout.categoryWidth * 0.7, alignment: .leading)
+                Capsule().fill(color).frame(width: NativeDesign.Space.xs, height: NativeDesign.Layout.toolbarVisual - NativeDesign.Space.xxs)
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
+                    Text(title).font(.body).foregroundStyle(.primary).lineLimit(2)
+                    if !detail.isEmpty { Text(detail).font(.footnote).foregroundStyle(NativeDesign.secondary) }
+                }
+                Spacer(minLength: NativeDesign.Space.small)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(NativePressStyle())
+        .accessibilityLabel(time + ", " + title + (detail.isEmpty ? "" : ", " + detail))
+    }
     private func returnToMonth() {
         if let origin = monthReturnDay {
             selected = origin
@@ -493,17 +553,28 @@ struct CalendarScreen: View {
                 Divider()
         }.dynamicTypeSize(...DynamicTypeSize.xxxLarge)
     }
+    /// Mese / Agenda (build 93 preview). Agenda opens the selected day with the next days.
+    private var viewSwitch: some View {
+        LOSegmented(options: [("Mese", "month"), ("Agenda", "agenda")], selection: Binding(
+            get: { showingDay ? "Agenda" : "Mese" },
+            set: { value in
+                if value == "Agenda", !showingDay { monthReturnDay = selected; showingDay = true }
+                else if value == "Mese", showingDay { returnToMonth() }
+            }), identifierPrefix: "calendar-view-")
+    }
     private var painting: Bool {
         get { router.calendarPainting }
         nonmutating set { router.calendarPainting = newValue }
     }
     private var brushPanel: some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-            HStack(spacing: NativeDesign.Space.large) {
-                Button(action: goToToday) {
-                    Text("Oggi").frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle())
-                }
+            HStack(spacing: NativeDesign.Space.small) {
+                Button(action: goToToday) { Text("Oggi").font(.subheadline.weight(.semibold)) }
+                    .buttonStyle(NativeGlassButtonStyle())
                     .accessibilityIdentifier("calendar-today").disabled(store.busy)
+                viewSwitch
+            }
+            HStack(spacing: NativeDesign.Space.large) {
                 Button { withAnimation(reduceMotion || typeSize.isAccessibilitySize ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration)) { painting.toggle(); brush = painting ? "morning" : "consult" } } label: { Label(painting ? "Fine" : "Dipingi turni", systemImage: painting ? "checkmark" : "calendar.badge.clock").labelStyle(.iconOnly).frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle()) }.accessibilityIdentifier("toggle-shift-paint")
                 Spacer()
                 if let lastShift { Button("Annulla") { Task { await store.run("paintShift", ["day": .string(lastShift.0), "kind": .string(lastShift.1)]); if store.error == nil { self.lastShift = nil } } }.disabled(store.busy) }
@@ -532,9 +603,14 @@ private struct NativeShiftBrushOption: View {
     var body: some View {
         Button { brush = kind.rawValue } label: {
             VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-                Label(kind.title, systemImage: kind.symbol)
-                    .font(.caption.weight(.semibold))
-                    .lineLimit(1)
+                HStack(spacing: NativeDesign.Space.xs) {
+                    if kind == .erase {
+                        Image(systemName: kind.symbol).font(.caption.weight(.semibold))
+                    } else {
+                        Circle().fill(kind.color).frame(width: NativeDesign.Space.medium, height: NativeDesign.Space.medium)
+                    }
+                    Text(kind.title).font(.caption.weight(.semibold)).lineLimit(1)
+                }
                 if !kind.time.isEmpty {
                     Text(kind.time).font(.caption2).foregroundStyle(.secondary)
                         .lineLimit(1)
@@ -546,8 +622,9 @@ private struct NativeShiftBrushOption: View {
                 .fixedSize(horizontal: true, vertical: false)
                 .contentShape(Rectangle())
         }.buttonStyle(NativeGlassButtonStyle())
+            .background { Capsule().fill(brush == kind.rawValue && kind != .erase ? kind.color.opacity(0.28) : .clear) }
             .overlay(Capsule()
-                .strokeBorder(brush == kind.rawValue ? kind.color : .clear, lineWidth: NativeDesign.Layout.selectionLine))
+                .strokeBorder(brush == kind.rawValue ? (kind == .erase ? NativeDesign.secondary : kind.color) : .clear, lineWidth: NativeDesign.Layout.selectionLine))
             .accessibilityLabel(kind.title + (kind.time.isEmpty ? "" : ", " + kind.time))
             .accessibilityHint("Tocca i giorni per applicare questo turno")
             .accessibilityIdentifier("shift-brush-" + kind.rawValue).accessibilityAddTraits(brush == kind.rawValue ? .isSelected : [])
