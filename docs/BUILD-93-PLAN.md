@@ -58,5 +58,5 @@ Non fatto o volutamente escluso:
 - Pennelli Dipingi turni restano nell'intestazione (non in basso come l'anteprima) per non toccare la geometria provata dai test del calendario.
 - Nessuna prova al simulatore delle nuove schermate in questa sessione: solo compilazione e test unitari in CI. Le catture del workflow di sviluppo sono la prima verifica visiva.
 
-Verifica tecnica: compilazione e 358 test unitari verdi, 0 falliti ([run 44949689104](https://github.com/azeroualit-cloud/LifeOS/actions/runs/44949689104), commit `9367df7`). Non è accettazione del prodotto.
+Verifica tecnica: compilazione e 358 test unitari verdi, 0 falliti ([run 44949689104](https://github.com/azeroualit-cloud/LifeOS/actions/runs/44949689104), commit `9367df7`). Anteprima di sviluppo con controlli UI selezionati e catture reali verde ([run 44949689024](https://github.com/azeroualit-cloud/LifeOS/actions/runs/44949689024), artefatto `lifeos-development-preview-9367df7…`). La suite UI completa resta per la fase 5. Non è accettazione del prodotto.
 
