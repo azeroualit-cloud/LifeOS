@@ -57,17 +57,19 @@ enum NativeDesign {
     static let financialGreen = Color(uiColor: UIColor { trait in
         trait.userInterfaceStyle == .dark ? UIColor(red: 0.55, green: 0.73, blue: 0.63, alpha: 1) : UIColor(red: 0.22, green: 0.45, blue: 0.33, alpha: 1)
     })
+    /// Golden-ratio scale (GOLDEN-01-IOS-2026-11-21): 2, 5, 8, 13, 21, 34 with the
+    /// 16 pt iOS screen gutter; rows 55 pt (34 x 1.618). Build 93 preview values.
     enum Space {
         static let none: CGFloat = 0
         static let hairline: CGFloat = 1
         static let xxs: CGFloat = 2
-        static let xs: CGFloat = 4
+        static let xs: CGFloat = 5
         static let small: CGFloat = 8
-        static let medium: CGFloat = 12
+        static let medium: CGFloat = 13
         static let large: CGFloat = 16
-        static let xLarge: CGFloat = 20
-        static let section: CGFloat = 24
-        static let bottom: CGFloat = 32
+        static let xLarge: CGFloat = 21
+        static let section: CGFloat = 34
+        static let bottom: CGFloat = 34
     }
     enum Layout {
         static let bloomPagerHeight: CGFloat = 400
@@ -80,7 +82,7 @@ enum NativeDesign {
         static let bloomMapFitBottom: CGFloat = 88
         // Finance amount remains prominent without dominating the screen.
         static let budgetAmount: CGFloat = 40
-        static let screenInset = Space.xLarge
+        static let screenInset = Space.large
         static let listInset = Space.large
         static let cardInset = Space.xLarge
         static let compactCardInset = Space.large
@@ -88,10 +90,10 @@ enum NativeDesign {
         static let nutritionInputLine: CGFloat = 32
         static let nutritionFieldHeight: CGFloat = 72
         static let financeTile: CGFloat = 72
-        static let bottomAction: CGFloat = 50
-        static let quickRow: CGFloat = 56
+        static let bottomAction: CGFloat = 55
+        static let quickRow: CGFloat = 55
         static let nutritionKcalColumn: CGFloat = 64
-        static let segmentHeight: CGFloat = 36
+        static let segmentHeight: CGFloat = 34
         static let bloomSectionSwitch: CGFloat = 200
         static let bloomRowThumbnail: CGFloat = 60
         /// Fixed room for the floating system tab bar where a screen must not
@@ -110,10 +112,10 @@ enum NativeDesign {
         static let healthSummaryChartHeight: CGFloat = 50
         static let healthOverviewChart: CGFloat = 88
         static let healthSelectionCaptionHeight: CGFloat = 28
-        static let rowHeight: CGFloat = 52
-        static let iconTile: CGFloat = 38
+        static let rowHeight: CGFloat = 55
+        static let iconTile: CGFloat = 34
         static let tabHeight: CGFloat = 52
-        static let primaryAction: CGFloat = 60
+        static let primaryAction: CGFloat = 55
         static let healthChartHeight: CGFloat = 200
         static let categoryWidth: CGFloat = 88
         static let navigationInset = Space.large
@@ -158,9 +160,9 @@ enum NativeDesign {
     static let danger = Color(uiColor: .systemRed)
     static let success = financialGreen
     static let gap = Space.large
-    static let cardRadius: CGFloat = 24
-    static let controlRadius: CGFloat = 12
-    static let dayRadius: CGFloat = 12
+    static let cardRadius: CGFloat = 21
+    static let controlRadius: CGFloat = 13
+    static let dayRadius: CGFloat = 13
     static let badgeRadius: CGFloat = 6
     static let progressRadius: CGFloat = 3
     static let heading = Font.system(.headline, weight: .semibold)

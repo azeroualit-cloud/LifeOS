@@ -1042,21 +1042,23 @@
     },
     {
       "id": "MACRO-NO-GOALS-92",
-      "status": "ACTIVE",
+      "status": "SUPERSEDED",
       "scope": "Nutrizione",
       "recorded_on": "2026-11-17",
       "provenance": "Richiesta diretta utente in chat Claude",
       "original_quote": "non abbiamo inoltre un sistema di obiettivo totale per i macro, e non lo voglio sincero, quindi va cambiata la scheda nutrizione attuale",
-      "rule": "Nessun obiettivo totale per calorie e macro: si mostrano i totali del giorno. Restano i riferimenti di vitamina C e zinco (decisione dell'8 novembre)."
+      "rule": "Nessun obiettivo totale per calorie e macro: si mostrano i totali del giorno. Restano i riferimenti di vitamina C e zinco (decisione dell'8 novembre).",
+      "superseded_by": "NUTRITION-GOALS-93-2026-11-21"
     },
     {
       "id": "HEALTH-GRID-3X2-92",
-      "status": "ACTIVE",
+      "status": "SUPERSEDED",
       "scope": "Riepilogo Salute",
       "recorded_on": "2026-11-17",
       "provenance": "Richiesta diretta utente in chat Claude",
       "original_quote": "il grid 2 colonne e 3 righe va cambiato in 3 colonne per 2 righe. in una riga tdee, peso previsto e peso, e sotto le calorie la media calorie e la media proteine",
-      "rule": "Riepilogo Salute 3×2: TDEE, Peso previsto, Peso / Calorie, Media calorie, Media proteine, in un'unica scheda poco affollata."
+      "rule": "Riepilogo Salute 3×2: TDEE, Peso previsto, Peso / Calorie, Media calorie, Media proteine, in un'unica scheda poco affollata.",
+      "superseded_by": "HEALTH-TREND-93-2026-11-21"
     },
     {
       "id": "SUPPLEMENTS-PERSONAL-ONLY-92",
@@ -1192,6 +1194,32 @@
       "provenance": "Risposta diretta utente in chat Claude (domanda a scelta) dopo «vai finito», 2026-11-21 18:06",
       "original_quote": "Sì IPA 93",
       "rule": "Autorizzati implementazione della build 93 secondo l'anteprima e confezionamento/pubblicazione di una IPA 0.10.31 build 93 soltanto a gate verdi sullo stesso commit. Soddisfa IPA-GATE-01 solo per questa IPA. Prova su iPhone e accettazione restano distinte; nessun deploy backend automatico (i Worker li distribuisce l'utente)."
+    },
+    {
+      "id": "NUTRITION-GOALS-93-2026-11-21",
+      "status": "ACTIVE",
+      "scope": "Nutrizione build 93 (Dashboard, Salute, foglio Obiettivi)",
+      "recorded_on": "2026-11-21",
+      "provenance": "Risposta diretta utente in chat Claude alla domanda META-01 durante la fase 2 della build 93",
+      "original_quote": "Sì, sostituisci",
+      "rule": "Obiettivi nutrizione come nell'anteprima approvata: calorie dal TDEE con deficit o surplus oppure fisse; proteine e grassi in g o g/kg (peso medio 7 giorni), carboidrati con il resto delle calorie. Dashboard e Salute mostrano totale / obiettivo con barre. Restano i riferimenti dei micronutrienti.",
+      "supersedes": [
+        "MACRO-NO-GOALS-92"
+      ],
+      "conflict_check": "Conflitto con MACRO-NO-GOALS-92 segnalato e confermato (META-01)."
+    },
+    {
+      "id": "HEALTH-TREND-93-2026-11-21",
+      "status": "ACTIVE",
+      "scope": "Salute build 93",
+      "recorded_on": "2026-11-21",
+      "provenance": "Risposta diretta utente in chat Claude alla domanda META-01 durante la fase 2 della build 93",
+      "original_quote": "Sì, sostituisci",
+      "rule": "Salute come nell'anteprima approvata: in alto calorie del giorno con obiettivo e barra divisa per macro, poi micronutrienti in evidenza, Diario, sezione Andamento con periodo 1/3/6 mesi e quattro valori (Peso, TDEE, Media calorie, Media proteine), grafico Peso e simulazione con il peso previsto, grafico Calorie per giorno. Azioni Peso e Alimento sopra la barra.",
+      "supersedes": [
+        "HEALTH-GRID-3X2-92"
+      ],
+      "conflict_check": "Conflitto con HEALTH-GRID-3X2-92 segnalato e confermato (META-01)."
     }
   ],
   "pending_confirmations": [
@@ -1308,6 +1336,14 @@
     {
       "date": "2026-11-21",
       "event": "Obiettivo di risparmio: l'utente ha risposto «non capisco» alla domanda se toglierlo. Nessuna rimozione: resta il comportamento della build 92 (scheda in Budget); tolto solo il foglio Obiettivo separato già approvato in anteprima."
+    },
+    {
+      "date": "2026-11-21",
+      "event": "META-01: anteprima 93 con obiettivi nutrizione in conflitto con MACRO-NO-GOALS-92. Domanda all'utente, risposta «Sì, sostituisci». MACRO-NO-GOALS-92 SUPERSEDED da NUTRITION-GOALS-93-2026-11-21."
+    },
+    {
+      "date": "2026-11-21",
+      "event": "META-01: anteprima Salute 93 (Andamento a quattro valori e grafico Peso e simulazione) in conflitto con HEALTH-GRID-3X2-92. Risposta «Sì, sostituisci». HEALTH-GRID-3X2-92 SUPERSEDED da HEALTH-TREND-93-2026-11-21."
     }
   ],
   "historical_inventory": "decision-history/2026-11-04-inventory.json",

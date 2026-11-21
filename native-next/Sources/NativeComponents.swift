@@ -45,7 +45,7 @@ struct NativePressStyle: ButtonStyle {
 enum NativeCardDensity: Equatable {
     case standard, compact
     var inset: CGFloat { self == .standard ? NativeDesign.Layout.cardInset : NativeDesign.Layout.compactCardInset }
-    var gap: CGFloat { self == .standard ? NativeDesign.Space.large : NativeDesign.Space.medium }
+    var gap: CGFloat { NativeDesign.Space.medium }
 }
 struct NativeCard<Content: View>: View {
     let content: Content
