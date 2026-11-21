@@ -1,0 +1,50 @@
+name: LifeOS build 93 compile and unit tests (no IPA)
+# Fast check for every build 93 step: compile the app and run the unit tests only.
+# Never packages or releases (IPA-GATE-01); the full gate is lifeos-candidate93.yml.
+on:
+  workflow_dispatch:
+  push:
+    branches: ['codex/build93']
+    paths: ['native-next/**', '.github/workflows/lifeos-compile93.yml']
+permissions:
+  contents: read
+concurrency:
+  group: lifeos-compile93
+  cancel-in-progress: true
+jobs:
+  compile:
+    runs-on: macos-15
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/native-compat76
+        with:
+          variant: primary
+      - name: Compile app and tests
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcodebuild build-for-testing -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/compile.log 2>&1 || { grep -E "error:" build/compile.log | sort -u | head -40 | sed -E 's#^/Users/runner/work/[^ ]*/app/##' | sed 's/^/::error::/'; exit 1; }
+      - name: Unit tests
+        id: unit
+        continue-on-error: true
+        working-directory: app
+        run: |
+          set -euo pipefail
+          xcrun simctl bootstatus "$MAIN_DEVICE" -b
+          xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -only-testing:LifeOSProbeTests -parallel-testing-enabled NO -resultBundlePath build/Unit.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/unit.log 2>&1
+      - name: Report
+        if: always()
+        working-directory: app
+        run: |
+          grep -E "Executed [0-9]+ tests" build/unit.log | tail -1 | sed 's/^/::notice::/' || true
+          grep -E "error: -\[" build/unit.log | sed -E 's#^/Users/runner/work/[^ ]*/##' | sort -u | head -30 | cut -c1-400 | sed 's/^/::error::/' || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lifeos-compile93-${{ github.sha }}
+          path: app/build/*.log
+          retention-days: 7
+      - name: Fail when a unit test failed
+        if: steps.unit.outcome == 'failure'
+        run: exit 1

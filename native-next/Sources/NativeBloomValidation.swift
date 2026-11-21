@@ -1,6 +1,10 @@
 import Foundation
 
 enum NativeBloomValidation {
+    /// UUIDs from the app or ids from the site ("tag-…"), the same alphabet the server accepts.
+    static func isIdentifier(_ raw: String) -> Bool {
+        UUID(uuidString: raw) != nil || (1...80).contains(raw.count) && raw.allSatisfy { $0.isASCII && ($0.isLetter || $0.isNumber || "_.:-".contains($0)) }
+    }
     static func validate(_ archive: NativeBloomArchive) throws {
         func invalid() -> Message { Message(text: "Il backup Bloom contiene metadati non validi o incompleti.") }
         func number(_ row: Record, _ key: String, required: Bool = false) throws {
@@ -13,13 +17,13 @@ enum NativeBloomValidation {
         }
         func uuid(_ row: Record, _ key: String, required: Bool = false) throws {
             guard let value = row[key], value != .null else { if required { throw invalid() }; return }
-            guard case .string(let raw) = value, UUID(uuidString: raw) != nil else { throw invalid() }
+            guard case .string(let raw) = value, isIdentifier(raw) else { throw invalid() }
         }
         func ids(_ row: Record, _ key: String) throws -> [String]? {
             guard let value = row[key], value != .null else { return nil }
             guard case .array(let values) = value else { throw invalid() }
             return try values.map { value in
-                guard case .string(let raw) = value, UUID(uuidString: raw) != nil else { throw invalid() }; return raw
+                guard case .string(let raw) = value, isIdentifier(raw) else { throw invalid() }; return raw
             }
         }
         func url(_ raw: String) throws {

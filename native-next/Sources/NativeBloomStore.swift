@@ -69,6 +69,14 @@ struct NativeBloomArchive: Codable {
     var items: [Record] = []
     var lifeosImportReports: [NativeBloomImportReport]? = nil
     var lifeosImportMappings: [String: String]? = nil
+    /// Online data (BUILD93-REQUEST-2026-11-21): the server is the source of truth; this
+    /// archive is the device cache plus attachment bytes, which stay on the device.
+    var lifeosServerModified: [String: Double]? = nil
+    var lifeosPendingItems: [String]? = nil
+    var lifeosPendingCollections: [String]? = nil
+    var lifeosDeletedItems: [String]? = nil
+    var lifeosDeletedCollections: [String]? = nil
+    var lifeosTransferred93: Bool? = nil
 }
 
 @MainActor final class NativeBloomStore: ObservableObject {
@@ -125,15 +133,39 @@ struct NativeBloomArchive: Codable {
         }
         return record
     }
-    private func commit(_ next: NativeBloomArchive) throws {
+    /// Called after every local change so the online sync can send it.
+    var onLocalChange: (() -> Void)?
+    private func commit(_ proposed: NativeBloomArchive, track: Bool = true) throws {
         guard available else { throw Message(text: "Archivio non disponibile: nessuna modifica salvata.") }
+        var next = proposed
+        var changedItems = false
+        if track {
+            let oldItems = Dictionary(archive.items.map { ($0.text("id"), $0) }, uniquingKeysWith: { a, _ in a })
+            let newIDs = Set(next.items.map { $0.text("id") })
+            var pending = Set(next.lifeosPendingItems ?? []), deleted = Set(next.lifeosDeletedItems ?? [])
+            for item in next.items where oldItems[item.text("id")] != item { pending.insert(item.text("id")); deleted.remove(item.text("id")) }
+            for id in oldItems.keys where !newIDs.contains(id) { deleted.insert(id); pending.remove(id) }
+            let oldCollections = Dictionary(archive.collections.map { ($0.text("id"), $0) }, uniquingKeysWith: { a, _ in a })
+            let newCollectionIDs = Set(next.collections.map { $0.text("id") })
+            var pendingC = Set(next.lifeosPendingCollections ?? []), deletedC = Set(next.lifeosDeletedCollections ?? [])
+            for c in next.collections where oldCollections[c.text("id")] != c { pendingC.insert(c.text("id")); deletedC.remove(c.text("id")) }
+            for id in oldCollections.keys where !newCollectionIDs.contains(id) { deletedC.insert(id); pendingC.remove(id) }
+            changedItems = pending != Set(next.lifeosPendingItems ?? []) || deleted != Set(next.lifeosDeletedItems ?? []) || pendingC != Set(next.lifeosPendingCollections ?? []) || deletedC != Set(next.lifeosDeletedCollections ?? [])
+            next.lifeosPendingItems = pending.sorted(); next.lifeosDeletedItems = deleted.sorted()
+            next.lifeosPendingCollections = pendingC.sorted(); next.lifeosDeletedCollections = deletedC.sorted()
+        }
         try writeFile(JSONEncoder().encode(next), root.appendingPathComponent("index.json"))
         archive = next
+        if changedItems { onLocalChange?() }
     }
+    /// Replaces the cache with the server state; never marks anything as a local change.
+    func applyServer(_ next: NativeBloomArchive) throws { try commit(next, track: false) }
     func save(_ record: Record) throws {
         var next = archive
-        var validation = archive
-        validation.items = try archive.items.filter { $0.text("id") != record.text("id") }.map(hydrated) + [hydrated(record)]
+        // Validate the saved note against the categories only: cached notes created on the
+        // site may lack the attachment bytes that live on another device.
+        var validation = NativeBloomArchive(); validation.collections = archive.collections
+        validation.items = [try hydrated(record)]
         _ = try preview(JSONEncoder().encode(validation))
         let stored = try externalize(record)
         next.items.removeAll { $0.text("id") == record.text("id") }; next.items.append(stored)
@@ -252,10 +284,10 @@ struct NativeBloomArchive: Codable {
         guard categories.count == incoming.collections.count, Set(incoming.items.map { $0.text("id") }).count == incoming.items.count else { throw Message(text: "Identificativi duplicati nel backup.") }
         var total = incoming.collections.reduce(0) { $0 + $1.text("name").utf8.count }
         for category in incoming.collections {
-            guard UUID(uuidString: category.text("id")) != nil, !category.text("name").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { throw Message(text: "Categoria non valida.") }
+            guard NativeBloomValidation.isIdentifier(category.text("id")), !category.text("name").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { throw Message(text: "Categoria non valida.") }
         }
         for item in incoming.items {
-            guard UUID(uuidString: item.text("id")) != nil, ["text", "link", "image", "file"].contains(item.text("kind")), item.text("lifeosFileSHA256").isEmpty else { throw Message(text: "Nota non valida.") }
+            guard NativeBloomValidation.isIdentifier(item.text("id")), ["text", "link", "image", "file"].contains(item.text("kind")), item.text("lifeosFileSHA256").isEmpty else { throw Message(text: "Nota non valida.") }
             let tags = item["tagIDs"].flatMap { value -> [String]? in if case .array(let values) = value { return values.compactMap { if case .string(let s) = $0 { return s }; return nil } }; return nil } ?? (item.text("collectionID").isEmpty ? [] : [item.text("collectionID")])
             guard tags.allSatisfy(categories.contains) else { throw Message(text: "Categoria mancante nel backup.") }
             if item.text("kind") == "link" { guard let url = URL(string: item.text("urlString")), ["https", "http"].contains(url.scheme?.lowercased() ?? ""), url.host != nil else { throw Message(text: "Link non valido.") } }

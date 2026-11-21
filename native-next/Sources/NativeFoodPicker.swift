@@ -444,7 +444,9 @@ struct NativeFoodPicker: View {
             storageError = true
             return false
         }
+        let previous = personalFoods ?? []
         personalData = data
+        NativeOnlineSync.shared.foodsChanged(old: previous, new: foods)
         return true
     }
 }

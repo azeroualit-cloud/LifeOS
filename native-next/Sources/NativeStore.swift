@@ -510,6 +510,15 @@ import SwiftUI
             try await refresh(pendingScope)
             var next = state; next.pending.removeAll { $0.accepted && $0.method != "saveHealthEntry" }; try save(next)
             lastAutomaticSync = Date()
+            // Bloom and personal foods: server first, device cache (BUILD93-REQUEST-2026-11-21).
+            // Only the real app store (no injected test session) talks to the shared service.
+            if publishesWidgets {
+            NativeOnlineSync.shared.connect { [weak self] method, args in
+                guard let self else { throw CancellationError() }
+                return try await self.read(method, args: args)
+            }
+            await NativeOnlineSync.shared.run()
+            }
             if let writeFailure { throw writeFailure }
             syncStatus = transferablePending.isEmpty ? "Aggiornato" : "Modifiche sul dispositivo · in attesa di invio"; notice = transferablePending.isEmpty ? nil : syncStatus
             if !transferablePending.isEmpty { scheduleSync() }
