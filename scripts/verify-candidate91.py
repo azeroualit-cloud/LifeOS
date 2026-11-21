@@ -174,7 +174,8 @@ def ipa(path):
 def authorization():
     assert os.environ["GITHUB_REPOSITORY"] == "azeroualit-cloud/LifeOS"
     assert os.environ["GITHUB_REF"] == "refs/heads/codex/revision77"
-    assert os.environ["GITHUB_EVENT_NAME"] == "workflow_dispatch"
+    # autorizzato esplicitamente da Nas il 2026-11-21: avvio manuale oppure push del solo file di innesco
+    assert os.environ["GITHUB_EVENT_NAME"] in ("workflow_dispatch", "push")
     data = json.loads(Path("docs/USER-DECISIONS.json").read_text(encoding="utf-8-sig"))
     rules = []
     def visit(value):
