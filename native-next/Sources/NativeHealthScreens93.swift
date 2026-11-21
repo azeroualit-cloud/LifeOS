@@ -129,6 +129,11 @@ struct NativeWeightSimulationScreen: View {
     }
     private func kg(_ value: Double) -> String { value.formatted(.number.precision(.fractionLength(1))) }
     private func whole(_ value: Double) -> String { value.formatted(.number.precision(.fractionLength(0))) }
+    private func perWeekText(_ value: Double?) -> String {
+        guard let value else { return "—" }
+        let sign: String = value >= 0 ? "+" : "−"
+        return sign + kg(abs(value)) + " kg"
+    }
 
     var body: some View {
         let forecast = self.forecast
@@ -150,7 +155,7 @@ struct NativeWeightSimulationScreen: View {
                     chart(forecast: forecast, start: chartStart)
                     HStack(alignment: .firstTextBaseline) {
                         VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
-                            Text(perWeek.map { ($0 >= 0 ? "+" : "−") + kg(abs($0)) + " kg" } ?? "—").font(.headline).monospacedDigit()
+                            Text(perWeekText(perWeek)).font(.headline).monospacedDigit()
                             Text("a settimana").font(.footnote).foregroundStyle(NativeDesign.secondary)
                         }
                         Spacer()
@@ -249,24 +254,35 @@ struct NativeWeightSimulationScreen: View {
         }
     }
 
+    private var intakeNeeded: Double? {
+        guard let estimate = health.estimate, let start = startWeight, target > 0 else { return nil }
+        return NativeWeightSimulation.intakeNeeded(tdee: estimate.tdee, from: start, to: target, weeks: horizon, energyPerKG: estimate.energyPerKG)
+    }
+    private var needDetail: String? {
+        guard let need = intakeNeeded, let tdee = health.estimate?.tdee else { return nil }
+        let delta: Double = need - tdee
+        let sign: String = delta >= 0 ? "+" : "−"
+        return "al giorno · TDEE " + whole(tdee) + " · " + sign + whole(abs(delta)) + " rispetto al TDEE"
+    }
+    private func lowerTarget() { target = ((target - 0.5) * 2).rounded() / 2 }
+    private func raiseTarget() { target = ((target + 0.5) * 2).rounded() / 2 }
+
     private var targetSection: some View {
-        let need = health.estimate.flatMap { estimate in
-            startWeight.flatMap { NativeWeightSimulation.intakeNeeded(tdee: estimate.tdee, from: $0, to: target, weeks: horizon, energyPerKG: estimate.energyPerKG) }
-        }
+        let need: Double? = intakeNeeded
+        let targetText: String = target > 0 ? kg(target) + " kg" : "—"
+        let needText: String = need.map { whole($0) + " kcal" } ?? "—"
+        let low: Bool = (need ?? 2000) < 1600
+        let decrement: (() -> Void)? = target > 30 ? lowerTarget : nil
+        let increment: (() -> Void)? = target < 300 ? raiseTarget : nil
         return NativeCard {
-            LOStepperRow(title: "Obiettivo", value: target > 0 ? kg(target) + " kg" : "—",
-                decrement: target > 30 ? { target = ((target - 0.5) * 2).rounded() / 2 } : nil,
-                increment: target < 300 ? { target = ((target + 0.5) * 2).rounded() / 2 } : nil,
-                identifier: "simulation-target")
+            LOStepperRow(title: "Obiettivo", value: targetText, decrement: decrement, increment: increment, identifier: "simulation-target")
             Divider()
             VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
                 Text("Per arrivarci in \(horizon) settimane").font(.footnote).foregroundStyle(NativeDesign.secondary)
-                Text(need.map { whole($0) + " kcal" } ?? "—").font(.title2.bold()).monospacedDigit()
-                    .foregroundStyle((need ?? 2000) < 1600 ? NativeDesign.overGoal : Color.primary)
-                if let need, let tdee = health.estimate?.tdee {
-                    let delta = need - tdee
-                    Text("al giorno · TDEE " + whole(tdee) + " · " + (delta >= 0 ? "+" : "−") + whole(abs(delta)) + " rispetto al TDEE")
-                        .font(.footnote).foregroundStyle(NativeDesign.secondary)
+                Text(needText).font(.title2.bold()).monospacedDigit()
+                    .foregroundStyle(low ? NativeDesign.overGoal : Color.primary)
+                if let detail = needDetail {
+                    Text(detail).font(.footnote).foregroundStyle(NativeDesign.secondary)
                 }
             }
             .accessibilityElement(children: .combine)

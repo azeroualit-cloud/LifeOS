@@ -234,8 +234,14 @@ struct DashboardScreen: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(NativePressStyle())
-        .accessibilityLabel("Finanza, " + (hiddenMoney ? "importo nascosto" : (overview.remaining.map(\.euro) ?? "nessun dato")) + " disponibili" + (hiddenMoney || overview.remaining == nil ? "" : ", " + overview.daily.euro + " al giorno"))
+        .accessibilityLabel(financeLabel(overview))
         .accessibilityIdentifier("home-finance")
+    }
+    private func financeLabel(_ overview: NativeFinanceOverview) -> String {
+        if hiddenMoney { return "Finanza, importo nascosto disponibili" }
+        guard let remaining = overview.remaining else { return "Finanza, nessun dato disponibili" }
+        let perDay: String = overview.daily.euro
+        return "Finanza, " + remaining.euro + " disponibili, " + perDay + " al giorno"
     }
     private func financeAmount(_ amount: String) -> some View {
         Text(amount).font(.title.bold()).monospacedDigit().foregroundStyle(.primary)
@@ -251,6 +257,11 @@ struct DashboardScreen: View {
             .accessibilityElement(children: .combine)
             .accessibilityIdentifier("home-budget-label")
         }
+    }
+    private func upcomingLabel(_ event: Record) -> String {
+        var parts: [String] = [event.text("title", fallback: "Appuntamento"), CivilDate.label(event.text("day"))]
+        if !event.text("start_time").isEmpty { parts.append(event.text("start_time")) }
+        return parts.joined(separator: ", ")
     }
     /// Events after the checklist window, at most three (preview "Prossimi appuntamenti").
     @ViewBuilder private func upcomingAppointments(today: String) -> some View {
@@ -280,7 +291,7 @@ struct DashboardScreen: View {
                             .contentShape(Rectangle())
                         }
                         .buttonStyle(NativePressStyle())
-                        .accessibilityLabel(event.text("title", fallback: "Appuntamento") + ", " + CivilDate.label(event.text("day")) + (event.text("start_time").isEmpty ? "" : ", " + event.text("start_time")))
+                        .accessibilityLabel(upcomingLabel(event))
                         .accessibilityIdentifier("home-upcoming-" + event.agendaIdentity)
                     }
                 }

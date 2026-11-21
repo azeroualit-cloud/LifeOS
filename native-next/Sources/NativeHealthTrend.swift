@@ -27,7 +27,7 @@ struct NativeHealthTrendSummary: Equatable {
         // Today is still being logged: averages use completed days only.
         let completed = days.filter { $0.date >= start && $0.date < today }
         averageCalories = NativeHealthMath.mean(completed.compactMap(\.calories).filter { $0 > 0 })
-        averageProtein = NativeHealthMath.mean(protein.filter { $0.key >= start && $0.key < today && $0.value > 0 }.map(\.value))
+        averageProtein = NativeHealthMath.mean(protein.filter { $0.key >= start && $0.key < today && $0.value > 0 }.map { $0.value })
         let weighed = days.filter { $0.date <= now && ($0.weight ?? 0) > 0 }.sorted { $0.date < $1.date }
         latestWeight = weighed.last?.weight
         latestWeightDate = weighed.last?.date
@@ -213,7 +213,7 @@ enum NativeNutritionBars {
             }
         }
         return buckets.map { bucket in
-            let logged = macros.filter { $0.key >= bucket.start && $0.key < bucket.end && $0.key <= today && $0.value.calories > 0 }.map(\.value)
+            let logged = macros.filter { $0.key >= bucket.start && $0.key < bucket.end && $0.key <= today && $0.value.calories > 0 }.map { $0.value }
             let count = Double(max(logged.count, 1))
             return NativeNutritionBar(start: bucket.start, label: bucket.label, name: bucket.name,
                 protein: logged.map(\.protein).reduce(0, +) / count,

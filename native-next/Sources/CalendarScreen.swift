@@ -282,12 +282,12 @@ struct CalendarScreen: View {
         let events = (eventsByDay[day] ?? []).filter { $0.text("occurrence_status") != "skipped" }
             .sorted { ($0.text("start_time").isEmpty ? "00:00" : $0.text("start_time"), $0.integer("id")) < ($1.text("start_time").isEmpty ? "00:00" : $1.text("start_time"), $1.integer("id")) }
         let tasks = tasksByDay[day] ?? []
-        let shift = shift(on: day)
+        let dayShift = self.shift(on: day)
         return VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
             HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.small) {
                 Text(CivilDate.agendaTitle(day)).font(.headline)
-                if let shift {
-                    Text(shift.title).font(.subheadline.weight(.semibold)).foregroundStyle(shift.color)
+                if let dayShift {
+                    Text(dayShift.title).font(.subheadline.weight(.semibold)).foregroundStyle(dayShift.color)
                 }
             }
             .accessibilityElement(children: .combine)
@@ -300,7 +300,7 @@ struct CalendarScreen: View {
                 ForEach(Array(events.enumerated()), id: \.offset) { index, event in
                     agendaRow(time: event.text("start_time").isEmpty ? "Tutto il giorno" : event.text("start_time"),
                               title: event.text("title", fallback: "Evento"), detail: event.text("location"),
-                              color: shift?.color ?? NativeDesign.calendarTitle, isLast: index == events.count - 1 && tasks.isEmpty) {
+                              color: dayShift?.color ?? NativeDesign.calendarTitle, isLast: index == events.count - 1 && tasks.isEmpty) {
                         router.sheet = .event(event)
                     }
                 }

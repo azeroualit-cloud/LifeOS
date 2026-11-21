@@ -72,12 +72,16 @@ struct LOMacroValue: View {
     var identifier: String
 
     var body: some View {
-        let shown = value.map { $0.formatted(.number.precision(.fractionLength(0))) } ?? "—"
-        VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
+        let shown: String = value.map { $0.formatted(.number.precision(.fractionLength(0))) } ?? "—"
+        let goalText: String? = goal.map { $0.formatted(.number.precision(.fractionLength(0))) }
+        let suffix: String = goalText.map { "/ " + $0 + " " + unit } ?? unit
+        var spoken: String = title + ", " + (value == nil ? "nessun dato" : shown + " " + unit)
+        if let goalText { spoken += " di " + goalText }
+        return VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
             Text(title).font(.footnote).foregroundStyle(NativeDesign.secondary).lineLimit(1)
             HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xs) {
                 Text(shown).font(.subheadline.weight(.semibold)).monospacedDigit()
-                Text(goal.map { "/ " + $0.formatted(.number.precision(.fractionLength(0))) + " " + unit } ?? unit)
+                Text(suffix)
                     .font(.footnote).foregroundStyle(NativeDesign.secondary).monospacedDigit().lineLimit(1).minimumScaleFactor(0.8)
             }
             // Without a goal the track stays empty: a full bar would suggest a target met.
@@ -85,7 +89,7 @@ struct LOMacroValue: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(title + ", " + (value == nil ? "nessun dato" : shown + " " + unit) + (goal.map { " di " + $0.formatted(.number.precision(.fractionLength(0))) } ?? ""))
+        .accessibilityLabel(spoken)
         .accessibilityIdentifier(identifier)
     }
 }
@@ -186,6 +190,13 @@ struct LOStatCard: View {
     var accessibilityHint: String? = nil
     var action: (() -> Void)? = nil
 
+    private var spoken: String {
+        var text: String = title + ", " + value
+        if !unit.isEmpty { text += " " + unit }
+        if let caption { text += ", " + caption }
+        return text
+    }
+
     var body: some View {
         let content = VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
             HStack {
@@ -204,7 +215,6 @@ struct LOStatCard: View {
         .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
         .background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.cardRadius, style: .continuous))
         .contentShape(Rectangle())
-        let spoken = title + ", " + value + (unit.isEmpty ? "" : " " + unit) + (caption.map { ", " + $0 } ?? "")
         if let action {
             Button(action: action) { content }
                 .buttonStyle(NativePressStyle())
