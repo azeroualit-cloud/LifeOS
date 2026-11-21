@@ -173,13 +173,13 @@ import Foundation
     /// Server note → local note, keeping the attachments this device already has.
     nonisolated static func note(_ row: Record, local: Record?) -> Record {
         var out = row.record("app")
+        out.removeValue(forKey: "noteFiles") // file bytes exist only where they were attached
         for (key, value) in local ?? [:] where ["data", "lifeosFileSHA256", "lifeosFileBytes", "noteFiles", "fileName", "contentType"].contains(key) { out[key] = value }
         out["id"] = .string(row.text("id"))
         let kind = row.text("kind")
         out["kind"] = .string(["text", "link", "image", "file"].contains(kind) ? kind : (row.text("url").isEmpty ? "text" : "link"))
         out["title"] = .string(row.text("title"))
         out["urlString"] = .string(row.text("url"))
-        out["text"] = .string(row.text("body"))
         out["notes"] = .string(row.text("notes"))
         let tags = row["tags"]?.array ?? []
         out["tagIDs"] = .array(tags)
@@ -193,6 +193,15 @@ import Foundation
         if ["image", "file"].contains(out.text("kind")), out.text("lifeosFileSHA256").isEmpty, out["data"] == nil {
             out["kind"] = .string(out.text("urlString").isEmpty ? "text" : "link")
         }
+        // Shape the app validates: text only on text notes, a capture date on every note.
+        if out.text("kind") == "text" {
+            out["text"] = .string(row.text("body"))
+            if out.text("text").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && out.text("title").isEmpty { out["title"] = .string("Nota") }
+        } else {
+            out["text"] = .null
+            if !row.text("body").isEmpty && out.text("notes").isEmpty { out["notes"] = .string(row.text("body")) }
+        }
+        if out["capturedAt"] == nil || out["capturedAt"] == .null { out["capturedAt"] = out["createdAt"] ?? out["modifiedAt"] ?? .number(0) }
         return out
     }
 
@@ -311,7 +320,10 @@ import Foundation
         // Notes still waiting to be sent stay; anything else missing was removed on the site.
         for id in pending where !items.contains(where: { $0.text("id") == id }) { if let mine = local[id], !(next.lifeosDeletedItems ?? []).contains(id) { items.append(mine) } }
         var collections = value.records("collections").map { row -> Record in
-            var c = row.record("doc"); c["id"] = .string(row.text("id")); c["name"] = .string(row.text("name")); return c
+            var c = row.record("doc"); c["id"] = .string(row.text("id")); c["name"] = .string(row.text("name"))
+            if case .number(let created)? = c["createdAt"] { c["createdAt"] = .number(Self.reference(created)) } else { c["createdAt"] = .number(0) }
+            c.removeValue(forKey: "modifiedAt")
+            return c
         }.filter { !pendingCollections.contains($0.text("id")) }
         collections += next.collections.filter { pendingCollections.contains($0.text("id")) && !(next.lifeosDeletedCollections ?? []).contains($0.text("id")) }
         let serverIDs = Set(value.records("items").map { $0.text("id") })
