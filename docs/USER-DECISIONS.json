@@ -1128,6 +1128,16 @@
       "original_quote": "si",
       "rule": "Proporzioni di layout in rapporto aureo (es. altezza riga 55 pt = 34 x 1,618, spaziature 21/13); tra livelli di testo consecutivi passo circa radice di 1,618 seguendo la scala Dynamic Type di iOS (13, 17, 22, 28, 34), senza scendere sotto i minimi leggibili di iOS.",
       "conflict_check": "Chiude la scelta pendente su come conciliare GOLDEN-01 con l'app nativa. Nessuna regola sostituita."
+    },
+    {
+      "id": "BUILD93-PREVIEW-APPROVED-NON-FINANCE-2026-11-21",
+      "status": "ACTIVE",
+      "scope": "Anteprima build 93, tutte le schermate e i fogli tranne Finanza",
+      "recorded_on": "2026-11-21",
+      "provenance": "Richiesta diretta utente in chat Claude",
+      "original_quote": "ricordami alle 15:00 ri rivalutare la sezione finanza, il resto è top",
+      "rule": "Approvate le schermate non di Finanza dell'anteprima https://claude.ai/artifact/QAanqSYRowbYWgUKV8n271 (Dashboard, Attività, Calendario, Agenda, Dipingi turni, Salute, Cronologia, Simulazione peso, TDEE, Bloom, Impostazioni e relativi fogli). Approvato anche il foglio Nuovo piano. Finanza da rivalutare alle 15:00.",
+      "conflict_check": "Nessuna regola sostituita. IPA build 93 ancora non autorizzata (IPA-GATE-01)."
     }
   ],
   "pending_confirmations": [
