@@ -260,6 +260,8 @@ final class NativeRevision71UITests: XCTestCase {
         XCTAssertGreaterThanOrEqual(clock.frame.height.rounded(), 44)
         clock.tap(); app.buttons["Salva"].tap()
         let complete = app.buttons["Cambia completamento evento Slot completato test"]
+        // The list refreshes after the editor closes: wait for the new row before scrolling to it.
+        XCTAssertTrue(complete.waitForExistence(timeout: 15), "Saved activity must appear in the list")
         reveal(complete, in: app.collectionViews.firstMatch, app: app); complete.tap()
         app.openOtherDestination("Calendario")
         let today = app.buttons["calendar-day-" + day()]
