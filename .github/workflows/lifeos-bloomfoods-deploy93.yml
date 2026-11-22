@@ -1,7 +1,7 @@
 name: Life OS - Bloom e alimenti nel Worker dell'app (build 93)
 # Solo avvio manuale dell'utente. Cambia lifeos-native-test aggiungendo le letture e scritture di Bloom e
 # alimenti personali sulle stesse tabelle del sito. Nessuna altra modifica backend.
-# Attempt 4 (new Cloudflare token). DEPLOY-WORKERS-93-2026-11-22: a push that changes this file is the deliberate start
+# Attempt 5 (token verified and trimmed). DEPLOY-WORKERS-93-2026-11-22: a push that changes this file is the deliberate start
 # (a workflow present only on this branch cannot be dispatched).
 on:
   workflow_dispatch:
@@ -25,6 +25,25 @@ jobs:
         run: |
           node --test backend/bloom-foods/tests/bloomfoods.test.mjs
           python3 backend/bloom-foods/tests/test_transform.py
+      - name: Verifica della chiave Cloudflare (nessun valore stampato)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import os, json, urllib.request, urllib.error
+          raw = os.environ.get('CLOUDFLARE_API_TOKEN', '')
+          token = raw.strip()
+          print('TOKEN_PRESENT', bool(token), 'SURROUNDING_WHITESPACE', raw != token)
+          req = urllib.request.Request('https://api.cloudflare.com/client/v4/user/tokens/verify', headers={'Authorization': 'Bearer ' + token})
+          try:
+              with urllib.request.urlopen(req, timeout=30) as r: data = json.loads(r.read())
+              status = (data.get('result') or {}).get('status')
+              print('::notice title=Chiave Cloudflare::verify HTTP 200, stato ' + str(status))
+          except urllib.error.HTTPError as e:
+              body = json.loads(e.read() or b'{}')
+              codes = [x.get('code') for x in body.get('errors', [])]
+              print('::error title=Chiave Cloudflare::verify HTTP ' + str(e.code) + ' codici ' + str(codes))
+          PY
       - name: Audit del Worker attuale senza scritture
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

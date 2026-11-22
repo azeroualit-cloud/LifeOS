@@ -57,7 +57,7 @@ def transform(source):
     return expected+source
 
 def main(post_verification=None, label="ACTIVITIES_68_DEPLOYED_AND_VERIFIED"):
-    token=os.environ.get('CLOUDFLARE_API_TOKEN','')
+    token=os.environ.get('CLOUDFLARE_API_TOKEN','').strip()
     if not token:raise RuntimeError('Credenziale Cloudflare non disponibile.')
     def api(path,method='GET',data=None,kind=None):
         req=urllib.request.Request('https://api.cloudflare.com/client/v4/accounts/'+helpers.ACCOUNT+path,data=data,method=method,headers={'Authorization':'Bearer '+token,**({'Content-Type':kind} if kind else {})})
