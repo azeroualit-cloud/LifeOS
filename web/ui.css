@@ -1092,12 +1092,12 @@ body .nav button[data-view].active .nav-symbol,body .nav #admin-link.active .nav
 }
 .nav button[data-view] svg{transition:transform var(--m2) var(--ease)}
 /* mappa unica dello stipendio (heatmap ad aree) */
-.sc-chips{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s3);margin:var(--s4) 0 var(--s3)}
+.sc-chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr));gap:var(--s3);margin:var(--s4) 0 var(--s3)}
 .sc-chip{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:2px var(--s2);align-items:center;padding:var(--s3);border-radius:var(--r-md);background:var(--surface-2)}
 .sc-chip i{width:10px;height:10px;border-radius:50%;background:var(--c)}
-.sc-chip span{font-size:var(--fs-2);color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sc-chip b{grid-column:2;font-size:var(--fs-4);font-weight:650;font-variant-numeric:tabular-nums}
-.sc-chip em{grid-column:3;grid-row:2;font-style:normal;font-size:var(--fs-2);color:var(--ink-3)}
+.sc-chip span{font-size:var(--fs-2);color:var(--ink-2);line-height:1.2;overflow-wrap:anywhere}
+.sc-chip b{grid-column:2;font-size:var(--fs-4);font-weight:650;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sc-chip em{grid-column:3;grid-row:2;font-style:normal;font-size:var(--fs-2);color:var(--ink-3);white-space:nowrap}
 .sc-tm{position:relative;width:100%;aspect-ratio:2.4/1;min-height:240px}
 .sc-grp{position:absolute;padding:3px;min-width:0}
 .sc-gi{position:relative;width:100%;height:100%}
@@ -1164,7 +1164,7 @@ div.sc-txtile{cursor:default}
 button.sc-chip{border:0;font:inherit;color:inherit;text-align:left;cursor:pointer;min-height:44px;transition:background var(--m2) var(--ease)}
 button.sc-chip:hover{background:color-mix(in srgb,var(--c) 16%,var(--surface-2))}
 button.sc-chip:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
-@media(max-width:620px){.sc-chips{grid-template-columns:repeat(2,minmax(0,1fr))}.sc-chip span{white-space:normal;line-height:1.2}.sc-tile.sm b{font-size:var(--fs-1);white-space:nowrap}.sc-tm{aspect-ratio:1/1.1}}
+@media(max-width:620px){.sc-chip span{white-space:normal;line-height:1.2}.sc-tile.sm b{font-size:var(--fs-1);white-space:nowrap}.sc-tm{aspect-ratio:1/1.1}}
 .sc-note{margin:var(--s2) 0 0;font-size:var(--fs-1);color:var(--ink-3)}
 
 /* 10. POPUP ------------------------------------------------------------
