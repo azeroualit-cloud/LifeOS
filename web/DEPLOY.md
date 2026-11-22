@@ -4,6 +4,8 @@ Stato: preparata, NON eseguita. Nessun deploy senza conferma esplicita di Nas.
 File da distribuire: `web/dist/worker-release.mjs` (generato da `python web/build-release.py`, non versionato).
 SHA256 del file online dal 2026-11-21 (versione 7cda51d0-3720-4c99-8d3e-535a813603a1), preparato il 2026-11-21 (mappa stipendio con dettaglio, grafico a linee, popup moderni, colori Salute uguali a dashboard): AE30DE6D6E7990733A00E87A163E24DBD01DD7F90C39919C02CB1E10F8719AC9
 
+Pronto al deploy dal 2026-11-22 (commit 0fc9a96: testo in ogni riquadro di "Dove va lo stipendio", popup della voce al clic), generato con `python -X utf8 web/build-release.py` e lo stesso `manual/build-75/worker.js` locale: SHA256 0F6DE610B2A8FEB00F71DEF85124C71031AF853BD8B99163B4A0CCEB661C8949. Non distribuito.
+
 Il Worker contiene backend build-75 (lo stesso dell'app), UI web aggiornata e i metodi Admin in sola lettura.
 Sito e app usano lo stesso D1 (confermato da Nas il 2026-11-19).
 
