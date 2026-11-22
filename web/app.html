@@ -1277,6 +1277,56 @@ button.sc-chip:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .fx-area,.fx-avg,.fx-avgl,.fx-dot{pointer-events:none}
 @media(max-width:760px){.fx-dgrid{gap:var(--s2)}.fx-dgrid strong{font-size:var(--fs-3);white-space:nowrap}.fx-dbox{padding:var(--s3) var(--s4)}}
 @media(prefers-reduced-motion:reduce){.fx-dbox>*,.sc-dbox>*{animation:none}}
+/* Analisi 93: Ritmo sulla norma, Quanto dura il fondo, Giorno per giorno (parità con l'app). */
+.an93-sub{font-size:var(--fs-2);font-weight:400;color:var(--ink-3);margin-left:var(--s2)}
+.an93-norm{display:flex;align-items:baseline;gap:var(--s3);margin:var(--s3) 0 var(--s4)}
+.an93-norm strong{font-size:var(--fs-7);font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.4px}
+.an93-norm span{color:var(--ink-3);font-size:var(--fs-2)}
+.an93-pace{display:grid;grid-template-columns:minmax(0,1fr) 120px 56px;gap:var(--s3);align-items:center;min-height:44px}
+.an93-pace>span{color:var(--ink-2);font-size:var(--fs-2)}
+.an93-pace strong{text-align:right;font-variant-numeric:tabular-nums}
+.an93-pace strong.neg{color:var(--warn)}.an93-pace strong.pos{color:var(--pos-t)}
+.an93-track{position:relative;height:8px;border-radius:var(--r-pill);background:var(--surface-3)}
+.an93-track i{position:absolute;top:0;bottom:0;border-radius:var(--r-pill)}
+.an93-track i.up{background:var(--warn)}.an93-track i.down{background:var(--pos)}
+.an93-track b{position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--ink-3)}
+.an93-two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.an93-two .an-stat span{font-size:var(--fs-1);color:var(--ink-3)}
+.an93-step{display:grid;grid-template-columns:minmax(0,1fr) 44px auto 44px;gap:var(--s2);align-items:center}
+.an93-step span{color:var(--ink-2);font-size:var(--fs-2)}
+.an93-step b{min-width:72px;text-align:center;font-variant-numeric:tabular-nums}
+.an93-step button{min-height:44px;border-radius:var(--r-pill);border:0;background:var(--surface-3);color:var(--ink);font:inherit;font-size:var(--fs-4);cursor:pointer}
+.an93-step button:disabled{opacity:.4;cursor:default}
+.an93-cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;margin:var(--s3) 0}
+.an93-wd{text-align:center;font-size:var(--fs-1);color:var(--ink-3)}
+.an93-day{min-height:44px;border:0;border-radius:8px;font:inherit;font-size:var(--fs-2);font-variant-numeric:tabular-nums;color:var(--ink);cursor:pointer;background:color-mix(in srgb,var(--sec-finance,#a8c7ff) calc(var(--a) * 100%),var(--surface-2))}
+.an93-day.on{box-shadow:0 0 0 2px var(--ink) inset;font-weight:700}
+.an93-day:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+@media(max-width:620px){.an93-pace{grid-template-columns:minmax(0,1fr) 90px 52px}}
+/* Avvisi di Finanza (parità con l'app). */
+.fa-card .card-title{display:flex;justify-content:space-between;align-items:center}
+.fa-card .card-title button{min-height:44px}
+.fa-list{list-style:none;margin:var(--s3) 0 0;padding:0;display:grid;gap:var(--s2)}
+.fa-row{display:grid;gap:2px;padding:var(--s3) var(--s4);border-radius:var(--r-md);background:color-mix(in srgb,var(--warn) 12%,var(--surface-2))}
+.fa-row.quiet{background:var(--surface-2)}
+.fa-row b{font-size:var(--fs-2);font-weight:650}
+.fa-row span{font-size:var(--fs-2);color:var(--ink-2)}
+.fa-pop{width:min(480px,100%)}
+.fa-rule{padding:var(--s3) 0;border-top:1px solid var(--line)}
+.fa-rule:first-of-type{border-top:0}
+.fa-head{display:flex;justify-content:space-between;align-items:center;gap:var(--s3)}
+.fa-head span{display:grid;gap:2px}
+.fa-head small{color:var(--ink-3);font-size:var(--fs-1)}
+.fa-switch{width:51px;height:31px;border-radius:16px;border:0;padding:0;position:relative;flex:none;cursor:pointer;background:rgba(120,120,128,.36)}
+.fa-switch[aria-checked=true]{background:var(--pos)}
+.fa-switch i{position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;transition:left var(--m2) var(--ease)}
+.fa-switch[aria-checked=true] i{left:22px}
+.fa-switch:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.fa-step{display:grid;grid-template-columns:minmax(0,1fr) 44px auto 44px;gap:var(--s2);align-items:center;margin-top:var(--s2)}
+.fa-step span{color:var(--ink-2);font-size:var(--fs-2)}
+.fa-step b{min-width:64px;text-align:center;font-variant-numeric:tabular-nums}
+.fa-step button{min-height:44px;border-radius:var(--r-pill);border:0;background:var(--surface-3);color:var(--ink);font:inherit;font-size:var(--fs-4);cursor:pointer}
+.fa-step button:disabled{opacity:.4;cursor:default}
 </style>
 </head>
   <body class="dashboard-mode">
@@ -1775,6 +1825,7 @@ document.addEventListener("keydown", (e) => {
         if (treat === "planned" || treat === "auto" && financialCommittedCategories().includes(category) || typeof isUtilityCategory === "function" && isUtilityCategory(category))
           return { amount, parts: [{ label: "Impegno del mese", value: amount, c: SF.fixed, detail: "già prenotato nel budget con la stima" }], note: "Se spendi meno della stima, la differenza non torna nel Libero: conta come risparmio." };
         const choice = f.elements.routingChoice?.value;
+        if (!edit && choice === "__savings") return { amount, parts: [{ label: "Dai risparmi", value: amount, c: SF.savings, detail: "esce dal conto, non pesa sul budget del mese" }] };
         if (!edit && choice && choice !== "__ordinary") {
           const plan = (rt.plans || []).find((p) => p.id === choice), avail = Number(plan?.availableCents ?? plan?.fundCents ?? 0) / 100, fromPlan = Math.min(amount, Math.max(0, avail)), extra = amount - fromPlan;
           return { amount, parts: [{ label: "Piano · " + (plan?.name || ""), value: fromPlan, c: SF.plan, detail: `fondo: ${exactEuro(avail)} → ${exactEuro(Math.max(0, avail - fromPlan))}` }, { label: "Risparmi generali", value: extra, c: SF.savings, detail: "oltre il fondo del piano" }] };
@@ -1804,7 +1855,7 @@ document.addEventListener("keydown", (e) => {
             if (r.version !== 1) { box.innerHTML = ""; rt.plans = []; renderSpendFlow(); return; }
             const plans = r.plans || [], keep = f.elements.routingChoice?.value; rt.plans = plans;
             const suggested = plans.length === 1 ? plans[0].id : "__ordinary";
-            box.innerHTML = `<label>Da dove viene pagata *<select name="routingChoice"><option value="__ordinary">Budget del mese</option>${plans.map((p) => `<option value="${escapeHtml(p.id)}">Piano · ${escapeHtml(p.name)}${p.availableCents != null || p.fundCents != null ? " (disponibile " + planEuro(p.availableCents ?? p.fundCents) + ")" : ""}</option>`).join("")}</select></label>`;
+            box.innerHTML = `<label>Da dove arrivano i soldi *<select name="routingChoice"><option value="__ordinary">Budget del mese</option>${r.savingsDestination ? `<option value="__savings">Risparmi</option>` : ""}${plans.map((p) => `<option value="${escapeHtml(p.id)}">Piano · ${escapeHtml(p.name)}${p.availableCents != null || p.fundCents != null ? " (disponibile " + planEuro(p.availableCents ?? p.fundCents) + ")" : ""}</option>`).join("")}</select></label>`;
             f.elements.routingChoice.value = [...f.elements.routingChoice.options].some((o) => o.value === keep) ? keep : suggested;
             f.classList.add("routing-on");
             renderSpendFlow();
@@ -1814,8 +1865,8 @@ document.addEventListener("keydown", (e) => {
       function applyRouting(d, f) {
         if (f.dataset.kind !== "transaction" || d.type !== "Spesa" || !f.classList.contains("routing-on") || !d.routingChoice) return d;
         d.expenseRoutingVersion = 1;
-        d.expenseDestination = d.routingChoice === "__ordinary" ? "ordinary" : "plan";
-        if (d.routingChoice !== "__ordinary") d.planId = d.routingChoice;
+        d.expenseDestination = d.routingChoice === "__ordinary" ? "ordinary" : d.routingChoice === "__savings" ? "savings" : "plan";
+        if (!["__ordinary", "__savings"].includes(d.routingChoice)) d.planId = d.routingChoice;
         delete d.routingChoice; delete d.budgetTreatment; delete d.recoveryMonths; delete d.recoveryAmount;
         return d;
       }
@@ -4095,12 +4146,72 @@ document.addEventListener("keydown", (e) => {
 
 
 
+      /* ---- Avvisi di Finanza (FINANCE-ALERTS-2026-11-21, parità con l'app): stesse regole e soglie ---- */
+      const FA_KEY = "lifeos-finance-alerts-93";
+      const FA_DEF = { rhythmOn: true, rhythm: 10, recurringOn: true, recP: 25, recE: 15, weeklyOn: true };
+      function faSettings() { try { return { ...FA_DEF, ...JSON.parse(localStorage.getItem(FA_KEY) || "{}") }; } catch (e) { return { ...FA_DEF }; } }
+      function faSave(s) { try { localStorage.setItem(FA_KEY, JSON.stringify(s)); } catch (e) {} }
+      function faCandidates(d, s) {
+        const now = todayIso().slice(0, 7), out = [];
+        if (s.rhythmOn) {
+          const flows = (d.yearly || []).filter((r) => r.month < now && (r.hasRecords || Number(r.spent) > 0 || Number(r.income) > 0)).sort((a, b) => a.month.localeCompare(b.month));
+          const norm = flows.length ? flows.reduce((n, r) => n + (Number(r.spent) || 0), 0) / flows.length : 0;
+          if (flows.length >= 3 && norm > 0) {
+            const pace = flows.slice(-3).reduce((n, r) => n + (Number(r.spent) || 0), 0) / 3 / norm - 1;
+            if (pace * 100 > s.rhythm) out.push({ key: "rhythm", title: "Ritmo sopra la norma", body: `Negli ultimi 3 mesi stai spendendo il ${Math.round(pace * 100)}% sopra la tua norma. Budget rimanente ${exactEuro(Number(d.summary?.monthlyRemaining) || 0)}.` });
+          }
+        }
+        if (s.recurringOn) for (const r of d.recurring || []) {
+          const norm = Number(r.estimate) || 0, name = r.name;
+          if (!name || !(norm > 0)) continue;
+          const actual = (d.transactions || []).filter((t) => String(t.date || "").startsWith(now) && t.amount < 0 && (t.category === name || t.displayCategory === name)).reduce((n, t) => n - t.amount, 0);
+          if (actual > norm * (1 + s.recP / 100) && actual - norm >= s.recE) out.push({ key: "recurring-" + name, title: name, body: `${exactEuro(actual)}, il ${Math.round((actual - norm) / norm * 100)}% sopra la norma (${exactEuro(norm)}).` });
+        }
+        if (s.weeklyOn) {
+          const start = new Date(Date.parse(todayIso() + "T12:00:00Z") - 7 * 864e5).toISOString().slice(0, 10), by = {};
+          const rows = (d.transactions || []).filter((t) => t.date > start && t.date <= todayIso() && t.amount < 0 && t.type !== "Entrata");
+          for (const t of rows) { const k = t.displayCategory || t.category || "Altro"; by[k] = (by[k] || 0) - t.amount; }
+          const top = Object.entries(by).sort((a, b) => b[1] - a[1])[0];
+          out.push({ key: "weekly", title: "La tua settimana", body: `Spesi ${exactEuro(rows.reduce((n, t) => n - t.amount, 0))} negli ultimi 7 giorni.${top ? ` ${top[0]} la voce più alta (${exactEuro(top[1])}).` : ""}`, quiet: true });
+        }
+        return out;
+      }
+      function financeAlertsCard(d) {
+        if (state.assetsVisible === false) return "";
+        const s = faSettings(), list = faCandidates(d, s), on = [s.rhythmOn, s.recurringOn, s.weeklyOn].filter(Boolean).length;
+        const rows = list.map((a) => `<li class="fa-row${a.quiet ? " quiet" : ""}"><b>${escapeHtml(a.title)}</b><span>${escapeHtml(a.body)}</span></li>`).join("");
+        return `<section class="card pad fa-card"><div class="card-title"><h2>Avvisi</h2><button type="button" class="ghost" data-fa-open aria-haspopup="dialog">${on} attivi</button></div>${rows ? `<ul class="fa-list">${rows}</ul>` : `<p class="empty">Nessun avviso</p>`}</section>`;
+      }
+      function faRule(i, title, sub, on, params) {
+        return `<div class="fa-rule"><div class="fa-head"><span><b>${title}</b><small>${sub}</small></span><button type="button" role="switch" class="fa-switch" aria-checked="${on}" aria-label="${title}" data-fa-flip="${i}"><i></i></button></div>${params.map(([label, value, key, step, min, max]) => `<div class="fa-step"><span>${label}</span><button type="button" data-fa-step="${key}" data-d="${-step}" data-min="${min}" data-max="${max}" aria-label="Meno" ${s_(key) <= min ? "disabled" : ""}>−</button><b>${value}</b><button type="button" data-fa-step="${key}" data-d="${step}" data-min="${min}" data-max="${max}" aria-label="Più" ${s_(key) >= max ? "disabled" : ""}>+</button></div>`).join("")}</div>`;
+      }
+      function s_(key) { return faSettings()[key]; }
+      function faOpen() {
+        const s = faSettings(), host = document.getElementById("dialog");
+        if (!host) return;
+        host.innerHTML = `<div class="modal fa-pop" role="dialog" aria-modal="true" aria-label="Avvisi di Finanza"><div class="modal-top"><h2>Avvisi di Finanza</h2><button type="button" class="ghost" data-close="1" aria-label="Chiudi">×</button></div>${faRule("rhythmOn", "Ritmo sopra la norma", `media 3 mesi oltre il ${s.rhythm}% della norma`, s.rhythmOn, [["Soglia", s.rhythm + "%", "rhythm", 5, 5, 30]])}${faRule("recurringOn", "Spese ricorrenti fuori norma", `bollette e abbonamenti oltre +${s.recP}% e +${s.recE} €`, s.recurringOn, [["Oltre la norma", "+" + s.recP + "%", "recP", 5, 10, 60], ["E almeno", s.recE + " €", "recE", 5, 5, 50]])}${faRule("weeklyOn", "Riepilogo della settimana", "spesa degli ultimi 7 giorni", s.weeklyOn, [])}</div>`;
+        host.classList.remove("hidden");
+        host.querySelector("[data-close]")?.focus({ preventScroll: true });
+      }
+      document.addEventListener("click", (e) => {
+        if (e.target.closest("[data-fa-open]")) { faOpen(); return; }
+        const flip = e.target.closest("[data-fa-flip]"), step = e.target.closest("[data-fa-step]");
+        if (!flip && !step) return;
+        const s = faSettings();
+        if (flip) s[flip.dataset.faFlip] = !s[flip.dataset.faFlip];
+        if (step) s[step.dataset.faStep] = Math.min(Number(step.dataset.max), Math.max(Number(step.dataset.min), s[step.dataset.faStep] + Number(step.dataset.d)));
+        faSave(s); faOpen();
+        const old = document.querySelector(".fa-card");
+        if (old && state.data) { const tmp = document.createElement("div"); tmp.innerHTML = financeAlertsCard(state.data); if (tmp.firstElementChild) old.replaceWith(tmp.firstElementChild); }
+      });
+
       /** Panoramica essenziale: saldo Trade Republic, impegnato, spendibile, patrimonio e flussi TR. */
       function overview(d) {
         const s = d.summary, daily = dailyBudgetRange(s);
         const recent = (d.transactions || []).slice(0, 3);
         return `<div class="finance-open">
         ${finHero(d, daily)}
+        ${financeAlertsCard(d)}
         <div class="finance-actions"><button data-new-transaction="Spesa" class="primary-pill"><span aria-hidden="true">+</span>Nuova spesa</button><button data-new-extra><span aria-hidden="true">+</span>Nuovo piano</button><button data-view="budget"><span aria-hidden="true">◔</span>Budget</button><button data-view="analysis"><span aria-hidden="true">≋</span>Analisi</button></div>
         ${budgetSankey(d)}
         <section class="finance-recent"><div class="finance-heading"><h2>Ultimi movimenti</h2><button data-view="movements">Vedi tutti</button></div>${recent.length ? recent.map(t => `<button class="finance-movement" data-edit-movement="${Number(t.row)}"><span><strong>${escapeHtml(t.name)}</strong><small>${escapeHtml(t.date || '')} · ${escapeHtml(t.category || t.type || '')}</small></span><b class="${amountClass(t.amount)}">${state.assetsVisible ? exactEuro(t.amount) : '•••• €'}</b></button>`).join('') : '<p class="empty">Nessun movimento nel mese.</p>'}</section>${overviewCharts(d)}</div>`;
@@ -6155,6 +6266,50 @@ document.addEventListener("keydown", (e) => {
       if (a) { const v = Number(a.value); if (Number.isFinite(v) && v >= 0) { fcs[a.dataset.fcA] = Math.round(v); fcPersist(); fcRefresh(); } }
     });
     document.addEventListener("input", (e) => { const r = e.target.closest("[data-fc-range]"); if (r) { const num = document.querySelector("[data-fc-num]"); if (num) num.value = r.value; } });
+    /* ---- Analisi 93 (parità con l'app): Ritmo sulla norma, Quanto dura il fondo, Giorno per giorno ---- */
+    const an93 = { monthly: Number(localStorage.getItem("lifeos-fund-monthly-93")) || 0, day: 0 };
+    const an93Hide = () => state.assetsVisible === false;
+    const an93Eur = (v) => an93Hide() ? "•••• €" : exactEuro(v);
+    const an93Pct = (v) => { const p = Math.round(v * 100); return (p > 0 ? "+" : p < 0 ? "−" : "") + Math.abs(p) + "%"; };
+    const an93MonthName = (m) => ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"][Math.max(0, Math.min(11, Number(String(m).slice(5, 7)) - 1))];
+    /** Mesi completi con dati prima del mese corrente (stessa regola dell'app). */
+    function an93Flows(d) {
+      const now = todayIso().slice(0, 7);
+      return (d.yearly || []).filter((r) => r.month < now && (r.hasRecords || Number(r.spent) > 0 || Number(r.income) > 0)).sort((a, b) => a.month.localeCompare(b.month)).map((r) => ({ month: r.month, income: Number(r.income) || 0, spent: Number(r.spent) || 0 }));
+    }
+    function an93Rhythm(d) {
+      const flows = an93Flows(d);
+      if (!flows.length) return card("Ritmo", `<p class="empty">Nessun mese completo</p>`);
+      const norm = flows.reduce((n, f) => n + f.spent, 0) / flows.length;
+      const pace = (k) => flows.length >= k && norm > 0 ? flows.slice(-k).reduce((n, f) => n + f.spent, 0) / k / norm - 1 : null;
+      const bar = (title, v) => v === null ? "" : `<div class="an93-pace"><span>${title}</span><div class="an93-track" role="img" aria-label="${title}: ${an93Pct(v)} rispetto alla norma"><i class="${v > 0 ? "up" : "down"}" style="${v > 0 ? "left:50%" : "right:50%"};width:${(Math.min(1, Math.abs(v) / 0.3) * 50).toFixed(1)}%"></i><b></b></div><strong class="${v > 0 ? "neg" : "pos"}">${an93Pct(v)}</strong></div>`;
+      return card(`Ritmo <small class="an93-sub">da ${an93MonthName(flows[0].month)}</small>`, `<div class="an93-norm"><strong>${an93Eur(norm)}</strong><span>la tua norma al mese</span></div>${bar("Ultimo mese", pace(1))}${bar("Ultimi 3 mesi", pace(3))}`);
+    }
+    function an93Fund(d) {
+      const fund = Number(d.planning?.now);
+      if (!Number.isFinite(fund) || !(fund > 0)) return card("Quanto dura il fondo", `<p class="empty">Fondo non disponibile</p>`);
+      const obs = (d.forecastHistory || []).filter((r) => r.observed);
+      const surplus = obs.length ? obs.reduce((n, r) => n + (Number(r.ordinaryNet) || 0), 0) / obs.length : null;
+      const flows = an93Flows(d), norm = flows.length ? flows.reduce((n, f) => n + f.spent, 0) / flows.length : 1000;
+      const monthly = an93.monthly > 0 ? an93.monthly : Math.max(50, Math.round(norm / 50) * 50);
+      const months = fund / monthly;
+      return card(`Quanto dura il fondo <small class="an93-sub">fondo ${an93Eur(fund)}</small>`, `<div class="an-stats an93-two"><div class="an-stat"><small>Con stipendio</small><strong>${surplus === null || surplus >= 0 ? "Stabile" : "In calo"}</strong><span>${surplus === null ? "" : (an93Hide() ? "••••" : exactEuro(Math.abs(surplus))) + (surplus >= 0 ? " di eccedenza al mese" : " in meno al mese")}</span></div><div class="an-stat"><small>Senza stipendio</small><strong>${months.toFixed(1).replace(".", ",")} mesi</strong><span>a ${Math.round(monthly)} € al mese</span></div></div><div class="an93-step"><span>Spesa al mese senza stipendio</span><button type="button" data-an93-fund="-50" aria-label="Meno 50 euro" ${monthly <= 50 ? "disabled" : ""}>−</button><b>${Math.round(monthly)} €</b><button type="button" data-an93-fund="50" aria-label="Più 50 euro" ${monthly >= 5000 ? "disabled" : ""}>+</button></div>`);
+    }
+    function an93Daily(d) {
+      const month = selectedMonth(), [y, m] = month.split("-").map(Number), count = new Date(Date.UTC(y, m, 0)).getUTCDate();
+      const offset = (new Date(Date.UTC(y, m - 1, 1)).getUTCDay() + 6) % 7, by = {};
+      for (const t of d.transactions || []) if (String(t.date || "").startsWith(month) && t.amount < 0 && t.type !== "Entrata") { const k = Number(t.date.slice(8, 10)); by[k] = (by[k] || 0) - t.amount; }
+      const top = Math.max(...Object.values(by), 0.01), spentDays = Object.values(by).filter((v) => v > 0), avg = spentDays.length ? spentDays.reduce((n, v) => n + v, 0) / count : 0;
+      const today = todayIso(), day = an93.day || (today.startsWith(month) ? Number(today.slice(8, 10)) : 1);
+      const cells = [...Array(offset).keys()].map(() => `<span class="an93-pad"></span>`).join("") + [...Array(count).keys()].map((i) => { const n = i + 1, v = by[n] || 0; return `<button type="button" class="an93-day${n === day ? " on" : ""}" data-an93-day="${n}" style="--a:${v > 0 ? (0.18 + 0.62 * v / top).toFixed(2) : 0}" aria-pressed="${n === day}" aria-label="${n}${an93Hide() ? "" : ", " + exactEuro(v)}">${n}</button>`; }).join("");
+      return card(`Giorno per giorno <small class="an93-sub">${an93MonthName(month)}</small>`, `<div class="an93-cal">${["L", "M", "M", "G", "V", "S", "D"].map((x) => `<span class="an93-wd" aria-hidden="true">${x}</span>`).join("")}${cells}</div><div class="kv an93-sel"><span>Il ${day} del mese</span><strong>${an93Eur(by[day] || 0)}</strong></div>${an93Hide() ? "" : `<p class="hint">in media ${exactEuro(avg)} al giorno nel mese</p>`}`);
+    }
+    function an93Refresh() { if (state.view === "analysis" && state.data && typeof render === "function") render(); }
+    document.addEventListener("click", (e) => {
+      const f = e.target.closest("[data-an93-fund]"), dd = e.target.closest("[data-an93-day]");
+      if (f) { const flows = state.data ? an93Flows(state.data) : [], norm = flows.length ? flows.reduce((n, x) => n + x.spent, 0) / flows.length : 1000, cur = an93.monthly > 0 ? an93.monthly : Math.max(50, Math.round(norm / 50) * 50); an93.monthly = Math.min(5000, Math.max(50, cur + Number(f.dataset.an93Fund))); try { localStorage.setItem("lifeos-fund-monthly-93", String(an93.monthly)); } catch (err) {} const box = f.closest("section.card"); if (box && state.data) { const tmp = document.createElement("div"); tmp.innerHTML = an93Fund(state.data); box.replaceWith(tmp.firstElementChild); } }
+      if (dd) { an93.day = Number(dd.dataset.an93Day); const box = dd.closest("section.card"); if (box && state.data) { const tmp = document.createElement("div"); tmp.innerHTML = an93Daily(state.data); box.replaceWith(tmp.firstElementChild); } }
+    });
     globalThis.platformAnalysis = function(d) {
       if (lastFinance !== d) {
         cache.clear();
@@ -6171,7 +6326,7 @@ document.addEventListener("keydown", (e) => {
       let salYear = String(state.year), salRows = salAll.filter((r) => r.month.startsWith(salYear + "-")), salFallback = false;
       if (!salRows.length) { const prev = [...new Set(salAll.map((r) => r.month.slice(0, 4)))].filter((y) => y < salYear).pop(); if (prev) { salYear = prev; salRows = salAll.filter((r) => r.month.startsWith(prev + "-")); salFallback = true; } }
       const salSum = (f) => salRows.reduce((n, r) => n + (Number(r[f]) || 0), 0), salAvgBase = salRows.length ? salSum("base") / salRows.length : 0, salExtra = salSum("additional"), salAvgAll = salRows.length ? (salSum("base") + salExtra) / salRows.length : 0;
-      const html = `<div class="budget-flow">${card("Spese per categoria", `<div class="chart-range" role="group" aria-label="Periodo categorie">${[3, 6, 12].map((n) => `<button data-category-period="${n}" class="${n === range ? "active" : ""}" aria-pressed="${n === range}">${n} mesi</button>`).join("")}</div><p class="hint" data-category-interval></p><div data-period-categories role="status">Caricamento categorie\u2026</div><button data-refresh-categories>Aggiorna categorie</button>`)}${card("Previsione del patrimonio", fcPanel(d))}${card("Patrimonio", `<p class="hint">Dal mese di inizio statistica fino a ${safe(titleMonth(state.year, state.month))}</p>${chart(wealthRows, "Patrimonio", false, true)}`)}${card("Stipendi per competenza", `<p class="hint">Anno solare ${safe(salYear)}${salFallback ? " (ultimo anno con dati)" : ""}</p>${salRows.length ? `<div class="an-stats">${[["Media senza 13ª/14ª", salAvgBase, "stipendio base"], ["Media con 13ª/14ª", salAvgAll, `su ${salRows.length} ${salRows.length === 1 ? "mese" : "mesi"}`], ["13ª e 14ª incassate", salExtra, "totale aggiuntive"], ["Ultimo stipendio", (salRows.at(-1).base || 0) + (salRows.at(-1).additional || 0), safe(shortMonth(salRows.at(-1).month))]].map(([l, v, sub]) => `<div class="an-stat"><small>${l}</small><strong>${state.assetsVisible ? exactEuro(v) : "\u2022\u2022\u2022\u2022"}</strong><span>${sub}</span></div>`).join("")}</div>` : ""}${chart(salRows.map((r) => ({ label: shortMonth(r.month), value: (r.base || 0) + (r.additional || 0), base: r.base || 0, additional: r.additional || 0 })), "Stipendi per competenza", true, false, true)}${salRows.length ? `<details><summary>Base e aggiuntive</summary>${salRows.map((r) => `<div class="kv"><span>${safe(shortMonth(r.month))}</span><strong>${state.assetsVisible ? `Base ${exactEuro(r.base || 0)} \xB7 Aggiuntive ${exactEuro(r.additional || 0)}` : "\u2022\u2022\u2022\u2022"}</strong></div>`).join("")}</details>` : ""}`)}</div>`;
+      const html = `<div class="budget-flow">${an93Rhythm(d)}${an93Fund(d)}${card("Spese per categoria", `<div class="chart-range" role="group" aria-label="Periodo categorie">${[3, 6, 12].map((n) => `<button data-category-period="${n}" class="${n === range ? "active" : ""}" aria-pressed="${n === range}">${n} mesi</button>`).join("")}</div><p class="hint" data-category-interval></p><div data-period-categories role="status">Caricamento categorie\u2026</div><button data-refresh-categories>Aggiorna categorie</button>`)}${card("Previsione del patrimonio", fcPanel(d))}${card("Patrimonio", `<p class="hint">Dal mese di inizio statistica fino a ${safe(titleMonth(state.year, state.month))}</p>${chart(wealthRows, "Patrimonio", false, true)}`)}${card("Stipendi per competenza", `<p class="hint">Anno solare ${safe(salYear)}${salFallback ? " (ultimo anno con dati)" : ""}</p>${salRows.length ? `<div class="an-stats">${[["Media senza 13ª/14ª", salAvgBase, "stipendio base"], ["Media con 13ª/14ª", salAvgAll, `su ${salRows.length} ${salRows.length === 1 ? "mese" : "mesi"}`], ["13ª e 14ª incassate", salExtra, "totale aggiuntive"], ["Ultimo stipendio", (salRows.at(-1).base || 0) + (salRows.at(-1).additional || 0), safe(shortMonth(salRows.at(-1).month))]].map(([l, v, sub]) => `<div class="an-stat"><small>${l}</small><strong>${state.assetsVisible ? exactEuro(v) : "\u2022\u2022\u2022\u2022"}</strong><span>${sub}</span></div>`).join("")}</div>` : ""}${chart(salRows.map((r) => ({ label: shortMonth(r.month), value: (r.base || 0) + (r.additional || 0), base: r.base || 0, additional: r.additional || 0 })), "Stipendi per competenza", true, false, true)}${salRows.length ? `<details><summary>Base e aggiuntive</summary>${salRows.map((r) => `<div class="kv"><span>${safe(shortMonth(r.month))}</span><strong>${state.assetsVisible ? `Base ${exactEuro(r.base || 0)} \xB7 Aggiuntive ${exactEuro(r.additional || 0)}` : "\u2022\u2022\u2022\u2022"}</strong></div>`).join("")}</details>` : ""}`)}${an93Daily(d)}</div>`;
       if (Array.isArray(d.categories)) cache.set(month, d.categories);
       queueMicrotask(() => { fcLoad(); loadCategories(d); });
       return html;

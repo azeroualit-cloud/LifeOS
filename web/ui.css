@@ -1238,3 +1238,53 @@ button.sc-chip:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .fx-area,.fx-avg,.fx-avgl,.fx-dot{pointer-events:none}
 @media(max-width:760px){.fx-dgrid{gap:var(--s2)}.fx-dgrid strong{font-size:var(--fs-3);white-space:nowrap}.fx-dbox{padding:var(--s3) var(--s4)}}
 @media(prefers-reduced-motion:reduce){.fx-dbox>*,.sc-dbox>*{animation:none}}
+/* Analisi 93: Ritmo sulla norma, Quanto dura il fondo, Giorno per giorno (parità con l'app). */
+.an93-sub{font-size:var(--fs-2);font-weight:400;color:var(--ink-3);margin-left:var(--s2)}
+.an93-norm{display:flex;align-items:baseline;gap:var(--s3);margin:var(--s3) 0 var(--s4)}
+.an93-norm strong{font-size:var(--fs-7);font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.4px}
+.an93-norm span{color:var(--ink-3);font-size:var(--fs-2)}
+.an93-pace{display:grid;grid-template-columns:minmax(0,1fr) 120px 56px;gap:var(--s3);align-items:center;min-height:44px}
+.an93-pace>span{color:var(--ink-2);font-size:var(--fs-2)}
+.an93-pace strong{text-align:right;font-variant-numeric:tabular-nums}
+.an93-pace strong.neg{color:var(--warn)}.an93-pace strong.pos{color:var(--pos-t)}
+.an93-track{position:relative;height:8px;border-radius:var(--r-pill);background:var(--surface-3)}
+.an93-track i{position:absolute;top:0;bottom:0;border-radius:var(--r-pill)}
+.an93-track i.up{background:var(--warn)}.an93-track i.down{background:var(--pos)}
+.an93-track b{position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--ink-3)}
+.an93-two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.an93-two .an-stat span{font-size:var(--fs-1);color:var(--ink-3)}
+.an93-step{display:grid;grid-template-columns:minmax(0,1fr) 44px auto 44px;gap:var(--s2);align-items:center}
+.an93-step span{color:var(--ink-2);font-size:var(--fs-2)}
+.an93-step b{min-width:72px;text-align:center;font-variant-numeric:tabular-nums}
+.an93-step button{min-height:44px;border-radius:var(--r-pill);border:0;background:var(--surface-3);color:var(--ink);font:inherit;font-size:var(--fs-4);cursor:pointer}
+.an93-step button:disabled{opacity:.4;cursor:default}
+.an93-cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;margin:var(--s3) 0}
+.an93-wd{text-align:center;font-size:var(--fs-1);color:var(--ink-3)}
+.an93-day{min-height:44px;border:0;border-radius:8px;font:inherit;font-size:var(--fs-2);font-variant-numeric:tabular-nums;color:var(--ink);cursor:pointer;background:color-mix(in srgb,var(--sec-finance,#a8c7ff) calc(var(--a) * 100%),var(--surface-2))}
+.an93-day.on{box-shadow:0 0 0 2px var(--ink) inset;font-weight:700}
+.an93-day:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+@media(max-width:620px){.an93-pace{grid-template-columns:minmax(0,1fr) 90px 52px}}
+/* Avvisi di Finanza (parità con l'app). */
+.fa-card .card-title{display:flex;justify-content:space-between;align-items:center}
+.fa-card .card-title button{min-height:44px}
+.fa-list{list-style:none;margin:var(--s3) 0 0;padding:0;display:grid;gap:var(--s2)}
+.fa-row{display:grid;gap:2px;padding:var(--s3) var(--s4);border-radius:var(--r-md);background:color-mix(in srgb,var(--warn) 12%,var(--surface-2))}
+.fa-row.quiet{background:var(--surface-2)}
+.fa-row b{font-size:var(--fs-2);font-weight:650}
+.fa-row span{font-size:var(--fs-2);color:var(--ink-2)}
+.fa-pop{width:min(480px,100%)}
+.fa-rule{padding:var(--s3) 0;border-top:1px solid var(--line)}
+.fa-rule:first-of-type{border-top:0}
+.fa-head{display:flex;justify-content:space-between;align-items:center;gap:var(--s3)}
+.fa-head span{display:grid;gap:2px}
+.fa-head small{color:var(--ink-3);font-size:var(--fs-1)}
+.fa-switch{width:51px;height:31px;border-radius:16px;border:0;padding:0;position:relative;flex:none;cursor:pointer;background:rgba(120,120,128,.36)}
+.fa-switch[aria-checked=true]{background:var(--pos)}
+.fa-switch i{position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;transition:left var(--m2) var(--ease)}
+.fa-switch[aria-checked=true] i{left:22px}
+.fa-switch:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.fa-step{display:grid;grid-template-columns:minmax(0,1fr) 44px auto 44px;gap:var(--s2);align-items:center;margin-top:var(--s2)}
+.fa-step span{color:var(--ink-2);font-size:var(--fs-2)}
+.fa-step b{min-width:64px;text-align:center;font-variant-numeric:tabular-nums}
+.fa-step button{min-height:44px;border-radius:var(--r-pill);border:0;background:var(--surface-3);color:var(--ink);font:inherit;font-size:var(--fs-4);cursor:pointer}
+.fa-step button:disabled{opacity:.4;cursor:default}
