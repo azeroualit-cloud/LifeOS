@@ -1292,6 +1292,15 @@
       "provenance": "Risposta diretta utente alla proposta in 10 punti",
       "original_quote": "Si tutto, ma sempre la proposta di tutte le modifiche rispetto alla 93 adesso",
       "rule": "Applicare a tutta l'app: pulsanti disegnati 44 (azioni in basso) e 34 (in scheda, tondi, pillole) con tocco 44; 5 dimensioni di testo (28/17/15/13/11), numero e unità della stessa dimensione; testate schede uniformi con scheda intera toccabile; righe 44 toccabili e 34 informative; raggi 21/13/pillola annidati; un colore per sezione, rosso/arancione/verde solo per stati; icone uniformi; stati vuoti di una riga; scorrimento senza ricalcoli; controllo automatico che blocca valori fuori regola. Prima mostrare l'anteprima di tutte le modifiche rispetto alla 93. Si estende SPACING-SYSTEM-2026-11-22."
+    },
+    {
+      "id": "IPA-DELIVERY-94-2026-11-23",
+      "status": "ACTIVE",
+      "scope": "IPA 0.10.32 build 94",
+      "recorded_on": "2026-11-23",
+      "provenance": "Via diretto dell'utente in chat",
+      "original_quote": "ti do il via, e non controllare ogni minuto, controlla ogni 5 minuti",
+      "rule": "Avviare il candidato completo della build 94 (tutte le modifiche dopo la 93, DESIGN-PASS-94) e pubblicare l'IPA solo a gate verdi; controllare lo stato ogni 5 minuti. Prove su iPhone e accettazione restano dell'utente."
     }
   ],
   "pending_confirmations": [

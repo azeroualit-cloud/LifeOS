@@ -1,5 +1,5 @@
 name: LifeOS candidate 94 validation and authorized IPA
-# Prepared for build 94 (DESIGN-PASS-94); started only with the user's go-ahead (IPA-DELIVERY-94). Change this line to start a new attempt on the current commit.
+# Start 1 for IPA-DELIVERY-94-2026-11-23 (user go-ahead): build 94 with DESIGN-PASS-94. Change this line to start a new attempt on the current commit.
 on:
   workflow_dispatch:
   push:
