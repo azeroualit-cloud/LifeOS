@@ -1254,6 +1254,16 @@
       "original_quote": "voglio che fixi questo, che veda testo anche nei quadretti più piccoli, e voglio anche le tecniche grafiche implementate che non ci sono nel sito ma nell'app si, tipo l'aggiunta spesa ecc, va aggiornato capito? il sito non deve mai avere meno dell'app ma 1:1 o di più",
       "rule": "Il sito non deve mai avere meno dell'app: funzioni e soluzioni grafiche dell'app (per esempio il foglio Aggiungi spesa) vanno portate sul sito, 1:1 o di più. Nella mappa Dove va lo stipendio ogni riquadro, anche il più piccolo, mostra testo leggibile.",
       "conflict_check": "Nessuna regola attiva contraddetta. Il deploy del sito resta manuale (web/DEPLOY.md, conferma di Nas); i dati che l'app tiene solo su Apple Salute non sono sul server e richiedono una sincronizzazione per comparire sul sito."
+    },
+    {
+      "id": "FOOD-DIARY-SERVER-2026-11-22",
+      "status": "ACTIVE",
+      "scope": "Diario alimentare: app iOS e sito",
+      "recorded_on": "2026-11-22",
+      "provenance": "Risposta diretta utente in chat Claude alla domanda sulla Salute nel sito",
+      "original_quote": "only food diary because the food diary i can edit it from pc and log it from phone, i tought that was clear",
+      "rule": "Il diario alimentare è condiviso tramite il server: si registra dal telefono e si modifica anche dal PC (sito). Il peso resta solo in Apple Salute e non va copiato sul server.",
+      "conflict_check": "Nessuna regola attiva contraddetta; coerente con SITE-PARITY-2026-11-22 e con BUILD93-REQUEST (server come fonte per i dati condivisi)."
     }
   ],
   "pending_confirmations": [
@@ -1390,6 +1400,10 @@
     {
       "date": "2026-11-22",
       "event": "Registrata SITE-PARITY-2026-11-22: il sito deve avere almeno tutto ciò che ha l'app; correzione del testo nei riquadri piccoli. Nessun conflitto."
+    },
+    {
+      "date": "2026-11-22",
+      "event": "Registrata FOOD-DIARY-SERVER-2026-11-22: diario alimentare sul server (telefono e PC), peso solo in Apple Salute."
     }
   ],
   "historical_inventory": "decision-history/2026-11-04-inventory.json",
