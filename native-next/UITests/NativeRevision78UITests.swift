@@ -255,13 +255,18 @@ final class NativeRevision78UITests: XCTestCase {
         let dashboard = app.scrollViews["dashboard-scroll"]
         let quick = app.buttons["quick-nutrition-open"]
         let status = dashboard.staticTexts.matching(NSPredicate(format: "label IN %@", ["Demo", "Salvataggio", "Sincronizzazione", "Da aggiornare", "Condiviso con il sito", "Sul dispositivo", "Collegato"])).firstMatch
+        // Build 93: Alimento sits in the Nutrizione card mid-page; check it, then the last status.
         for _ in 0..<15 {
-            if quick.isHittable && status.exists && status.frame.maxY <= tabBar.frame.minY { break }
+            if quick.isHittable && quick.frame.maxY <= tabBar.frame.minY { break }
             dashboard.swipeUp(velocity: .slow)
         }
         XCTAssertTrue(quick.isHittable, "Dashboard bottom action must be reachable")
-        XCTAssertTrue(status.exists, "The final connection status must remain readable")
         XCTAssertLessThanOrEqual(quick.frame.maxY, tabBar.frame.minY)
+        for _ in 0..<15 {
+            if status.exists && status.frame.maxY <= tabBar.frame.minY && status.frame.minY >= dashboard.frame.minY { break }
+            dashboard.swipeUp(velocity: .slow)
+        }
+        XCTAssertTrue(status.exists, "The final connection status must remain readable")
         XCTAssertLessThanOrEqual(status.frame.maxY, tabBar.frame.minY)
         capture(large ? "safe-area-dashboard-large" : "safe-area-dashboard-standard", app)
 

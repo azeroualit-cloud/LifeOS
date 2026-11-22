@@ -1,5 +1,5 @@
 name: LifeOS candidate 93 validation and authorized IPA
-# Start 2 for IPA-DELIVERY-93-2026-11-21 (failing cases now published as annotations) (build 93: golden-ratio layout, Salute trend and goals, Finanza overview/analysis/alerts, Bloom map card). Change this line to start a new attempt on the current commit.
+# Start 3 for IPA-DELIVERY-93-2026-11-21 (habit weekday, dashboard safe area, calendar header with large text) (build 93: golden-ratio layout, Salute trend and goals, Finanza overview/analysis/alerts, Bloom map card). Change this line to start a new attempt on the current commit.
 on:
   workflow_dispatch:
   push:

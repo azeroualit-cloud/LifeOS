@@ -315,7 +315,7 @@ final class NativeInterfaceTests: XCTestCase {
         show(edit, towardTop: true)
         print("HABIT_SAVED_ROW: " + edit.debugDescription)
         XCTAssertTrue(edit.label.contains("Lunedì"), "Saved habit label: " + edit.label)
-        edit.tap(); show(monday); XCTAssertEqual(monday.value as? String, "1")
+        edit.tap(); show(monday); XCTAssertTrue(monday.isSelected, monday.debugDescription)
         capture("habits-weekday-schedule")
     }
     func testHealthWeightSummaryOpensDetailInEachAppearance() {

@@ -211,7 +211,7 @@ struct CalendarScreen: View {
                     NativeIconButton(symbol: "chevron.right", label: "Giorno successivo") { moveDay(by: 1) }
                         .accessibilityIdentifier("calendar-next-day")
                 }
-                viewSwitch
+                if !typeSize.isAccessibilitySize { viewSwitch }
                 Text(CivilDate.agendaTitle(selected))
                     .font(.largeTitle.weight(.bold))
                     .fixedSize(horizontal: false, vertical: true)
@@ -568,11 +568,20 @@ struct CalendarScreen: View {
     }
     private var brushPanel: some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-            HStack(spacing: NativeDesign.Space.small) {
-                Button(action: goToToday) { Text("Oggi").font(.subheadline.weight(.semibold)) }
-                    .buttonStyle(NativeGlassButtonStyle())
-                    .accessibilityIdentifier("calendar-today").disabled(store.busy)
-                viewSwitch
+            // Accessibility sizes keep the build 92 header (plain Oggi, no switch): the month
+            // stays as light as the version proven with large text; days still open the agenda.
+            if typeSize.isAccessibilitySize {
+                Button(action: goToToday) {
+                    Text("Oggi").frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle())
+                }
+                .accessibilityIdentifier("calendar-today").disabled(store.busy)
+            } else {
+                HStack(spacing: NativeDesign.Space.small) {
+                    Button(action: goToToday) { Text("Oggi").font(.subheadline.weight(.semibold)) }
+                        .buttonStyle(NativeGlassButtonStyle())
+                        .accessibilityIdentifier("calendar-today").disabled(store.busy)
+                    viewSwitch
+                }
             }
             HStack(spacing: NativeDesign.Space.large) {
                 Button { withAnimation(reduceMotion || typeSize.isAccessibilitySize ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration)) { painting.toggle(); brush = painting ? "morning" : "consult" } } label: { Label(painting ? "Fine" : "Dipingi turni", systemImage: painting ? "checkmark" : "calendar.badge.clock").labelStyle(.iconOnly).frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle()) }.accessibilityIdentifier("toggle-shift-paint")
