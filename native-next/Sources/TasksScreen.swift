@@ -84,22 +84,30 @@ struct TasksScreen: View {
         }
     }
 
-    /// Category drop-down (preview "Tutte"), Da fare / Abitudini, reorder for one category.
+    /// Da fare / Abitudini, then the categories as one row of chips (one tap, user request
+    /// 22/11/2026; ACTIVITY-CATEGORY-GLASS-01), reorder for one category.
     private var header: some View {
-        VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
-            HStack(spacing: NativeDesign.Space.small) {
-                LOFilterPill(title: "Categoria", value: category == Self.all ? "Tutte" : label(category), isActive: true, identifier: "task-category-filter") {
-                    Button { category = Self.all } label: { menuLabel("Tutte", selected: category == Self.all) }
-                        .accessibilityIdentifier("task-category-all")
-                    ForEach(store.categories.map { DisplayRecord($0, key: "key") }) { item in
-                        let key = item.value.text("key")
-                        Button { category = key } label: { menuLabel(item.value.text("label"), selected: category == key) }
-                            .accessibilityIdentifier("task-category-" + key)
+        VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+            LOSegmented(options: [("Da fare", "todo"), ("Abitudini", "habits")], selection: $view, identifierPrefix: "activity-view-")
+            if view == "Da fare" {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: NativeDesign.Space.small) {
+                        categoryChip("Tutte", key: Self.all, identifier: "task-category-all")
+                        ForEach(store.categories.map { DisplayRecord($0, key: "key") }) { item in
+                            let key = item.value.text("key")
+                            categoryChip(item.value.text("label"), key: key, identifier: "task-category-" + key)
+                        }
+                        Button { router.sheet = .categories } label: {
+                            Image(systemName: "folder").frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget)
+                        }
+                        .buttonStyle(LOGlassButtonStyle())
+                        .accessibilityLabel("Gestisci categorie")
+                        .accessibilityIdentifier("task-category-manage")
                     }
-                    Divider()
-                    Button { router.sheet = .categories } label: { Label("Gestisci categorie", systemImage: "folder") }
+                    .padding(.vertical, NativeDesign.Space.xxs)
                 }
-                LOSegmented(options: [("Da fare", "todo"), ("Abitudini", "habits")], selection: $view, identifierPrefix: "activity-view-")
+                .scrollClipDisabled()
+                .accessibilityIdentifier("task-category-filter")
             }
             if view == "Da fare" && category != Self.all {
                 Button(editMode == .active ? "Fine" : "Riordina") { editMode = editMode == .active ? .inactive : .active }
@@ -110,6 +118,22 @@ struct TasksScreen: View {
             }
         }
         .padding(.vertical, NativeDesign.Space.xs)
+    }
+    /// One category: neutral glass, the selected one filled (no accent colour, UI-LOOK-92).
+    private func categoryChip(_ title: String, key: String, identifier: String) -> some View {
+        let selected = category == key
+        return Button { category = key } label: {
+            Text(title).font(.subheadline.weight(selected ? .semibold : .regular))
+                .foregroundStyle(selected ? Color(uiColor: .systemBackground) : Color.primary)
+                .padding(.horizontal, NativeDesign.Space.medium)
+                .frame(minHeight: NativeDesign.Layout.touchTarget)
+                .background { if selected { Capsule().fill(Color.primary) } }
+                .contentShape(Capsule())
+        }
+        .buttonStyle(NativePressStyle())
+        .modifier(NativeGlass())
+        .accessibilityAddTraits(selected ? .isSelected : [])
+        .accessibilityIdentifier(identifier)
     }
 
     /// Abitudini: every habit with its schedule and next date; today's can be checked.
@@ -139,9 +163,6 @@ struct TasksScreen: View {
         } header: { checklistHeading("Abitudini") }
     }
 
-    @ViewBuilder private func menuLabel(_ title: String, selected: Bool) -> some View {
-        if selected { Label(title, systemImage: "checkmark") } else { Text(title) }
-    }
     private func checkRoutine(_ record: Record) {
         Task {
             await store.run("setRoutineCheck", ["id": .int(record.integer("id")), "day": .string(CivilDate.day()), "checked": .bool(!record.flag("checked"))])

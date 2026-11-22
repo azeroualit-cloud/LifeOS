@@ -753,15 +753,14 @@ final class NativeInterfaceTests: XCTestCase {
     func testSharedRowsAndCategoryChoicesKeepAccessibleTargets() {
         let app = launch(["--dark"])
         app.openMainTab("Attività")
-        // Build 93: categories are a drop-down pill ("Tutte" or one category).
-        let filter = app.buttons["task-category-filter"]
-        XCTAssertTrue(filter.waitForExistence(timeout: 10))
-        filter.tap(); let wishes = app.buttons["task-category-wish"]
-        XCTAssertTrue(wishes.waitForExistence(timeout: 5)); wishes.tap()
-        XCTAssertTrue(filter.label.contains("Desideri"), filter.label)
-        filter.tap(); let actions = app.buttons["task-category-action"]
+        // Categories are one row of chips: one tap selects (22/11/2026).
+        let wishes = app.buttons["task-category-wish"], actions = app.buttons["task-category-action"]
+        XCTAssertTrue(wishes.waitForExistence(timeout: 10))
+        wishes.tap()
+        XCTAssertTrue(wishes.isSelected)
         XCTAssertTrue(actions.waitForExistence(timeout: 5)); actions.tap()
-        XCTAssertFalse(filter.label.contains("Desideri"), filter.label)
+        XCTAssertTrue(actions.isSelected); XCTAssertFalse(wishes.isSelected)
+        let filter = actions
         assertMinimumTouchTarget(filter)
         let completion = app.buttons["Cambia completamento Organizzare la settimana"]
         XCTAssertTrue(completion.waitForExistence(timeout: 10)); XCTAssertTrue(completion.isHittable)
@@ -938,7 +937,7 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertTrue(assets.exists)
         capture("savings-breakdown")
         app.buttons["Attività"].tap()
-        XCTAssertTrue(app.buttons["task-category-filter"].exists)
+        XCTAssertTrue(app.buttons["task-category-all"].exists)
         app.buttons["reorder-tasks"].tap()
         capture("task-categories-and-reorder")
         app.buttons["reorder-tasks"].tap()
@@ -1213,15 +1212,13 @@ final class NativeInterfaceTests: XCTestCase {
     func testReducedMotionKeepsChecklistAndFinanceActionsFunctional() {
         let app = launch(["--dark", "--reduce-motion"])
         app.openMainTab("Attività")
-        // Build 93: categories are a drop-down pill ("Tutte" or one category).
-        let filter = app.buttons["task-category-filter"]
-        XCTAssertTrue(filter.waitForExistence(timeout: 10))
-        filter.tap(); let wishes = app.buttons["task-category-wish"]
-        XCTAssertTrue(wishes.waitForExistence(timeout: 5)); wishes.tap()
-        XCTAssertTrue(filter.label.contains("Desideri"), filter.label)
-        filter.tap(); let actions = app.buttons["task-category-action"]
+        // Categories are one row of chips: one tap selects (22/11/2026).
+        let wishes = app.buttons["task-category-wish"], actions = app.buttons["task-category-action"]
+        XCTAssertTrue(wishes.waitForExistence(timeout: 10))
+        wishes.tap()
+        XCTAssertTrue(wishes.isSelected)
         XCTAssertTrue(actions.waitForExistence(timeout: 5)); actions.tap()
-        XCTAssertFalse(filter.label.contains("Desideri"), filter.label)
+        XCTAssertTrue(actions.isSelected); XCTAssertFalse(wishes.isSelected)
         let completion = app.buttons["Cambia completamento Organizzare la settimana"]
         XCTAssertTrue(completion.waitForExistence(timeout: 10))
         completion.tap()
