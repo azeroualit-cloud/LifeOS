@@ -97,7 +97,7 @@ struct CalendarScreen: View {
         }
     }
     private var weekdayLabels: some View {
-        HStack(spacing: NativeDesign.Space.xs) {
+        HStack(spacing: CalendarMetrics92.xs) {
             ForEach(Array(["L", "M", "M", "G", "V", "S", "D"].enumerated()), id: \.offset) { _, name in
                 Text(name).font(.caption.weight(.medium)).foregroundStyle(NativeDesign.secondary).frame(maxWidth: .infinity)
             }
@@ -112,10 +112,10 @@ struct CalendarScreen: View {
                 Spacer(minLength: NativeDesign.Space.small)
                 NativeToolbarButton(symbol: "plus", label: "Aggiungi evento") { router.sheet = .event(["day": .string(selected)]) }
                     .accessibilityIdentifier("primary-add")
-            }.padding(.horizontal, NativeDesign.Layout.screenInset)
-            brushPanel.padding(.horizontal, NativeDesign.Layout.screenInset)
+            }.padding(.horizontal, CalendarMetrics92.inset)
+            brushPanel.padding(.horizontal, CalendarMetrics92.inset)
             if let loadError { HStack { NativeInlineMessage(text: loadError); Button("Riprova") { reload += 1 } }.padding(.horizontal) }
-            weekdayLabels.padding(.horizontal, NativeDesign.Layout.screenInset)
+            weekdayLabels.padding(.horizontal, CalendarMetrics92.inset)
             Divider()
             ScrollViewReader { proxy in
                 ScrollView {
@@ -128,7 +128,7 @@ struct CalendarScreen: View {
                                     }
                                 }
                         }
-                    }.scrollTargetLayout().padding(.horizontal, NativeDesign.Layout.screenInset)
+                    }.scrollTargetLayout().padding(.horizontal, CalendarMetrics92.inset)
                         .padding(.vertical, NativeDesign.Space.large).padding(.bottom, NativeDesign.Layout.scrollClearance + NativeDesign.Layout.tabBarClearance)
                 }.scrollPosition(id: $scrollWeek, anchor: .top)
                 .ignoresSafeArea(.container, edges: .bottom)
@@ -508,7 +508,7 @@ struct CalendarScreen: View {
         let days = monthDays[month] ?? []
         return VStack(spacing: NativeDesign.Space.none) {
                 if (0..<7).contains(where: { days[week * 7 + $0].day.hasSuffix("-01") }) {
-                    HStack(spacing: NativeDesign.Space.xs) {
+                    HStack(spacing: CalendarMetrics92.xs) {
                         ForEach(0..<7, id: \.self) { index in
                             let day = days[week * 7 + index].day
                             Text(day.hasSuffix("-01") ? NativeCalendarWindow.monthLabel(String(day.prefix(7))) : "")
@@ -516,10 +516,10 @@ struct CalendarScreen: View {
                                 .foregroundStyle(day.hasPrefix(CivilDate.month()) ? Color.primary : NativeDesign.secondary)
                                 .frame(maxWidth: .infinity)
                         }
-                    }.frame(height: monthLabelLine).padding(.top, NativeDesign.Space.medium).padding(.bottom, NativeDesign.Space.small)
+                    }.frame(height: monthLabelLine).padding(.top, CalendarMetrics92.medium).padding(.bottom, NativeDesign.Space.small)
                     Divider()
                 }
-                HStack(alignment: .top, spacing: NativeDesign.Space.xs) {
+                HStack(alignment: .top, spacing: CalendarMetrics92.xs) {
                     ForEach(0..<7, id: \.self) { index in
                         let item = days[week * 7 + index]
                         let displayed = CalendarDayPresentation(day: item.day, label: item.label, shift: item.shift, eventCount: item.eventCount, isToday: item.isToday, isWeekend: item.isWeekend, isCurrentMonth: true)
@@ -570,15 +570,13 @@ struct CalendarScreen: View {
         nonmutating set { router.calendarPainting = newValue }
     }
     private var brushPanel: some View {
+        brushPanelContent
+    }
+    private var brushPanelContent: some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-            // Accessibility sizes keep the build 92 header (plain Oggi, no switch): the month
-            // stays as light as the version proven with large text; days still open the agenda.
-            if typeSize.isAccessibilitySize {
-                Button(action: goToToday) {
-                    Text("Oggi").frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle())
-                }
-                .accessibilityIdentifier("calendar-today").disabled(store.busy)
-            } else {
+            // Accessibility sizes keep the build 92 header exactly (Oggi in the row below, no
+            // switch): the month stays the version proven with large text; days open the agenda.
+            if !typeSize.isAccessibilitySize {
                 HStack(spacing: NativeDesign.Space.small) {
                     Button(action: goToToday) { Text("Oggi").font(.subheadline.weight(.semibold)) }
                         .buttonStyle(NativeGlassButtonStyle())
@@ -587,6 +585,12 @@ struct CalendarScreen: View {
                 }
             }
             HStack(spacing: NativeDesign.Space.large) {
+                if typeSize.isAccessibilitySize {
+                    Button(action: goToToday) {
+                        Text("Oggi").frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle())
+                    }
+                    .accessibilityIdentifier("calendar-today").disabled(store.busy)
+                }
                 Button { withAnimation(reduceMotion || typeSize.isAccessibilitySize ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration)) { painting.toggle(); brush = painting ? "morning" : "consult" } } label: { Label(painting ? "Fine" : "Dipingi turni", systemImage: painting ? "checkmark" : "calendar.badge.clock").labelStyle(.iconOnly).frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle()) }.accessibilityIdentifier("toggle-shift-paint")
                 Spacer()
                 if let lastShift { Button("Annulla") { Task { await store.run("paintShift", ["day": .string(lastShift.0), "kind": .string(lastShift.1)]); if store.error == nil { self.lastShift = nil } } }.disabled(store.busy) }
@@ -685,9 +689,9 @@ struct CalendarDayCell: View, Equatable {
                 } else {
                     Capsule()
                         .fill(item.shift.map { $0.color.opacity(item.isWeekend ? 0.76 : 1) } ?? .clear)
-                        .frame(height: NativeDesign.Space.xs)
+                        .frame(height: CalendarMetrics92.xs)
                         .padding(.horizontal, NativeDesign.Space.xxs)
-                        .padding(.vertical, NativeDesign.Space.xs)
+                        .padding(.vertical, CalendarMetrics92.xs)
                         .accessibilityHidden(true)
                 }
             }
@@ -740,4 +744,12 @@ private struct NativeCalendarMonthFrames: PreferenceKey {
 private struct NativeCalendarViewportHeight: PreferenceKey {
     static var defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
+}
+
+/// Build 92 spacing for the month grid: the week rows keep the exact heights the anchored,
+/// lazily realized month scroll was proven with (large text included).
+enum CalendarMetrics92 {
+    static let xs: CGFloat = 4
+    static let medium: CGFloat = 12
+    static let inset: CGFloat = 20
 }
