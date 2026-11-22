@@ -134,49 +134,72 @@ struct NativeHealthDetail: View {
     private func whole(_ value: Double) -> String { value.formatted(.number.precision(.fractionLength(0))) }
 
     /// Calories of the selected day (Fitia-like, user request 22/11/2026): centred value over
-    /// the goal, an arc with the ±10 % goal band, then the three macros in centred columns.
+    /// the goal, an arc with the recommended range, then the three macros in centred columns.
+    /// Built from small views so the type checker stays fast.
     private var caloriesCard: some View {
+        NativeCard(density: .compact) {
+            caloriesHeader
+            caloriesMacros
+        }
+    }
+    private var caloriesSpoken: String {
+        let targets = health.goalTargets
+        let calories = health.calories(on: selectedDate)
+        let kcal: String = calories.map(whole) ?? "—"
+        var text: String = "Calorie " + kcal
+        if let targets {
+            text += " di " + whole(targets.calories)
+            if let calories {
+                let remaining: Double = targets.calories - calories
+                text += remaining >= 0 ? ", restano " + whole(remaining) : ", oltre di " + whole(-remaining)
+            }
+        } else {
+            text += ", imposta un obiettivo"
+        }
+        return text + ". Apri obiettivi"
+    }
+    private var caloriesHeader: some View {
+        let goal: Double? = health.goalTargets?.calories
+        let calories: Double? = health.calories(on: selectedDate)
+        let kcal: String = calories.map(whole) ?? "—"
+        return Button { editingGoals = true } label: {
+            VStack(spacing: NativeDesign.Space.none) {
+                Text("kcal").font(.footnote).foregroundStyle(NativeDesign.secondary)
+                HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xxs) {
+                    Text(kcal).font(.title.weight(.bold)).monospacedDigit()
+                    if let goal {
+                        Text("/ " + whole(goal)).font(.title.weight(.bold))
+                            .foregroundStyle(NativeDesign.secondary).monospacedDigit()
+                    }
+                }
+                .lineLimit(1).minimumScaleFactor(0.7)
+                NativeCalorieGauge(calories: calories, goal: goal)
+            }
+            .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(NativePressStyle())
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(caloriesSpoken)
+        .accessibilityIdentifier("health-calories-goals")
+    }
+    private var caloriesMacros: some View {
         let targets = health.goalTargets
         let values = health.nutrients(on: selectedDate)
-        let protein = values[.dietaryProtein], carbohydrate = values[.dietaryCarbohydrates], fat = values[.dietaryFatTotal]
-        let calories = health.calories(on: selectedDate)
-        let kcal = calories.map(whole) ?? "—"
-        let remaining: Double? = targets.flatMap { goal in calories.map { goal.calories - $0 } }
-        let status: String = targets == nil ? "Imposta un obiettivo" : (remaining.map { ($0 >= 0 ? "restano " : "oltre di ") + whole(abs($0)) } ?? " ")
-        let centered = !typeSize.isAccessibilitySize
-        let macroLayout = typeSize.isAccessibilitySize
+        let centered: Bool = !typeSize.isAccessibilitySize
+        let layout: AnyLayout = typeSize.isAccessibilitySize
             ? AnyLayout(VStackLayout(alignment: .leading, spacing: NativeDesign.Space.small))
             : AnyLayout(HStackLayout(alignment: .top, spacing: NativeDesign.Space.medium))
-        return NativeCard(density: .compact) {
-            Button { editingGoals = true } label: {
-                VStack(spacing: NativeDesign.Space.none) {
-                    Text("kcal").font(.footnote).foregroundStyle(NativeDesign.secondary)
-                    HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xxs) {
-                        Text(kcal).font(.title.weight(.bold)).monospacedDigit()
-                        if let targets {
-                            Text("/ " + whole(targets.calories)).font(.title.weight(.bold))
-                                .foregroundStyle(NativeDesign.secondary).monospacedDigit()
-                        }
-                    }
-                    .lineLimit(1).minimumScaleFactor(0.7)
-                    NativeCalorieGauge(calories: calories, goal: targets?.calories)
-                }
-                .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget)
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(NativePressStyle())
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel("Calorie " + kcal + (targets.map { " di " + whole($0.calories) } ?? "") + ", " + status + ". Apri obiettivi")
-            .accessibilityIdentifier("health-calories-goals")
-            macroLayout {
-                LOMacroValue(title: "Proteine", value: protein, goal: targets?.protein, unit: "g", color: macroColor(protein, targets?.protein, NativeDesign.macroProtein),
-                             identifier: "health-nutrient-" + HKQuantityTypeIdentifier.dietaryProtein.rawValue, centered: centered)
-                LOMacroValue(title: "Carboidrati", value: carbohydrate, goal: targets?.carbohydrate, unit: "g", color: macroColor(carbohydrate, targets?.carbohydrate, NativeDesign.macroCarbohydrate),
-                             identifier: "health-nutrient-" + HKQuantityTypeIdentifier.dietaryCarbohydrates.rawValue, centered: centered)
-                LOMacroValue(title: "Grassi", value: fat, goal: targets?.fat, unit: "g", color: macroColor(fat, targets?.fat, NativeDesign.macroFat),
-                             identifier: "health-nutrient-" + HKQuantityTypeIdentifier.dietaryFatTotal.rawValue, centered: centered)
-            }
+        return layout {
+            macro("Proteine", values[.dietaryProtein], targets?.protein, NativeDesign.macroProtein, .dietaryProtein, centered)
+            macro("Carboidrati", values[.dietaryCarbohydrates], targets?.carbohydrate, NativeDesign.macroCarbohydrate, .dietaryCarbohydrates, centered)
+            macro("Grassi", values[.dietaryFatTotal], targets?.fat, NativeDesign.macroFat, .dietaryFatTotal, centered)
         }
+    }
+    private func macro(_ title: String, _ value: Double?, _ goal: Double?, _ fallback: Color,
+                       _ type: HKQuantityTypeIdentifier, _ centered: Bool) -> LOMacroValue {
+        LOMacroValue(title: title, value: value, goal: goal, unit: "g", color: macroColor(value, goal, fallback),
+                     identifier: "health-nutrient-" + type.rawValue, centered: centered)
     }
 
     /// Macro bar colour carries the meaning when there is a goal: green in range, amber under, orange over.
