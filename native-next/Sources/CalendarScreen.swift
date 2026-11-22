@@ -128,8 +128,12 @@ struct CalendarScreen: View {
                         ForEach(calendarWeeks) { week in
                             weekGrid(week.month, week: week.index).id(week.id)
                                 .background {
-                                    GeometryReader { geometry in
-                                        Color.clear.preference(key: NativeCalendarMonthFrames.self, value: [week.id: geometry.frame(in: .named("calendar-viewport"))])
+                                    // Frames are only needed while a requested week is being reached:
+                                    // reporting them on every scroll frame made scrolling stutter.
+                                    if requestedWeek != nil {
+                                        GeometryReader { geometry in
+                                            Color.clear.preference(key: NativeCalendarMonthFrames.self, value: [week.id: geometry.frame(in: .named("calendar-viewport"))])
+                                        }
                                     }
                                 }
                         }
