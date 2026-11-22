@@ -1,5 +1,5 @@
 name: LifeOS candidate 93 validation and authorized IPA
-# Start 10 for IPA-DELIVERY-93-2026-11-21: build 93 with the shared food diary; Salute actions Peso left and Alimento right as in the Dashboard. (build 93: golden-ratio layout, Salute trend and goals, Finanza overview/analysis/alerts, Bloom map card). Change this line to start a new attempt on the current commit.
+# Stop 10 (user asked to stop; [hold] commit skips every job). Start 10 for IPA-DELIVERY-93-2026-11-21: build 93 with the shared food diary; Salute actions Peso left and Alimento right as in the Dashboard. (build 93: golden-ratio layout, Salute trend and goals, Finanza overview/analysis/alerts, Bloom map card). Change this line to start a new attempt on the current commit.
 on:
   workflow_dispatch:
   push:
@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   full-suite:
-    if: (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && github.repository == 'azeroualit-cloud/LifeOS' && github.ref == 'refs/heads/codex/build93'
+    if: (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && github.repository == 'azeroualit-cloud/LifeOS' && github.ref == 'refs/heads/codex/build93' && !contains(github.event.head_commit.message, '[hold]')
     runs-on: macos-15
     timeout-minutes: 240
     steps:
