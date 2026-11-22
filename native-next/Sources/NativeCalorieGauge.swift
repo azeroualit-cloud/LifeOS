@@ -73,7 +73,7 @@ struct NativeCalorieGauge: View {
                         Circle().fill(band.color)
                         Circle().strokeBorder(Color(uiColor: .systemBackground), lineWidth: 3)
                         if band == .within {
-                            Image(systemName: "checkmark").font(.system(size: 9, weight: .heavy)).foregroundStyle(Color(uiColor: .systemBackground))
+                            Image(systemName: "checkmark").font(.caption2.weight(.heavy)).imageScale(.small).foregroundStyle(Color(uiColor: .systemBackground))
                         }
                     }
                     .frame(width: knob, height: knob)
