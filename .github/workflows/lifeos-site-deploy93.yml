@@ -1,5 +1,5 @@
 name: Life OS - Sito (interfaccia 93 e diario condiviso)
-# Attempt 5 (token verified and trimmed). DEPLOY-WORKERS-93-2026-11-22: changes the site Worker `lifeos` only. A push that changes this file
+# Attempt 6 (token replaced by the user). DEPLOY-WORKERS-93-2026-11-22: changes the site Worker `lifeos` only. A push that changes this file
 # is the deliberate start. Interface and diary come from codex/revision77 at a pinned commit.
 on:
   push:
