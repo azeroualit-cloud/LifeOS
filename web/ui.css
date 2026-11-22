@@ -1144,15 +1144,19 @@ body .nav button[data-view].active .nav-symbol,body .nav #admin-link.active .nav
 .sc-pop .modal-top h2{display:flex;align-items:center;gap:var(--s2)}
 .sc-pop .modal-top h2::before{content:"";width:12px;height:12px;border-radius:50%;background:var(--c);flex:none}
 .sc-pop .sc-dbox{background:var(--surface-2)}
+.sc-pop:not(.sc-pop-g) .sc-dbox header span b{display:none}
 .sc-pop .sc-dr{padding:2px 0}
-.sc-sibs{margin-top:var(--s4);display:grid;gap:var(--s2)}
-.sc-sibs>small{font-size:var(--fs-1);color:var(--ink-3)}
-.sc-sibs>div{display:flex;flex-wrap:wrap;gap:var(--s2)}
-.sc-sib{min-height:44px;padding:0 var(--s3);border-radius:var(--r-pill);border:0;background:var(--surface-3);color:var(--ink);font:inherit;font-size:var(--fs-2);font-weight:560;display:inline-flex;align-items:center;gap:var(--s2);cursor:pointer}
-.sc-sib i{width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}
-.sc-sib b{font-weight:650;font-variant-numeric:tabular-nums;color:var(--ink-2)}
-.sc-sib:hover{background:color-mix(in srgb,var(--c) 22%,var(--surface-3))}
-.sc-sib:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+/* Popup del gruppo: totale e mappa delle voci (stessi riquadri della mappa principale). */
+.sc-pop-g{width:min(560px,100%)}
+.sc-gsum{margin:0 0 var(--s3);display:flex;align-items:baseline;gap:var(--s3)}
+.sc-gsum b{font-size:var(--fs-5,26px);font-weight:700;font-variant-numeric:tabular-nums}
+.sc-gsum span{font-size:var(--fs-2);color:var(--ink-3)}
+.sc-tm-g{aspect-ratio:16/10;min-height:0}
+.sc-tm-g .sc-tile{animation-delay:0s}
+/* I gruppi in alto sono pulsanti: aprono il popup del gruppo. */
+button.sc-chip{border:0;font:inherit;color:inherit;text-align:left;cursor:pointer;min-height:44px;transition:background var(--m2) var(--ease)}
+button.sc-chip:hover{background:color-mix(in srgb,var(--c) 16%,var(--surface-2))}
+button.sc-chip:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 @media(max-width:620px){.sc-chips{grid-template-columns:repeat(2,minmax(0,1fr))}.sc-chip span{white-space:normal;line-height:1.2}.sc-tile.sm b{font-size:var(--fs-1);white-space:nowrap}.sc-tm{aspect-ratio:1/1.1}}
 .sc-note{margin:var(--s2) 0 0;font-size:var(--fs-1);color:var(--ink-3)}
 

@@ -1183,15 +1183,19 @@ body .nav button[data-view].active .nav-symbol,body .nav #admin-link.active .nav
 .sc-pop .modal-top h2{display:flex;align-items:center;gap:var(--s2)}
 .sc-pop .modal-top h2::before{content:"";width:12px;height:12px;border-radius:50%;background:var(--c);flex:none}
 .sc-pop .sc-dbox{background:var(--surface-2)}
+.sc-pop:not(.sc-pop-g) .sc-dbox header span b{display:none}
 .sc-pop .sc-dr{padding:2px 0}
-.sc-sibs{margin-top:var(--s4);display:grid;gap:var(--s2)}
-.sc-sibs>small{font-size:var(--fs-1);color:var(--ink-3)}
-.sc-sibs>div{display:flex;flex-wrap:wrap;gap:var(--s2)}
-.sc-sib{min-height:44px;padding:0 var(--s3);border-radius:var(--r-pill);border:0;background:var(--surface-3);color:var(--ink);font:inherit;font-size:var(--fs-2);font-weight:560;display:inline-flex;align-items:center;gap:var(--s2);cursor:pointer}
-.sc-sib i{width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}
-.sc-sib b{font-weight:650;font-variant-numeric:tabular-nums;color:var(--ink-2)}
-.sc-sib:hover{background:color-mix(in srgb,var(--c) 22%,var(--surface-3))}
-.sc-sib:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+/* Popup del gruppo: totale e mappa delle voci (stessi riquadri della mappa principale). */
+.sc-pop-g{width:min(560px,100%)}
+.sc-gsum{margin:0 0 var(--s3);display:flex;align-items:baseline;gap:var(--s3)}
+.sc-gsum b{font-size:var(--fs-5,26px);font-weight:700;font-variant-numeric:tabular-nums}
+.sc-gsum span{font-size:var(--fs-2);color:var(--ink-3)}
+.sc-tm-g{aspect-ratio:16/10;min-height:0}
+.sc-tm-g .sc-tile{animation-delay:0s}
+/* I gruppi in alto sono pulsanti: aprono il popup del gruppo. */
+button.sc-chip{border:0;font:inherit;color:inherit;text-align:left;cursor:pointer;min-height:44px;transition:background var(--m2) var(--ease)}
+button.sc-chip:hover{background:color-mix(in srgb,var(--c) 16%,var(--surface-2))}
+button.sc-chip:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 @media(max-width:620px){.sc-chips{grid-template-columns:repeat(2,minmax(0,1fr))}.sc-chip span{white-space:normal;line-height:1.2}.sc-tile.sm b{font-size:var(--fs-1);white-space:nowrap}.sc-tm{aspect-ratio:1/1.1}}
 .sc-note{margin:var(--s2) 0 0;font-size:var(--fs-1);color:var(--ink-3)}
 
@@ -4168,21 +4172,30 @@ document.addEventListener("keydown", (e) => {
         const W = 260, H = 110, pctS = (v) => salary > 0 ? (v / salary * 100 >= 10 ? Math.round(v / salary * 100) : (v / salary * 100).toFixed(1).replace(".", ",")) + "%" : "";
         const posSum = (g) => g.items.reduce((n, x) => n + Math.max(0, x.value), 0), gl = tmLayout(groups.map((g) => ({ ...g, value: g.items.length && posSum(g) > 0 ? posSum(g) : g.value })).sort((p, q) => q.value - p.value), W, H);
         let n = 0;
-        const out = gl.map((gr) => {
-          const g = gr.r, its = g.items.filter((x) => x.value > 0.005).sort((p, q) => q.value - p.value);
-          const lay = its.length ? tmLayout(its, gr.w, gr.h) : [{ r: { name: g.label, value: g.value }, x: 0, y: 0, w: gr.w, h: gr.h }];
+        const tilesOf = (g, its, lay, gw, gh) => {
           const max = lay[0].r.value;
-          const tiles = lay.map((t) => {
+          return lay.map((t) => {
             const it = t.r, big = t.w > 44 && t.h > 44, mid = t.w > 36 && t.h > 30, cls = big ? "" : mid ? " sm" : " xs", k = Math.round(86 + 14 * it.value / max);
             const label = `${g.label} · ${it.name}: ${fmt(it.value)}${salary > 0 ? ", " + pctS(it.value) + " dello stipendio" : ""}`;
             const rows = (it.rows && it.rows.length ? it.rows : (its.length ? [{ label: it.name, sub: g.label, value: it.value }] : (g.rows || []))), shown = rows.slice(0, 8), more = rows.slice(8), rmax = Math.max(...rows.map((r) => Math.abs(r.value)), 1);
             const dp = `<header><i style="background:${g.color}"></i><span><b>${escapeHtml(it.name)}</b><small>${escapeHtml(g.label)}</small></span><strong>${fmt0(it.value)}</strong><em>${pctS(it.value)}</em></header>${shown.map((r) => `<div class="sc-dr"><span>${escapeHtml(r.label)}${r.sub ? `<small>${escapeHtml(r.sub)}</small>` : ""}</span><b class="${r.value < 0 ? "neg" : ""}">${r.value < 0 ? "−" : ""}${fmt(Math.abs(r.value))}</b><i style="width:${(Math.abs(r.value) / rmax * 100).toFixed(1)}%"></i></div>`).join("")}${more.length ? `<div class="sc-dr"><span>+ altre ${more.length} voci</span><b>${fmt(more.reduce((n, r) => n + r.value, 0))}</b></div>` : ""}${it.info ? `<p class="sc-dinfo">${escapeHtml(it.info)}</p>` : ""}`;
-            return `<button type="button" class="sc-tile${cls}" style="left:${(t.x / gr.w * 100).toFixed(2)}%;top:${(t.y / gr.h * 100).toFixed(2)}%;width:${(t.w / gr.w * 100).toFixed(2)}%;height:${(t.h / gr.h * 100).toFixed(2)}%;--k:${k};--n:${n++};--c:${g.color}" data-g="${escapeHtml(g.label)}" data-name="${escapeHtml(it.name)}" aria-haspopup="dialog" aria-label="${escapeHtml(label)}. Apri il dettaglio"><div><p class="sc-in"><span>${escapeHtml(it.name)}</span><b>${fmt0(it.value)}</b><em>${pctS(it.value)}</em></p></div><template class="sc-dp">${dp}</template></button>`;
+            return `<button type="button" class="sc-tile${cls}" style="left:${(t.x / gw * 100).toFixed(2)}%;top:${(t.y / gh * 100).toFixed(2)}%;width:${(t.w / gw * 100).toFixed(2)}%;height:${(t.h / gh * 100).toFixed(2)}%;--k:${k};--n:${n++};--c:${g.color}" data-g="${escapeHtml(g.label)}" data-name="${escapeHtml(it.name)}" aria-haspopup="dialog" aria-label="${escapeHtml(label)}. Apri il dettaglio"><div><p class="sc-in"><span>${escapeHtml(it.name)}</span><b>${fmt0(it.value)}</b><em>${pctS(it.value)}</em></p></div><template class="sc-dp">${dp}</template></button>`;
           }).join("");
+        };
+        const itemsOf = (g) => g.items.filter((x) => x.value > 0.005).sort((p, q) => q.value - p.value);
+        const layOf = (g, its, w, h) => its.length ? tmLayout(its, w, h) : [{ r: { name: g.label, value: g.value }, x: 0, y: 0, w, h }];
+        const out = gl.map((gr) => {
+          const g = gr.r, its = itemsOf(g);
+          const tiles = tilesOf(g, its, layOf(g, its, gr.w, gr.h), gr.w, gr.h);
           return `<div class="sc-grp" style="--c:${g.color};left:${(gr.x / W * 100).toFixed(2)}%;top:${(gr.y / H * 100).toFixed(2)}%;width:${(gr.w / W * 100).toFixed(2)}%;height:${(gr.h / H * 100).toFixed(2)}%"><div class="sc-gi">${tiles}</div></div>`;
         }).join("");
+        // Ogni gruppo ha anche la sua mappa, mostrata nel popup del gruppo (proporzione 16:10).
+        const groupMaps = groups.map((g) => {
+          const its = itemsOf(g), gw = 160, gh = 100;
+          return `<template class="sc-gmap" data-g="${escapeHtml(g.label)}" data-total="${escapeHtml(fmt0(g.value))}" data-pct="${escapeHtml(pctS(g.value))}" data-c="${g.color}"><div class="sc-tm sc-tm-g">${tilesOf(g, its, layOf(g, its, gw, gh), gw, gh)}</div></template>`;
+        }).join("");
         const neg = groups.flatMap((g) => g.items.filter((x) => x.value < -0.005));
-        return `<div class="sc-tm">${out}</div>${neg.length ? `<p class="sc-note">${neg.map((x) => `${escapeHtml(x.name)} −${fmt(Math.abs(x.value))}`).join(" · ")}</p>` : ""}`;
+        return `<div class="sc-tm">${out}</div>${groupMaps}${neg.length ? `<p class="sc-note">${neg.map((x) => `${escapeHtml(x.name)} −${fmt(Math.abs(x.value))}`).join(" · ")}</p>` : ""}`;
       }
       /** Come si divide lo stipendio del mese: ciambella animata + righe espandibili + ritmo del mese. */
       function budgetSankey(d) {
@@ -4209,7 +4222,7 @@ document.addEventListener("keydown", (e) => {
           { k: "free", label: over ? "Sforamento" : "Libero", hint: over ? "oltre lo stipendio" : "ancora da spendere", color: over ? "#ee6f8b" : "var(--pos)", items: [], rows: [{ label: "Stipendio di riferimento", sub: "", value: S }, { label: "Impegni del mese", sub: "meno", value: -fixed.reduce((n, x) => n + x.value, 0) }, { label: "Messo da parte", sub: "meno", value: -save.reduce((n, x) => n + x.value, 0) }, { label: "Speso", sub: "meno", value: -spent }] }
         ].map((g) => ({ ...g, value: g.k === "free" ? over || free : g.items.reduce((n, x) => n + x.value, 0) })).filter((g) => g.value > 0.005);
         const total = groups.reduce((n, g) => n + g.value, 0) || 1, pct = (v) => Math.round(v / total * 100);
-        const chips = groups.map((g) => `<div class="sc-chip" style="--c:${g.color}"><i></i><span>${g.label}</span><b>${fmt0(g.value)}</b><em>${pct(g.value)}%</em></div>`).join("");
+        const chips = groups.map((g) => `<button type="button" class="sc-chip" data-g="${escapeHtml(g.label)}" aria-haspopup="dialog" aria-label="${escapeHtml(g.label)}: ${escapeHtml(fmt0(g.value))}, ${pct(g.value)}%. Apri la mappa del gruppo" style="--c:${g.color}"><i></i><span>${g.label}</span><b>${fmt0(g.value)}</b><em>${pct(g.value)}%</em></button>`).join("");
         const map = scMap(groups, S, fmt, fmt0);
         const isNow = `${state.year}-${String(state.month).padStart(2, "0")}` === todayIso().slice(0, 7), dim = new Date(Date.UTC(state.year, state.month, 0)).getUTCDate(), day = Number(todayIso().slice(8));
         let pace = "";
@@ -4221,31 +4234,34 @@ document.addEventListener("keydown", (e) => {
         return `<section class="card pad sankey"><div class="card-title"><h2>Dove va lo stipendio</h2><span class="sk-total">Stipendio <b>${fmt0(S)}</b></span></div><div class="sc-chips">${chips}</div>${map}${pace}</section>`;
       }
       globalThis.lifeOSSankey = budgetSankey;
-      /** Popup della voce: dettaglio, composizione e altre voci dello stesso gruppo (come nell'app). */
+      /** Popup della voce: solo quella voce (dettaglio e composizione). */
       function scOpenTile(tile) {
-        const sec = tile.closest(".sankey"), tpl = tile.querySelector("template.sc-dp"), host = document.getElementById("dialog");
-        if (!sec || !tpl || !host) return;
-        sec.querySelectorAll(".sc-tile.on").forEach((x) => x.classList.remove("on"));
-        tile.classList.add("on");
-        const c = tile.style.getPropertyValue("--c"), g = tile.dataset.g || "";
-        const sib = [...sec.querySelectorAll(".sc-tile")].filter((t) => t !== tile && t.dataset.g === g);
-        const chips = sib.map((t) => `<button type="button" class="sc-sib" data-sc-name="${escapeHtml(t.dataset.name || "")}"><i></i>${escapeHtml(t.dataset.name || "")}<b>${escapeHtml(t.querySelector(".sc-in b")?.textContent || "")}</b></button>`).join("");
-        host.innerHTML = `<div class="modal sc-pop" role="dialog" aria-modal="true" aria-label="${escapeHtml(tile.dataset.name || "Dettaglio")}" style="--c:${c}"><div class="modal-top"><h2>${escapeHtml(g)}</h2><button type="button" class="ghost" data-close="1" aria-label="Chiudi">×</button></div><div class="sc-dbox">${tpl.innerHTML}</div>${chips ? `<div class="sc-sibs"><small>Altre voci di ${escapeHtml(g)}</small><div>${chips}</div></div>` : ""}</div>`;
+        const tpl = tile.querySelector("template.sc-dp"), host = document.getElementById("dialog");
+        if (!tpl || !host) return;
+        document.querySelectorAll(".sc-tile.on").forEach((x) => x.classList.remove("on"));
+        if (tile.closest(".sankey")) { tile.classList.add("on"); globalThis.__scLast = tile; }
+        const c = tile.style.getPropertyValue("--c");
+        host.innerHTML = `<div class="modal sc-pop" role="dialog" aria-modal="true" aria-label="${escapeHtml(tile.dataset.name || "Dettaglio")}" style="--c:${c}"><div class="modal-top"><h2>${escapeHtml(tile.dataset.name || "")}</h2><button type="button" class="ghost" data-close="1" aria-label="Chiudi">×</button></div><div class="sc-dbox">${tpl.innerHTML}</div></div>`;
         host.classList.remove("hidden");
         host.dataset.scFrom = "1";
-        globalThis.__scLast = tile;
-        host.querySelector(".sc-sib, [data-close]")?.focus({ preventScroll: true });
+        host.querySelector("[data-close]")?.focus({ preventScroll: true });
+      }
+      /** Popup del gruppo: totale, quota e la mappa delle sue voci; ogni riquadro apre la sua voce. */
+      function scOpenGroup(chip) {
+        const sec = chip.closest(".sankey"), host = document.getElementById("dialog");
+        const tpl = sec && [...sec.querySelectorAll("template.sc-gmap")].find((t) => t.dataset.g === chip.dataset.g);
+        if (!tpl || !host) return;
+        globalThis.__scLast = chip;
+        host.innerHTML = `<div class="modal sc-pop sc-pop-g" role="dialog" aria-modal="true" aria-label="${escapeHtml(tpl.dataset.g)}" style="--c:${tpl.dataset.c}"><div class="modal-top"><h2>${escapeHtml(tpl.dataset.g)}</h2><button type="button" class="ghost" data-close="1" aria-label="Chiudi">×</button></div><p class="sc-gsum"><b>${escapeHtml(tpl.dataset.total)}</b><span>${escapeHtml(tpl.dataset.pct)} dello stipendio</span></p>${tpl.innerHTML}</div>`;
+        host.classList.remove("hidden");
+        host.dataset.scFrom = "1";
+        host.querySelector("[data-close]")?.focus({ preventScroll: true });
       }
       if (!globalThis.__scTmBound) {
         globalThis.__scTmBound = true;
         document.addEventListener("click", (ev) => {
-          const chip = ev.target.closest && ev.target.closest(".sc-sib");
-          if (chip) {
-            const sec = globalThis.__scLast?.closest(".sankey");
-            const next = sec && [...sec.querySelectorAll(".sc-tile")].find((t) => t.dataset.name === chip.dataset.scName && t.dataset.g === globalThis.__scLast.dataset.g);
-            if (next) scOpenTile(next);
-            return;
-          }
+          const group = ev.target.closest && ev.target.closest(".sc-chip[data-g]");
+          if (group) { scOpenGroup(group); return; }
           const tile = ev.target.closest && ev.target.closest(".sc-tile");
           if (tile) scOpenTile(tile);
         });
