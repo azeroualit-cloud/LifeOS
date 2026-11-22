@@ -83,8 +83,9 @@ struct LOMacroValue: View {
             Text(title).font(.footnote).foregroundStyle(NativeDesign.secondary).lineLimit(1)
             HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xs) {
                 Text(shown).font(.subheadline.weight(.semibold)).monospacedDigit()
+                // Same size as the value: only colour and weight differ (user request 22/11/2026).
                 Text(suffix)
-                    .font(.footnote).foregroundStyle(NativeDesign.secondary).monospacedDigit().lineLimit(1).minimumScaleFactor(0.8)
+                    .font(.subheadline).foregroundStyle(NativeDesign.secondary).monospacedDigit().lineLimit(1).minimumScaleFactor(0.8)
             }
             // Without a goal the track stays empty: a full bar would suggest a target met.
             LOProgressBar(value: value ?? 0, total: goal, color: color, height: NativeDesign.Space.xs)

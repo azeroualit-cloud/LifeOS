@@ -155,7 +155,7 @@ struct NativeHealthDetail: View {
                     HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xxs) {
                         Text(kcal).font(.title.weight(.bold)).monospacedDigit()
                         if let targets {
-                            Text("/ " + whole(targets.calories)).font(.title3.weight(.semibold))
+                            Text("/ " + whole(targets.calories)).font(.title.weight(.bold))
                                 .foregroundStyle(NativeDesign.secondary).monospacedDigit()
                         }
                     }

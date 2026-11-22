@@ -43,6 +43,8 @@ struct NativeBloomScreen: View {
     @State private var selectedPlaceNote: String?
     /// The place whose notes are open (from the map card's "Apri nota").
     @State private var openedPlace: String?
+    /// Place waiting for the Apple Mappe / Google Maps choice.
+    @State private var mapsDestination: NativeBloomDestination?
     /// Place type filter on the map (nil = every type).
     @State private var mapKind: NativeBloomPlaceKind?
     @State private var hasOpenedMap = false
@@ -360,53 +362,13 @@ struct NativeBloomScreen: View {
     }
     /// Selected place: tapping the card opens its notes; arrows move between places;
     /// directions open in Apple Maps or Waze (user request 22/11/2026).
+    /// Split into small views so the type checker stays fast.
     @ViewBuilder private func placeCard(_ notes: [Record]) -> some View {
         let groups = filteredGroups(notes)
         if section == "Mappa", let id = selectedPlaceNote, let index = groups.firstIndex(where: { $0.id == id }) {
-            let group = groups[index]
             VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-                HStack(spacing: NativeDesign.Space.small) {
-                    Button { openedPlace = group.id } label: {
-                        HStack(spacing: NativeDesign.Space.medium) {
-                            Image(systemName: group.place.resolvedKind.symbol).font(.body.weight(.semibold)).foregroundStyle(.white)
-                                .frame(width: NativeDesign.Layout.iconTile, height: NativeDesign.Layout.iconTile)
-                                .background { Circle().fill(Color(uiColor: NativeDesign.placeColor(group.place.resolvedKind))) }
-                                .accessibilityHidden(true)
-                            VStack(alignment: .leading, spacing: NativeDesign.Space.none) {
-                                Text(group.place.name).font(.headline).foregroundStyle(.primary).lineLimit(2)
-                                Text(group.place.resolvedKind.label + " · " + (group.notes.count == 1 ? "1 nota" : String(group.notes.count) + " note"))
-                                    .font(.footnote).foregroundStyle(NativeDesign.secondary)
-                            }
-                            Spacer(minLength: NativeDesign.Space.none)
-                        }
-                        .frame(minHeight: NativeDesign.Layout.touchTarget)
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(NativePressStyle())
-                    .accessibilityLabel(group.place.name + ", " + (group.notes.count == 1 ? "apri nota" : "apri note"))
-                    .accessibilityIdentifier("bloom-place-open")
-                    NativeIconButton(symbol: "chevron.left", label: "Luogo precedente") {
-                        selectedPlaceNote = groups[(index - 1 + groups.count) % groups.count].id
-                    }.disabled(groups.count < 2).accessibilityIdentifier("bloom-place-previous")
-                    NativeIconButton(symbol: "chevron.right", label: "Luogo successivo") {
-                        selectedPlaceNote = groups[(index + 1) % groups.count].id
-                    }.disabled(groups.count < 2).accessibilityIdentifier("bloom-place-next")
-                }
-                HStack(spacing: NativeDesign.Space.small) {
-                    Button {
-                        let item = MKMapItem(placemark: MKPlacemark(coordinate: CLLocationCoordinate2D(latitude: group.place.latitude, longitude: group.place.longitude)))
-                        item.name = group.place.name; item.openInMaps()
-                    } label: { LOActionLabel(title: "Mappe", systemImage: "map") }
-                    .buttonStyle(LOGlassButtonStyle(fillsWidth: true, compact: true))
-                    .accessibilityLabel("Apri in Mappe")
-                    .accessibilityIdentifier("bloom-place-maps")
-                    Button {
-                        if let url = NativeBloomDirections.waze(latitude: group.place.latitude, longitude: group.place.longitude) { openURL(url) }
-                    } label: { LOActionLabel(title: "Waze", systemImage: "car") }
-                    .buttonStyle(LOGlassButtonStyle(fillsWidth: true, compact: true))
-                    .accessibilityLabel("Apri in Waze")
-                    .accessibilityIdentifier("bloom-place-waze")
-                }
+                placeHeader(groups, index: index)
+                placeDirections(groups[index])
             }
             .padding(NativeDesign.Space.medium)
             .modifier(LOGlassPanel())
@@ -414,6 +376,78 @@ struct NativeBloomScreen: View {
             .padding(.bottom, NativeDesign.Layout.scrollClearance)
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("bloom-place-card")
+            .confirmationDialog("Apri con", isPresented: Binding(get: { mapsDestination != nil }, set: { if !$0 { mapsDestination = nil } }),
+                                titleVisibility: .visible, presenting: mapsDestination) { place in
+                Button("Apple Mappe") { openAppleMaps(place) }
+                    .accessibilityIdentifier("bloom-maps-apple")
+                Button("Google Maps") { openGoogleMaps(place) }
+                    .accessibilityIdentifier("bloom-maps-google")
+                Button("Annulla", role: .cancel) { mapsDestination = nil }
+            }
+        }
+    }
+    private func openAppleMaps(_ place: NativeBloomDestination) {
+        let item = MKMapItem(placemark: MKPlacemark(coordinate: CLLocationCoordinate2D(latitude: place.latitude, longitude: place.longitude)))
+        item.name = place.name
+        item.openInMaps()
+    }
+    /// The Google Maps app when installed, otherwise Google Maps on the web.
+    private func openGoogleMaps(_ place: NativeBloomDestination) {
+        guard let app = NativeBloomDirections.googleMapsApp(latitude: place.latitude, longitude: place.longitude) else { return }
+        openURL(app) { accepted in
+            if !accepted, let web = NativeBloomDirections.googleMapsWeb(latitude: place.latitude, longitude: place.longitude) { openURL(web) }
+        }
+    }
+    private func placeHeader(_ groups: [MapGroup], index: Int) -> some View {
+        let group = groups[index]
+        let count = group.notes.count
+        let subtitle: String = group.place.resolvedKind.label + " · " + (count == 1 ? "1 nota" : String(count) + " note")
+        let spoken: String = group.place.name + ", " + (count == 1 ? "apri nota" : "apri note")
+        return HStack(spacing: NativeDesign.Space.small) {
+            Button { openedPlace = group.id } label: { placeTitle(group, subtitle: subtitle) }
+                .buttonStyle(NativePressStyle())
+                .accessibilityLabel(spoken)
+                .accessibilityIdentifier("bloom-place-open")
+            NativeIconButton(symbol: "chevron.left", label: "Luogo precedente") {
+                selectedPlaceNote = groups[(index - 1 + groups.count) % groups.count].id
+            }.disabled(groups.count < 2).accessibilityIdentifier("bloom-place-previous")
+            NativeIconButton(symbol: "chevron.right", label: "Luogo successivo") {
+                selectedPlaceNote = groups[(index + 1) % groups.count].id
+            }.disabled(groups.count < 2).accessibilityIdentifier("bloom-place-next")
+        }
+    }
+    private func placeTitle(_ group: MapGroup, subtitle: String) -> some View {
+        let kind = group.place.resolvedKind
+        let tint = Color(uiColor: NativeDesign.placeColor(kind))
+        return HStack(spacing: NativeDesign.Space.medium) {
+            Image(systemName: kind.symbol).font(.body.weight(.semibold)).foregroundStyle(.white)
+                .frame(width: NativeDesign.Layout.iconTile, height: NativeDesign.Layout.iconTile)
+                .background { Circle().fill(tint) }
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: NativeDesign.Space.none) {
+                Text(group.place.name).font(.headline).foregroundStyle(.primary).lineLimit(2)
+                Text(subtitle).font(.footnote).foregroundStyle(NativeDesign.secondary)
+            }
+            Spacer(minLength: NativeDesign.Space.none)
+        }
+        .frame(minHeight: NativeDesign.Layout.touchTarget)
+        .contentShape(Rectangle())
+    }
+    private func placeDirections(_ group: MapGroup) -> some View {
+        let latitude = group.place.latitude, longitude = group.place.longitude, name = group.place.name
+        return HStack(spacing: NativeDesign.Space.small) {
+            Button {
+                mapsDestination = NativeBloomDestination(name: name, latitude: latitude, longitude: longitude)
+            } label: { LOActionLabel(title: "Mappe", systemImage: "map") }
+            .buttonStyle(LOGlassButtonStyle(fillsWidth: true, compact: true))
+            .accessibilityLabel("Apri in Mappe, scegli l'app")
+            .accessibilityIdentifier("bloom-place-maps")
+            Button {
+                if let url = NativeBloomDirections.waze(latitude: latitude, longitude: longitude) { openURL(url) }
+            } label: { LOActionLabel(title: "Waze", systemImage: "car") }
+            .buttonStyle(LOGlassButtonStyle(fillsWidth: true, compact: true))
+            .accessibilityLabel("Apri in Waze")
+            .accessibilityIdentifier("bloom-place-waze")
         }
     }
     private func ordered(_ notes: [Record]) -> [Record] {
@@ -639,8 +673,26 @@ private struct NativeBloomComposer: View {
 
 }
 
+/// A place to open in a maps app.
+struct NativeBloomDestination: Equatable {
+    let name: String
+    let latitude: Double
+    let longitude: Double
+}
+
 /// Directions links for a place.
 enum NativeBloomDirections {
+    private static func valid(_ latitude: Double, _ longitude: Double) -> Bool {
+        latitude.isFinite && longitude.isFinite && abs(latitude) <= 90 && abs(longitude) <= 180
+    }
+    static func googleMapsApp(latitude: Double, longitude: Double) -> URL? {
+        guard valid(latitude, longitude) else { return nil }
+        return URL(string: String(format: "comgooglemaps://?daddr=%.6f,%.6f&directionsmode=driving", latitude, longitude))
+    }
+    static func googleMapsWeb(latitude: Double, longitude: Double) -> URL? {
+        guard valid(latitude, longitude) else { return nil }
+        return URL(string: String(format: "https://www.google.com/maps/dir/?api=1&destination=%.6f,%.6f", latitude, longitude))
+    }
     /// Waze universal link: opens the Waze app when installed, otherwise its web page.
     static func waze(latitude: Double, longitude: Double) -> URL? {
         guard latitude.isFinite, longitude.isFinite, abs(latitude) <= 90, abs(longitude) <= 180 else { return nil }

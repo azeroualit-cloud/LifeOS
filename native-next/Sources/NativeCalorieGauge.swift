@@ -27,7 +27,7 @@ enum NativeCalorieBand: Equatable {
     }
 }
 
-/// Shallow arc used as the calorie track.
+/// Shallow arc used as the calorie track; its top touches the frame's top edge.
 private struct NativeCalorieArcShape: Shape {
     func path(in rect: CGRect) -> Path {
         var path = Path()
@@ -37,50 +37,64 @@ private struct NativeCalorieArcShape: Shape {
     }
 }
 
-/// Arc with the eaten calories, the goal band markers and their values underneath.
+/// Arc gauge: grey track, the goal band as a lighter stretch of the arc, the eaten calories
+/// as a gradient stroke ending in a knob (a check inside the band), band limits underneath.
 struct NativeCalorieGauge: View {
     let calories: Double?
     let goal: Double?
-    private let lineWidth: CGFloat = 8
+    private let lineWidth: CGFloat = 10
+    private let knob: CGFloat = 20
 
     var body: some View {
         let band = NativeCalorieBand.of(calories, goal: goal)
         let value = goal.map { NativeCalorieBand.fraction(calories ?? 0, goal: $0) } ?? 0
-        VStack(spacing: NativeDesign.Space.xxs) {
-            GeometryReader { proxy in
-                let rect = CGRect(origin: .zero, size: proxy.size).insetBy(dx: lineWidth / 2, dy: lineWidth / 2)
-                ZStack {
-                    NativeCalorieArcShape().stroke(Color(uiColor: .tertiarySystemFill), style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
-                        .frame(width: rect.width, height: rect.height).position(x: proxy.size.width / 2, y: proxy.size.height / 2)
-                    NativeCalorieArcShape().trim(from: 0, to: value)
-                        .stroke(band.color, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
-                        .frame(width: rect.width, height: rect.height).position(x: proxy.size.width / 2, y: proxy.size.height / 2)
-                    if let goal, goal > 0 {
-                        ForEach([0.9, 1.1], id: \.self) { share in
-                            // Same arc-length measure as `trim`, so markers and progress agree.
-                            let local = NativeCalorieArcShape().path(in: CGRect(origin: .zero, size: rect.size))
-                                .trimmedPath(from: 0, to: NativeCalorieBand.fraction(goal * share, goal: goal)).currentPoint ?? .zero
-                            Capsule().fill(Color.primary.opacity(0.55))
-                                .frame(width: 3, height: lineWidth + NativeDesign.Space.small)
-                                .position(x: local.x + rect.minX, y: local.y + rect.minY)
+        let low = goal.map { NativeCalorieBand.fraction($0 * 0.9, goal: $0) } ?? 0
+        let high = goal.map { NativeCalorieBand.fraction($0 * 1.1, goal: $0) } ?? 0
+        GeometryReader { proxy in
+            let inset = knob / 2
+            let arcRect = CGRect(x: inset, y: inset, width: proxy.size.width - knob, height: proxy.size.height - knob - NativeDesign.Space.medium)
+            let local = NativeCalorieArcShape().path(in: CGRect(origin: .zero, size: arcRect.size))
+            let point: (Double) -> CGPoint = { t in
+                let p = local.trimmedPath(from: 0, to: max(t, 0.0001)).currentPoint ?? .zero
+                return CGPoint(x: p.x + arcRect.minX, y: p.y + arcRect.minY)
+            }
+            ZStack(alignment: .topLeading) {
+                arc(arcRect).stroke(Color(uiColor: .tertiarySystemFill), style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                if goal != nil {
+                    arc(arcRect, from: low, to: high)
+                        .stroke(NativeDesign.nutritionTitle.opacity(0.28), style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                }
+                if value > 0 {
+                    arc(arcRect, from: 0, to: value)
+                        .stroke(LinearGradient(colors: [band.color.opacity(0.55), band.color], startPoint: .leading, endPoint: .trailing),
+                                style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                    let end = point(value)
+                    ZStack {
+                        Circle().fill(band.color)
+                        Circle().strokeBorder(Color(uiColor: .systemBackground), lineWidth: 3)
+                        if band == .within {
+                            Image(systemName: "checkmark").font(.system(size: 9, weight: .heavy)).foregroundStyle(Color(uiColor: .systemBackground))
                         }
                     }
+                    .frame(width: knob, height: knob)
+                    .position(end)
                 }
-            }
-            .frame(height: NativeDesign.Space.xLarge + NativeDesign.Space.small)
-            if let goal, goal > 0 {
-                GeometryReader { proxy in
-                    ForEach([0.9, 1.1], id: \.self) { share in
-                        Text((goal * share).formatted(.number.precision(.fractionLength(0))))
-                            .font(.caption2).foregroundStyle(NativeDesign.secondary).monospacedDigit()
+                if let goal, goal > 0 {
+                    ForEach([(low, goal * 0.9), (high, goal * 1.1)], id: \.0) { item in
+                        Text(item.1.formatted(.number.precision(.fractionLength(0))))
+                            .font(.caption2.weight(.medium)).foregroundStyle(NativeDesign.secondary).monospacedDigit()
                             .fixedSize()
-                            .position(x: proxy.size.width * NativeCalorieBand.fraction(goal * share, goal: goal), y: proxy.size.height / 2)
+                            .position(x: point(item.0).x, y: proxy.size.height - NativeDesign.Space.xs)
                     }
                 }
-                .frame(height: NativeDesign.Space.medium)
             }
         }
+        .frame(height: NativeDesign.Space.section + NativeDesign.Space.xLarge)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(goal.map { "Fascia obiettivo da " + ($0 * 0.9).formatted(.number.precision(.fractionLength(0))) + " a " + ($0 * 1.1).formatted(.number.precision(.fractionLength(0))) + " kcal" } ?? "Nessun obiettivo")
+    }
+
+    private func arc(_ rect: CGRect, from: Double = 0, to: Double = 1) -> some Shape {
+        NativeCalorieArcShape().trim(from: from, to: to).offset(x: rect.minX, y: rect.minY).size(width: rect.width, height: rect.height)
     }
 }
