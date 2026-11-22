@@ -22,7 +22,8 @@ struct NativeExpenseRouteSection: View {
     private var chosen: Record? { plans.first { $0.text("id") == selected } }
     var body: some View {
         Group {
-            Section("Da dove viene pagata") {
+            // FUNDING-BLOCK-2026-11-21: "Da dove arrivano i soldi" with the split between plan, savings and budget.
+            Section {
                 if loading { ProgressView("Verifico fondi e piani…") }
                 if let issue {
                     NativeInlineMessage(text: issue)
@@ -34,6 +35,7 @@ struct NativeExpenseRouteSection: View {
                         if offersSavings || selected == NativeExpenseRouting.savings { Text("Risparmi").tag(NativeExpenseRouting.savings) }
                         ForEach(plans.indices, id: \.self) { index in Text("Piano · " + plans[index].text("name")).tag(plans[index].text("id")) }
                     }.accessibilityIdentifier("expense-destination")
+                    if !selected.isEmpty { fundingBar }
                     if let chosen {
                     if chosen.flag("retained") {
                         Text("Mantieni il collegamento esistente. Cambiare il periodo non sposta denaro.").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
@@ -41,15 +43,18 @@ struct NativeExpenseRouteSection: View {
                         let split = NativeExpenseRouting.split(amount: amount, plan: chosen)
                         LabeledContent("Dal fondo " + chosen.text("name"), value: (Double(split.fund) / 100).euro)
                         LabeledContent("Dagli altri risparmi", value: (Double(split.savings) / 100).euro).accessibilityIdentifier("expense-savings-preview")
-                        Text("Il pagamento non viene sottratto di nuovo dal budget. Disponibilità verificata nuovamente al salvataggio.").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
                     }
                     } else if selected == NativeExpenseRouting.savings {
                         LabeledContent("Dai risparmi", value: (Double(amount) / 100).euro).accessibilityIdentifier("expense-direct-savings-preview")
-                        Text("La spesa esce dal conto ma non riduce il budget del mese.").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
                     } else if selected == NativeExpenseRouting.ordinary {
                         LabeledContent(bill.enabled ? "Pagamento bancario" : "Dal budget mensile", value: (Double(amount) / 100).euro).accessibilityIdentifier("expense-budget-preview")
-                        Text(plans.isEmpty ? "Nessun piano compatibile con questa categoria e data." : "Hai scelto di non usare il fondo del piano.").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
-                    } else { Text("Ci sono più piani compatibili: scegli quale utilizzare.").font(NativeDesign.metadata) }
+                    } else { Text("Scegli il piano").font(NativeDesign.metadata) }
+                }
+            } header: {
+                HStack {
+                    Text("Da dove arrivano i soldi")
+                    Spacer()
+                    Text((Double(amount) / 100).euro).monospacedDigit().foregroundStyle(Color.primary)
                 }
             }
             if bill.enabled { Section("Periodo di competenza") {
@@ -64,6 +69,26 @@ struct NativeExpenseRouteSection: View {
             }
             .onChange(of: category + day) { _, _ in selected = ""; ready = false }
             .onChange(of: category) { _, _ in plans = []; selected = ""; ready = false }
+    }
+    /// Plan, savings and budget parts of the amount, as the selected destination pays it.
+    private var funding: (plan: Int, savings: Int, budget: Int) {
+        if let chosen, !chosen.flag("retained") {
+            let split = NativeExpenseRouting.split(amount: amount, plan: chosen); return (split.fund, split.savings, 0)
+        }
+        if chosen != nil { return (amount, 0, 0) }
+        if selected == NativeExpenseRouting.savings { return (0, amount, 0) }
+        return (0, 0, amount)
+    }
+    private var fundingBar: some View {
+        let parts = funding
+        let euro: (Int) -> String = { (Double($0) / 100).euro }
+        return LOSplitBar(segments: [
+            LOSegment(id: "plan", value: Double(parts.plan), color: NativeDesign.financeGroups[1]),
+            LOSegment(id: "savings", value: Double(parts.savings), color: NativeDesign.financeGroups[0]),
+            LOSegment(id: "budget", value: Double(parts.budget), color: NativeDesign.financeBudget[0])
+        ], scale: Double(max(amount, 1)), height: NativeDesign.Space.medium,
+           accessibilityText: "Piano " + euro(parts.plan) + ", risparmi " + euro(parts.savings) + ", budget " + euro(parts.budget))
+        .accessibilityIdentifier("expense-funding-bar")
     }
     private func updateReady() {
         bill.prepare(day: day, required: NativeUtilityPeriodDraft.categories.contains(category) || chosen?.text("kind") == "estimated" || bill.enabled)

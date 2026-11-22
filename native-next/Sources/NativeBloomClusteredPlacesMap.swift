@@ -222,7 +222,11 @@ final class NativeBloomPlacePinView: NativeBloomPlaceAnnotationView {
         ring.layer.borderWidth = selected ? 4 : 2
     }
     func configure(_ place: NativeBloomPlaceMapAnnotation) {
-        glyph.image = UIImage(systemName: place.kind.symbol, withConfiguration: UIImage.SymbolConfiguration(pointSize: 16, weight: .semibold))
+        let color = NativeDesign.placeColor(place.kind)
+        ring.backgroundColor = color
+        ring.layer.borderColor = UIColor.white.cgColor
+        glyph.tintColor = .white
+        glyph.image = UIImage(systemName: place.kind.symbol, withConfiguration: UIImage.SymbolConfiguration(pointSize: 14, weight: .semibold))
         accessibilityIdentifier = "map-marker-\(place.id)"
         accessibilityLabel = "\(place.title ?? "Luogo"), \(place.kind.label), \(NativeBloomMapLabels.noteCount(place.count))"
         accessibilityHint = "Mostra le note salvate in questo luogo"

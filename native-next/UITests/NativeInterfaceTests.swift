@@ -978,7 +978,7 @@ final class NativeInterfaceTests: XCTestCase {
         app.openOtherDestination("Finanza")
         app.buttons["finance-budget"].tap()
         XCTAssertTrue(app.navigationBars["Budget"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.staticTexts["Stipendio di riferimento"].exists)
+        XCTAssertTrue(app.staticTexts["Stipendio"].exists) // Build 93 Budget summary
         XCTAssertFalse(app.staticTexts["Ricorrenti"].exists)
         capture("budget-unified-salary-and-plans")
         app.buttons["plans-info"].tap()

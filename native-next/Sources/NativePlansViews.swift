@@ -32,7 +32,6 @@ struct NativePlansScreen: View {
         List {
             Section {
                 MonthControl(finance: true)
-                Text("Stipendio, piani e budget disponibile").font(.caption).foregroundStyle(NativeDesign.secondary)
                 if store.plansBusy { ProgressView("Aggiorno i piani…") }
                 if let error = store.plansError {
                     NativeInlineMessage(text: error)
@@ -41,9 +40,15 @@ struct NativePlansScreen: View {
                 }
                 if store.isDemo { Text("Piani demo · nessuna modifica al server").font(.caption).foregroundStyle(NativeDesign.secondary) }
             }
-            Section("Budget del mese") {
-                LabeledContent("Stipendio di riferimento", value: money(flow.salaryCents)).accessibilityIdentifier("budget-salary-reference")
-                if flow.rows.isEmpty { Text("Nessun piano per questo mese. Aggiungi un piano per destinare una quota dello stipendio.").foregroundStyle(NativeDesign.secondary) }
+            // Build 93 Budget: salary, plans and commitments, budget of the month; then the plans.
+            Section {
+                LabeledContent("Stipendio", value: money(flow.salaryCents)).monospacedDigit().accessibilityIdentifier("budget-salary-reference")
+                LabeledContent("Piani e impegni", value: money(-flow.rows.reduce(0) { $0 + $1.amountCents })).monospacedDigit()
+                LabeledContent("Budget del mese", value: money(flow.salaryCents - flow.rows.reduce(0) { $0 + $1.amountCents })).font(.headline).monospacedDigit()
+                    .accessibilityIdentifier("budget-month-total")
+            }
+            Section("Piani del mese") {
+                if flow.rows.isEmpty { Text("Nessun piano per questo mese").foregroundStyle(NativeDesign.secondary) }
                 ForEach(flow.rows) { row in
                     if let id = row.planID {
                         NavigationLink { NativePlanDetail(planID: id) } label: { budgetRow(row) }.accessibilityIdentifier("plan-" + id)
@@ -51,7 +56,6 @@ struct NativePlansScreen: View {
                 }
                 LabeledContent("Spese non già coperte dai piani", value: money(-flow.spentCents))
                 LabeledContent("Budget finale", value: money(flow.remainingCents)).font(.headline).accessibilityIdentifier("budget-final-remaining")
-                Text("Le quote dei piani riducono il budget. I pagamenti già coperti da un piano non vengono sottratti una seconda volta.").font(.caption).foregroundStyle(NativeDesign.secondary)
             }
             Section {
                 DisclosureGroup("Altri piani · futuri e conclusi") {
@@ -64,7 +68,6 @@ struct NativePlansScreen: View {
             }
             if !store.allocations.isEmpty {
                 Section("Piani precedenti") {
-                    Text("Le voci storiche non adottate sono conservate. Non duplicarle con un nuovo piano.").font(.caption).foregroundStyle(NativeDesign.secondary)
                     ForEach(Array(Dictionary(grouping: store.allocations, by: { $0.integer("cycle_id") }).values.compactMap(\.first)).sorted { $0.text("name") < $1.text("name") }.map { DisplayRecord($0, key: "cycle_id") }) { item in
                         Button { router.sheet = .extra(item.value) } label: { NativeRowText(title: item.value.text("name"), subtitle: NativeExtraState.title(item.value.text("status"))) }.buttonStyle(NativePressStyle())
                     }
@@ -85,10 +88,21 @@ struct NativePlansScreen: View {
             .onDisappear { router.financeSection = "Panoramica" }
     }
     private func budgetRow(_ row: NativeBudgetFlow.Row) -> some View {
-        VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-            LabeledContent(row.name, value: money(-row.amountCents))
-            Text("Rimane " + money(row.remainingCents)).font(.caption).foregroundStyle(NativeDesign.secondary).monospacedDigit()
-        }.padding(.vertical, NativeDesign.Space.xs)
+        let plan = row.planID.flatMap { id in plans.first { $0.text("id") == id } }
+        let kinds = ["advance": "anticipo", "goal": "obiettivo", "fund": "fondo", "fixed": "fisso", "estimated": "stima", "recovery": "spesa a rate"]
+        let kind = plan.flatMap { kinds[$0.text("kind")] } ?? ""
+        return HStack(spacing: NativeDesign.Space.medium) {
+            Circle().fill(NativeDesign.financeGroups[plan == nil ? 0 : 1]).frame(width: NativeDesign.Space.small, height: NativeDesign.Space.small)
+            VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
+                Text(row.name)
+                Text([kind, "rimane " + money(row.remainingCents)].filter { !$0.isEmpty }.joined(separator: " · "))
+                    .font(.caption).foregroundStyle(NativeDesign.secondary).monospacedDigit()
+            }
+            Spacer(minLength: NativeDesign.Space.small)
+            Text(money(row.amountCents)).monospacedDigit()
+        }
+        .padding(.vertical, NativeDesign.Space.xs)
+        .accessibilityElement(children: .combine)
     }
 }
 private extension Dictionary where Key == String, Value == JSONValue { var textID: String { text("id") } }

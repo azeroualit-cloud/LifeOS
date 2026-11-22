@@ -75,6 +75,22 @@ enum NativeDesign {
     private static func hex(_ value: Int) -> UIColor {
         UIColor(red: CGFloat((value >> 16) & 0xff) / 255, green: CGFloat((value >> 8) & 0xff) / 255, blue: CGFloat(value & 0xff) / 255, alpha: 1)
     }
+    /// Bloom map pins, one hue per place type (build 93 preview).
+    static func placeColor(_ kind: NativeBloomPlaceKind) -> UIColor {
+        switch kind {
+        case .restaurant: return .systemOrange
+        case .cafe: return .systemBrown
+        case .shop: return .systemPink
+        case .mountain: return .systemIndigo
+        case .nature: return .systemGreen
+        case .beach: return .systemCyan
+        case .culture: return .systemPurple
+        case .stay: return .systemBlue
+        case .city: return .systemTeal
+        case .sport: return .systemRed
+        case .other: return .systemGray
+        }
+    }
     static let healthGray = Color(uiColor: .systemGray)
     static let healthHistoricalBar = healthGray.opacity(0.28)
     static let healthTrend = Color(uiColor: .label)

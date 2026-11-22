@@ -371,10 +371,16 @@ struct NativeFoodPicker: View {
                                         Text("≈ \(NSDecimalNumber(decimal: food.calories)) kcal · \(cocktail.volumeML) ml / bicchiere")
                                             .font(.caption).foregroundStyle(.secondary)
                                     } else {
-                                        Text(food.nutritionNotDeclared == true ? "Energia e macro non dichiarati" : "\(NSDecimalNumber(decimal: food.calories / food.basisDivisor).doubleValue.formatted(.number.precision(.fractionLength(0...1)))) kcal / \(food.quantityUnit.basisTitle)")
+                                        Text((food.nutritionNotDeclared == true ? "Energia e macro non dichiarati" : "per \(food.quantityUnit.basisTitle)") + " · " + (personalIDs.contains(food.id) ? "Personale" : "Catalogo"))
                                             .font(.caption).foregroundStyle(.secondary)
                                     }
                                 }.frame(minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
+                                Spacer(minLength: NativeDesign.Space.small)
+                                if food.cocktail == nil && food.nutritionNotDeclared != true {
+                                    Text(NSDecimalNumber(decimal: food.calories / food.basisDivisor).doubleValue.formatted(.number.precision(.fractionLength(0))) + " kcal")
+                                        .font(.subheadline).monospacedDigit().foregroundStyle(.secondary)
+                                }
+                                Image(systemName: "plus.circle.fill").font(.title3).foregroundStyle(NativeDesign.nutritionTitle).accessibilityHidden(true)
                             }
                         }.accessibilityIdentifier("generic-food-" + food.id)
                             .listRowBackground(NativeDesign.nutritionInput)
@@ -394,10 +400,6 @@ struct NativeFoodPicker: View {
                             .foregroundStyle(.secondary)
                             .listRowBackground(NativeDesign.nutritionInput)
                     }
-                } footer: {
-                    if scope == .all {
-                        Text("Alimenti generici e di marca · Cerca anche per marca o codice a barre · Cocktail con valori stimati")
-                    }
                 }
             }
             .modifier(NativeListAppearance(background: NativeDesign.nutritionCanvas))
@@ -406,6 +408,11 @@ struct NativeFoodPicker: View {
         .background(NativeDesign.nutritionCanvas)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { DoneButton() }
+        // Build 93 "Aggiungi alimento": the search is ready to type as soon as the sheet opens.
+        .task {
+            try? await Task.sleep(nanoseconds: 450_000_000)
+            if !creating && editingFood == nil { searchFocused = true }
+        }
         .sheet(isPresented: $creating) {
             NavigationStack {
                 NativePersonalFoodEditor(initialFamily: scope == .supplements ? .supplement : .meal) { food in

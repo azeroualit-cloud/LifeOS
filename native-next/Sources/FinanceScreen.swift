@@ -9,6 +9,7 @@ struct FinanceScreen: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     @State private var search = ""
     @State private var account = "Tutti"
+    @State private var movementCategory = "Tutte"
     @AppStorage("native-hide-money") private var hidden = false
     var body: some View {
         VStack(spacing: NativeDesign.Space.none) {
@@ -160,12 +161,33 @@ struct FinanceScreen: View {
             .foregroundStyle(record.amount("amount") > 0 ? NativeDesign.financialGreen : Color.primary)
     }
     @ViewBuilder private var movements: some View {
+        // Build 93 Movimenti: search, category and account drop-downs, total of the filter.
         Section {
-            TextField("Cerca movimento", text: $search)
-            Picker("Conto", selection: $account) { ForEach(["Tutti", "Trade Republic", "Revolut", "IsyBank"], id: \.self) { Text($0) } }
+            HStack(spacing: NativeDesign.Space.small) {
+                Image(systemName: "magnifyingglass").foregroundStyle(NativeDesign.secondary).accessibilityHidden(true)
+                TextField("Cerca movimento", text: $search).accessibilityIdentifier("movements-search")
+            }
+            HStack(spacing: NativeDesign.Space.small) {
+                LOFilterPill(title: "Categoria", value: movementCategory == "Tutte" ? "Tutte le categorie" : movementCategory, isActive: true, identifier: "movements-category") {
+                    ForEach(["Tutte"] + movementCategories, id: \.self) { name in
+                        Button { movementCategory = name } label: {
+                            if movementCategory == name { Label(name == "Tutte" ? "Tutte le categorie" : name, systemImage: "checkmark") } else { Text(name == "Tutte" ? "Tutte le categorie" : name) }
+                        }
+                    }
+                }
+                LOFilterPill(title: "Conto", value: account == "Tutti" ? "Tutti i conti" : account, isActive: true, identifier: "movements-account") {
+                    ForEach(["Tutti", "Trade Republic", "Revolut", "IsyBank"], id: \.self) { name in
+                        Button { account = name } label: {
+                            if account == name { Label(name == "Tutti" ? "Tutti i conti" : name, systemImage: "checkmark") } else { Text(name == "Tutti" ? "Tutti i conti" : name) }
+                        }
+                    }
+                }
+                Spacer(minLength: 0)
+            }
+            .listRowBackground(Color.clear).listRowInsets(EdgeInsets())
         }
         if !store.financialPending.isEmpty {
-            Section("Salvati sul dispositivo") {
+            Section("Sul dispositivo") {
                 Button("Riprova invio") { Task { await store.sync(scope: .finance) } }.disabled(store.busy || store.syncing)
                 ForEach(store.financialPending) { pending in
                     VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
@@ -180,8 +202,12 @@ struct FinanceScreen: View {
                 }
             }
         }
-        let rows = store.transactions.filter { (account == "Tutti" || $0.text("account") == account) && (search.isEmpty || ($0.text("name") + $0.text("category")).localizedCaseInsensitiveContains(search)) }
-        Section("Movimenti del mese") {
+        let rows = store.transactions.filter {
+            (account == "Tutti" || $0.text("account") == account) &&
+            (movementCategory == "Tutte" || $0.text("displayCategory", fallback: $0.text("category")) == movementCategory) &&
+            (search.isEmpty || ($0.text("name") + $0.text("category")).localizedCaseInsensitiveContains(search))
+        }
+        Section(CivilDate.monthTitle(store.financeMonth) + (movementCategory == "Tutte" ? "" : " · " + movementCategory)) {
             if rows.isEmpty { Text("Nessun movimento").foregroundStyle(NativeDesign.secondary) }
             ForEach(rows.map { DisplayRecord($0, key: "row") }) { item in
                 Button { router.sheet = .movement(item.value) } label: {
@@ -192,7 +218,19 @@ struct FinanceScreen: View {
                     }.padding(.vertical, NativeDesign.Space.xs)
                 }
             }
+            if movementCategory != "Tutte" && !rows.isEmpty {
+                HStack {
+                    Text("Totale " + movementCategory).font(.headline)
+                    Spacer()
+                    MoneyText(amount: rows.reduce(0) { $0 + $1.amount("amount") }).font(.headline).foregroundStyle(Color.primary)
+                }
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier("movements-total")
+            }
         }
+    }
+    private var movementCategories: [String] {
+        Array(Set(store.transactions.map { $0.text("displayCategory", fallback: $0.text("category")) }.filter { !$0.isEmpty })).sorted()
     }
 
 }

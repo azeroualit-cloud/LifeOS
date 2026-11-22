@@ -40,6 +40,10 @@ struct NativeBloomScreen: View {
     @AppStorage("lifeos.bloom.rediscovery.round") private var rediscoveryRound = 0
     @AppStorage("lifeos.bloom.filter.category") private var savedCategory = ""
     @State private var selectedPlaceNote: String?
+    /// The place whose notes are open (from the map card's "Apri nota").
+    @State private var openedPlace: String?
+    /// Place type filter on the map (nil = every type).
+    @State private var mapKind: NativeBloomPlaceKind?
     @State private var hasOpenedMap = false
     @State private var hasOpenedRediscovery = false
     @State private var mapFitRequest = 0
@@ -84,6 +88,8 @@ struct NativeBloomScreen: View {
                             .ignoresSafeArea()
                         mapControls.padding(NativeDesign.Layout.screenInset)
                     }
+                    .overlay(alignment: .topLeading) { mapFilter(current).padding(NativeDesign.Layout.screenInset) }
+                    .overlay { VStack(spacing: NativeDesign.Space.none) { Spacer(minLength: 0); placeCard(current) } }
                     .overlay(alignment: .top) {
                         if let message = classifier.message {
                             Text(message).font(.caption).padding(.horizontal, NativeDesign.Space.medium)
@@ -104,8 +110,8 @@ struct NativeBloomScreen: View {
             .navigationBarTitleDisplayMode(.inline)
             .modifier(NativeUITestValue(value: pickerHandoff.diagnostic + ";preparing=\(preparingImport);preview=\(pendingData != nil)", identifier: "bloom-import-state"))
             .searchable(text: $search, prompt: "Cerca nella Libreria")
-            .navigationDestination(isPresented: Binding(get: { selectedPlaceNote != nil }, set: { if !$0 { selectedPlaceNote = nil } })) {
-                if let id = selectedPlaceNote, let group = mapGroups(notes).first(where: { $0.id == id }) {
+            .navigationDestination(isPresented: Binding(get: { openedPlace != nil }, set: { if !$0 { openedPlace = nil } })) {
+                if let id = openedPlace, let group = mapGroups(notes).first(where: { $0.id == id }) {
                     List {
                         Section(group.place.name) {
                             ForEach(group.notes.map { NativeBloomRow($0) }) { row in
@@ -330,7 +336,72 @@ struct NativeBloomScreen: View {
         return groups.values.sorted { $0.id < $1.id }
     }
     private func mapAnnotations(_ notes: [Record]) -> [NativeBloomPlaceMapAnnotation] {
-        mapGroups(notes).map { NativeBloomPlaceMapAnnotation(id: $0.id, place: $0.place, count: $0.notes.count) }
+        filteredGroups(notes).map { NativeBloomPlaceMapAnnotation(id: $0.id, place: $0.place, count: $0.notes.count) }
+    }
+    private func filteredGroups(_ notes: [Record]) -> [MapGroup] {
+        mapGroups(notes).filter { mapKind == nil || $0.place.resolvedKind == mapKind }
+    }
+    /// Place type drop-down with the number of places of each type (build 93 preview).
+    private func mapFilter(_ notes: [Record]) -> some View {
+        let groups = mapGroups(notes)
+        let kinds = NativeBloomPlaceKind.allCases.filter { kind in groups.contains { $0.place.resolvedKind == kind } }
+        return LOFilterPill(title: "Luoghi", value: mapKind?.label ?? "Tutti i luoghi", isActive: true, identifier: "bloom-map-filter") {
+            Button { mapKind = nil; selectedPlaceNote = nil } label: {
+                if mapKind == nil { Label("Tutti i luoghi · " + String(groups.count), systemImage: "checkmark") } else { Text("Tutti i luoghi · " + String(groups.count)) }
+            }
+            ForEach(kinds) { kind in
+                let count = groups.filter { $0.place.resolvedKind == kind }.count
+                Button { mapKind = kind; selectedPlaceNote = nil; mapFitRequest += 1 } label: {
+                    if mapKind == kind { Label(kind.label + " · " + String(count), systemImage: "checkmark") } else { Label(kind.label + " · " + String(count), systemImage: kind.symbol) }
+                }
+            }
+        }
+    }
+    /// Selected place: name, type, notes; arrows to the previous and next place; open note or Maps.
+    @ViewBuilder private func placeCard(_ notes: [Record]) -> some View {
+        let groups = filteredGroups(notes)
+        if section == "Mappa", let id = selectedPlaceNote, let index = groups.firstIndex(where: { $0.id == id }) {
+            let group = groups[index]
+            VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
+                HStack(spacing: NativeDesign.Space.medium) {
+                    Image(systemName: group.place.resolvedKind.symbol).font(.body.weight(.semibold)).foregroundStyle(.white)
+                        .frame(width: NativeDesign.Layout.iconTile, height: NativeDesign.Layout.iconTile)
+                        .background { Circle().fill(Color(uiColor: NativeDesign.placeColor(group.place.resolvedKind))) }
+                        .accessibilityHidden(true)
+                    VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
+                        Text(group.place.name).font(.headline).lineLimit(2)
+                        Text(group.place.resolvedKind.label + " · " + (group.notes.count == 1 ? "1 nota" : String(group.notes.count) + " note"))
+                            .font(.footnote).foregroundStyle(NativeDesign.secondary)
+                    }
+                    Spacer(minLength: NativeDesign.Space.small)
+                    NativeIconButton(symbol: "chevron.left", label: "Luogo precedente") {
+                        selectedPlaceNote = groups[(index - 1 + groups.count) % groups.count].id
+                    }.disabled(groups.count < 2).accessibilityIdentifier("bloom-place-previous")
+                    NativeIconButton(symbol: "chevron.right", label: "Luogo successivo") {
+                        selectedPlaceNote = groups[(index + 1) % groups.count].id
+                    }.disabled(groups.count < 2).accessibilityIdentifier("bloom-place-next")
+                }
+                HStack(spacing: NativeDesign.Space.small) {
+                    Button { openedPlace = group.id } label: {
+                        LOActionLabel(title: group.notes.count == 1 ? "Apri nota" : "Apri note", systemImage: "doc.text")
+                    }
+                    .buttonStyle(LOGlassButtonStyle(fillsWidth: true))
+                    .accessibilityIdentifier("bloom-place-open")
+                    Button {
+                        let item = MKMapItem(placemark: MKPlacemark(coordinate: CLLocationCoordinate2D(latitude: group.place.latitude, longitude: group.place.longitude)))
+                        item.name = group.place.name; item.openInMaps()
+                    } label: { LOActionLabel(title: "Apri in Mappe", systemImage: "map") }
+                    .buttonStyle(LOGlassButtonStyle(fillsWidth: true))
+                    .accessibilityIdentifier("bloom-place-maps")
+                }
+            }
+            .padding(NativeDesign.Layout.compactCardInset)
+            .modifier(LOGlassPanel())
+            .padding(.horizontal, NativeDesign.Layout.screenInset)
+            .padding(.bottom, NativeDesign.Layout.scrollClearance)
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("bloom-place-card")
+        }
     }
     private func ordered(_ notes: [Record]) -> [Record] {
         let candidates = notes.compactMap { item -> NativeBloomRediscoveryCandidate? in
