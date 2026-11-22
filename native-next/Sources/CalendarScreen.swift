@@ -94,6 +94,11 @@ struct CalendarScreen: View {
             }
             guard !Task.isCancelled else { return }
             await loadMonth(target)
+            // The agenda looks 30 days ahead: load the following month too.
+            if showingDay {
+                let ahead = String(CivilDate.adding(NativeCalendarAgendaRange.days, to: selected).prefix(7))
+                if ahead != target, !Task.isCancelled { await loadMonth(ahead) }
+            }
         }
     }
     private var weekdayLabels: some View {
@@ -276,10 +281,14 @@ struct CalendarScreen: View {
         .id(selected)
     }
 
-    /// The six days after the selected one, only where their month is loaded
-    /// (an unloaded month would wrongly read as "Nessun impegno").
+    /// The next 30 days after the selected one that have at least one event or task
+    /// (user request 22/11/2026: the agenda lists only days with commitments). Only loaded months count.
     private var followingDays: [String] {
-        (1...6).map { CivilDate.adding($0, to: selected) }.filter { monthDays[String($0.prefix(7))] != nil }
+        (1...NativeCalendarAgendaRange.days).map { CivilDate.adding($0, to: selected) }.filter { day in
+            guard monthData[String(day.prefix(7))] != nil else { return false }
+            let events = (eventsByDay[day] ?? []).filter { $0.text("occurrence_status") != "skipped" }
+            return !events.isEmpty || !(tasksByDay[day] ?? []).isEmpty
+        }
     }
     private func followingDay(_ day: String) -> some View {
         let events = (eventsByDay[day] ?? []).filter { $0.text("occurrence_status") != "skipped" }
@@ -297,9 +306,6 @@ struct CalendarScreen: View {
             .accessibilityAddTraits(.isHeader)
             .accessibilityIdentifier("calendar-next-day-" + day)
             LOListCard {
-                if events.isEmpty && tasks.isEmpty {
-                    LOListRow(isLast: true) { Text("Nessun impegno").font(.subheadline).foregroundStyle(NativeDesign.secondary) }
-                }
                 ForEach(Array(events.enumerated()), id: \.offset) { index, event in
                     agendaRow(time: event.text("start_time").isEmpty ? "Tutto il giorno" : event.text("start_time"),
                               title: event.text("title", fallback: "Evento"), detail: event.text("location"),
@@ -752,4 +758,9 @@ enum CalendarMetrics92 {
     static let xs: CGFloat = 4
     static let medium: CGFloat = 12
     static let inset: CGFloat = 20
+}
+
+/// How far the agenda looks ahead of the selected day.
+enum NativeCalendarAgendaRange {
+    static let days = 30
 }
