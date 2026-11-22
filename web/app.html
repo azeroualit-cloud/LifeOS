@@ -1196,6 +1196,9 @@ body .nav button[data-view].active .nav-symbol,body .nav #admin-link.active .nav
 .sc-gsum span{font-size:var(--fs-2);color:var(--ink-3)}
 .sc-tm-g{aspect-ratio:16/10;min-height:0}
 .sc-tm-g .sc-tile{animation-delay:0s}
+.sc-tm-tx{min-height:120px}
+.sc-txtile{cursor:pointer}
+div.sc-txtile{cursor:default}
 /* I gruppi in alto sono pulsanti: aprono il popup del gruppo. */
 button.sc-chip{border:0;font:inherit;color:inherit;text-align:left;cursor:pointer;min-height:44px;transition:background var(--m2) var(--ease)}
 button.sc-chip:hover{background:color-mix(in srgb,var(--c) 16%,var(--surface-2))}
@@ -4129,7 +4132,7 @@ document.addEventListener("keydown", (e) => {
           if (v <= 0.004) continue;
           const key = norm(t.displayCategory || cat);
           by.set(key, (by.get(key) || 0) + v);
-          (rowsBy.get(key) || rowsBy.set(key, []).get(key)).push({ label: t.name || cat, sub: /^\d{4}-\d{2}-\d{2}/.test(t.date || "") ? `${t.date.slice(8, 10)}/${t.date.slice(5, 7)}` : "", value: v });
+          (rowsBy.get(key) || rowsBy.set(key, []).get(key)).push({ row: Number(t.row) || 0, label: t.name || cat, sub: /^\d{4}-\d{2}-\d{2}/.test(t.date || "") ? `${t.date.slice(8, 10)}/${t.date.slice(5, 7)}` : "", value: v });
         }
         let items = [...by].map(([name, value]) => ({ name, value, txRows: true, rows: (rowsBy.get(name) || []).sort((p, q) => q.value - p.value) })).sort((a, b) => b.value - a.value);
         const sum = items.reduce((n, x) => n + x.value, 0);
@@ -4185,9 +4188,21 @@ document.addEventListener("keydown", (e) => {
             const row = (r, top, cls = "") => `<div class="sc-dr${cls}"><span>${escapeHtml(r.label)}${r.sub ? `<small>${escapeHtml(r.sub)}</small>` : ""}</span><b class="${r.value < 0 ? "neg" : ""}">${r.value < 0 ? "−" : ""}${fmt(Math.abs(r.value))}</b><i style="width:${(Math.abs(r.value) / top * 100).toFixed(1)}%"></i></div>`;
             // Composizione: quota del piano o voci raggruppate; per le spese le righe sono già i movimenti.
             const compHtml = it.txRows ? "" : `<p class="sc-dsec">Composizione</p>${shown.map((r) => row(r, rmax)).join("")}${more.length ? `<div class="sc-dr"><span>+ altre ${more.length} voci</span><b>${fmt(more.reduce((n, r) => n + r.value, 0))}</b></div>` : ""}`;
-            const txList = it.txRows ? rows : (it.tx || []), tmax = Math.max(...txList.map((r) => Math.abs(r.value)), 1), txMore = txList.slice(12);
+            const txList = it.txRows ? rows : (it.tx || []);
+            // Movimenti del mese come mappa: area = importo; il riquadro apre la modifica del movimento.
+            const txMap = (list) => {
+              const sorted = list.map((r) => ({ ...r, value: Math.abs(r.value) })).filter((r) => r.value > 0.004).sort((p, q) => q.value - p.value);
+              const top = sorted.slice(0, 40), rest = sorted.slice(40), all = rest.length ? [...top, { label: `+ altri ${rest.length}`, sub: "", value: rest.reduce((n, r) => n + r.value, 0) }] : top;
+              const tw = 160, th = Math.max(60, Math.min(130, 40 + all.length * 6)), tl = tmLayout(all, tw, th), tmx = all[0]?.value || 1;
+              return `<div class="sc-tm sc-tm-g sc-tm-tx" style="aspect-ratio:${tw}/${th}">${tl.map((t, i) => {
+                const r = t.r, k = Math.round(78 + 22 * r.value / tmx), box = `left:${(t.x / tw * 100).toFixed(2)}%;top:${(t.y / th * 100).toFixed(2)}%;width:${(t.w / tw * 100).toFixed(2)}%;height:${(t.h / th * 100).toFixed(2)}%;--k:${k};--n:${i};--c:${g.color}`;
+                const inner = `<div><p class="sc-in"><span>${escapeHtml(r.label)}</span><b>${fmt(r.value)}</b><em>${escapeHtml(r.sub || "")}</em></p></div>`;
+                const spoken = `${r.label}${r.sub ? ", " + r.sub : ""}: ${fmt(r.value)}`;
+                return r.row ? `<button type="button" class="sc-tile sc-txtile" style="${box}" data-edit-movement="${r.row}" aria-label="${escapeHtml(spoken)}. Modifica il movimento">${inner}</button>` : `<div class="sc-tile sc-txtile" style="${box}" role="img" aria-label="${escapeHtml(spoken)}">${inner}</div>`;
+              }).join("")}</div>`;
+            };
             const txHtml = txList.length
-              ? `<p class="sc-dsec">Movimenti del mese<span>${txList.length}</span></p>${txList.slice(0, 12).map((r) => row(r, tmax, " sc-tx")).join("")}${txMore.length ? `<div class="sc-dr"><span>+ altri ${txMore.length} movimenti</span><b>${fmt(txMore.reduce((n, r) => n + Math.abs(r.value), 0))}</b></div>` : ""}`
+              ? `<p class="sc-dsec">Movimenti del mese<span>${txList.length}</span></p>${txMap(txList)}`
               : (it.txRows || it.tx ? `<p class="sc-dsec">Movimenti del mese</p><p class="sc-dnone">Nessun movimento nel mese.</p>` : "");
             const dp = `<header><i style="background:${g.color}"></i><span><b>${escapeHtml(it.name)}</b><small>${escapeHtml(g.label)}</small></span><strong>${fmt0(it.value)}</strong><em>${pctS(it.value)}</em></header>${compHtml}${it.info ? `<p class="sc-dinfo">${escapeHtml(it.info)}</p>` : ""}${txHtml}`;
             return `<button type="button" class="sc-tile${cls}" style="left:${(t.x / gw * 100).toFixed(2)}%;top:${(t.y / gh * 100).toFixed(2)}%;width:${(t.w / gw * 100).toFixed(2)}%;height:${(t.h / gh * 100).toFixed(2)}%;--k:${k};--n:${n++};--c:${g.color}" data-g="${escapeHtml(g.label)}" data-name="${escapeHtml(it.name)}" aria-haspopup="dialog" aria-label="${escapeHtml(label)}. Apri il dettaglio"><div><p class="sc-in"><span>${escapeHtml(it.name)}</span><b>${fmt0(it.value)}</b><em>${pctS(it.value)}</em></p></div><template class="sc-dp">${dp}</template></button>`;
@@ -4215,7 +4230,7 @@ document.addEventListener("keydown", (e) => {
         if (!S) return "";
         const spent = Math.max(0, Number(sm.monthlySpent) || 0), rem = Number(sm.monthlyRemaining) || 0, committed = Math.max(0, S - spent - rem);
         const save = [], fixed = [], normCat = globalThis.lifeOSNormCategory || ((x) => x);
-        const txFor = (cat) => cat ? (d.transactions || []).filter((t) => t.type === "Spesa" && t.amount < 0 && (normCat(t.displayCategory || t.category || "") === normCat(cat) || (t.category || "") === cat)).map((t) => ({ label: t.name || cat, sub: /^\d{4}-\d{2}-\d{2}/.test(t.date || "") ? `${t.date.slice(8, 10)}/${t.date.slice(5, 7)}` : "", value: -t.amount })).sort((p, q) => q.value - p.value) : [];
+        const txFor = (cat) => cat ? (d.transactions || []).filter((t) => t.type === "Spesa" && t.amount < 0 && (normCat(t.displayCategory || t.category || "") === normCat(cat) || (t.category || "") === cat)).map((t) => ({ row: Number(t.row) || 0, label: t.name || cat, sub: /^\d{4}-\d{2}-\d{2}/.test(t.date || "") ? `${t.date.slice(8, 10)}/${t.date.slice(5, 7)}` : "", value: -t.amount })).sort((p, q) => q.value - p.value) : [];
         for (const p of d.plansV2?.plans || []) {
           const v = Number(p.contributionCents) / 100;
           if (!(v > 0)) continue;

@@ -4,7 +4,7 @@ Stato: preparata, NON eseguita. Nessun deploy senza conferma esplicita di Nas.
 File da distribuire: `web/dist/worker-release.mjs` (generato da `python web/build-release.py`, non versionato).
 SHA256 del file online dal 2026-11-21 (versione 7cda51d0-3720-4c99-8d3e-535a813603a1), preparato il 2026-11-21 (mappa stipendio con dettaglio, grafico a linee, popup moderni, colori Salute uguali a dashboard): AE30DE6D6E7990733A00E87A163E24DBD01DD7F90C39919C02CB1E10F8719AC9
 
-Pronto al deploy dal 2026-11-22 (riquadri con testo; popup della voce con composizione e movimenti del mese; popup del gruppo con la sua mappa), generato con `python -X utf8 web/build-release.py` e lo stesso `manual/build-75/worker.js` locale: SHA256 2D2692734D7D135CF39CA372FD11534538548C8E32C4D25B1B0337867C06DF40. Non distribuito.
+Pronto al deploy dal 2026-11-22 (riquadri con testo; popup della voce con composizione e mappa dei movimenti del mese, il riquadro apre la modifica del movimento; popup del gruppo con la sua mappa), generato con `python -X utf8 web/build-release.py` e lo stesso `manual/build-75/worker.js` locale: SHA256 E1AAB6B31ECC7E6D422142B7EC4B229D57D8B27B2282FDD32507BC5A6E096FDF. Non distribuito.
 
 Il Worker contiene backend build-75 (lo stesso dell'app), UI web aggiornata e i metodi Admin in sola lettura.
 Sito e app usano lo stesso D1 (confermato da Nas il 2026-11-19).

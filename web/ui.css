@@ -1157,6 +1157,9 @@ body .nav button[data-view].active .nav-symbol,body .nav #admin-link.active .nav
 .sc-gsum span{font-size:var(--fs-2);color:var(--ink-3)}
 .sc-tm-g{aspect-ratio:16/10;min-height:0}
 .sc-tm-g .sc-tile{animation-delay:0s}
+.sc-tm-tx{min-height:120px}
+.sc-txtile{cursor:pointer}
+div.sc-txtile{cursor:default}
 /* I gruppi in alto sono pulsanti: aprono il popup del gruppo. */
 button.sc-chip{border:0;font:inherit;color:inherit;text-align:left;cursor:pointer;min-height:44px;transition:background var(--m2) var(--ease)}
 button.sc-chip:hover{background:color-mix(in srgb,var(--c) 16%,var(--surface-2))}
