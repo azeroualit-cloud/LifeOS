@@ -496,7 +496,7 @@ main:has(#today.active) .home-context{display:none}
 .routing-on #budget-policy-fields,.routing-on #commitment-hint{display:none!important}
 
 /* 7. RESPONSIVE ------------------------------------------------------ */
-@media(min-width:1100px){
+@media(min-width:860px){
   #calendar>.os-card{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(300px,1fr);column-gap:var(--s7);align-items:start}
   #calendar .os-month-header,#calendar .os-weekdays,#calendar .os-days{grid-column:1}
   #calendar .os-calendar-details{grid-column:2;grid-row:1/span 3;margin-top:0;border-top:0;padding-top:0;border-left:1px solid var(--line-soft);padding-left:var(--s6)}
@@ -1311,3 +1311,38 @@ button.sc-chip:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .fd-row b{font-variant-numeric:tabular-nums;font-weight:650}
 .fd-pop{width:min(560px,100%)}
 @media(max-width:620px){.fd-totals{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* Calendario: agenda dei giorni successivi accanto al mese. */
+.os-next{display:grid;gap:var(--s3);margin-top:var(--s2)}
+.os-next-day{display:grid;gap:4px}
+.os-next-head{display:flex;align-items:center;justify-content:space-between;gap:var(--s2);min-height:36px;padding:0;border:0;background:none;color:var(--ink);font:inherit;font-weight:650;text-transform:capitalize;cursor:pointer;text-align:left}
+.os-next-ev{display:grid;grid-template-columns:64px minmax(0,1fr);gap:var(--s2);align-items:start;min-height:44px;padding:var(--s2) var(--s3);border:0;border-radius:var(--r-md);background:var(--surface-2);color:inherit;font:inherit;text-align:left;cursor:pointer;box-shadow:inset 3px 0 0 var(--accent)}
+.os-next-ev b{font-variant-numeric:tabular-nums;font-size:var(--fs-2);color:var(--ink-2)}
+.os-next-ev span{display:grid;min-width:0}
+.os-next-ev small{color:var(--ink-3);font-size:var(--fs-1)}
+.os-next-ev:hover{background:var(--surface-3)}
+/* Dashboard: settimana orizzontale da oggi con gli impegni sotto ogni giorno. */
+.home-native>.hw-wide{grid-column:1/-1}
+.hw-strip{display:grid;grid-template-columns:repeat(7,minmax(128px,1fr));gap:var(--s2);overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px}
+.hw-day{display:flex;flex-direction:column;gap:var(--s2);min-width:0;padding:var(--s2);border-radius:var(--r-md);background:var(--surface-2);scroll-snap-align:start}
+.hw-day.today{box-shadow:inset 0 0 0 2px var(--ink)}
+.hw-head{display:grid;justify-items:start;gap:2px;min-height:44px;padding:var(--s1,4px) var(--s2);border:0;border-radius:var(--r-sm,10px);background:none;color:var(--ink);font:inherit;cursor:pointer;text-align:left}
+.hw-head small{font-size:var(--fs-1);color:var(--ink-3);text-transform:capitalize}
+.hw-head b{font-size:var(--fs-6);font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+.hw-shift{display:inline-block;height:20px;min-width:56px;padding:0 8px;border-radius:var(--r-pill);background:var(--shift-color,var(--surface-3));color:#0b0b0b;font-size:11px;font-weight:650;line-height:20px}
+.hw-shift.none{visibility:hidden}
+.hw-items{display:grid;gap:5px;align-content:start}
+.hw-ev{display:grid;gap:1px;padding:6px 8px;min-height:44px;border:0;border-radius:8px;background:color-mix(in srgb,var(--shift-color,var(--accent)) 22%,var(--surface));color:var(--ink);font:inherit;text-align:left;cursor:pointer;box-shadow:inset 3px 0 0 var(--shift-color,var(--accent))}
+.hw-ev b{font-size:11px;font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.hw-ev span{font-size:var(--fs-2);font-weight:560;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.hw-ev small{font-size:11px;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hw-ev.past{opacity:.5}
+.hw-ev:hover{filter:brightness(1.1)}
+.hw-ev:focus-visible,.hw-head:focus-visible,.hw-task:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.hw-task{display:block;min-height:36px;padding:6px 8px;border:1px dashed var(--line);border-radius:8px;background:none;color:var(--ink-2);font:inherit;font-size:var(--fs-1);text-align:left;cursor:pointer}
+.hw-empty{margin:0;font-size:var(--fs-1);color:var(--ink-3);padding:0 var(--s2)}
+@media(max-width:760px){.hw-strip{grid-template-columns:repeat(7,minmax(112px,42%))}}
+/* Avvisi: Ignora. */
+.fa-row{grid-template-columns:minmax(0,1fr) auto;align-items:center}
+.fa-text{display:grid;gap:2px}
+.fa-ignore{min-height:44px;font-size:var(--fs-2)}
+.fa-restore{margin-top:var(--s2);min-height:44px}
