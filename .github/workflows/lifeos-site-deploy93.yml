@@ -1,5 +1,5 @@
 name: Life OS - Sito (interfaccia 93 e diario condiviso)
-# Attempt 3 (HTTP status in the annotation). DEPLOY-WORKERS-93-2026-11-22: changes the site Worker `lifeos` only. A push that changes this file
+# Attempt 4 (new Cloudflare token). DEPLOY-WORKERS-93-2026-11-22: changes the site Worker `lifeos` only. A push that changes this file
 # is the deliberate start. Interface and diary come from codex/revision77 at a pinned commit.
 on:
   push:
