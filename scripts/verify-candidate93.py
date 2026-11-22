@@ -191,6 +191,8 @@ def authorization():
     visit(data)
     for identifier in ("IPA-DELIVERY-93-2026-11-21", "BUILD93-PREVIEW-FINAL-2026-11-21", "FOOD-CATALOG-92", "SUPPLEMENTS-PERSONAL-ONLY-92"):
         assert any(r.get("id") == identifier and r.get("status") == "ACTIVE" for r in rules), identifier
+    # FOOD-DIARY-SERVER-2026-11-22: build 93 ships only with the shared food diary.
+    assert Path("native-next/Sources/NativeFoodDiarySync.swift").is_file(), "Diario condiviso non ancora implementato: niente IPA 93 senza diario"
     assert len(TARGETED) == len(set(TARGETED)), "Duplicate targeted selector"
     for selector in TARGETED:
         _, cls, method = selector.split("/")
