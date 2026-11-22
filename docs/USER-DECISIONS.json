@@ -1264,6 +1264,16 @@
       "original_quote": "only food diary because the food diary i can edit it from pc and log it from phone, i tought that was clear",
       "rule": "Il diario alimentare è condiviso tramite il server: si registra dal telefono e si modifica anche dal PC (sito). Il peso resta solo in Apple Salute e non va copiato sul server.",
       "conflict_check": "Nessuna regola attiva contraddetta; coerente con SITE-PARITY-2026-11-22 e con BUILD93-REQUEST (server come fonte per i dati condivisi)."
+    },
+    {
+      "id": "DEPLOY-WORKERS-93-2026-11-22",
+      "status": "ACTIVE",
+      "scope": "Deploy dei Worker lifeos-native-test e lifeos per la build 93 e il sito",
+      "recorded_on": "2026-11-22",
+      "provenance": "Risposta diretta utente in chat Claude alla domanda META-01 sul deploy (opzione 2)",
+      "original_quote": "fai te il deploy ti do il permesso",
+      "rule": "Eccezione a IPA-DELIVERY-93-2026-11-21 («i Worker li distribuisce l'utente»), limitata a questo ambito: Claude distribuisce lifeos-native-test (modulo Bloom, alimenti e diario, backend/bloom-foods) e lifeos (interfaccia del sito dal ramo codex/revision77 e metodi del diario) tramite flussi GitHub Actions che conservano database, accesso e segreti, con verifica e ritorno automatico alla versione precedente se la verifica fallisce. Nessun altro deploy backend.",
+      "conflict_check": "Conflitto con IPA-DELIVERY-93-2026-11-21 chiesto con la domanda META-01 («Vuoi sostituire questa regola e procedere?»); confermato. Approvata solo l'eccezione per questi due Worker: IPA-DELIVERY-93 resta ACTIVE per tutto il resto."
     }
   ],
   "pending_confirmations": [
@@ -1404,6 +1414,10 @@
     {
       "date": "2026-11-22",
       "event": "Registrata FOOD-DIARY-SERVER-2026-11-22: diario alimentare sul server (telefono e PC), peso solo in Apple Salute."
+    },
+    {
+      "date": "2026-11-22",
+      "event": "META-01: deploy dei Worker in conflitto con IPA-DELIVERY-93 (i Worker li distribuisce l'utente). Risposta «fai te il deploy ti do il permesso»: eccezione DEPLOY-WORKERS-93-2026-11-22 limitata a lifeos-native-test e lifeos."
     }
   ],
   "historical_inventory": "decision-history/2026-11-04-inventory.json",

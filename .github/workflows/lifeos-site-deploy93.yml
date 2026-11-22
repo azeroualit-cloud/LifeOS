@@ -1,0 +1,52 @@
+name: Life OS - Sito (interfaccia 93 e diario condiviso)
+# DEPLOY-WORKERS-93-2026-11-22: changes the site Worker `lifeos` only. A push that changes this file
+# is the deliberate start. Interface and diary come from codex/revision77 at a pinned commit.
+on:
+  push:
+    branches: ['codex/build93']
+    paths: ['.github/workflows/lifeos-site-deploy93.yml']
+concurrency:
+  group: lifeos-site-deploy93
+  cancel-in-progress: false
+permissions:
+  contents: read
+env:
+  SITE_COMMIT: 3131f85
+jobs:
+  deploy:
+    if: github.repository == 'azeroualit-cloud/LifeOS' && github.ref == 'refs/heads/codex/build93'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Interfaccia e diario dal commit fissato del sito
+        run: |
+          set -euo pipefail
+          git fetch --quiet origin +refs/heads/codex/revision77:refs/remotes/origin/codex/revision77
+          git merge-base --is-ancestor "$SITE_COMMIT" origin/codex/revision77
+          mkdir -p site
+          git show "$SITE_COMMIT:web/app.html" > site/app.html
+          git show "$SITE_COMMIT:web/life-api.js" | python3 -c "import sys; t=sys.stdin.read(); i=t.index('let ndReady = null;'); sys.stdout.write(t[i:])" > site/diary.js
+          python3 - <<'PY'
+          import re, pathlib
+          html = pathlib.Path('site/app.html').read_text(encoding='utf-8')
+          for i, script in enumerate(re.findall(r'<script[^>]*>(.*?)</script>', html, re.S)):
+              pathlib.Path(f'/tmp/ui-{i}.js').write_text(script, encoding='utf-8')
+          PY
+          for f in /tmp/ui-*.js; do node --check "$f"; done
+          echo "SITE_SOURCE_READY commit=$SITE_COMMIT"
+      - name: Test del diario sul server
+        run: node --test backend/bloom-foods/tests/bloomfoods.test.mjs
+      - name: Audit del Worker attuale senza scritture
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          LIFEOS_BACKEND_AUDIT_ONLY: '1'
+        run: python3 scripts/deploy-site-93.py
+      - name: Aggiorna lifeos
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: python3 scripts/deploy-site-93.py

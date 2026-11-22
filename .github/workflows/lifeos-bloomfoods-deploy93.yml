@@ -1,8 +1,16 @@
 name: Life OS - Bloom e alimenti nel Worker dell'app (build 93)
 # Solo avvio manuale dell'utente. Cambia lifeos-native-test aggiungendo le letture e scritture di Bloom e
 # alimenti personali sulle stesse tabelle del sito. Nessuna altra modifica backend.
+# DEPLOY-WORKERS-93-2026-11-22: a push that changes this file is the deliberate start
+# (a workflow present only on this branch cannot be dispatched).
 on:
   workflow_dispatch:
+  push:
+    branches: ['codex/build93']
+    paths: ['.github/workflows/lifeos-bloomfoods-deploy93.yml']
+concurrency:
+  group: lifeos-bloomfoods-deploy93
+  cancel-in-progress: false
 permissions:
   contents: read
 jobs:
@@ -42,7 +50,8 @@ jobs:
               post('/auth/login',{'user':'nas','password':os.environ['LIFEOS_TEST_PASSWORD']})
               stage='foods'; foods=post('/api/listFoods',[]); assert isinstance(foods['foods'],list)
               stage='bloom'; bloom=post('/api/getBloom',[]); assert isinstance(bloom['items'],list) and isinstance(bloom['collections'],list)
-              print('BLOOM_FOODS_93_READ_CONTRACT_OK foods=%d items=%d collections=%d; no private content logged.'%(len(foods['foods']),len(bloom['items']),len(bloom['collections'])))
+              stage='diary'; diary=post('/api/listFoodDiary',[1e15]); assert diary['version']==1 and isinstance(diary['entries'],list)
+              print('BLOOM_FOODS_93_READ_CONTRACT_OK foods=%d items=%d collections=%d diary=v1; no private content logged.'%(len(foods['foods']),len(bloom['items']),len(bloom['collections'])))
           except Exception as error:
               raise SystemExit('Verifica API fallita: stage='+stage+' class='+type(error).__name__+' HTTP='+str(getattr(error,'code','n/a')))
           PY
