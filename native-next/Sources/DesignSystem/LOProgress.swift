@@ -353,4 +353,15 @@ extension View {
             if !hidden { Divider().padding(.leading, leadingInset) }
         }
     }
+    /// Card surface: 21 pt continuous corners on the surface colour (preview `.card`).
+    func loCardSurface(_ color: Color = NativeDesign.surface) -> some View {
+        background(color, in: RoundedRectangle(cornerRadius: NativeDesign.cardRadius, style: .continuous))
+    }
+    /// Inner tile or chip on a card: 13 pt corners, or a capsule.
+    func loTileSurface(_ color: Color = NativeDesign.barTrack, capsule: Bool = false) -> some View {
+        background {
+            if capsule { Capsule().fill(color) }
+            else { RoundedRectangle(cornerRadius: NativeDesign.controlRadius, style: .continuous).fill(color) }
+        }
+    }
 }

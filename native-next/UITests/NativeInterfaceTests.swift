@@ -1080,19 +1080,20 @@ final class NativeInterfaceTests: XCTestCase {
         app.openOtherDestination("Finanza")
         app.buttons["finance-analysis"].tap()
         XCTAssertTrue(app.navigationBars["Analisi"].waitForExistence(timeout: 10))
-        let picker = app.segmentedControls["category-period"]
-        XCTAssertTrue(picker.waitForExistence(timeout: 10))
-        for period in ["3 mesi", "6 mesi", "12 mesi"] {
-            picker.buttons[period].tap()
-            XCTAssertTrue(picker.buttons[period].isSelected)
-            XCTAssertTrue(app.buttons["Tutte le categorie"].waitForExistence(timeout: 10) || app.staticTexts["Tutte le categorie"].exists)
+        // Build 93 Analisi: cards in the preview order, category periods as a segmented control.
+        XCTAssertTrue(app.staticTexts["Ritmo"].waitForExistence(timeout: 10))
+        for period in ["3", "6", "12"] {
+            let option = app.buttons["category-period-" + period]
+            for _ in 0..<6 { if option.isHittable { break }; app.scrollViews.firstMatch.swipeUp() }
+            option.tap()
+            XCTAssertTrue(option.isSelected)
+            XCTAssertTrue(app.descendants(matching: .any)["finance-category-average"].waitForExistence(timeout: 10) || app.staticTexts["Nessuna spesa nel periodo"].exists)
             capture("category-period-" + period)
         }
-        XCTAssertFalse(app.staticTexts["Entrate e uscite"].exists)
-        for title in ["Previsione patrimonio", "Patrimonio", "Stipendi per competenza"] {
+        for title in ["Entrate e uscite", "Stipendi per competenza", "Giorno per giorno", "Patrimonio"] {
             let heading = app.staticTexts[title]
-            for _ in 0..<8 { if heading.isHittable { break }; app.collectionViews.firstMatch.swipeUp() }
-            XCTAssertTrue(heading.exists)
+            for _ in 0..<10 { if heading.isHittable { break }; app.scrollViews.firstMatch.swipeUp() }
+            XCTAssertTrue(heading.exists, title)
         }
         capture("analysis-four-charts")
     }

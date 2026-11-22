@@ -12,6 +12,9 @@ struct FinanceAnalysisScreen: View {
     @State private var retry = 0
     @State private var activeLoad = UUID()
     @State private var loadedKey = ""
+    @State private var flowSelection: String?
+    @State private var salarySelection: String?
+    @AppStorage("native-hide-money") private var hidden = false
     private var lifetime: Record { store.finance.record("lifetime") }
     private var months: [String] { NativeCategoryPeriod.months(ending: store.financeMonth, count: categoryRange) }
     private var sourceScope: String { (store.state.endpoint ?? "offline") + (store.isDemo ? "|demo" : "|real") }
@@ -22,38 +25,87 @@ struct FinanceAnalysisScreen: View {
         return rows.filter { $0.text("month") >= first && $0.text("month") <= store.financeMonth }.sorted { $0.text("month") < $1.text("month") }
     }
     var body: some View {
-        List {
-            categories
-            Section { NativeForecastCard() }
-            wealth
-            salary
-        }.modifier(NativeListAppearance())
-            .task(id: requestKey) { await loadCategories() }
-            .onChange(of: store.finance) { _, _ in
-                if !categoryLoading { updateCurrentMonth() }
+        let flows = NativeFinanceAnalysis93.flows(store.finance, before: CivilDate.month())
+        ScrollView {
+            VStack(alignment: .leading, spacing: NativeDesign.Space.large) {
+                NativeRhythmCard(flows: flows, hidden: hidden)
+                NativeFundRunwayCard(fund: NativeFinanceAnalysis93.fund(store.finance), surplus: NativeFinanceAnalysis93.surplus(store.finance),
+                                     norm: NativeFinanceAnalysis93.norm(flows), hidden: hidden)
+                LOAnalysisCard(title: "Stima patrimonio", trailing: "6 mesi prima · 6 dopo", identifier: "finance-wealth-estimate") {
+                    NativeForecastCard()
+                }
+                categories
+                incomeAndSpending(flows)
+                salary
+                NativeDailySpendCard(month: store.financeMonth, daily: NativeFinanceAnalysis93.daily(store.transactions, month: store.financeMonth), hidden: hidden)
+                wealth
             }
-            .navigationTitle("Analisi").navigationBarTitleDisplayMode(.inline)
+            .padding(.horizontal, NativeDesign.Layout.screenInset)
+            .padding(.vertical, NativeDesign.Space.medium)
+        }
+        .background(NativeDesign.canvas)
+        .task(id: requestKey) { await loadCategories() }
+        .onChange(of: store.finance) { _, _ in
+            if !categoryLoading { updateCurrentMonth() }
+        }
+        .navigationTitle("Analisi").navigationBarTitleDisplayMode(.large)
+    }
+    private var categoryTrailing: String {
+        guard let first = months.first, let last = months.last else { return "" }
+        return NativeFinanceAnalysis93.shortMonth(first) + " – " + NativeFinanceAnalysis93.shortMonth(last)
     }
     private var categories: some View {
-        Section("Spese per categoria") {
-            Picker("Periodo categorie", selection: $categoryRange) {
-                Text("3 mesi").tag(3); Text("6 mesi").tag(6); Text("12 mesi").tag(12)
-            }.pickerStyle(.segmented).accessibilityIdentifier("category-period")
-            if let first = months.first, let last = months.last {
-                Text(CivilDate.monthTitle(first) + " – " + CivilDate.monthTitle(last)).font(.caption).foregroundStyle(NativeDesign.secondary)
-            }
+        LOAnalysisCard(title: "Spese per categoria", trailing: categoryTrailing, identifier: "finance-categories") {
+            LOSegmented(options: [("3 mesi", "3"), ("6 mesi", "6"), ("12 mesi", "12")], selection: Binding(
+                get: { String(categoryRange) + " mesi" },
+                set: { categoryRange = Int($0.prefix(while: { $0.isNumber })) ?? 3 }), identifierPrefix: "category-period-")
             if categoryLoading || loadedKey != requestKey { ProgressView("Categorie: \(categoryLoadedMonths) di \(months.count) mesi…") }
             else if let categoryError { NativeInlineMessage(text: categoryError) }
-            else if categoryRows.isEmpty { Text("Nessuna spesa nel periodo").foregroundStyle(NativeDesign.secondary) }
-            else { NativeCategoryChart(rows: categoryRows) }
-            if store.isDemo { Text("Dati demo · movimenti simulati disponibili.").font(.caption).foregroundStyle(NativeDesign.secondary) }
-            if store.server != nil {
-                Button(categoryError == nil ? "Aggiorna categorie" : "Riprova") {
-                    // A failed month must not force successful months to be downloaded again.
-                    if categoryError == nil { categoryCache.clear() }
-                    retry &+= 1
-                }.disabled(categoryLoading || loadedKey != requestKey)
+            else if categoryRows.isEmpty { Text("Nessuna spesa nel periodo").font(.subheadline).foregroundStyle(NativeDesign.secondary) }
+            else { NativeCategoryBars93(rows: categoryRows, months: months.count, hidden: hidden) }
+            if store.server != nil, categoryError != nil {
+                Button("Riprova") { retry &+= 1 }.disabled(categoryLoading || loadedKey != requestKey)
             }
+        }
+    }
+    private func flowBar(_ flow: NativeMonthFlow) -> LOBarPicker.Bar {
+        let spoken: String = hidden ? "" : ": entrate " + flow.income.euro + ", uscite " + flow.spent.euro
+        return LOBarPicker.Bar(id: flow.month, label: NativeFinanceAnalysis93.shortMonth(flow.month), values: [flow.income, flow.spent],
+                               accessibility: CivilDate.monthTitle(flow.month) + spoken)
+    }
+    private func flowSummary(_ flow: NativeMonthFlow) -> String {
+        if hidden { return "••••" }
+        let sign: String = flow.saved >= 0 ? "+" : "−"
+        return flow.income.euro + " · " + flow.spent.euro + " · " + sign + abs(flow.saved).euro
+    }
+    private func incomeAndSpending(_ flows: [NativeMonthFlow]) -> some View {
+        let bars: [LOBarPicker.Bar] = flows.suffix(6).map(flowBar)
+        let current: NativeMonthFlow? = flows.first { $0.month == flowSelection } ?? flows.last
+        let trailing: String = flows.first.map { "da " + NativeFinanceAnalysis93.shortMonth($0.month) } ?? ""
+        return LOAnalysisCard(title: "Entrate e uscite", trailing: trailing, identifier: "finance-income-spending") {
+            if bars.isEmpty { Text("Nessun mese completo").font(.subheadline).foregroundStyle(NativeDesign.secondary) }
+            else {
+                LOBarPicker(bars: bars, colors: [NativeDesign.financialGreen, NativeDesign.financeBudget[0]], selected: $flowSelection, identifierPrefix: "finance-flow-")
+                HStack(spacing: NativeDesign.Space.medium) {
+                    legend("entrate", NativeDesign.financialGreen)
+                    legend("uscite", NativeDesign.financeBudget[0])
+                }
+                if let current {
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(CivilDate.monthTitle(current.month)).font(.subheadline)
+                        Spacer(minLength: NativeDesign.Space.small)
+                        Text(flowSummary(current)).font(.footnote.weight(.semibold)).monospacedDigit()
+                    }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier("finance-flow-selected")
+                }
+            }
+        }
+    }
+    private func legend(_ title: String, _ color: Color) -> some View {
+        HStack(spacing: NativeDesign.Space.xs) {
+            Circle().fill(color).frame(width: NativeDesign.Space.small, height: NativeDesign.Space.small)
+            Text(title).font(.caption).foregroundStyle(NativeDesign.secondary)
         }
     }
     @MainActor private func loadCategories() async {
@@ -125,51 +177,57 @@ struct FinanceAnalysisScreen: View {
                 if case .number(let value)? = row[key] { return value.isFinite }; return false
             }
         }
-            Section("Patrimonio") {
-                Text("12 mesi fino a " + CivilDate.monthTitle(store.financeMonth)).font(.caption).foregroundStyle(NativeDesign.secondary)
-                if rows.isEmpty { Text("Storico del patrimonio non disponibile per il periodo.").foregroundStyle(NativeDesign.secondary) }
-                else { Chart {
-                    ForEach(rows.enumerated().map { IndexedRecord(index: $0.offset, value: $0.element) }) { item in
-                        let value = wealthValue(item.value)
-                        if item.index > 0 {
-                            let previous = rows[item.index - 1]
-                            let previousValue = wealthValue(previous)
-                            let color = value < previousValue ? NativeDesign.financialRed : NativeDesign.financialGreen
-                            LineMark(x: .value("Mese", previous.text("month")), y: .value("Euro", previousValue), series: .value("Tratto", item.index)).foregroundStyle(color)
-                            LineMark(x: .value("Mese", item.value.text("month")), y: .value("Euro", value), series: .value("Tratto", item.index)).foregroundStyle(color)
-                        }
-                        PointMark(x: .value("Mese", item.value.text("month")), y: .value("Euro", value)).foregroundStyle(item.index > 0 && value < wealthValue(rows[item.index - 1]) ? NativeDesign.financialRed : NativeDesign.financialGreen)
-                    }
-                }.chartXAxis {
-                    AxisMarks(values: NativeFinanceMonthAxis.ticks(rows.map { $0.text("month") })) { value in
-                        AxisValueLabel {
-                            if let month = value.as(String.self) { Text(NativeFinanceMonthAxis.label(month)).font(.caption2).multilineTextAlignment(.center).fixedSize() }
-                        }
-                    }
-                }.frame(height: 220).accessibilityIdentifier("finance-wealth-history-chart") }
-                Text("Misure e stime storiche provengono dal Worker. Prima della prima rilevazione il saldo può non essere ricostruibile.").font(.caption).foregroundStyle(NativeDesign.secondary)
+        LOAnalysisCard(title: "Patrimonio", trailing: "12 mesi", identifier: "finance-wealth") {
+            if rows.isEmpty || hidden { Text(hidden ? "Importi nascosti" : "Storico non disponibile").font(.subheadline).foregroundStyle(NativeDesign.secondary) }
+            else { wealthChart(rows) }
+        }
+    }
+    private func wealthChart(_ rows: [Record]) -> some View {
+        Chart {
+            ForEach(rows.enumerated().map { IndexedRecord(index: $0.offset, value: $0.element) }) { item in
+                LineMark(x: .value("Mese", item.value.text("month")), y: .value("Euro", wealthValue(item.value))).foregroundStyle(NativeDesign.financeBudget[0])
+                PointMark(x: .value("Mese", item.value.text("month")), y: .value("Euro", wealthValue(item.value))).foregroundStyle(NativeDesign.financeBudget[0])
             }
+        }
+        .chartXAxis {
+            AxisMarks(values: NativeFinanceMonthAxis.ticks(rows.map { $0.text("month") })) { value in
+                AxisValueLabel {
+                    if let month = value.as(String.self) { Text(NativeFinanceMonthAxis.label(month)).font(.caption2).multilineTextAlignment(.center).fixedSize() }
+                }
+            }
+        }
+        .frame(height: 160).accessibilityIdentifier("finance-wealth-history-chart")
+    }
+    private func salaryBar(_ row: Record) -> LOBarPicker.Bar {
+        let total: Double = row.amount("base") + row.amount("additional")
+        let spoken: String = hidden ? "" : ": " + total.euro
+        return LOBarPicker.Bar(id: row.text("month"), label: NativeFinanceAnalysis93.shortMonth(row.text("month")), values: [total],
+                               accessibility: CivilDate.monthTitle(row.text("month")) + spoken)
     }
     @ViewBuilder private var salary: some View {
         let rows = selected(lifetime.records("salaryHistory"))
-            Section("Stipendi per competenza") {
-                Text("12 mesi fino a " + CivilDate.monthTitle(store.financeMonth)).font(.caption).foregroundStyle(NativeDesign.secondary)
-                if rows.isEmpty { Text("Nessun cedolino disponibile nel periodo.").foregroundStyle(NativeDesign.secondary) }
-                else { Chart {
-                    ForEach(rows.enumerated().map { IndexedRecord(index: $0.offset, value: $0.element) }) { item in
-                        BarMark(x: .value("Mese", item.value.text("month")), y: .value("Euro", item.value.amount("base"))).foregroundStyle(by: .value("Voce", "Base"))
-                        BarMark(x: .value("Mese", item.value.text("month")), y: .value("Euro", item.value.amount("additional"))).foregroundStyle(by: .value("Voce", "Aggiuntive"))
-                    }
-                }.chartForegroundStyleScale(["Base": NativeDesign.financialGreen, "Aggiuntive": NativeDesign.financialGreen.opacity(0.55)])
-                    .chartXAxis {
-                        AxisMarks(values: NativeFinanceMonthAxis.ticks(rows.map { $0.text("month") })) { value in
-                            AxisValueLabel {
-                                if let month = value.as(String.self) { Text(NativeFinanceMonthAxis.label(month)).font(.caption2).multilineTextAlignment(.center).fixedSize() }
-                            }
-                        }
-                    }.frame(height: 220).accessibilityIdentifier("finance-salary-history-chart") }
-                Text("La competenza del cedolino è distinta dalla data di accredito.").font(.caption).foregroundStyle(NativeDesign.secondary)
+        let bars: [LOBarPicker.Bar] = rows.suffix(6).map(salaryBar)
+        let current: Record? = rows.first { $0.text("month") == salarySelection } ?? rows.last
+        LOAnalysisCard(title: "Stipendi per competenza", trailing: "cedolini", identifier: "finance-salaries") {
+            if bars.isEmpty { Text("Nessun cedolino nel periodo").font(.subheadline).foregroundStyle(NativeDesign.secondary) }
+            else {
+                LOBarPicker(bars: bars, colors: [NativeDesign.financeGroups[0]], selected: $salarySelection, identifierPrefix: "finance-salary-")
+                    .accessibilityIdentifier("finance-salary-history-chart")
+                if let current { salaryDetail(current) }
             }
+        }
+    }
+    private func salaryDetail(_ row: Record) -> some View {
+        let total: Double = row.amount("base") + row.amount("additional")
+        return HStack(alignment: .firstTextBaseline) {
+            Text(CivilDate.monthTitle(row.text("month"))).font(.subheadline)
+            if row.amount("additional") > 0 && !hidden {
+                Text("aggiuntive " + row.amount("additional").euro).font(.caption).foregroundStyle(NativeDesign.secondary)
+            }
+            Spacer(minLength: NativeDesign.Space.small)
+            Text(hidden ? "••••" : total.euro).font(.subheadline.weight(.semibold)).monospacedDigit()
+        }
+        .accessibilityElement(children: .combine)
     }
     private func wealthValue(_ row: Record) -> Double {
         for key in ["measured", "estimated", "wealth"] {

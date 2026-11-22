@@ -45,7 +45,7 @@ struct NativeForecastCard: View {
         let model = NativeWealthForecast(finance: store.finance, plan: store.finance.record("forecastPlan").isEmpty ? store.state.plan : store.finance.record("forecastPlan"))
         VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
             HStack {
-                VStack(alignment: .leading, spacing: NativeDesign.Space.xs) { Text("Previsione patrimonio").font(NativeDesign.heading); Text("6 mesi precedenti · 6 mesi successivi").font(.caption2).foregroundStyle(NativeDesign.secondary) }
+                // Build 93: the title is on the Analisi card ("Stima patrimonio"); estimates in cyan.
                 Spacer(minLength: 0)
                 NativeIconButton(symbol: "info.circle", label: "Come funziona la previsione") { explain = true }
             }
@@ -55,12 +55,12 @@ struct NativeForecastCard: View {
             } else {
                 Chart {
                     ForEach(model.prediction) { point in
-                        AreaMark(x: .value("Data", CivilDate.date(point.day)), yStart: .value("Limite inferiore", point.lower), yEnd: .value("Limite superiore", point.upper)).foregroundStyle(NativeDesign.accent.opacity(0.12))
+                        AreaMark(x: .value("Data", CivilDate.date(point.day)), yStart: .value("Limite inferiore", point.lower), yEnd: .value("Limite superiore", point.upper)).foregroundStyle(NativeDesign.estimate.opacity(0.14))
                     }
                     ForEach(Array(model.prediction.enumerated()), id: \.offset) { index, point in
                         if index > 0 {
                             let previous = model.prediction[index - 1]
-                            let color = point.value < previous.value ? NativeDesign.financialRed : NativeDesign.financialGreen
+                            let color = NativeDesign.estimate
                             LineMark(x: .value("Data", CivilDate.date(previous.day)), y: .value("Stima", previous.value), series: .value("Serie", "stima-\(index)")).foregroundStyle(color).lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 4]))
                             LineMark(x: .value("Data", CivilDate.date(point.day)), y: .value("Stima", point.value), series: .value("Serie", "stima-\(index)")).foregroundStyle(color).lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 4]))
                         }

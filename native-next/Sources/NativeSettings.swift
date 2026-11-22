@@ -14,6 +14,7 @@ struct NativeSettings: View {
     @State private var message: String?
     @State private var useDemo = false
     @ObservedObject private var online = NativeOnlineSync.shared
+    @ObservedObject private var alerts = NativeFinanceAlerts.shared
     var body: some View {
         Form {
             Section("Dati") {
@@ -26,6 +27,11 @@ struct NativeSettings: View {
             }
             Section("Aspetto") {
                 Picker("Tema", selection: $theme) { Text("Automatico").tag("system"); Text("Chiaro").tag("light"); Text("Scuro").tag("dark") }
+            }
+            Section("Avvisi") {
+                NavigationLink { NativeFinanceAlertsScreen() } label: {
+                    LabeledContent("Avvisi di Finanza", value: String(alerts.settings.activeCount) + " attivi")
+                }.accessibilityIdentifier("settings-finance-alerts")
             }
             NativeIntegrationSettings()
             if !store.state.pending.isEmpty { PendingWritesSection() }

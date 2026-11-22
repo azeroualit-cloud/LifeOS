@@ -62,6 +62,19 @@ enum NativeDesign {
     static let estimate = Color(uiColor: UIColor { traits in
         traits.userInterfaceStyle == .dark ? UIColor(red: 0.36, green: 0.77, blue: 0.88, alpha: 1) : UIColor(red: 0.0, green: 0.45, blue: 0.56, alpha: 1)
     })
+    /// Finance "Monocromo" palette (FINANCE-PALETTE-2026-11-21): four salary groups and four budget shades.
+    /// In light mode the same hues are darkened so they stay readable on white.
+    static let financeGroups: [Color] = [(0x6f8bc4, 0x4e6da7), (0x93aee6, 0x6c8bc5), (0xb9d0ff, 0x8aa9e3), (0xe3ecff, 0xc4d4f2)].map { dark, light in
+        Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? hex(dark) : hex(light) })
+    }
+    static let financeBudget: [Color] = [(0xa8c7ff, 0x6c8bc5), (0x8aa9e3, 0x4e6da7), (0x6c8bc5, 0x3b5a94), (0x4e6da7, 0x2a4880)].map { dark, light in
+        Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? hex(dark) : hex(light) })
+    }
+    /// Text on the lighter finance tiles.
+    static let financeTileText = Color(uiColor: UIColor(white: 0.06, alpha: 1))
+    private static func hex(_ value: Int) -> UIColor {
+        UIColor(red: CGFloat((value >> 16) & 0xff) / 255, green: CGFloat((value >> 8) & 0xff) / 255, blue: CGFloat(value & 0xff) / 255, alpha: 1)
+    }
     static let healthGray = Color(uiColor: .systemGray)
     static let healthHistoricalBar = healthGray.opacity(0.28)
     static let healthTrend = Color(uiColor: .label)

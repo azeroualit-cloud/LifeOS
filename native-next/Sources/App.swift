@@ -168,6 +168,10 @@ struct NativeRoot: View {
             if let url = note.object as? URL { route(url) }
         }
         .onChange(of: store.life, initial: true) { _, _ in updateReminders() }
+        // FINANCE-ALERTS-2026-11-21: re-evaluated after every finance refresh (never in demo).
+        .task(id: store.finance) {
+            await NativeFinanceAlerts.shared.update(finance: store.finance, transactions: store.transactions, month: store.financeMonth, enabled: !store.isDemo)
+        }
         .task(id: NativeUrgentAlarmSource(life: store.life, editing: router.sheet != nil)) {
             guard router.sheet == nil, !store.isDemo else { return }
             do { try await NativeUrgentAlarm.reconcile(life: store.life) }

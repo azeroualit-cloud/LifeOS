@@ -16,15 +16,19 @@ struct FinanceScreen: View {
                 Button { if router.tab == .finance { router.tab = .dashboard } else { dismiss() } } label: { Image(systemName: "chevron.left").frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget) }.accessibilityLabel("Torna alla Dashboard").accessibilityIdentifier("other-back")
                 Text("Finanza").font(.largeTitle.bold()).lineLimit(1).minimumScaleFactor(0.75).accessibilityAddTraits(.isHeader).accessibilityIdentifier("finance-heading")
                 Spacer()
+                NativeToolbarButton(symbol: hidden ? "eye.slash" : "eye", label: hidden ? "Mostra importi" : "Nascondi importi") { hidden.toggle() }
+                    .accessibilityIdentifier("finance-hide-amounts")
                 NativeToolbarButton(symbol: "gearshape", label: "Impostazioni") { router.sheet = .settings }
                     .contextMenu { Button("Sincronizza", systemImage: "arrow.triangle.2.circlepath") { Task { await store.sync() } }.disabled(store.busy || store.syncing) }
             }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.top, NativeDesign.Space.small).padding(.bottom, NativeDesign.Space.large)
         ScrollView {
             VStack(alignment: .leading, spacing: NativeDesign.Space.section) {
                 MonthControl(finance: true)
-                balance
+                NativeBudgetHero93(summary: store.summary, categories: monthCategories, month: store.financeMonth, hidden: hidden)
+                accountCard
                 actions
                 recentMovements
+                NativeSalaryMapCard(summary: store.summary, categories: monthCategories, hidden: hidden)
                 if !store.financialPending.isEmpty {
                     VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
                         Label("\(store.financialPending.count) movimenti salvati sul dispositivo", systemImage: "icloud.and.arrow.up").font(.subheadline)
@@ -48,45 +52,33 @@ struct FinanceScreen: View {
         .toolbar(.hidden, for: .navigationBar)
         .onAppear { router.financeSection = "Panoramica" }
     }
-    private var balance: some View {
-        VStack(alignment: .leading, spacing: NativeDesign.Space.large) {
-            VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-                HStack {
-                    LOCardHeader(title: "Budget rimanente", systemImage: "wallet.bifold", section: .finance)
-                    Spacer()
-                    NativeIconButton(symbol: hidden ? "eye.slash" : "eye", label: hidden ? "Mostra importi" : "Nascondi importi") { hidden.toggle() }
-                }
-                Group {
-                    if hidden { Text("•••• €") }
-                    else if let remaining = presentation.remaining { Text(remaining.euro).modifier(NativeNumericFeedback(value: remaining)) }
-                    else { Text("Da aggiornare") }
-                }.font(NativeDesign.budgetValue(size: budgetAmountSize)).monospacedDigit()
-                    .minimumScaleFactor(0.7).lineLimit(1).accessibilityIdentifier("finance-budget-value")
-                if !hidden, presentation.remaining != nil {
-                    if presentation.days > 0 {
-                        Text(presentation.daily.euro + " al giorno").font(.title3.weight(.semibold)).monospacedDigit()
-                    }
-                    Text(presentation.days == 1 ? "1 giorno · incluso oggi" : presentation.periodLabel).font(.subheadline).foregroundStyle(NativeDesign.secondary)
-                }
-            }.accessibilityElement(children: .contain).accessibilityIdentifier("budget-hero")
-            VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-                Text("CONTO PRINCIPALE").font(.caption.weight(.medium)).foregroundStyle(NativeDesign.secondary)
-                ViewThatFits(in: .horizontal) {
-                    HStack(alignment: .firstTextBaseline) { accountName; Spacer(minLength: NativeDesign.Space.small); accountBalance }
-                    VStack(alignment: .leading, spacing: NativeDesign.Space.small) { accountName; accountBalance }
-                }
-                if store.financeMonth != CivilDate.month() {
-                    Text("Saldo dell’ultima sincronizzazione, distinto dal mese selezionato.").font(.caption).foregroundStyle(NativeDesign.secondary)
-                }
-            }
-        }.frame(maxWidth: .infinity, alignment: .leading)
-            .padding(NativeDesign.Layout.compactCardInset)
-            .background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.cardRadius, style: .continuous))
+    /// Spending by category in the selected month (server snapshot, else the month's movements).
+    private var monthCategories: [Record] {
+        if case .array(let rows)? = store.finance["categories"], !rows.isEmpty { return rows.map(\.object) }
+        var totals: [String: Double] = [:]
+        for row in store.transactions where row.amount("amount") < 0 && row.text("type") != "Entrata" {
+            totals[row.text("displayCategory", fallback: row.text("category", fallback: "Altro")), default: 0] += -row.amount("amount")
+        }
+        return totals.map { ["name": .string($0.key), "amount": .number($0.value)] }
     }
-    private var accountName: some View { Text(store.summary.text("account", fallback: "Trade Republic")).font(.title3.weight(.semibold)) }
+    private var accountCard: some View {
+        VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+            LOSectionLabel(title: "Conto principale")
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .firstTextBaseline) { accountName; Spacer(minLength: NativeDesign.Space.small); accountBalance }
+                VStack(alignment: .leading, spacing: NativeDesign.Space.small) { accountName; accountBalance }
+            }
+            .padding(NativeDesign.Layout.compactCardInset)
+            .loCardSurface()
+            if store.financeMonth != CivilDate.month() {
+                Text("Saldo dell’ultima sincronizzazione").font(.caption).foregroundStyle(NativeDesign.secondary)
+            }
+        }
+    }
+    private var accountName: some View { Text(store.summary.text("account", fallback: "Trade Republic")).font(.headline) }
     private var accountBalance: some View {
         Text(hidden ? "•••• €" : presentation.balance.map(\.euro) ?? "Da aggiornare")
-            .font(.title3.weight(.semibold)).monospacedDigit().accessibilityIdentifier("finance-current-balance")
+            .font(.headline).monospacedDigit().accessibilityIdentifier("finance-current-balance")
     }
     private var presentation: NativeFinanceOverview { NativeFinanceOverview(summary: store.summary, month: store.financeMonth) }
     // FINANCE-SCREEN-REDESIGN-2026-11-16: four visible actions of equal weight, no overflow menu.
@@ -113,7 +105,7 @@ struct FinanceScreen: View {
             }
         }.buttonStyle(.plain).foregroundStyle(Color.primary)
             .padding(NativeDesign.Space.xs)
-            .background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.cardRadius, style: .continuous))
+            .loCardSurface()
     }
     private func financeTile(_ title: String, symbol: String) -> some View {
         VStack(spacing: NativeDesign.Space.xs) {
@@ -123,33 +115,43 @@ struct FinanceScreen: View {
             .contentShape(Rectangle())
     }
     private var recentMovements: some View {
-        VStack(alignment: .leading, spacing: NativeDesign.Space.large) {
-            NativeSectionHeader("Ultimi movimenti") { EmptyView() }
-            ForEach(store.transactions.prefix(3).map { DisplayRecord($0, key: "row") }) { item in
-                Button { router.sheet = .movement(item.value) } label: {
-                    ViewThatFits(in: .horizontal) {
-                        HStack(spacing: NativeDesign.Space.medium) {
-                            movementDescription(item.value)
-                            Spacer(minLength: NativeDesign.Space.small)
-                            movementAmount(item.value).fixedSize()
+        let rows = Array(store.transactions.prefix(3))
+        return VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+            Text("Ultimi movimenti").font(.title3.bold()).accessibilityAddTraits(.isHeader)
+            if rows.isEmpty {
+                Text("Nessun movimento nel mese").font(.subheadline).foregroundStyle(NativeDesign.secondary)
+            } else {
+                LOListCard {
+                    ForEach(Array(rows.enumerated()), id: \.offset) { index, record in
+                        Button { router.sheet = .movement(record) } label: {
+                            LOListRow(isLast: index == rows.count - 1) {
+                                ViewThatFits(in: .horizontal) {
+                                    HStack(spacing: NativeDesign.Space.medium) {
+                                        movementDescription(record)
+                                        Spacer(minLength: NativeDesign.Space.small)
+                                        movementAmount(record).fixedSize()
+                                    }
+                                    VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+                                        movementDescription(record)
+                                        movementAmount(record)
+                                    }
+                                }
+                                .multilineTextAlignment(.leading)
+                            }
+                            .contentShape(Rectangle())
                         }
-                        VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-                            movementDescription(item.value)
-                            movementAmount(item.value)
-                        }
-                    }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
-                        .padding(.vertical, NativeDesign.Space.small).contentShape(Rectangle()).multilineTextAlignment(.leading)
-                }.buttonStyle(NativePressStyle())
-                Divider().padding(.leading, NativeDesign.Layout.touchTarget + NativeDesign.Space.medium)
+                        .buttonStyle(NativePressStyle())
+                    }
+                }
             }
-            if store.transactions.isEmpty { Text("Nessun movimento nel mese").font(.subheadline).foregroundStyle(NativeDesign.secondary) }
         }
     }
     private func movementDescription(_ record: Record) -> some View {
         HStack(spacing: NativeDesign.Space.medium) {
             Image(systemName: NativeCategoryCatalog.symbol(for: record.text("displayCategory", fallback: record.text("category"))))
-                .font(.title3.weight(.regular)).foregroundStyle(NativeDesign.secondary)
-                .frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget)
+                .font(.body).foregroundStyle(NativeDesign.financeTitle)
+                .frame(width: NativeDesign.Layout.iconTile, height: NativeDesign.Layout.iconTile)
+                .loTileSurface()
             NativeRowText(title: record.text("name"), subtitle: CivilDate.label(record.text("date")), titleLineLimit: 2)
         }
     }
