@@ -1362,3 +1362,7 @@ html[data-theme="light"] [data-kind="night"]{--shift-color:#b3b1cc}
 .os-day-shift,.os-day-shift[data-kind]{display:inline-grid;place-items:center;width:28px;height:28px;padding:0;border-radius:50%;background:var(--shift-color);color:#1c1e24!important;font-size:13px;font-weight:700}
 .os-day-shift::before{content:none}
 .hw-shift,.os-day[data-kind=night] .os-shift{color:#1c1e24}
+/* Badge turno: rettangolo smussato, non pillola. */
+#calendar .os-day .os-shift,#calendar .os-day[data-kind] .os-shift{width:28px;height:24px;border-radius:7px}
+.os-day-shift,.os-day-shift[data-kind]{width:30px;height:26px;border-radius:7px}
+.hw-shift{border-radius:6px}
