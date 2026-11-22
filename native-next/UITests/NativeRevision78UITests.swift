@@ -282,6 +282,7 @@ final class NativeRevision78UITests: XCTestCase {
         XCTAssertTrue(history.isHittable, "The last Health action must be reachable")
         XCTAssertLessThanOrEqual(history.frame.maxY, min(weight.frame.minY, food.frame.minY))
         XCTAssertTrue(weight.isHittable); XCTAssertTrue(food.isHittable)
+        if abs(weight.frame.midY - food.frame.midY) < 2 { XCTAssertLessThan(weight.frame.midX, food.frame.midX, "Peso left, Alimento right, as in the Dashboard") }
         XCTAssertLessThanOrEqual(max(weight.frame.maxY, food.frame.maxY), tabBar.frame.minY)
         capture(large ? "safe-area-health-large" : "safe-area-health-standard", app)
 

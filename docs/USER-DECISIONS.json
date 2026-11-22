@@ -1295,13 +1295,14 @@
     },
     {
       "id": "HEALTH-FOOD-BUTTON-2026-11-22",
-      "status": "PENDING_CONFIRMATION",
+      "status": "RESOLVED_NO_CONFLICT",
       "scope": "App iOS, Salute",
       "recorded": "2026-11-22",
       "source": "utente",
       "text": "non ci credo mi hai lasciato il pulsante alimento sulla scheda salute a sinistra [...] devo aspettare di nuovo altre 3 ore adesso per questa cazzata?",
       "conflicts_with": "HEALTH-TREND-93-2026-11-21 (Peso e Alimento sopra la barra)",
-      "note": "Parafrasi: togliere il pulsante Alimento da Salute. Domanda META-01 posta."
+      "note": "Parafrasi: togliere il pulsante Alimento da Salute. Domanda META-01 posta.",
+      "resolution": "Chiarimento utente: «io intendevo che alimento deve essere a DESTRA [...] COME LO HAI FATTO IN DASHBOARD». Nessun conflitto con HEALTH-TREND-93: in Salute Peso a sinistra e Alimento a destra, come in Dashboard."
     }
   ],
   "history": [

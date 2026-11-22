@@ -332,14 +332,14 @@ struct NativeHealthDetail: View {
             NativePinnedNutrients(entries: nutrition.entries, date: selectedDate)
         }
     }
-    /// Liquid Glass actions above the tab bar (G06 icons, UI-80-01 visible text).
+    /// Liquid Glass actions above the tab bar: Peso left, Alimento right, as in the Dashboard.
     @ViewBuilder private var nutritionActions: some View {
-        Button { showingNutrition = true } label: {
-            LOActionLabel(title: "Alimento", systemImage: NativeHealthMetric.calories.symbol, section: .nutrition)
-        }.buttonStyle(LOGlassButtonStyle(fillsWidth: true)).accessibilityLabel("Aggiungi alimento").accessibilityIdentifier("health-add-nutrition")
         Button { addingWeight = true } label: {
             LOActionLabel(title: "Peso", systemImage: NativeHealthMetric.weight.symbol, section: .weight)
         }.buttonStyle(LOGlassButtonStyle(fillsWidth: true)).accessibilityLabel("Aggiungi peso").accessibilityIdentifier("health-add-weight")
+        Button { showingNutrition = true } label: {
+            LOActionLabel(title: "Alimento", systemImage: NativeHealthMetric.calories.symbol, section: .nutrition)
+        }.buttonStyle(LOGlassButtonStyle(fillsWidth: true)).accessibilityLabel("Aggiungi alimento").accessibilityIdentifier("health-add-nutrition")
     }
     /// DIARIO: rows in one grouped card, kcal on the right (preview list).
     private var diary: some View {

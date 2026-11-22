@@ -104,3 +104,4 @@ Distribuzione: i due Worker (`lifeos-native-test` con `lifeos-bloomfoods-deploy9
 - Candidato completo verde nella run [45057419266](https://github.com/azeroualit-cloud/LifeOS/actions/runs/45057419266) (sorgente `ec8d16a`): suite completa, quattro avvii Release e pacchetto riusciti; IPA nell'artifact `LifeOS-93-ec8d16a0a04472b8b7ea25ed800550b8164eb885-1`.
 - Pubblicazione della release `ios-0.10.31-build93` rifiutata da GitHub con HTTP 403 (token Actions senza scrittura), anche nella ripresa dedicata `lifeos-publish93-retry.yml` (run 45073413159 e 45076302501). Serve verificare i permessi Actions del repository.
 - Prove fisiche su iPhone e accettazione dell'utente ancora aperte.
+- 22/11/2026: in Salute «Peso» a sinistra e «Alimento» a destra, come in Dashboard (richiesta utente), con controllo nel test UI. Nuovo candidato completo avviato (Start 10).
