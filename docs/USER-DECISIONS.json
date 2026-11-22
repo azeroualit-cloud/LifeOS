@@ -1244,6 +1244,16 @@
       "original_quote": "io voglio solo ipa completo capisci o no?",
       "rule": "Parafrasi: per la build 93 l'utente non vuole revisioni intermedie (catture, domande di avanzamento): completare tutte le fasi del piano e consegnare l'IPA completa a gate verdi. L'accettazione resta la prova su iPhone; restano valide META-01 per i conflitti e IPA-DELIVERY-93-2026-11-21 per i gate.",
       "conflict_check": "Nessuna regola attiva contraddetta: compatibile con IPA-DELIVERY-93-2026-11-21 (una IPA a gate verdi)."
+    },
+    {
+      "id": "SITE-PARITY-2026-11-22",
+      "status": "ACTIVE",
+      "scope": "Sito LifeOS (Worker lifeos) rispetto all'app iOS",
+      "recorded_on": "2026-11-22",
+      "provenance": "Messaggio diretto utente in chat Claude con screenshot della mappa Dove va lo stipendio del sito",
+      "original_quote": "voglio che fixi questo, che veda testo anche nei quadretti più piccoli, e voglio anche le tecniche grafiche implementate che non ci sono nel sito ma nell'app si, tipo l'aggiunta spesa ecc, va aggiornato capito? il sito non deve mai avere meno dell'app ma 1:1 o di più",
+      "rule": "Il sito non deve mai avere meno dell'app: funzioni e soluzioni grafiche dell'app (per esempio il foglio Aggiungi spesa) vanno portate sul sito, 1:1 o di più. Nella mappa Dove va lo stipendio ogni riquadro, anche il più piccolo, mostra testo leggibile.",
+      "conflict_check": "Nessuna regola attiva contraddetta. Il deploy del sito resta manuale (web/DEPLOY.md, conferma di Nas); i dati che l'app tiene solo su Apple Salute non sono sul server e richiedono una sincronizzazione per comparire sul sito."
     }
   ],
   "pending_confirmations": [
@@ -1376,6 +1386,10 @@
     {
       "date": "2026-11-22",
       "event": "Registrata IPA-COMPLETE-ONLY-93-2026-11-22 («io voglio solo ipa completo capisci o no?»): lavoro della build 93 fino all'IPA completa senza revisioni intermedie. Nessun conflitto."
+    },
+    {
+      "date": "2026-11-22",
+      "event": "Registrata SITE-PARITY-2026-11-22: il sito deve avere almeno tutto ciò che ha l'app; correzione del testo nei riquadri piccoli. Nessun conflitto."
     }
   ],
   "historical_inventory": "decision-history/2026-11-04-inventory.json",
