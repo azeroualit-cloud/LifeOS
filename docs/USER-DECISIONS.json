@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "LifeOS",
-  "updated_on": "2026-11-21",
+  "updated_on": "2026-11-22",
   "policy": {
     "id": "META-01",
     "status": "ACTIVE",
@@ -1234,6 +1234,16 @@
         "DASHBOARD-ORDER-92"
       ],
       "conflict_check": "Conflitto con DASHBOARD-ORDER-92 (Finanza compatta) segnalato e confermato (META-01)."
+    },
+    {
+      "id": "IPA-COMPLETE-ONLY-93-2026-11-22",
+      "status": "ACTIVE",
+      "scope": "Consegna della build 93",
+      "recorded_on": "2026-11-22",
+      "provenance": "Messaggio diretto utente in chat Claude dopo le catture della fase 2",
+      "original_quote": "io voglio solo ipa completo capisci o no?",
+      "rule": "Parafrasi: per la build 93 l'utente non vuole revisioni intermedie (catture, domande di avanzamento): completare tutte le fasi del piano e consegnare l'IPA completa a gate verdi. L'accettazione resta la prova su iPhone; restano valide META-01 per i conflitti e IPA-DELIVERY-93-2026-11-21 per i gate.",
+      "conflict_check": "Nessuna regola attiva contraddetta: compatibile con IPA-DELIVERY-93-2026-11-21 (una IPA a gate verdi)."
     }
   ],
   "pending_confirmations": [
@@ -1362,6 +1372,10 @@
     {
       "date": "2026-11-21",
       "event": "META-01: scheda Finanza della Dashboard 93 (importo, euro al giorno, barra) in conflitto con DASHBOARD-ORDER-92 (Finanza compatta). Risposta «Sì, sostituisci». DASHBOARD-ORDER-92 SUPERSEDED da DASHBOARD-93-2026-11-21."
+    },
+    {
+      "date": "2026-11-22",
+      "event": "Registrata IPA-COMPLETE-ONLY-93-2026-11-22 («io voglio solo ipa completo capisci o no?»): lavoro della build 93 fino all'IPA completa senza revisioni intermedie. Nessun conflitto."
     }
   ],
   "historical_inventory": "decision-history/2026-11-04-inventory.json",

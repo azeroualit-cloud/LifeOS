@@ -18,10 +18,10 @@ Su Linux non c'è Xcode. La CI assembla lo zip di base fissato (`lifeos-native.z
 |---|---|---|
 | 1 Dati online | Modulo `backend/bloom-foods` (stesse tabelle del sito, campi solo-app in `web_foods_app` e `web_bloom_app`, date Apple convertite anche per `trashedAt` con riparazione idempotente). `NativeOnlineSync`: il server decide, il telefono tiene cache e byte degli allegati; trasferimento automatico una tantum ripetibile senza doppioni; vince la modifica più recente; Worker vecchio = nessun cambiamento. Impostazioni: Dati sul server, Esporta backup completo (Bloom con allegati, alimenti, dati app). | Fatto: compilazione e test unitari verdi (run 44930586905, commit 60d5a63) |
 | 1b Deploy Worker | `lifeos-bloomfoods-deploy93.yml` (solo avvio manuale) cambia solo `lifeos-native-test`. Lo avvia Nas. | Pronto, non distribuito |
-| 2 Schede approvate | Dashboard, Attività, Calendario, Agenda, Dipingi turni, Salute (Cronologia a barre verticali, Simulazione peso, TDEE con criteri), fogli alimento/quantità/macro/obiettivi/peso/evento/abitudine/orari | In corso: vedi "Fase 2 - stato" sotto |
-| 3 Finanza | Panoramica, Analisi interattiva (ordine Ritmo, Fondo con € al mese, Stima patrimonio con uscite programmate, Spese per categoria, Entrate e uscite, Stipendi, Giorno per giorno da luglio), Avvisi regolabili (`FINANCE-ALERTS-2026-11-21`), Budget, Movimenti, fogli con blocco "Da dove arrivano i soldi" (`FUNDING-BLOCK-2026-11-21`) | Da fare |
-| 4 Bloom | Mappa con pin per categoria, gruppi, filtro a tendina, scheda con frecce; schede | Da fare |
-| 5 Gate e IPA | Versione 0.10.31/93, workflow candidate93, controlli scala aurea e continuità linee, suite UI completa, 4 avvii Release, IPA | Da fare |
+| 2 Schede approvate | Dashboard, Attività, Calendario, Agenda, Dipingi turni, Salute (Cronologia a barre verticali, Simulazione peso, TDEE con criteri), fogli alimento/quantità/macro/obiettivi/peso/evento/abitudine/orari | Fatto nel codice (vedi "Fase 2 - stato"); ricerca immediata in Aggiungi alimento aggiunta il 22 novembre |
+| 3 Finanza | Panoramica, Analisi interattiva (ordine Ritmo, Fondo con € al mese, Stima patrimonio con uscite programmate, Spese per categoria, Entrate e uscite, Stipendi, Giorno per giorno da luglio), Avvisi regolabili (`FINANCE-ALERTS-2026-11-21`), Budget, Movimenti, fogli con blocco "Da dove arrivano i soldi" (`FUNDING-BLOCK-2026-11-21`) | Fatto nel codice, vedi "Fasi 3-5 - stato" |
+| 4 Bloom | Mappa con pin per categoria, gruppi, filtro a tendina, scheda con frecce; schede | Fatto nel codice, vedi "Fasi 3-5 - stato" |
+| 5 Gate e IPA | Versione 0.10.31/93, workflow candidate93, controlli scala aurea e continuità linee, suite UI completa, 4 avvii Release, IPA | In corso |
 
 ## Regole di lavoro
 
@@ -59,4 +59,23 @@ Non fatto o volutamente escluso:
 - Nessuna prova al simulatore delle nuove schermate in questa sessione: solo compilazione e test unitari in CI. Le catture del workflow di sviluppo sono la prima verifica visiva.
 
 Verifica tecnica: compilazione e 358 test unitari verdi, 0 falliti ([run 44949689104](https://github.com/azeroualit-cloud/LifeOS/actions/runs/44949689104), commit `9367df7`). Anteprima di sviluppo con controlli UI selezionati e catture reali verde ([run 44949689024](https://github.com/azeroualit-cloud/LifeOS/actions/runs/44949689024), artefatto `lifeos-development-preview-9367df7…`). La suite UI completa resta per la fase 5. Non è accettazione del prodotto.
+
+## Fasi 3-5 - stato (22 novembre 2026, sessione Claude)
+
+Istruzione dell'utente: `IPA-COMPLETE-ONLY-93-2026-11-22` («io voglio solo ipa completo capisci o no?»): niente revisioni intermedie, IPA completa a gate verdi.
+
+Fatto nel codice:
+- Panoramica Finanza (`NativeFinance93.swift`, `FinanceScreen.swift`): budget rimanente con barra per categoria (palette Monocromo), speso di totale e giorno del mese, conto principale in scheda, quattro azioni, ultimi movimenti in scheda, "Dove va lo stipendio" a riquadri (impegni, messo da parte, speso per categoria, libero) con dettaglio e altre voci del gruppo. Occhio "Nascondi importi" nell'intestazione.
+- Analisi (`FinanceAnalysisScreen.swift`, `NativeFinanceAnalysis93.swift`): Ritmo (norma dai mesi completi di `yearly`, ultimo mese e ultimi 3 mesi), Quanto dura il fondo (`planning.now`, eccedenza media da `forecastHistory`, spesa al mese regolabile a passi di 50 €), Stima patrimonio (previsione esistente, stime in ciano), Spese per categoria a barre con media al mese, Entrate e uscite, Stipendi per competenza, Giorno per giorno, Patrimonio.
+- Avvisi (`NativeFinanceAlerts93.swift`, Impostazioni → Avvisi di Finanza): Ritmo sopra la norma (5-30%, 10%), Spese ricorrenti fuori norma (+10..60%, +25%; 5..50 €, 15 €), Riepilogo del lunedì (6-21, 9); limiti 1 a settimana / 1 per voce al mese / 1 al mese in tutto; silenzio 22-8. Notifiche locali calcolate sul telefono a ogni aggiornamento della Finanza, mai in demo.
+- Budget: Stipendio, Piani e impegni, Budget del mese; piani del mese con tipo e residuo; testi esplicativi tolti. Movimenti: ricerca, categoria e conto a tendina, totale della categoria, sezione "Sul dispositivo".
+- Blocco "Da dove arrivano i soldi" in spesa/bolletta/modifica destinazione: barra piano/risparmi/budget e importi.
+- Bloom: pin colorati per tipo di luogo, filtro a tendina con conteggi, scheda del luogo con frecce precedente/successivo, Apri nota/e e Apri in Mappe.
+- Versione 0.10.31 build 93 in `project.yml`; `scripts/verify-candidate93.py`.
+
+Limiti dichiarati:
+- "Da dove arrivano i soldi": la divisione manuale fra risparmi e mesi di budget e la restituzione dei mesi del piano richiedono un Worker che le gestisca; l'app mostra e invia solo le destinazioni già supportate (piano con resto dai risparmi, risparmi, budget).
+- Ritmo usa mesi completi (ultimo mese, ultimi 3 mesi) perché il server invia i totali mensili, non giornalieri; Giorno per giorno usa i movimenti del mese caricato.
+- Avvisi solo locali: nessun invio dal server; il tocco apre la Dashboard.
+- Fogli Quantità, Macro a mano, Alimento personale, Evento e Categorie restano moduli iOS raggruppati con i nuovi token.
 
