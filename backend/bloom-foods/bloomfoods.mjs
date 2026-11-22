@@ -11,6 +11,10 @@ async function nbTables(env) {
       env.DB.prepare("CREATE TABLE IF NOT EXISTS web_bloom_items (id TEXT PRIMARY KEY, kind TEXT NOT NULL DEFAULT 'note', title TEXT NOT NULL DEFAULT '', url TEXT NOT NULL DEFAULT '', body TEXT NOT NULL DEFAULT '', notes TEXT NOT NULL DEFAULT '', tags TEXT NOT NULL DEFAULT '[]', place TEXT NOT NULL DEFAULT '', archived INTEGER NOT NULL DEFAULT 0, trashed_at REAL, modified_at REAL NOT NULL DEFAULT 0, files TEXT NOT NULL DEFAULT '[]', doc TEXT NOT NULL DEFAULT '{}')"),
       env.DB.prepare("CREATE TABLE IF NOT EXISTS web_foods_app (id TEXT PRIMARY KEY, app TEXT NOT NULL DEFAULT '{}')"),
       env.DB.prepare("CREATE TABLE IF NOT EXISTS web_bloom_app (id TEXT PRIMARY KEY, app TEXT NOT NULL DEFAULT '{}')"),
+      // FOOD-DIARY-SERVER-2026-11-22: diario alimentare condiviso (telefono e sito). Il peso resta in Apple Salute.
+      env.DB.prepare("CREATE TABLE IF NOT EXISTS web_food_diary (id TEXT PRIMARY KEY, day TEXT NOT NULL, at TEXT NOT NULL, name TEXT NOT NULL DEFAULT '', grams REAL, ml REAL, kcal REAL, protein REAL, carbs REAL, fat REAL, fibre REAL, revision INTEGER NOT NULL DEFAULT 0, modified REAL NOT NULL DEFAULT 0, deleted INTEGER NOT NULL DEFAULT 0, app TEXT NOT NULL DEFAULT '{}')"),
+      env.DB.prepare("CREATE INDEX IF NOT EXISTS web_food_diary_modified ON web_food_diary(modified)"),
+      env.DB.prepare("CREATE INDEX IF NOT EXISTS web_food_diary_day ON web_food_diary(day)"),
       // Riparazione idempotente: cestinati importati con la data di riferimento Apple (2001).
       env.DB.prepare("UPDATE web_bloom_items SET trashed_at = trashed_at + 978307200 WHERE trashed_at > 0 AND trashed_at < 1500000000"),
     ]).catch((error) => { nbReady = null; throw error; });
@@ -258,6 +262,72 @@ async function importBloom(env, payload) {
   return { added, updated, skipped: cleanI.length - added - updated, collections: cleanC.length, rejected: rejected.slice(0, 20), rejectedCount: rejected.length };
 }
 
+
+/* ---- Diario alimentare (FOOD-DIARY-SERVER-2026-11-22) ----
+   Una riga per pasto. Campi leggibili dal sito (data, nome, quantità, macro) + `app`, la voce
+   completa dell'app (micronutrienti, alcol, porzioni...). Vince la modifica più recente (`modified`,
+   millisecondi). Le eliminazioni restano come righe `deleted` perché telefono e sito le ricevano. */
+const ndDay = (iso) => {
+  const d = new Date(iso);
+  if (!Number.isFinite(d.getTime())) throw Error("Data del pasto non valida.");
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Rome", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+};
+const ndRow = (r) => ({ id: r.id, day: r.day, at: r.at, name: r.name, grams: r.grams, ml: r.ml, kcal: r.kcal, protein: r.protein, carbs: r.carbs, fat: r.fat, fibre: r.fibre, revision: r.revision, modified: r.modified, deleted: r.deleted === 1, app: (() => { try { return JSON.parse(r.app || "{}"); } catch { return {}; } })() });
+function ndClean(input) {
+  const v = input && typeof input === "object" ? input : {};
+  const id = nbId(v.id, "diary-");
+  const at = new Date(v.at || "");
+  if (!Number.isFinite(at.getTime())) throw Error("Data del pasto non valida.");
+  const modified = Number(v.modified);
+  if (!Number.isFinite(modified) || modified <= 0) throw Error("Data di modifica non valida.");
+  const app = v.app && typeof v.app === "object" ? JSON.stringify(v.app) : "{}";
+  if (app.length > 24000) throw Error("Voce del diario troppo grande.");
+  return { id, at: at.toISOString(), day: ndDay(at.toISOString()), name: nbText(v.name, 160, ""), grams: nbNum(v.grams, 100000), ml: nbNum(v.ml, 100000), kcal: nbNum(v.kcal, 100000), protein: nbNum(v.protein, 10000), carbs: nbNum(v.carbs, 10000), fat: nbNum(v.fat, 10000), fibre: nbNum(v.fibre, 10000), revision: Math.max(0, Math.floor(Number(v.revision) || 0)), modified, app };
+}
+/** Modifiche dal momento `since` (millisecondi, 0 = tutto), eliminazioni comprese. */
+async function listFoodDiary(env, since) {
+  await nbTables(env);
+  const from = Number(since) > 0 ? Number(since) : 0;
+  const { results } = await env.DB.prepare("SELECT * FROM web_food_diary WHERE modified > ? ORDER BY modified LIMIT 5000").bind(from).all();
+  return { version: 1, now: Date.now(), entries: results.map(ndRow) };
+}
+async function listFoodDiaryDays(env, fromDay, toDay) {
+  await nbTables(env);
+  const re = /^\d{4}-\d{2}-\d{2}$/;
+  if (!re.test(String(fromDay)) || !re.test(String(toDay))) throw Error("Intervallo di giorni non valido.");
+  const { results } = await env.DB.prepare("SELECT * FROM web_food_diary WHERE deleted = 0 AND day >= ? AND day <= ? ORDER BY at LIMIT 5000").bind(fromDay, toDay).all();
+  return { version: 1, entries: results.map(ndRow) };
+}
+/** Salva se è più recente della copia sul server; restituisce sempre la copia valida. */
+async function saveFoodDiaryEntry(env, input) {
+  await nbTables(env);
+  const e = ndClean(input);
+  const old = await env.DB.prepare("SELECT * FROM web_food_diary WHERE id = ?").bind(e.id).first();
+  if (old && Number(old.modified) > e.modified) return { saved: false, entry: ndRow(old) };
+  const revision = Math.max(e.revision, old ? Number(old.revision) + 1 : 0);
+  await env.DB.prepare("INSERT INTO web_food_diary(id,day,at,name,grams,ml,kcal,protein,carbs,fat,fibre,revision,modified,deleted,app) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,0,?) ON CONFLICT(id) DO UPDATE SET day=excluded.day,at=excluded.at,name=excluded.name,grams=excluded.grams,ml=excluded.ml,kcal=excluded.kcal,protein=excluded.protein,carbs=excluded.carbs,fat=excluded.fat,fibre=excluded.fibre,revision=excluded.revision,modified=excluded.modified,deleted=0,app=excluded.app")
+    .bind(e.id, e.day, e.at, e.name, e.grams, e.ml, e.kcal, e.protein, e.carbs, e.fat, e.fibre, revision, e.modified, e.app).run();
+  return { saved: true, entry: ndRow(await env.DB.prepare("SELECT * FROM web_food_diary WHERE id = ?").bind(e.id).first()) };
+}
+async function deleteFoodDiaryEntry(env, id, modified) {
+  await nbTables(env);
+  const key = nbId(id, "diary-"), when = Number(modified);
+  if (!Number.isFinite(when) || when <= 0) throw Error("Data di modifica non valida.");
+  const old = await env.DB.prepare("SELECT * FROM web_food_diary WHERE id = ?").bind(key).first();
+  if (!old) return { deleted: false };
+  if (Number(old.modified) > when) return { deleted: false, entry: ndRow(old) };
+  await env.DB.prepare("UPDATE web_food_diary SET deleted = 1, modified = ?, revision = revision + 1 WHERE id = ?").bind(when, key).run();
+  return { deleted: true };
+}
+/** Trasferimento una tantum dello storico dell'app, ripetibile senza doppioni. */
+async function importFoodDiary(env, list) {
+  await nbTables(env);
+  if (!Array.isArray(list) || list.length > 500) throw Error("Elenco del diario non valido.");
+  let saved = 0, skipped = 0;
+  for (const item of list) { const r = await saveFoodDiaryEntry(env, item); if (r.saved) saved++; else skipped++; }
+  return { saved, skipped };
+}
+
 /** Gateway dell'app: stesse tabelle del sito, nessun metodo arbitrario. Restituisce undefined se il metodo non è suo. */
 const BLOOM_FOODS_METHODS = {
   listFoods: (env) => listFoods(env),
@@ -272,6 +342,11 @@ const BLOOM_FOODS_METHODS = {
   saveBloomCollection: (env, a) => saveBloomCollection(env, a[0]),
   deleteBloomCollection: (env, a) => deleteBloomCollection(env, a[0]),
   importBloom: (env, a) => importBloom(env, a[0]),
+  listFoodDiary: (env, a) => listFoodDiary(env, a[0]),
+  listFoodDiaryDays: (env, a) => listFoodDiaryDays(env, a[0], a[1]),
+  saveFoodDiaryEntry: (env, a) => saveFoodDiaryEntry(env, a[0]),
+  deleteFoodDiaryEntry: (env, a) => deleteFoodDiaryEntry(env, a[0], a[1]),
+  importFoodDiary: (env, a) => importFoodDiary(env, a[0]),
 };
 export async function bloomFoodsAction(env, method, args) {
   if (!Object.prototype.hasOwnProperty.call(BLOOM_FOODS_METHODS, method)) return undefined;

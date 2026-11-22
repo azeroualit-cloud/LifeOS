@@ -84,3 +84,27 @@ test('app-only fields survive the round trip and site edits keep them', async ()
   await bloomFoodsAction(e, 'deleteFood', ['personal-2']);
   assert.equal(e.sqlite.prepare('SELECT COUNT(*) n FROM web_foods_app').get().n, 0);
 });
+
+test('food diary: last change wins, deletions travel, day follows Rome time', async () => {
+  const e = env();
+  const base = { id: 'A1B2C3D4-0000-0000-0000-000000000001', at: '2026-11-21T23:30:00Z', name: 'Skyr', grams: 150, kcal: 95, protein: 16.5, carbs: 5.9, fat: 0.3, fibre: 0, revision: 1, modified: 1000, app: { protein: 16.5, nutrientValues: { calcium: { amount: 180 } } } };
+  let r = await bloomFoodsAction(e, 'saveFoodDiaryEntry', [base]);
+  assert.equal(r.saved, true); assert.equal(r.entry.day, '2026-11-22', 'after midnight in Rome'); assert.equal(r.entry.app.nutrientValues.calcium.amount, 180);
+  r = await bloomFoodsAction(e, 'saveFoodDiaryEntry', [{ ...base, grams: 200, modified: 900 }]);
+  assert.equal(r.saved, false, 'an older edit never overwrites'); assert.equal(r.entry.grams, 150);
+  r = await bloomFoodsAction(e, 'saveFoodDiaryEntry', [{ ...base, grams: 200, kcal: 127, modified: 2000, revision: 1 }]);
+  assert.equal(r.saved, true); assert.equal(r.entry.revision, 2, 'revision always grows');
+  const changes = await bloomFoodsAction(e, 'listFoodDiary', [1500]);
+  assert.equal(changes.entries.length, 1); assert.equal(changes.version, 1);
+  const days = await bloomFoodsAction(e, 'listFoodDiaryDays', ['2026-11-22', '2026-11-22']);
+  assert.equal(days.entries.length, 1);
+  assert.deepEqual(await bloomFoodsAction(e, 'deleteFoodDiaryEntry', [base.id, 1500]), { deleted: false, entry: changes.entries[0] });
+  assert.equal((await bloomFoodsAction(e, 'deleteFoodDiaryEntry', [base.id, 3000])).deleted, true);
+  const after = await bloomFoodsAction(e, 'listFoodDiary', [2500]);
+  assert.equal(after.entries[0].deleted, true, 'the deletion reaches the other side');
+  assert.equal((await bloomFoodsAction(e, 'listFoodDiaryDays', ['2026-11-22', '2026-11-22'])).entries.length, 0);
+  const imp = await bloomFoodsAction(e, 'importFoodDiary', [[{ ...base, id: 'B1', modified: 10 }, { ...base, id: 'B1', modified: 10 }]]);
+  assert.deepEqual(imp, { saved: 2, skipped: 0 });
+  assert.equal((await bloomFoodsAction(e, 'listFoodDiary', [0])).entries.filter((x) => x.id === 'B1').length, 1, 'repeatable without duplicates');
+  await assert.rejects(() => bloomFoodsAction(e, 'saveFoodDiaryEntry', [{ ...base, at: 'ieri' }]), /Data del pasto/);
+});

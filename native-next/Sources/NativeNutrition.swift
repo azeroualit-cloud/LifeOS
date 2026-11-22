@@ -26,6 +26,8 @@ struct NativeNutritionEntry: Codable, Identifiable, Equatable {
     var supplementUnit: String? = nil
     var cocktailServings: Decimal? = nil
     var alcoholGrams: Decimal? = nil
+    /// Last change on any device (FOOD-DIARY-SERVER-2026-11-22): the most recent wins.
+    var modifiedAt: Date? = nil
     var standardDrinks: Decimal? { alcoholGrams.map { $0 / 12 } }
     var calories: Decimal { labelCalories ?? (protein * 4 + carbohydrate * 4 + fat * 9) }
 
@@ -227,6 +229,8 @@ extension NativeNutritionWriting {
     private let writer: any NativeNutritionWriting
     private let file: URL
     private var loaded = false
+    /// Called after a local save or deletion reached Apple Health (the diary sync sends it to the server).
+    var onLocalChange: ((UUID) -> Void)?
     init(directory: URL? = nil, writer: (any NativeNutritionWriting)? = nil) {
         self.writer = writer ?? NativeHealthNutritionWriter()
         let root = directory ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("LifeOSNutrition", isDirectory: true)
@@ -263,6 +267,7 @@ extension NativeNutritionWriting {
             if retry, let old, !old.confirmed { pending = old }
             else {
                 pending.revision = (old?.revision ?? 0) + 1; pending.confirmed = false
+                pending.modifiedAt = Date()
                 let authorized = await writer.authorizeNutrients(for: pending)
                 let previouslyShared = Set(old?.sharedNutrientKeys ?? [])
                 let shareKeys = previouslyShared.union(authorized).sorted()
@@ -272,6 +277,7 @@ extension NativeNutritionWriting {
             try await writer.write(pending)
             pending.confirmed = true
             try persist(entries.filter { $0.id != pending.id } + [pending])
+            onLocalChange?(pending.id)
             return true
         } catch { self.error = error.localizedDescription; return false }
     }
@@ -287,8 +293,43 @@ extension NativeNutritionWriting {
             if entry.nutritionNotDeclared != true { try await writer.authorize(includeFibre: entry.fibre != nil) }
             try await writer.delete(entry)
             try persist(entries.filter { $0.id != id })
+            onLocalChange?(id)
             return true
         } catch { self.error = "Eliminazione da completare: " + error.localizedDescription; return false }
+    }
+
+    // MARK: Changes from the server (FOOD-DIARY-SERVER-2026-11-22)
+
+    /// Writes an entry edited on another device into Apple Health and the local diary.
+    /// The revision always grows so Apple Health replaces the previous samples.
+    func applyRemote(_ value: NativeNutritionEntry) async -> Bool {
+        guard loaded, !busy else { return false }
+        busy = true; defer { busy = false }
+        do {
+            let old = entries.first { $0.id == value.id }
+            var entry = value
+            entry.revision = max(value.revision, (old?.revision ?? 0) + 1)
+            entry.confirmed = false; entry.deletionPending = nil
+            entry.sharedNutrientKeys = old?.sharedNutrientKeys ?? value.sharedNutrientKeys
+            if entry.nutritionNotDeclared != true { try await writer.authorize(includeFibre: entry.fibre != nil) }
+            try persist(entries.filter { $0.id != entry.id } + [entry])
+            try await writer.write(entry)
+            entry.confirmed = true
+            try persist(entries.filter { $0.id != entry.id } + [entry])
+            return true
+        } catch { self.error = error.localizedDescription; return false }
+    }
+    /// Removes an entry deleted on another device from Apple Health and the local diary.
+    func applyRemoteDeletion(_ id: UUID) async -> Bool {
+        guard loaded, !busy else { return false }
+        guard let entry = entries.first(where: { $0.id == id }) else { return true }
+        busy = true; defer { busy = false }
+        do {
+            if entry.nutritionNotDeclared != true { try await writer.authorize(includeFibre: entry.fibre != nil) }
+            try await writer.delete(entry)
+            try persist(entries.filter { $0.id != id })
+            return true
+        } catch { self.error = error.localizedDescription; return false }
     }
 
 }

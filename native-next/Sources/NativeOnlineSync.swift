@@ -30,6 +30,7 @@ import Foundation
     func connect(_ reader: @escaping Reader) {
         self.reader = reader
         bloom.onLocalChange = { [weak self] in self?.soon() }
+        NativeFoodDiarySync.shared.connect { [weak self] in self?.soon() }
     }
 
     func soon() {
@@ -54,6 +55,7 @@ import Foundation
             do {
                 try await syncFoods(reader)
                 try await syncBloom(reader)
+                try await NativeFoodDiarySync.shared.sync(reader)
                 online = true; lastSync = Date(); lastError = nil
             } catch let error as NativeRequestRejected where error.message.contains("Operazione non disponibile") {
                 online = false // Worker not updated yet: keep working on the device.
