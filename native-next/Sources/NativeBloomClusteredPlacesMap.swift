@@ -17,7 +17,7 @@ struct NativeBloomClusteredPlacesMap: UIViewRepresentable {
         map.preferredConfiguration = MKStandardMapConfiguration(elevationStyle: .flat, emphasisStyle: .muted)
         map.pointOfInterestFilter = .excludingAll
         map.showsCompass = true
-        map.showsScale = true
+        map.showsScale = false // the scale overlapped the place filter (22/11/2026)
         map.register(NativeBloomPlacePinView.self, forAnnotationViewWithReuseIdentifier: "place")
         map.register(NativeBloomPlaceClusterView.self, forAnnotationViewWithReuseIdentifier: "cluster")
         return map

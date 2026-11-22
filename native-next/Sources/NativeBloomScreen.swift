@@ -15,6 +15,7 @@ private struct NativeBloomDocument: FileDocument {
 struct NativeBloomScreen: View {
     @EnvironmentObject private var router: NativeRouter
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.openURL) private var openURL
     @StateObject private var store = NativeBloomVisualFixture.store()
     @StateObject private var classifier = NativeBloomPlaceClassifier()
     @StateObject private var captureInbox = NativeBloomCaptureInbox.shared
@@ -357,23 +358,33 @@ struct NativeBloomScreen: View {
             }
         }
     }
-    /// Selected place: name, type, notes; arrows to the previous and next place; open note or Maps.
+    /// Selected place: tapping the card opens its notes; arrows move between places;
+    /// directions open in Apple Maps or Waze (user request 22/11/2026).
     @ViewBuilder private func placeCard(_ notes: [Record]) -> some View {
         let groups = filteredGroups(notes)
         if section == "Mappa", let id = selectedPlaceNote, let index = groups.firstIndex(where: { $0.id == id }) {
             let group = groups[index]
-            VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
-                HStack(spacing: NativeDesign.Space.medium) {
-                    Image(systemName: group.place.resolvedKind.symbol).font(.body.weight(.semibold)).foregroundStyle(.white)
-                        .frame(width: NativeDesign.Layout.iconTile, height: NativeDesign.Layout.iconTile)
-                        .background { Circle().fill(Color(uiColor: NativeDesign.placeColor(group.place.resolvedKind))) }
-                        .accessibilityHidden(true)
-                    VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
-                        Text(group.place.name).font(.headline).lineLimit(2)
-                        Text(group.place.resolvedKind.label + " · " + (group.notes.count == 1 ? "1 nota" : String(group.notes.count) + " note"))
-                            .font(.footnote).foregroundStyle(NativeDesign.secondary)
+            VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+                HStack(spacing: NativeDesign.Space.small) {
+                    Button { openedPlace = group.id } label: {
+                        HStack(spacing: NativeDesign.Space.medium) {
+                            Image(systemName: group.place.resolvedKind.symbol).font(.body.weight(.semibold)).foregroundStyle(.white)
+                                .frame(width: NativeDesign.Layout.iconTile, height: NativeDesign.Layout.iconTile)
+                                .background { Circle().fill(Color(uiColor: NativeDesign.placeColor(group.place.resolvedKind))) }
+                                .accessibilityHidden(true)
+                            VStack(alignment: .leading, spacing: NativeDesign.Space.none) {
+                                Text(group.place.name).font(.headline).foregroundStyle(.primary).lineLimit(2)
+                                Text(group.place.resolvedKind.label + " · " + (group.notes.count == 1 ? "1 nota" : String(group.notes.count) + " note"))
+                                    .font(.footnote).foregroundStyle(NativeDesign.secondary)
+                            }
+                            Spacer(minLength: NativeDesign.Space.none)
+                        }
+                        .frame(minHeight: NativeDesign.Layout.touchTarget)
+                        .contentShape(Rectangle())
                     }
-                    Spacer(minLength: NativeDesign.Space.small)
+                    .buttonStyle(NativePressStyle())
+                    .accessibilityLabel(group.place.name + ", " + (group.notes.count == 1 ? "apri nota" : "apri note"))
+                    .accessibilityIdentifier("bloom-place-open")
                     NativeIconButton(symbol: "chevron.left", label: "Luogo precedente") {
                         selectedPlaceNote = groups[(index - 1 + groups.count) % groups.count].id
                     }.disabled(groups.count < 2).accessibilityIdentifier("bloom-place-previous")
@@ -382,20 +393,22 @@ struct NativeBloomScreen: View {
                     }.disabled(groups.count < 2).accessibilityIdentifier("bloom-place-next")
                 }
                 HStack(spacing: NativeDesign.Space.small) {
-                    Button { openedPlace = group.id } label: {
-                        LOActionLabel(title: group.notes.count == 1 ? "Apri nota" : "Apri note", systemImage: "doc.text")
-                    }
-                    .buttonStyle(LOGlassButtonStyle(fillsWidth: true))
-                    .accessibilityIdentifier("bloom-place-open")
                     Button {
                         let item = MKMapItem(placemark: MKPlacemark(coordinate: CLLocationCoordinate2D(latitude: group.place.latitude, longitude: group.place.longitude)))
                         item.name = group.place.name; item.openInMaps()
-                    } label: { LOActionLabel(title: "Apri in Mappe", systemImage: "map") }
-                    .buttonStyle(LOGlassButtonStyle(fillsWidth: true))
+                    } label: { LOActionLabel(title: "Mappe", systemImage: "map") }
+                    .buttonStyle(LOGlassButtonStyle(fillsWidth: true, compact: true))
+                    .accessibilityLabel("Apri in Mappe")
                     .accessibilityIdentifier("bloom-place-maps")
+                    Button {
+                        if let url = NativeBloomDirections.waze(latitude: group.place.latitude, longitude: group.place.longitude) { openURL(url) }
+                    } label: { LOActionLabel(title: "Waze", systemImage: "car") }
+                    .buttonStyle(LOGlassButtonStyle(fillsWidth: true, compact: true))
+                    .accessibilityLabel("Apri in Waze")
+                    .accessibilityIdentifier("bloom-place-waze")
                 }
             }
-            .padding(NativeDesign.Layout.compactCardInset)
+            .padding(NativeDesign.Space.medium)
             .modifier(LOGlassPanel())
             .padding(.horizontal, NativeDesign.Layout.screenInset)
             .padding(.bottom, NativeDesign.Layout.scrollClearance)
@@ -624,4 +637,13 @@ private struct NativeBloomComposer: View {
             }
     }
 
+}
+
+/// Directions links for a place.
+enum NativeBloomDirections {
+    /// Waze universal link: opens the Waze app when installed, otherwise its web page.
+    static func waze(latitude: Double, longitude: Double) -> URL? {
+        guard latitude.isFinite, longitude.isFinite, abs(latitude) <= 90, abs(longitude) <= 180 else { return nil }
+        return URL(string: String(format: "https://waze.com/ul?ll=%.6f,%.6f&navigate=yes", latitude, longitude))
+    }
 }
