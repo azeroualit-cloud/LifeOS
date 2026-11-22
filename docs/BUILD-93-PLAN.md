@@ -89,3 +89,10 @@ Decisioni: `FOOD-DIARY-SERVER-2026-11-22` (diario sul server, registrato dal tel
 
 Distribuzione: i due Worker (`lifeos-native-test` con `lifeos-bloomfoods-deploy93.yml`, `lifeos` con `web/DEPLOY.md`) li distribuisce l'utente. Senza di essi l'app continua a funzionare solo sul telefono.
 
+## Deploy dei Worker (22 novembre 2026, DEPLOY-WORKERS-93-2026-11-22)
+
+- `lifeos` (sito): interfaccia e diario da `codex/revision77` @ `3131f85`, run [45065087236](https://github.com/azeroualit-cloud/LifeOS/actions/runs/45065087236): caricamento verificato da Cloudflare.
+- `lifeos-native-test` (app): Bloom, alimenti personali e diario, run [45065698114](https://github.com/azeroualit-cloud/LifeOS/actions/runs/45065698114): caricamento verificato e lettura reale di alimenti, Bloom e diario riuscita con il login di prova.
+- Token Cloudflare e password di prova rinnovati dall'utente nei segreti del repository. Database, accesso e segreti dei Worker conservati.
+- Non è ancora stata fatta una prova d'uso reale sul sito nel browser né sull'iPhone.
+
