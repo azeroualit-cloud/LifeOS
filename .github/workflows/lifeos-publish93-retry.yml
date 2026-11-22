@@ -1,0 +1,68 @@
+name: Life OS - Pubblica IPA 93 (ripresa)
+
+# Retries only the publish step of candidate run 45057419266 (all gates passed, publish93 failed).
+# Reuses that run's IPA artifact; checks its hashes and provenance against that exact run; never replaces a release.
+on:
+  push:
+    branches: [codex/build93]
+    paths: [.github/workflows/lifeos-publish93-retry.yml]
+  workflow_dispatch:
+
+concurrency:
+  group: lifeos-publish93
+  cancel-in-progress: false
+
+env:
+  SOURCE_RUN: "45057419266"
+  SOURCE_SHA: ec8d16a0a04472b8b7ea25ed800550b8164eb885
+  SOURCE_ATTEMPT: "1"
+
+jobs:
+  publish93:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: LifeOS-93-${{ env.SOURCE_SHA }}-${{ env.SOURCE_ATTEMPT }}
+          run-id: ${{ env.SOURCE_RUN }}
+          github-token: ${{ github.token }}
+      - name: Verify the source run gates and provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          sha256sum --check SHA256.txt || { echo "::error title=Publish93::SHA256 non valido"; exit 1; }
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_RUN/jobs" --jq '.jobs[] | "\(.name) \(.conclusion)"' > jobs.txt
+          cat jobs.txt
+          for job in full-suite release-launches package93; do grep -qx "$job success" jobs.txt || { echo "::error title=Publish93::Gate $job non riuscito"; exit 1; }; done
+          python3 - <<'PY'
+          import json,os
+          proof=json.load(open('BUILD-PROVENANCE.json'))
+          for key,env in [('sourceCommit','SOURCE_SHA'),('runID','SOURCE_RUN'),('runAttempt','SOURCE_ATTEMPT')]:
+              assert str(proof[key])==os.environ[env], (key,proof[key])
+          assert proof['version']=='0.10.31' and proof['build']==93
+          assert proof['testsPassed']>=405 and proof['releaseLaunchesPassed']==4
+          assert proof['physicalAcceptance'] is False
+          print('provenance ok', proof['testsPassed'])
+          PY
+      - name: Publish without replacing a release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if gh release view ios-0.10.31-build93 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then echo "::error title=Publish93::La release esiste già"; exit 1; fi
+          cat > RELEASE-NOTES.md <<EOF
+          Build 93: spaziature in scala aurea; Salute con calorie e macro su obiettivi, Andamento 1/3/6 mesi, Simulazione peso e TDEE con criteri regolabili, Cronologia a barre impilate; Dashboard con prossimo turno, Cose da fare, Nutrizione, Finanza e Prossimi appuntamenti; Attività con categoria a tendina e Abitudini; Calendario con Mese/Agenda e pennelli colorati; Finanza con Panoramica (budget per categoria, dove va lo stipendio), Analisi interattiva, Avvisi regolabili, blocco «Da dove arrivano i soldi»; Bloom con mappa a pin colorati, filtro e scheda del luogo; diario alimentare condiviso con il sito.
+
+          Sorgente: $SOURCE_SHA. Collaudo mirato, restante suite e quattro avvii Release: https://github.com/$GITHUB_REPOSITORY/actions/runs/$SOURCE_RUN.
+
+          IPA da firmare con Signulous mantenendo widget e App Groups. Prove fisiche su iPhone e accettazione ancora aperte. Worker del sito e dell'app aggiornati separatamente (DEPLOY-WORKERS-93). Dati USDA FoodData Central (pubblico dominio); dati Open Food Facts e contributori, ODbL 1.0: https://opendatacommons.org/licenses/odbl/1-0/.
+          EOF
+          gh release create ios-0.10.31-build93 LifeOS-93.ipa SHA256.txt BUILD-PROVENANCE.json \
+            --repo "$GITHUB_REPOSITORY" --target "$SOURCE_SHA" --title "LifeOS 0.10.31 build 93" --latest \
+            --notes-file RELEASE-NOTES.md 2> err.txt || { echo "::error title=Publish93::$(tr '\n' ' ' < err.txt | tail -c 600)"; exit 1; }
+          gh release view ios-0.10.31-build93 --repo "$GITHUB_REPOSITORY" --json url,assets --jq '.url, (.assets[] | .name)'
