@@ -2,6 +2,7 @@ name: Life OS - Pubblica IPA 93 (ripresa)
 
 # Retries only the publish step of candidate run 45057419266 (all gates passed, publish93 failed).
 # Reuses that run's IPA artifact; checks its hashes and provenance against that exact run; never replaces a release.
+# Attempt 2: after enabling read and write workflow permissions.
 on:
   push:
     branches: [codex/build93]
