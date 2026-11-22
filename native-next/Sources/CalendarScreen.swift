@@ -263,7 +263,10 @@ struct CalendarScreen: View {
                         NativeCalendarAgendaBlock(node: node, onOpen: openAgendaEntry)
                     }
                 }
-                ForEach(followingDays, id: \.self) { day in followingDay(day) }
+                // Accessibility sizes keep the single-day agenda proven in build 92.
+                if !typeSize.isAccessibilitySize {
+                    ForEach(followingDays, id: \.self) { day in followingDay(day) }
+                }
             }
             .padding(.horizontal, NativeDesign.Layout.screenInset)
             .padding(.vertical, NativeDesign.Space.medium)
