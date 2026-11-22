@@ -69,7 +69,7 @@ def main(post_verification=None, label="ACTIVITIES_68_DEPLOYED_AND_VERIFIED"):
                     if not result.get('success'):raise RuntimeError('Richiesta rifiutata.')
                     return result.get('result')
                 return raw,response.headers
-        except Exception as error:raise RuntimeError('Cloudflare: '+type(error).__name__) from None
+        except Exception as error:raise RuntimeError('Cloudflare: '+type(error).__name__+' '+str(getattr(error,'code',''))+' '+method+' '+path.split('/')[1]+'/'+(path.split('/')[-1] if path.count('/')>2 else '')) from None
     prepared=[]
     for name in helpers.WORKERS:
         settings=api('/workers/scripts/'+name+'/settings')
