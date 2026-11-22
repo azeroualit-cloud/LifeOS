@@ -1,5 +1,5 @@
 name: Life OS - Sito (interfaccia 93 e diario condiviso)
-# Attempt 7 (APP_HTML in any string form). DEPLOY-WORKERS-93-2026-11-22: changes the site Worker `lifeos` only. A push that changes this file
+# Site update: horizontal week, calendar agenda, ignorable alerts (efeadad). DEPLOY-WORKERS-93-2026-11-22: changes the site Worker `lifeos` only. A push that changes this file
 # is the deliberate start. Interface and diary come from codex/revision77 at a pinned commit.
 on:
   push:
@@ -11,7 +11,7 @@ concurrency:
 permissions:
   contents: read
 env:
-  SITE_COMMIT: 3131f85
+  SITE_COMMIT: efeadad
 jobs:
   deploy:
     if: github.repository == 'azeroualit-cloud/LifeOS' && github.ref == 'refs/heads/codex/build93'
