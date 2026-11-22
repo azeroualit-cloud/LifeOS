@@ -584,8 +584,16 @@ struct CalendarScreen: View {
             // switch): the month stays the version proven with large text; days open the agenda.
             if !typeSize.isAccessibilitySize {
                 HStack(spacing: NativeDesign.Space.small) {
-                    Button(action: goToToday) { Text("Oggi").font(.subheadline.weight(.semibold)) }
-                        .buttonStyle(NativeGlassButtonStyle())
+                    // Same visible height as the Mese/Agenda switch; the touch area stays 44 pt.
+                    Button(action: goToToday) {
+                        Text("Oggi").font(.subheadline.weight(.semibold)).foregroundStyle(.primary)
+                            .padding(.horizontal, NativeDesign.Space.medium)
+                            .frame(height: NativeDesign.Layout.segmentHeight + NativeDesign.Space.xxs * 2)
+                            .modifier(NativeGlass())
+                            .frame(minHeight: NativeDesign.Layout.touchTarget)
+                            .contentShape(Rectangle())
+                    }
+                        .buttonStyle(NativePressStyle())
                         .accessibilityIdentifier("calendar-today").disabled(store.busy)
                     viewSwitch
                 }
