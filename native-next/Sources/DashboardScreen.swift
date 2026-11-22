@@ -208,7 +208,7 @@ struct DashboardScreen: View {
         // Explicit path write, like the Calendar entry: a value link did not push
         // after a programmatic Calendar visit (gate 91 run 43999971306).
         return Button { router.dashboardPath = [.finance] } label: {
-            VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
+            VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
                 LOCardHeader(title: "Finanza", systemImage: "chart.bar", section: .finance, showsChevron: true)
                 ViewThatFits(in: .horizontal) {
                     HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.small) {
@@ -226,7 +226,9 @@ struct DashboardScreen: View {
                                           LOSegment(id: "left", value: 1 - fraction, color: NativeDesign.financialGreen)],
                                scale: 1, height: NativeDesign.Space.small,
                                accessibilityText: "Speso \(Int((fraction * 100).rounded())) per cento, rimane \(Int(((1 - fraction) * 100).rounded())) per cento")
+                    financeLegend(spent: spent, remaining: overview.remaining, days: overview.days)
                 }
+                financeRecent
             }
             .padding(NativeDesign.Layout.cardInset)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -236,6 +238,35 @@ struct DashboardScreen: View {
         .buttonStyle(NativePressStyle())
         .accessibilityLabel(financeLabel(overview))
         .accessibilityIdentifier("home-finance")
+    }
+    /// Spent and month budget under the bar, with the days left.
+    private func financeLegend(spent: Double, remaining: Double?, days: Int) -> some View {
+        HStack(spacing: NativeDesign.Space.xs) {
+            Circle().fill(NativeDesign.financialRed).frame(width: NativeDesign.Space.small, height: NativeDesign.Space.small)
+            Text("Speso " + spent.euro).monospacedDigit()
+            Spacer(minLength: NativeDesign.Space.small)
+            if let remaining { Text("Budget " + (spent + remaining).euro + (days > 0 ? " · \(days) gg" : "")).monospacedDigit() }
+        }
+        .font(.caption).foregroundStyle(NativeDesign.secondary).lineLimit(1).minimumScaleFactor(0.8)
+        .accessibilityElement(children: .combine)
+    }
+    /// The two latest expenses of the month, so the card says where the money went.
+    @ViewBuilder private var financeRecent: some View {
+        let recent = Array(store.transactions.filter { $0.amount("amount") < 0 }.prefix(2))
+        if !recent.isEmpty {
+            Divider().padding(.vertical, NativeDesign.Space.xxs)
+            ForEach(Array(recent.enumerated()), id: \.offset) { _, row in
+                HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.small) {
+                    VStack(alignment: .leading, spacing: NativeDesign.Space.none) {
+                        Text(row.text("name", fallback: "Spesa")).font(.subheadline).foregroundStyle(.primary).lineLimit(1)
+                        Text([row.text("category"), CivilDate.label(row.text("date"))].filter { !$0.isEmpty }.joined(separator: " · "))
+                            .font(.caption).foregroundStyle(NativeDesign.secondary).lineLimit(1)
+                    }
+                    Spacer(minLength: NativeDesign.Space.small)
+                    Text(hiddenMoney ? "•••• €" : abs(row.amount("amount")).euro).font(.subheadline.weight(.semibold)).monospacedDigit().foregroundStyle(.primary)
+                }
+            }
+        }
     }
     private func financeLabel(_ overview: NativeFinanceOverview) -> String {
         if hiddenMoney { return "Finanza, importo nascosto disponibili" }

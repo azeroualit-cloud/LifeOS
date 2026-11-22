@@ -69,13 +69,15 @@ struct LOActionLabel: View {
 /// `prominent` widens the button to fill its container (bottom actions).
 struct LOGlassButtonStyle: ButtonStyle {
     var fillsWidth = false
+    /// Inside a card: full width but touch-target height, not the taller bottom-action height.
+    var compact = false
     @Environment(\.nativeReduceMotion) private var reduceMotion
     @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .padding(.horizontal, NativeDesign.Space.large)
-            .frame(maxWidth: fillsWidth ? .infinity : nil, minHeight: fillsWidth ? NativeDesign.Layout.bottomAction : NativeDesign.Layout.touchTarget)
+            .frame(maxWidth: fillsWidth ? .infinity : nil, minHeight: fillsWidth && !compact ? NativeDesign.Layout.bottomAction : NativeDesign.Layout.touchTarget)
             .contentShape(Capsule())
             .modifier(NativeGlass())
             .opacity(isEnabled ? (configuration.isPressed ? NativeDesign.Motion.pressedOpacity : 1) : 0.45)

@@ -113,7 +113,7 @@ enum NativeDesign {
         static let medium: CGFloat = 13
         static let large: CGFloat = 16
         static let xLarge: CGFloat = 21
-        static let section: CGFloat = 34
+        static let section: CGFloat = 21 // was 34: user asked for less padding (22/11/2026)
         static let bottom: CGFloat = 34
     }
     enum Layout {
@@ -129,7 +129,7 @@ enum NativeDesign {
         static let budgetAmount: CGFloat = 40
         static let screenInset = Space.large
         static let listInset = Space.large
-        static let cardInset = Space.xLarge
+        static let cardInset = Space.large // was xLarge: less padding (22/11/2026)
         static let compactCardInset = Space.large
         static let groupedInset = Space.large
         static let nutritionInputLine: CGFloat = 32

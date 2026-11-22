@@ -50,10 +50,10 @@ struct NativeNutritionQuickEntry: View {
                 // Build 93 preview: Peso on the left, Alimento on the right.
                 Button { addingWeight = true } label: {
                     LOActionLabel(title: "Peso", systemImage: NativeHealthMetric.weight.symbol, section: .weight)
-                }.buttonStyle(LOGlassButtonStyle(fillsWidth: true)).accessibilityLabel("Aggiungi peso")
+                }.buttonStyle(LOGlassButtonStyle(fillsWidth: true, compact: true)).accessibilityLabel("Aggiungi peso")
                 Button { notice = nil; showing = true } label: {
                     LOActionLabel(title: "Alimento", systemImage: NativeHealthMetric.calories.symbol, section: .nutrition)
-                }.buttonStyle(LOGlassButtonStyle(fillsWidth: true)).accessibilityLabel("Aggiungi alimento")
+                }.buttonStyle(LOGlassButtonStyle(fillsWidth: true, compact: true)).accessibilityLabel("Aggiungi alimento")
                     .accessibilityIdentifier("quick-nutrition-open")
             }
             if let notice { Text(notice).font(.caption).foregroundStyle(NativeDesign.secondary).accessibilityIdentifier("quick-nutrition-notice") }
