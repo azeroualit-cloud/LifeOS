@@ -32,7 +32,7 @@ struct NativeBloomMarkdownDocumentView: View {
         case .quote:
             HStack { Rectangle().fill(Color.accentColor).frame(width: NativeDesign.Layout.calendarMarker); Text(rich(block.text)) }.fixedSize(horizontal: false, vertical: true)
         case .code:
-            ScrollView(.horizontal) { Text(block.text).font(.body.monospaced()).padding(NativeDesign.Space.medium) }
+            ScrollView(.horizontal) { Text(block.text).font(.subheadline.monospaced()).padding(NativeDesign.Space.medium) }
                 .background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
         case .paragraph: Text(rich(block.text)).lineSpacing(NativeDesign.Space.xs)
         case .table(let headers, let rows): table(headers: headers, rows: rows)
@@ -68,7 +68,7 @@ struct NativeBloomMarkdownDocumentView: View {
                     }
                 }
             }.clipShape(RoundedRectangle(cornerRadius: NativeDesign.controlRadius)).accessibilityIdentifier("markdown-table")
-            Label("Scorri la tabella per leggere tutte le colonne", systemImage: "arrow.left.and.right").font(.caption).foregroundStyle(Color.primary.opacity(0.8))
+            Label("Scorri la tabella per leggere tutte le colonne", systemImage: "arrow.left.and.right").font(.footnote).foregroundStyle(Color.primary.opacity(0.8))
         }
     }
 }

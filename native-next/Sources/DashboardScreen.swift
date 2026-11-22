@@ -25,7 +25,7 @@ struct DashboardScreen: View {
                     financeOverview
                     upcomingAppointments(today: today)
                     NativeConnectionBadge()
-                    if let notice = store.notice { Text(notice).font(.caption).foregroundStyle(NativeDesign.secondary) }
+                    if let notice = store.notice { Text(notice).font(.footnote).foregroundStyle(NativeDesign.secondary) }
                 }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.top, NativeDesign.Space.small).padding(.bottom, NativeDesign.Layout.scrollClearance)
             }
             .background(NativeDesign.canvas).scrollBounceBehavior(.basedOnSize).accessibilityIdentifier("dashboard-scroll")
@@ -58,7 +58,7 @@ struct DashboardScreen: View {
                         isCurrentMonth: day.hasPrefix(String(today.prefix(7))))
                     Button { openCalendar(day, opensDay: true) } label: {
                         VStack(spacing: NativeDesign.Space.xs) {
-                            Text(["D", "L", "M", "M", "G", "V", "S"][weekday - 1]).font(.caption).foregroundStyle(day < today ? NativeDesign.pastCalendarSecondary : NativeDesign.secondary)
+                            Text(["D", "L", "M", "M", "G", "V", "S"][weekday - 1]).font(.footnote).foregroundStyle(day < today ? NativeDesign.pastCalendarSecondary : NativeDesign.secondary)
                             CalendarDayCell(item: item, active: current, appearance: .week).equatable()
                         }.frame(maxWidth: .infinity).contentShape(Rectangle())
                     }.buttonStyle(NativePressStyle()).opacity(day < today ? NativeDesign.Layout.pastDayOpacity : 1).accessibilityIdentifier("dashboard-day-" + day)
@@ -131,7 +131,7 @@ struct DashboardScreen: View {
         let items = NativeHomeChecklist.rows(events: store.dashboardEvents, routines: store.todayRoutines, today: today)
         return VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
             HStack(spacing: NativeDesign.Space.medium) {
-                Text("Cose da fare").font(.title2.bold()).accessibilityAddTraits(.isHeader)
+                Text("Cose da fare").font(.title.bold()).accessibilityAddTraits(.isHeader)
                     .accessibilityIdentifier("home-checklist-heading")
                 Spacer(minLength: NativeDesign.Space.small)
                 Menu {
@@ -247,7 +247,7 @@ struct DashboardScreen: View {
             Spacer(minLength: NativeDesign.Space.small)
             if let remaining { Text("Budget " + (spent + remaining).euro + (days > 0 ? " · \(days) gg" : "")).monospacedDigit() }
         }
-        .font(.caption).foregroundStyle(NativeDesign.secondary).lineLimit(1).minimumScaleFactor(0.8)
+        .font(.footnote).foregroundStyle(NativeDesign.secondary).lineLimit(1).minimumScaleFactor(0.8)
         .accessibilityElement(children: .combine)
     }
     /// The two latest expenses of the month, so the card says where the money went.
@@ -260,7 +260,7 @@ struct DashboardScreen: View {
                     VStack(alignment: .leading, spacing: NativeDesign.Space.none) {
                         Text(row.text("name", fallback: "Spesa")).font(.subheadline).foregroundStyle(.primary).lineLimit(1)
                         Text([row.text("category"), CivilDate.label(row.text("date"))].filter { !$0.isEmpty }.joined(separator: " · "))
-                            .font(.caption).foregroundStyle(NativeDesign.secondary).lineLimit(1)
+                            .font(.footnote).foregroundStyle(NativeDesign.secondary).lineLimit(1)
                     }
                     Spacer(minLength: NativeDesign.Space.small)
                     Text(hiddenMoney ? "•••• €" : abs(row.amount("amount")).euro).font(.subheadline.weight(.semibold)).monospacedDigit().foregroundStyle(.primary)
@@ -300,19 +300,19 @@ struct DashboardScreen: View {
         let rows = NativeDashboard93.upcoming(events: source, today: today)
         if !rows.isEmpty {
             VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
-                Text("Prossimi appuntamenti").font(.title2.bold()).accessibilityAddTraits(.isHeader)
+                Text("Prossimi appuntamenti").font(.title.bold()).accessibilityAddTraits(.isHeader)
                 LOListCard {
                     ForEach(rows, id: \.agendaIdentity) { event in
                         Button { router.sheet = .event(event) } label: {
                             LOListRow(isLast: event.agendaIdentity == rows.last?.agendaIdentity, leadingInset: NativeDesign.Space.large + NativeDesign.Layout.touchTarget) {
                                 let date = CivilDate.date(event.text("day"))
                                 VStack(spacing: NativeDesign.Space.none) {
-                                    Text(date.formatted(.dateTime.day())).font(.body.weight(.bold)).monospacedDigit()
+                                    Text(date.formatted(.dateTime.day())).font(.subheadline.weight(.bold)).monospacedDigit()
                                     Text(date.formatted(.dateTime.month(.abbreviated).locale(Locale(identifier: "it_IT")))).font(.caption2).foregroundStyle(NativeDesign.secondary)
                                 }
                                 .frame(width: NativeDesign.Layout.touchTarget)
                                 VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
-                                    Text(event.text("title", fallback: "Appuntamento")).font(.body).foregroundStyle(.primary).lineLimit(2)
+                                    Text(event.text("title", fallback: "Appuntamento")).font(.subheadline).foregroundStyle(.primary).lineLimit(2)
                                     let detail = event.text("start_time")
                                     if !detail.isEmpty { Text(detail).font(.footnote).foregroundStyle(NativeDesign.secondary) }
                                 }

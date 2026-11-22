@@ -203,9 +203,9 @@ struct NativeFundRunwayCard: View {
     }
     private func tile(_ title: String, value: String, detail: String) -> some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-            Text(title).font(.caption).foregroundStyle(NativeDesign.secondary)
-            Text(value).font(.title3.bold()).monospacedDigit()
-            if !detail.isEmpty { Text(detail).font(.caption).foregroundStyle(NativeDesign.secondary).fixedSize(horizontal: false, vertical: true) }
+            Text(title).font(.footnote).foregroundStyle(NativeDesign.secondary)
+            Text(value).font(.headline.bold()).monospacedDigit()
+            if !detail.isEmpty { Text(detail).font(.footnote).foregroundStyle(NativeDesign.secondary).fixedSize(horizontal: false, vertical: true) }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(NativeDesign.Space.medium)
@@ -302,7 +302,7 @@ struct NativeDailySpendCard: View {
             }
             .accessibilityElement(children: .combine)
             .accessibilityIdentifier("finance-daily-selected")
-            if !hidden { Text("in media " + average.euro + " al giorno nel mese").font(.caption).foregroundStyle(NativeDesign.secondary) }
+            if !hidden { Text("in media " + average.euro + " al giorno nel mese").font(.footnote).foregroundStyle(NativeDesign.secondary) }
         }
     }
 }

@@ -56,7 +56,7 @@ struct NativeNutritionQuickEntry: View {
                 }.buttonStyle(LOGlassButtonStyle(fillsWidth: true, compact: true)).accessibilityLabel("Aggiungi alimento")
                     .accessibilityIdentifier("quick-nutrition-open")
             }
-            if let notice { Text(notice).font(.caption).foregroundStyle(NativeDesign.secondary).accessibilityIdentifier("quick-nutrition-notice") }
+            if let notice { Text(notice).font(.footnote).foregroundStyle(NativeDesign.secondary).accessibilityIdentifier("quick-nutrition-notice") }
         }.sheet(isPresented: $showing) {
             NavigationStack { NativeNutritionQuickSheet { notice = "Registrazione salvata." } }
                 .modifier(NativeVisualTestSize()).modifier(NativeVisualTestMotion())
@@ -120,7 +120,7 @@ struct NativeNutritionQuickSheet: View {
     var body: some View {
         VStack(spacing: NativeDesign.Space.none) {
             HStack(alignment: typeSize.isAccessibilitySize ? .top : .center) {
-                Text("Aggiungi nutrienti").font(.title2.bold()).accessibilityAddTraits(.isHeader)
+                Text("Aggiungi nutrienti").font(.title.bold()).accessibilityAddTraits(.isHeader)
                     .onTapGesture { focus = nil }
                     .accessibilityAction(named: Text("Nascondi tastiera")) { focus = nil }
                 Spacer(minLength: NativeDesign.Space.small)
@@ -143,12 +143,12 @@ struct NativeNutritionQuickSheet: View {
                             if let detail = selectedFood.displayDetail {
                                 Text(detail).font(.subheadline).foregroundStyle(.secondary)
                             }
-                            if let note = selectedFood.dataNote { Text(note).font(.caption).foregroundStyle(.secondary) }
+                            if let note = selectedFood.dataNote { Text(note).font(.footnote).foregroundStyle(.secondary) }
                             if let source = selectedFood.sourceURL, let url = URL(string: source), url.scheme == "https" {
-                                Link(selectedFood.isCommunitySourced ? "Open Food Facts · scheda prodotto" : "Scheda prodotto", destination: url).font(.caption).accessibilityIdentifier("nutrition-product-source")
+                                Link(selectedFood.isCommunitySourced ? "Open Food Facts · scheda prodotto" : "Scheda prodotto", destination: url).font(.footnote).accessibilityIdentifier("nutrition-product-source")
                             }
                             if selectedFood.isCommunitySourced, let license = URL(string: "https://opendatacommons.org/licenses/odbl/1.0/") {
-                                Link("Database Open Food Facts · licenza ODbL", destination: license).font(.caption).accessibilityIdentifier("nutrition-source-license")
+                                Link("Database Open Food Facts · licenza ODbL", destination: license).font(.footnote).accessibilityIdentifier("nutrition-source-license")
                             }
                         }
                         if selectedFood.boneInEdiblePercent != nil {
@@ -190,11 +190,11 @@ struct NativeNutritionQuickSheet: View {
                                     .font(.subheadline.weight(.semibold))
                                     .accessibilityIdentifier("quick-nutrition-alcohol")
                                 Text("Bicchiere da circa \(recipe.volumeML) ml · 1 UA = 12 g")
-                                    .font(.caption).foregroundStyle(.secondary)
+                                    .font(.footnote).foregroundStyle(.secondary)
                             }
                             if weighedWithBone, let edible = draft.portionGrams {
                                 Text("Parte edibile stimata: \(NSDecimalNumber(decimal: edible).doubleValue.formatted(.number.precision(.fractionLength(0)))) g")
-                                    .font(.caption).foregroundStyle(.secondary)
+                                    .font(.footnote).foregroundStyle(.secondary)
                             }
                             activeNutrients(draft)
                             if let caffeine = draft.nutrientValues?["caffeine"]?.amount {
@@ -202,7 +202,7 @@ struct NativeNutritionQuickSheet: View {
                             }
                             let fibreText = draft.fibre.map { NSDecimalNumber(decimal: $0).stringValue } ?? "—"
                             Text(draft.nutritionNotDeclared == true ? "Energia e macronutrienti non dichiarati: non inviati ad Apple Salute" : "P \(NSDecimalNumber(decimal: draft.protein)) · C \(NSDecimalNumber(decimal: draft.carbohydrate)) · G \(NSDecimalNumber(decimal: draft.fat)) · F \(fibreText) g")
-                                .font(.caption).foregroundStyle(.secondary)
+                                .font(.footnote).foregroundStyle(.secondary)
                         }
                         Button("Inserisci nutrienti a mano") { self.selectedFood = nil; focus = nil }
                             .frame(minHeight: NativeDesign.Layout.touchTarget)
@@ -219,11 +219,11 @@ struct NativeNutritionQuickSheet: View {
                     HStack(alignment: .firstTextBaseline) {
                         VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
                             Text("Calorie").font(.headline)
-                            Text(selectedFood == nil ? "Calcolate automaticamente" : "Dalla porzione selezionata").font(.caption).foregroundStyle(.secondary)
+                            Text(selectedFood == nil ? "Calcolate automaticamente" : "Dalla porzione selezionata").font(.footnote).foregroundStyle(.secondary)
                         }
                         Spacer(minLength: NativeDesign.Space.small)
                         Text(draft.map { $0.nutritionNotDeclared == true ? "Non dichiarate" : NSDecimalNumber(decimal: $0.calories).doubleValue.formatted(.number.precision(.fractionLength(0...1))) + " kcal" } ?? (allZero ? "0 kcal" : "Valori non validi"))
-                            .font(.title2.bold()).monospacedDigit().accessibilityIdentifier("quick-nutrition-calories")
+                            .font(.title.bold()).monospacedDigit().accessibilityIdentifier("quick-nutrition-calories")
                     }.accessibilityElement(children: .contain).accessibilityIdentifier("quick-nutrition-calorie-summary")
                     Divider()
                     HStack {
@@ -341,7 +341,7 @@ struct NativeNutritionQuickSheet: View {
                 let key = nutrient == .folate ? "folateMass" : nutrient.rawValue
                 if let value = entry.nutrientValues?[key] {
                     Text(nutrient.title + ": " + NSDecimalNumber(decimal: value.amount).doubleValue.formatted(.number.precision(.fractionLength(0...2))) + " " + nutrient.unit)
-                        .font(.caption).foregroundStyle(.secondary)
+                        .font(.footnote).foregroundStyle(.secondary)
                         .accessibilityIdentifier("quick-nutrition-nutrient-" + nutrient.rawValue)
                 }
             }
@@ -350,10 +350,10 @@ struct NativeNutritionQuickSheet: View {
 
     private func grams(_ title: String, text: Binding<String>, field: Field, unit: String? = "g") -> some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-            Text(title).font(.caption).foregroundStyle(.secondary)
+            Text(title).font(.footnote).foregroundStyle(.secondary)
             HStack {
                 TextField("0", text: text, prompt: typeSize.isAccessibilitySize ? nil : Text("0").foregroundStyle(NativeDesign.secondary)).keyboardType(.decimalPad).focused($focus, equals: field)
-                    .font(.title2.weight(.semibold)).frame(minHeight: NativeDesign.Layout.nutritionInputLine)
+                    .font(.title.weight(.semibold)).frame(minHeight: NativeDesign.Layout.nutritionInputLine)
                     .accessibilityLabel(unit == nil ? title : unit == "ml" ? title + " in millilitri" : unit == "g" ? title + " in grammi" : title + ", " + (unit ?? "")).accessibilityIdentifier("quick-nutrition-" + title)
                 if let unit { Text(unit).foregroundStyle(.secondary) }
             }

@@ -35,10 +35,10 @@ struct NativePlansScreen: View {
                 if store.plansBusy { ProgressView("Aggiorno i piani…") }
                 if let error = store.plansError {
                     NativeInlineMessage(text: error)
-                    if let server = store.server { Text(server.host ?? "").font(.caption).foregroundStyle(NativeDesign.secondary) }
+                    if let server = store.server { Text(server.host ?? "").font(.footnote).foregroundStyle(NativeDesign.secondary) }
                     Button("Riprova") { Task { await store.loadFinancePlans() } }
                 }
-                if store.isDemo { Text("Piani demo · nessuna modifica al server").font(.caption).foregroundStyle(NativeDesign.secondary) }
+                if store.isDemo { Text("Piani demo · nessuna modifica al server").font(.footnote).foregroundStyle(NativeDesign.secondary) }
             }
             // Build 93 Budget: salary, plans and commitments, budget of the month; then the plans.
             Section {
@@ -96,7 +96,7 @@ struct NativePlansScreen: View {
             VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
                 Text(row.name)
                 Text([kind, "rimane " + money(row.remainingCents)].filter { !$0.isEmpty }.joined(separator: " · "))
-                    .font(.caption).foregroundStyle(NativeDesign.secondary).monospacedDigit()
+                    .font(.footnote).foregroundStyle(NativeDesign.secondary).monospacedDigit()
             }
             Spacer(minLength: NativeDesign.Space.small)
             Text(money(row.amountCents)).monospacedDigit()
@@ -137,16 +137,16 @@ struct NativePlanEditor: View {
                 if draft.kind == .advance { NativeMonthPicker(title: "Mese beneficiario", selection: $draft.beneficiaryMonth) }
                 NativeMonthPicker(title: draft.kind == .advance ? "Recupera da" : "Primo mese", selection: $draft.startMonth)
                 if draft.kind.finite { NativeMonthPicker(title: "Ultimo mese", selection: $draft.endMonth) }
-                else { Text("Senza scadenza · continua finché interrompi il piano").font(.caption).foregroundStyle(NativeDesign.secondary) }
+                else { Text("Senza scadenza · continua finché interrompi il piano").font(.footnote).foregroundStyle(NativeDesign.secondary) }
                 if draft.kind == .fixed { Stepper("Pagamento ogni \(draft.intervalMonths) mesi", value: $draft.intervalMonths, in: 1...12) }
-                if draft.kind == .estimated { Text("La quota verrà aggiornata dai pagamenti e dai mesi coperti, a partire dal mese successivo. Le quote passate restano invariate.").font(.caption).foregroundStyle(NativeDesign.secondary) }
+                if draft.kind == .estimated { Text("La quota verrà aggiornata dai pagamenti e dai mesi coperti, a partire dal mese successivo. Le quote passate restano invariate.").font(.footnote).foregroundStyle(NativeDesign.secondary) }
             }.disabled(submitted)
             if draft.kind == .recovery {
                 Section("Pagamento già effettuato") {
                     Picker("Movimento bancario", selection: $usesExisting) { Text("Da registrare").tag(false); Text("Già registrato").tag(true) }.pickerStyle(.segmented)
                     if usesExisting { NativePlanMovementPicker(selection: $movement) }
                     else { DatePicker("Giorno del pagamento", selection: paymentDate, in: ...Date(), displayedComponents: .date) }
-                    Text(usesExisting ? "Collega il movimento esistente: il saldo non cambia. Sono disponibili le spese dai risparmi e quelle del mese corrente non già collegate." : "Registra una sola spesa dai risparmi e recupera l’importo nei budget scelti.").font(.caption).foregroundStyle(NativeDesign.secondary)
+                    Text(usesExisting ? "Collega il movimento esistente: il saldo non cambia. Sono disponibili le spese dai risparmi e quelle del mese corrente non già collegate." : "Registra una sola spesa dai risparmi e recupera l’importo nei budget scelti.").font(.footnote).foregroundStyle(NativeDesign.secondary)
                 }.disabled(submitted)
             }
             Section(draft.kind.finite ? "Anteprima budget" : "Anteprima · primi tre mesi") {
@@ -154,7 +154,7 @@ struct NativePlanEditor: View {
                     LabeledContent(CivilDate.monthTitle(row.text("month")), value: (Double(row.integer("deltaCents")) / 100).euro)
                 }
                 Text(draft.kind == .recovery ? "Il saldo diminuisce una sola volta, dell’importo pagato. Le quote future modificano solo il budget." : "Queste quote modificano il budget, senza creare un’uscita dal conto.")
-                    .font(.caption).foregroundStyle(NativeDesign.secondary)
+                    .font(.footnote).foregroundStyle(NativeDesign.secondary)
                 if preview.isEmpty { Text(validationIssue ?? "Completa nome, importo e mesi per visualizzare l’anteprima.").foregroundStyle(NativeDesign.secondary) }
             }
             if !store.isDemo && store.finance.record("plansV2").integer("version") != 2 {
@@ -216,7 +216,7 @@ struct NativePlanDetail: View {
                 LabeledContent("Stato") { Text(NativePlanRules.stateTitle(plan.text("status"))).accessibilityIdentifier("plan-status") }
                 LabeledContent("Primo mese", value: CivilDate.monthTitle(plan.text("startMonth")))
                 if !plan.text("endMonth").isEmpty { LabeledContent("Ultimo mese", value: CivilDate.monthTitle(plan.text("endMonth"))) }
-                else { Text("Senza scadenza").font(.caption).foregroundStyle(NativeDesign.secondary) }
+                else { Text("Senza scadenza").font(.footnote).foregroundStyle(NativeDesign.secondary) }
                 if plan.text("kind") == "advance" { LabeledContent("Mese beneficiario", value: CivilDate.monthTitle(plan.text("beneficiaryMonth"))) }
                 LabeledContent((NativeUtilityPeriodDraft.isCostFund(plan) ? "Accantonato in " : "Budget di ") + CivilDate.monthTitle(store.financeMonth), value: (Double(plan.integer("contributionCents")) * (NativeUtilityPeriodDraft.isCostFund(plan) ? 1 : -1) / 100).euro)
                 if !["advance", "recovery"].contains(plan.text("kind")) {
@@ -240,7 +240,7 @@ struct NativePlanDetail: View {
                         } label: {
                             LabeledContent(CivilDate.label(payment.text("date")), value: (Double(payment.integer("amountCents")) / 100).euro)
                         }.accessibilityIdentifier("plan-payment-detail-" + payment.text("id"))
-                        Text(payment.text("status") == "posted" ? "Pagato · movimento collegato" : payment.text("status") == "deleting" ? "Eliminazione da completare" : "Da completare · non registrare una nuova spesa").font(.caption).foregroundStyle(NativeDesign.secondary).accessibilityIdentifier("plan-payment-status")
+                        Text(payment.text("status") == "posted" ? "Pagato · movimento collegato" : payment.text("status") == "deleting" ? "Eliminazione da completare" : "Da completare · non registrare una nuova spesa").font(.footnote).foregroundStyle(NativeDesign.secondary).accessibilityIdentifier("plan-payment-status")
                         if payment.text("status") == "pending" {
                             Button("Completa questa registrazione") {
                                 Task { await run("resumeFinancePlanPayment", ["paymentId": .string(payment.text("id"))]) }
@@ -302,18 +302,18 @@ private struct NativePlanPaymentEditor: View {
                 else { DatePicker("Giorno del pagamento", selection: $date, in: ...Date(), displayedComponents: .date) }
                 if plan.text("kind") == "fixed" && !NativeUtilityPeriodDraft.isCostFund(plan) { NativeMonthPicker(title: "Scadenza pagata", selection: $cycleMonth) }
                 if NativeUtilityPeriodDraft.isCostFund(plan) { NativeUtilityPeriodFields(period: $bill, amountCents: amountCents ?? 0) }
-                Text(usesExisting ? "Collega una spesa esistente senza un secondo addebito. Le quote del piano restano distinte dal saldo." : "Un unico movimento dai risparmi. L’intero pagamento non verrà sottratto una seconda volta dal budget.").font(.caption).foregroundStyle(NativeDesign.secondary)
+                Text(usesExisting ? "Collega una spesa esistente senza un secondo addebito. Le quote del piano restano distinte dal saldo." : "Un unico movimento dai risparmi. L’intero pagamento non verrà sottratto una seconda volta dal budget.").font(.footnote).foregroundStyle(NativeDesign.secondary)
             }.disabled(submitted)
             if plan.text("kind") == "goal", extra > 0 {
                 Section("Differenza rispetto al previsto") {
                     LabeledContent("In più", value: (Double(extra) / 100).euro)
                     Toggle("Recupera la differenza nei budget futuri", isOn: $recover)
                     if recover { NativeMonthPicker(title: "Primo mese", selection: $first); NativeMonthPicker(title: "Ultimo mese", selection: $last) }
-                    Text("Se non attivi il recupero, la differenza resta a carico dei risparmi.").font(.caption).foregroundStyle(NativeDesign.secondary)
+                    Text("Se non attivi il recupero, la differenza resta a carico dei risparmi.").font(.footnote).foregroundStyle(NativeDesign.secondary)
                 }.disabled(submitted)
             }
             Section {
-                Text(plan.text("kind") == "goal" ? "Il piano si chiude e le quote future si annullano. Il denaro non utilizzato rimane nei risparmi." : "Il piano rimane attivo dopo il pagamento. Il fondo residuo e le quote future continuano.").font(.caption).foregroundStyle(NativeDesign.secondary)
+                Text(plan.text("kind") == "goal" ? "Il piano si chiude e le quote future si annullano. Il denaro non utilizzato rimane nei risparmi." : "Il piano rimane attivo dopo il pagamento. Il fondo residuo e le quote future continuano.").font(.footnote).foregroundStyle(NativeDesign.secondary)
             }
             if let error { Section { NativeInlineMessage(text: error) } }
         }.modifier(NativeListAppearance()).navigationTitle("Registra pagamento").navigationBarTitleDisplayMode(.inline)
@@ -405,7 +405,7 @@ private struct NativePlanMovementPicker: View {
             NativeMonthPicker(title: "Mese del movimento", selection: $month)
             if loading { ProgressView("Cerco i movimenti…") }
             if let error { NativeInlineMessage(text: error) }
-            if !loading, rows.isEmpty { Text("Nessun movimento collegabile in questo mese.").font(.caption).foregroundStyle(NativeDesign.secondary) }
+            if !loading, rows.isEmpty { Text("Nessun movimento collegabile in questo mese.").font(.footnote).foregroundStyle(NativeDesign.secondary) }
             ForEach(rows.map { DisplayRecord($0, key: "row") }) { item in
                 Button {
                     selection = item.value
@@ -455,7 +455,7 @@ private struct NativePlanQuotaEditor: View {
                 TextField(plan.text("kind") == "goal" ? "Nuovo totale previsto €" : plan.text("kind") == "fixed" ? "Importo per scadenza €" : plan.text("kind") == "estimated" ? "Accantonamento mensile €" : "Quota mensile €", text: $amount).keyboardType(.decimalPad).focused($editing).accessibilityIdentifier("plan-edit-amount")
                 NativeMonthPicker(title: "Decorrenza", selection: $first)
                 if plan.text("kind") == "goal" { NativeMonthPicker(title: "Ultimo mese", selection: $last) }
-                Text("I mesi precedenti alla decorrenza e i pagamenti restano invariati. Per un obiettivo, il nuovo totale viene distribuito sui mesi futuri dopo le quote già maturate.").font(.caption).foregroundStyle(NativeDesign.secondary)
+                Text("I mesi precedenti alla decorrenza e i pagamenti restano invariati. Per un obiettivo, il nuovo totale viene distribuito sui mesi futuri dopo le quote già maturate.").font(.footnote).foregroundStyle(NativeDesign.secondary)
             }.disabled(submitted)
             if let error { Section { NativeInlineMessage(text: error) } }
         }.modifier(NativeListAppearance()).navigationTitle("Modifica piano").navigationBarTitleDisplayMode(.inline)

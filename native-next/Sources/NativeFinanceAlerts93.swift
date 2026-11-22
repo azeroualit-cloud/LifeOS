@@ -225,7 +225,7 @@ struct NativeFinanceAlertsScreen: View {
             LOListRow(isLast: last && !expanded) {
                 Button { open = expanded ? nil : index } label: {
                     VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
-                        Text(title).font(.body).foregroundStyle(Color.primary)
+                        Text(title).font(.subheadline).foregroundStyle(Color.primary)
                         Text(subtitle).font(.footnote).foregroundStyle(NativeDesign.secondary)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)

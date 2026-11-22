@@ -217,7 +217,7 @@ struct NativeSalaryMapCard: View {
         let salary = NativeSalaryMap.salary(summary: summary, items: items)
         VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
             HStack(alignment: .firstTextBaseline) {
-                Text("Dove va lo stipendio").font(.title3.bold()).accessibilityAddTraits(.isHeader)
+                Text("Dove va lo stipendio").font(.headline.bold()).accessibilityAddTraits(.isHeader)
                 Spacer(minLength: NativeDesign.Space.small)
                 Text(hidden ? "••••" : salary.euro).font(.subheadline).monospacedDigit().foregroundStyle(NativeDesign.secondary)
             }
@@ -254,7 +254,7 @@ struct NativeSalaryMapCard: View {
         let color = NativeDesign.financeGroups[min(item.group, NativeDesign.financeGroups.count - 1)]
         return Button { selected = on ? nil : item.id } label: {
             VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
-                if big || mid { Text(item.name).font(.caption.weight(.semibold)).lineLimit(1).minimumScaleFactor(0.7) }
+                if big || mid { Text(item.name).font(.footnote.weight(.semibold)).lineLimit(1).minimumScaleFactor(0.7) }
                 if big && !hidden { Text(NativeSalaryMap.percent(item.value, of: salary)).font(.caption2).monospacedDigit() }
             }
             .foregroundStyle(NativeDesign.financeTileText)
@@ -284,7 +284,7 @@ struct NativeSalaryMapCard: View {
             Text(NativeSalaryMap.groupTitles[group]).foregroundStyle(NativeDesign.secondary)
             if !hidden { Text(NativeSalaryMap.percent(total, of: salary)).fontWeight(.semibold).monospacedDigit() }
         }
-        .font(.caption)
+        .font(.footnote)
         .accessibilityElement(children: .combine)
     }
     private func detail(_ item: NativeSalaryItem, items: [NativeSalaryItem], salary: Double) -> some View {
@@ -296,12 +296,12 @@ struct NativeSalaryMapCard: View {
                 Circle().fill(color).frame(width: NativeDesign.Space.small, height: NativeDesign.Space.small).padding(.top, NativeDesign.Space.xs)
                 VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
                     Text(item.name).font(.headline)
-                    Text(NativeSalaryMap.groupTitles[item.group]).font(.caption).foregroundStyle(NativeDesign.secondary)
+                    Text(NativeSalaryMap.groupTitles[item.group]).font(.footnote).foregroundStyle(NativeDesign.secondary)
                 }
                 Spacer(minLength: NativeDesign.Space.small)
                 VStack(alignment: .trailing, spacing: NativeDesign.Space.xxs) {
                     Text(hidden ? "••••" : item.value.euro).font(.headline).monospacedDigit()
-                    if !hidden { Text(NativeSalaryMap.percent(item.value, of: salary) + " dello stipendio").font(.caption).foregroundStyle(NativeDesign.secondary) }
+                    if !hidden { Text(NativeSalaryMap.percent(item.value, of: salary) + " dello stipendio").font(.footnote).foregroundStyle(NativeDesign.secondary) }
                 }
             }
             ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
@@ -312,7 +312,7 @@ struct NativeSalaryMapCard: View {
                 }.font(.subheadline)
             }
             if !siblings.isEmpty {
-                Text("Altre voci di " + NativeSalaryMap.groupTitles[item.group]).font(.caption).foregroundStyle(NativeDesign.secondary)
+                Text("Altre voci di " + NativeSalaryMap.groupTitles[item.group]).font(.footnote).foregroundStyle(NativeDesign.secondary)
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: NativeDesign.Space.small) {
                         ForEach(siblings) { other in

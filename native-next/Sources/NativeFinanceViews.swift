@@ -9,7 +9,7 @@ struct NativeBudgetAllocation: View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
             if !compact {
                 Divider()
-                HStack { Text("Stipendio medio"); Spacer(); Text(budget.salary.euro).monospacedDigit() }.font(.caption).foregroundStyle(NativeDesign.secondary)
+                HStack { Text("Stipendio medio"); Spacer(); Text(budget.salary.euro).monospacedDigit() }.font(.footnote).foregroundStyle(NativeDesign.secondary)
             }
             GeometryReader { proxy in
                 HStack(spacing: NativeDesign.Space.xxs) {
@@ -22,7 +22,7 @@ struct NativeBudgetAllocation: View {
                 HStack(alignment: .top, spacing: NativeDesign.Space.medium) { segment("Spesi", budget.spent, NativeDesign.financialRed); segment("Accantonati", budget.reserved, NativeDesign.accent.opacity(0.65)); segment("Disponibili", budget.remaining, NativeDesign.financialGreen) }
                 VStack(alignment: .leading, spacing: NativeDesign.Space.small) { segment("Spesi", budget.spent, NativeDesign.financialRed); segment("Accantonati", budget.reserved, NativeDesign.accent.opacity(0.65)); segment("Disponibili", budget.remaining, NativeDesign.financialGreen) }
             }
-            if budget.remaining < 0 { Label("Sforamento " + (-budget.remaining).euro, systemImage: "exclamationmark.triangle").font(.caption).foregroundStyle(NativeDesign.financialRed) }
+            if budget.remaining < 0 { Label("Sforamento " + (-budget.remaining).euro, systemImage: "exclamationmark.triangle").font(.footnote).foregroundStyle(NativeDesign.financialRed) }
             if abs(budget.adjustment) > 0.02 { Text("Ripartizione da aggiornare: i dati non sono ancora riconciliati.").font(.caption2).foregroundStyle(NativeDesign.secondary) }
             if budget.spent < 0 { Text("Le spese nette includono rimborsi e storni.").font(.caption2).foregroundStyle(NativeDesign.secondary) }
         }
@@ -33,7 +33,7 @@ struct NativeBudgetAllocation: View {
                 Circle().fill(color).frame(width: 6, height: 6)
                 Text(title).foregroundStyle(NativeDesign.secondary).fixedSize()
             }.font(.caption2)
-            Text(value.euro).font(.caption.weight(.medium)).monospacedDigit().fixedSize()
+            Text(value.euro).font(.footnote.weight(.medium)).monospacedDigit().fixedSize()
         }.frame(maxWidth: .infinity, alignment: .leading)
     }
 }
@@ -49,9 +49,9 @@ struct NativeForecastCard: View {
                 Spacer(minLength: 0)
                 NativeIconButton(symbol: "info.circle", label: "Come funziona la previsione") { explain = true }
             }
-            if hidden { Text("Importi nascosti").font(.caption).foregroundStyle(NativeDesign.secondary).frame(height: 150) }
+            if hidden { Text("Importi nascosti").font(.footnote).foregroundStyle(NativeDesign.secondary).frame(height: 150) }
             else if model.prediction.isEmpty {
-                Text(store.analysisBusy ? "Aggiorno lo storico…" : "Servono almeno 4 mesi completi osservati sui 6 precedenti. Disponibili: \(model.samples).").font(.caption).foregroundStyle(NativeDesign.secondary).frame(minHeight: 80)
+                Text(store.analysisBusy ? "Aggiorno lo storico…" : "Servono almeno 4 mesi completi osservati sui 6 precedenti. Disponibili: \(model.samples).").font(.footnote).foregroundStyle(NativeDesign.secondary).frame(minHeight: 80)
             } else {
                 Chart {
                     ForEach(model.prediction) { point in
@@ -82,7 +82,7 @@ struct NativeForecastCard: View {
                     Label("Crescita", systemImage: "arrow.up.right").foregroundStyle(NativeDesign.financialGreen)
                     Label("Calo", systemImage: "arrow.down.right").foregroundStyle(NativeDesign.financialRed)
                 }.font(.caption2)
-                if let last = model.prediction.last { Text("Fra 6 mesi: " + last.lower.euro + " – " + last.upper.euro).font(.caption.weight(.medium)).monospacedDigit().fixedSize(horizontal: false, vertical: true) }
+                if let last = model.prediction.last { Text("Fra 6 mesi: " + last.lower.euro + " – " + last.upper.euro).font(.footnote.weight(.medium)).monospacedDigit().fixedSize(horizontal: false, vertical: true) }
                 Text("*Scenario indicativo sul conto principale, non garantito.").font(.caption2).foregroundStyle(NativeDesign.secondary)
                 if model.samples < 6 { Text("Storico parziale: \(model.samples) mesi su 6.").font(.caption2).foregroundStyle(NativeDesign.warning) }
             }

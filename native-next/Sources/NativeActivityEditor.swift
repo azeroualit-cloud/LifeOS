@@ -66,8 +66,8 @@ struct NativeActivityEditor: View {
                         Toggle("Sveglia urgente", isOn: $urgent).disabled(store.isDemo || (!urgent && !alarmEligible))
                             .accessibilityIdentifier("activity-urgent-alarm")
                         Text(store.isDemo ? "Le sveglie non vengono programmate nella demo." : frequency != "none" ? "Disponibile per eventi senza ripetizione." : !hasTime ? "Aggiungi un orario per attivarla." : !alarmEligible ? "Scegli una data e un’ora future." : "Suona anche in silenzioso e Full immersion. Solo su questo iPhone.")
-                            .font(.caption).foregroundStyle(NativeDesign.secondary)
-                    } else { Text("La sveglia urgente è disponibile da iOS 26.").font(.caption).foregroundStyle(NativeDesign.secondary) }
+                            .font(.footnote).foregroundStyle(NativeDesign.secondary)
+                    } else { Text("La sveglia urgente è disponibile da iOS 26.").font(.footnote).foregroundStyle(NativeDesign.secondary) }
                 }
             }
             if hasDate {
@@ -81,7 +81,7 @@ struct NativeActivityEditor: View {
                     }
                     if source == "event", record.integer("id") > 0, record.text("frequency", fallback: "none") != "none" {
                         Toggle("Modifica da questa occorrenza", isOn: $fromHere)
-                        Text("Le occorrenze precedenti restano nello storico.").font(.caption).foregroundStyle(NativeDesign.secondary)
+                        Text("Le occorrenze precedenti restano nello storico.").font(.footnote).foregroundStyle(NativeDesign.secondary)
                     }
                 }.id("repeat")
             }
@@ -181,7 +181,7 @@ struct NativeActivityEditor: View {
                 }
             } else {
                 Button { focusedField = nil; enabled.wrappedValue = true } label: {
-                    Label(title, systemImage: "clock").font(.caption)
+                    Label(title, systemImage: "clock").font(.footnote)
                         .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading).contentShape(Rectangle())
                 }.buttonStyle(.plain)
             }

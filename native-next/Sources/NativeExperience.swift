@@ -47,7 +47,7 @@ struct NativeCategoryChart: View {
                     Circle().trim(from: start, to: min(1, start + row.amount("amount") / max(Double.leastNonzeroMagnitude, total)))
                         .stroke(color(row.text("name")), style: StrokeStyle(lineWidth: 18, lineCap: .butt)).rotationEffect(.degrees(-90))
                 }
-                Text(total.euro).font(.caption.weight(.semibold)).minimumScaleFactor(0.5).lineLimit(1).padding(NativeDesign.Space.medium)
+                Text(total.euro).font(.footnote.weight(.semibold)).minimumScaleFactor(0.5).lineLimit(1).padding(NativeDesign.Space.medium)
             }.frame(width: 108, height: 108).padding(NativeDesign.Space.small).accessibilityLabel("Spese totali " + total.euro)
             VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
                 ForEach(Array(compact.enumerated()), id: \.offset) { index, row in

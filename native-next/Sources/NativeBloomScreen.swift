@@ -80,7 +80,7 @@ struct NativeBloomScreen: View {
                     .padding(NativeDesign.Layout.screenInset)
             }
             if preparingImport { ProgressView("Preparazione backup…") }
-            if let notice, section == "Libreria" { Text(notice).font(.caption).foregroundStyle(.secondary) }
+            if let notice, section == "Libreria" { Text(notice).font(.footnote).foregroundStyle(.secondary) }
             if let error = store.error { Text(error).foregroundStyle(.red) }
             ZStack {
                 if hasOpenedMap {
@@ -95,7 +95,7 @@ struct NativeBloomScreen: View {
                     .overlay { VStack(spacing: NativeDesign.Space.none) { Spacer(minLength: 0); placeCard(current) } }
                     .overlay(alignment: .top) {
                         if let message = classifier.message {
-                            Text(message).font(.caption).padding(.horizontal, NativeDesign.Space.medium)
+                            Text(message).font(.footnote).padding(.horizontal, NativeDesign.Space.medium)
                                 .frame(minHeight: NativeDesign.Layout.touchTarget).modifier(NativeGlass(interactive: false))
                                 .padding(.top, NativeDesign.Space.small)
                         }
@@ -180,7 +180,7 @@ struct NativeBloomScreen: View {
                 Image(systemName: classifier.running ? "hourglass" : "sparkle.magnifyingglass").frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget)
             }.disabled(classifier.running).accessibilityLabel(classifier.running ? "Ricerca in corso" : "Classifica luoghi")
         }
-        .font(.body.weight(.medium)).foregroundStyle(.primary).buttonStyle(NativePressStyle())
+        .font(.subheadline.weight(.medium)).foregroundStyle(.primary).buttonStyle(NativePressStyle())
         .modifier(LOGlassPanel())
     }
     @ToolbarContentBuilder private var bloomToolbar: some ToolbarContent {
@@ -273,9 +273,9 @@ struct NativeBloomScreen: View {
                             LabeledContent("Conflitti risolti", value: String(report.resolvedConflicts))
                             LabeledContent("Allegati", value: String(report.fileCount ?? 0))
                             LabeledContent("Byte", value: String(report.byteCount ?? 0))
-                            Text(report.sourceSHA256 ?? "").font(.caption).textSelection(.enabled)
+                            Text(report.sourceSHA256 ?? "").font(.footnote).textSelection(.enabled)
                             ForEach((report.categoryMappings ?? [:]).keys.sorted(), id: \.self) { source in
-                                Text(source + " → " + (report.categoryMappings?[source] ?? "")).font(.caption)
+                                Text(source + " → " + (report.categoryMappings?[source] ?? "")).font(.footnote)
                             }
                         }
                     }.navigationTitle("Rapporto importazione").toolbar { Button("Fine") { showingReport = false } }
@@ -420,7 +420,7 @@ struct NativeBloomScreen: View {
         let kind = group.place.resolvedKind
         let tint = Color(uiColor: NativeDesign.placeColor(kind))
         return HStack(spacing: NativeDesign.Space.medium) {
-            Image(systemName: kind.symbol).font(.body.weight(.semibold)).foregroundStyle(.white)
+            Image(systemName: kind.symbol).font(.subheadline.weight(.semibold)).foregroundStyle(.white)
                 .frame(width: NativeDesign.Layout.iconTile, height: NativeDesign.Layout.iconTile)
                 .background { Circle().fill(tint) }
                 .accessibilityHidden(true)

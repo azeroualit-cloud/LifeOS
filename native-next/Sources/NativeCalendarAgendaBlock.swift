@@ -23,7 +23,7 @@ struct NativeCalendarAgendaBlock: View {
                             .accessibilityLabel("Fine " + NativeCalendarTimeline.clock(end))
                     }
                 }
-                .font(.caption).monospacedDigit().foregroundStyle(NativeDesign.secondary)
+                .font(.footnote).monospacedDigit().foregroundStyle(NativeDesign.secondary)
                 .fixedSize(horizontal: true, vertical: false)
                 .frame(minWidth: typeSize.isAccessibilitySize ? nil : timeColumn, alignment: .leading)
                 if entry.source == "shift" {
@@ -56,7 +56,7 @@ struct NativeCalendarAgendaTitle: View {
     var body: some View {
         HStack(spacing: NativeDesign.Space.small) {
             if entry.completed {
-                Image(systemName: "checkmark.circle.fill").font(.caption).foregroundStyle(color)
+                Image(systemName: "checkmark.circle.fill").font(.footnote).foregroundStyle(color)
                     .accessibilityHidden(true)
             } else {
                 Circle().fill(color)

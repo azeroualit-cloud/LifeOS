@@ -16,11 +16,11 @@ struct PendingWritesSection: View {
     }
     var body: some View {
         Section("Modifiche sul dispositivo") {
-            Text(store.syncStatus.isEmpty ? "In attesa di sincronizzazione" : store.syncStatus).font(.caption)
+            Text(store.syncStatus.isEmpty ? "In attesa di sincronizzazione" : store.syncStatus).font(.footnote)
             ForEach(store.state.pending) { write in
                 VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
                     Text(title(write))
-                    Text(write.accepted ? "Ricevuta dal server · aggiornamento dati in attesa" : "Conferma del server in attesa").font(.caption).foregroundStyle(NativeDesign.secondary)
+                    Text(write.accepted ? "Ricevuta dal server · aggiornamento dati in attesa" : "Conferma del server in attesa").font(.footnote).foregroundStyle(NativeDesign.secondary)
                     if !write.accepted && write.payload.integer("expenseRoutingVersion") == 1 {
                         Button("Annulla invio non ancora iniziato", role: .destructive) { Task { do { try await store.cancelPendingExpense(write.id) } catch { store.error = error.localizedDescription } } }.disabled(store.busy || store.syncing)
                     }

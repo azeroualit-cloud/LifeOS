@@ -113,14 +113,14 @@ struct LOStepperRow: View {
             : AnyLayout(HStackLayout(spacing: NativeDesign.Space.small))
         layout {
             VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
-                Text(title).font(.body)
+                Text(title).font(.subheadline)
                 if let detail { Text(detail).font(.footnote).foregroundStyle(NativeDesign.secondary) }
             }
             if !typeSize.isAccessibilitySize { Spacer(minLength: NativeDesign.Space.small) }
             HStack(spacing: NativeDesign.Space.small) {
                 stepButton("minus", label: "Meno " + title.lowercased(), action: decrement)
                     .accessibilityIdentifier(identifier + "-minus")
-                Text(value).font(.body.weight(.semibold)).monospacedDigit()
+                Text(value).font(.subheadline.weight(.semibold)).monospacedDigit()
                     .frame(minWidth: NativeDesign.Layout.categoryWidth)
                     .accessibilityIdentifier(identifier + "-value")
                 stepButton("plus", label: "Più " + title.lowercased(), action: increment)
@@ -133,7 +133,7 @@ struct LOStepperRow: View {
 
     private func stepButton(_ symbol: String, label: String, action: (() -> Void)?) -> some View {
         Button { action?() } label: {
-            Image(systemName: symbol).font(.body.weight(.semibold))
+            Image(systemName: symbol).font(.subheadline.weight(.semibold))
                 .frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget)
                 .contentShape(Circle())
                 .modifier(NativeGlass())
@@ -208,7 +208,7 @@ struct LOStatCard: View {
                 if action != nil { NativeDisclosureIndicator() }
             }
             HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xs) {
-                Text(value).font(.title2.weight(.bold)).monospacedDigit().lineLimit(1).minimumScaleFactor(0.7)
+                Text(value).font(.title.weight(.bold)).monospacedDigit().lineLimit(1).minimumScaleFactor(0.7)
                 Text(unit).font(.footnote).foregroundStyle(NativeDesign.secondary).lineLimit(1)
             }
             if let caption { Text(caption).font(.footnote).foregroundStyle(NativeDesign.secondary).lineLimit(1) }
@@ -333,7 +333,7 @@ struct LOStackedColumns: View {
             .frame(height: height, alignment: .bottom)
             HStack(spacing: gap) {
                 ForEach(columns) { column in
-                    Text(column.label).font(.caption).monospacedDigit()
+                    Text(column.label).font(.footnote).monospacedDigit()
                         .foregroundStyle(selection == column.id ? Color.primary : NativeDesign.secondary)
                         .frame(maxWidth: .infinity)
                         .accessibilityHidden(true)

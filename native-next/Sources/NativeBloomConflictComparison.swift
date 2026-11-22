@@ -40,11 +40,11 @@ struct NativeBloomConflictComparison: View {
             ForEach(keys, id: \.self) { key in
                 Section(label(key)) {
                     VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-                        Text("LifeOS").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                        Text("LifeOS").font(.footnote.weight(.semibold)).foregroundStyle(.secondary)
                         Text(value(conflict.current[key], key: key)).textSelection(.enabled)
                     }.frame(maxWidth: .infinity, alignment: .leading)
                     VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-                        Text("Backup").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                        Text("Backup").font(.footnote.weight(.semibold)).foregroundStyle(.secondary)
                         Text(value(conflict.incoming[key], key: key)).textSelection(.enabled)
                     }.frame(maxWidth: .infinity, alignment: .leading)
                 }

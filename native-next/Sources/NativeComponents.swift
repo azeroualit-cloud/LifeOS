@@ -118,9 +118,10 @@ struct NativeGlassButtonStyle: ButtonStyle {
         configuration.label
             .foregroundStyle(Color.primary)
             .padding(.horizontal, NativeDesign.Space.medium)
-            .frame(minHeight: NativeDesign.Layout.touchTarget)
-            .contentShape(Capsule())
+            .frame(minHeight: NativeDesign.Layout.compactControl)
             .modifier(NativeGlass())
+            .frame(minHeight: NativeDesign.Layout.touchTarget)
+            .contentShape(Rectangle())
             .scaleEffect(configuration.isPressed && !reduceMotion ? NativeDesign.Motion.pressedScale : 1)
             .opacity(configuration.isPressed ? NativeDesign.Motion.pressedOpacity : 1)
             .animation(reduceMotion ? nil : .easeOut(duration: NativeDesign.Motion.selectionDuration), value: configuration.isPressed)
@@ -146,7 +147,7 @@ struct NativeCheckmark: View {
     let checked: Bool
     var body: some View {
         Image(systemName: checked ? "largecircle.fill.circle" : "circle")
-            .symbolRenderingMode(.monochrome).font(.title2.weight(.regular))
+            .symbolRenderingMode(.monochrome).font(.title.weight(.regular))
             .foregroundStyle(checked ? NativeDesign.accent : NativeDesign.secondary)
             .contentTransition(reduceMotion ? .identity : .symbolEffect(.replace))
             .animation(reduceMotion ? nil : .easeOut(duration: NativeDesign.Motion.selectionDuration), value: checked)
@@ -207,7 +208,7 @@ struct NativeCompactPrimaryButtonStyle: ButtonStyle {
     var readableDisabled = false
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.body.weight(.semibold))
+            .font(.subheadline.weight(.semibold))
             .foregroundStyle(!enabled && readableDisabled ? NativeDesign.secondary : Color.primary)
             .padding(.horizontal, NativeDesign.Space.large)
             .frame(minHeight: NativeDesign.Layout.touchTarget)

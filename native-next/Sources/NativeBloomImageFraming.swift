@@ -51,7 +51,7 @@ struct NativeBloomFramingEditor: View {
                 edge("Sinistra", key: "left", opposite: "right")
                 edge("Destra", key: "right", opposite: "left")
                 Button("Mostra originale") { framing = NativeBloomImageFraming().record }
-                Text("Il file originale resta intatto. L’inquadratura viene salvata con la nota.").font(.caption).foregroundStyle(.secondary)
+                Text("Il file originale resta intatto. L’inquadratura viene salvata con la nota.").font(.footnote).foregroundStyle(.secondary)
             }
         }.navigationTitle("Inquadratura").onAppear { if framing.isEmpty { framing = NativeBloomImageFraming().record } }
     }

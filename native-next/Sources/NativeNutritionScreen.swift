@@ -118,7 +118,7 @@ struct NativeNutritionScreen: View {
                         if entry.deletionPending == true {
                             VStack(alignment: .leading) {
                                 Text("Eliminazione da completare")
-                                Text(entry.date.formatted(date: .abbreviated, time: .omitted)).font(.caption)
+                                Text(entry.date.formatted(date: .abbreviated, time: .omitted)).font(.footnote)
                                 Button("Riprova eliminazione") { remove(entry.id) }.disabled(nutrition.busy)
                             }
                         } else if entry.confirmed {
@@ -126,8 +126,8 @@ struct NativeNutritionScreen: View {
                                 VStack(alignment: .leading) {
                                     if let name = entry.foodName { Text(name) }
                                     Text(entry.date.formatted(date: .abbreviated, time: .omitted))
-                                    if let quantity = entry.quantityDescription { Text(quantity).font(.caption).foregroundStyle(.secondary) }
-                                    Text(entry.nutritionSummary).font(.caption).foregroundStyle(.secondary)
+                                    if let quantity = entry.quantityDescription { Text(quantity).font(.footnote).foregroundStyle(.secondary) }
+                                    Text(entry.nutritionSummary).font(.footnote).foregroundStyle(.secondary)
                                 }
                             }
                             .swipeActions { Button("Elimina", role: .destructive) { deleting = entry.id }.disabled(nutrition.busy) }
@@ -167,7 +167,7 @@ struct NativeNutritionScreen: View {
             HStack(alignment: .firstTextBaseline) {
                 Text(bar.name).font(.headline)
                 Spacer()
-                Text(empty ? "—" : whole(bar.calories)).font(.title3.weight(.bold)).monospacedDigit()
+                Text(empty ? "—" : whole(bar.calories)).font(.headline.weight(.bold)).monospacedDigit()
                     .foregroundStyle(over ? NativeDesign.overGoal : Color.primary)
                 if let targets { Text("/ " + whole(targets.calories) + " kcal").font(.footnote).foregroundStyle(NativeDesign.secondary).monospacedDigit() }
             }

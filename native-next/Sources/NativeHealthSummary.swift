@@ -72,7 +72,7 @@ struct NativeHealthDetail: View {
                 // HEALTH-TREND-93-2026-11-21: day first, then the trend over months.
                 VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
                     weekPicker
-                    if demo { Text("Dati illustrativi").font(.caption).foregroundStyle(NativeDesign.secondary) }
+                    if demo { Text("Dati illustrativi").font(.footnote).foregroundStyle(NativeDesign.secondary) }
                     caloriesCard
                     nutrients
                 }
@@ -80,11 +80,11 @@ struct NativeHealthDetail: View {
                 trendSection
                 if nutrition.entries.contains(where: { !$0.confirmed || $0.deletionPending == true }) {
                     Text("Registrazioni LifeOS in sospeso: consultale nella cronologia.")
-                        .font(.caption).foregroundStyle(NativeDesign.secondary)
+                        .font(.footnote).foregroundStyle(NativeDesign.secondary)
                 }
-                if let message = health.nutrientMessage { Text(message).font(.caption).foregroundStyle(NativeDesign.secondary) }
+                if let message = health.nutrientMessage { Text(message).font(.footnote).foregroundStyle(NativeDesign.secondary) }
                 if health.loading { ProgressView().accessibilityLabel("Lettura Salute") }
-                if let message = health.message { Text(message).font(.caption).foregroundStyle(NativeDesign.secondary) }
+                if let message = health.message { Text(message).font(.footnote).foregroundStyle(NativeDesign.secondary) }
             }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.vertical, NativeDesign.Space.large)
         }
             .accessibilityIdentifier("health-detail-scroll")
@@ -200,7 +200,7 @@ struct NativeHealthDetail: View {
         let simulationLabel = ["Peso e simulazione", value(.simulation) + " kg previsti", change].compactMap { $0 }.joined(separator: ", ")
         let caloriesLabel = "Calorie per giorno, " + value(.calories) + " kcal il giorno selezionato" + (weekMean.map { ", media della settimana " + whole($0) } ?? "")
         return VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
-            Text("Andamento").font(.title2.bold()).accessibilityAddTraits(.isHeader)
+            Text("Andamento").font(.title.bold()).accessibilityAddTraits(.isHeader)
             LOSegmented(options: NativeHealthTrendPeriod.allCases.map { (title: $0.title, id: String($0.rawValue)) }, selection: Binding(
                 get: { period.title }, set: { title in period = NativeHealthTrendPeriod.allCases.first { $0.title == title } ?? .three }),
                 identifierPrefix: "health-period-")
@@ -249,7 +249,7 @@ struct NativeHealthDetail: View {
             HStack(spacing: NativeDesign.Space.xs) {
                 Button { selectedDate = today } label: {
                     HStack(spacing: NativeDesign.Space.xs) {
-                        Text(title).font(.title2.bold()).foregroundStyle(.primary).lineLimit(1).minimumScaleFactor(0.7)
+                        Text(title).font(.title.bold()).foregroundStyle(.primary).lineLimit(1).minimumScaleFactor(0.7)
                         if !isToday {
                             Image(systemName: "arrow.uturn.backward").font(.footnote.weight(.semibold)).foregroundStyle(NativeDesign.secondary)
                         }
@@ -275,7 +275,7 @@ struct NativeHealthDetail: View {
                     let band = NativeCalorieBand.of(health.calories(on: day), goal: goal)
                     Button { selectedDate = day } label: {
                         VStack(spacing: NativeDesign.Space.xxs) {
-                            Text(day.formatted(.dateTime.weekday(.narrow))).font(.caption.weight(.semibold))
+                            Text(day.formatted(.dateTime.weekday(.narrow))).font(.footnote.weight(.semibold))
                                 .foregroundStyle(selection ? Color(uiColor: .systemBackground) : NativeDesign.secondary)
                                 .frame(width: NativeDesign.Layout.calendarDayNumber, height: NativeDesign.Layout.calendarDayNumber)
                                 .background { if selection { Circle().fill(Color.primary) } }
@@ -360,7 +360,7 @@ struct NativeHealthDetail: View {
                 ForEach(rows) { row in
                     LOListRow(isLast: row.id == rows.last?.id) {
                         VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
-                            Text(row.name).font(.body).lineLimit(2)
+                            Text(row.name).font(.subheadline).lineLimit(2)
                             Text(row.detail).font(.footnote).foregroundStyle(NativeDesign.secondary)
                             if row.deletionPending {
                                 Text("Eliminazione da completare").font(.footnote).foregroundStyle(NativeDesign.overGoal)
@@ -368,7 +368,7 @@ struct NativeHealthDetail: View {
                         }
                         Spacer(minLength: NativeDesign.Space.small)
                         Text(row.calories.map { $0.formatted(.number.precision(.fractionLength(0))) + " kcal" } ?? "— kcal")
-                            .font(.body.weight(.semibold)).monospacedDigit()
+                            .font(.subheadline.weight(.semibold)).monospacedDigit()
                         if let localID = row.localID {
                             NativeIconButton(symbol: row.deletionPending ? "arrow.clockwise" : "trash", label: row.deletionPending ? "Riprova eliminazione di " + row.name : "Elimina " + row.name) {
                                 if row.deletionPending { removeFood(localID) }
@@ -383,8 +383,8 @@ struct NativeHealthDetail: View {
                 }
             }
             if nutrition.busy { ProgressView("Aggiornamento diario") }
-            if let diaryNotice { Text(diaryNotice).font(.caption).foregroundStyle(NativeDesign.secondary) }
-            if let error = nutrition.error { Text(error).font(.caption).foregroundStyle(NativeDesign.danger) }
+            if let diaryNotice { Text(diaryNotice).font(.footnote).foregroundStyle(NativeDesign.secondary) }
+            if let error = nutrition.error { Text(error).font(.footnote).foregroundStyle(NativeDesign.danger) }
         }
     }
 
@@ -488,7 +488,7 @@ struct NativeNutrientValues: View {
         let failed = health.nutrientFailures.contains(type)
         let value = health.nutrients(on: date)[type].map { $0.formatted(.number.precision(.fractionLength(0...1))) } ?? "—"
         return VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-            Text(title).font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+            Text(title).font(.footnote).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             Text(value == "—" ? value : value + " g").font(.subheadline.weight(.semibold)).monospacedDigit()
         }.frame(maxWidth: .infinity, alignment: .leading)
             .accessibilityElement(children: .ignore)
@@ -504,7 +504,7 @@ private struct NativeHealthSummaryRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-            Text(metric.title).font(.caption.weight(.semibold)).foregroundStyle(metric.color)
+            Text(metric.title).font(.footnote.weight(.semibold)).foregroundStyle(metric.color)
                 .fixedSize(horizontal: false, vertical: true)
             ViewThatFits(in: .horizontal) {
                 HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xs) { amountText; unitText }.fixedSize()
@@ -519,9 +519,9 @@ private struct NativeHealthSummaryRow: View {
             .accessibilityHint(metric == .weeklyCalories || metric == .weeklyProtein ? "" : "Apre il dettaglio")
     }
     private var amountText: some View {
-        Text(value).font(.title2.weight(.bold)).foregroundStyle(.primary).monospacedDigit()
+        Text(value).font(.title.weight(.bold)).foregroundStyle(.primary).monospacedDigit()
     }
     private var unitText: some View {
-        Text(metric.unit).font(.caption).foregroundStyle(.secondary)
+        Text(metric.unit).font(.footnote).foregroundStyle(.secondary)
     }
 }

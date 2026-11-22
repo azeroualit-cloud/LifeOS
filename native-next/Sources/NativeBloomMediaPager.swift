@@ -41,7 +41,7 @@ struct NativeBloomMediaPager: View {
                 VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
                     Label(url.host ?? "Link", systemImage: "link").font(.headline)
                     Link(page.text, destination: url)
-                    Text("Il contenuto remoto può richiedere una connessione o l’accesso al sito.").font(.caption).foregroundStyle(.secondary)
+                    Text("Il contenuto remoto può richiedere una connessione o l’accesso al sito.").font(.footnote).foregroundStyle(.secondary)
                 }.frame(maxWidth: .infinity, alignment: .leading)
             }
         case "image":

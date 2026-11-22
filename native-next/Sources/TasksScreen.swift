@@ -126,12 +126,13 @@ struct TasksScreen: View {
             Text(title).font(.subheadline.weight(selected ? .semibold : .regular))
                 .foregroundStyle(selected ? Color(uiColor: .systemBackground) : Color.primary)
                 .padding(.horizontal, NativeDesign.Space.medium)
-                .frame(minHeight: NativeDesign.Layout.touchTarget)
+                .frame(minHeight: NativeDesign.Layout.compactControl)
                 .background { if selected { Capsule().fill(Color.primary) } }
-                .contentShape(Capsule())
+                .modifier(NativeGlass())
+                .frame(minHeight: NativeDesign.Layout.touchTarget)
+                .contentShape(Rectangle())
         }
         .buttonStyle(NativePressStyle())
-        .modifier(NativeGlass())
         .accessibilityAddTraits(selected ? .isSelected : [])
         .accessibilityIdentifier(identifier)
     }
@@ -280,8 +281,8 @@ struct RoutinesEditor: View {
                     Button { edit(item.value) } label: {
                         VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
                             Text(item.value.text("title")).foregroundStyle(Color.primary)
-                            Text((try? NativeRoutineSchedule(item.value["schedule"]).summary) ?? "Programmazione non valida").font(.caption).foregroundStyle(NativeDesign.secondary)
-                            Text(NativeRoutineSchedule.nextLabel(item.value)).font(.caption).foregroundStyle(NativeDesign.secondary)
+                            Text((try? NativeRoutineSchedule(item.value["schedule"]).summary) ?? "Programmazione non valida").font(.footnote).foregroundStyle(NativeDesign.secondary)
+                            Text(NativeRoutineSchedule.nextLabel(item.value)).font(.footnote).foregroundStyle(NativeDesign.secondary)
                                 .accessibilityIdentifier("routine-next-\(item.value.integer("id"))")
                         }
                     }.accessibilityIdentifier("routine-edit-\(item.value.integer("id"))")
@@ -322,7 +323,7 @@ struct RoutinesEditor: View {
                 Button("Salva") { save() }.disabled(!supported || schedule == nil || name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || name.count > 60).accessibilityIdentifier("routine-save")
                 if editingID != 0 { Button("Annulla modifica") { reset() } }
             }
-            Text("La dashboard mostra le abitudini previste oggi. Gli intervalli si contano dalla data di inizio, anche se salti un completamento. Ogni data ha i propri completamenti.").font(.caption).foregroundStyle(NativeDesign.secondary)
+            Text("La dashboard mostra le abitudini previste oggi. Gli intervalli si contano dalla data di inizio, anche se salti un completamento. Ogni data ha i propri completamenti.").font(.footnote).foregroundStyle(NativeDesign.secondary)
         }.disabled(saving || store.busy).modifier(NativeListAppearance()).navigationTitle("Abitudini").toolbar { DoneButton() }
     }
     private func edit(_ record: Record) {

@@ -21,20 +21,20 @@ struct NativeIntegrationSettings: View {
                     catch { status = error.localizedDescription }
                 }
             })).disabled(requesting || store.isDemo)
-            Text(status).font(.caption).foregroundStyle(NativeDesign.secondary)
-            Text("Attività all’orario scelto (altrimenti alle 9 del giorno programmato o della scadenza), eventi 15 minuti prima, turni un’ora prima. Sono programmati i prossimi 48 avvisi dai dati presenti su questo iPhone. Apri l’app dopo modifiche dal web per aggiornarli.").font(.caption).foregroundStyle(NativeDesign.secondary)
+            Text(status).font(.footnote).foregroundStyle(NativeDesign.secondary)
+            Text("Attività all’orario scelto (altrimenti alle 9 del giorno programmato o della scadenza), eventi 15 minuti prima, turni un’ora prima. Sono programmati i prossimi 48 avvisi dai dati presenti su questo iPhone. Apri l’app dopo modifiche dal web per aggiornarli.").font(.footnote).foregroundStyle(NativeDesign.secondary)
             if let url = URL(string: UIApplication.openSettingsURLString) { Link("Impostazioni notifiche di iPhone", destination: url) }
             NavigationLink { Form { ShiftCalendarPanel() }.modifier(NativeListAppearance()).navigationTitle("Esporta turni").navigationBarTitleDisplayMode(.inline) } label: {
                 Label("Esporta turni su Apple", systemImage: "calendar.badge.plus")
             }.accessibilityIdentifier("shift-export-settings")
             ShortcutsLink()
-            Text("Con Siri: “Registra il peso in Life OS” oppure “Prepara un’attività in Life OS”. Il peso viene scritto in Apple Health dopo il consenso. Per le attività conferma il salvataggio nell’app.").font(.caption).foregroundStyle(NativeDesign.secondary)
+            Text("Con Siri: “Registra il peso in Life OS” oppure “Prepara un’attività in Life OS”. Il peso viene scritto in Apple Health dopo il consenso. Per le attività conferma il salvataggio nell’app.").font(.footnote).foregroundStyle(NativeDesign.secondary)
             Button("Aggiorna widget 2×2") {
                 NativeWidgetBridge.publish(life: store.life, demo: store.isDemo, updatedAt: store.state.lifeRefreshedAt)
                 Task { await refreshStatus() }
             }
-            Text("Se nella galleria non compare ‘Life OS · Oggi’, la versione dell’estensione installata è ancora quella precedente: reinstalla l’IPA mantenendo l’estensione widget nel servizio di firma.").font(.caption).foregroundStyle(NativeDesign.secondary)
-            Text(widgetStatus).font(.caption).foregroundStyle(NativeDesign.secondary)
+            Text("Se nella galleria non compare ‘Life OS · Oggi’, la versione dell’estensione installata è ancora quella precedente: reinstalla l’IPA mantenendo l’estensione widget nel servizio di firma.").font(.footnote).foregroundStyle(NativeDesign.secondary)
+            Text(widgetStatus).font(.footnote).foregroundStyle(NativeDesign.secondary)
         }.task { await refreshStatus() }
         .onChange(of: phase) { _, value in if value == .active { Task { await refreshStatus() } } }
     }

@@ -201,7 +201,7 @@ struct NativeNutrientProgress: View {
                     Text(caption ?? nutrient.title).fontWeight(.semibold)
                     Text(value).monospacedDigit().foregroundStyle(.secondary)
                 }
-            }.font(.caption)
+            }.font(.footnote)
             ProgressView(value: period.progress(toward: target))
                 .tint(warning ? NativeDesign.financialRed : NativeDesign.nutritionTitle)
                 .accessibilityHidden(true)
@@ -244,7 +244,7 @@ struct NativeMicronutrientScreen: View {
         let daily = NativeNutrientPeriod.recordedDays(nutrition.entries, count: 1, now: selectedDate)
         List {
             Section("In evidenza") {
-                if pinned.isEmpty { Text("Usa la stella per aggiungere un nutriente.").font(.caption) }
+                if pinned.isEmpty { Text("Usa la stella per aggiungere un nutriente.").font(.footnote) }
                 ForEach(pinned) { row($0, pinned: true, daily: daily, weekly: weekly, weekHasEnded: weekHasEnded) }
                     .onMove { offsets, destination in
                         var updated = pinned

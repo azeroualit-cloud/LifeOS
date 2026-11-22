@@ -92,14 +92,14 @@ struct NativeBloomLinkPreview: View {
             } else {
                 ZStack {
                     NativeDesign.inset
-                    Image(systemName: "link").font(.title2).foregroundStyle(.secondary)
+                    Image(systemName: "link").font(.title).foregroundStyle(.secondary)
                 }.frame(width: width, height: NativeDesign.Layout.bloomThumbnailHeight)
                     .accessibilityLabel(finished ? "Anteprima non disponibile" : "Caricamento anteprima")
             }
             if showTitle, let title = snapshot?.title, !title.isEmpty {
                 Text(title).font(.subheadline).lineLimit(3).multilineTextAlignment(.leading)
             }
-            Text(url.host ?? url.absoluteString).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+            Text(url.host ?? url.absoluteString).font(.footnote).foregroundStyle(.secondary).lineLimit(1)
         }.frame(width: width, alignment: .leading)
             .task(id: url) {
                 snapshot = nil; image = nil; finished = false

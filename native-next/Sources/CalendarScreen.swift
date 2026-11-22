@@ -104,7 +104,7 @@ struct CalendarScreen: View {
     private var weekdayLabels: some View {
         HStack(spacing: CalendarMetrics92.xs) {
             ForEach(Array(["L", "M", "M", "G", "V", "S", "D"].enumerated()), id: \.offset) { _, name in
-                Text(name).font(.caption.weight(.medium)).foregroundStyle(NativeDesign.secondary).frame(maxWidth: .infinity)
+                Text(name).font(.footnote.weight(.medium)).foregroundStyle(NativeDesign.secondary).frame(maxWidth: .infinity)
             }
         }.padding(.vertical, NativeDesign.Space.small).accessibilityHidden(true)
     }
@@ -222,7 +222,7 @@ struct CalendarScreen: View {
                 }
                 if !typeSize.isAccessibilitySize { viewSwitch }
                 Text(CivilDate.agendaTitle(selected))
-                    .font(.largeTitle.weight(.bold))
+                    .font(.title.weight(.bold))
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityAddTraits(.isHeader)
                     .accessibilityIdentifier("calendar-day-heading")
@@ -334,7 +334,7 @@ struct CalendarScreen: View {
                 Capsule().fill(color).frame(width: NativeDesign.Space.xs, height: NativeDesign.Layout.toolbarVisual - NativeDesign.Space.xxs)
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
-                    Text(title).font(.body).foregroundStyle(.primary).lineLimit(2)
+                    Text(title).font(.subheadline).foregroundStyle(.primary).lineLimit(2)
                     if !detail.isEmpty { Text(detail).font(.footnote).foregroundStyle(NativeDesign.secondary) }
                 }
                 Spacer(minLength: NativeDesign.Space.small)
@@ -382,7 +382,7 @@ struct CalendarScreen: View {
     }
     private func allDayStrip(_ entries: [NativeCalendarAgendaEntry]) -> some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-            Text("Tutto il giorno").font(.caption).foregroundStyle(NativeDesign.secondary)
+            Text("Tutto il giorno").font(.footnote).foregroundStyle(NativeDesign.secondary)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: NativeDesign.Space.small) {
                     ForEach(entries) { item in
@@ -522,7 +522,7 @@ struct CalendarScreen: View {
                         ForEach(0..<7, id: \.self) { index in
                             let day = days[week * 7 + index].day
                             Text(day.hasSuffix("-01") ? NativeCalendarWindow.monthLabel(String(day.prefix(7))) : "")
-                                .font(.title3.weight(.semibold))
+                                .font(.headline.weight(.semibold))
                                 .foregroundStyle(day.hasPrefix(CivilDate.month()) ? Color.primary : NativeDesign.secondary)
                                 .frame(maxWidth: .infinity)
                         }
@@ -592,7 +592,7 @@ struct CalendarScreen: View {
                     Button(action: goToToday) {
                         Text("Oggi").font(.subheadline.weight(.semibold)).foregroundStyle(.primary)
                             .padding(.horizontal, NativeDesign.Space.medium)
-                            .frame(height: NativeDesign.Layout.segmentHeight + NativeDesign.Space.xxs * 2)
+                            .frame(height: NativeDesign.Layout.compactControl)
                             .modifier(NativeGlass())
                             .frame(minHeight: NativeDesign.Layout.touchTarget)
                             .contentShape(Rectangle())
@@ -639,11 +639,11 @@ private struct NativeShiftBrushOption: View {
             VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
                 HStack(spacing: NativeDesign.Space.xs) {
                     if kind == .erase {
-                        Image(systemName: kind.symbol).font(.caption.weight(.semibold))
+                        Image(systemName: kind.symbol).font(.footnote.weight(.semibold))
                     } else {
                         Circle().fill(kind.color).frame(width: NativeDesign.Space.medium, height: NativeDesign.Space.medium)
                     }
-                    Text(kind.title).font(.caption.weight(.semibold)).lineLimit(1)
+                    Text(kind.title).font(.footnote.weight(.semibold)).lineLimit(1)
                 }
                 if !kind.time.isEmpty {
                     Text(kind.time).font(.caption2).foregroundStyle(.secondary)

@@ -49,11 +49,11 @@ struct NativeNutritionGoalsSheet: View {
                 if draft.calorieMode == .tdee {
                     HStack(alignment: .firstTextBaseline) {
                         VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
-                            Text("TDEE").font(.body)
+                            Text("TDEE").font(.subheadline)
                             Text("dal tuo storico").font(.footnote).foregroundStyle(NativeDesign.secondary)
                         }
                         Spacer()
-                        Text(tdee.map { kcal($0) } ?? "Non disponibile").font(.body.weight(.semibold)).monospacedDigit()
+                        Text(tdee.map { kcal($0) } ?? "Non disponibile").font(.subheadline.weight(.semibold)).monospacedDigit()
                     }
                     .accessibilityElement(children: .combine)
                     LOStepperRow(title: "Deficit o surplus", value: signed(draft.adjustment),
@@ -70,7 +70,7 @@ struct NativeNutritionGoalsSheet: View {
                 HStack(alignment: .firstTextBaseline) {
                     Text("Obiettivo di oggi").font(.headline)
                     Spacer()
-                    Text(draft.calories(tdee: tdee).map { kcal($0) } ?? "—").font(.title3.weight(.bold)).monospacedDigit()
+                    Text(draft.calories(tdee: tdee).map { kcal($0) } ?? "—").font(.headline.weight(.bold)).monospacedDigit()
                         .accessibilityIdentifier("goals-today")
                 }
                 .accessibilityElement(children: .combine)
@@ -88,11 +88,11 @@ struct NativeNutritionGoalsSheet: View {
                 Divider()
                 HStack(alignment: .firstTextBaseline) {
                     VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
-                        Text("Carboidrati").font(.body).foregroundStyle(NativeDesign.macroCarbohydrate)
+                        Text("Carboidrati").font(.subheadline).foregroundStyle(NativeDesign.macroCarbohydrate)
                         Text("il resto delle calorie").font(.footnote).foregroundStyle(NativeDesign.secondary)
                     }
                     Spacer()
-                    Text(targets.map { grams($0.carbohydrate) } ?? "—").font(.body.weight(.semibold)).monospacedDigit()
+                    Text(targets.map { grams($0.carbohydrate) } ?? "—").font(.subheadline.weight(.semibold)).monospacedDigit()
                         .accessibilityIdentifier("goals-carbohydrate")
                 }
                 .frame(minHeight: NativeDesign.Layout.rowHeight)
@@ -114,7 +114,7 @@ struct NativeNutritionGoalsSheet: View {
             : grams(value.wrappedValue)
         return VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
             HStack {
-                Text(title).font(.body).foregroundStyle(color)
+                Text(title).font(.subheadline).foregroundStyle(color)
                 Spacer()
                 Menu {
                     Picker("Unità", selection: Binding(get: { unit.wrappedValue }, set: { newUnit in
@@ -130,7 +130,7 @@ struct NativeNutritionGoalsSheet: View {
                 } label: {
                     HStack(spacing: NativeDesign.Space.xs) {
                         Text(perKG ? "g per kg" : "Grammi")
-                        Image(systemName: "chevron.up.chevron.down").font(.caption)
+                        Image(systemName: "chevron.up.chevron.down").font(.footnote)
                     }
                     .font(.subheadline).foregroundStyle(NativeDesign.secondary)
                     .frame(minHeight: NativeDesign.Layout.touchTarget)

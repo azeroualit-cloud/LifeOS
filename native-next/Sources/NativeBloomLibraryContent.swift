@@ -35,7 +35,7 @@ struct NativeBloomRowThumbnail: View {
                 Image(uiImage: linkImage).resizable().scaledToFill()
                     .accessibilityLabel("Anteprima link").accessibilityIdentifier("bloom-link-image")
             } else {
-                Image(systemName: linkURL == nil ? "note.text" : "link").font(.title3).foregroundStyle(.secondary).accessibilityHidden(true)
+                Image(systemName: linkURL == nil ? "note.text" : "link").font(.headline).foregroundStyle(.secondary).accessibilityHidden(true)
             }
         }
         .frame(width: NativeDesign.Layout.bloomRowThumbnail, height: NativeDesign.Layout.bloomRowThumbnail)

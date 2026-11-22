@@ -49,8 +49,8 @@ struct NativeHealthCard: View {
     private func metric(_ value: String, unit: String) -> some View {
         let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: NativeDesign.Space.xs)) : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xs))
         return layout {
-            Text(value).font(.title2.weight(.semibold)).monospacedDigit().foregroundStyle(NativeDesign.healthAccent)
-            Text(unit).font(.caption).foregroundStyle(NativeDesign.secondary)
+            Text(value).font(.title.weight(.semibold)).monospacedDigit().foregroundStyle(NativeDesign.healthAccent)
+            Text(unit).font(.footnote).foregroundStyle(NativeDesign.secondary)
         }
     }
     private func accessibilitySummary(_ estimate: HealthEstimate?) -> String {
@@ -121,10 +121,10 @@ struct NativeAddWeightSheet: View {
                     VStack(spacing: NativeDesign.Space.xs) {
                         HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xs) {
                             TextField("0,0", text: $weightText).keyboardType(.decimalPad).focused($editing)
-                                .font(.largeTitle.bold()).monospacedDigit().multilineTextAlignment(.center)
+                                .font(.title.bold()).monospacedDigit().multilineTextAlignment(.center)
                                 .fixedSize()
                                 .accessibilityLabel("Peso in chilogrammi").accessibilityIdentifier("health-new-weight")
-                            Text("kg").font(.title3).foregroundStyle(NativeDesign.secondary)
+                            Text("kg").font(.headline).foregroundStyle(NativeDesign.secondary)
                         }
                         if let change = changeFromLast {
                             Text((change >= 0 ? "+" : "−") + abs(change).formatted(.number.precision(.fractionLength(1))) + " kg dall’ultima pesata")
@@ -258,11 +258,11 @@ private struct NativeHealthWeightChart: View {
                     .frame(height: 190)
                     .accessibilityIdentifier(forecast.isEmpty ? "health-weight-chart" : "health-forecast-chart")
                     .accessibilityLabel("Peso in chilogrammi: pesate e tendenza" + (forecast.isEmpty ? "" : ", previsione tratteggiata"))
-                Text(selectionDescription).font(.caption).foregroundStyle(NativeDesign.secondary)
+                Text(selectionDescription).font(.footnote).foregroundStyle(NativeDesign.secondary)
                     .lineLimit(2).frame(maxWidth: .infinity, minHeight: selectionCaptionHeight, alignment: .leading)
                     .accessibilityIdentifier(forecast.isEmpty ? "health-weight-selection" : "health-forecast-selection")
                 Text(forecast.isEmpty ? "kg · Punti: pesate · Linea: tendenza" : "kg · Linea: tendenza · Tratteggio: previsione")
-                    .font(.caption).foregroundStyle(NativeDesign.secondary)
+                    .font(.footnote).foregroundStyle(NativeDesign.secondary)
             }
         }.onChange(of: days) { _, _ in referenceDate = Date() }
             .onChange(of: period) { _, _ in referenceDate = Date(); selectedDate = nil }
@@ -326,7 +326,7 @@ private struct NativeHealthCaloriesChart: View {
                     .frame(height: 190)
                     .accessibilityIdentifier("health-calories-chart")
                     .accessibilityLabel("Calorie assunte per giorno nel periodo selezionato")
-                Text(selectionDescription).font(.caption).foregroundStyle(NativeDesign.secondary)
+                Text(selectionDescription).font(.footnote).foregroundStyle(NativeDesign.secondary)
                     .lineLimit(2).frame(maxWidth: .infinity, minHeight: selectionCaptionHeight, alignment: .leading)
                     .accessibilityIdentifier("health-calories-selection")
             }
@@ -358,7 +358,7 @@ struct NativeHealthMetricDetail: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: NativeDesign.Space.section) {
-                if demo { Text("Dati illustrativi").font(.caption).foregroundStyle(NativeDesign.secondary) }
+                if demo { Text("Dati illustrativi").font(.footnote).foregroundStyle(NativeDesign.secondary) }
                 switch metric {
                 case .tdee: tdeeSection
                 case .weight:
@@ -391,21 +391,21 @@ struct NativeHealthMetricDetail: View {
                 Text("TDEE medio dallo storico").font(NativeDesign.heading)
                 Text(((estimate.tdee / 50).rounded() * 50).formatted(.number.precision(.fractionLength(0))) + " kcal/giorno").font(NativeDesign.value).monospacedDigit()
                 if let first = estimate.firstDate {
-                    Text(first.formatted(date: .abbreviated, time: .omitted) + " – " + estimate.lastDate.formatted(date: .abbreviated, time: .omitted)).font(.caption).foregroundStyle(NativeDesign.secondary)
+                    Text(first.formatted(date: .abbreviated, time: .omitted) + " – " + estimate.lastDate.formatted(date: .abbreviated, time: .omitted)).font(.footnote).foregroundStyle(NativeDesign.secondary)
                 }
                 LabeledContent("Pesate utilizzate", value: String(estimate.weighIns))
                 LabeledContent("Giorni con calorie", value: "\(estimate.loggedDays) / \(estimate.days)")
                 LabeledContent("Introito medio nello storico", value: estimate.calibrationIntake.formatted(.number.precision(.fractionLength(0))) + " kcal/giorno")
                 if estimate.imputedDays > 0 {
-                    Text("\(estimate.imputedDays) giorni mancanti sono stimati dalla media dei giorni registrati. Se ciascuno fosse più alto o basso di 500 kcal, il risultato cambierebbe di circa ±" + estimate.missingDaySensitivity.formatted(.number.precision(.fractionLength(0))) + " kcal/giorno. È una sensibilità all’ipotesi, non un intervallo di confidenza.").font(.caption).foregroundStyle(NativeDesign.warning)
+                    Text("\(estimate.imputedDays) giorni mancanti sono stimati dalla media dei giorni registrati. Se ciascuno fosse più alto o basso di 500 kcal, il risultato cambierebbe di circa ±" + estimate.missingDaySensitivity.formatted(.number.precision(.fractionLength(0))) + " kcal/giorno. È una sensibilità all’ipotesi, non un intervallo di confidenza.").font(.footnote).foregroundStyle(NativeDesign.warning)
                 }
-                Text("Media storica stimata, non misura del metabolismo attuale. L’attività può essere cambiata nel periodo.").font(.caption).foregroundStyle(NativeDesign.secondary)
+                Text("Media storica stimata, non misura del metabolismo attuale. L’attività può essere cambiata nel periodo.").font(.footnote).foregroundStyle(NativeDesign.secondary)
             }
         } else {
             NativeCard {
                 Text("TDEE stimato").font(NativeDesign.heading)
                 Text("Dati insufficienti").font(.headline)
-                Text("Il calcolo usa i 14 giorni precedenti l’ultima pesata, inclusa. Servono due pesate in date diverse per misurare la variazione e calorie registrate in almeno il 90% dell’intervallo tra le pesate.").font(.caption).foregroundStyle(NativeDesign.secondary)
+                Text("Il calcolo usa i 14 giorni precedenti l’ultima pesata, inclusa. Servono due pesate in date diverse per misurare la variazione e calorie registrate in almeno il 90% dell’intervallo tra le pesate.").font(.footnote).foregroundStyle(NativeDesign.secondary)
             }
         }
     }
@@ -422,7 +422,7 @@ struct NativeHealthMetricDetail: View {
                 Button((estimate.scenarioUsesCalibrationIntake ? "Usa media del periodo di calibrazione: " : "Usa media ultimi 7 giorni: ") + estimate.averageIntake.formatted(.number.precision(.fractionLength(0))) + " kcal") {
                     intakeText = String(Int(estimate.averageIntake.rounded())); editing = false
                 }.frame(minHeight: NativeDesign.Layout.touchTarget)
-                if forecast.isEmpty { Text("Inserisci un valore fra 800 e 6.000 kcal/giorno. Questo intervallo è tecnico, non una raccomandazione alimentare.").font(.caption).foregroundStyle(NativeDesign.secondary) }
+                if forecast.isEmpty { Text("Inserisci un valore fra 800 e 6.000 kcal/giorno. Questo intervallo è tecnico, non una raccomandazione alimentare.").font(.footnote).foregroundStyle(NativeDesign.secondary) }
                 else {
                     NativeHealthWeightChart(days: health.days, forecast: forecast, onScrubbing: { setChartScrubbing("forecast", $0) })
                     ForEach([4, 8], id: \.self) { week in
@@ -432,7 +432,7 @@ struct NativeHealthMetricDetail: View {
                     }
                 }
                 Text("Scenario indicativo con attività invariata. Parte dal peso di tendenza dell’ultima giornata completa, non dall’ultima oscillazione della bilancia.")
-                    .font(.caption).foregroundStyle(NativeDesign.secondary)
+                    .font(.footnote).foregroundStyle(NativeDesign.secondary)
             }
         } else {
             NativeCard {
@@ -447,7 +447,7 @@ struct NativeHealthMetricDetail: View {
             NativeCard {
                 DisclosureGroup("Misurazioni salvate in Life OS") {
                     Text("Conservate sul dispositivo. Nel grafico, i dati Apple Health hanno precedenza sullo stesso giorno. Questi valori non vengono copiati automaticamente in Salute.")
-                        .font(.caption).foregroundStyle(NativeDesign.secondary)
+                        .font(.footnote).foregroundStyle(NativeDesign.secondary)
                     ForEach(health.localDays) { day in
                         LabeledContent(day.date.formatted(date: .abbreviated, time: .omitted), value: [day.weight.map { $0.formatted() + " kg" }, day.calories.map { $0.formatted() + " kcal" }].compactMap { $0 }.joined(separator: " · "))
                     }

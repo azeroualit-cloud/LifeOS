@@ -105,7 +105,7 @@ struct FinanceAnalysisScreen: View {
     private func legend(_ title: String, _ color: Color) -> some View {
         HStack(spacing: NativeDesign.Space.xs) {
             Circle().fill(color).frame(width: NativeDesign.Space.small, height: NativeDesign.Space.small)
-            Text(title).font(.caption).foregroundStyle(NativeDesign.secondary)
+            Text(title).font(.footnote).foregroundStyle(NativeDesign.secondary)
         }
     }
     @MainActor private func loadCategories() async {
@@ -222,7 +222,7 @@ struct FinanceAnalysisScreen: View {
         return HStack(alignment: .firstTextBaseline) {
             Text(CivilDate.monthTitle(row.text("month"))).font(.subheadline)
             if row.amount("additional") > 0 && !hidden {
-                Text("aggiuntive " + row.amount("additional").euro).font(.caption).foregroundStyle(NativeDesign.secondary)
+                Text("aggiuntive " + row.amount("additional").euro).font(.footnote).foregroundStyle(NativeDesign.secondary)
             }
             Spacer(minLength: NativeDesign.Space.small)
             Text(hidden ? "••••" : total.euro).font(.subheadline.weight(.semibold)).monospacedDigit()

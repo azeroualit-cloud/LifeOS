@@ -61,7 +61,7 @@ struct LOActionLabel: View {
                 .accessibilityHidden(true)
             Text(title).foregroundStyle(.primary).lineLimit(1).minimumScaleFactor(0.8)
         }
-        .font(.body.weight(.semibold))
+        .font(.subheadline.weight(.semibold))
     }
 }
 
@@ -75,11 +75,13 @@ struct LOGlassButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
+        // Drawn at 44 pt as a bottom action, 34 pt elsewhere; the touch area is always 44 pt.
         configuration.label
             .padding(.horizontal, NativeDesign.Space.large)
-            .frame(maxWidth: fillsWidth ? .infinity : nil, minHeight: fillsWidth && !compact ? NativeDesign.Layout.bottomAction : NativeDesign.Layout.touchTarget)
-            .contentShape(Capsule())
+            .frame(maxWidth: fillsWidth ? .infinity : nil, minHeight: fillsWidth && !compact ? NativeDesign.Layout.bottomAction : NativeDesign.Layout.compactControl)
             .modifier(NativeGlass())
+            .frame(minHeight: NativeDesign.Layout.touchTarget)
+            .contentShape(Rectangle())
             .opacity(isEnabled ? (configuration.isPressed ? NativeDesign.Motion.pressedOpacity : 1) : 0.45)
             .scaleEffect(configuration.isPressed && !reduceMotion ? NativeDesign.Motion.pressedScale : 1)
             .animation(reduceMotion ? nil : .easeOut(duration: NativeDesign.Motion.selectionDuration), value: configuration.isPressed)
@@ -150,7 +152,7 @@ struct LOStatGrid: View {
             Text(stat.title).font(.footnote.weight(.medium)).foregroundStyle(NativeDesign.secondary)
                 .lineLimit(1).minimumScaleFactor(0.8)
             HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xs) {
-                Text(stat.value).font(.title3.weight(.semibold)).monospacedDigit().foregroundStyle(.primary)
+                Text(stat.value).font(.headline.weight(.semibold)).monospacedDigit().foregroundStyle(.primary)
                     .lineLimit(1).minimumScaleFactor(0.7)
                 if !stat.unit.isEmpty { Text(stat.unit).font(.footnote).foregroundStyle(NativeDesign.secondary).lineLimit(1) }
             }
@@ -195,10 +197,10 @@ struct LOQuickRow: View {
             ForEach(items) { item in
                 Button(action: item.action) {
                     VStack(spacing: NativeDesign.Space.xs) {
-                        Image(systemName: item.systemImage).font(.title3)
+                        Image(systemName: item.systemImage).font(.headline)
                             .foregroundStyle(section == .neutral ? Color.primary : section.color)
                             .accessibilityHidden(true)
-                        Text(item.title).font(.caption.weight(.medium)).foregroundStyle(.primary)
+                        Text(item.title).font(.footnote.weight(.medium)).foregroundStyle(.primary)
                             .lineLimit(1).minimumScaleFactor(0.8)
                     }
                     .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.quickRow)
@@ -225,7 +227,7 @@ struct LOFilterPill<Options: View>: View {
         Menu(content: menu) {
             HStack(spacing: NativeDesign.Space.xs) {
                 Text(isActive ? value : title + ": " + value).lineLimit(1)
-                Image(systemName: "chevron.down").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                Image(systemName: "chevron.down").font(.footnote.weight(.semibold)).foregroundStyle(.secondary)
             }
             .font(.subheadline.weight(.medium))
             .foregroundStyle(.primary)

@@ -25,6 +25,10 @@ RULES = {
     "literal-radius": r"cornerRadius: [0-9]",
     "system-button-look": r"\.buttonStyle\(\.(bordered|borderedProminent|glassProminent)\)",
     "hand-drawn-surface": r"\.background\([^)]*, in: (RoundedRectangle|Capsule|Circle)",
+    # DESIGN-PASS-94: five text sizes (.title, .headline, .subheadline, .footnote, .caption2)
+    # and spacing only from NativeDesign tokens.
+    "off-scale-font": r"\.font\(\.(largeTitle|title2|title3|body|callout|caption)(?![0-9])",
+    "literal-spacing": r"\.padding\((\.[a-zA-Z]+, |\[[^\]]*\], )?[0-9]|spacing: [1-9]",
 }
 
 def scan():

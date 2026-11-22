@@ -34,7 +34,9 @@ import UIKit
     @StateObject private var router = NativeRouter()
     var body: some Scene {
         WindowGroup {
+            // DESIGN-PASS-94: running text is 15 pt (subheadline) unless a view picks one of the five sizes.
             rootContent.environmentObject(store).environmentObject(health).environmentObject(router).tint(NativeDesign.accent)
+                .font(.subheadline)
                 .environment(\.calendar, CivilDate.calendar)
                 .environment(\.timeZone, CivilDate.calendar.timeZone)
                 .modifier(NativeVisualTestSize()).modifier(NativeVisualTestMotion())

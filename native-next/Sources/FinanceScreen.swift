@@ -15,7 +15,7 @@ struct FinanceScreen: View {
         VStack(spacing: NativeDesign.Space.none) {
             HStack {
                 Button { if router.tab == .finance { router.tab = .dashboard } else { dismiss() } } label: { Image(systemName: "chevron.left").frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget) }.accessibilityLabel("Torna alla Dashboard").accessibilityIdentifier("other-back")
-                Text("Finanza").font(.largeTitle.bold()).lineLimit(1).minimumScaleFactor(0.75).accessibilityAddTraits(.isHeader).accessibilityIdentifier("finance-heading")
+                Text("Finanza").font(.title.bold()).lineLimit(1).minimumScaleFactor(0.75).accessibilityAddTraits(.isHeader).accessibilityIdentifier("finance-heading")
                 Spacer()
                 NativeToolbarButton(symbol: hidden ? "eye.slash" : "eye", label: hidden ? "Mostra importi" : "Nascondi importi") { hidden.toggle() }
                     .accessibilityIdentifier("finance-hide-amounts")
@@ -33,7 +33,7 @@ struct FinanceScreen: View {
                 if !store.financialPending.isEmpty {
                     VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
                         Label("\(store.financialPending.count) movimenti salvati sul dispositivo", systemImage: "icloud.and.arrow.up").font(.subheadline)
-                        Text("In attesa di sincronizzazione. Il saldo mostra l’ultimo dato del server.").font(.caption).foregroundStyle(NativeDesign.secondary)
+                        Text("In attesa di sincronizzazione. Il saldo mostra l’ultimo dato del server.").font(.footnote).foregroundStyle(NativeDesign.secondary)
                     }
                 }
                 NativeConnectionBadge()
@@ -72,7 +72,7 @@ struct FinanceScreen: View {
             .padding(.horizontal, NativeDesign.Layout.compactCardInset).padding(.vertical, NativeDesign.Layout.cardInsetVertical)
             .loCardSurface()
             if store.financeMonth != CivilDate.month() {
-                Text("Saldo dell’ultima sincronizzazione").font(.caption).foregroundStyle(NativeDesign.secondary)
+                Text("Saldo dell’ultima sincronizzazione").font(.footnote).foregroundStyle(NativeDesign.secondary)
             }
         }
     }
@@ -110,15 +110,15 @@ struct FinanceScreen: View {
     }
     private func financeTile(_ title: String, symbol: String) -> some View {
         VStack(spacing: NativeDesign.Space.xs) {
-            Image(systemName: symbol).font(.title3.weight(.regular)).foregroundStyle(NativeDesign.financeTitle)
-            Text(title).font(.caption.weight(.medium)).lineLimit(1).minimumScaleFactor(0.75)
+            Image(systemName: symbol).font(.headline.weight(.regular)).foregroundStyle(NativeDesign.financeTitle)
+            Text(title).font(.footnote.weight(.medium)).lineLimit(1).minimumScaleFactor(0.75)
         }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.quickRow)
             .contentShape(Rectangle())
     }
     private var recentMovements: some View {
         let rows = Array(store.transactions.prefix(3))
         return VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-            Text("Ultimi movimenti").font(.title3.bold()).accessibilityAddTraits(.isHeader)
+            Text("Ultimi movimenti").font(.headline.bold()).accessibilityAddTraits(.isHeader)
             if rows.isEmpty {
                 Text("Nessun movimento nel mese").font(.subheadline).foregroundStyle(NativeDesign.secondary)
             } else {
@@ -150,7 +150,7 @@ struct FinanceScreen: View {
     private func movementDescription(_ record: Record) -> some View {
         HStack(spacing: NativeDesign.Space.medium) {
             Image(systemName: NativeCategoryCatalog.symbol(for: record.text("displayCategory", fallback: record.text("category"))))
-                .font(.body).foregroundStyle(NativeDesign.financeTitle)
+                .font(.subheadline).foregroundStyle(NativeDesign.financeTitle)
                 .frame(width: NativeDesign.Layout.iconTile, height: NativeDesign.Layout.iconTile)
                 .loTileSurface()
             NativeRowText(title: record.text("name"), subtitle: CivilDate.label(record.text("date")), titleLineLimit: 2)
@@ -191,7 +191,7 @@ struct FinanceScreen: View {
                 Button("Riprova invio") { Task { await store.sync(scope: .finance) } }.disabled(store.busy || store.syncing)
                 ForEach(store.financialPending) { pending in
                     VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-                        HStack { VStack(alignment: .leading) { Text(pending.payload.text("name")); Text(pending.accepted ? "Inviato · aggiornamento da completare" : "Conferma del server in attesa").font(.caption).foregroundStyle(NativeDesign.secondary) }; Spacer(); MoneyText(amount: pending.payload.amount("amount")) }
+                        HStack { VStack(alignment: .leading) { Text(pending.payload.text("name")); Text(pending.accepted ? "Inviato · aggiornamento da completare" : "Conferma del server in attesa").font(.footnote).foregroundStyle(NativeDesign.secondary) }; Spacer(); MoneyText(amount: pending.payload.amount("amount")) }
                         if !pending.accepted && pending.payload.integer("expenseRoutingVersion") == 1 {
                             Button("Correggi destinazione") {
                                 Task { do { try await store.cancelPendingExpense(pending.id); router.sheet = .movement(pending.payload) } catch { store.error = error.localizedDescription } }
@@ -252,7 +252,7 @@ struct NativeSavingsSection: View {
             LabeledContent("Prossimo traguardo", value: hidden ? "••••" : progress.target.euro)
             LabeledContent("Manca", value: hidden ? "••••" : progress.missing.euro)
             LabeledContent("Da risparmiare al mese", value: hidden ? "••••" : progress.monthly.euro)
-            Text("Cifra mancante divisa per \(progress.months) mesi fino a dicembre, incluso quello corrente.").font(.caption).foregroundStyle(NativeDesign.secondary)
+            Text("Cifra mancante divisa per \(progress.months) mesi fino a dicembre, incluso quello corrente.").font(.footnote).foregroundStyle(NativeDesign.secondary)
             Button("Obiettivo e fondo emergenza") { router.sheet = .planning }
         }
     }
@@ -337,7 +337,7 @@ struct MovementEditor: View {
             if snapshotChoice {
                 Section {
                     Toggle("Già inclusa nel saldo rilevato", isOn: $included)
-                    Text("Usa questa opzione solo se la banca aveva già contabilizzato il movimento nella rilevazione. Il server verifica la data.").font(.caption).foregroundStyle(NativeDesign.secondary)
+                    Text("Usa questa opzione solo se la banca aveva già contabilizzato il movimento nella rilevazione. Il server verifica la data.").font(.footnote).foregroundStyle(NativeDesign.secondary)
                 }
             }
             Section("Note") { TextField("Note", text: $note, axis: .vertical).focused($editingInput, equals: .note).disabled(linkedPayment) }

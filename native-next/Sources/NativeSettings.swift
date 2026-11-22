@@ -54,8 +54,8 @@ struct NativeSettings: View {
                 Button("Importa snapshot JSON") { message = nil; importing = true }.disabled(store.server != nil || store.busy)
                 NavigationLink("Incolla JSON") { PasteJSONScreen() }.disabled(store.server != nil || store.busy)
             }
-            if let message { Section { Text(message).font(.callout).textSelection(.enabled) } }
-            if let notice = store.notice { Section { Text(notice).font(.caption).foregroundStyle(NativeDesign.secondary) } }
+            if let message { Section { Text(message).font(.subheadline).textSelection(.enabled) } }
+            if let notice = store.notice { Section { Text(notice).font(.footnote).foregroundStyle(NativeDesign.secondary) } }
             Section("Life OS") {
                 LabeledContent("Versione", value: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.3")
                 LabeledContent("Build", value: Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "—")

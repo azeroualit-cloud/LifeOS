@@ -16,7 +16,7 @@ struct NativeTDEEScreen: View {
             VStack(alignment: .leading, spacing: NativeDesign.Space.section) {
                 VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
                     Text(estimate.map { whole(($0.tdee / 10).rounded() * 10) } ?? "Dati insufficienti")
-                        .font(.largeTitle.bold()).monospacedDigit()
+                        .font(.title.bold()).monospacedDigit()
                         .accessibilityIdentifier("tdee-value")
                     Text("kcal al giorno · ultimi \(criteria.days) giorni").font(.subheadline).foregroundStyle(NativeDesign.secondary)
                 }
@@ -89,7 +89,7 @@ struct NativeTDEEScreen: View {
                     identifier: "tdee-missing")
                 Divider()
                 VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-                    Text("Pendenza del peso").font(.body)
+                    Text("Pendenza del peso").font(.subheadline)
                     LOSegmented(options: [("Mediana", "median"), ("Regressione", "regression")], selection: Binding(
                         get: { criteria.slope == .median ? "Mediana" : "Regressione" },
                         set: { preferences.criteria.slope = $0 == "Mediana" ? .median : .regression }), identifierPrefix: "tdee-slope-")
@@ -147,7 +147,7 @@ struct NativeWeightSimulationScreen: View {
         ScrollView {
             VStack(alignment: .leading, spacing: NativeDesign.Space.section) {
                 HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xs) {
-                    Text(latest.map(kg) ?? "—").font(.largeTitle.bold()).monospacedDigit()
+                    Text(latest.map(kg) ?? "—").font(.title.bold()).monospacedDigit()
                     Text("kg oggi").font(.subheadline).foregroundStyle(NativeDesign.secondary)
                 }
                 .accessibilityElement(children: .combine)
@@ -233,11 +233,11 @@ struct NativeWeightSimulationScreen: View {
                     identifier: "simulation-trend-weeks")
             } else {
                 HStack(spacing: NativeDesign.Space.small) {
-                    Text("Se mangio").font(.body)
+                    Text("Se mangio").font(.subheadline)
                     Spacer()
                     stepButton("minus", "Meno calorie") { adjustIntake(-100) }
                     TextField("kcal", text: $intakeText).keyboardType(.numberPad).focused($editingIntake)
-                        .multilineTextAlignment(.center).monospacedDigit().font(.body.weight(.semibold))
+                        .multilineTextAlignment(.center).monospacedDigit().font(.subheadline.weight(.semibold))
                         .frame(width: NativeDesign.Layout.categoryWidth, height: NativeDesign.Layout.touchTarget)
                         .accessibilityLabel("Calorie dello scenario").accessibilityIdentifier("health-intake")
                     stepButton("plus", "Più calorie") { adjustIntake(100) }
@@ -279,7 +279,7 @@ struct NativeWeightSimulationScreen: View {
             Divider()
             VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
                 Text("Per arrivarci in \(horizon) settimane").font(.footnote).foregroundStyle(NativeDesign.secondary)
-                Text(needText).font(.title2.bold()).monospacedDigit()
+                Text(needText).font(.title.bold()).monospacedDigit()
                     .foregroundStyle(low ? NativeDesign.overGoal : Color.primary)
                 if let detail = needDetail {
                     Text(detail).font(.footnote).foregroundStyle(NativeDesign.secondary)
@@ -297,7 +297,7 @@ struct NativeWeightSimulationScreen: View {
 
     private func stepButton(_ symbol: String, _ label: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Image(systemName: symbol).font(.body.weight(.semibold))
+            Image(systemName: symbol).font(.subheadline.weight(.semibold))
                 .frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget)
                 .contentShape(Circle())
                 .modifier(NativeGlass())

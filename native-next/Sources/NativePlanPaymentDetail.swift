@@ -20,7 +20,7 @@ struct NativePlanPaymentDetail: View {
                 Section {
                     LabeledContent("Importo", value: (Double(payment.integer("amountCents")) / 100).euro)
                     LabeledContent("Data", value: CivilDate.label(payment.text("date")))
-                    Text("Pagamento collegato al piano. Puoi eliminarlo anche se il piano è interrotto.").font(.caption).foregroundStyle(NativeDesign.secondary)
+                    Text("Pagamento collegato al piano. Puoi eliminarlo anche se il piano è interrotto.").font(.footnote).foregroundStyle(NativeDesign.secondary)
                 }
                 if !payment.record("utilityPeriod").isEmpty || NativeUtilityPeriodDraft.isCostFund(store.finance.record("plansV2").records("plans").first(where: { $0.text("id") == planID }) ?? [:]) {
                     Section("Periodo della bolletta") {

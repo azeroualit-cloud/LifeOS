@@ -69,13 +69,13 @@ struct NativePersonalFoodEditor: View {
                     }.accessibilityIdentifier("personal-food-unit")
                     if unit == .legacyServing {
                         Text("Questa voce precedente conserva i valori per dose. Scegli capsule, compresse o grammi e verifica i valori prima di salvare.")
-                            .font(.caption).foregroundStyle(.secondary)
+                            .font(.footnote).foregroundStyle(.secondary)
                     }
                 }
             }
             Section(family == .supplement ? "Valori per " + unit.basisTitle : "Valori per " + (original?.cocktail != nil ? "bicchiere" : original?.measurementBasis == "ml" ? "100 ml" : "100 g")) {
                 if nutritionNotDeclared {
-                    Text("Energia e macro non disponibili: non verranno inviati ad Apple Salute.").font(.caption).foregroundStyle(.secondary)
+                    Text("Energia e macro non disponibili: non verranno inviati ad Apple Salute.").font(.footnote).foregroundStyle(.secondary)
                 } else {
                 amount("Calorie (kcal)", text: $energy).accessibilityIdentifier("personal-food-energy")
                 amount("Proteine (g)", text: $protein).accessibilityIdentifier("personal-food-protein")
@@ -86,7 +86,7 @@ struct NativePersonalFoodEditor: View {
                 if family == .supplement { amount("Caffeina (mg), facoltativa", text: $caffeine) }
             }
             if let note = original?.dataNote {
-                Section { Text(note).font(.caption).foregroundStyle(.secondary) }
+                Section { Text(note).font(.footnote).foregroundStyle(.secondary) }
             }
             Section {
                 DisclosureGroup("Micronutrienti e omega-3, facoltativi") {

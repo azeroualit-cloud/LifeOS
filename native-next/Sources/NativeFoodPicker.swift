@@ -358,21 +358,21 @@ struct NativeFoodPicker: View {
                             dismiss()
                         } label: {
                             HStack(spacing: NativeDesign.Space.medium) {
-                                Text(food.cocktail == nil ? food.family.icon : "🍸").font(.title3).accessibilityHidden(true)
+                                Text(food.cocktail == nil ? food.family.icon : "🍸").font(.headline).accessibilityHidden(true)
                                 VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
                                     Text(food.name)
                                     if let detail = food.displayDetail {
                                         Text(detail).font(.subheadline).foregroundStyle(.secondary)
                                     }
                                     if food.isCommunitySourced {
-                                        Text("Open Food Facts · dati collaborativi").font(.caption).foregroundStyle(.secondary)
+                                        Text("Open Food Facts · dati collaborativi").font(.footnote).foregroundStyle(.secondary)
                                     }
                                     if let cocktail = food.cocktail {
                                         Text("≈ \(NSDecimalNumber(decimal: food.calories)) kcal · \(cocktail.volumeML) ml / bicchiere")
-                                            .font(.caption).foregroundStyle(.secondary)
+                                            .font(.footnote).foregroundStyle(.secondary)
                                     } else {
                                         Text((food.nutritionNotDeclared == true ? "Energia e macro non dichiarati" : "per \(food.quantityUnit.basisTitle)") + " · " + (personalIDs.contains(food.id) ? "Personale" : "Catalogo"))
-                                            .font(.caption).foregroundStyle(.secondary)
+                                            .font(.footnote).foregroundStyle(.secondary)
                                     }
                                 }.frame(minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
                                 Spacer(minLength: NativeDesign.Space.small)
@@ -380,7 +380,7 @@ struct NativeFoodPicker: View {
                                     Text(NSDecimalNumber(decimal: food.calories / food.basisDivisor).doubleValue.formatted(.number.precision(.fractionLength(0))) + " kcal")
                                         .font(.subheadline).monospacedDigit().foregroundStyle(.secondary)
                                 }
-                                Image(systemName: "plus.circle.fill").font(.title3).foregroundStyle(NativeDesign.nutritionTitle).accessibilityHidden(true)
+                                Image(systemName: "plus.circle.fill").font(.headline).foregroundStyle(NativeDesign.nutritionTitle).accessibilityHidden(true)
                             }
                         }.accessibilityIdentifier("generic-food-" + food.id)
                             .listRowBackground(NativeDesign.nutritionInput)

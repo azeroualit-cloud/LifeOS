@@ -137,10 +137,14 @@ enum NativeDesign {
         static let nutritionInputLine: CGFloat = 32
         static let nutritionFieldHeight: CGFloat = 72
         static let financeTile: CGFloat = 72
-        static let bottomAction: CGFloat = 55
+        /// Bottom glass actions, drawn and touched at 44 pt (DESIGN-PASS-94).
+        static let bottomAction: CGFloat = 44
+        /// Drawn height of buttons inside cards, pills and chips; the touch area stays touchTarget.
+        static let compactControl: CGFloat = Space.section
         static let quickRow: CGFloat = 55
         static let nutritionKcalColumn: CGFloat = 64
-        static let segmentHeight: CGFloat = 34
+        /// Segment height; with its 2 pt glass rim the switch is drawn at compactControl (34 pt).
+        static let segmentHeight: CGFloat = 30
         static let bloomSectionSwitch: CGFloat = 200
         static let bloomRowThumbnail: CGFloat = 60
         /// Fixed room for the floating system tab bar where a screen must not
@@ -159,7 +163,7 @@ enum NativeDesign {
         static let healthSummaryChartHeight: CGFloat = 50
         static let healthOverviewChart: CGFloat = 88
         static let healthSelectionCaptionHeight: CGFloat = 28
-        static let rowHeight: CGFloat = 55
+        static let rowHeight: CGFloat = 44 // DESIGN-PASS-94: tappable rows 44 pt (was 55)
         static let iconTile: CGFloat = 34
         static let tabHeight: CGFloat = 52
         static let primaryAction: CGFloat = 55
@@ -210,7 +214,7 @@ enum NativeDesign {
     static let cardRadius: CGFloat = 21
     static let controlRadius: CGFloat = 13
     static let dayRadius: CGFloat = 13
-    static let badgeRadius: CGFloat = 6
+    static let badgeRadius: CGFloat = 5 // golden scale
     static let progressRadius: CGFloat = 3
     static let heading = Font.system(.headline, weight: .semibold)
     static let value = Font.system(.title, weight: .semibold)
