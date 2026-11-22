@@ -244,7 +244,7 @@ struct LOLinkCard<Content: View>: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
+            VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
                 HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.small) {
                     Text(title).font(.headline).foregroundStyle(color)
                     Spacer(minLength: NativeDesign.Space.small)
@@ -253,7 +253,7 @@ struct LOLinkCard<Content: View>: View {
                 }
                 content()
             }
-            .padding(NativeDesign.Layout.cardInset)
+            .padding(.horizontal, NativeDesign.Layout.cardInset).padding(.vertical, NativeDesign.Layout.cardInsetVertical)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.cardRadius, style: .continuous))
             .contentShape(Rectangle())

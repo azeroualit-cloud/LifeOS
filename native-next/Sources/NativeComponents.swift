@@ -45,7 +45,8 @@ struct NativePressStyle: ButtonStyle {
 enum NativeCardDensity: Equatable {
     case standard, compact
     var inset: CGFloat { self == .standard ? NativeDesign.Layout.cardInset : NativeDesign.Layout.compactCardInset }
-    var gap: CGFloat { NativeDesign.Space.medium }
+    /// Rows inside a card are 8 pt apart (SPACING-SYSTEM-2026-11-22).
+    var gap: CGFloat { NativeDesign.Space.small }
 }
 struct NativeCard<Content: View>: View {
     let content: Content
@@ -58,8 +59,9 @@ struct NativeCard<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: density.gap) { content }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding([.horizontal, .bottom], density.inset)
-            .padding(.top, topInset ?? density.inset)
+            .padding(.horizontal, density.inset)
+            .padding(.bottom, NativeDesign.Layout.cardInsetVertical)
+            .padding(.top, topInset ?? NativeDesign.Layout.cardInsetVertical)
             .modifier(NativeSurface(material: material))
     }
 }

@@ -16,7 +16,7 @@ struct DashboardScreen: View {
         TimelineView(.periodic(from: .now, by: 60)) { context in
             let now = context.date, today = CivilDate.day(now)
             ScrollView {
-                VStack(alignment: .leading, spacing: NativeDesign.Space.section) {
+                VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
                     heading(today: today, now: now)
                     // DASHBOARD-93-2026-11-21: week, things to do, nutrition, finance, appointments.
                     rollingCalendar(today, now: now)
@@ -230,7 +230,7 @@ struct DashboardScreen: View {
                 }
                 financeRecent
             }
-            .padding(NativeDesign.Layout.cardInset)
+            .padding(.horizontal, NativeDesign.Layout.cardInset).padding(.vertical, NativeDesign.Layout.cardInsetVertical)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.cardRadius, style: .continuous))
             .contentShape(Rectangle())

@@ -321,7 +321,6 @@ struct NativeHealthDetail: View {
                     Spacer()
                     NativeDisclosureIndicator()
                 }
-                .frame(minHeight: NativeDesign.Layout.touchTarget)
                 .contentShape(Rectangle())
             }
             .buttonStyle(NativePressStyle())
@@ -511,7 +510,7 @@ private struct NativeHealthSummaryRow: View {
                 HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xs) { amountText; unitText }.fixedSize()
                 VStack(alignment: .leading, spacing: NativeDesign.Space.xs) { amountText; unitText }
             }
-        }.padding(NativeDesign.Layout.compactCardInset)
+        }.padding(.horizontal, NativeDesign.Layout.compactCardInset).padding(.vertical, NativeDesign.Layout.cardInsetVertical)
             .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, maxHeight: .infinity, alignment: .topLeading)
             .background(NativeDesign.healthSurface, in: RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
             .contentShape(Rectangle())

@@ -161,7 +161,7 @@ struct NativeBudgetHero93: View {
             .font(.footnote).monospacedDigit().foregroundStyle(NativeDesign.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(NativeDesign.Layout.compactCardInset)
+        .padding(.horizontal, NativeDesign.Layout.compactCardInset).padding(.vertical, NativeDesign.Layout.cardInsetVertical)
         .loCardSurface()
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("budget-hero")
@@ -229,7 +229,7 @@ struct NativeSalaryMapCard: View {
                     legend(items, salary: salary)
                     if let item = items.first(where: { $0.id == selected }) { detail(item, items: items, salary: salary) }
                 }
-                .padding(NativeDesign.Layout.compactCardInset)
+                .padding(.horizontal, NativeDesign.Layout.compactCardInset).padding(.vertical, NativeDesign.Layout.cardInsetVertical)
                 .loCardSurface()
             }
         }

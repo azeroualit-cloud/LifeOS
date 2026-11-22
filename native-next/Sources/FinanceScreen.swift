@@ -69,7 +69,7 @@ struct FinanceScreen: View {
                 HStack(alignment: .firstTextBaseline) { accountName; Spacer(minLength: NativeDesign.Space.small); accountBalance }
                 VStack(alignment: .leading, spacing: NativeDesign.Space.small) { accountName; accountBalance }
             }
-            .padding(NativeDesign.Layout.compactCardInset)
+            .padding(.horizontal, NativeDesign.Layout.compactCardInset).padding(.vertical, NativeDesign.Layout.cardInsetVertical)
             .loCardSurface()
             if store.financeMonth != CivilDate.month() {
                 Text("Saldo dell’ultima sincronizzazione").font(.caption).foregroundStyle(NativeDesign.secondary)

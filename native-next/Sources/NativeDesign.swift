@@ -131,6 +131,8 @@ enum NativeDesign {
         static let listInset = Space.large
         static let cardInset = Space.large // was xLarge: less padding (22/11/2026)
         static let compactCardInset = Space.large
+        /// Top and bottom inset of every card (SPACING-SYSTEM-2026-11-22); sides use cardInset.
+        static let cardInsetVertical = Space.medium
         static let groupedInset = Space.large
         static let nutritionInputLine: CGFloat = 32
         static let nutritionFieldHeight: CGFloat = 72
