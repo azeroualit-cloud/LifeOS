@@ -319,12 +319,8 @@ struct NativeHealthDetail: View {
         return NativeCard {
             // Programmatic push: closure links stop working next to navigationDestination(item:).
             Button { showingMicronutrients = true } label: {
-                HStack {
-                    Text("Micronutrienti · in evidenza").font(.footnote.weight(.semibold)).foregroundStyle(NativeDesign.nutritionTitle)
-                    Spacer()
-                    NativeDisclosureIndicator()
-                }
-                .contentShape(Rectangle())
+                LOCardHeader(title: "Micronutrienti", systemImage: "leaf", section: .nutrition, showsChevron: true, trailing: "in evidenza")
+                    .contentShape(Rectangle().inset(by: -NativeDesign.Space.medium)) // 44 pt touch without 44 pt of layout
             }
             .buttonStyle(NativePressStyle())
             .accessibilityLabel("Tutti i micronutrienti")

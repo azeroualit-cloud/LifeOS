@@ -22,19 +22,26 @@ enum LOSection {
     }
 }
 
-/// Card header: coloured icon and title on the left, optional chevron on the right.
+/// Card header, the same on every card (DESIGN-PASS-94): coloured icon and title on the left,
+/// an optional value and chevron on the right. No forced 44 pt height: the whole card is the tap.
 struct LOCardHeader: View {
     let title: String
     let systemImage: String
     var section: LOSection = .neutral
     var showsChevron = false
+    var trailing: String? = nil
 
     var body: some View {
         HStack(spacing: NativeDesign.Space.small) {
             Label { Text(title) } icon: { LOSymbol(name: systemImage) }
                 .font(.headline)
                 .foregroundStyle(section.color)
+                .lineLimit(1)
             Spacer(minLength: NativeDesign.Space.small)
+            if let trailing {
+                Text(trailing).font(.footnote).foregroundStyle(NativeDesign.secondary).monospacedDigit()
+                    .lineLimit(1).minimumScaleFactor(0.8)
+            }
             if showsChevron {
                 Image(systemName: "chevron.right")
                     .font(.footnote.weight(.semibold))
@@ -42,7 +49,6 @@ struct LOCardHeader: View {
                     .accessibilityHidden(true)
             }
         }
-        .frame(minHeight: NativeDesign.Layout.touchTarget)
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isHeader)
     }

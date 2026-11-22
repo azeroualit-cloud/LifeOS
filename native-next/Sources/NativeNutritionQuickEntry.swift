@@ -22,16 +22,9 @@ struct NativeNutritionQuickEntry: View {
             : AnyLayout(HStackLayout(alignment: .top, spacing: NativeDesign.Space.medium))
         NativeCard {
             Button { router.tab = .health } label: {
-                HStack(spacing: NativeDesign.Space.small) {
-                    Label { Text("Nutrizione") } icon: { LOSymbol(name: NativeHealthMetric.calories.symbol) }
-                        .font(.headline).foregroundStyle(NativeDesign.nutritionTitle)
-                    Spacer(minLength: NativeDesign.Space.small)
-                    Text(kcalText + goalText + " kcal").font(.subheadline).foregroundStyle(NativeDesign.secondary).monospacedDigit()
-                        .lineLimit(1).minimumScaleFactor(0.8)
-                    NativeDisclosureIndicator()
-                }
-                .frame(minHeight: NativeDesign.Layout.touchTarget)
-                .contentShape(Rectangle())
+                LOCardHeader(title: "Nutrizione", systemImage: NativeHealthMetric.calories.symbol, section: .nutrition,
+                             showsChevron: true, trailing: kcalText + goalText + " kcal")
+                .contentShape(Rectangle().inset(by: -NativeDesign.Space.medium)) // 44 pt touch without 44 pt of layout
             }
             .buttonStyle(NativePressStyle())
             .accessibilityElement(children: .ignore)
