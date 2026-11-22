@@ -79,3 +79,13 @@ Limiti dichiarati:
 - Avvisi solo locali: nessun invio dal server; il tocco apre la Dashboard.
 - Fogli Quantità, Macro a mano, Alimento personale, Evento e Categorie restano moduli iOS raggruppati con i nuovi token.
 
+## Diario alimentare condiviso e sito (22 novembre 2026)
+
+Decisioni: `FOOD-DIARY-SERVER-2026-11-22` (diario sul server, registrato dal telefono e modificabile dal PC; peso solo in Apple Salute), `SITE-PARITY-2026-11-22` (il sito non ha mai meno dell'app). Su richiesta dell'utente («No, nella 93») il diario entra nella build 93: il run candidato 45030075390, già verde sulla suite completa, è stato annullato prima della pubblicazione; nessuna IPA prodotta. `scripts/verify-candidate93.py` rifiuta l'IPA senza `NativeFoodDiarySync.swift`.
+
+- Server (`backend/bloom-foods`, Worker `lifeos-native-test`): tabella `web_food_diary` nel D1 condiviso; `listFoodDiary(since)`, `listFoodDiaryDays(from,to)`, `saveFoodDiaryEntry`, `deleteFoodDiaryEntry`, `importFoodDiary`. Vince la modifica più recente (`modified` in millisecondi); le eliminazioni restano come righe `deleted`; il giorno è quello di Roma. Test Node verdi.
+- App (`NativeFoodDiarySync.swift`): ogni pasto salvato o eliminato entra in coda per il server; lo storico del telefono viene inviato una volta (ripetibile senza doppioni); le modifiche dal PC vengono scritte in Apple Salute con revisione più alta (sostituisce i campioni precedenti), le eliminazioni tolte da Apple Salute. Worker vecchio: nessun cambiamento sul telefono, la coda resta. Test unitari in `NativeFoodDiarySyncTests.swift`.
+- Sito (ramo `codex/revision77`, `web/`): Diario per giorno in Nutrizione con totali, aggiunta da alimento personale o macro a mano, modifica (la quantità scala macro e micronutrienti) ed eliminazione; stessi metodi nel Worker `lifeos`. Inoltre: mappa Dove va lo stipendio con testo in ogni riquadro e popup di voce e gruppo; Analisi con Ritmo, Quanto dura il fondo, Giorno per giorno; Da dove arrivano i soldi con Risparmi; Avvisi di Finanza.
+
+Distribuzione: i due Worker (`lifeos-native-test` con `lifeos-bloomfoods-deploy93.yml`, `lifeos` con `web/DEPLOY.md`) li distribuisce l'utente. Senza di essi l'app continua a funzionare solo sul telefono.
+
