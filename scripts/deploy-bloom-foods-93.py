@@ -39,4 +39,9 @@ def transform(source):
 if __name__ == '__main__':
     deployment.helpers.WORKERS = ['lifeos-native-test']
     deployment.transform = transform
-    deployment.main(label='BLOOM_FOODS_93_DEPLOYED_AND_VERIFIED')
+    try:
+        deployment.main(label='BLOOM_FOODS_93_DEPLOYED_AND_VERIFIED')
+    except Exception as error:
+        # Messages are fixed Italian texts or exception classes: no source, records or credentials.
+        print('::error title=Deploy lifeos-native-test::' + type(error).__name__ + ': ' + str(error)[:300])
+        raise SystemExit(1)

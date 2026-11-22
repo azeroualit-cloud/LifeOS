@@ -58,4 +58,9 @@ def transform(source):
 if __name__ == '__main__':
     deployment.helpers.WORKERS = ['lifeos']
     deployment.transform = transform
-    deployment.main(label='SITE_93_DEPLOYED_AND_VERIFIED')
+    try:
+        deployment.main(label='SITE_93_DEPLOYED_AND_VERIFIED')
+    except Exception as error:
+        # Messages are fixed Italian texts or exception classes: no source, records or credentials.
+        print('::error title=Deploy lifeos::' + type(error).__name__ + ': ' + str(error)[:300])
+        raise SystemExit(1)
