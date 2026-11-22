@@ -1,5 +1,5 @@
 name: LifeOS candidate 93 validation and authorized IPA
-# Start 7 for IPA-DELIVERY-93-2026-11-21: stops the previous run; the IPA waits for the shared food diary (FOOD-DIARY-SERVER-2026-11-22). (build 93: golden-ratio layout, Salute trend and goals, Finanza overview/analysis/alerts, Bloom map card). Change this line to start a new attempt on the current commit.
+# Start 8 for IPA-DELIVERY-93-2026-11-21: build 93 with the shared food diary (FOOD-DIARY-SERVER-2026-11-22). (build 93: golden-ratio layout, Salute trend and goals, Finanza overview/analysis/alerts, Bloom map card). Change this line to start a new attempt on the current commit.
 on:
   workflow_dispatch:
   push:
