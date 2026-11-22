@@ -63,7 +63,13 @@ final class NativeNutritionQuickUITests: XCTestCase {
             if !visible(field, in: app) { capture("Nutrition keyboard: \(label) not fully visible", app) }
             XCTAssertTrue(visible(field, in: app),
                           "\(label) must be above the pinned action and keyboard: field \(field.frame), viewport \(visibleRegion(in: app))")
-            XCTAssertTrue(field.isHittable); field.tap(); field.typeText(value)
+            XCTAssertTrue(field.isHittable); field.tap()
+            // A tap that lands while the sheet is still settling can leave focus on the
+            // previous field; tap again until this field owns the keyboard.
+            for _ in 0..<3 where !(field.value(forKey: "hasKeyboardFocus") as? Bool ?? false) {
+                Thread.sleep(forTimeInterval: 0.3); field.tap()
+            }
+            field.typeText(value)
         }
     }
     func testRenderCocktailAndBoneInPortions() {

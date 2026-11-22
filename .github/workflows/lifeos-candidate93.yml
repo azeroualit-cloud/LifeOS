@@ -1,5 +1,5 @@
 name: LifeOS candidate 93 validation and authorized IPA
-# Start 5 for IPA-DELIVERY-93-2026-11-21 (month grid with build 92 metrics, build 92 header at accessibility sizes) (build 93: golden-ratio layout, Salute trend and goals, Finanza overview/analysis/alerts, Bloom map card). Change this line to start a new attempt on the current commit.
+# Start 6 for IPA-DELIVERY-93-2026-11-21 (nutrition typing waits for keyboard focus) (build 93: golden-ratio layout, Salute trend and goals, Finanza overview/analysis/alerts, Bloom map card). Change this line to start a new attempt on the current commit.
 on:
   workflow_dispatch:
   push:
