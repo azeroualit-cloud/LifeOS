@@ -1,7 +1,7 @@
 name: Life OS - Bloom e alimenti nel Worker dell'app (build 93)
 # Solo avvio manuale dell'utente. Cambia lifeos-native-test aggiungendo le letture e scritture di Bloom e
 # alimenti personali sulle stesse tabelle del sito. Nessuna altra modifica backend.
-# Attempt 6 (token replaced by the user). DEPLOY-WORKERS-93-2026-11-22: a push that changes this file is the deliberate start
+# Attempt 7 (verification reason as annotation). DEPLOY-WORKERS-93-2026-11-22: a push that changes this file is the deliberate start
 # (a workflow present only on this branch cannot be dispatched).
 on:
   workflow_dispatch:
@@ -72,5 +72,6 @@ jobs:
               stage='diary'; diary=post('/api/listFoodDiary',[1e15]); assert diary['version']==1 and isinstance(diary['entries'],list)
               print('BLOOM_FOODS_93_READ_CONTRACT_OK foods=%d items=%d collections=%d diary=v1; no private content logged.'%(len(foods['foods']),len(bloom['items']),len(bloom['collections'])))
           except Exception as error:
+              print('::error title=Verifica lifeos-native-test::stage='+stage+' class='+type(error).__name__+' HTTP='+str(getattr(error,'code','n/a')))
               raise SystemExit('Verifica API fallita: stage='+stage+' class='+type(error).__name__+' HTTP='+str(getattr(error,'code','n/a')))
           PY

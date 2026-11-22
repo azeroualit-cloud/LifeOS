@@ -30,13 +30,38 @@ def diary_block():
     return MARKER + '\n' + text.rstrip('\n') + '\n'
 
 
+def replace_app_html(source, html):
+    """Replaces the string assigned to APP_HTML whatever the quoting (bundlers may use ` or ')."""
+    found = list(re.finditer(r'\b(?:var|let|const)\s+APP_HTML\s*=\s*', source))
+    if len(found) != 1:
+        raise RuntimeError('APP_HTML non trovato nel Worker online (%d); nessuna scrittura.' % len(found))
+    start = found[0].end()
+    quote = source[start:start + 1]
+    if quote not in ('"', "'", '`'):
+        raise RuntimeError('APP_HTML non e una stringa; nessuna scrittura.')
+    i = start + 1
+    while i < len(source):
+        c = source[i]
+        if c == '\\':
+            i += 2
+            continue
+        if quote == '`' and source.startswith('${', i):
+            raise RuntimeError('APP_HTML con espressioni; nessuna scrittura.')
+        if c == quote:
+            break
+        i += 1
+    else:
+        raise RuntimeError('Fine di APP_HTML non trovata; nessuna scrittura.')
+    if '</html>' not in source[start:i + 1]:
+        raise RuntimeError('APP_HTML online non contiene una pagina; nessuna scrittura.')
+    return source[:start] + json.dumps(html, ensure_ascii=True) + source[i + 1:]
+
+
 def transform(source):
     html = Path('site/app.html').read_text(encoding='utf-8')
     if '<html' not in html or 'fdSection' not in html:
         raise RuntimeError('Interfaccia del sito non riconosciuta; nessuna scrittura.')
-    source, count = re.subn(r'var APP_HTML = ".*";', lambda _: 'var APP_HTML = ' + json.dumps(html, ensure_ascii=True) + ';', source, count=1)
-    if count != 1:
-        raise RuntimeError('APP_HTML non trovato nel Worker online; nessuna scrittura.')
+    source = replace_app_html(source, html)
     block = diary_block()
     if MARKER in source:
         if block not in source:
