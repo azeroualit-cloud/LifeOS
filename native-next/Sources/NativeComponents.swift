@@ -28,6 +28,7 @@ struct NativeSurface: ViewModifier {
             content.background(.regularMaterial, in: RoundedRectangle(cornerRadius: NativeDesign.cardRadius, style: .continuous))
         } else {
             content.background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.cardRadius, style: .continuous))
+                .shadow(color: NativeDesign.cardShadow, radius: NativeDesign.cardShadowRadius, y: NativeDesign.cardShadowOffset)
         }
     }
 }

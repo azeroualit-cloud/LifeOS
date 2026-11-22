@@ -232,7 +232,7 @@ struct DashboardScreen: View {
             }
             .padding(.horizontal, NativeDesign.Layout.cardInset).padding(.vertical, NativeDesign.Layout.cardInsetVertical)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.cardRadius, style: .continuous))
+            .modifier(NativeSurface())
             .contentShape(Rectangle())
         }
         .buttonStyle(NativePressStyle())

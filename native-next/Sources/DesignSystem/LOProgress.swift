@@ -256,7 +256,7 @@ struct LOLinkCard<Content: View>: View {
             }
             .padding(.horizontal, NativeDesign.Layout.cardInset).padding(.vertical, NativeDesign.Layout.cardInsetVertical)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.cardRadius, style: .continuous))
+            .modifier(NativeSurface())
             .contentShape(Rectangle())
         }
         .buttonStyle(NativePressStyle())
@@ -359,6 +359,7 @@ extension View {
     /// Card surface: 21 pt continuous corners on the surface colour (preview `.card`).
     func loCardSurface(_ color: Color = NativeDesign.surface) -> some View {
         background(color, in: RoundedRectangle(cornerRadius: NativeDesign.cardRadius, style: .continuous))
+            .shadow(color: NativeDesign.cardShadow, radius: NativeDesign.cardShadowRadius, y: NativeDesign.cardShadowOffset)
     }
     /// Inner tile or chip on a card: 13 pt corners, or a capsule.
     func loTileSurface(_ color: Color = NativeDesign.barTrack, capsule: Bool = false) -> some View {

@@ -1,33 +1,39 @@
 import SwiftUI
 
-/// Where the day's calories sit against the goal (Fitia-like card, user request 22/11/2026).
-/// The goal band is ±10 % of the target; the scale runs to 130 % of it.
+/// Where a value sits against its goal (Fitia-like card, user request 23/11/2026).
+/// The recommended range is ±10 % of the goal; colour carries the meaning:
+/// green inside the range, amber below, orange above, grey with nothing logged.
 enum NativeCalorieBand: Equatable {
     case none, under, within, over
 
-    static func of(_ calories: Double?, goal: Double?) -> NativeCalorieBand {
-        guard let calories, calories > 0 else { return .none }
+    static let low = 0.9, high = 1.1
+
+    static func of(_ value: Double?, goal: Double?) -> NativeCalorieBand {
+        guard let value, value > 0 else { return .none }
         guard let goal, goal > 0 else { return .within }
-        if calories < goal * 0.9 { return .under }
-        if calories > goal * 1.1 { return .over }
+        if value < goal * low { return .under }
+        if value > goal * high { return .over }
         return .within
     }
     var color: Color {
         switch self {
         case .none: Color(uiColor: .tertiaryLabel)
-        case .under: NativeDesign.nutritionTitle.opacity(0.55)
-        case .within: NativeDesign.nutritionTitle
+        case .under: Color(uiColor: .systemYellow)
+        case .within: Color(uiColor: .systemGreen)
         case .over: NativeDesign.overGoal
         }
     }
+    /// The arc runs to 130 % of the goal.
     static let scale = 1.3
     static func fraction(_ value: Double, goal: Double) -> Double {
         guard goal > 0 else { return 0 }
         return min(max(value / (goal * scale), 0), 1)
     }
+    /// Recommended calorie range for a goal, e.g. 1787–2185 for 1986.
+    static func range(goal: Double) -> ClosedRange<Double> { (goal * low)...(goal * high) }
 }
 
-/// Shallow arc used as the calorie track; its top touches the frame's top edge.
+/// Wide, shallow arc whose top touches the frame's top edge.
 private struct NativeCalorieArcShape: Shape {
     func path(in rect: CGRect) -> Path {
         var path = Path()
@@ -37,64 +43,82 @@ private struct NativeCalorieArcShape: Shape {
     }
 }
 
-/// Arc gauge: grey track, the goal band as a lighter stretch of the arc, the eaten calories
-/// as a gradient stroke ending in a knob (a check inside the band), band limits underneath.
+/// Fitia-like gauge: thin grey track, solid progress in the meaning colour ending in a knob
+/// (check inside the range), two range ticks with the recommended limits underneath.
 struct NativeCalorieGauge: View {
     let calories: Double?
     let goal: Double?
-    private let lineWidth: CGFloat = 10
+    private let lineWidth: CGFloat = 6
     private let knob: CGFloat = 20
 
     var body: some View {
         let band = NativeCalorieBand.of(calories, goal: goal)
         let value = goal.map { NativeCalorieBand.fraction(calories ?? 0, goal: $0) } ?? 0
-        let low = goal.map { NativeCalorieBand.fraction($0 * 0.9, goal: $0) } ?? 0
-        let high = goal.map { NativeCalorieBand.fraction($0 * 1.1, goal: $0) } ?? 0
-        GeometryReader { proxy in
-            let inset = knob / 2
-            let arcRect = CGRect(x: inset, y: inset, width: proxy.size.width - knob, height: proxy.size.height - knob - NativeDesign.Space.medium)
-            let local = NativeCalorieArcShape().path(in: CGRect(origin: .zero, size: arcRect.size))
-            let point: (Double) -> CGPoint = { t in
-                let p = local.trimmedPath(from: 0, to: max(t, 0.0001)).currentPoint ?? .zero
-                return CGPoint(x: p.x + arcRect.minX, y: p.y + arcRect.minY)
-            }
-            ZStack(alignment: .topLeading) {
-                arc(arcRect).stroke(Color(uiColor: .tertiarySystemFill), style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
-                if goal != nil {
-                    arc(arcRect, from: low, to: high)
-                        .stroke(NativeDesign.nutritionTitle.opacity(0.28), style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
-                }
-                if value > 0 {
-                    arc(arcRect, from: 0, to: value)
-                        .stroke(LinearGradient(colors: [band.color.opacity(0.55), band.color], startPoint: .leading, endPoint: .trailing),
-                                style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
-                    let end = point(value)
-                    ZStack {
-                        Circle().fill(band.color)
-                        Circle().strokeBorder(Color(uiColor: .systemBackground), lineWidth: 3)
-                        if band == .within {
-                            Image(systemName: "checkmark").font(.caption2.weight(.heavy)).imageScale(.small).foregroundStyle(Color(uiColor: .systemBackground))
-                        }
+        VStack(spacing: NativeDesign.Space.xxs) {
+            GeometryReader { proxy in
+                let rect = CGRect(x: knob / 2, y: knob / 2, width: proxy.size.width - knob, height: proxy.size.height - knob)
+                ZStack(alignment: .topLeading) {
+                    arc(rect).stroke(Color(uiColor: .tertiarySystemFill), style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                    if value > 0 {
+                        arc(rect, to: value).stroke(band.color, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                     }
-                    .frame(width: knob, height: knob)
-                    .position(end)
-                }
-                if let goal, goal > 0 {
-                    ForEach([(low, goal * 0.9), (high, goal * 1.1)], id: \.0) { item in
-                        Text(item.1.formatted(.number.precision(.fractionLength(0))))
-                            .font(.caption2.weight(.medium)).foregroundStyle(NativeDesign.secondary).monospacedDigit()
-                            .fixedSize()
-                            .position(x: point(item.0).x, y: proxy.size.height - NativeDesign.Space.xs)
+                    if let goal, goal > 0 {
+                        tick(at: point(NativeCalorieBand.fraction(goal * NativeCalorieBand.low, goal: goal), in: rect), filled: true)
+                        tick(at: point(NativeCalorieBand.fraction(goal * NativeCalorieBand.high, goal: goal), in: rect), filled: false)
                     }
+                    if value > 0 { knobView(band).position(point(value, in: rect)) }
                 }
             }
+            .frame(height: NativeDesign.Space.section + NativeDesign.Space.small)
+            if let goal, goal > 0 { rangeLabels(goal) }
         }
-        .frame(height: NativeDesign.Space.section + NativeDesign.Space.xLarge)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(goal.map { "Fascia obiettivo da " + ($0 * 0.9).formatted(.number.precision(.fractionLength(0))) + " a " + ($0 * 1.1).formatted(.number.precision(.fractionLength(0))) + " kcal" } ?? "Nessun obiettivo")
+        .accessibilityLabel(goal.map { goal -> String in
+            let range = NativeCalorieBand.range(goal: goal)
+            return "Range consigliato da " + whole(range.lowerBound) + " a " + whole(range.upperBound) + " kcal"
+        } ?? "Nessun obiettivo")
     }
 
-    private func arc(_ rect: CGRect, from: Double = 0, to: Double = 1) -> some Shape {
-        NativeCalorieArcShape().trim(from: from, to: to).offset(x: rect.minX, y: rect.minY).size(width: rect.width, height: rect.height)
+    private func whole(_ value: Double) -> String { value.formatted(.number.precision(.fractionLength(0))) }
+
+    private func arc(_ rect: CGRect, to: Double = 1) -> some Shape {
+        NativeCalorieArcShape().trim(from: 0, to: to).offset(x: rect.minX, y: rect.minY).size(width: rect.width, height: rect.height)
+    }
+    /// Point at a fraction of the arc length (the same measure `trim` uses).
+    private func point(_ fraction: Double, in rect: CGRect) -> CGPoint {
+        let local = NativeCalorieArcShape().path(in: CGRect(origin: .zero, size: rect.size))
+            .trimmedPath(from: 0, to: max(fraction, 0.0001)).currentPoint ?? .zero
+        return CGPoint(x: local.x + rect.minX, y: local.y + rect.minY)
+    }
+    private func tick(at point: CGPoint, filled: Bool) -> some View {
+        Capsule()
+            .fill(filled ? Color.primary : Color(uiColor: .systemGray3))
+            .overlay(Capsule().strokeBorder(Color(uiColor: .secondarySystemGroupedBackground), lineWidth: 2))
+            .frame(width: NativeDesign.Space.small - 1, height: NativeDesign.Space.medium + NativeDesign.Space.xs)
+            .position(point)
+    }
+    private func knobView(_ band: NativeCalorieBand) -> some View {
+        ZStack {
+            Circle().fill(band.color)
+            Circle().strokeBorder(Color(uiColor: .secondarySystemGroupedBackground), lineWidth: 2)
+            if band == .within {
+                Image(systemName: "checkmark").font(.caption2.weight(.heavy)).imageScale(.small).foregroundStyle(.white)
+            }
+        }
+        .frame(width: knob, height: knob)
+    }
+    /// The recommended range under the two ticks, centred on each tick.
+    private func rangeLabels(_ goal: Double) -> some View {
+        GeometryReader { proxy in
+            let rect = CGRect(x: knob / 2, y: knob / 2, width: proxy.size.width - knob, height: 1)
+            ForEach([NativeCalorieBand.low, NativeCalorieBand.high], id: \.self) { share in
+                let fraction = NativeCalorieBand.fraction(goal * share, goal: goal)
+                Text(whole(goal * share))
+                    .font(.caption2.weight(.medium)).foregroundStyle(NativeDesign.secondary).monospacedDigit()
+                    .fixedSize()
+                    .position(x: rect.minX + rect.width * fraction, y: proxy.size.height / 2)
+            }
+        }
+        .frame(height: NativeDesign.Space.medium)
     }
 }

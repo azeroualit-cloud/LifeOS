@@ -212,6 +212,10 @@ enum NativeDesign {
     static let success = financialGreen
     static let gap = Space.large
     static let cardRadius: CGFloat = 21
+    /// Soft card shadow (Fitia-like, 23/11/2026): visible on light backgrounds, a deeper hint in dark mode.
+    static let cardShadow = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor(white: 0, alpha: 0.45) : UIColor(white: 0, alpha: 0.08) })
+    static let cardShadowRadius: CGFloat = 13
+    static let cardShadowOffset: CGFloat = 5
     static let controlRadius: CGFloat = 13
     static let dayRadius: CGFloat = 13
     static let badgeRadius: CGFloat = 5 // golden scale
