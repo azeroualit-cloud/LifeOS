@@ -1327,6 +1327,29 @@ button.sc-chip:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .fa-step b{min-width:64px;text-align:center;font-variant-numeric:tabular-nums}
 .fa-step button{min-height:44px;border-radius:var(--r-pill);border:0;background:var(--surface-3);color:var(--ink);font:inherit;font-size:var(--fs-4);cursor:pointer}
 .fa-step button:disabled{opacity:.4;cursor:default}
+/* Diario alimentare (FOOD-DIARY-SERVER-2026-11-22). */
+.fd-card{margin-bottom:var(--s4)}
+.fd-head{display:flex;justify-content:space-between;align-items:center;gap:var(--s3);flex-wrap:wrap}
+.fd-head .actions{display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap}
+.fd-head .actions>button{min-height:44px;min-width:44px}
+.fd-head input[type=date]{min-height:44px;width:auto;flex:none}
+.fd-head .actions{flex-wrap:nowrap}
+.fd-totals{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s2);margin:var(--s4) 0}
+.fd-totals>div{display:grid;gap:2px;padding:var(--s3);border-radius:var(--r-md);background:var(--surface-2)}
+.fd-totals b{font-size:var(--fs-5);font-weight:650;font-variant-numeric:tabular-nums}
+.fd-totals small{font-size:var(--fs-1);color:var(--ink-3)}
+.fd-list{display:grid;border-radius:var(--r-md);overflow:hidden;background:var(--surface-2)}
+.fd-row{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:var(--s3);align-items:center;min-height:55px;padding:var(--s2) var(--s4);border:0;border-bottom:1px solid var(--line);background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.fd-row:last-child{border-bottom:0}
+.fd-row:hover{background:var(--surface-3)}
+.fd-row:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+.fd-time{font-variant-numeric:tabular-nums;color:var(--ink-3);font-size:var(--fs-2)}
+.fd-name{display:grid;min-width:0}
+.fd-name strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fd-name small{color:var(--ink-3);font-size:var(--fs-1)}
+.fd-row b{font-variant-numeric:tabular-nums;font-weight:650}
+.fd-pop{width:min(560px,100%)}
+@media(max-width:620px){.fd-totals{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 </head>
   <body class="dashboard-mode">
@@ -1558,6 +1581,124 @@ async function nbLoad(kind) {
   if (state.view === "nutrition") renderNutrition();
   if (state.view === "bloom") renderBloom();
 }
+/* ---------------- Diario alimentare (FOOD-DIARY-SERVER-2026-11-22) ----------------
+   Stesso diario dell'app: si registra dal telefono, si modifica anche da qui. Vince la modifica
+   più recente; le eliminazioni arrivano all'iPhone che le toglie anche da Apple Salute. */
+const fd = { day: "", entries: null, loading: false, error: "", editing: null };
+const fdRomeDay = (d = new Date()) => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Rome", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+const fdRomeTime = (iso) => new Intl.DateTimeFormat("it-IT", { timeZone: "Europe/Rome", hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
+/** Giorno e ora di Roma → istante ISO (gestisce ora legale e solare). */
+function fdRomeIso(day, time) {
+  const [y, m, d] = day.split("-").map(Number), [hh, mm] = (time || "12:00").split(":").map(Number);
+  let guess = Date.UTC(y, m - 1, d, hh, mm);
+  for (let i = 0; i < 2; i++) {
+    const parts = Object.fromEntries(new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Rome", hour12: false, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).formatToParts(new Date(guess)).map((p) => [p.type, p.value]));
+    const shown = Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day), Number(parts.hour) % 24, Number(parts.minute));
+    guess += Date.UTC(y, m - 1, d, hh, mm) - shown;
+  }
+  return new Date(guess).toISOString();
+}
+const fdShift = (day, n) => { const t = new Date(day + "T12:00:00Z"); t.setUTCDate(t.getUTCDate() + n); return t.toISOString().slice(0, 10); };
+const fdNum = (v, digits = 0) => v == null || !Number.isFinite(Number(v)) ? "—" : Number(v).toLocaleString("it-IT", { maximumFractionDigits: digits });
+async function fdLoad() {
+  if (!fd.day) fd.day = fdRomeDay();
+  fd.loading = true; fd.error = "";
+  try { fd.entries = (await workerRequest("listFoodDiaryDays", [fd.day, fd.day])).entries || []; }
+  catch (e) { fd.entries = []; fd.error = String(e.message || e); }
+  fd.loading = false;
+  if (state.view === "nutrition") renderNutrition();
+}
+function fdSection() {
+  if (!fd.day) fd.day = fdRomeDay();
+  if (fd.entries === null && !fd.loading) fdLoad();
+  const list = (fd.entries || []).slice().sort((a, b) => a.at.localeCompare(b.at));
+  const sum = (k) => list.reduce((n, e) => n + (Number(e[k]) || 0), 0);
+  const today = fdRomeDay(), title = fd.day === today ? "Oggi" : fd.day === fdShift(today, -1) ? "Ieri" : new Date(fd.day + "T12:00:00Z").toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
+  const rows = list.map((e) => `<button type="button" class="fd-row" data-fd-entry="${nbE(e.id)}" aria-label="${nbE(fdRomeTime(e.at) + ", " + (e.name || "Pasto") + ", " + fdNum(e.kcal) + " kcal")}. Modifica"><span class="fd-time">${fdRomeTime(e.at)}</span><span class="fd-name"><strong>${nbE(e.name || "Pasto")}</strong><small>${e.grams ? fdNum(e.grams) + " g · " : e.ml ? fdNum(e.ml) + " ml · " : ""}P ${fdNum(e.protein, 1)} · C ${fdNum(e.carbs, 1)} · G ${fdNum(e.fat, 1)}</small></span><b>${fdNum(e.kcal)} kcal</b></button>`).join("");
+  return `<section class="card pad fd-card" aria-label="Diario alimentare">
+    <div class="card-title fd-head"><div><h2>Diario</h2><small>${nbE(title)}</small></div><div class="actions"><button type="button" data-fd-day="-1" aria-label="Giorno precedente">‹</button><input type="date" value="${fd.day}" max="${today}" data-fd-pick aria-label="Giorno del diario"><button type="button" data-fd-day="1" aria-label="Giorno successivo" ${fd.day >= today ? "disabled" : ""}>›</button><button type="button" class="save" data-fd-new>+ Pasto</button></div></div>
+    ${fd.error ? `<div class="errorbox">${nbE(fd.error)} <button type="button" data-fd-retry>Riprova</button></div>` : ""}
+    <div class="fd-totals"><div><b>${fdNum(sum("kcal"))}</b><small>kcal</small></div><div><b>${fdNum(sum("protein"))}</b><small>proteine g</small></div><div><b>${fdNum(sum("carbs"))}</b><small>carboidrati g</small></div><div><b>${fdNum(sum("fat"))}</b><small>grassi g</small></div></div>
+    ${fd.loading && fd.entries === null ? `<p class="empty">Caricamento…</p>` : list.length ? `<div class="fd-list">${rows}</div>` : `<p class="empty">Nessun pasto registrato</p>`}
+  </section>`;
+}
+function fdForm(e) {
+  const foods = nb.foods || [], x = e || { name: "", grams: "", kcal: "", protein: "", carbs: "", fat: "", fibre: "", at: fdRomeIso(fd.day, new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Rome", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date())) };
+  const num = (k, label, unit) => `<label>${label}<span class="nb-unit"><input type="number" inputmode="decimal" step="0.1" min="0" name="${k}" value="${x[k] ?? ""}"><em>${unit}</em></span></label>`;
+  return `<form id="fd-form" class="os-form nb-form" autocomplete="off">
+    ${e ? "" : `<label class="wide">Alimento<select name="food"><option value="">Inserisci i macro a mano</option>${foods.map((f) => `<option value="${nbE(f.id)}">${nbE(f.name)}${f.brand ? " · " + nbE(f.brand) : ""}</option>`).join("")}</select></label>`}
+    <label class="wide">Nome<input name="name" value="${nbE(x.name)}" maxlength="160" placeholder="Facoltativo"></label>
+    <label>Quantità<span class="nb-unit"><input type="number" inputmode="decimal" step="1" min="0" name="grams" value="${x.grams ?? ""}"><em>${x.ml ? "ml" : "g"}</em></span></label>
+    <label>Ora<input type="time" name="time" value="${fdRomeTime(x.at)}" required></label>
+    <div class="nb-nums wide">${num("kcal", "Energia", "kcal")}${num("protein", "Proteine", "g")}${num("carbs", "Carboidrati", "g")}${num("fat", "Grassi", "g")}${num("fibre", "Fibre", "g")}</div>
+    <div class="os-form-error" data-fd-err role="alert"></div>
+    <div class="form-actions">${e ? '<button type="button" class="danger" data-fd-delete>Elimina</button>' : ""}<button type="button" data-close="1">Annulla</button><button class="save" type="submit">Salva</button></div></form>`;
+}
+function fdOpen(e) {
+  fd.editing = e ? { ...e } : null;
+  const host = document.getElementById("dialog");
+  if (!host) return;
+  if (!nb.foods && !nb.loading) nbLoad("foods");
+  host.innerHTML = `<div class="modal fd-pop" role="dialog" aria-modal="true" aria-label="${e ? "Modifica pasto" : "Nuovo pasto"}"><div class="modal-top"><h2>${e ? "Modifica pasto" : "Nuovo pasto"}</h2><button type="button" class="ghost" data-close="1" aria-label="Chiudi">×</button></div>${fdForm(e)}</div>`;
+  host.classList.remove("hidden");
+  host.querySelector("input[name=grams], select[name=food]")?.focus({ preventScroll: true });
+}
+/** Alimento personale + quantità → macro (valori per 100 g o 100 ml). */
+function fdFromFood(form) {
+  const f = (nb.foods || []).find((x) => x.id === form.elements.food?.value), q = Number(form.elements.grams.value);
+  if (!f || !(q > 0)) return;
+  const k = q / 100;
+  for (const [field, key] of [["kcal", "kcal"], ["protein", "protein"], ["carbs", "carbs"], ["fat", "fat"], ["fibre", "fibre"]]) form.elements[field].value = f[key] == null ? "" : Math.round(Number(f[key]) * k * 10) / 10;
+  if (!form.elements.name.value) form.elements.name.value = f.name;
+}
+async function fdSave(form) {
+  const err = form.querySelector("[data-fd-err]"), val = (k) => form.elements[k].value === "" ? null : Number(form.elements[k].value);
+  const old = fd.editing, grams = val("grams"), nums = { kcal: val("kcal"), protein: val("protein"), carbs: val("carbs"), fat: val("fat"), fibre: val("fibre") };
+  if (![nums.kcal, nums.protein, nums.carbs, nums.fat].some((v) => v > 0)) { err.textContent = "Inserisci almeno l'energia o un macronutriente."; return; }
+  if (Object.values(nums).some((v) => v != null && (!Number.isFinite(v) || v < 0))) { err.textContent = "Valori non validi."; return; }
+  let app = old?.app && typeof old.app === "object" ? JSON.parse(JSON.stringify(old.app)) : {};
+  // Quantità cambiata e macro lasciati com'erano: si scalano anche macro e micronutrienti della voce dell'app.
+  if (old && grams > 0 && old.grams > 0 && grams !== old.grams && ["kcal", "protein", "carbs", "fat"].every((k) => nums[k] === (old[k] ?? null))) {
+    const k = grams / old.grams;
+    for (const key of ["kcal", "protein", "carbs", "fat", "fibre"]) if (nums[key] != null) nums[key] = Math.round(nums[key] * k * 1000) / 1000;
+    for (const v of Object.values(app.nutrientValues || {})) if (v && typeof v.amount === "number") v.amount = Math.round(v.amount * k * 1000) / 1000;
+    if (typeof app.alcoholGrams === "number") app.alcoholGrams = Math.round(app.alcoholGrams * k * 1000) / 1000;
+  }
+  const day = old ? fdRomeDay(new Date(old.at)) : fd.day;
+  const entry = { id: old?.id || crypto.randomUUID().toUpperCase(), at: fdRomeIso(day, form.elements.time.value), name: form.elements.name.value.trim(), grams: old?.ml ? null : grams, ml: old?.ml ? grams : null, ...nums, revision: old ? Number(old.revision) || 0 : 0, modified: Date.now(), app };
+  try {
+    const r = await workerRequest("saveFoodDiaryEntry", [entry]);
+    if (!r.saved) err.textContent = "Il pasto è stato cambiato su un altro dispositivo: ricarico la versione più recente.";
+    fd.entries = null; closeDialog(); fdLoad();
+  } catch (e) { err.textContent = String(e.message || e); }
+}
+document.addEventListener("click", async (e) => {
+  const t = e.target;
+  if (!t.closest) return;
+  const shift = t.closest("[data-fd-day]");
+  if (shift && !shift.disabled) { fd.day = fdShift(fd.day || fdRomeDay(), Number(shift.dataset.fdDay)); fd.entries = null; renderNutrition(); return; }
+  if (t.closest("[data-fd-retry]")) { fd.entries = null; renderNutrition(); return; }
+  if (t.closest("[data-fd-new]")) { fdOpen(null); return; }
+  const row = t.closest("[data-fd-entry]");
+  if (row) { const entry = (fd.entries || []).find((x) => x.id === row.dataset.fdEntry); if (entry) fdOpen(entry); return; }
+  if (t.closest("[data-fd-delete]") && fd.editing) {
+    const form = t.closest("form"), err = form.querySelector("[data-fd-err]");
+    if (!confirm("Eliminare questo pasto? Verrà tolto anche da Apple Salute sull'iPhone.")) return;
+    try { await workerRequest("deleteFoodDiaryEntry", [fd.editing.id, Date.now()]); fd.entries = null; closeDialog(); fdLoad(); }
+    catch (x) { err.textContent = String(x.message || x); }
+  }
+});
+document.addEventListener("change", (e) => {
+  if (e.target.matches?.("[data-fd-pick]") && /^\d{4}-\d{2}-\d{2}$/.test(e.target.value)) { fd.day = e.target.value; fd.entries = null; renderNutrition(); }
+  const form = e.target.closest?.("#fd-form");
+  if (form && ["food", "grams"].includes(e.target.name) && form.elements.food) fdFromFood(form);
+});
+document.addEventListener("submit", (e) => {
+  if (e.target.id !== "fd-form") return;
+  e.preventDefault();
+  fdSave(e.target);
+});
+
 /* ---------------- Nutrizione ---------------- */
 function renderNutrition() {
   const root = document.getElementById("nutrition");
@@ -1571,6 +1712,7 @@ function renderNutrition() {
   const stack = fams.map(([k, n]) => `<button class="nb-seg${nb.fam === k ? " on" : ""}" style="flex:${n}" data-nb-fam="${k}" title="${nbE(NB_FAM[k][1])}: ${n}" aria-pressed="${nb.fam === k}"></button>`).join("");
   const chips = fams.map(([k, n]) => `<button class="nb-chip${nb.fam === k ? " on" : ""}" data-nb-fam="${k}" aria-pressed="${nb.fam === k}">${NB_FAM[k][0]} ${nbE(NB_FAM[k][1])} <b>${n}</b></button>`).join("");
   root.innerHTML = `<div class="nb-wrap">
+    ${fdSection()}
     ${nb.error ? `<div class="errorbox">${nbE(nb.error)} <button data-nb-act="retry-foods">Riprova</button></div>` : ""}
     <section class="card pad nb-head"><div class="card-title"><div><h2>Alimenti personali</h2><small>${foods.length ? foods.length + " alimenti nel catalogo del sito" : nb.loading ? "Caricamento..." : "Nessun alimento ancora"}</small></div><div class="actions"><button data-nb-act="import-foods">Importa</button><button class="save" data-nb-act="new-food">+ Nuovo alimento</button></div></div>
       <input type="search" class="search" placeholder="Cerca per nome, marca o alias" value="${nbE(nb.fq)}" data-nb-q="food" aria-label="Cerca alimenti">

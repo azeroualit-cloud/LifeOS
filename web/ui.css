@@ -1288,3 +1288,26 @@ button.sc-chip:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .fa-step b{min-width:64px;text-align:center;font-variant-numeric:tabular-nums}
 .fa-step button{min-height:44px;border-radius:var(--r-pill);border:0;background:var(--surface-3);color:var(--ink);font:inherit;font-size:var(--fs-4);cursor:pointer}
 .fa-step button:disabled{opacity:.4;cursor:default}
+/* Diario alimentare (FOOD-DIARY-SERVER-2026-11-22). */
+.fd-card{margin-bottom:var(--s4)}
+.fd-head{display:flex;justify-content:space-between;align-items:center;gap:var(--s3);flex-wrap:wrap}
+.fd-head .actions{display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap}
+.fd-head .actions>button{min-height:44px;min-width:44px}
+.fd-head input[type=date]{min-height:44px;width:auto;flex:none}
+.fd-head .actions{flex-wrap:nowrap}
+.fd-totals{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s2);margin:var(--s4) 0}
+.fd-totals>div{display:grid;gap:2px;padding:var(--s3);border-radius:var(--r-md);background:var(--surface-2)}
+.fd-totals b{font-size:var(--fs-5);font-weight:650;font-variant-numeric:tabular-nums}
+.fd-totals small{font-size:var(--fs-1);color:var(--ink-3)}
+.fd-list{display:grid;border-radius:var(--r-md);overflow:hidden;background:var(--surface-2)}
+.fd-row{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:var(--s3);align-items:center;min-height:55px;padding:var(--s2) var(--s4);border:0;border-bottom:1px solid var(--line);background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.fd-row:last-child{border-bottom:0}
+.fd-row:hover{background:var(--surface-3)}
+.fd-row:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+.fd-time{font-variant-numeric:tabular-nums;color:var(--ink-3);font-size:var(--fs-2)}
+.fd-name{display:grid;min-width:0}
+.fd-name strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fd-name small{color:var(--ink-3);font-size:var(--fs-1)}
+.fd-row b{font-variant-numeric:tabular-nums;font-weight:650}
+.fd-pop{width:min(560px,100%)}
+@media(max-width:620px){.fd-totals{grid-template-columns:repeat(2,minmax(0,1fr))}}
