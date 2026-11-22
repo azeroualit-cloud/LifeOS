@@ -1377,3 +1377,10 @@ html[data-theme="light"] [data-kind="afternoon"],html[data-theme="light"] .os-pa
 html[data-theme="light"] [data-kind="night"],html[data-theme="light"] .os-palette button[data-life-tool="night"]{--shift-color:#808080}
 html[data-theme="light"] [data-kind="rest"],html[data-theme="light"] .os-palette button[data-life-tool="rest"]{--shift-color:#f4b183}
 html[data-theme="light"] [data-kind="holiday"],html[data-theme="light"] .os-palette button[data-life-tool="holiday"]{--shift-color:#ffff00}
+/* Avvisi in Dashboard e ignorati nel popup. */
+.home-native>.fa-card .fa-list{margin:0}
+.fa-ign{display:grid;gap:var(--s2);margin-top:var(--s4);padding-top:var(--s3);border-top:1px solid var(--line)}
+.fa-ign-head{display:flex;align-items:center;justify-content:space-between;gap:var(--s2)}
+.fa-ign-head button{min-height:44px}
+.fa-ign .fa-text{color:var(--ink-2)}
+.fa-ign-empty{margin:var(--s4) 0 0;color:var(--ink-3);font-size:var(--fs-2)}

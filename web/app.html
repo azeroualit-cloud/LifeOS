@@ -1416,6 +1416,13 @@ html[data-theme="light"] [data-kind="afternoon"],html[data-theme="light"] .os-pa
 html[data-theme="light"] [data-kind="night"],html[data-theme="light"] .os-palette button[data-life-tool="night"]{--shift-color:#808080}
 html[data-theme="light"] [data-kind="rest"],html[data-theme="light"] .os-palette button[data-life-tool="rest"]{--shift-color:#f4b183}
 html[data-theme="light"] [data-kind="holiday"],html[data-theme="light"] .os-palette button[data-life-tool="holiday"]{--shift-color:#ffff00}
+/* Avvisi in Dashboard e ignorati nel popup. */
+.home-native>.fa-card .fa-list{margin:0}
+.fa-ign{display:grid;gap:var(--s2);margin-top:var(--s4);padding-top:var(--s3);border-top:1px solid var(--line)}
+.fa-ign-head{display:flex;align-items:center;justify-content:space-between;gap:var(--s2)}
+.fa-ign-head button{min-height:44px}
+.fa-ign .fa-text{color:var(--ink-2)}
+.fa-ign-empty{margin:var(--s4) 0 0;color:var(--ink-3);font-size:var(--fs-2)}
 </style>
 </head>
   <body class="dashboard-mode">
@@ -4402,31 +4409,45 @@ document.addEventListener("keydown", (e) => {
       function faIgnored() { try { return JSON.parse(localStorage.getItem(FA_IGNORED) || "{}"); } catch (e) { return {}; } }
       /** Un avviso ignorato resta nascosto finché il suo testo non cambia (nuovo importo, nuova percentuale). */
       function faIgnore(key, body) { const m = faIgnored(); m[key] = body; try { localStorage.setItem(FA_IGNORED, JSON.stringify(m)); } catch (e) {} }
+      /** Avvisi in Dashboard: la scheda compare solo se c'è almeno un avviso da leggere. */
+      function faData() { return state.data || life.finance || null; }
       function financeAlertsCard(d) {
-        if (state.assetsVisible === false) return "";
-        const s = faSettings(), ign = faIgnored(), all = faCandidates(d, s), list = all.filter((a) => ign[a.key] !== a.body), hidden = all.length - list.length, on = [s.rhythmOn, s.recurringOn, s.weeklyOn].filter(Boolean).length;
+        if (!d || state.assetsVisible === false) return "";
+        const s = faSettings(), ign = faIgnored(), list = faCandidates(d, s).filter((a) => ign[a.key] !== a.body);
+        if (!list.length) return "";
         const rows = list.map((a) => `<li class="fa-row${a.quiet ? " quiet" : ""}"><span class="fa-text"><b>${escapeHtml(a.title)}</b><span>${escapeHtml(a.body)}</span></span><button type="button" class="ghost fa-ignore" data-fa-ignore="${escapeHtml(a.key)}" data-fa-body="${escapeHtml(a.body)}" aria-label="Ignora ${escapeHtml(a.title)}">Ignora</button></li>`).join("");
-        return `<section class="card pad fa-card"><div class="card-title"><h2>Avvisi</h2><button type="button" class="ghost" data-fa-open aria-haspopup="dialog">${on} attivi</button></div>${rows ? `<ul class="fa-list">${rows}</ul>` : `<p class="empty">Nessun avviso</p>`}${hidden ? `<button type="button" class="ghost fa-restore" data-fa-restore>Mostra ${hidden} ${hidden === 1 ? "ignorato" : "ignorati"}</button>` : ""}</section>`;
+        return `<section class="os-card fa-card hw-wide"><div class="card-title"><h2>Avvisi</h2><button type="button" class="ghost" data-fa-open aria-haspopup="dialog">Gestisci</button></div><ul class="fa-list">${rows}</ul></section>`;
+      }
+      function faRefresh() {
+        const old = document.querySelector(".fa-card"), html = financeAlertsCard(faData());
+        if (old) { if (!html) { old.remove(); return; } const tmp = document.createElement("div"); tmp.innerHTML = html; old.replaceWith(tmp.firstElementChild); }
+        else if (html) document.querySelector("#today .home-week")?.insertAdjacentHTML("afterend", html);
       }
       function faRule(i, title, sub, on, params) {
         return `<div class="fa-rule"><div class="fa-head"><span><b>${title}</b><small>${sub}</small></span><button type="button" role="switch" class="fa-switch" aria-checked="${on}" aria-label="${title}" data-fa-flip="${i}"><i></i></button></div>${params.map(([label, value, key, step, min, max]) => `<div class="fa-step"><span>${label}</span><button type="button" data-fa-step="${key}" data-d="${-step}" data-min="${min}" data-max="${max}" aria-label="Meno" ${s_(key) <= min ? "disabled" : ""}>−</button><b>${value}</b><button type="button" data-fa-step="${key}" data-d="${step}" data-min="${min}" data-max="${max}" aria-label="Più" ${s_(key) >= max ? "disabled" : ""}>+</button></div>`).join("")}</div>`;
       }
       function s_(key) { return faSettings()[key]; }
+      function faIgnoredSection() {
+        const d = faData(), ign = faIgnored(), list = d ? faCandidates(d, faSettings()).filter((a) => ign[a.key] === a.body) : [];
+        if (!list.length) return `<p class="fa-ign-empty">Nessun avviso ignorato.</p>`;
+        return `<div class="fa-ign"><div class="fa-ign-head"><b>Ignorati (${list.length})</b><button type="button" class="ghost" data-fa-restore>Mostra tutti</button></div><ul class="fa-list">${list.map((a) => `<li class="fa-row"><span class="fa-text"><b>${escapeHtml(a.title)}</b><span>${escapeHtml(a.body)}</span></span><button type="button" class="ghost fa-ignore" data-fa-unignore="${escapeHtml(a.key)}">Mostra</button></li>`).join("")}</ul></div>`;
+      }
       function faOpen() {
         const s = faSettings(), host = document.getElementById("dialog");
         if (!host) return;
-        host.innerHTML = `<div class="modal fa-pop" role="dialog" aria-modal="true" aria-label="Avvisi di Finanza"><div class="modal-top"><h2>Avvisi di Finanza</h2><button type="button" class="ghost" data-close="1" aria-label="Chiudi">×</button></div>${faRule("rhythmOn", "Ritmo sopra la norma", `media 3 mesi oltre il ${s.rhythm}% della norma`, s.rhythmOn, [["Soglia", s.rhythm + "%", "rhythm", 5, 5, 30]])}${faRule("recurringOn", "Spese ricorrenti fuori norma", `bollette e abbonamenti oltre +${s.recP}% e +${s.recE} €`, s.recurringOn, [["Oltre la norma", "+" + s.recP + "%", "recP", 5, 10, 60], ["E almeno", s.recE + " €", "recE", 5, 5, 50]])}${faRule("weeklyOn", "Riepilogo della settimana", "spesa degli ultimi 7 giorni", s.weeklyOn, [])}</div>`;
+        host.innerHTML = `<div class="modal fa-pop" role="dialog" aria-modal="true" aria-label="Avvisi di Finanza"><div class="modal-top"><h2>Avvisi di Finanza</h2><button type="button" class="ghost" data-close="1" aria-label="Chiudi">×</button></div>${faRule("rhythmOn", "Ritmo sopra la norma", `media 3 mesi oltre il ${s.rhythm}% della norma`, s.rhythmOn, [["Soglia", s.rhythm + "%", "rhythm", 5, 5, 30]])}${faRule("recurringOn", "Spese ricorrenti fuori norma", `bollette e abbonamenti oltre +${s.recP}% e +${s.recE} €`, s.recurringOn, [["Oltre la norma", "+" + s.recP + "%", "recP", 5, 10, 60], ["E almeno", s.recE + " €", "recE", 5, 5, 50]])}${faRule("weeklyOn", "Riepilogo della settimana", "spesa degli ultimi 7 giorni", s.weeklyOn, [])}${faIgnoredSection()}</div>`;
         host.classList.remove("hidden");
         host.querySelector("[data-close]")?.focus({ preventScroll: true });
       }
       document.addEventListener("click", (e) => {
         if (e.target.closest("[data-fa-open]")) { faOpen(); return; }
-        const ig = e.target.closest("[data-fa-ignore]"), rs = e.target.closest("[data-fa-restore]");
-        if (ig || rs) {
+        const ig = e.target.closest("[data-fa-ignore]"), rs = e.target.closest("[data-fa-restore]"), un = e.target.closest("[data-fa-unignore]");
+        if (ig || rs || un) {
           if (ig) faIgnore(ig.dataset.faIgnore, ig.dataset.faBody);
+          else if (un) { const m = faIgnored(); delete m[un.dataset.faUnignore]; try { localStorage.setItem(FA_IGNORED, JSON.stringify(m)); } catch (x) {} }
           else try { localStorage.removeItem(FA_IGNORED); } catch (x) {}
-          const old = document.querySelector(".fa-card");
-          if (old && state.data) { const tmp = document.createElement("div"); tmp.innerHTML = financeAlertsCard(state.data); if (tmp.firstElementChild) old.replaceWith(tmp.firstElementChild); }
+          faRefresh();
+          if (rs || un) faOpen();
           return;
         }
         const flip = e.target.closest("[data-fa-flip]"), step = e.target.closest("[data-fa-step]");
@@ -4434,9 +4455,7 @@ document.addEventListener("keydown", (e) => {
         const s = faSettings();
         if (flip) s[flip.dataset.faFlip] = !s[flip.dataset.faFlip];
         if (step) s[step.dataset.faStep] = Math.min(Number(step.dataset.max), Math.max(Number(step.dataset.min), s[step.dataset.faStep] + Number(step.dataset.d)));
-        faSave(s); faOpen();
-        const old = document.querySelector(".fa-card");
-        if (old && state.data) { const tmp = document.createElement("div"); tmp.innerHTML = financeAlertsCard(state.data); if (tmp.firstElementChild) old.replaceWith(tmp.firstElementChild); }
+        faSave(s); faOpen(); faRefresh();
       });
 
       /** Panoramica essenziale: saldo Trade Republic, impegnato, spendibile, patrimonio e flussi TR. */
@@ -4445,8 +4464,7 @@ document.addEventListener("keydown", (e) => {
         const recent = (d.transactions || []).slice(0, 3);
         return `<div class="finance-open">
         ${finHero(d, daily)}
-        ${financeAlertsCard(d)}
-        <div class="finance-actions"><button data-new-transaction="Spesa" class="primary-pill"><span aria-hidden="true">+</span>Nuova spesa</button><button data-new-extra><span aria-hidden="true">+</span>Nuovo piano</button><button data-view="budget"><span aria-hidden="true">◔</span>Budget</button><button data-view="analysis"><span aria-hidden="true">≋</span>Analisi</button></div>
+        <div class="finance-actions"><button data-new-transaction="Spesa" class="primary-pill"><span aria-hidden="true">+</span>Nuova spesa</button><button data-new-extra><span aria-hidden="true">+</span>Nuovo piano</button><button data-view="budget"><span aria-hidden="true">◔</span>Budget</button><button data-view="analysis"><span aria-hidden="true">≋</span>Analisi</button><button type="button" data-fa-open aria-haspopup="dialog"><span aria-hidden="true">!</span>Avvisi</button></div>
         ${budgetSankey(d)}
         <section class="finance-recent"><div class="finance-heading"><h2>Ultimi movimenti</h2><button data-view="movements">Vedi tutti</button></div>${recent.length ? recent.map(t => `<button class="finance-movement" data-edit-movement="${Number(t.row)}"><span><strong>${escapeHtml(t.name)}</strong><small>${escapeHtml(t.date || '')} · ${escapeHtml(t.category || t.type || '')}</small></span><b class="${amountClass(t.amount)}">${state.assetsVisible ? exactEuro(t.amount) : '•••• €'}</b></button>`).join('') : '<p class="empty">Nessun movimento nel mese.</p>'}</section>${overviewCharts(d)}</div>`;
       }
@@ -6211,7 +6229,7 @@ document.addEventListener("keydown", (e) => {
     }).join('');
     return `<div class="home-native"><div class="home-head"><div class="home-recap" data-key="${safe(key)}" aria-label="${safe(plain)}"><p>${lines.map(l=>l).join(' ')}</p></div></div>
 <div class="dash-kpis">${kpis}</div>
-<section class="os-card home-week hw-wide"><div class="card-title"><h2>Prossimi giorni</h2><button class="ghost" data-home-day="${today}" aria-label="Apri calendario">Calendario</button></div><div class="hw-strip" role="list">${weekRows}</div></section>
+<section class="os-card home-week hw-wide"><div class="card-title"><h2>Prossimi giorni</h2><button class="ghost" data-home-day="${today}" aria-label="Apri calendario">Calendario</button></div><div class="hw-strip" role="list">${weekRows}</div></section>${typeof financeAlertsCard==='function'?financeAlertsCard(life.finance):''}
 <section class="os-card home-todo"><div class="card-title"><h2>Da fare</h2><button class="ghost" data-view="tasks">Attività</button></div>${todoRows}</section>
 <section class="os-card home-habits"><div class="card-title"><h2>Abitudini</h2><button class="ghost" data-life-routine-manage>Gestisci</button></div>${habitRows}</section></div>`;
   };
