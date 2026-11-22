@@ -277,7 +277,7 @@ body:not(.dashboard-mode) .header-meta:has(.top-right.hidden){display:none}
 .home-native>.os-card{display:flex;flex-direction:column;gap:var(--s2);padding:var(--s5)}
 .home-native .card-title{margin:0 0 var(--s2)}
 .home-native .card-title h2{font-size:16px;font-weight:650}
-.dash-kpis{grid-column:1/-1;display:grid;align-items:stretch;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s4)}
+.dash-kpis{grid-column:1/-1;display:grid;align-items:stretch;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s4)}
 .dash-kpi{display:grid;justify-content:stretch;align-self:stretch;align-content:start;justify-items:start;text-align:left;gap:4px;min-height:112px;height:auto;padding:var(--s4) var(--s5);background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r-lg);min-width:0}
 .dash-kpi small{font-size:12px;font-weight:650;letter-spacing:.4px;text-transform:uppercase;color:var(--ink-3)}
 .dash-kpi strong{font-size:31px;font-weight:650;letter-spacing:-1px;line-height:1.1;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -308,17 +308,16 @@ body:not(.dashboard-mode) .header-meta:has(.top-right.hidden){display:none}
 .dw-dot{width:8px;height:8px;border-radius:50%;background:var(--sec-finance,var(--ink));flex:0 0 auto}
 .home-habit{min-height:48px}
 .home-habit span{font-size:19px;width:24px;text-align:center}
-.home-habits{grid-column:1/-1}
 main:has(#today.active) .home-context{display:none}
 .home-head{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:var(--s4)}
 .home-head .home-recap{font-size:19px;margin:0}.home-head .home-solar{margin:0;flex:0 0 auto}
-.home-native>.home-habits{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(210px,100%),1fr));gap:var(--s3)}
+.home-native>.home-habits{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(180px,100%),1fr));gap:var(--s3);align-content:start}
 .home-habits>.card-title,.home-habits>.os-empty{grid-column:1/-1}
 .home-habits .home-habit{display:flex;align-items:center;justify-content:flex-start;gap:var(--s3);text-align:left;margin:0;padding:0 var(--s4);background:var(--surface-2);border:1px solid transparent;border-radius:var(--r-md);font-weight:400}
 .home-habits .home-habit[aria-pressed="true"]{border-color:var(--pos-t);color:var(--ink-2)}
 .home-habits .home-habit[aria-pressed="true"] span{color:var(--pos-t)}
 .home-native .os-empty{margin:var(--s3) 0;color:var(--ink-3)}
-@media(max-width:1000px){.dash-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.dash-kpi strong{font-size:26px}}
+@media(max-width:1000px){.dash-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.dash-kpi strong{font-size:26px}}
 @media(max-width:760px){
   .home-native{grid-template-columns:minmax(0,1fr);gap:var(--s3)}
   .dash-kpis{gap:var(--s3)}.dash-kpi{min-height:96px;padding:var(--s3) var(--s4)}.dash-kpi strong{font-size:26px}
@@ -1362,29 +1361,46 @@ button.sc-chip:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 /* Dashboard: settimana orizzontale da oggi con gli impegni sotto ogni giorno. */
 .home-native>.hw-wide{grid-column:1/-1}
 .hw-strip{display:grid;grid-template-columns:repeat(7,minmax(128px,1fr));gap:var(--s2);overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px}
-.hw-day{display:flex;flex-direction:column;gap:var(--s2);min-width:0;padding:var(--s2);border-radius:var(--r-md);background:var(--surface-2);scroll-snap-align:start}
-.hw-day.today{box-shadow:inset 0 0 0 2px var(--ink)}
-.hw-head{display:grid;justify-items:start;gap:2px;min-height:44px;padding:var(--s1,4px) var(--s2);border:0;border-radius:var(--r-sm,10px);background:none;color:var(--ink);font:inherit;cursor:pointer;text-align:left}
+.hw-day{display:flex;flex-direction:column;gap:var(--s2);min-width:0;padding:var(--s2);border-radius:var(--r-md);background:var(--surface-2);border:1px solid transparent;scroll-snap-align:start;transition:border-color .15s}
+.hw-day:hover{border-color:var(--line)}
+.hw-day.today{border-color:var(--ink);background:color-mix(in srgb,var(--ink) 6%,var(--surface-2))}
+.hw-strip .hw-head{display:grid;justify-items:start;justify-content:start;align-content:start;gap:4px;width:100%;margin:0;min-height:44px;padding:var(--s1,4px) var(--s1,4px) var(--s2);border:0;border-bottom:1px solid var(--line);border-radius:0;background:none!important;box-shadow:none;color:var(--ink);font:inherit;cursor:pointer;text-align:left}
 .hw-head small{font-size:var(--fs-1);color:var(--ink-3);text-transform:capitalize}
+.hw-day.today .hw-head small{color:var(--ink);font-weight:650}
 .hw-head b{font-size:var(--fs-6);font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
-.hw-shift{display:inline-block;height:20px;min-width:56px;padding:0 8px;border-radius:var(--r-pill);background:var(--shift-color,var(--surface-3));color:#0b0b0b;font-size:11px;font-weight:650;line-height:20px}
+.hw-shift{display:inline-block;height:20px;padding:0 10px;border-radius:var(--r-pill);background:var(--shift-color,var(--surface-3));color:#0b0b0b;font-size:11px;font-weight:650;line-height:20px}
 .hw-shift.none{visibility:hidden}
-.hw-items{display:grid;gap:5px;align-content:start}
-.hw-ev{display:grid;gap:1px;padding:6px 8px;min-height:44px;border:0;border-radius:8px;background:color-mix(in srgb,var(--shift-color,var(--accent)) 22%,var(--surface));color:var(--ink);font:inherit;text-align:left;cursor:pointer;box-shadow:inset 3px 0 0 var(--shift-color,var(--accent))}
-.hw-ev b{font-size:11px;font-variant-numeric:tabular-nums;color:var(--ink-2)}
-.hw-ev span{font-size:var(--fs-2);font-weight:560;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.hw-items{display:grid;gap:6px;align-content:start;min-width:0}
+.hw-strip .hw-ev{display:grid;justify-content:stretch;justify-items:start;align-content:start;gap:2px;width:100%;margin:0;box-sizing:border-box;padding:7px 9px 7px 11px;min-height:44px;border:0;border-radius:8px;background:color-mix(in srgb,var(--shift-color,var(--accent)) 16%,var(--surface));color:var(--ink);font:inherit;text-align:left;cursor:pointer;box-shadow:inset 3px 0 0 var(--shift-color,var(--accent));overflow:hidden}
+.hw-ev b{font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.hw-ev span{font-size:var(--fs-2);font-weight:560;line-height:1.25;overflow:hidden;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
 .hw-ev small{font-size:11px;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hw-ev.past{opacity:.5}
-.hw-ev:hover{filter:brightness(1.1)}
+.hw-ev:hover{filter:brightness(1.12)}
 .hw-ev:focus-visible,.hw-head:focus-visible,.hw-task:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
-.hw-task{display:block;min-height:36px;padding:6px 8px;border:1px dashed var(--line);border-radius:8px;background:none;color:var(--ink-2);font:inherit;font-size:var(--fs-1);text-align:left;cursor:pointer}
-.hw-empty{margin:0;font-size:var(--fs-1);color:var(--ink-3);padding:0 var(--s2)}
+.hw-strip .hw-task{display:block;width:100%;margin:0;box-sizing:border-box;min-height:36px;padding:6px 8px;border:1px dashed var(--line);border-radius:8px;background:none;color:var(--ink-2);font:inherit;font-size:var(--fs-1);text-align:left;cursor:pointer;overflow-wrap:anywhere}
+.hw-empty{margin:0;font-size:var(--fs-1);color:var(--ink-3);padding:0 var(--s1,4px)}
 @media(max-width:760px){.hw-strip{grid-template-columns:repeat(7,minmax(112px,42%))}}
 /* Avvisi: Ignora. */
 .fa-row{grid-template-columns:minmax(0,1fr) auto;align-items:center}
 .fa-text{display:grid;gap:2px}
 .fa-ignore{min-height:44px;font-size:var(--fs-2)}
 .fa-restore{margin-top:var(--s2);min-height:44px}
+
+/* Turni: palette pastello (meno satura) e badge con una lettera nel calendario. */
+[data-kind="morning"],.os-palette button[data-life-tool="morning"]{--shift-color:#93b9dc}
+[data-kind="afternoon"],.os-palette button[data-life-tool="afternoon"]{--shift-color:#a5d1a8}
+[data-kind="night"],.os-palette button[data-life-tool="night"]{--shift-color:#b3b1cc}
+[data-kind="rest"],.os-palette button[data-life-tool="rest"]{--shift-color:#e9bf93}
+[data-kind="holiday"],.os-palette button[data-life-tool="holiday"]{--shift-color:#e8d59c}
+html[data-theme="light"] [data-kind="night"]{--shift-color:#b3b1cc}
+#calendar .os-day .os-shift,#calendar .os-day[data-kind] .os-shift{width:26px;height:26px;min-width:0;padding:0;border-radius:50%;font-size:13px;font-weight:700;justify-self:center;color:#1c1e24!important}
+#calendar .os-day .os-shift .sh-i{display:inline}
+#calendar .os-day .os-shift .sh-t,#calendar .os-day[data-kind] .os-shift .sh-t{display:none}
+#calendar .os-day .os-shift.no-shift{background:transparent!important}
+.os-day-shift,.os-day-shift[data-kind]{display:inline-grid;place-items:center;width:28px;height:28px;padding:0;border-radius:50%;background:var(--shift-color);color:#1c1e24!important;font-size:13px;font-weight:700}
+.os-day-shift::before{content:none}
+.hw-shift,.os-day[data-kind=night] .os-shift{color:#1c1e24}
 </style>
 </head>
   <body class="dashboard-mode">
@@ -2682,13 +2698,14 @@ document.addEventListener("keydown", (e) => {
       /** Agenda accanto al mese: i sei giorni dopo quello scelto, con turno ed eventi (solo giorni del mese caricato). */
       function osNextDays() {
         const shiftMap = new Map(life.data.shifts.map((s) => [s.day, s.kind])), out = [];
-        for (let i = 1; i <= 6; i++) {
+        for (let i = 1; i <= 14 && out.length < 6; i++) {
           const d = new Date(life.selected + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + i);
           const day = d.toISOString().slice(0, 10);
           if (day.slice(0, 7) !== life.month) break;
           const evs = life.data.events.filter((e) => e.day === day && e.occurrence_status !== "skipped").sort((a, b) => (a.start_time || "").localeCompare(b.start_time || ""));
           const kind = shiftMap.get(day);
-          out.push(`<div class="os-next-day"><button class="os-next-head" data-life-day="${day}"><span>${osDate(day)}</span>${kind ? `<span class="os-day-shift" data-kind="${kind}">${osShiftAbbr[kind] || ""}</span>` : ""}</button>${evs.length ? evs.map((e) => `<button class="os-next-ev" data-life-event="${e.id}"><b>${e.start_time || "Tutto il giorno"}</b><span>${osSafe(e.title)}${e.location ? `<small>${osSafe(e.location)}</small>` : ""}</span></button>`).join("") : '<p class="os-empty">Nessun impegno</p>'}</div>`);
+          if (!evs.length) continue;
+          out.push(`<div class="os-next-day"><button class="os-next-head" data-life-day="${day}"><span>${osDate(day)}</span>${kind ? `<span class="os-day-shift" data-kind="${kind}" title="${osShiftAbbr[kind] || ""}">${osShiftInitial[kind] || ""}</span>` : ""}</button>${evs.length ? evs.map((e) => `<button class="os-next-ev" data-life-event="${e.id}"><b>${e.start_time || "Tutto il giorno"}</b><span>${osSafe(e.title)}${e.location ? `<small>${osSafe(e.location)}</small>` : ""}</span></button>`).join("") : '<p class="os-empty">Nessun impegno</p>'}</div>`);
         }
         return out.length ? `<div class="os-section-label">Prossimi giorni</div><div class="os-next">${out.join("")}</div>` : "";
       }
@@ -2733,7 +2750,7 @@ document.addEventListener("keydown", (e) => {
           "--calendar-rows",
           Math.ceil((offset + days) / 7),
         );
-        return `<div class="os-card"><div class="os-month-header"><button data-life-month="-1" aria-label="Mese precedente">‹</button><h2>${first.toLocaleDateString("it-IT", { month: "long", year: "numeric", timeZone: "UTC" })}</h2><button data-life-month="1" aria-label="Mese successivo">›</button></div><div class="os-weekdays">${["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"].map((x) => `<span>${x}</span>`).join("")}</div><div class="os-days">${cells}</div>${life.selected ? `<div class="os-calendar-details">` : ""}${life.selected ? `<h3>${osDate(life.selected)}${shift ? `<span class="os-day-shift" data-kind="${shift}">${osShiftAbbr[shift] || ""}</span>` : ""}</h3>${events.length ? events.map((e) => `<div class="os-mini"><div><strong>${osSafe(e.title)}</strong><small>${e.start_time || "Tutto il giorno"}${e.end_time ? "–" + e.end_time : ""}${e.location ? " · " + osSafe(e.location) : ""}${e.occurrence_status === "done" ? " · Fatto" : ""}</small></div><button class="os-row-action" ${e.day < life.data.today ? `data-life-event="${e.id}"` : `data-life-occurrence="${e.id}:${e.day}:${e.occurrence_status === "done" ? "open" : "done"}"`}>${e.day < life.data.today ? "Riprogramma" : e.occurrence_status === "done" ? "Riapri" : "Fatto"}</button><details class="os-event-options"><summary aria-label="Opzioni evento">Opzioni</summary><button class="os-row-action" data-life-occurrence="${e.id}:${e.day}:skipped" aria-label="Elimina questa occorrenza">Elimina questa</button>${e.frequency && e.frequency !== "none" ? `<button class="os-row-action" data-life-split-event="${e.id}:${e.day}">Modifica da qui</button>` : ""}<button class="os-row-action" data-life-event="${e.id}" aria-label="Modifica serie">Modifica</button></details></div>`).join("") : '<p class="os-empty">Nessun evento.</p>'}${tasks.length ? '<div class="os-section-label">Attività</div>' + tasks.map((t) => `<div class="os-mini"><strong>${osSafe(t.title)}</strong><button class="os-row-action" data-life-task="${t.id}" aria-label="Modifica attività">···</button></div>`).join("") : ""}` : ""}${life.selected ? osNextDays() + "</div>" : ""}${osEventForm()}</div><details class="os-palette-wrap os-tools-drawer" ${life.paletteOpen || life.tool ? "open" : ""}><summary>Dipingi turni${life.tool ? " · " + osSafe(osShiftAbbr[life.tool] || life.tool) : ""}</summary><div class="os-palette-state" role="status">${life.tool ? `Pennello attivo: <strong>${osSafe(osShiftAbbr[life.tool] || (life.tool === "event" ? "Evento" : "Cancella"))}</strong>` : "Scegli un turno, poi tocca i giorni."}</div><div class="os-palette" aria-label="Pennello calendario">${Object.entries(
+        return `<div class="os-card"><div class="os-month-header"><button data-life-month="-1" aria-label="Mese precedente">‹</button><h2>${first.toLocaleDateString("it-IT", { month: "long", year: "numeric", timeZone: "UTC" })}</h2><button data-life-month="1" aria-label="Mese successivo">›</button></div><div class="os-weekdays">${["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"].map((x) => `<span>${x}</span>`).join("")}</div><div class="os-days">${cells}</div>${life.selected ? `<div class="os-calendar-details">` : ""}${life.selected ? `<h3>${osDate(life.selected)}${shift ? `<span class="os-day-shift" data-kind="${shift}" title="${osShiftAbbr[shift] || ""}">${osShiftInitial[shift] || ""}</span>` : ""}</h3>${events.length ? events.map((e) => `<div class="os-mini"><div><strong>${osSafe(e.title)}</strong><small>${e.start_time || "Tutto il giorno"}${e.end_time ? "–" + e.end_time : ""}${e.location ? " · " + osSafe(e.location) : ""}${e.occurrence_status === "done" ? " · Fatto" : ""}</small></div><button class="os-row-action" ${e.day < life.data.today ? `data-life-event="${e.id}"` : `data-life-occurrence="${e.id}:${e.day}:${e.occurrence_status === "done" ? "open" : "done"}"`}>${e.day < life.data.today ? "Riprogramma" : e.occurrence_status === "done" ? "Riapri" : "Fatto"}</button><details class="os-event-options"><summary aria-label="Opzioni evento">Opzioni</summary><button class="os-row-action" data-life-occurrence="${e.id}:${e.day}:skipped" aria-label="Elimina questa occorrenza">Elimina questa</button>${e.frequency && e.frequency !== "none" ? `<button class="os-row-action" data-life-split-event="${e.id}:${e.day}">Modifica da qui</button>` : ""}<button class="os-row-action" data-life-event="${e.id}" aria-label="Modifica serie">Modifica</button></details></div>`).join("") : '<p class="os-empty">Nessun evento.</p>'}${tasks.length ? '<div class="os-section-label">Attività</div>' + tasks.map((t) => `<div class="os-mini"><strong>${osSafe(t.title)}</strong><button class="os-row-action" data-life-task="${t.id}" aria-label="Modifica attività">···</button></div>`).join("") : ""}` : ""}${life.selected ? osNextDays() + "</div>" : ""}${osEventForm()}</div><details class="os-palette-wrap os-tools-drawer" ${life.paletteOpen || life.tool ? "open" : ""}><summary>Dipingi turni${life.tool ? " · " + osSafe(osShiftAbbr[life.tool] || life.tool) : ""}</summary><div class="os-palette-state" role="status">${life.tool ? `Pennello attivo: <strong>${osSafe(osShiftAbbr[life.tool] || (life.tool === "event" ? "Evento" : "Cancella"))}</strong>` : "Scegli un turno, poi tocca i giorni."}</div><div class="os-palette" aria-label="Pennello calendario">${Object.entries(
           osShift,
         )
           .map(
@@ -6163,7 +6180,6 @@ document.addEventListener("keydown", (e) => {
     const kpi=(cls,label,value,sub,attr)=>`<button class="dash-kpi ${cls}" ${attr}><small>${label}</small><strong>${value}</strong><span>${sub}</span></button>`;
     
     const kpis=[
-      kpi('k-shift','Turno oggi',shift?short[shift]:'—',shift&&/\d/.test(osShift[shift])?osShift[shift]:'turno di riposo','data-home-day="'+today+'" data-kind="'+(shift||'')+'"'),
       kpi('k-money','Budget del mese',perDay,perDaySub,'data-view="overview"'),
       kpi('k-sun','Prossimo orario',safe(nextSolar.time),safe(nextSolar.label),'data-home-times-sheet'),
       kpi('k-weather','Meteo',wx?wx.t:'—',wx?wx.c+' · Empoli':'Non disponibile','aria-disabled="true" tabindex="-1"')
