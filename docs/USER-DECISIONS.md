@@ -429,3 +429,5 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 ## IPA-DELIVERY-92-2026-11-17 (ACTIVE)
 - Richiesta utente: "make the ipa".
 - IPA 0.10.30 build 92 solo a gate verdi sullo stesso commit; prova su iPhone e accettazione restano distinte.
+
+- **HEALTH-FOOD-BUTTON-2026-11-22 — PENDING_CONFIRMATION.** Testo utente: «non ci credo mi hai lasciato il pulsante alimento sulla scheda salute a sinistra […] devo aspettare di nuovo altre 3 ore adesso per questa cazzata?». Parafrasi: togliere «Alimento» da Salute. In conflitto con HEALTH-TREND-93-2026-11-21 («Peso e Alimento sopra la barra»); domanda META-01 posta il 22 novembre 2026.
