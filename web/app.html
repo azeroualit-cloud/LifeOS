@@ -1177,6 +1177,10 @@ body .nav button[data-view].active .nav-symbol,body .nav #admin-link.active .nav
 .sc-dr>b.neg{color:var(--neg-t)}
 .sc-dr>i{display:block;grid-column:1/-1;height:4px;border-radius:var(--r-pill);background:var(--c);opacity:.9;transform-origin:left;animation:sc-bar .6s cubic-bezier(.2,.7,.2,1) both}
 .sc-dinfo{margin:0;font-size:var(--fs-1);color:var(--ink-3)}
+.sc-dsec{margin:var(--s2) 0 0;display:flex;justify-content:space-between;align-items:baseline;font-size:var(--fs-1);font-weight:650;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3)}
+.sc-dsec span{font-weight:500;letter-spacing:0}
+.sc-dnone{margin:0;font-size:var(--fs-2);color:var(--ink-3)}
+.sc-pop .sc-dbox{max-height:min(62svh,560px);overflow-y:auto}
 /* Popup della voce (clic su un riquadro): scheda centrata, foglio dal basso su telefono. */
 .sc-pop{width:min(440px,100%);padding:var(--s5)}
 .sc-pop .modal-top{margin-bottom:var(--s3)}
@@ -4127,7 +4131,7 @@ document.addEventListener("keydown", (e) => {
           by.set(key, (by.get(key) || 0) + v);
           (rowsBy.get(key) || rowsBy.set(key, []).get(key)).push({ label: t.name || cat, sub: /^\d{4}-\d{2}-\d{2}/.test(t.date || "") ? `${t.date.slice(8, 10)}/${t.date.slice(5, 7)}` : "", value: v });
         }
-        let items = [...by].map(([name, value]) => ({ name, value, rows: (rowsBy.get(name) || []).sort((p, q) => q.value - p.value) })).sort((a, b) => b.value - a.value);
+        let items = [...by].map(([name, value]) => ({ name, value, txRows: true, rows: (rowsBy.get(name) || []).sort((p, q) => q.value - p.value) })).sort((a, b) => b.value - a.value);
         const sum = items.reduce((n, x) => n + x.value, 0);
         if (sum > 0 && Math.abs(sum - spent) > 0.5) { const k = spent / sum; items = items.map((x) => ({ ...x, value: x.value * k, rows: x.rows.map((r) => ({ ...r, value: r.value * k })) })); }
         else if (!sum && spent > 0.5) items = [{ name: "Altre spese", value: spent }];
@@ -4178,7 +4182,14 @@ document.addEventListener("keydown", (e) => {
             const it = t.r, big = t.w > 44 && t.h > 44, mid = t.w > 36 && t.h > 30, cls = big ? "" : mid ? " sm" : " xs", k = Math.round(86 + 14 * it.value / max);
             const label = `${g.label} · ${it.name}: ${fmt(it.value)}${salary > 0 ? ", " + pctS(it.value) + " dello stipendio" : ""}`;
             const rows = (it.rows && it.rows.length ? it.rows : (its.length ? [{ label: it.name, sub: g.label, value: it.value }] : (g.rows || []))), shown = rows.slice(0, 8), more = rows.slice(8), rmax = Math.max(...rows.map((r) => Math.abs(r.value)), 1);
-            const dp = `<header><i style="background:${g.color}"></i><span><b>${escapeHtml(it.name)}</b><small>${escapeHtml(g.label)}</small></span><strong>${fmt0(it.value)}</strong><em>${pctS(it.value)}</em></header>${shown.map((r) => `<div class="sc-dr"><span>${escapeHtml(r.label)}${r.sub ? `<small>${escapeHtml(r.sub)}</small>` : ""}</span><b class="${r.value < 0 ? "neg" : ""}">${r.value < 0 ? "−" : ""}${fmt(Math.abs(r.value))}</b><i style="width:${(Math.abs(r.value) / rmax * 100).toFixed(1)}%"></i></div>`).join("")}${more.length ? `<div class="sc-dr"><span>+ altre ${more.length} voci</span><b>${fmt(more.reduce((n, r) => n + r.value, 0))}</b></div>` : ""}${it.info ? `<p class="sc-dinfo">${escapeHtml(it.info)}</p>` : ""}`;
+            const row = (r, top, cls = "") => `<div class="sc-dr${cls}"><span>${escapeHtml(r.label)}${r.sub ? `<small>${escapeHtml(r.sub)}</small>` : ""}</span><b class="${r.value < 0 ? "neg" : ""}">${r.value < 0 ? "−" : ""}${fmt(Math.abs(r.value))}</b><i style="width:${(Math.abs(r.value) / top * 100).toFixed(1)}%"></i></div>`;
+            // Composizione: quota del piano o voci raggruppate; per le spese le righe sono già i movimenti.
+            const compHtml = it.txRows ? "" : `<p class="sc-dsec">Composizione</p>${shown.map((r) => row(r, rmax)).join("")}${more.length ? `<div class="sc-dr"><span>+ altre ${more.length} voci</span><b>${fmt(more.reduce((n, r) => n + r.value, 0))}</b></div>` : ""}`;
+            const txList = it.txRows ? rows : (it.tx || []), tmax = Math.max(...txList.map((r) => Math.abs(r.value)), 1), txMore = txList.slice(12);
+            const txHtml = txList.length
+              ? `<p class="sc-dsec">Movimenti del mese<span>${txList.length}</span></p>${txList.slice(0, 12).map((r) => row(r, tmax, " sc-tx")).join("")}${txMore.length ? `<div class="sc-dr"><span>+ altri ${txMore.length} movimenti</span><b>${fmt(txMore.reduce((n, r) => n + Math.abs(r.value), 0))}</b></div>` : ""}`
+              : (it.txRows || it.tx ? `<p class="sc-dsec">Movimenti del mese</p><p class="sc-dnone">Nessun movimento nel mese.</p>` : "");
+            const dp = `<header><i style="background:${g.color}"></i><span><b>${escapeHtml(it.name)}</b><small>${escapeHtml(g.label)}</small></span><strong>${fmt0(it.value)}</strong><em>${pctS(it.value)}</em></header>${compHtml}${it.info ? `<p class="sc-dinfo">${escapeHtml(it.info)}</p>` : ""}${txHtml}`;
             return `<button type="button" class="sc-tile${cls}" style="left:${(t.x / gw * 100).toFixed(2)}%;top:${(t.y / gh * 100).toFixed(2)}%;width:${(t.w / gw * 100).toFixed(2)}%;height:${(t.h / gh * 100).toFixed(2)}%;--k:${k};--n:${n++};--c:${g.color}" data-g="${escapeHtml(g.label)}" data-name="${escapeHtml(it.name)}" aria-haspopup="dialog" aria-label="${escapeHtml(label)}. Apri il dettaglio"><div><p class="sc-in"><span>${escapeHtml(it.name)}</span><b>${fmt0(it.value)}</b><em>${pctS(it.value)}</em></p></div><template class="sc-dp">${dp}</template></button>`;
           }).join("");
         };
@@ -4203,15 +4214,16 @@ document.addEventListener("keydown", (e) => {
         const S = Number(sm.monthlySalary) || 0;
         if (!S) return "";
         const spent = Math.max(0, Number(sm.monthlySpent) || 0), rem = Number(sm.monthlyRemaining) || 0, committed = Math.max(0, S - spent - rem);
-        const save = [], fixed = [];
+        const save = [], fixed = [], normCat = globalThis.lifeOSNormCategory || ((x) => x);
+        const txFor = (cat) => cat ? (d.transactions || []).filter((t) => t.type === "Spesa" && t.amount < 0 && (normCat(t.displayCategory || t.category || "") === normCat(cat) || (t.category || "") === cat)).map((t) => ({ label: t.name || cat, sub: /^\d{4}-\d{2}-\d{2}/.test(t.date || "") ? `${t.date.slice(8, 10)}/${t.date.slice(5, 7)}` : "", value: -t.amount })).sort((p, q) => q.value - p.value) : [];
         for (const p of d.plansV2?.plans || []) {
           const v = Number(p.contributionCents) / 100;
           if (!(v > 0)) continue;
           const monthly = ["estimated", "advance", "recovery"].includes(p.kind) || p.kind === "fixed" && !(Number(p.intervalMonths) > 1);
           const kindLbl = { estimated: "Stima mensile", advance: "Anticipo", recovery: "Recupero", fixed: "Spesa fissa" }[p.kind] || "Accantonamento", tot = Number(p.amountCents) / 100, im = Number(p.intervalMonths) || 0;
-          (monthly ? fixed : save).push({ name: p.name, value: v, rows: [{ label: "Quota di questo mese", sub: kindLbl, value: v }], info: [im > 1 ? `Si ripete ogni ${im} mesi` : "", tot > 0 && im > 1 ? `Importo da coprire ${exactEuro(tot)}` : "", p.startMonth ? `Da ${p.startMonth}${p.endMonth ? " a " + p.endMonth : ""}` : ""].filter(Boolean).join(" · ") });
+          (monthly ? fixed : save).push({ name: p.name, value: v, tx: txFor(p.category), rows: [{ label: "Quota di questo mese", sub: kindLbl, value: v }], info: [im > 1 ? `Si ripete ogni ${im} mesi` : "", tot > 0 && im > 1 ? `Importo da coprire ${exactEuro(tot)}` : "", p.startMonth ? `Da ${p.startMonth}${p.endMonth ? " a " + p.endMonth : ""}` : ""].filter(Boolean).join(" · ") });
         }
-        for (const x of sm.monthlyBudgetBreakdown || []) if (!x.planId && Number(x.amount) > 0) (/^Accantonament/i.test(x.name) ? save : fixed).push({ name: x.name, value: Number(x.amount), rows: [{ label: x.name, sub: /^Accantonament/i.test(x.name) ? "Messo da parte" : "Impegno del mese", value: Number(x.amount) }] });
+        for (const x of sm.monthlyBudgetBreakdown || []) if (!x.planId && Number(x.amount) > 0) (/^Accantonament/i.test(x.name) ? save : fixed).push({ name: x.name, value: Number(x.amount), tx: /^Accantonament/i.test(x.name) ? undefined : txFor(x.name), rows: [{ label: x.name, sub: /^Accantonament/i.test(x.name) ? "Messo da parte" : "Impegno del mese", value: Number(x.amount) }] });
         const diff = committed - [...save, ...fixed].reduce((n, x) => n + x.value, 0);
         if (Math.abs(diff) > 0.5) fixed.push({ name: diff > 0 ? "Altri impegni del mese" : "Quote già coperte", value: diff, rows: [], info: "Differenza tra stipendio, speso e rimanente non attribuita a un singolo piano" });
         const free = Math.max(0, rem), over = rem < 0 ? -rem : 0, sp = spentBreakdown(d, spent);

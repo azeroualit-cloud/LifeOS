@@ -1138,6 +1138,10 @@ body .nav button[data-view].active .nav-symbol,body .nav #admin-link.active .nav
 .sc-dr>b.neg{color:var(--neg-t)}
 .sc-dr>i{display:block;grid-column:1/-1;height:4px;border-radius:var(--r-pill);background:var(--c);opacity:.9;transform-origin:left;animation:sc-bar .6s cubic-bezier(.2,.7,.2,1) both}
 .sc-dinfo{margin:0;font-size:var(--fs-1);color:var(--ink-3)}
+.sc-dsec{margin:var(--s2) 0 0;display:flex;justify-content:space-between;align-items:baseline;font-size:var(--fs-1);font-weight:650;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3)}
+.sc-dsec span{font-weight:500;letter-spacing:0}
+.sc-dnone{margin:0;font-size:var(--fs-2);color:var(--ink-3)}
+.sc-pop .sc-dbox{max-height:min(62svh,560px);overflow-y:auto}
 /* Popup della voce (clic su un riquadro): scheda centrata, foglio dal basso su telefono. */
 .sc-pop{width:min(440px,100%);padding:var(--s5)}
 .sc-pop .modal-top{margin-bottom:var(--s3)}
