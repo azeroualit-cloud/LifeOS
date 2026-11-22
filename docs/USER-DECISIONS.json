@@ -1283,6 +1283,15 @@
       "provenance": "Risposta diretta utente alla proposta di sistema di spaziature",
       "original_quote": "confermo le spaziatura, ma fammi vedere un anteprima di tutte le modifiche, soprattutto la spaziatura",
       "rule": "Scala aurea con pochi valori: 5 testo-valore/valore-barra; 8 tra righe in una scheda; schede 13 sopra/sotto e 16 ai lati; 13 tra schede; 21 tra sezioni; 16 bordi schermo. Vicinanza (dentro un gruppo meno spazio che tra gruppi), niente testate alte 44 pt dentro le schede: la scheda intera è il tocco. Coerente con GOLDEN-01."
+    },
+    {
+      "id": "DESIGN-PASS-94-2026-11-23",
+      "status": "ACTIVE",
+      "scope": "Tutta l'app, build 94",
+      "recorded_on": "2026-11-23",
+      "provenance": "Risposta diretta utente alla proposta in 10 punti",
+      "original_quote": "Si tutto, ma sempre la proposta di tutte le modifiche rispetto alla 93 adesso",
+      "rule": "Applicare a tutta l'app: pulsanti disegnati 44 (azioni in basso) e 34 (in scheda, tondi, pillole) con tocco 44; 5 dimensioni di testo (28/17/15/13/11), numero e unità della stessa dimensione; testate schede uniformi con scheda intera toccabile; righe 44 toccabili e 34 informative; raggi 21/13/pillola annidati; un colore per sezione, rosso/arancione/verde solo per stati; icone uniformi; stati vuoti di una riga; scorrimento senza ricalcoli; controllo automatico che blocca valori fuori regola. Prima mostrare l'anteprima di tutte le modifiche rispetto alla 93. Si estende SPACING-SYSTEM-2026-11-22."
     }
   ],
   "pending_confirmations": [
