@@ -72,9 +72,6 @@ struct NativeHealthDetail: View {
                 // HEALTH-TREND-93-2026-11-21: day first, then the trend over months.
                 VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
                     weekPicker
-                    Text(selectedDate.formatted(.dateTime.weekday(.wide).day()).capitalized(with: Locale(identifier: "it_IT")))
-                        .font(.title2.bold()).accessibilityAddTraits(.isHeader)
-                        .accessibilityIdentifier("health-selected-day")
                     if demo { Text("Dati illustrativi").font(.caption).foregroundStyle(NativeDesign.secondary) }
                     caloriesCard
                     nutrients
@@ -136,7 +133,8 @@ struct NativeHealthDetail: View {
 
     private func whole(_ value: Double) -> String { value.formatted(.number.precision(.fractionLength(0))) }
 
-    /// Calories of the selected day against the goal, split by macro (preview top card).
+    /// Calories of the selected day (Fitia-like, user request 22/11/2026): centred value over
+    /// the goal, an arc with the ±10 % goal band, then the three macros in centred columns.
     private var caloriesCard: some View {
         let targets = health.goalTargets
         let values = health.nutrients(on: selectedDate)
@@ -144,47 +142,42 @@ struct NativeHealthDetail: View {
         let calories = health.calories(on: selectedDate)
         let kcal = calories.map(whole) ?? "—"
         let remaining: Double? = targets.flatMap { goal in calories.map { goal.calories - $0 } }
-        let detail: String
-        if let targets {
-            if let remaining {
-                detail = "/ " + whole(targets.calories) + (remaining >= 0 ? " · restano " : " · oltre di ") + whole(abs(remaining))
-            } else { detail = "/ " + whole(targets.calories) }
-        } else { detail = "Imposta un obiettivo" }
         let over = (remaining ?? 0) < 0
-        let split = [LOSegment(id: "p", value: (protein ?? 0) * 4, color: NativeDesign.macroProtein),
-                     LOSegment(id: "c", value: (carbohydrate ?? 0) * 4, color: NativeDesign.macroCarbohydrate),
-                     LOSegment(id: "f", value: (fat ?? 0) * 9, color: NativeDesign.macroFat)]
-        let splitTotal = split.map(\.value).reduce(0, +)
-        let spokenSplit = "Calorie divise per macro: proteine " + whole((protein ?? 0) * 4) + ", carboidrati " + whole((carbohydrate ?? 0) * 4) + ", grassi " + whole((fat ?? 0) * 9)
+        let status: String = targets == nil ? "Imposta un obiettivo" : (remaining.map { ($0 >= 0 ? "restano " : "oltre di ") + whole(abs($0)) } ?? " ")
+        let centered = !typeSize.isAccessibilitySize
         let macroLayout = typeSize.isAccessibilitySize
             ? AnyLayout(VStackLayout(alignment: .leading, spacing: NativeDesign.Space.small))
             : AnyLayout(HStackLayout(alignment: .top, spacing: NativeDesign.Space.medium))
-        return NativeCard {
+        return NativeCard(density: .compact) {
             Button { editingGoals = true } label: {
-                VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-                    HStack {
-                        Text("Calorie").font(.footnote.weight(.semibold)).foregroundStyle(NativeDesign.nutritionTitle)
-                        Spacer()
-                        NativeDisclosureIndicator()
+                VStack(spacing: NativeDesign.Space.xxs) {
+                    Text("kcal").font(.footnote).foregroundStyle(NativeDesign.secondary)
+                    HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xxs) {
+                        Text(kcal).font(.title.weight(.bold)).monospacedDigit()
+                        if let targets {
+                            Text("/ " + whole(targets.calories)).font(.title3.weight(.semibold))
+                                .foregroundStyle(NativeDesign.secondary).monospacedDigit()
+                        }
                     }
-                    HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xs) {
-                        Text(kcal).font(.title2.weight(.bold)).monospacedDigit()
-                        Text(detail).font(.footnote).foregroundStyle(over ? NativeDesign.overGoal : NativeDesign.secondary)
-                            .monospacedDigit().lineLimit(1).minimumScaleFactor(0.8)
-                    }
+                    .lineLimit(1).minimumScaleFactor(0.7)
+                    Text(status).font(.footnote).foregroundStyle(over ? NativeDesign.overGoal : NativeDesign.secondary).monospacedDigit()
+                    NativeCalorieGauge(calories: calories, goal: targets?.calories)
+                        .padding(.top, NativeDesign.Space.xs)
                 }
-                .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
+                .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget)
                 .contentShape(Rectangle())
             }
             .buttonStyle(NativePressStyle())
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Calorie " + kcal + (targets.map { " di " + whole($0.calories) } ?? "") + ". Apri obiettivi")
             .accessibilityIdentifier("health-calories-goals")
-            LOSplitBar(segments: split, scale: max(targets?.calories ?? 0, splitTotal, 1), accessibilityText: spokenSplit)
             macroLayout {
-                LOMacroValue(title: "Proteine", value: protein, goal: targets?.protein, unit: "g", color: NativeDesign.macroProtein, identifier: "health-nutrient-" + HKQuantityTypeIdentifier.dietaryProtein.rawValue)
-                LOMacroValue(title: "Carboidrati", value: carbohydrate, goal: targets?.carbohydrate, unit: "g", color: NativeDesign.macroCarbohydrate, identifier: "health-nutrient-" + HKQuantityTypeIdentifier.dietaryCarbohydrates.rawValue)
-                LOMacroValue(title: "Grassi", value: fat, goal: targets?.fat, unit: "g", color: NativeDesign.macroFat, identifier: "health-nutrient-" + HKQuantityTypeIdentifier.dietaryFatTotal.rawValue)
+                LOMacroValue(title: "Proteine", value: protein, goal: targets?.protein, unit: "g", color: NativeDesign.macroProtein,
+                             identifier: "health-nutrient-" + HKQuantityTypeIdentifier.dietaryProtein.rawValue, centered: centered)
+                LOMacroValue(title: "Carboidrati", value: carbohydrate, goal: targets?.carbohydrate, unit: "g", color: NativeDesign.macroCarbohydrate,
+                             identifier: "health-nutrient-" + HKQuantityTypeIdentifier.dietaryCarbohydrates.rawValue, centered: centered)
+                LOMacroValue(title: "Grassi", value: fat, goal: targets?.fat, unit: "g", color: NativeDesign.macroFat,
+                             identifier: "health-nutrient-" + HKQuantityTypeIdentifier.dietaryFatTotal.rawValue, centered: centered)
             }
         }
     }
@@ -242,52 +235,65 @@ struct NativeHealthDetail: View {
         }
     }
 
+    /// Fitia-like week (user request 22/11/2026): no card; the day as title with the week arrows;
+    /// weekday letters with the selected one in a filled circle, the date, and a dot per day
+    /// coloured by the calorie goal band (grey: nothing logged).
     private var weekPicker: some View {
         let calendar = NativeHealthWeek.calendar
         let today = calendar.startOfDay(for: .now)
         let days = NativeHealthWeek.days(containing: selectedDate)
-        return NativeCard(density: .compact) {
-            HStack {
+        let goal = health.goalTargets?.calories
+        let isToday = selectedDate == today
+        let title = isToday ? "Oggi" : selectedDate.formatted(.dateTime.weekday(.wide).day().month(.abbreviated)).capitalized(with: Locale(identifier: "it_IT"))
+        return VStack(spacing: NativeDesign.Space.xs) {
+            HStack(spacing: NativeDesign.Space.xs) {
+                Button { selectedDate = today } label: {
+                    HStack(spacing: NativeDesign.Space.xs) {
+                        Text(title).font(.title2.bold()).foregroundStyle(.primary).lineLimit(1).minimumScaleFactor(0.7)
+                        if !isToday {
+                            Image(systemName: "arrow.uturn.backward").font(.footnote.weight(.semibold)).foregroundStyle(NativeDesign.secondary)
+                        }
+                    }
+                    .frame(minHeight: NativeDesign.Layout.touchTarget)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(NativePressStyle())
+                .disabled(isToday)
+                .accessibilityLabel(isToday ? "Oggi" : title + ", torna a oggi")
+                .accessibilityAddTraits(.isHeader)
+                .accessibilityIdentifier(isToday ? "health-selected-day" : "health-week-today")
+                Spacer(minLength: NativeDesign.Space.none)
                 NativeIconButton(symbol: "chevron.left", label: "Settimana precedente") { moveWeek(-1) }
                     .accessibilityIdentifier("health-week-previous")
-                Spacer()
-                Text(days.first.map { $0.formatted(.dateTime.day().month(.abbreviated)) } ?? "")
-                    + Text(" – ")
-                    + Text(days.last.map { $0.formatted(.dateTime.day().month(.abbreviated)) } ?? "")
-                Spacer()
                 NativeIconButton(symbol: "chevron.right", label: "Settimana successiva") { moveWeek(1) }
                     .accessibilityIdentifier("health-week-next")
                     .disabled(days.contains(today))
-            }.font(.subheadline.weight(.semibold))
-            if selectedDate != today {
-                Button("Oggi") { selectedDate = today }
-                    .buttonStyle(NativePressStyle())
-                    .frame(minHeight: NativeDesign.Layout.touchTarget)
-                    .accessibilityIdentifier("health-week-today")
             }
             HStack(spacing: NativeDesign.Space.xxs) {
                 ForEach(days, id: \.self) { day in
-                    let current = day == today
                     let selection = day == selectedDate
-                    let accent = store.shift(CivilDate.day(day))?.color ?? NativeDesign.accent
+                    let band = NativeCalorieBand.of(health.calories(on: day), goal: goal)
                     Button { selectedDate = day } label: {
                         VStack(spacing: NativeDesign.Space.xxs) {
-                            Text(day.formatted(.dateTime.weekday(.narrow))).font(.caption2)
-                            Text(day.formatted(.dateTime.day())).font(.subheadline.weight(.semibold)).monospacedDigit()
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.55)
-                                .foregroundStyle(current ? (store.shift(CivilDate.day(day)) == nil ? NativeDesign.onAccent : Color.black) : .primary)
+                            Text(day.formatted(.dateTime.weekday(.narrow))).font(.caption.weight(.semibold))
+                                .foregroundStyle(selection ? Color(uiColor: .systemBackground) : NativeDesign.secondary)
                                 .frame(width: NativeDesign.Layout.calendarDayNumber, height: NativeDesign.Layout.calendarDayNumber)
-                                .background(current ? accent : .clear, in: Circle())
-                                .overlay(Circle().strokeBorder(selection && !current ? NativeDesign.accent : .clear))
-                        }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget)
-                            .contentShape(Rectangle())
-                    }.buttonStyle(NativePressStyle())
-                        .disabled(day > today)
-                        .opacity(day > today ? 0.45 : 1)
-                        .accessibilityLabel(day.formatted(date: .complete, time: .omitted))
-                        .accessibilityIdentifier("health-date-" + CivilDate.day(day))
-                        .accessibilityAddTraits(selection ? .isSelected : [])
+                                .background { if selection { Circle().fill(Color.primary) } }
+                            Text(day.formatted(.dateTime.day())).font(.subheadline.weight(.semibold)).monospacedDigit()
+                                .foregroundStyle(day == today ? NativeDesign.nutritionTitle : Color.primary)
+                                .lineLimit(1).minimumScaleFactor(0.55)
+                            Circle().fill(day > today ? Color.clear : band.color)
+                                .frame(width: NativeDesign.Space.small - 2, height: NativeDesign.Space.small - 2)
+                        }
+                        .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(NativePressStyle())
+                    .disabled(day > today)
+                    .opacity(day > today ? 0.45 : 1)
+                    .accessibilityLabel(day.formatted(date: .complete, time: .omitted))
+                    .accessibilityIdentifier("health-date-" + CivilDate.day(day))
+                    .accessibilityAddTraits(selection ? .isSelected : [])
                 }
             }
             .dynamicTypeSize(...DynamicTypeSize.xxxLarge)

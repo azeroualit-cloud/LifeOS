@@ -70,6 +70,8 @@ struct LOMacroValue: View {
     let unit: String
     let color: Color
     var identifier: String
+    /// Centred column (Salute calorie card) instead of the leading one.
+    var centered = false
 
     var body: some View {
         let shown: String = value.map { $0.formatted(.number.precision(.fractionLength(0))) } ?? "—"
@@ -77,7 +79,7 @@ struct LOMacroValue: View {
         let suffix: String = goalText.map { "/ " + $0 + " " + unit } ?? unit
         var spoken: String = title + ", " + (value == nil ? "nessun dato" : shown + " " + unit)
         if let goalText { spoken += " di " + goalText }
-        return VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
+        return VStack(alignment: centered ? .center : .leading, spacing: NativeDesign.Space.xs) {
             Text(title).font(.footnote).foregroundStyle(NativeDesign.secondary).lineLimit(1)
             HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xs) {
                 Text(shown).font(.subheadline.weight(.semibold)).monospacedDigit()
@@ -87,7 +89,7 @@ struct LOMacroValue: View {
             // Without a goal the track stays empty: a full bar would suggest a target met.
             LOProgressBar(value: value ?? 0, total: goal, color: color, height: NativeDesign.Space.xs)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, alignment: centered ? .center : .leading)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(spoken)
         .accessibilityIdentifier(identifier)
