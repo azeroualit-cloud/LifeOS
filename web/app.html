@@ -6879,7 +6879,7 @@ document.addEventListener("keydown", (e) => {
       const norm = flows.reduce((n, f) => n + f.spent, 0) / flows.length;
       const pace = (k) => flows.length >= k && norm > 0 ? flows.slice(-k).reduce((n, f) => n + f.spent, 0) / k / norm - 1 : null;
       const bar = (title, v) => v === null ? "" : `<div class="an93-pace"><span>${title}</span><div class="an93-track" role="img" aria-label="${title}: ${an93Pct(v)} rispetto alla norma"><i class="${v > 0 ? "up" : "down"}" style="${v > 0 ? "left:50%" : "right:50%"};width:${(Math.min(1, Math.abs(v) / 0.3) * 50).toFixed(1)}%"></i><b></b></div><strong class="${v > 0 ? "neg" : "pos"}">${an93Pct(v)}</strong></div>`;
-      return card(`Ritmo`, `<div class="an93-norm"><strong>${an93Eur(norm)}</strong><span>la tua norma al mese</span></div>${bar("Ultimo mese", pace(1))}${bar("Ultimi 3 mesi", pace(3))}`);
+      return card(`Ritmo`, `<div class="an93-norm"><strong>${an93Eur(norm)}</strong><span>la tua norma al mese</span></div>${bar("1 mese", pace(1))}${bar("3 mesi", pace(3))}`);
     }
     function an93Fund(d) {
       const fund = Number(d.planning?.now);
