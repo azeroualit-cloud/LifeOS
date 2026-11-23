@@ -114,18 +114,10 @@ struct NativeCalorieGauge: View {
         }
         .frame(width: knob, height: knob)
     }
-    /// The recommended range under the two ticks, centred on each tick.
+    /// The recommended range, centred under the arc (the two ticks are too close for separate labels).
     private func rangeLabels(_ goal: Double) -> some View {
-        GeometryReader { proxy in
-            let rect = CGRect(x: knob / 2, y: knob / 2, width: proxy.size.width - knob, height: 1)
-            ForEach([NativeCalorieBand.low, NativeCalorieBand.high], id: \.self) { share in
-                let fraction = NativeCalorieBand.fraction(goal * share, goal: goal)
-                Text(whole(goal * share))
-                    .font(.caption2.weight(.medium)).foregroundStyle(NativeDesign.secondary).monospacedDigit()
-                    .fixedSize()
-                    .position(x: rect.minX + rect.width * fraction, y: proxy.size.height / 2)
-            }
-        }
-        .frame(height: NativeDesign.Space.medium)
+        Text("Consigliate " + whole(goal * NativeCalorieBand.low) + "–" + whole(goal * NativeCalorieBand.high))
+            .font(.caption2.weight(.medium)).foregroundStyle(NativeDesign.secondary).monospacedDigit()
+            .frame(maxWidth: .infinity)
     }
 }

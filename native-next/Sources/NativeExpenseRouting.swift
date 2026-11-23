@@ -35,7 +35,7 @@ struct NativeExpenseRouteSection: View {
                         if offersSavings || selected == NativeExpenseRouting.savings { Text("Risparmi").tag(NativeExpenseRouting.savings) }
                         ForEach(plans.indices, id: \.self) { index in Text("Piano · " + plans[index].text("name")).tag(plans[index].text("id")) }
                     }.accessibilityIdentifier("expense-destination")
-                    if !selected.isEmpty { fundingBar }
+                    if !selected.isEmpty && amount > 0 { fundingBar }
                     if let chosen {
                     if chosen.flag("retained") {
                         Text("Mantieni il collegamento esistente. Cambiare il periodo non sposta denaro.").font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)

@@ -306,7 +306,7 @@ struct CalendarScreen: View {
         let dayShift = self.shift(on: day)
         return LOListCard {
             ForEach(Array(events.enumerated()), id: \.offset) { index, event in
-                agendaRow(time: event.text("start_time").isEmpty ? "Tutto il giorno" : event.text("start_time"),
+                agendaRow(time: event.text("start_time").isEmpty ? "Giornata" : event.text("start_time"),
                           title: event.text("title", fallback: "Evento"), detail: eventDetail(event),
                           color: dayShift?.color ?? NativeDesign.calendarTitle, isLast: index == events.count - 1 && tasks.isEmpty) {
                     router.sheet = .event(event)

@@ -38,13 +38,16 @@ struct NativePlansScreen: View {
                     if let server = store.server { Text(server.host ?? "").font(.footnote).foregroundStyle(NativeDesign.secondary) }
                     Button("Riprova") { Task { await store.loadFinancePlans() } }
                 }
-                if store.isDemo { Text("Piani demo · nessuna modifica al server").font(.footnote).foregroundStyle(NativeDesign.secondary) }
+            } footer: {
+                if store.isDemo { Text("Piani demo · nessuna modifica al server") }
             }
             // Build 93 Budget: salary, plans and commitments, budget of the month; then the plans.
             Section {
                 LabeledContent("Stipendio", value: money(flow.salaryCents)).monospacedDigit().accessibilityIdentifier("budget-salary-reference")
                 LabeledContent("Piani e impegni", value: money(-flow.rows.reduce(0) { $0 + $1.amountCents })).monospacedDigit()
-                LabeledContent("Budget del mese", value: money(flow.salaryCents - flow.rows.reduce(0) { $0 + $1.amountCents })).font(.headline).monospacedDigit()
+                LabeledContent("Budget del mese") {
+                    Text(money(flow.salaryCents - flow.rows.reduce(0) { $0 + $1.amountCents })).foregroundStyle(.primary)
+                }.font(.headline).monospacedDigit()
                     .accessibilityIdentifier("budget-month-total")
             }
             Section("Piani del mese") {
@@ -510,7 +513,7 @@ enum NativePlanKindText {
         switch kind {
         case .fixed: return "Affitto e utenze: importo fisso a ogni scadenza"
         case .estimated: return "Bollette: quota stimata, divisa su più mesi"
-        case .fund: return "Fondo senza scadenza, per esempio l'auto"
+        case .fund: return "Metti da parte ogni mese, per esempio per l'auto"
         case .goal: return "Una cifra da raggiungere entro una data"
         case .advance: return "Usa ora il budget di un mese futuro"
         case .recovery: return "Una spesa già fatta, recuperata nei mesi"

@@ -240,7 +240,9 @@ struct LOFilterPill<Options: View>: View {
             .foregroundStyle(.primary)
             .padding(.horizontal, NativeDesign.Space.medium)
             .frame(minHeight: NativeDesign.Layout.compactControl)
-            .modifier(NativeGlass())
+            // Flat capsule: a glass shadow inside list rows rendered as a grey band under the pills.
+            .background(Capsule().fill(Color(uiColor: .secondarySystemGroupedBackground)))
+            .overlay(Capsule().strokeBorder(Color(uiColor: .separator).opacity(0.5), lineWidth: 0.5))
             .frame(minHeight: NativeDesign.Layout.touchTarget)
             .contentShape(Rectangle())
         }

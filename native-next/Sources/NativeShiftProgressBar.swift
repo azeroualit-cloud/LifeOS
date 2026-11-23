@@ -12,7 +12,7 @@ struct NativeShiftProgressBar: View {
                 let fraction = min(1, max(0, now.timeIntervalSince(interval.start) / interval.duration))
                 let tint = model.shift?.color ?? NativeDesign.accent
                 ZStack(alignment: .leading) {
-                    Rectangle().fill(tint.opacity(0.14))
+                    Rectangle().fill(tint.opacity(0.24))
                     Rectangle().fill(tint.opacity(0.42 + pulse * 0.08))
                         .frame(width: geometry.size.width * fraction)
                 }.animation(reduceMotion ? nil : .smooth(duration: NativeDesign.Motion.layoutDuration), value: fraction)

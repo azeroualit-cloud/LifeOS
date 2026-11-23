@@ -452,7 +452,7 @@ struct NativeFinanceMonthChip: View {
             Button("Mese successivo", systemImage: "chevron.right") { Task { await store.changeMonth(1, finance: true) } }
         } label: {
             HStack(spacing: NativeDesign.Space.xs) {
-                Text(CivilDate.monthTitle(store.financeMonth)).font(.subheadline.weight(.semibold)).lineLimit(1)
+                Text(Self.label(store.financeMonth)).font(.subheadline.weight(.semibold)).lineLimit(1).fixedSize()
                 Image(systemName: "chevron.up.chevron.down").font(.caption2.weight(.semibold)).foregroundStyle(NativeDesign.secondary)
             }
             .foregroundStyle(Color.primary)
@@ -465,5 +465,10 @@ struct NativeFinanceMonthChip: View {
         .disabled(store.busy)
         .accessibilityLabel("Mese: " + CivilDate.monthTitle(store.financeMonth))
         .accessibilityIdentifier("finance-month")
+    }
+    /// Short month (year only when it is not this year) so the chip never truncates next to the title.
+    static func label(_ month: String) -> String {
+        let short = CivilDate.monthAbbreviation(month)
+        return month.prefix(4) == CivilDate.month().prefix(4) ? short : short + " " + String(month.prefix(4).suffix(2))
     }
 }
