@@ -27,6 +27,10 @@ def routing():
 
 def transform(source):
     if source.count(START) != 1 or source.count(END) != 1:
+        # Counts only (never source): tells which marker a bundled Worker spells differently.
+        print('ROUTING_MARKERS start=%d end=%d var_end=%d let_end=%d create=%d' % (
+            source.count(START), source.count(END), source.count('var expenseRouting = createExpenseRouting('),
+            source.count('let expenseRouting = createExpenseRouting('), source.count('function createExpenseRouting(')))
         raise RuntimeError('Contesto routing non riconosciuto; nessuna scrittura.')
     a = source.index(START)
     b = source.index(END, a)
