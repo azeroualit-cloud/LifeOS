@@ -71,3 +71,17 @@ Galleria privata con le 135 schermate della 94: https://claude.ai/artifact/CvgN9
 47. Pallini «senza pasti» e scritte disattivate (grigio terziario) 1,6–2,5:1: per i pallini usare almeno 3:1.
 48. Pulsanti: oggi ci sono 13 stili diversi (vetro, vetro del Calendario, primario compatto, pillole filtro, segmenti, icone senza fondo, cerchi della barra, testo semplice, stili di sistema). Ridurli a cinque famiglie: azione in basso (44 pt, vetro, larga quanto la barra), pulsante nella scheda (44 pt), pillola/segmento (34 pt visibili, tocco 44), icona tonda (34 pt visibili, tocco 44), riga toccabile (44 pt). Togliere gli stili di sistema `.bordered` e `.glass` rimasti.
 49. Ogni pulsante con etichetta ha il testo almeno 4,5:1 sul suo fondo e l'icona almeno 3:1; i disattivati restano riconoscibili (non solo più chiari).
+
+## SITE-ADMIN-HUB (dentro la 95)
+50. Sito: obiettivi di nutrizione e fibre, guida di importazione degli alimenti con prompt per altre AI, pannello Admin, pannello Avvisi con regole per criteri (budget sotto soglia, categoria oltre soglia, budget del giorno, nutrienti sotto obiettivo, evento o turno domani, riepilogo settimanale, personalizzato), notifiche della preghiera (quali, quanti minuti prima, on/off), ore di silenzio, massimo al giorno, registro.
+51. App (`NativeHub95.swift`): legge le impostazioni dal server, sincronizza gli obiettivi (vale la modifica più recente), pubblica i target calcolati, programma in locale le notifiche delle regole e della preghiera per i prossimi 2 giorni, invia al sito il registro degli avvisi mostrati. Si aggiorna all'avvio e quando l'app torna attiva.
+52. Server: tabelle `web_settings` e `web_alert_log` nel D1 condiviso; metodi `getSettings`, `saveSettings`, `addAlertLog`, `listAlertLog` in entrambi i Worker.
+
+## Correzioni dopo il tour del 23/11/2026 (commit c482496)
+53. Chip del mese in Finanza troncato («Nove…»): mese abbreviato, anno solo se diverso.
+54. Range calorie: un'unica etichetta centrata «Consigliate X–Y» (app e sito).
+55. Agenda: «Giornata» su una riga al posto di «Tutto il giorno» su due.
+56. Pillole filtro piatte (la banda grigia sotto le pillole in Movimenti spariva solo togliendo l'ombra).
+57. Nuovo movimento: la barra della ripartizione compare solo con un importo.
+58. Budget: totale del mese in colore primario; nota demo come piè di sezione (niente divisore a metà).
+59. Descrizione di «Fondo senza scadenza» non ripete più il titolo.
