@@ -136,9 +136,12 @@ final class NativeScreenTourUITests: XCTestCase {
             if tap(app.buttons["finance-new-plan"]) {
                 _ = tap(app.buttons["plan-kind-estimated"])
                 type(app.textFields["plan-name"], "Luce", app)
-                if tap(app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Categoria della spesa'")).firstMatch) { _ = tap(app.buttons["Elettricità"].firstMatch) }
                 type(app.textFields["plan-amount"], "40", app)
+                if app.keyboards.count > 0 { app.swipeDown(velocity: .slow) }
+                if tap(app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Categoria della spesa'")).firstMatch) { _ = tap(app.buttons["Elettricità"].firstMatch) }
+                shot(prefix + " 20d Piano Luce", app)
                 _ = tap(app.buttons["plan-save"]); Thread.sleep(forTimeInterval: 1.5)
+                if app.textFields["plan-name"].exists { dismissSheet(app) }
             }
         }
         if tap(app.buttons["primary-add"]) {
