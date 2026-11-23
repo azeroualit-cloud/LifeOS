@@ -44,6 +44,18 @@ final class NativeScreenTourUITests: XCTestCase {
         shot(prefix + " 01 Dashboard", app)
         scroll(app, prefix + " 02 Dashboard sotto")
         scroll(app, prefix + " 03 Dashboard fondo")
+        // Avvisi: always reachable from Impostazioni, also when every alert was ignored.
+        app.swipeDown(velocity: .fast); app.swipeDown(velocity: .fast)
+        if tap(app.buttons["Impostazioni"].firstMatch) {
+            shot(prefix + " 03b Impostazioni", app)
+            for _ in 0..<3 where !app.buttons["settings-finance-alerts"].isHittable { app.swipeUp(velocity: .slow) }
+            if tap(app.buttons["settings-finance-alerts"]) {
+                shot(prefix + " 03c Avvisi", app)
+                app.swipeUp(velocity: .slow); shot(prefix + " 03d Avvisi sotto", app)
+                app.swipeUp(velocity: .slow); shot(prefix + " 03e Avvisi fondo", app)
+            }
+            dismissSheet(app); if app.buttons["Impostazioni"].firstMatch.exists == false { dismissSheet(app) }
+        }
 
         app.openMainTab("Attività")
         shot(prefix + " 04 Attività", app)
