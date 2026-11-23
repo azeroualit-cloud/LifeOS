@@ -1310,6 +1310,15 @@
       "provenance": "Richiesta diretta utente in chat",
       "original_quote": "Analisi, il ritmo inizia da gennaio quando io ho detto più volte iniziamolo da luglio, ma facciamo una cosa migliore, fammi decidere a me da quale mese iniziare direttamente dall'app/sito. Anche il giorno per giorno, io ti avevo detto che non deve essere un mese preciso, ma la spesa giorno per giorno di tutti i mesi. Quindi ho un calendario che mi dice che in genere il giorno x spendo, non un mese preciso, ma tutti i mesi che scelgo io.",
       "rule": "Ritmo: mese di inizio scelto dall'utente in app e sito (sostituisce l'inizio fisso a luglio/gennaio). Giorno per giorno: calendario dei giorni 1–31 con la spesa tipica di quel giorno su tutti i mesi scelti dall'utente, non un mese singolo."
+    },
+    {
+      "id": "SITE-ADMIN-HUB-2026-11-23",
+      "status": "ACTIVE",
+      "scope": "Sito (pannello Admin e Avvisi) e app solo per l'essenziale",
+      "recorded_on": "2026-11-23",
+      "provenance": "Richiesta diretta utente in chat",
+      "original_quote": "poi voglio poter gestire tutto in life os, cibo, micronutrienti, (istruzioni di importazione ad esempio dei cibi sempre presenti anche per utilizzare altri ai dal sito), gestione fibre e obiettivi, rendendo più forte il pannello admin e creando il pannello avvisi sul sito e potendo gestire le notifiche o crearle come voglio io in base a criteri vari. Non voglio necessariamente appensantire l'app se non per le cose essenziali, voglio che sia principalmente il sito a fare alcune di queste cose",
+      "rule": "Il sito diventa il posto dove si gestiscono alimenti, micronutrienti, fibre e obiettivi, con istruzioni di importazione sempre visibili (anche per usare altre AI); pannello Admin più completo; nuovo pannello Avvisi sul sito per creare e gestire notifiche con criteri a scelta. L'app resta leggera: legge dal server obiettivi e regole e mostra le notifiche."
     }
   ],
   "pending_confirmations": [
