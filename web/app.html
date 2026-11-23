@@ -2289,7 +2289,18 @@ document.addEventListener("keydown", (e) => {
               const first = String(f.elements.date.value || todayIso()).slice(0, 7), months = Array.from({ length: 12 }, (_, i) => { const [y, mm] = first.split("-").map(Number), d = new Date(Date.UTC(y, mm - 1 + i, 1)); return d.toISOString().slice(0, 7); });
               box.insertAdjacentHTML("beforeend", `<div class="split-box" data-split-box><label>Dai risparmi (€)<input name="splitSavings" type="number" min="0" step="5" inputmode="decimal" value="0"></label><fieldset class="split-months"><legend>Mesi in cui pesa sul budget</legend>${months.map((mo, i) => `<label class="split-month"><input type="checkbox" name="splitMonth" value="${mo}"${i === 0 ? " checked" : ""}><span>${escapeHtml(shortMonth(mo))}</span></label>`).join("")}</fieldset><p class="hint" data-split-summary></p></div>`);
             }
-            const showSplit = () => { const b = box.querySelector("[data-split-box]"); if (b) b.hidden = f.elements.routingChoice.value !== "__ordinary"; splitSummary(f); };
+            rt.planSplit = r.planSplitDestination === true; rt.available = Object.fromEntries(plans.map((p) => [p.id, p.availableCents ?? p.fundCents ?? 0]));
+            const showSplit = () => {
+              const b = box.querySelector("[data-split-box]"), choice = f.elements.routingChoice.value, isPlan = !["__ordinary", "__savings"].includes(choice);
+              if (b) {
+                const uncovered = isPlan ? Math.max(0, (toCents(f.elements.amount.value) || 0) - (rt.available[choice] || 0)) : 0;
+                b.hidden = !(choice === "__ordinary" || (isPlan && rt.planSplit && uncovered > 0));
+                b.dataset.planUncovered = isPlan ? String(uncovered) : "";
+                const lab = b.querySelector("label"); if (lab && lab.firstChild) lab.firstChild.textContent = isPlan ? "Dagli altri risparmi (€)" : "Dai risparmi (€)";
+                if (isPlan && f.elements.splitSavings && b.dataset.planFor !== choice) { f.elements.splitSavings.value = String(uncovered / 100); b.dataset.planFor = choice; }
+              }
+              splitSummary(f);
+            };
             f.elements.routingChoice.addEventListener("change", showSplit);
             box.addEventListener("input", () => splitSummary(f));
             showSplit();
@@ -2300,8 +2311,9 @@ document.addEventListener("keydown", (e) => {
       }
       /** Budget part and the share of each chosen month (same rounding as the server). */
       function splitPlan(f) {
-        const cents = toCents(f.elements.amount.value) || 0;
-        const savings = Math.min(Math.max(0, Math.round(Number(f.elements.splitSavings?.value || 0) * 100)), Math.max(0, cents - 1));
+        const box = f.querySelector("[data-split-box]"), planPart = box?.dataset.planUncovered ? Number(box.dataset.planUncovered) : null;
+        const cents = planPart ?? (toCents(f.elements.amount.value) || 0);
+        const savings = Math.min(Math.max(0, Math.round(Number(f.elements.splitSavings?.value || 0) * 100)), Math.max(0, planPart !== null ? cents : cents - 1));
         const months = [...f.querySelectorAll('input[name="splitMonth"]:checked')].map((x) => x.value).sort();
         const budget = cents - savings, n = months.length || 1;
         return { cents, savings, budget, months, shares: months.map((m, i) => ({ month: m, cents: Math.floor(budget / n) + (i < budget % n ? 1 : 0) })) };
@@ -2318,10 +2330,11 @@ document.addEventListener("keydown", (e) => {
         d.expenseDestination = d.routingChoice === "__ordinary" ? "ordinary" : d.routingChoice === "__savings" ? "savings" : "plan";
         if (!["__ordinary", "__savings"].includes(d.routingChoice)) d.planId = d.routingChoice;
         delete d.routingChoice; delete d.budgetTreatment; delete d.recoveryMonths; delete d.recoveryAmount;
-        const sp = rt.split && d.expenseDestination === "ordinary" ? splitPlan(f) : null;
+        const isPlan = d.expenseDestination === "plan", sp = (rt.split && d.expenseDestination === "ordinary") || (isPlan && rt.planSplit) ? splitPlan(f) : null;
         delete d.splitSavings; delete d.splitMonth;
-        if (sp && sp.months.length && sp.budget > 0 && (sp.savings > 0 || sp.months.join() !== String(d.date || "").slice(0, 7))) {
+        if (sp && sp.months.length && sp.budget > 0 && (isPlan || sp.savings > 0 || sp.months.join() !== String(d.date || "").slice(0, 7))) {
           d.budgetTreatment = "recovery"; d.recoveryMonths = sp.months.join(", "); d.recoveryAmount = sp.budget / 100;
+          if (isPlan) d.expectedAvailableCents = rt.available[d.planId] ?? d.expectedAvailableCents;
         }
         return d;
       }
@@ -4398,9 +4411,16 @@ document.addEventListener("keydown", (e) => {
         return [...new Set(["Affitto", ...recurring.filter(r=>r.treatment==="Vincolata" && r.name!=="Benzina").map(r=>r.name).filter(Boolean)])];
       }
       function financeCategoryLabel(value) { return String(value || ""); }
+      // REFERENCE-GAPS-95 (parità con l'app): categorie in 9 gruppi, ogni voce sotto il suo gruppo.
+      const EXPENSE_GROUPS = [["Casa", ["Affitto", "Condominio", "Utenze", "Elettricità", "Gas", "Acqua", "Arredamento e casa", "Casa"]], ["Auto", ["Benzina", "Assicurazione", "Bollo", "Manutenzione auto", "Auto"]], ["Spesa", ["Alimentari"]], ["Mangiare fuori", ["Ristorazione"]], ["Abbonamenti", ["Abbonamenti"]], ["Salute e sport", ["Palestra", "Dentista", "Farmaci e visite", "Salute"]], ["Persona", ["Shopping"]], ["Svago", ["Svago", "Viaggi"]], ["Altro", ["Altro"]]];
       function categoryOptionsHtml(values,value="") {
         const choices=[...new Set([...values,...(value?[value]:[])])];
-        return choices.map(x=>`<option value="${escapeHtml(x)}" ${x===value?"selected":""}>${escapeHtml(x)}</option>`).join("");
+        const opt=x=>`<option value="${escapeHtml(x)}" ${x===value?"selected":""}>${escapeHtml(x)}</option>`;
+        const placed=new Set(), groups=EXPENSE_GROUPS.map(([g,items])=>[g,items.filter(i=>choices.includes(i))]).filter(([,items])=>items.length);
+        if(!groups.length) return choices.map(opt).join("");
+        groups.forEach(([,items])=>items.forEach(i=>placed.add(i)));
+        const rest=choices.filter(x=>!placed.has(x));
+        return groups.map(([g,items])=>`<optgroup label="${escapeHtml(g)}">${(g==="Altro"?[...rest,...items]:items).map(opt).join("")}</optgroup>`).join("")+(groups.some(([g])=>g==="Altro")||!rest.length?"":`<optgroup label="Altro">${rest.map(opt).join("")}</optgroup>`);
       }
       function financialCategoryOptions(type = "Spesa") {
         return [...(type === "Entrata" ? financeIncomeCategories : financeManualCategories)];
@@ -7161,8 +7181,16 @@ document.addEventListener("keydown", (e) => {
           button.textContent = "Salvataggio\u2026";
           error.textContent = "";
           form.querySelectorAll("input,select").forEach((x) => x.disabled = true);
-          const result = await workerRequest(method, [payload]);
+          const { budgetSplit, ...sent } = payload;
+          const result = await workerRequest(method, [sent]);
           if (result === false) throw Error("Il server non ha confermato la modifica.");
+          if (budgetSplit) {
+            // REFERENCE-GAPS-95 «Registra pagamento»: part of the difference on budget months.
+            const plansNow = await workerRequest("getFinancePlans", [current()]);
+            const paid = (plansNow?.payments || []).find((x) => x.id === payload.requestId || x.requestId === payload.requestId);
+            if (!paid?.movementId) throw Error("Pagamento registrato. Riapri il piano per dividere la differenza sul budget.");
+            await workerRequest("changeExpenseDestination", [{ requestId: payload.requestId + "-split", movementId: paid.movementId, expenseDestination: "budgetSplit", ...budgetSplit }]);
+          }
           host.classList.add("hidden");
           state.data = null;
           state.loadedDetail = false;
@@ -7187,9 +7215,17 @@ document.addEventListener("keydown", (e) => {
       if (!Number.isFinite(n) || n <= 0 || Math.abs(n * 100 - Math.round(n * 100)) > 1e-6) throw Error("Usa un importo positivo con massimo due decimali.");
       return Math.round(n * 100);
     };
+    /** REFERENCE-GAPS-95 «Da dove arrivano le quote»: for a goal, the part from savings does not become quotes. */
+    const goalBudgetCents = (f) => {
+      const total = cents2(f);
+      if (String(f.get("kind")) !== "goal") return total;
+      const saved = Math.round(Number(f.get("fromSavings") || 0) * 100);
+      if (!Number.isFinite(saved) || saved < 0 || saved >= total) throw Error("La parte dai risparmi deve essere minore del totale.");
+      return total - saved;
+    };
     openExtra = function() {
       const form = modal("Nuovo piano", `<label class="full">Tipo<select name="kind">${Object.entries(kinds2).map(([k, v]) => `<option value="${k}" ${k === "goal" ? "selected" : ""}>${v}</option>`).join("")}</select></label>${field("Nome", "name", "text", "", 'required maxlength="120" class="full"')}<div class="full" data-plan-fields></div>`, "saveFinancePlan", (f) => {
-        const kind = String(f.get("kind")), p = { kind, name: String(f.get("name")).trim(), amountCents: cents2(f), startMonth: String(f.get("startMonth")), category: String(f.get("category") || "Altro") };
+        const kind = String(f.get("kind")), p = { kind, name: String(f.get("name")).trim(), amountCents: goalBudgetCents(f), startMonth: String(f.get("startMonth")), category: String(f.get("category") || "Altro") };
         if (["goal", "advance", "recovery"].includes(kind)) p.endMonth = String(f.get("endMonth"));
         if (kind === "advance") p.beneficiaryMonth = String(f.get("beneficiaryMonth"));
         if (kind === "fixed") p.intervalMonths = Number(f.get("intervalMonths"));
@@ -7203,7 +7239,7 @@ document.addEventListener("keydown", (e) => {
       const update = () => {
         const kind = form.elements.kind.value, start = kind === "advance" ? next(current()) : current();
         const labels = { goal: "Totale obiettivo \u20AC", fund: "Quota mensile \u20AC", fixed: "Importo per scadenza \u20AC", estimated: "Stima mensile \u20AC", advance: "Budget da anticipare \u20AC", recovery: "Spesa da recuperare \u20AC" };
-        form.querySelector("[data-plan-fields]").innerHTML = `<div class="form-grid">${kind !== "advance" ? `<label>Categoria della spesa<select name="category">${lifeOSContract.expenseCategories.map((c) => `<option ${c === "Altro" ? "selected" : ""}>${safe(c)}</option>`).join("")}</select></label>` : ""}${amount(labels[kind])}${monthField(kind === "advance" ? "Primo mese di recupero" : "Dal mese", "startMonth", start)}${["goal", "advance", "recovery"].includes(kind) ? monthField("Ultimo mese", "endMonth", start) : '<p class="hint">Senza scadenza: continua finch\xE9 non lo interrompi.</p>'}${kind === "advance" ? monthField("Mese beneficiario", "beneficiaryMonth", current()) : ""}${kind === "fixed" ? `<label>Ogni quanti mesi<select name="intervalMonths">${Array.from({ length: 12 }, (_, i) => `<option value="${i + 1}">Ogni ${i + 1} ${i === 0 ? "mese" : "mesi"}</option>`).join("")}</select></label>` : ""}${kind === "recovery" ? `${field("Data della spesa", "date", "date", today(), 'required max="' + today() + '"')}<label class="full">Movimento<select name="movementId"><option value="">Registra una nuova spesa</option></select></label><p class="hint full">Collega una spesa gi\xE0 registrata per recuperarla senza un secondo addebito.</p>` : ""}<p class="hint full">${kind === "advance" ? "Non sposta denaro tra conti: aumenta il budget del mese beneficiario e lo recupera nei mesi scelti." : kind === "recovery" ? "La spesa incide sul saldo una sola volta; le quote recuperano il budget nei mesi scelti." : "Creare il piano non registra un pagamento."}</p><section class="full" data-plan-preview aria-live="polite"></section></div>`;
+        form.querySelector("[data-plan-fields]").innerHTML = `<div class="form-grid">${kind !== "advance" ? `<label>Categoria della spesa<select name="category">${lifeOSContract.expenseCategories.map((c) => `<option ${c === "Altro" ? "selected" : ""}>${safe(c)}</option>`).join("")}</select></label>` : ""}${amount(labels[kind])}${kind === "goal" ? `<label>Dai risparmi €<input name="fromSavings" type="number" min="0" step="5" value="0"></label><p class="hint">Da dove arrivano le quote: la parte dai risparmi non diventa quota, il resto si divide sui mesi.</p>` : ""}${monthField(kind === "advance" ? "Primo mese di recupero" : "Dal mese", "startMonth", start)}${["goal", "advance", "recovery"].includes(kind) ? monthField("Ultimo mese", "endMonth", start) : '<p class="hint">Senza scadenza: continua finch\xE9 non lo interrompi.</p>'}${kind === "advance" ? monthField("Mese beneficiario", "beneficiaryMonth", current()) : ""}${kind === "fixed" ? `<label>Ogni quanti mesi<select name="intervalMonths">${Array.from({ length: 12 }, (_, i) => `<option value="${i + 1}">Ogni ${i + 1} ${i === 0 ? "mese" : "mesi"}</option>`).join("")}</select></label>` : ""}${kind === "recovery" ? `${field("Data della spesa", "date", "date", today(), 'required max="' + today() + '"')}<label class="full">Movimento<select name="movementId"><option value="">Registra una nuova spesa</option></select></label><p class="hint full">Collega una spesa gi\xE0 registrata per recuperarla senza un secondo addebito.</p>` : ""}<p class="hint full">${kind === "advance" ? "Non sposta denaro tra conti: aumenta il budget del mese beneficiario e lo recupera nei mesi scelti." : kind === "recovery" ? "La spesa incide sul saldo una sola volta; le quote recuperano il budget nei mesi scelti." : "Creare il piano non registra un pagamento."}</p><section class="full" data-plan-preview aria-live="polite"></section></div>`;
         preview();
         if (kind === "recovery") loadMovements(form);
       };
@@ -7218,7 +7254,7 @@ document.addEventListener("keydown", (e) => {
             target.textContent = "Inserisci importo e mesi per vedere l\u2019anteprima budget.";
             return;
           }
-          const p = newPlan({ kind, name: f.get("name") || "Anteprima", category: f.get("category") || "Altro", amountCents: cents2(f), startMonth: f.get("startMonth"), endMonth: f.get("endMonth"), beneficiaryMonth: f.get("beneficiaryMonth"), intervalMonths: Number(f.get("intervalMonths") || 1), paymentDate: f.get("date") }, today(), "preview");
+          const p = newPlan({ kind, name: f.get("name") || "Anteprima", category: f.get("category") || "Altro", amountCents: goalBudgetCents(f), startMonth: f.get("startMonth"), endMonth: f.get("endMonth"), beneficiaryMonth: f.get("beneficiaryMonth"), intervalMonths: Number(f.get("intervalMonths") || 1), paymentDate: f.get("date") }, today(), "preview");
           p.status = "active";
           const range = p.endMonth ? months(p.startMonth, p.endMonth) : [0, 1, 2].map((i) => addMonth(p.startMonth, i));
           if (kind === "advance") range.unshift(p.beneficiaryMonth);
@@ -7282,10 +7318,15 @@ document.addEventListener("keydown", (e) => {
       const p = plan(id);
       if (!p) return;
       const m = view().month <= current() ? view().month : current();
-      const form = modal("Paga o collega \xB7 " + p.name, `${amount("Importo effettivo \u20AC", (p.kind === "goal" ? p.outstandingCents : ["fixed", "fund", "estimated"].includes(p.kind) ? (p.rateChanges || []).filter((r) => r.fromMonth <= current()).sort((a, b) => a.fromMonth.localeCompare(b.fromMonth)).at(-1)?.amountCents ?? p.amountCents : Math.max(p.contributionCents, 1)) / 100)}${field("Data pagamento", "date", "date", today(), 'required max="' + today() + '"')}${["fixed", "estimated"].includes(p.kind) ? monthField("Scadenza pagata", "cycleMonth", m) : ""}${p.kind === "estimated" ? field("Mesi coperti dalla bolletta", "competenceMonths", "number", 1, 'required min="1" max="12"') : ""}<label class="full">Movimento<select name="movementId"><option value="">Registra un nuovo pagamento</option></select></label><p class="hint full">Collegare un movimento esistente non genera un nuovo addebito.${p.kind === "goal" ? " Il pagamento chiude l\u2019obiettivo e libera le quote future." : ""}</p>${p.kind === "goal" ? `<section class="full hidden" data-overage><label class="full">Eccedenza<select name="recoverDifference"><option value="">Usa i risparmi</option><option value="yes">Recupera solo l\u2019eccedenza nei mesi successivi</option></select></label><div class="full hidden" data-excess-recovery>${monthField("Primo mese", "recoveryStartMonth", next(current()))}${monthField("Ultimo mese", "recoveryEndMonth", next(current()))}</div></section>` : ""}`, "recordFinancePlanPayment", (f) => {
+      const form = modal("Paga o collega \xB7 " + p.name, `${amount("Importo effettivo \u20AC", (p.kind === "goal" ? p.outstandingCents : ["fixed", "fund", "estimated"].includes(p.kind) ? (p.rateChanges || []).filter((r) => r.fromMonth <= current()).sort((a, b) => a.fromMonth.localeCompare(b.fromMonth)).at(-1)?.amountCents ?? p.amountCents : Math.max(p.contributionCents, 1)) / 100)}${field("Data pagamento", "date", "date", today(), 'required max="' + today() + '"')}${["fixed", "estimated"].includes(p.kind) ? monthField("Scadenza pagata", "cycleMonth", m) : ""}${p.kind === "estimated" ? field("Mesi coperti dalla bolletta", "competenceMonths", "number", 1, 'required min="1" max="12"') : ""}<label class="full">Movimento<select name="movementId"><option value="">Registra un nuovo pagamento</option></select></label><fieldset class="full split-box" data-difference-box><legend>Differenza rispetto al previsto: parte sul budget</legend><label>Sul budget (€)<input name="differenceBudget" type="number" min="0" step="5" value="0"></label><div class="split-months">${Array.from({ length: 12 }, (_, i) => addMonth(current(), i)).map((mo, i) => `<label class="split-month"><input type="checkbox" name="differenceMonth" value="${mo}"${i === 0 ? " checked" : ""}><span>${safe(shortMonth(mo))}</span></label>`).join("")}</div><p class="hint">Il resto della differenza resta sui risparmi. Vale solo per un pagamento nuovo.</p></fieldset><p class="hint full">Collegare un movimento esistente non genera un nuovo addebito.${p.kind === "goal" ? " Il pagamento chiude l\u2019obiettivo e libera le quote future." : ""}</p>${p.kind === "goal" ? `<section class="full hidden" data-overage><label class="full">Eccedenza<select name="recoverDifference"><option value="">Usa i risparmi</option><option value="yes">Recupera solo l\u2019eccedenza nei mesi successivi</option></select></label><div class="full hidden" data-excess-recovery>${monthField("Primo mese", "recoveryStartMonth", next(current()))}${monthField("Ultimo mese", "recoveryEndMonth", next(current()))}</div></section>` : ""}`, "recordFinancePlanPayment", (f) => {
         const out = { planId: id, amountCents: cents2(f), date: String(f.get("date")), cycleMonth: String(f.get("cycleMonth") || current()), competenceMonths: Number(f.get("competenceMonths") || 1) };
         if (f.get("movementId")) out.movementId = Number(f.get("movementId"));
         if (f.get("recoverDifference") === "yes") Object.assign(out, { recoverDifference: true, recoveryStartMonth: String(f.get("recoveryStartMonth")), recoveryEndMonth: String(f.get("recoveryEndMonth")) });
+        const toBudget = Math.round(Number(f.get("differenceBudget") || 0) * 100), budgetMonths = f.getAll("differenceMonth").map(String).sort();
+        if (!out.movementId && !out.recoverDifference && toBudget > 0) {
+          if (!budgetMonths.length) throw Error("Scegli almeno un mese per la parte sul budget.");
+          out.budgetSplit = { recoveryAmount: toBudget / 100, recoveryMonths: budgetMonths.join(", ") };
+        }
         return out;
       });
       if (form.elements.cycleMonth) form.elements.cycleMonth.min = "2024-01";
