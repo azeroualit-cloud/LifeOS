@@ -1301,6 +1301,15 @@
       "provenance": "Via diretto dell'utente in chat",
       "original_quote": "ti do il via, e non controllare ogni minuto, controlla ogni 5 minuti",
       "rule": "Avviare il candidato completo della build 94 (tutte le modifiche dopo la 93, DESIGN-PASS-94) e pubblicare l'IPA solo a gate verdi; controllare lo stato ogni 5 minuti. Prove su iPhone e accettazione restano dell'utente."
+    },
+    {
+      "id": "FINANCE-ANALYSIS-RANGE-2026-11-23",
+      "status": "ACTIVE",
+      "scope": "Finanza › Analisi, app e sito",
+      "recorded_on": "2026-11-23",
+      "provenance": "Richiesta diretta utente in chat",
+      "original_quote": "Analisi, il ritmo inizia da gennaio quando io ho detto più volte iniziamolo da luglio, ma facciamo una cosa migliore, fammi decidere a me da quale mese iniziare direttamente dall'app/sito. Anche il giorno per giorno, io ti avevo detto che non deve essere un mese preciso, ma la spesa giorno per giorno di tutti i mesi. Quindi ho un calendario che mi dice che in genere il giorno x spendo, non un mese preciso, ma tutti i mesi che scelgo io.",
+      "rule": "Ritmo: mese di inizio scelto dall'utente in app e sito (sostituisce l'inizio fisso a luglio/gennaio). Giorno per giorno: calendario dei giorni 1–31 con la spesa tipica di quel giorno su tutti i mesi scelti dall'utente, non un mese singolo."
     }
   ],
   "pending_confirmations": [
