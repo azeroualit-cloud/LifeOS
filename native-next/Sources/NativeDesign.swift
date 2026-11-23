@@ -147,6 +147,8 @@ enum NativeDesign {
         static let compactControl: CGFloat = Space.section
         /// Side inset of the floating tab bar; bottom actions use the same, so their edges align.
         static let tabBarInset: CGFloat = Space.xLarge
+        /// Glass circle of the Finanza actions (preview 93).
+        static let actionCircle: CGFloat = Space.section + Space.xLarge
         static let quickRow: CGFloat = 55
         static let nutritionKcalColumn: CGFloat = 64
         /// Segment height; with its 2 pt glass rim the switch is drawn at compactControl (34 pt).

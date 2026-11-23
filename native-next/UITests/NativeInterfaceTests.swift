@@ -899,10 +899,13 @@ final class NativeInterfaceTests: XCTestCase {
         var calendar = Calendar(identifier: .gregorian); calendar.timeZone = formatter.timeZone
         let current = formatter.string(from: Date()).capitalized
         let previous = formatter.string(from: calendar.date(byAdding: .month, value: -1, to: Date())!).capitalized
-        app.buttons["Mese precedente"].tap()
-        XCTAssertTrue(app.staticTexts[previous].waitForExistence(timeout: 10))
-        app.buttons["Mese successivo"].tap()
-        XCTAssertTrue(app.staticTexts[current].waitForExistence(timeout: 10))
+        // Build 95: the month is a chip in the title row; its menu moves back and forward.
+        let month = app.buttons["finance-month"]
+        XCTAssertTrue(month.waitForExistence(timeout: 10))
+        month.tap(); app.buttons["Mese precedente"].tap()
+        XCTAssertTrue(month.label.contains(previous) || app.staticTexts[previous].waitForExistence(timeout: 10), month.label)
+        month.tap(); app.buttons["Mese successivo"].tap()
+        XCTAssertTrue(month.label.contains(current) || app.staticTexts[current].waitForExistence(timeout: 10), month.label)
         capture("extra-month-navigation")
     }
     func testVisibleShiftBrushPaintsAndUndoRestoresDay() {

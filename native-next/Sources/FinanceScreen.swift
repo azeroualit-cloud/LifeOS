@@ -17,6 +17,7 @@ struct FinanceScreen: View {
                 Button { if router.tab == .finance { router.tab = .dashboard } else { dismiss() } } label: { Image(systemName: "chevron.left").frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget) }.accessibilityLabel("Torna alla Dashboard").accessibilityIdentifier("other-back")
                 Text("Finanza").font(.title.bold()).lineLimit(1).minimumScaleFactor(0.75).accessibilityAddTraits(.isHeader).accessibilityIdentifier("finance-heading")
                 Spacer()
+                NativeFinanceMonthChip()
                 NativeToolbarButton(symbol: hidden ? "eye.slash" : "eye", label: hidden ? "Mostra importi" : "Nascondi importi") { hidden.toggle() }
                     .accessibilityIdentifier("finance-hide-amounts")
                 NativeToolbarButton(symbol: "gearshape", label: "Impostazioni") { router.sheet = .settings }
@@ -24,7 +25,6 @@ struct FinanceScreen: View {
             }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.top, NativeDesign.Space.small).padding(.bottom, NativeDesign.Space.large)
         ScrollView {
             VStack(alignment: .leading, spacing: NativeDesign.Space.section) {
-                MonthControl(finance: true)
                 NativeBudgetHero93(summary: store.summary, categories: monthCategories, month: store.financeMonth, hidden: hidden)
                 accountCard
                 actions
@@ -105,15 +105,17 @@ struct FinanceScreen: View {
                 HStack(alignment: .top, spacing: NativeDesign.Space.none) { budget; analysis; plan; all }
             }
         }.buttonStyle(.plain).foregroundStyle(Color.primary)
-            .padding(NativeDesign.Space.xs)
-            .loCardSurface()
     }
+    /// One action: a 55 pt glass circle with the icon, the name below (preview 93, all four aligned).
     private func financeTile(_ title: String, symbol: String) -> some View {
-        VStack(spacing: NativeDesign.Space.xs) {
+        VStack(spacing: NativeDesign.Space.small) {
             Image(systemName: symbol).font(.headline.weight(.regular)).foregroundStyle(NativeDesign.financeTitle)
+                .frame(width: NativeDesign.Layout.actionCircle, height: NativeDesign.Layout.actionCircle)
+                .modifier(NativeGlass())
             Text(title).font(.footnote.weight(.medium)).lineLimit(1).minimumScaleFactor(0.75)
-        }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.quickRow)
-            .contentShape(Rectangle())
+        }
+        .frame(maxWidth: .infinity, alignment: .top)
+        .contentShape(Rectangle())
     }
     private var recentMovements: some View {
         let rows = Array(store.transactions.prefix(3))
@@ -406,5 +408,31 @@ struct MovementEditor: View {
         }
         do { try await store.perform(editing ? "editMovement" : type == "Spesa" && bill.enabled ? "saveUtilityBill" : "saveTransaction", payload); dismiss() }
         catch { self.error = error.localizedDescription }
+    }
+}
+
+
+/// Month of Finanza as a glass chip in the title row; the menu moves one month back or forward.
+struct NativeFinanceMonthChip: View {
+    @EnvironmentObject var store: NativeStore
+    var body: some View {
+        Menu {
+            Button("Mese precedente", systemImage: "chevron.left") { Task { await store.changeMonth(-1, finance: true) } }
+            Button("Mese successivo", systemImage: "chevron.right") { Task { await store.changeMonth(1, finance: true) } }
+        } label: {
+            HStack(spacing: NativeDesign.Space.xs) {
+                Text(CivilDate.monthTitle(store.financeMonth)).font(.subheadline.weight(.semibold)).lineLimit(1)
+                Image(systemName: "chevron.up.chevron.down").font(.caption2.weight(.semibold)).foregroundStyle(NativeDesign.secondary)
+            }
+            .foregroundStyle(Color.primary)
+            .padding(.horizontal, NativeDesign.Space.medium)
+            .frame(minHeight: NativeDesign.Layout.compactControl)
+            .modifier(NativeGlass())
+            .frame(minHeight: NativeDesign.Layout.touchTarget)
+            .contentShape(Rectangle())
+        }
+        .disabled(store.busy)
+        .accessibilityLabel("Mese: " + CivilDate.monthTitle(store.financeMonth))
+        .accessibilityIdentifier("finance-month")
     }
 }

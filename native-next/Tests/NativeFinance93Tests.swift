@@ -22,6 +22,14 @@ final class NativeFinance93Tests: XCTestCase {
         XCTAssertEqual(NativeSalaryMap.percent(30, of: 1850).replacingOccurrences(of: ",", with: "."), "1.6%")
     }
 
+    func testSalaryMapCountsARentPaymentOnceAndCapsSpending() {
+        let summary: Record = ["monthlySalary": .number(1749), "monthlyRemaining": .number(62), "monthlySpent": .number(445),
+                               "monthlyBudgetBreakdown": .array([.object(row("Affitto", 550))])]
+        let categories = [row("Affitto", 550), row("Benzina", 136), row("Altre", 400)]
+        let items = NativeSalaryMap.items(summary: summary, categories: categories)
+        XCTAssertEqual(items.filter { $0.name == "Affitto" }.count, 1)
+        XCTAssertEqual(items.filter { $0.group == 2 }.reduce(0) { $0 + $1.value }, 445, accuracy: 0.01)
+    }
     func testSquarifyFillsTheRectangleWithProportionalAreas() {
         let rect = CGRect(x: 0, y: 0, width: 326, height: 220)
         let values: [Double] = [450, 260, 200, 120, 90, 30]

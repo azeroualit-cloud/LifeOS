@@ -29,11 +29,17 @@ enum NativeSalaryMap {
             guard value > 0, !name.isEmpty else { continue }
             result.append(NativeSalaryItem(name: name, group: isSaving(name) ? 1 : 0, value: value))
         }
+        // A commitment (rent, bills) paid this month also appears among the categories:
+        // count it once, as a commitment (build 95, «Affitto» was shown twice).
+        let committed = Set(result.map { $0.name.lowercased() })
         var spent: [String: Double] = [:]
         for row in categories {
             let value = row.amount("amount"), name = row.text("name", fallback: "Altro")
-            if value > 0 { spent[name, default: 0] += value }
+            if value > 0, !committed.contains(name.lowercased()) { spent[name, default: 0] += value }
         }
+        // Spending never exceeds what the budget recorded as spent this month.
+        let spentTotal = spent.values.reduce(0, +), recorded = summary.amount("monthlySpent")
+        if recorded > 0, spentTotal > recorded { for key in spent.keys { spent[key] = (spent[key] ?? 0) / spentTotal * recorded } }
         let sorted = spent.sorted { $0.value == $1.value ? $0.key < $1.key : $0.value > $1.value }
         let head = sorted.prefix(4), tail = sorted.dropFirst(4)
         for entry in head { result.append(NativeSalaryItem(name: entry.key, group: 2, value: entry.value)) }
@@ -44,7 +50,25 @@ enum NativeSalaryMap {
         }
         let free = summary.amount("monthlyRemaining")
         if free > 0 { result.append(NativeSalaryItem(name: "Libero", group: 3, value: free, rows: [NativeSalaryRow(label: "Ancora da spendere", value: free)])) }
-        return result
+        return mergeSmall(result)
+    }
+
+    /// Entries under 2 % of the total join one «Altre voci» tile per group, listed in its detail,
+    /// so the map has no tiny unnamed squares.
+    static func mergeSmall(_ items: [NativeSalaryItem]) -> [NativeSalaryItem] {
+        let total = items.reduce(0) { $0 + $1.value }
+        guard total > 0 else { return items }
+        var kept: [NativeSalaryItem] = []
+        var small: [Int: [NativeSalaryItem]] = [:]
+        for item in items {
+            if item.value / total < 0.02 && item.name != "Libero" { small[item.group, default: []].append(item) } else { kept.append(item) }
+        }
+        for (group, list) in small.sorted(by: { $0.key < $1.key }) {
+            if list.count == 1 { kept.append(list[0]); continue }
+            let rows = list.flatMap { $0.rows.isEmpty ? [NativeSalaryRow(label: $0.name, value: $0.value)] : $0.rows }
+            kept.append(NativeSalaryItem(name: "Altre voci", group: group, value: list.reduce(0) { $0 + $1.value }, rows: rows))
+        }
+        return kept
     }
 
     static func salary(summary: Record, items: [NativeSalaryItem]) -> Double {
@@ -132,11 +156,21 @@ struct NativeBudgetHero93: View {
     private var overview: NativeFinanceOverview { NativeFinanceOverview(summary: summary, month: month) }
     private var spent: Double { max(0, summary.amount("monthlySpent")) }
     private var total: Double { spent + max(0, summary.amount("monthlyRemaining")) }
+    /// Up to four shares of what was spent, scaled so that together they equal `spent`.
     private var parts: [Double] {
         let values = categories.map { $0.amount("amount") }.filter { $0 > 0 }.sorted(by: >)
-        let head = Array(values.prefix(3))
-        let rest = max(0, spent - head.reduce(0, +))
+        let sum = values.reduce(0, +)
+        guard sum > 0, spent > 0 else { return spent > 0 ? [spent] : [] }
+        let scaled = values.map { $0 / sum * spent }
+        let head = Array(scaled.prefix(3)), rest = scaled.dropFirst(3).reduce(0, +)
         return rest > 0.005 ? head + [rest] : head
+    }
+    /// Today's share of the month, for the marker on the bar (nil outside the current month).
+    private var dayShare: Double? {
+        let today = CivilDate.day()
+        guard String(today.prefix(7)) == month else { return nil }
+        let count = CivilDate.calendar.range(of: .day, in: .month, for: CivilDate.date(month + "-01"))?.count ?? 30
+        return Double(Int(today.suffix(2)) ?? 1) / Double(count)
     }
     private var dayLabel: String {
         let today = CivilDate.day()
@@ -184,17 +218,26 @@ struct NativeBudgetHero93: View {
     private var bar: some View {
         let values = parts
         let scale = max(total, 0.01)
+        let marker = dayShare
         return GeometryReader { proxy in
             let width = proxy.size.width
+            let gap = NativeDesign.Space.xxs
             ZStack(alignment: .leading) {
                 Capsule().fill(NativeDesign.barTrack)
-                HStack(spacing: NativeDesign.Space.xxs) {
+                HStack(spacing: gap) {
                     ForEach(Array(values.enumerated()), id: \.offset) { index, value in
                         Rectangle().fill(NativeDesign.financeBudget[min(index, NativeDesign.financeBudget.count - 1)])
-                            .frame(width: max(0, width * CGFloat(min(value, scale) / scale) - NativeDesign.Space.xxs))
+                            .frame(width: max(0, (width - gap * CGFloat(values.count)) * CGFloat(min(value, scale) / scale)))
                     }
                 }
+                .frame(width: width, alignment: .leading)
                 .clipShape(Capsule())
+                if let marker {
+                    Capsule().fill(Color.primary)
+                        .frame(width: NativeDesign.Space.xxs, height: NativeDesign.Space.xLarge)
+                        .offset(x: min(max(0, width * CGFloat(marker) - 1), width - NativeDesign.Space.xxs))
+                        .accessibilityHidden(true)
+                }
             }
         }
         .frame(height: NativeDesign.Space.medium)
@@ -261,7 +304,9 @@ struct NativeSalaryMapCard: View {
             .padding(NativeDesign.Space.xs)
             .frame(width: max(0, rect.width - 1), height: max(0, rect.height - 1), alignment: .topLeading)
             .background(color.opacity(on ? 1 : 0.72 + 0.28 * item.value / max(largest, 0.01)))
-            .overlay { if on { Rectangle().strokeBorder(Color.white, lineWidth: NativeDesign.Layout.selectionLine) } }
+            // With a selection, the other tiles fade so the chosen one stands out even when small.
+            .opacity(selected == nil || on ? 1 : 0.4)
+            .overlay { if on { Rectangle().strokeBorder(Color.primary, lineWidth: NativeDesign.Layout.selectionLine) } }
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -288,7 +333,6 @@ struct NativeSalaryMapCard: View {
         .accessibilityElement(children: .combine)
     }
     private func detail(_ item: NativeSalaryItem, items: [NativeSalaryItem], salary: Double) -> some View {
-        let siblings = items.filter { $0.group == item.group && $0.id != item.id }
         let rows = item.rows.isEmpty ? [NativeSalaryRow(label: item.name, value: item.value)] : item.rows
         let color = NativeDesign.financeGroups[min(item.group, 3)]
         return VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
@@ -310,25 +354,6 @@ struct NativeSalaryMapCard: View {
                     Spacer()
                     Text(hidden ? "••••" : row.value.euro).monospacedDigit()
                 }.font(.subheadline)
-            }
-            if !siblings.isEmpty {
-                Text("Altre voci di " + NativeSalaryMap.groupTitles[item.group]).font(.footnote).foregroundStyle(NativeDesign.secondary)
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: NativeDesign.Space.small) {
-                        ForEach(siblings) { other in
-                            Button { selected = other.id } label: {
-                                HStack(spacing: NativeDesign.Space.xs) {
-                                    Circle().fill(color).frame(width: NativeDesign.Space.small, height: NativeDesign.Space.small)
-                                    Text(other.name + (hidden ? "" : " · " + other.value.euro)).font(.footnote.weight(.medium))
-                                }
-                                .padding(.horizontal, NativeDesign.Space.medium)
-                                .frame(minHeight: NativeDesign.Layout.touchTarget)
-                                .loTileSurface(capsule: true)
-                            }
-                            .buttonStyle(NativePressStyle())
-                        }
-                    }
-                }
             }
         }
         .padding(.top, NativeDesign.Space.xs)
