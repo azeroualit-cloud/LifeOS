@@ -1423,6 +1423,62 @@ html[data-theme="light"] [data-kind="holiday"],html[data-theme="light"] .os-pale
 .fa-ign-head button{min-height:44px}
 .fa-ign .fa-text{color:var(--ink-2)}
 .fa-ign-empty{margin:var(--s4) 0 0;color:var(--ink-3);font-size:var(--fs-2)}
+
+/* SITE-94: parity with app build 94 (DESIGN-PASS-94, Fitia-like Salute). */
+:root{--ok-94:#34c759;--warn-94:#ffd60a;--over-94:#ff9500;--track-94:color-mix(in srgb,var(--ink) 12%,transparent);--tick-94:color-mix(in srgb,var(--ink) 35%,transparent);--shadow-94:0 5px 13px rgba(0,0,0,.45)}
+html[data-theme="light"]{--shadow-94:0 5px 13px rgba(0,0,0,.08);--warn-94:#c99a00}
+.card,.os-card{box-shadow:var(--shadow-94)}
+.fw-wrap{display:grid;gap:8px}
+.fw-title{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.fw-today{border:0;background:none;color:var(--ink);font:inherit;font-size:28px;font-weight:700;padding:0;min-height:44px;cursor:pointer;text-transform:capitalize}
+.fw-today:disabled{cursor:default;opacity:1}
+.fw-arrows{display:flex;gap:5px}
+.fw-arrows button{width:34px;height:34px;border-radius:50%;border:0;background:var(--surface-2);color:var(--ink);font-size:17px;cursor:pointer}
+.fw-arrows button:disabled{opacity:.35;cursor:default}
+.fw-week{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.fw-day{display:grid;justify-items:center;gap:2px;min-height:44px;border:0;background:none;color:var(--ink);font:inherit;cursor:pointer;padding:2px 0}
+.fw-day:disabled{opacity:.45;cursor:default}
+.fw-day i{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;font-style:normal;font-size:13px;font-weight:600;color:var(--ink-2)}
+.fw-day.sel i{background:var(--ink);color:var(--surface)}
+.fw-day b{font-size:15px;font-variant-numeric:tabular-nums}
+.fw-day.today b{color:var(--ok-94)}
+.fw-dot{width:6px;height:6px;border-radius:50%}
+.fw-card{display:grid;gap:5px;padding:13px 16px;text-align:center}
+.fw-kcal{display:grid;justify-items:center;gap:0;border:0;background:none;color:var(--ink);font:inherit;cursor:pointer;padding:0}
+.fw-kcal small{font-size:13px;color:var(--ink-2)}
+.fw-kcal strong{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums}
+.fw-kcal em{font-style:normal;color:var(--ink-2)}
+.fw-set{font-size:13px;color:var(--ink-2);text-decoration:underline}
+.fw-gauge{display:block;width:min(100%,360px);height:auto;margin:0 auto}
+.fw-gauge text{font-size:11px;font-weight:500;fill:var(--ink-2);font-variant-numeric:tabular-nums}
+.fw-macros{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin-top:5px}
+.fw-macro{display:grid;justify-items:center;gap:5px;min-width:0}
+.fw-macro small{font-size:13px;color:var(--ink-2)}
+.fw-macro span{font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.fw-macro em{font-style:normal;color:var(--ink-2)}
+.fw-bar{display:block;width:100%;height:5px;border-radius:3px;background:var(--track-94);overflow:hidden}
+.fw-bar>i{display:block;height:100%;border-radius:3px}
+.hf-card{display:grid;gap:8px}
+.hf-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.hf-top strong{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums}
+.hf-top span{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+.hf-top small{font-weight:400;color:var(--ink-2)}
+.hf-bar{display:flex;gap:2px;height:8px;border-radius:4px;overflow:hidden}
+.hf-bar>i:first-child{background:#d98b8b}
+.hf-bar>i:last-child{flex:1;background:#8fc7a4}
+.hf-legend{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.hf-legend i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#d98b8b;margin-right:5px}
+.hf-recent{display:grid;gap:8px;border-top:1px solid var(--line);padding-top:8px}
+.hf-row{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:15px}
+.hf-row span{display:grid;min-width:0}
+.hf-row small{font-size:13px;color:var(--ink-2)}
+.hf-row b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.nb-places{display:grid;gap:13px}
+.nb-place{display:flex;justify-content:space-between;align-items:center;gap:13px;flex-wrap:wrap;padding:13px 16px}
+.nb-place>div:first-child{display:grid;min-width:0}
+.nb-place small{font-size:13px;color:var(--ink-2)}
+.nb-place-actions{display:flex;gap:8px;flex-wrap:wrap}
+.nb-place-actions a{text-decoration:none}
 </style>
 </head>
   <body class="dashboard-mode">
@@ -1681,6 +1737,96 @@ async function fdLoad() {
   fd.loading = false;
   if (state.view === "nutrition") renderNutrition();
 }
+/* SITE-94: Fitia-like week and calorie card (parity with app build 94). Goals live in this browser
+   until the app shares its goals: the range is ±10 % of the calorie goal. */
+const FD_GOALS = "lifeos-nutrition-goals-94";
+function fdGoals() { try { const g = JSON.parse(localStorage.getItem(FD_GOALS) || "null"); return g && g.kcal > 0 ? g : null; } catch (e) { return null; } }
+function fdBand(v, goal) { if (!(v > 0)) return "none"; if (!(goal > 0)) return "within"; return v < goal * 0.9 ? "under" : v > goal * 1.1 ? "over" : "within"; }
+const FD_BAND_COLOR = { none: "var(--ink-3)", under: "var(--warn-94)", within: "var(--ok-94)", over: "var(--over-94)" };
+function fdMonday(day) { const t = new Date(day + "T12:00:00Z"); const k = (t.getUTCDay() + 6) % 7; return fdShift(day, -k); }
+async function fdLoadWeek(from) {
+  if (fd.weekLoading === from) return;
+  fd.weekLoading = from;
+  try {
+    const rows = (await workerRequest("listFoodDiaryDays", [from, fdShift(from, 6)])).entries || [];
+    const totals = {};
+    for (const e of rows) { const d = fdRomeDay(new Date(e.at)); totals[d] = (totals[d] || 0) + (Number(e.kcal) || 0); }
+    fd.week = { from, totals };
+  } catch (e) { fd.week = { from, totals: {} }; }
+  fd.weekLoading = null;
+  if (state.view === "nutrition") renderNutrition();
+}
+/** Point at a share of the arc length on the quadratic curve used by the gauge. */
+function fdArcPoint(share) {
+  const P = (t) => { const u = 1 - t; return [u * u * 12 + 2 * u * t * 150 + t * t * 288, u * u * 50 + 2 * u * t * 2 + t * t * 50]; };
+  const pts = []; let len = 0, prev = P(0);
+  for (let i = 0; i <= 200; i++) { const q = P(i / 200); len += Math.hypot(q[0] - prev[0], q[1] - prev[1]); pts.push([len, q]); prev = q; }
+  const target = Math.min(Math.max(share, 0), 1) * len;
+  return (pts.find((x) => x[0] >= target) || pts[pts.length - 1])[1];
+}
+function fdWeekCard() {
+  const today = fdRomeDay(), from = fdMonday(fd.day || today);
+  if ((!fd.week || fd.week.from !== from) && fd.weekLoading !== from) fdLoadWeek(from);
+  const g = fdGoals(), totals = fd.week?.from === from ? fd.week.totals : {};
+  const letters = ["L", "M", "M", "G", "V", "S", "D"];
+  const days = letters.map((l, i) => {
+    const d = fdShift(from, i), band = fdBand(totals[d], g?.kcal), future = d > today;
+    return `<button type="button" class="fw-day${d === fd.day ? " sel" : ""}${d === today ? " today" : ""}" data-fd-goto="${d}" ${future ? "disabled" : ""} aria-pressed="${d === fd.day}" aria-label="${nbE(new Date(d + "T12:00:00Z").toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" }))}"><i>${l}</i><b>${Number(d.slice(8))}</b><span class="fw-dot" style="background:${future ? "transparent" : FD_BAND_COLOR[band]}"></span></button>`;
+  }).join("");
+  const list = fd.entries || [], sum = (k) => list.reduce((n, e) => n + (Number(e[k]) || 0), 0);
+  const kcal = sum("kcal"), band = fdBand(kcal, g?.kcal);
+  let gauge = "";
+  if (g) {
+    const share = (v) => Math.min(Math.max(v / (g.kcal * 1.3), 0), 1);
+    const lo = fdArcPoint(share(g.kcal * 0.9)), hi = fdArcPoint(share(g.kcal * 1.1)), k = fdArcPoint(share(kcal));
+    const dash = Math.round(share(kcal) * 1000);
+    gauge = `<svg class="fw-gauge" viewBox="0 0 300 66" aria-label="Range consigliato da ${fdNum(g.kcal * 0.9)} a ${fdNum(g.kcal * 1.1)} kcal">
+      <path d="M12 50 Q150 2 288 50" fill="none" stroke="var(--track-94)" stroke-width="6" stroke-linecap="round"/>
+      ${kcal > 0 ? `<path d="M12 50 Q150 2 288 50" fill="none" stroke="${FD_BAND_COLOR[band]}" stroke-width="6" stroke-linecap="round" pathLength="1000" stroke-dasharray="${dash} 1000"/>` : ""}
+      <rect x="${(lo[0] - 3.5).toFixed(1)}" y="${(lo[1] - 9).toFixed(1)}" width="7" height="18" rx="3.5" fill="var(--ink)" stroke="var(--surface)" stroke-width="2"/>
+      <rect x="${(hi[0] - 3.5).toFixed(1)}" y="${(hi[1] - 9).toFixed(1)}" width="7" height="18" rx="3.5" fill="var(--tick-94)" stroke="var(--surface)" stroke-width="2"/>
+      ${kcal > 0 ? `<g transform="translate(${k[0].toFixed(1)} ${k[1].toFixed(1)})"><circle r="10" fill="${FD_BAND_COLOR[band]}" stroke="var(--surface)" stroke-width="2"/>${band === "within" ? '<path d="M-4 0 L-1 3 L4 -3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>' : ""}</g>` : ""}
+      <text x="${lo[0].toFixed(1)}" y="65" text-anchor="middle">${fdNum(g.kcal * 0.9)}</text><text x="${hi[0].toFixed(1)}" y="65" text-anchor="middle">${fdNum(g.kcal * 1.1)}</text>
+    </svg>`;
+  }
+  const macro = (label, key, goal) => {
+    const v = sum(key), b = fdBand(v, goal), w = goal > 0 ? Math.min(100, (v / goal) * 100) : 0;
+    return `<div class="fw-macro"><small>${label}</small><span><b>${fdNum(v)}</b>${goal > 0 ? ` <em>/ ${fdNum(goal)} g</em>` : " <em>g</em>"}</span><i class="fw-bar"><i style="width:${w}%;background:${goal > 0 ? FD_BAND_COLOR[b] : "var(--ink-3)"}"></i></i></div>`;
+  };
+  const title = fd.day === today ? "Oggi" : new Date(fd.day + "T12:00:00Z").toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "short" });
+  return `<section class="fw-wrap" aria-label="Settimana e calorie">
+    <div class="fw-title"><button type="button" class="fw-today" data-fd-goto="${today}" ${fd.day === today ? "disabled" : ""}>${nbE(title)}${fd.day === today ? "" : " ↺"}</button><span class="fw-arrows"><button type="button" data-fd-day="-7" aria-label="Settimana precedente">‹</button><button type="button" data-fd-day="7" aria-label="Settimana successiva" ${fdShift(from, 7) > today ? "disabled" : ""}>›</button></span></div>
+    <div class="fw-week">${days}</div>
+    <div class="card fw-card">
+      <button type="button" class="fw-kcal" data-fd-goals aria-label="Calorie ${fdNum(kcal)}${g ? " di " + fdNum(g.kcal) : ""}. Imposta obiettivi"><small>kcal</small><strong>${fdNum(kcal)}${g ? `<em> / ${fdNum(g.kcal)}</em>` : ""}</strong>${g ? "" : '<span class="fw-set">Imposta un obiettivo</span>'}</button>
+      ${gauge}
+      <div class="fw-macros">${macro("Proteine", "protein", g?.protein)}${macro("Carboidrati", "carbs", g?.carbs)}${macro("Grassi", "fat", g?.fat)}</div>
+    </div>
+  </section>`;
+}
+function fdGoalsOpen() {
+  const g = fdGoals() || {}, host = document.getElementById("dialog");
+  if (!host) return;
+  const f = (k, label, unit) => `<label>${label}<span class="nb-unit"><input type="number" inputmode="decimal" min="0" step="1" name="${k}" value="${g[k] ?? ""}"><em>${unit}</em></span></label>`;
+  host.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-label="Obiettivi"><div class="modal-top"><h2>Obiettivi</h2><button type="button" class="ghost" data-close="1" aria-label="Chiudi">×</button></div>
+    <form id="fd-goals" class="os-form nb-form">${f("kcal", "Calorie", "kcal")}${f("protein", "Proteine", "g")}${f("carbs", "Carboidrati", "g")}${f("fat", "Grassi", "g")}
+    <p class="hint wide">Range consigliato: ±10% dell'obiettivo di calorie. Gli obiettivi restano in questo browser.</p>
+    <div class="form-actions"><button type="button" data-close="1">Annulla</button><button class="save" type="submit">Salva</button></div></form></div>`;
+  host.classList.remove("hidden");
+}
+document.addEventListener("click", (e) => {
+  const t = e.target; if (!t.closest) return;
+  const go = t.closest("[data-fd-goto]");
+  if (go && !go.disabled) { fd.day = go.dataset.fdGoto; fd.entries = null; renderNutrition(); return; }
+  if (t.closest("[data-fd-goals]")) fdGoalsOpen();
+});
+document.addEventListener("submit", (e) => {
+  if (e.target.id !== "fd-goals") return;
+  e.preventDefault();
+  const f = e.target, n = (k) => Number(f.elements[k].value) || 0;
+  try { localStorage.setItem(FD_GOALS, JSON.stringify({ kcal: n("kcal"), protein: n("protein"), carbs: n("carbs"), fat: n("fat") })); } catch (x) {}
+  closeDialog(); renderNutrition();
+});
 function fdSection() {
   if (!fd.day) fd.day = fdRomeDay();
   if (fd.entries === null && !fd.loading) fdLoad();
@@ -1688,11 +1834,31 @@ function fdSection() {
   const sum = (k) => list.reduce((n, e) => n + (Number(e[k]) || 0), 0);
   const today = fdRomeDay(), title = fd.day === today ? "Oggi" : fd.day === fdShift(today, -1) ? "Ieri" : new Date(fd.day + "T12:00:00Z").toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
   const rows = list.map((e) => `<button type="button" class="fd-row" data-fd-entry="${nbE(e.id)}" aria-label="${nbE(fdRomeTime(e.at) + ", " + (e.name || "Pasto") + ", " + fdNum(e.kcal) + " kcal")}. Modifica"><span class="fd-time">${fdRomeTime(e.at)}</span><span class="fd-name"><strong>${nbE(e.name || "Pasto")}</strong><small>${e.grams ? fdNum(e.grams) + " g · " : e.ml ? fdNum(e.ml) + " ml · " : ""}P ${fdNum(e.protein, 1)} · C ${fdNum(e.carbs, 1)} · G ${fdNum(e.fat, 1)}</small></span><b>${fdNum(e.kcal)} kcal</b></button>`).join("");
-  return `<section class="card pad fd-card" aria-label="Diario alimentare">
+  return fdWeekCard() + `<section class="card pad fd-card" aria-label="Diario alimentare">
     <div class="card-title fd-head"><div><h2>Diario</h2><small>${nbE(title)}</small></div><div class="actions"><button type="button" data-fd-day="-1" aria-label="Giorno precedente">‹</button><input type="date" value="${fd.day}" max="${today}" data-fd-pick aria-label="Giorno del diario"><button type="button" data-fd-day="1" aria-label="Giorno successivo" ${fd.day >= today ? "disabled" : ""}>›</button><button type="button" class="save" data-fd-new>+ Pasto</button></div></div>
     ${fd.error ? `<div class="errorbox">${nbE(fd.error)} <button type="button" data-fd-retry>Riprova</button></div>` : ""}
     <div class="fd-totals"><div><b>${fdNum(sum("kcal"))}</b><small>kcal</small></div><div><b>${fdNum(sum("protein"))}</b><small>proteine g</small></div><div><b>${fdNum(sum("carbs"))}</b><small>carboidrati g</small></div><div><b>${fdNum(sum("fat"))}</b><small>grassi g</small></div></div>
     ${fd.loading && fd.entries === null ? `<p class="empty">Caricamento…</p>` : list.length ? `<div class="fd-list">${rows}</div>` : `<p class="empty">Nessun pasto registrato</p>`}
+  </section>`;
+}
+/* SITE-94: Dashboard finance card like the app: remaining, per day, spent/left bar, legend, last 2 expenses. */
+function homeFinanceCard() {
+  const f = (typeof life !== "undefined" && life.finance) || null, s = f?.summary;
+  if (!s || !Number.isFinite(Number(s.monthlyRemaining))) return "";
+  const hide = typeof state !== "undefined" && state.assetsVisible === false;
+  const money = (v) => hide ? "••• €" : new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" }).format(v);
+  const today = fdRomeDay(), y = Number(today.slice(0, 4)), m = Number(today.slice(5, 7));
+  const left = Math.max(1, new Date(Date.UTC(y, m, 0)).getUTCDate() - Number(today.slice(8)) + 1);
+  const remaining = Number(s.monthlyRemaining), spent = Math.max(0, Number(s.monthlySpent) || 0), budget = spent + Math.max(0, remaining);
+  const share = budget > 0 ? Math.min(100, (spent / budget) * 100) : 0;
+  const recent = (f.transactions || []).filter((t) => Number(t.amount) < 0).sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, 2);
+  const label = (d) => d === today ? "oggi" : d === fdShift(today, -1) ? "ieri" : new Date(d + "T12:00:00Z").toLocaleDateString("it-IT", { day: "numeric", month: "short" });
+  const rows = recent.map((t) => `<div class="hf-row"><span>${nbE(t.name || "Spesa")}<small>${nbE([t.category, label(String(t.date).slice(0, 10))].filter(Boolean).join(" · "))}</small></span><b>${money(Math.abs(Number(t.amount)))}</b></div>`).join("");
+  return `<section class="os-card hf-card hw-wide"><div class="card-title"><h2>Finanza</h2><button class="ghost" data-view="overview">Apri</button></div>
+    <div class="hf-top"><strong>${money(remaining)}</strong><span>${money(remaining / left)} <small>al giorno</small></span></div>
+    <div class="hf-bar" role="img" aria-label="Speso ${Math.round(share)} per cento"><i style="width:${share}%"></i><i></i></div>
+    <div class="hf-legend"><span><i></i>Speso ${money(spent)}</span><span>Budget ${money(budget)} · ${left} gg</span></div>
+    ${rows ? `<div class="hf-recent">${rows}</div>` : ""}
   </section>`;
 }
 function fdForm(e) {
@@ -1896,11 +2062,30 @@ function nbBloomView() {
   const shown = base.filter((i) => (!nb.btag || i.tags.includes(nb.btag)) && hit(i));
   return { b, cname, counts, shown, live, trash: b.items.filter((i) => i.trashedAt).length, archive: live.filter((i) => i.archived).length };
 }
+/* SITE-94: Bloom places (parity with the app map card): Waze always, Apple Maps or Google Maps. */
+function nbPlaces(items) {
+  const groups = new Map();
+  for (const i of items) {
+    let p = i.place; if (typeof p === "string") { try { p = JSON.parse(p); } catch (e) { p = null; } }
+    const lat = Number(p?.latitude), lon = Number(p?.longitude);
+    if (!p || !Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) continue;
+    const key = lat.toFixed(5) + "," + lon.toFixed(5);
+    if (!groups.has(key)) groups.set(key, { name: p.name || "Luogo", lat, lon, kind: p.kind || "", items: [] });
+    groups.get(key).items.push(i);
+  }
+  return [...groups.values()].sort((a, b) => a.name.localeCompare(b.name, "it"));
+}
+function nbPlacesView(places) {
+  const ll = (g) => g.lat.toFixed(6) + "," + g.lon.toFixed(6);
+  return places.length ? `<div class="nb-places">${places.map((g) => `<article class="card nb-place"><div><strong>${nbE(g.name)}</strong><small>${g.items.length === 1 ? "1 nota" : g.items.length + " note"} · ${g.items.map((i) => nbE(i.title || nbHost(i.url) || "Nota")).slice(0, 2).join(", ")}</small></div>
+    <div class="nb-place-actions"><a class="nb-chip" href="https://maps.apple.com/?daddr=${ll(g)}&q=${encodeURIComponent(g.name)}" target="_blank" rel="noopener">Apple Mappe</a><a class="nb-chip" href="https://www.google.com/maps/dir/?api=1&destination=${ll(g)}" target="_blank" rel="noopener">Google Maps</a><a class="nb-chip" href="https://waze.com/ul?ll=${ll(g)}&navigate=yes" target="_blank" rel="noopener">Waze</a></div></article>`).join("")}</div>` : `<section class="card pad nb-empty"><p>Nessuna nota con un luogo.</p></section>`;
+}
 function renderBloom() {
   const root = document.getElementById("bloom");
   if (!root) return;
   if (!nb.bloom && !nb.loading) nbLoad("bloom");
   const v = nbBloomView();
+  const places = nbPlaces(v.live.filter((i) => !i.archived));
   const tagChips = v.b.collections.map((c) => ({ c, n: v.counts.get(c.id) || 0 })).sort((a, z) => z.n - a.n || a.c.name.localeCompare(z.c.name, "it")).map(({ c, n }) => `<button class="nb-chip${nb.btag === c.id ? " on" : ""}" data-nb-tag="${nbE(c.id)}" aria-pressed="${nb.btag === c.id}">${nbE(c.name)} <b>${n}</b></button>`).join("");
   const card = (i) => `<article class="card nb-item${i.trashedAt ? " trashed" : ""}"><button class="nb-item-main" data-nb-item="${nbE(i.id)}"><span class="nb-ico" aria-hidden="true">${NB_KIND[i.kind] || "📝"}</span><span class="nb-main"><strong>${nbE(i.title || nbHost(i.url) || (i.body || i.notes || "Nota").slice(0, 70))}</strong><small>${nbE([nbHost(i.url), nbDate(i.modifiedAt)].filter(Boolean).join(" · "))}${i.files.length ? " · 📎 " + i.files.length : ""}</small></span></button>${i.body || i.notes ? `<p>${nbE((i.body || i.notes).replace(/\s+/g, " ").slice(0, 160))}</p>` : ""}<div class="nb-tags">${i.tags.map((t) => `<span>${nbE(v.cname.get(t) || "?")}</span>`).join("")}</div><div class="nb-item-act">${i.url ? `<a class="nb-open" href="${nbE(i.url)}" target="_blank" rel="noopener noreferrer">Apri</a>` : ""}${i.trashedAt ? `<button data-nb-act="restore" data-id="${nbE(i.id)}">Ripristina</button><button class="danger" data-nb-act="purge" data-id="${nbE(i.id)}">Elimina</button>` : `<button data-nb-item="${nbE(i.id)}">Modifica</button><button data-nb-act="${i.archived ? "unarchive" : "archive"}" data-id="${nbE(i.id)}">${i.archived ? "Ripristina" : "Archivia"}</button><button data-nb-act="trash" data-id="${nbE(i.id)}">Cestino</button>`}</div></article>`;
   root.innerHTML = `<div class="nb-wrap">
@@ -1908,9 +2093,9 @@ function renderBloom() {
     <section class="card pad nb-head"><div class="card-title"><div><h2>Libreria</h2><small>${v.live.length ? v.live.length + " elementi · " + v.b.collections.length + " categorie" : nb.loading ? "Caricamento..." : "Ancora vuota"}</small></div><div class="actions"><button data-nb-act="import-bloom">Importa dall'app</button><button class="save" data-nb-act="new-item">+ Aggiungi</button></div></div>
       <input type="search" class="search" placeholder="Cerca in titoli, link, testi e categorie" value="${nbE(nb.bq)}" data-nb-q="bloom" aria-label="Cerca in Bloom">
       <div class="nb-chips"><button class="nb-chip${nb.bmode === "all" && !nb.btag ? " on" : ""}" data-nb-mode="all">Tutti <b>${v.live.filter((i) => !i.archived).length}</b></button>${tagChips}<button class="nb-chip ghost" data-nb-act="new-collection">+ Categoria</button>${v.b.collections.length ? '<button class="nb-chip ghost" data-nb-act="manage-collections">Gestisci</button>' : ""}</div>
-      <div class="nb-chips sub"><button class="nb-chip${nb.bmode === "archive" ? " on" : ""}" data-nb-mode="archive">Archivio <b>${v.archive}</b></button><button class="nb-chip${nb.bmode === "trash" ? " on" : ""}" data-nb-mode="trash">Cestino <b>${v.trash}</b></button></div>
+      <div class="nb-chips sub"><button class="nb-chip${nb.bmode === "places" ? " on" : ""}" data-nb-mode="places">Luoghi <b>${places.length}</b></button><button class="nb-chip${nb.bmode === "archive" ? " on" : ""}" data-nb-mode="archive">Archivio <b>${v.archive}</b></button><button class="nb-chip${nb.bmode === "trash" ? " on" : ""}" data-nb-mode="trash">Cestino <b>${v.trash}</b></button></div>
     </section>
-    ${v.shown.length ? `<div class="nb-grid">${v.shown.map(card).join("")}</div>` : `<section class="card pad nb-empty"><p>${v.live.length || v.trash ? "Niente da mostrare con questi filtri." : "Importa la copia di Bloom dall'app oppure aggiungi il primo elemento."}</p></section>`}
+    ${nb.bmode === "places" ? nbPlacesView(places) : v.shown.length ? `<div class="nb-grid">${v.shown.map(card).join("")}</div>` : `<section class="card pad nb-empty"><p>${v.live.length || v.trash ? "Niente da mostrare con questi filtri." : "Importa la copia di Bloom dall'app oppure aggiungi il primo elemento."}</p></section>`}
   </div>`;
 }
 function nbItemForm(i, full) {
@@ -2718,14 +2903,21 @@ document.addEventListener("keydown", (e) => {
       }
 
       /** Agenda accanto al mese: i sei giorni dopo quello scelto, con turno ed eventi (solo giorni del mese caricato). */
+      function osLoadAhead(month) {
+        if (life.aheadLoading === month) return;
+        life.aheadLoading = month;
+        osRequest("getLifeData", month).then((data) => { life.ahead = { ...data, month }; renderLifeOS(); }).catch(() => {}).finally(() => { life.aheadLoading = null; });
+      }
       function osNextDays() {
         const shiftMap = new Map(life.data.shifts.map((s) => [s.day, s.kind])), out = [];
-        for (let i = 1; i <= 14 && out.length < 6; i++) {
+        // SITE-94: the next 30 days, also in the following month (loaded on demand).
+        for (let i = 1; i <= 30; i++) {
           const d = new Date(life.selected + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + i);
-          const day = d.toISOString().slice(0, 10);
-          if (day.slice(0, 7) !== life.month) break;
-          const evs = life.data.events.filter((e) => e.day === day && e.occurrence_status !== "skipped").sort((a, b) => (a.start_time || "").localeCompare(b.start_time || ""));
-          const kind = shiftMap.get(day);
+          const day = d.toISOString().slice(0, 10), month = day.slice(0, 7);
+          const src = month === life.month ? life.data : life.ahead?.month === month ? life.ahead : null;
+          if (!src) { osLoadAhead(month); break; }
+          const evs = (src.events || []).filter((e) => e.day === day && e.occurrence_status !== "skipped").sort((a, b) => (a.start_time || "").localeCompare(b.start_time || ""));
+          const kind = month === life.month ? shiftMap.get(day) : (src.shifts || []).find((x) => x.day === day)?.kind;
           if (!evs.length) continue;
           out.push(`<div class="os-next-day"><button class="os-next-head" data-life-day="${day}"><span>${osDate(day)}</span>${kind ? `<span class="os-day-shift" data-kind="${kind}" title="${osShiftAbbr[kind] || ""}">${osShiftInitial[kind] || ""}</span>` : ""}</button>${evs.length ? evs.map((e) => `<button class="os-next-ev" data-life-event="${e.id}"><b>${e.start_time || "Tutto il giorno"}</b><span>${osSafe(e.title)}${e.location ? `<small>${osSafe(e.location)}</small>` : ""}</span></button>`).join("") : '<p class="os-empty">Nessun impegno</p>'}</div>`);
         }
@@ -6229,7 +6421,7 @@ document.addEventListener("keydown", (e) => {
     }).join('');
     return `<div class="home-native"><div class="home-head"><div class="home-recap" data-key="${safe(key)}" aria-label="${safe(plain)}"><p>${lines.map(l=>l).join(' ')}</p></div></div>
 <div class="dash-kpis">${kpis}</div>
-<section class="os-card home-week hw-wide"><div class="card-title"><h2>Prossimi giorni</h2><button class="ghost" data-home-day="${today}" aria-label="Apri calendario">Calendario</button></div><div class="hw-strip" role="list">${weekRows}</div></section>${typeof financeAlertsCard==='function'?financeAlertsCard(life.finance):''}
+<section class="os-card home-week hw-wide"><div class="card-title"><h2>Prossimi giorni</h2><button class="ghost" data-home-day="${today}" aria-label="Apri calendario">Calendario</button></div><div class="hw-strip" role="list">${weekRows}</div></section>${typeof financeAlertsCard==='function'?financeAlertsCard(life.finance):''}${typeof homeFinanceCard==='function'?homeFinanceCard():''}
 <section class="os-card home-todo"><div class="card-title"><h2>Da fare</h2><button class="ghost" data-view="tasks">Attività</button></div>${todoRows}</section>
 <section class="os-card home-habits"><div class="card-title"><h2>Abitudini</h2><button class="ghost" data-life-routine-manage>Gestisci</button></div>${habitRows}</section></div>`;
   };
