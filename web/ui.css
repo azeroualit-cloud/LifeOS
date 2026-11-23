@@ -1469,3 +1469,10 @@ html[data-theme="light"]{--shadow-94:0 5px 13px rgba(0,0,0,.08);--warn-94:#c99a0
 .cat-choice{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 13px}
 .cat-choice button{min-height:34px;padding:0 13px;border-radius:17px;border:1px solid var(--line,rgba(127,127,127,.3));background:var(--surface,transparent);color:inherit;font:inherit;font-size:13px}
 .cat-choice button.active{background:var(--ink);color:var(--surface);border-color:transparent}
+
+/* REVIEW-95: ripartizione tra risparmi e mesi di budget */
+.split-box{display:grid;gap:13px;margin-top:13px}
+.split-months{display:flex;flex-wrap:wrap;gap:8px;border:0;padding:0;margin:0}
+.split-months legend{font-size:13px;color:var(--muted,inherit);margin-bottom:8px}
+.split-month{display:inline-flex;align-items:center;gap:5px;min-height:34px;padding:0 13px;border-radius:17px;border:1px solid var(--line);cursor:pointer}
+.split-month:has(input:checked){background:var(--ink);color:var(--surface);border-color:transparent}
