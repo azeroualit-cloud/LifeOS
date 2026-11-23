@@ -1,44 +1,133 @@
 """Context-guarded expense split for expense routing (REVIEW-95 / FUNDING-BLOCK-2026-11-21).
 
 An ordinary expense may be split by the user: the part from the budget is recovered in the chosen
-budget months through the existing 'recovery' policy, the rest stays on savings. Only the routing
-section between its two fixed markers is replaced, and only when the live section is byte for byte
-the savings version deployed in build 91. Both Workers (site and app) are changed together.
+budget months through the existing 'recovery' policy, the rest stays on savings. Only the function
+`createExpenseRouting` is replaced, in both Workers (site and app). The live Workers are bundled
+(comments removed, `const` printed as `var`), so the function is found by its name and its braces,
+and the live version must be the build 91 one: three destinations with savings, no split yet.
 Never logs source or credentials.
 """
 from pathlib import Path
-import hashlib
 import importlib.util
+import re
 
 spec = importlib.util.spec_from_file_location('deployment', Path(__file__).with_name('deploy-unified-activities.py'))
 deployment = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(deployment)
 
-START = '// Integrates the existing plan service.'
-END = '\nconst expenseRouting = createExpenseRouting('
-# Routing section deployed by deploy-savings-91 (backend/expense-routing/routing.mjs at 2f2fd2a).
-BEFORE_SHA256 = '1f465922b5860813673725187fd3329da8391bd152677b64a31fe2101b816191'
+HEAD = 'function createExpenseRouting('
+CALL = re.compile(r'\b(?:const|let|var)\s+expenseRouting\s*=\s*createExpenseRouting\(')
 
 
 def routing():
     text = Path('backend/expense-routing/routing.mjs').read_text(encoding='utf-8')
-    return text.replace('export function createExpenseRouting', 'function createExpenseRouting', 1)
+    text = text.replace('export function createExpenseRouting', 'function createExpenseRouting', 1)
+    start = text.index(HEAD)
+    return text[start:function_end(text, start)]
+
+
+def function_end(source, start):
+    """Index just after the closing brace of the function starting at `start`.
+    Skips strings, template literals, comments and regular expression literals."""
+    i = source.index('(', start)  # parameter list first (it may hold destructuring braces), then the body
+    depth, n = 0, len(source)
+    stack = []  # template literal nesting: depth at which a ${ opened
+    prev = ''
+    while i < n:
+        c = source[i]
+        if c in '"\'':
+            j = i + 1
+            while source[j] != c:
+                j += 2 if source[j] == '\\' else 1
+            i = j + 1; prev = 'v'; continue
+        if c == '`':
+            j = i + 1
+            while True:
+                if source[j] == '\\': j += 2; continue
+                if source[j] == '`': break
+                if source.startswith('${', j):
+                    stack.append(depth); depth += 1; j += 2; break
+                j += 1
+            if source[j] == '`':
+                i = j + 1; prev = 'v'; continue
+            i = j; prev = '{'; continue
+        if source.startswith('//', i):
+            i = source.index('\n', i); continue
+        if source.startswith('/*', i):
+            i = source.index('*/', i) + 2; continue
+        if c == '/' and prev in ('', '(', ',', '=', ':', '[', '!', '&', '|', '?', '{', '}', ';', 'op'):
+            j, in_class = i + 1, False
+            while True:
+                d = source[j]
+                if d == '\\': j += 2; continue
+                if d == '[': in_class = True
+                elif d == ']': in_class = False
+                elif d == '/' and not in_class: break
+                j += 1
+            j += 1
+            while j < n and source[j].isalpha(): j += 1
+            i = j; prev = 'v'; continue
+        if c in '([':
+            depth += 1
+        elif c in ')]':
+            depth -= 1
+        elif c == '{':
+            depth += 1
+        elif c == '}':
+            if stack and depth - 1 == stack[-1]:
+                # end of a ${ } inside a template literal: resume the template
+                stack.pop(); depth -= 1
+                j = i + 1
+                while True:
+                    if source[j] == '\\': j += 2; continue
+                    if source[j] == '`': break
+                    if source.startswith('${', j):
+                        stack.append(depth); depth += 1; j += 2; break
+                    j += 1
+                if source[j] == '`':
+                    i = j + 1; prev = 'v'; continue
+                i = j; prev = '{'; continue
+            depth -= 1
+            if depth == 0:
+                return i + 1
+        if not c.isspace():
+            if c.isalnum() or c in '_$)]':
+                prev = 'v'
+                m = re.match(r'[A-Za-z_$][\w$]*', source[i:])
+                if m:
+                    word = m.group(0)
+                    prev = 'op' if word in ('return', 'typeof', 'case', 'in', 'of', 'delete', 'void', 'throw', 'new') else 'v'
+                    i += len(word); continue
+            else:
+                prev = c if c in '(,=:[!&|?{};' else ('op' if c in '+-*%<>~^' else 'v')
+        i += 1
+    raise RuntimeError('Fine della funzione di routing non trovata; nessuna scrittura.')
+
+
+def compact(text):
+    return re.sub(r'\s+', '', text).replace('"', "'")
 
 
 def transform(source):
-    if source.count(START) != 1 or source.count(END) != 1:
-        # Counts only (never source): tells which marker a bundled Worker spells differently.
-        print('ROUTING_MARKERS start=%d end=%d var_end=%d let_end=%d create=%d' % (
-            source.count(START), source.count(END), source.count('var expenseRouting = createExpenseRouting('),
-            source.count('let expenseRouting = createExpenseRouting('), source.count('function createExpenseRouting(')))
+    if source.count(HEAD) != 1 or len(CALL.findall(source)) != 1:
+        print('ROUTING_MARKERS head=%d call=%d' % (source.count(HEAD), len(CALL.findall(source))))
         raise RuntimeError('Contesto routing non riconosciuto; nessuna scrittura.')
-    a = source.index(START)
-    b = source.index(END, a)
+    a = source.index(HEAD)
+    b = function_end(source, a)
+    if CALL.search(source).start() < b:
+        raise RuntimeError('Routing non riconosciuto; nessuna scrittura.')
     current, replacement = source[a:b], routing()
-    if current == replacement:
+    if current == replacement or 'splitDestination' in current:
+        if compact(current) != compact(replacement):
+            raise RuntimeError('Ripartizione gia presente ma diversa; nessuna scrittura.')
         return source
-    if hashlib.sha256(current.encode()).hexdigest() != BEFORE_SHA256:
-        raise RuntimeError('Routing live differente dalla versione attesa; nessuna scrittura.')
+    live = compact(current)
+    # The build 91 routing: savings destination declared, three destinations, plan payments.
+    for needle in ("savingsDestination:true", "['ordinary','plan','savings'].includes(input.expenseDestination)",
+                   "budgetTreatment:kind", "command(state,'pay',paymentInput,today)"):
+        if needle not in live:
+            print('ROUTING_EXPECTED_MISSING ' + needle.split('(')[0][:40])
+            raise RuntimeError('Routing live differente dalla versione attesa; nessuna scrittura.')
     if 'splitDestination: true' not in replacement or "input.budgetTreatment === 'recovery'" not in replacement:
         raise RuntimeError('Sorgente routing senza ripartizione; nessuna scrittura.')
     return source[:a] + replacement + source[b:]
