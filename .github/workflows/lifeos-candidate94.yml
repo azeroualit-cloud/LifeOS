@@ -1,5 +1,5 @@
 name: LifeOS candidate 94 validation and authorized IPA
-# Stop 3 (user asked to stop to speed up the pipeline). Start 3 for IPA-DELIVERY-94-2026-11-23 (user go-ahead): build 94 with DESIGN-PASS-94; nutrition save button keeps 44 pt. Change this line to start a new attempt on the current commit.
+# Start 4 for IPA-DELIVERY-94-2026-11-23: faster gate (user request): quick check first, remaining suite on 3 parallel runners, release launches beside it.
 on:
   workflow_dispatch:
   push:
@@ -12,10 +12,10 @@ concurrency:
   group: lifeos-candidate94
   cancel-in-progress: true
 jobs:
-  full-suite:
+  preflight:
     if: (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && github.repository == 'azeroualit-cloud/LifeOS' && github.ref == 'refs/heads/codex/build93' && !contains(github.event.head_commit.message, '[hold]')
     runs-on: macos-15
-    timeout-minutes: 240
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v5
         with:
@@ -78,10 +78,9 @@ jobs:
           xcrun simctl shutdown "$COMPACT_DEVICE"
           xcrun simctl boot "$MAIN_DEVICE"
           xcrun simctl bootstatus "$MAIN_DEVICE" -b
-      - name: Run previously failing regressions first on the original primary device
+      - name: Run previously failing tests and touched screens first on the primary device
         id: regressions
-        # Keep going so one run reports every failing test; the gate step below still fails the job.
-        continue-on-error: true
+        # Quick check: a failure here stops the build within minutes, before the long suite.
         working-directory: app
         run: |
           set -euo pipefail
@@ -91,84 +90,93 @@ jobs:
           xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 660 "${only[@]}" -resultBundlePath build/Regressions.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/regression-tests.log 2>&1 || { grep -E 'error:|Test Case .*failed' build/regression-tests.log || true; tail -n 80 build/regression-tests.log; exit 1; }
       - name: Require all targeted cases before the remaining suite
         id: targeted
-        continue-on-error: true
         run: python3 scripts/verify-candidate94.py preflight
-      - name: Run the remaining unit and UI tests
-        id: remaining
-        continue-on-error: true
+      - name: Report failing quick-check tests
+        if: ${{ failure() }}
         working-directory: app
         run: |
-          set -euo pipefail
-          skip=()
-          while IFS= read -r test; do skip+=("-skip-testing:$test"); done < build/preflight-cases.txt
-          # Nas, 17 nov: the Apple Health app reference capture drives an external app and is excluded from the release gate.
-          skip+=("-skip-testing:LifeOSProbeUITests/NativeAppleHealthReferenceUITests")
-          xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 660 "${skip[@]}" -resultBundlePath build/Final.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/final-tests.log 2>&1 || { grep -E 'error:|Test Case .*failed' build/final-tests.log || true; tail -n 120 build/final-tests.log; exit 1; }
-      - name: Fail the job if any test step failed
-        if: ${{ steps.regressions.outcome == 'failure' || steps.targeted.outcome == 'failure' || steps.remaining.outcome == 'failure' }}
-        working-directory: app
-        run: |
-          echo "## Test falliti" >> "$GITHUB_STEP_SUMMARY"
-          for f in build/regression-tests.log build/final-tests.log; do
-            [ -f "$f" ] && grep -E "error: -\[|Test Case .*failed" "$f" | sed -E 's#^/Users/runner/work/[^ ]*/##' | sort -u | tee -a "$GITHUB_STEP_SUMMARY"
-          done
-          # Public annotations so the failing cases are readable without downloading logs.
-          for f in build/preflight-tests.log build/regression-tests.log build/final-tests.log; do
+          for f in build/preflight-tests.log build/regression-tests.log; do
             [ -f "$f" ] || continue
             grep -E "error: -\[" "$f" | sed -E 's#^/Users/runner/work/[^ ]*/##' | sort -u | head -n 40 | while IFS= read -r line; do
               echo "::error title=Test fallito ($(basename "$f"))::${line:0:900}"
             done
           done
-          echo "regressions=${{ steps.regressions.outcome }} targeted=${{ steps.targeted.outcome }} remaining=${{ steps.remaining.outcome }}"
-          exit 1
-      - name: Verify unique passing cases and retain exact SHA evidence
-        run: python3 scripts/verify-candidate94.py tests
-      - name: Collect lightweight test diagnostics
-        if: ${{ !cancelled() }}
-        shell: bash
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lifeos-candidate94-preflight-${{ github.sha }}-${{ github.run_attempt }}
+          path: |
+            app/build/Preflight.xcresult
+            app/build/Regressions.xcresult
+
+  suite:
+    needs: preflight
+    runs-on: macos-15
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2]
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: ./.github/actions/native-compat76
+        with:
+          variant: primary
+      - name: Compile app and tests
+        working-directory: app
         run: |
-          set -u
-          mkdir -p app/build/candidate94-diagnostics
-          diag=app/build/candidate94-diagnostics
-          result=app/build/Final.xcresult
-          if [ ! -f "$result/Info.plist" ]; then result=app/build/Regressions.xcresult; fi
-          if [ ! -f "$result/Info.plist" ]; then result=app/build/Preflight.xcresult; fi
-          if [ -f app/build/preflight-tests.log ]; then cp app/build/preflight-tests.log "$diag/"; fi
-          if [ -f app/build/regression-tests.log ]; then cp app/build/regression-tests.log "$diag/"; fi
-          printf 'Commit: %s\nRun: %s attempt %s\n' "$GITHUB_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" > "$diag/context.txt"
-          if [ -f app/build/final-tests.log ]; then
-            cp app/build/final-tests.log "$diag/final-tests.log"
-            # Preserve every matching line; the complete log remains available for context.
-            grep -E 'error:|Test Case .*failed|Executed [0-9]+ tests?, with [0-9]+ failures?' app/build/final-tests.log > "$diag/failures-and-counts.txt" || true
-          elif [ -f app/build/regression-tests.log ]; then
-            grep -E 'error:|Test Case .*failed|Executed [0-9]+ tests?, with [0-9]+ failures?' app/build/regression-tests.log > "$diag/failures-and-counts.txt" || true
-          elif [ -f app/build/preflight-tests.log ]; then
-            grep -E 'error:|Test Case .*failed|Executed [0-9]+ tests?, with [0-9]+ failures?' app/build/preflight-tests.log > "$diag/failures-and-counts.txt" || true
-          else
-            printf 'Test log unavailable: the test step may not have started.\n' > "$diag/failures-and-counts.txt"
-          fi
-          if [ -f "$result/Info.plist" ]; then
-            for kind in summary tests; do
-              if xcrun xcresulttool get test-results "$kind" --path "$result" > "$diag/$kind.json.tmp" 2> "$diag/$kind-error.txt"; then
-                mv "$diag/$kind.json.tmp" "$diag/$kind.json"
-                rm "$diag/$kind-error.txt"
-              else
-                rm -f "$diag/$kind.json.tmp"
-                printf '%s extraction failed; see %s-error.txt.\n' "$kind" "$kind" >> "$diag/context.txt"
-              fi
+          set -euo pipefail
+          xcodebuild build-for-testing -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/final-compile.log 2>&1 || { tail -n 100 build/final-compile.log; exit 1; }
+      - name: Run shard ${{ matrix.shard }} of the remaining unit and UI tests
+        working-directory: app
+        run: |
+          set -euo pipefail
+          python3 ../scripts/verify-candidate94.py shard --index ${{ matrix.shard }} --count 3 --root . > build/shard-cases.txt
+          echo "Shard ${{ matrix.shard }}: $(wc -l < build/shard-cases.txt) selectors"
+          only=()
+          while IFS= read -r test; do only+=("-only-testing:$test"); done < build/shard-cases.txt
+          xcodebuild test-without-building -derivedDataPath simulator-build -project LifeOSProbe.xcodeproj -scheme LifeOSProbe -destination "platform=iOS Simulator,id=$MAIN_DEVICE" -parallel-testing-enabled NO -test-timeouts-enabled YES -default-test-execution-time-allowance 180 -maximum-test-execution-time-allowance 660 "${only[@]}" -resultBundlePath build/Shard.xcresult CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- > build/final-tests.log 2>&1 || {
+            grep -E "error: -\[" build/final-tests.log | sed -E 's#^/Users/runner/work/[^ ]*/##' | sort -u | head -n 40 | while IFS= read -r line; do
+              echo "::error title=Test fallito (shard ${{ matrix.shard }})::${line:0:900}"
             done
-          else
-            printf 'Result bundle unavailable or incomplete; structured extraction not attempted.\n' >> "$diag/context.txt"
-          fi
-          {
-            printf '## LifeOS final test diagnostics\n\n'
-            printf 'Commit: `%s` · Run: `%s`, attempt `%s`\n\n' "$GITHUB_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT"
-            printf 'Lightweight artifact: `lifeos-candidate94-diagnostics-%s-%s`.\n\n' "$GITHUB_SHA" "$GITHUB_RUN_ATTEMPT"
-            printf 'First 100 failure/count lines (complete list and log in artifact):\n\n```text\n'
-            head -n 100 "$diag/failures-and-counts.txt"
-            printf '\n```\n\n'
-            cat "$diag/context.txt"
-          } >> "$GITHUB_STEP_SUMMARY"
+            tail -n 80 build/final-tests.log; exit 1; }
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: lifeos-candidate94-shard${{ matrix.shard }}-${{ github.sha }}-${{ github.run_attempt }}
+          path: |
+            app/build/Shard.xcresult
+            app/build/final-tests.log
+
+  full-suite:
+    needs: suite
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Select the toolchain used for the tests
+        run: python3 scripts/select-compatible-xcode76.py
+      - uses: actions/download-artifact@v4
+        with:
+          name: lifeos-candidate94-preflight-${{ github.sha }}-${{ github.run_attempt }}
+          path: app/build
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: lifeos-candidate94-shard*-${{ github.sha }}-${{ github.run_attempt }}
+          path: shards
+      - name: Merge the three shards into one result and verify every case once
+        run: |
+          set -euo pipefail
+          ls shards
+          xcrun xcresulttool merge shards/*/Shard.xcresult --output-path app/build/Final.xcresult
+          mkdir -p app/build/candidate94-diagnostics
+          cat shards/*/final-tests.log > app/build/final-tests.log
+          python3 scripts/verify-candidate94.py tests
       - name: Upload lightweight test diagnostics
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
@@ -176,28 +184,9 @@ jobs:
           name: lifeos-candidate94-diagnostics-${{ github.sha }}-${{ github.run_attempt }}
           if-no-files-found: warn
           path: app/build/candidate94-diagnostics
-      - name: Export screenshots
-        if: ${{ !cancelled() }}
-        run: |
-          for suite in Preflight Regressions Final; do
-            if [ -f "app/build/$suite.xcresult/Info.plist" ]; then
-              xcrun xcresulttool export attachments --path "app/build/$suite.xcresult" --output-path "app/build/final-screenshots/$suite"
-            fi
-          done
-      - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: lifeos-candidate94-validation-${{ github.sha }}-${{ github.run_attempt }}
-          path: |
-            app/build/final-*.log
-            app/build/Preflight.xcresult
-            app/build/Final.xcresult
-            app/build/Regressions.xcresult
-            app/build/regression-tests.log
-            app/build/final-screenshots
 
   release-launches:
-    needs: full-suite
+    needs: preflight
     runs-on: macos-15
     timeout-minutes: 120
     steps:
