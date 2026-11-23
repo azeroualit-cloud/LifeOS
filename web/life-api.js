@@ -291,3 +291,67 @@ async function importFoodDiary(env, list) {
   for (const item of list) { const r = await saveFoodDiaryEntry(env, item); if (r.saved) saved++; else skipped++; }
   return { saved, skipped };
 }
+// LIFEOS_HUB_95 (SITE-ADMIN-HUB-2026-11-23): impostazioni condivise fra sito e app (obiettivi di
+// nutrizione, regole degli avvisi, notifiche della preghiera) e registro degli avvisi scattati.
+// Tabelle create se mancanti; vale la modifica più recente.
+let hubReady = null;
+async function hubTables(env) {
+  if (!hubReady) {
+    hubReady = env.DB.batch([
+      env.DB.prepare("CREATE TABLE IF NOT EXISTS web_settings (key TEXT PRIMARY KEY, doc TEXT NOT NULL DEFAULT '{}', modified REAL NOT NULL DEFAULT 0)"),
+      env.DB.prepare("CREATE TABLE IF NOT EXISTS web_alert_log (id TEXT PRIMARY KEY, rule TEXT NOT NULL DEFAULT '', at TEXT NOT NULL, title TEXT NOT NULL DEFAULT '', body TEXT NOT NULL DEFAULT '')"),
+      env.DB.prepare("CREATE INDEX IF NOT EXISTS web_alert_log_at ON web_alert_log(at)"),
+    ]).catch((error) => { hubReady = null; throw error; });
+  }
+  await hubReady;
+}
+const HUB_KEYS = ["nutrition-goals", "nutrition-targets", "alerts"];
+function hubKey(key) {
+  const k = String(key || "");
+  if (!HUB_KEYS.includes(k)) throw Error("Impostazione sconosciuta.");
+  return k;
+}
+async function getSettings(env, key) {
+  await hubTables(env);
+  const k = hubKey(key);
+  const row = await env.DB.prepare("SELECT doc, modified FROM web_settings WHERE key = ?").bind(k).first();
+  let doc = {};
+  try { doc = row ? JSON.parse(row.doc || "{}") : {}; } catch { doc = {}; }
+  return { key: k, doc, modified: row ? Number(row.modified) : 0 };
+}
+/** Salva se più recente della copia sul server; restituisce sempre la copia valida. */
+async function saveSettings(env, key, doc, modified) {
+  await hubTables(env);
+  const k = hubKey(key), when = Number(modified);
+  if (!Number.isFinite(when) || when <= 0) throw Error("Data di modifica non valida.");
+  if (!doc || typeof doc !== "object" || Array.isArray(doc)) throw Error("Impostazioni non valide.");
+  const text = JSON.stringify(doc);
+  if (text.length > 64000) throw Error("Impostazioni troppo grandi.");
+  const old = await env.DB.prepare("SELECT modified FROM web_settings WHERE key = ?").bind(k).first();
+  if (old && Number(old.modified) > when) return { saved: false, ...(await getSettings(env, k)) };
+  await env.DB.prepare("INSERT INTO web_settings(key, doc, modified) VALUES (?,?,?) ON CONFLICT(key) DO UPDATE SET doc = excluded.doc, modified = excluded.modified").bind(k, text, when).run();
+  return { saved: true, ...(await getSettings(env, k)) };
+}
+/** Avvisi mostrati dall'iPhone, per vederli sul sito; ne restano gli ultimi 500. */
+async function addAlertLog(env, list) {
+  await hubTables(env);
+  if (!Array.isArray(list) || list.length > 100) throw Error("Elenco degli avvisi non valido.");
+  let saved = 0;
+  for (const item of list) {
+    const v = item && typeof item === "object" ? item : {};
+    const at = new Date(v.at || "");
+    if (!Number.isFinite(at.getTime())) continue;
+    const id = String(v.id || "").slice(0, 80) || "log-" + at.getTime();
+    await env.DB.prepare("INSERT OR IGNORE INTO web_alert_log(id, rule, at, title, body) VALUES (?,?,?,?,?)")
+      .bind(id, String(v.rule || "").slice(0, 80), at.toISOString(), String(v.title || "").slice(0, 160), String(v.body || "").slice(0, 600)).run();
+    saved++;
+  }
+  await env.DB.prepare("DELETE FROM web_alert_log WHERE id NOT IN (SELECT id FROM web_alert_log ORDER BY at DESC LIMIT 500)").run();
+  return { saved };
+}
+async function listAlertLog(env, limit) {
+  await hubTables(env);
+  const n = Math.max(1, Math.min(500, Math.floor(Number(limit) || 100)));
+  const { results } = await env.DB.prepare("SELECT * FROM web_alert_log ORDER BY at DESC LIMIT ?").bind(n).all();
+  return { entries: results };
+}

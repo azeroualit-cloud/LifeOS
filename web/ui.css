@@ -1444,3 +1444,23 @@ html[data-theme="light"]{--shadow-94:0 5px 13px rgba(0,0,0,.08);--warn-94:#c99a0
 /* SITE-95: Analisi start month, typical-day calendar without weekday header. */
 .an93-start{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600}
 .an93-start select{min-height:34px;border-radius:999px;padding:0 13px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font:inherit}
+/* SITE-ADMIN-HUB-2026-11-23: Avvisi, obiettivi e importazione. */
+.hub-rules{display:grid;gap:8px}
+.hub-rule{display:flex;align-items:center;gap:13px;padding:8px 0;border-bottom:1px solid var(--line)}
+.hub-rule:last-child{border-bottom:0}
+.hub-rule-main{flex:1;display:grid;justify-items:start;gap:2px;border:0;background:none;color:var(--ink);font:inherit;text-align:left;cursor:pointer;min-height:44px}
+.hub-rule-main small{color:var(--ink-2);font-size:13px}
+.hub-switch{position:relative;width:51px;height:31px;border-radius:16px;border:0;background:var(--surface-2);cursor:pointer;flex:none}
+.hub-switch i{position:absolute;left:2px;top:2px;width:27px;height:27px;border-radius:50%;background:#fff;transition:left .15s}
+.hub-switch[aria-checked="true"]{background:var(--ok-94)}
+.hub-switch[aria-checked="true"] i{left:22px}
+.hub-row{display:flex;align-items:center;justify-content:space-between;gap:13px;min-height:44px}
+.hub-row select,.hub-row input{min-height:34px;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font:inherit;padding:0 8px}
+.hub-prayers{display:grid;gap:5px}
+.hub-check{display:flex;align-items:center;gap:8px;min-height:34px}
+.hub-days{display:flex;flex-wrap:wrap;gap:8px;border:0;padding:0}
+.hub-log{display:grid;gap:5px}
+.hub-log .kv span{display:grid}
+.hub-log small{color:var(--ink-2);font-size:13px}
+.hub-steps{margin:0;padding-left:21px;display:grid;gap:5px}
+#hub-ai-prompt{width:100%;font:13px/1.45 ui-monospace,monospace;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);padding:8px}

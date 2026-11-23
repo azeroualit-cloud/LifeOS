@@ -1483,6 +1483,26 @@ html[data-theme="light"]{--shadow-94:0 5px 13px rgba(0,0,0,.08);--warn-94:#c99a0
 /* SITE-95: Analisi start month, typical-day calendar without weekday header. */
 .an93-start{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600}
 .an93-start select{min-height:34px;border-radius:999px;padding:0 13px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font:inherit}
+/* SITE-ADMIN-HUB-2026-11-23: Avvisi, obiettivi e importazione. */
+.hub-rules{display:grid;gap:8px}
+.hub-rule{display:flex;align-items:center;gap:13px;padding:8px 0;border-bottom:1px solid var(--line)}
+.hub-rule:last-child{border-bottom:0}
+.hub-rule-main{flex:1;display:grid;justify-items:start;gap:2px;border:0;background:none;color:var(--ink);font:inherit;text-align:left;cursor:pointer;min-height:44px}
+.hub-rule-main small{color:var(--ink-2);font-size:13px}
+.hub-switch{position:relative;width:51px;height:31px;border-radius:16px;border:0;background:var(--surface-2);cursor:pointer;flex:none}
+.hub-switch i{position:absolute;left:2px;top:2px;width:27px;height:27px;border-radius:50%;background:#fff;transition:left .15s}
+.hub-switch[aria-checked="true"]{background:var(--ok-94)}
+.hub-switch[aria-checked="true"] i{left:22px}
+.hub-row{display:flex;align-items:center;justify-content:space-between;gap:13px;min-height:44px}
+.hub-row select,.hub-row input{min-height:34px;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font:inherit;padding:0 8px}
+.hub-prayers{display:grid;gap:5px}
+.hub-check{display:flex;align-items:center;gap:8px;min-height:34px}
+.hub-days{display:flex;flex-wrap:wrap;gap:8px;border:0;padding:0}
+.hub-log{display:grid;gap:5px}
+.hub-log .kv span{display:grid}
+.hub-log small{color:var(--ink-2);font-size:13px}
+.hub-steps{margin:0;padding-left:21px;display:grid;gap:5px}
+#hub-ai-prompt{width:100%;font:13px/1.45 ui-monospace,monospace;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);padding:8px}
 </style>
 </head>
   <body class="dashboard-mode">
@@ -1555,6 +1575,7 @@ html[data-theme="light"]{--shadow-94:0 5px 13px rgba(0,0,0,.08);--warn-94:#c99a0
           </button>
           <button data-view="nutrition"><svg class="nav-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7c-2-2-6-1-6 4 0 5 3 9 6 9s6-4 6-9c0-5-4-6-6-4Z"/><path d="M12 7c0-2 1-3 3-4"/></svg><span>Nutrizione</span></button>
           <button data-view="bloom"><svg class="nav-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h10a1 1 0 0 1 1 1v17l-6-4-6 4V4a1 1 0 0 1 1-1Z"/></svg><span>Bloom</span></button>
+          <button type="button" data-view="alerts"><svg class="nav-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>Avvisi</button>
           <button id="admin-link" type="button" data-view="admin"><svg class="nav-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>Admin</button>
         </nav>
         <div class="sidebar-foot">
@@ -1592,7 +1613,7 @@ html[data-theme="light"]{--shadow-94:0 5px 13px rgba(0,0,0,.08);--warn-94:#c99a0
         <section id="overview" class="view"></section>
         <section id="movements" class="view"></section>
 
-        <section id="budget" class="view"></section><section id="analysis" class="view"></section><section id="admin" class="view"></section><section id="nutrition" class="view"></section><section id="bloom" class="view"></section><section id="extras" class="view"></section>
+        <section id="budget" class="view"></section><section id="analysis" class="view"></section><section id="admin" class="view"></section><section id="alerts" class="view"></section><section id="nutrition" class="view"></section><section id="bloom" class="view"></section><section id="extras" class="view"></section>
       </main>
     </div>
     <script id="lifeos-admin">
@@ -3677,6 +3698,7 @@ document.addEventListener("keydown", (e) => {
             "analysis",
             "extras",
             "admin",
+            "alerts",
             "nutrition",
             "bloom",
           ].includes(view)
@@ -3712,6 +3734,7 @@ document.addEventListener("keydown", (e) => {
           analysis: "Analisi",
           extras: "Piani",
           admin: "Admin",
+          alerts: "Avvisi",
           nutrition: "Nutrizione",
           bloom: "Bloom",
         }[view];
@@ -3754,6 +3777,7 @@ document.addEventListener("keydown", (e) => {
             ),
           );
         if (view === "admin" && typeof renderAdmin === "function") renderAdmin();
+        if (view === "alerts" && typeof renderAlerts === "function") renderAlerts();
         if (view === "nutrition" && typeof renderNutrition === "function") renderNutrition();
         if (view === "bloom" && typeof renderBloom === "function") renderBloom();
         if (view !== "calendar") life.tool = null;
@@ -8710,5 +8734,192 @@ document.addEventListener("keydown", (e) => {
     });
   })();
 })();
-</script><script>window.dispatchEvent(new Event("lifeos-ready"));</script></body>
+</script><script>window.dispatchEvent(new Event("lifeos-ready"));</script><script id="lifeos-hub95">
+/* SITE-ADMIN-HUB-2026-11-23: obiettivi condivisi con l'iPhone, istruzioni di importazione, pannello Avvisi
+   (regole create dall'utente e notifiche della preghiera). Salvato sul server (web_settings); l'iPhone legge
+   regole e obiettivi e mostra le notifiche. */
+const hub = { goals: null, targets: null, alerts: null, log: null, busy: "", error: "", editing: null, msg: "" };
+const HUB_PRAYERS = [["fajr", "Fajr (alba)"], ["sunrise", "Sorgere del sole"], ["dhuhr", "Dhuhr (mezzogiorno)"], ["asr", "Asr (pomeriggio)"], ["maghrib", "Maghrib (tramonto)"], ["isha", "Isha (notte)"]];
+const HUB_DAYS = [[1, "L"], [2, "M"], [3, "M"], [4, "G"], [5, "V"], [6, "S"], [7, "D"]];
+const HUB_TYPES = {
+  budgetBelow: { label: "Budget del mese sotto una soglia", params: [["amount", "Soglia €", "number", 50]] },
+  categoryOver: { label: "Spesa di una categoria oltre una cifra nel mese", params: [["category", "Categoria", "text", "Benzina"], ["amount", "Oltre €", "number", 150]] },
+  dailyBudget: { label: "Quanto puoi spendere oggi", params: [] },
+  nutritionBelow: { label: "Nutrizione sotto l'obiettivo a una certa ora", params: [["nutrient", "Cosa", "select:kcal=Calorie,protein=Proteine,fibre=Fibre", "protein"], ["percent", "Sotto il % dell'obiettivo", "number", 70]] },
+  eventTomorrow: { label: "Impegni di domani", params: [] },
+  shiftTomorrow: { label: "Turno di domani", params: [] },
+  weeklySummary: { label: "Riepilogo della settimana (spese e calorie)", params: [] },
+  custom: { label: "Promemoria personale", params: [["title", "Titolo", "text", "Promemoria"], ["body", "Testo", "text", ""]] },
+};
+const hubE = (v) => escapeHtml(String(v ?? ""));
+const hubDefaults = () => ({ rules: [], prayer: { enabled: false, before: 10, prayers: { fajr: true, sunrise: false, dhuhr: true, asr: true, maghrib: true, isha: true } }, quiet: { from: "22:00", to: "07:00" }, maxPerDay: 6 });
+async function hubLoad(force) {
+  if (hub.busy || (!force && hub.alerts && hub.goals)) return;
+  hub.busy = "load"; hub.error = "";
+  try {
+    const [g, t, a, l] = await Promise.all([workerRequest("getSettings", ["nutrition-goals"]), workerRequest("getSettings", ["nutrition-targets"]), workerRequest("getSettings", ["alerts"]), workerRequest("listAlertLog", [40])]);
+    hub.goals = g; hub.targets = t; hub.alerts = a.modified ? a : { ...a, doc: hubDefaults() }; hub.log = l.entries || [];
+    hub.alerts.doc = { ...hubDefaults(), ...hub.alerts.doc, prayer: { ...hubDefaults().prayer, ...(hub.alerts.doc.prayer || {}), prayers: { ...hubDefaults().prayer.prayers, ...((hub.alerts.doc.prayer || {}).prayers || {}) } } };
+  } catch (e) { hub.error = String(e.message || e); }
+  hub.busy = "";
+  if (state.view === "admin" && typeof renderAdmin === "function") renderAdmin();
+  if (state.view === "alerts") renderAlerts();
+  if (state.view === "nutrition" && typeof renderNutrition === "function") renderNutrition();
+}
+async function hubSave(key, doc) {
+  hub.error = ""; hub.msg = "";
+  try {
+    const r = await workerRequest("saveSettings", [key, doc, Date.now()]);
+    if (key === "alerts") hub.alerts = r; else if (key === "nutrition-goals") hub.goals = r;
+    hub.msg = r.saved ? "Salvato. L'iPhone lo applica alla prossima sincronizzazione." : "Nel frattempo è stato cambiato altrove: ricaricata la versione più recente.";
+  } catch (e) { hub.error = String(e.message || e); }
+}
+/* Obiettivi: priorità ai valori calcolati dall'iPhone (TDEE e peso), poi a quelli fissati qui. */
+const fdGoalsLocal = typeof fdGoals === "function" ? fdGoals : () => null;
+fdGoals = function () {
+  const t = hub.targets?.doc;
+  if (t && Number(t.calories) > 0) return { kcal: Number(t.calories), protein: Number(t.protein) || 0, carbs: Number(t.carbohydrate) || 0, fat: Number(t.fat) || 0, fibre: Number(hub.goals?.doc?.fibre) || 0 };
+  const g = hub.goals?.doc;
+  if (g && g.calorieMode === "fixed" && Number(g.fixedCalories) > 0) return { kcal: Number(g.fixedCalories), protein: g.proteinUnit === "grams" ? Number(g.protein) : 0, carbs: 0, fat: g.fatUnit === "grams" ? Number(g.fat) : 0, fibre: Number(g.fibre) || 0 };
+  return fdGoalsLocal();
+};
+if (typeof fdGoalsOpen === "function") fdGoalsOpen = function () { setView("admin"); setTimeout(() => document.getElementById("hub-goals")?.scrollIntoView({ behavior: "smooth" }), 200); };
+function hubGoalsHtml() {
+  const g = { calorieMode: "tdee", adjustment: -300, fixedCalories: 2450, proteinUnit: "perKG", protein: 2, fatUnit: "perKG", fat: 0.9, fibre: 30, micro: {}, ...(hub.goals?.doc || {}) };
+  const t = hub.targets?.doc;
+  const micro = (typeof NB_MICRO !== "undefined" ? NB_MICRO : []).slice(0, 18);
+  const sel = (name, value, opts) => `<select name="${name}">${opts.map(([v, l]) => `<option value="${v}" ${String(value) === v ? "selected" : ""}>${l}</option>`).join("")}</select>`;
+  return `<section class="card pad adm-wide" id="hub-goals"><div class="card-title"><h2>Obiettivi di nutrizione</h2><small>${hub.goals?.modified ? "aggiornati " + new Date(hub.goals.modified).toLocaleString("it-IT") : "non ancora impostati sul server"}</small></div>
+    ${t && Number(t.calories) > 0 ? `<p class="hint adm-note">Oggi sull'iPhone: <b>${Math.round(t.calories)} kcal</b> · proteine ${Math.round(t.protein)} g · carboidrati ${Math.round(t.carbohydrate)} g · grassi ${Math.round(t.fat)} g${t.tdee ? " · TDEE " + Math.round(t.tdee) : ""}${t.weight ? " · peso medio " + Number(t.weight).toFixed(1) + " kg" : ""}</p>` : ""}
+    <form id="hub-goals-form" class="os-form nb-form">
+      <label>Calorie${sel("calorieMode", g.calorieMode, [["tdee", "Dal TDEE"], ["fixed", "Fisse"]])}</label>
+      <label>Deficit o surplus sul TDEE<span class="nb-unit"><input type="number" step="50" name="adjustment" value="${g.adjustment}"><em>kcal</em></span></label>
+      <label>Calorie fisse<span class="nb-unit"><input type="number" step="10" name="fixedCalories" value="${g.fixedCalories}"><em>kcal</em></span></label>
+      <label>Proteine<span class="nb-unit"><input type="number" step="0.1" name="protein" value="${g.protein}">${sel("proteinUnit", g.proteinUnit, [["perKG", "g/kg"], ["grams", "g"]])}</span></label>
+      <label>Grassi<span class="nb-unit"><input type="number" step="0.1" name="fat" value="${g.fat}">${sel("fatUnit", g.fatUnit, [["perKG", "g/kg"], ["grams", "g"]])}</span></label>
+      <label>Fibre<span class="nb-unit"><input type="number" step="1" name="fibre" value="${g.fibre ?? ""}"><em>g</em></span></label>
+      <p class="hint wide">I carboidrati prendono le calorie che restano. Con «g/kg» si usa il peso medio degli ultimi 7 giorni.</p>
+      <details class="wide nb-micro"><summary>Obiettivi dei micronutrienti <small>lascia vuoto per usare i riferimenti standard</small></summary><div class="nb-micro-grid">${micro.map(([k, l, u]) => `<label>${hubE(l)}<span class="nb-unit"><input type="number" step="any" name="mg_${k}" value="${g.micro?.[k] ?? ""}"><em>${u}</em></span></label>`).join("")}</div></details>
+      <div class="form-actions wide"><button class="save" type="submit">Salva obiettivi</button></div>
+    </form></section>`;
+}
+function hubImportHtml() {
+  const prompt = `Prepara un file JSON per l'app LifeOS: un array di alimenti. Ogni elemento ha questi campi, con i valori per 100 g (o 100 ml se "basis" è "ml"):\n{"name": "Yogurt greco 0%", "brand": "Fage", "family": "dairy", "basis": "g", "kcal": 54, "protein": 10.3, "carbs": 3, "fat": 0, "fibre": 0, "micro": {"calcium": 110, "vitaminB12": 0.4}, "aliases": ["greco", "fage total"]}\nFamiglie ammesse: ${typeof NB_FAMILIES_LIST !== "undefined" ? NB_FAMILIES_LIST : "bakery, grain, egg, dairy, cheese, fat, legume, fruit, nut, poultry, meat, fish, meal, pantry, drink, sweet, vegetable, supplement"}.\nMicronutrienti ammessi (chiave = unità): ${(typeof NB_MICRO !== "undefined" ? NB_MICRO : []).map(([k, , u]) => k + " (" + u + ")").join(", ")}.\nUsa solo dati dell'etichetta o di fonti affidabili; se un valore non è noto, ometti il campo. Rispondi solo con il JSON.`;
+  return `<section class="card pad adm-wide" id="hub-import"><div class="card-title"><h2>Importare alimenti</h2><button data-view="nutrition">Vai a Nutrizione</button></div>
+    <ol class="hub-steps"><li>Prepara un file <b>.json</b> con un elenco di alimenti nel formato sotto (anche con un'altra AI: copia il testo pronto).</li><li>Apri <b>Nutrizione › Alimenti personali › Importa</b> e scegli il file.</li><li>Gli alimenti con lo stesso nome e marca vengono aggiornati, non duplicati. L'iPhone li riceve alla prossima sincronizzazione.</li></ol>
+    <label class="wide">Testo per un'altra AI<textarea id="hub-ai-prompt" rows="9" readonly>${hubE(prompt)}</textarea></label>
+    <div class="form-actions"><button type="button" class="save" data-hub-copy>Copia il testo</button><span class="hint" data-hub-copied></span></div>
+  </section>`;
+}
+/* Admin: obiettivi e importazione dopo lo stato. */
+const renderAdminBase = renderAdmin;
+renderAdmin = async function () {
+  await renderAdminBase();
+  if (!hub.goals && !hub.busy) hubLoad();
+  const grid = document.querySelector("#admin .adm-grid");
+  if (!grid) return;
+  grid.insertAdjacentHTML("beforeend", (hub.error ? `<div class="errorbox adm-wide">${hubE(hub.error)}</div>` : "") + (hub.msg ? `<p class="hint adm-wide" role="status">${hubE(hub.msg)}</p>` : "") + hubGoalsHtml() + hubImportHtml());
+};
+/* Pannello Avvisi. */
+function hubRuleText(r) {
+  const t = HUB_TYPES[r.type]; if (!t) return "Avviso";
+  const p = r.params || {};
+  const detail = r.type === "budgetBelow" ? `sotto ${p.amount} €` : r.type === "categoryOver" ? `${p.category} oltre ${p.amount} €` : r.type === "nutritionBelow" ? `${{ kcal: "calorie", protein: "proteine", fibre: "fibre" }[p.nutrient] || p.nutrient} sotto il ${p.percent}%` : r.type === "custom" ? (p.body || "") : "";
+  const days = (r.days || []).length === 7 || !(r.days || []).length ? "ogni giorno" : (r.days || []).map((d) => HUB_DAYS[d - 1][1]).join(" ");
+  return `${detail ? detail + " · " : ""}alle ${r.time || "09:00"} · ${days}`;
+}
+function hubRuleForm(r) {
+  const x = r || { id: "", name: "", type: "budgetBelow", enabled: true, time: "09:00", days: [1, 2, 3, 4, 5, 6, 7], params: {} };
+  const t = HUB_TYPES[x.type] || HUB_TYPES.budgetBelow;
+  const field = ([k, label, kind, def]) => {
+    const v = x.params?.[k] ?? def;
+    if (kind.startsWith("select:")) return `<label>${label}<select name="p_${k}">${kind.slice(7).split(",").map((o) => { const [ov, ol] = o.split("="); return `<option value="${ov}" ${String(v) === ov ? "selected" : ""}>${ol}</option>`; }).join("")}</select></label>`;
+    return `<label>${label}<input name="p_${k}" type="${kind}" value="${hubE(v)}" ${kind === "number" ? 'step="any"' : 'maxlength="140"'}></label>`;
+  };
+  return `<form id="hub-rule-form" class="os-form nb-form" data-rule="${hubE(x.id)}">
+    <label class="wide">Nome<input name="name" maxlength="60" value="${hubE(x.name || t.label)}" required></label>
+    <label class="wide">Quando avvisarmi<select name="type" data-hub-type>${Object.entries(HUB_TYPES).map(([k, v]) => `<option value="${k}" ${k === x.type ? "selected" : ""}>${v.label}</option>`).join("")}</select></label>
+    ${t.params.map(field).join("")}
+    <label>Ora<input name="time" type="time" value="${hubE(x.time || "09:00")}" required></label>
+    <fieldset class="wide hub-days"><legend>Giorni</legend>${HUB_DAYS.map(([d, l]) => `<label class="nb-chip pick"><input type="checkbox" name="day" value="${d}" ${(x.days || []).includes(d) ? "checked" : ""}>${l}</label>`).join("")}</fieldset>
+    <div class="form-actions wide">${x.id ? '<button type="button" class="danger" data-hub-delete>Elimina</button>' : ""}<button type="button" data-hub-cancel>Annulla</button><button class="save" type="submit">Salva avviso</button></div>
+  </form>`;
+}
+function renderAlerts() {
+  const root = document.getElementById("alerts");
+  if (!root) return;
+  if (!hub.alerts && !hub.busy) { hubLoad(); root.innerHTML = `<div class="adm-grid"><p class="empty">Caricamento degli avvisi…</p></div>`; return; }
+  const doc = hub.alerts?.doc || hubDefaults(), p = doc.prayer;
+  const rules = doc.rules || [];
+  root.innerHTML = `<div class="adm-grid hub-alerts">
+    ${hub.error ? `<div class="errorbox adm-wide">${hubE(hub.error)}</div>` : ""}${hub.msg ? `<p class="hint adm-wide" role="status">${hubE(hub.msg)}</p>` : ""}
+    <section class="card pad adm-wide"><div class="card-title"><h2>I tuoi avvisi</h2><button class="save" data-hub-new>+ Nuovo avviso</button></div>
+      ${hub.editing !== null ? hubRuleForm(rules.find((r) => r.id === hub.editing) || null) : ""}
+      ${rules.length ? `<div class="hub-rules">${rules.map((r) => `<div class="hub-rule"><button class="hub-switch" role="switch" aria-checked="${r.enabled !== false}" data-hub-toggle="${hubE(r.id)}" aria-label="${r.enabled !== false ? "Spegni" : "Accendi"} ${hubE(r.name)}"><i></i></button><button class="hub-rule-main" data-hub-edit="${hubE(r.id)}"><b>${hubE(r.name)}</b><small>${hubE(hubRuleText(r))}</small></button></div>`).join("")}</div>` : `<p class="empty">Nessun avviso. Crea il primo: scegli cosa controllare, l'ora e i giorni.</p>`}
+    </section>
+    <section class="card pad"><div class="card-title"><h2>Preghiera</h2><button class="hub-switch" role="switch" aria-checked="${!!p.enabled}" data-hub-prayer-toggle aria-label="Notifiche della preghiera"><i></i></button></div>
+      <label class="hub-row">Avvisami<select data-hub-prayer-before>${[0, 5, 10, 15, 20, 30].map((m) => `<option value="${m}" ${Number(p.before) === m ? "selected" : ""}>${m ? m + " minuti prima" : "all'orario"}</option>`).join("")}</select></label>
+      <div class="hub-prayers">${HUB_PRAYERS.map(([k, l]) => `<label class="hub-check"><input type="checkbox" data-hub-prayer="${k}" ${p.prayers?.[k] ? "checked" : ""} ${p.enabled ? "" : "disabled"}>${l}</label>`).join("")}</div>
+      <p class="hint">Orari calcolati per Empoli come nella Dashboard.</p>
+    </section>
+    <section class="card pad"><div class="card-title"><h2>Limiti</h2></div>
+      <label class="hub-row">Silenzio dalle<input type="time" data-hub-quiet="from" value="${hubE(doc.quiet?.from || "22:00")}"></label>
+      <label class="hub-row">alle<input type="time" data-hub-quiet="to" value="${hubE(doc.quiet?.to || "07:00")}"></label>
+      <label class="hub-row">Al massimo al giorno<input type="number" min="1" max="20" data-hub-max value="${Number(doc.maxPerDay) || 6}"></label>
+      <p class="hint">Le preghiere non rispettano il silenzio: arrivano sempre se accese.</p>
+    </section>
+    <section class="card pad adm-wide"><div class="card-title"><h2>Ultimi avvisi sull'iPhone</h2><button data-hub-reload>Aggiorna</button></div>
+      ${(hub.log || []).length ? `<div class="hub-log">${hub.log.map((x) => `<div class="kv"><span>${hubE(x.title)}<small>${hubE(x.body)}</small></span><strong>${hubE(new Date(x.at).toLocaleString("it-IT", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }))}</strong></div>`).join("")}</div>` : `<p class="empty">Ancora nessun avviso mostrato.</p>`}
+    </section>
+  </div>`;
+}
+async function hubSaveAlerts(mutate) {
+  const doc = JSON.parse(JSON.stringify(hub.alerts?.doc || hubDefaults()));
+  mutate(doc);
+  hub.alerts = { ...(hub.alerts || {}), doc };
+  renderAlerts();
+  await hubSave("alerts", doc);
+  renderAlerts();
+}
+document.addEventListener("click", (e) => {
+  const t = e.target; if (!t.closest) return;
+  if (t.closest("[data-hub-copy]")) { const area = document.getElementById("hub-ai-prompt"); const done = (m) => { const s = document.querySelector("[data-hub-copied]"); if (s) s.textContent = m; }; navigator.clipboard?.writeText(area.value).then(() => done("Copiato."), () => { area.select(); done("Selezionato: premi Ctrl+C."); }); return; }
+  if (t.closest("[data-hub-new]")) { hub.editing = ""; renderAlerts(); return; }
+  if (t.closest("[data-hub-cancel]")) { hub.editing = null; renderAlerts(); return; }
+  if (t.closest("[data-hub-reload]")) { hub.alerts = null; hubLoad(true); return; }
+  const edit = t.closest("[data-hub-edit]"); if (edit) { hub.editing = edit.dataset.hubEdit; renderAlerts(); return; }
+  const tog = t.closest("[data-hub-toggle]"); if (tog) { const id = tog.dataset.hubToggle; hubSaveAlerts((d) => { const r = d.rules.find((x) => x.id === id); if (r) r.enabled = r.enabled === false; }); return; }
+  if (t.closest("[data-hub-prayer-toggle]")) { hubSaveAlerts((d) => { d.prayer.enabled = !d.prayer.enabled; }); return; }
+  if (t.closest("[data-hub-delete]")) { const id = t.closest("form").dataset.rule; if (!confirm("Eliminare questo avviso?")) return; hub.editing = null; hubSaveAlerts((d) => { d.rules = d.rules.filter((x) => x.id !== id); }); return; }
+});
+document.addEventListener("change", (e) => {
+  const t = e.target;
+  if (t.matches && t.matches("[data-hub-type]")) { const form = t.closest("form"); const id = form.dataset.rule; const rules = hub.alerts?.doc?.rules || []; const base = rules.find((r) => r.id === id) || {}; const host = form.parentElement; const tmp = document.createElement("div"); tmp.innerHTML = hubRuleForm({ ...base, id, name: HUB_TYPES[t.value].label, type: t.value, params: {}, time: form.elements.time.value, days: [...form.querySelectorAll("[name=day]:checked")].map((x) => Number(x.value)) }); host.replaceChild(tmp.firstElementChild, form); return; }
+  if (t.matches && t.matches("[data-hub-prayer]")) { const k = t.dataset.hubPrayer, on = t.checked; hubSaveAlerts((d) => { d.prayer.prayers[k] = on; }); return; }
+  if (t.matches && t.matches("[data-hub-prayer-before]")) { const v = Number(t.value); hubSaveAlerts((d) => { d.prayer.before = v; }); return; }
+  if (t.matches && t.matches("[data-hub-quiet]")) { const k = t.dataset.hubQuiet, v = t.value; hubSaveAlerts((d) => { d.quiet = { ...(d.quiet || {}), [k]: v }; }); return; }
+  if (t.matches && t.matches("[data-hub-max]")) { const v = Math.max(1, Math.min(20, Number(t.value) || 6)); hubSaveAlerts((d) => { d.maxPerDay = v; }); return; }
+});
+document.addEventListener("submit", async (e) => {
+  if (e.target.id === "hub-rule-form") {
+    e.preventDefault();
+    const f = e.target, type = f.elements.type.value, params = {};
+    for (const [k, , kind] of HUB_TYPES[type].params) { const v = f.elements["p_" + k].value; params[k] = kind === "number" ? Number(v) : v; }
+    const days = [...f.querySelectorAll("[name=day]:checked")].map((x) => Number(x.value));
+    const rule = { id: f.dataset.rule || "rule-" + Date.now().toString(36), name: f.elements.name.value.trim() || HUB_TYPES[type].label, type, enabled: true, time: f.elements.time.value || "09:00", days: days.length ? days : [1, 2, 3, 4, 5, 6, 7], params };
+    hub.editing = null;
+    await hubSaveAlerts((d) => { const i = d.rules.findIndex((x) => x.id === rule.id); if (i >= 0) d.rules[i] = { ...d.rules[i], ...rule, enabled: d.rules[i].enabled }; else d.rules.push(rule); });
+  }
+  if (e.target.id === "hub-goals-form") {
+    e.preventDefault();
+    const f = e.target.elements, micro = {};
+    for (const [k] of (typeof NB_MICRO !== "undefined" ? NB_MICRO : [])) if (f["mg_" + k] && f["mg_" + k].value !== "") micro[k] = Number(f["mg_" + k].value);
+    const doc = { ...(hub.goals?.doc || {}), calorieMode: f.calorieMode.value, adjustment: Number(f.adjustment.value) || 0, fixedCalories: Number(f.fixedCalories.value) || 2450, proteinUnit: f.proteinUnit.value, protein: Number(f.protein.value) || 0, fatUnit: f.fatUnit.value, fat: Number(f.fat.value) || 0, fibre: f.fibre.value === "" ? null : Number(f.fibre.value), micro };
+    await hubSave("nutrition-goals", doc);
+    renderAdmin();
+  }
+});
+</script>
+
+</body>
 </html>
