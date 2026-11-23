@@ -1479,6 +1479,10 @@ html[data-theme="light"]{--shadow-94:0 5px 13px rgba(0,0,0,.08);--warn-94:#c99a0
 .nb-place small{font-size:13px;color:var(--ink-2)}
 .nb-place-actions{display:flex;gap:8px;flex-wrap:wrap}
 .nb-place-actions a{text-decoration:none}
+
+/* SITE-95: Analisi start month, typical-day calendar without weekday header. */
+.an93-start{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600}
+.an93-start select{min-height:34px;border-radius:999px;padding:0 13px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font:inherit}
 </style>
 </head>
   <body class="dashboard-mode">
@@ -1742,7 +1746,8 @@ async function fdLoad() {
 const FD_GOALS = "lifeos-nutrition-goals-94";
 function fdGoals() { try { const g = JSON.parse(localStorage.getItem(FD_GOALS) || "null"); return g && g.kcal > 0 ? g : null; } catch (e) { return null; } }
 function fdBand(v, goal) { if (!(v > 0)) return "none"; if (!(goal > 0)) return "within"; return v < goal * 0.9 ? "under" : v > goal * 1.1 ? "over" : "within"; }
-const FD_BAND_COLOR = { none: "var(--ink-3)", under: "var(--warn-94)", within: "var(--ok-94)", over: "var(--over-94)" };
+const FD_BAND_COLOR = { none: "var(--ink-3)", under: "var(--over-94)", within: "var(--ok-94)", over: "var(--over-94)" };
+const fdMacroColor = (v, goal) => !(goal > 0) || !(v > 0) ? "var(--ink-3)" : v >= goal ? "var(--ok-94)" : "var(--over-94)";
 function fdMonday(day) { const t = new Date(day + "T12:00:00Z"); const k = (t.getUTCDay() + 6) % 7; return fdShift(day, -k); }
 async function fdLoadWeek(from) {
   if (fd.weekLoading === from) return;
@@ -1758,7 +1763,7 @@ async function fdLoadWeek(from) {
 }
 /** Point at a share of the arc length on the quadratic curve used by the gauge. */
 function fdArcPoint(share) {
-  const P = (t) => { const u = 1 - t; return [u * u * 12 + 2 * u * t * 150 + t * t * 288, u * u * 50 + 2 * u * t * 2 + t * t * 50]; };
+  const P = (t) => { const u = 1 - t; return [u * u * 12 + 2 * u * t * 150 + t * t * 288, u * u * 62 + 2 * u * t * -22 + t * t * 62]; };
   const pts = []; let len = 0, prev = P(0);
   for (let i = 0; i <= 200; i++) { const q = P(i / 200); len += Math.hypot(q[0] - prev[0], q[1] - prev[1]); pts.push([len, q]); prev = q; }
   const target = Math.min(Math.max(share, 0), 1) * len;
@@ -1777,21 +1782,21 @@ function fdWeekCard() {
   const kcal = sum("kcal"), band = fdBand(kcal, g?.kcal);
   let gauge = "";
   if (g) {
-    const share = (v) => Math.min(Math.max(v / (g.kcal * 1.3), 0), 1);
+    const share = (v) => Math.min(Math.max(v / (g.kcal * 2), 0), 1);
     const lo = fdArcPoint(share(g.kcal * 0.9)), hi = fdArcPoint(share(g.kcal * 1.1)), k = fdArcPoint(share(kcal));
     const dash = Math.round(share(kcal) * 1000);
-    gauge = `<svg class="fw-gauge" viewBox="0 0 300 66" aria-label="Range consigliato da ${fdNum(g.kcal * 0.9)} a ${fdNum(g.kcal * 1.1)} kcal">
-      <path d="M12 50 Q150 2 288 50" fill="none" stroke="var(--track-94)" stroke-width="6" stroke-linecap="round"/>
-      ${kcal > 0 ? `<path d="M12 50 Q150 2 288 50" fill="none" stroke="${FD_BAND_COLOR[band]}" stroke-width="6" stroke-linecap="round" pathLength="1000" stroke-dasharray="${dash} 1000"/>` : ""}
+    gauge = `<svg class="fw-gauge" viewBox="0 0 300 78" aria-label="Range consigliato da ${fdNum(g.kcal * 0.9)} a ${fdNum(g.kcal * 1.1)} kcal">
+      <path d="M12 62 Q150 -22 288 62" fill="none" stroke="var(--track-94)" stroke-width="6" stroke-linecap="round"/>
+      ${kcal > 0 ? `<path d="M12 62 Q150 -22 288 62" fill="none" stroke="${FD_BAND_COLOR[band]}" stroke-width="6" stroke-linecap="round" pathLength="1000" stroke-dasharray="${dash} 1000"/>` : ""}
       <rect x="${(lo[0] - 3.5).toFixed(1)}" y="${(lo[1] - 9).toFixed(1)}" width="7" height="18" rx="3.5" fill="var(--ink)" stroke="var(--surface)" stroke-width="2"/>
       <rect x="${(hi[0] - 3.5).toFixed(1)}" y="${(hi[1] - 9).toFixed(1)}" width="7" height="18" rx="3.5" fill="var(--tick-94)" stroke="var(--surface)" stroke-width="2"/>
-      ${kcal > 0 ? `<g transform="translate(${k[0].toFixed(1)} ${k[1].toFixed(1)})"><circle r="10" fill="${FD_BAND_COLOR[band]}" stroke="var(--surface)" stroke-width="2"/>${band === "within" ? '<path d="M-4 0 L-1 3 L4 -3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>' : ""}</g>` : ""}
-      <text x="${lo[0].toFixed(1)}" y="65" text-anchor="middle">${fdNum(g.kcal * 0.9)}</text><text x="${hi[0].toFixed(1)}" y="65" text-anchor="middle">${fdNum(g.kcal * 1.1)}</text>
+      ${kcal > 0 ? `<g transform="translate(${k[0].toFixed(1)} ${k[1].toFixed(1)})"><circle r="10" fill="${FD_BAND_COLOR[band]}" stroke="var(--surface)" stroke-width="2"/>${band === "within" ? '<path d="M-4 0 L-1 3 L4 -3" fill="none" stroke="var(--surface)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>' : ""}</g>` : ""}
+      <text x="${lo[0].toFixed(1)}" y="77" text-anchor="middle">${fdNum(g.kcal * 0.9)}</text><text x="${hi[0].toFixed(1)}" y="77" text-anchor="middle">${fdNum(g.kcal * 1.1)}</text>
     </svg>`;
   }
   const macro = (label, key, goal) => {
     const v = sum(key), b = fdBand(v, goal), w = goal > 0 ? Math.min(100, (v / goal) * 100) : 0;
-    return `<div class="fw-macro"><small>${label}</small><span><b>${fdNum(v)}</b>${goal > 0 ? ` <em>/ ${fdNum(goal)} g</em>` : " <em>g</em>"}</span><i class="fw-bar"><i style="width:${w}%;background:${goal > 0 ? FD_BAND_COLOR[b] : "var(--ink-3)"}"></i></i></div>`;
+    return `<div class="fw-macro"><small>${label}</small><span><b>${fdNum(v)}</b>${goal > 0 ? ` <em>/ ${fdNum(goal)} g</em>` : " <em>g</em>"}</span><i class="fw-bar"><i style="width:${w}%;background:${fdMacroColor(v, goal)}"></i></i></div>`;
   };
   const title = fd.day === today ? "Oggi" : new Date(fd.day + "T12:00:00Z").toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "short" });
   return `<section class="fw-wrap" aria-label="Settimana e calorie">
@@ -6716,7 +6721,28 @@ document.addEventListener("keydown", (e) => {
     });
     document.addEventListener("input", (e) => { const r = e.target.closest("[data-fc-range]"); if (r) { const num = document.querySelector("[data-fc-num]"); if (num) num.value = r.value; } });
     /* ---- Analisi 93 (parità con l'app): Ritmo sulla norma, Quanto dura il fondo, Giorno per giorno ---- */
-    const an93 = { monthly: Number(localStorage.getItem("lifeos-fund-monthly-93")) || 0, day: 0 };
+    const an93 = { monthly: Number(localStorage.getItem("lifeos-fund-monthly-93")) || 0, day: 0, start: (() => { try { return localStorage.getItem("lifeos-analysis-start") || "2026-07"; } catch (e) { return "2026-07"; } })(), byMonth: null, loadingKey: "" };
+    const an93Months = (from, to) => { const out = []; let [y, m] = from.split("-").map(Number); while (out.length < 60) { const k = `${y}-${String(m).padStart(2, "0")}`; if (k > to) break; out.push(k); m++; if (m > 12) { m = 1; y++; } } return out; };
+    async function an93LoadDaily(d) {
+      const key = an93.start + "|" + todayIso().slice(0, 7);
+      if (an93.loadingKey === key) return;
+      an93.loadingKey = key;
+      const result = {};
+      for (const month of an93Months(an93.start, todayIso().slice(0, 7))) {
+        try {
+          const data = month === d.key ? d : await workerRequest("getFinanceData", [Number(month.slice(0, 4)), Number(month.slice(5, 7))]);
+          const by = {};
+          for (const t of data.transactions || []) if (String(t.date || "").startsWith(month) && t.amount < 0 && t.type !== "Entrata") { const k = Number(t.date.slice(8, 10)); by[k] = (by[k] || 0) - t.amount; }
+          result[month] = by;
+        } catch (e) {}
+      }
+      an93.byMonth = result;
+      an93Refresh();
+    }
+    function an93StartPicker(d) {
+      const months = [...new Set((d.yearly || []).filter((r) => r.hasRecords || Number(r.spent) > 0).map((r) => r.month).concat([todayIso().slice(0, 7)]))].sort();
+      return `<label class="an93-start">Da <select data-an93-start>${months.map((m) => `<option value="${m}" ${m === an93.start ? "selected" : ""}>${an93MonthName(m)} ${m.slice(0, 4)}</option>`).join("")}</select></label>`;
+    }
     const an93Hide = () => state.assetsVisible === false;
     const an93Eur = (v) => an93Hide() ? "•••• €" : exactEuro(v);
     const an93Pct = (v) => { const p = Math.round(v * 100); return (p > 0 ? "+" : p < 0 ? "−" : "") + Math.abs(p) + "%"; };
@@ -6724,7 +6750,7 @@ document.addEventListener("keydown", (e) => {
     /** Mesi completi con dati prima del mese corrente (stessa regola dell'app). */
     function an93Flows(d) {
       const now = todayIso().slice(0, 7);
-      return (d.yearly || []).filter((r) => r.month < now && (r.hasRecords || Number(r.spent) > 0 || Number(r.income) > 0)).sort((a, b) => a.month.localeCompare(b.month)).map((r) => ({ month: r.month, income: Number(r.income) || 0, spent: Number(r.spent) || 0 }));
+      return (d.yearly || []).filter((r) => r.month < now && r.month >= an93.start && (r.hasRecords || Number(r.spent) > 0 || Number(r.income) > 0)).sort((a, b) => a.month.localeCompare(b.month)).map((r) => ({ month: r.month, income: Number(r.income) || 0, spent: Number(r.spent) || 0 }));
     }
     function an93Rhythm(d) {
       const flows = an93Flows(d);
@@ -6732,7 +6758,7 @@ document.addEventListener("keydown", (e) => {
       const norm = flows.reduce((n, f) => n + f.spent, 0) / flows.length;
       const pace = (k) => flows.length >= k && norm > 0 ? flows.slice(-k).reduce((n, f) => n + f.spent, 0) / k / norm - 1 : null;
       const bar = (title, v) => v === null ? "" : `<div class="an93-pace"><span>${title}</span><div class="an93-track" role="img" aria-label="${title}: ${an93Pct(v)} rispetto alla norma"><i class="${v > 0 ? "up" : "down"}" style="${v > 0 ? "left:50%" : "right:50%"};width:${(Math.min(1, Math.abs(v) / 0.3) * 50).toFixed(1)}%"></i><b></b></div><strong class="${v > 0 ? "neg" : "pos"}">${an93Pct(v)}</strong></div>`;
-      return card(`Ritmo <small class="an93-sub">da ${an93MonthName(flows[0].month)}</small>`, `<div class="an93-norm"><strong>${an93Eur(norm)}</strong><span>la tua norma al mese</span></div>${bar("Ultimo mese", pace(1))}${bar("Ultimi 3 mesi", pace(3))}`);
+      return card(`Ritmo`, `<div class="an93-norm"><strong>${an93Eur(norm)}</strong><span>la tua norma al mese</span></div>${bar("Ultimo mese", pace(1))}${bar("Ultimi 3 mesi", pace(3))}`);
     }
     function an93Fund(d) {
       const fund = Number(d.planning?.now);
@@ -6744,15 +6770,24 @@ document.addEventListener("keydown", (e) => {
       const months = fund / monthly;
       return card(`Quanto dura il fondo <small class="an93-sub">fondo ${an93Eur(fund)}</small>`, `<div class="an-stats an93-two"><div class="an-stat"><small>Con stipendio</small><strong>${surplus === null || surplus >= 0 ? "Stabile" : "In calo"}</strong><span>${surplus === null ? "" : (an93Hide() ? "••••" : exactEuro(Math.abs(surplus))) + (surplus >= 0 ? " di eccedenza al mese" : " in meno al mese")}</span></div><div class="an-stat"><small>Senza stipendio</small><strong>${months.toFixed(1).replace(".", ",")} mesi</strong><span>a ${Math.round(monthly)} € al mese</span></div></div><div class="an93-step"><span>Spesa al mese senza stipendio</span><button type="button" data-an93-fund="-50" aria-label="Meno 50 euro" ${monthly <= 50 ? "disabled" : ""}>−</button><b>${Math.round(monthly)} €</b><button type="button" data-an93-fund="50" aria-label="Più 50 euro" ${monthly >= 5000 ? "disabled" : ""}>+</button></div>`);
     }
+    /** Giorno per giorno: cosa spendi di solito in ogni giorno del mese, sulla media dei mesi scelti. */
     function an93Daily(d) {
-      const month = selectedMonth(), [y, m] = month.split("-").map(Number), count = new Date(Date.UTC(y, m, 0)).getUTCDate();
-      const offset = (new Date(Date.UTC(y, m - 1, 1)).getUTCDay() + 6) % 7, by = {};
-      for (const t of d.transactions || []) if (String(t.date || "").startsWith(month) && t.amount < 0 && t.type !== "Entrata") { const k = Number(t.date.slice(8, 10)); by[k] = (by[k] || 0) - t.amount; }
-      const top = Math.max(...Object.values(by), 0.01), spentDays = Object.values(by).filter((v) => v > 0), avg = spentDays.length ? spentDays.reduce((n, v) => n + v, 0) / count : 0;
-      const today = todayIso(), day = an93.day || (today.startsWith(month) ? Number(today.slice(8, 10)) : 1);
-      const cells = [...Array(offset).keys()].map(() => `<span class="an93-pad"></span>`).join("") + [...Array(count).keys()].map((i) => { const n = i + 1, v = by[n] || 0; return `<button type="button" class="an93-day${n === day ? " on" : ""}" data-an93-day="${n}" style="--a:${v > 0 ? (0.18 + 0.62 * v / top).toFixed(2) : 0}" aria-pressed="${n === day}" aria-label="${n}${an93Hide() ? "" : ", " + exactEuro(v)}">${n}</button>`; }).join("");
-      return card(`Giorno per giorno <small class="an93-sub">${an93MonthName(month)}</small>`, `<div class="an93-cal">${["L", "M", "M", "G", "V", "S", "D"].map((x) => `<span class="an93-wd" aria-hidden="true">${x}</span>`).join("")}${cells}</div><div class="kv an93-sel"><span>Il ${day} del mese</span><strong>${an93Eur(by[day] || 0)}</strong></div>${an93Hide() ? "" : `<p class="hint">in media ${exactEuro(avg)} al giorno nel mese</p>`}`);
+      if (!an93.byMonth) { an93LoadDaily(d); return card("Giorno per giorno", `<p class="empty">Caricamento dei mesi…</p>`); }
+      const months = Object.keys(an93.byMonth), totals = {}, counts = {};
+      for (const m of months) { const [y, mm] = m.split("-").map(Number), len = new Date(Date.UTC(y, mm, 0)).getUTCDate(); for (let n = 1; n <= len; n++) { totals[n] = (totals[n] || 0) + (an93.byMonth[m][n] || 0); counts[n] = (counts[n] || 0) + 1; } }
+      const by = {}; for (const n of Object.keys(totals)) by[n] = totals[n] / Math.max(1, counts[n]);
+      const top = Math.max(...Object.values(by), 0.01), monthTotal = Object.values(by).reduce((n, v) => n + v, 0);
+      const day = an93.day || Number(todayIso().slice(8, 10));
+      const cells = [...Array(31).keys()].map((i) => { const n = i + 1, v = by[n] || 0; return `<button type="button" class="an93-day${n === day ? " on" : ""}" data-an93-day="${n}" style="--a:${v > 0 ? (0.18 + 0.62 * v / top).toFixed(2) : 0}" aria-pressed="${n === day}" aria-label="Giorno ${n}${an93Hide() ? "" : ", di solito " + exactEuro(v)}">${n}</button>`; }).join("");
+      return card(`Giorno per giorno <small class="an93-sub">${months.length === 1 ? "1 mese" : months.length + " mesi"}</small>`, `<div class="an93-cal">${cells}</div><div class="kv an93-sel"><span>Il ${day} del mese</span><strong>${an93Eur(by[day] || 0)}</strong></div>${an93Hide() ? "" : `<p class="hint">di solito, sulla media dei mesi scelti · in un mese tipo ${exactEuro(monthTotal)}</p>`}`);
     }
+    document.addEventListener("change", (e) => {
+      const sel = e.target.closest && e.target.closest("[data-an93-start]");
+      if (!sel) return;
+      an93.start = sel.value; an93.byMonth = null; an93.loadingKey = "";
+      try { localStorage.setItem("lifeos-analysis-start", an93.start); } catch (err) {}
+      an93Refresh();
+    });
     function an93Refresh() { if (state.view === "analysis" && state.data && typeof render === "function") render(); }
     document.addEventListener("click", (e) => {
       const f = e.target.closest("[data-an93-fund]"), dd = e.target.closest("[data-an93-day]");
@@ -6775,7 +6810,7 @@ document.addEventListener("keydown", (e) => {
       let salYear = String(state.year), salRows = salAll.filter((r) => r.month.startsWith(salYear + "-")), salFallback = false;
       if (!salRows.length) { const prev = [...new Set(salAll.map((r) => r.month.slice(0, 4)))].filter((y) => y < salYear).pop(); if (prev) { salYear = prev; salRows = salAll.filter((r) => r.month.startsWith(prev + "-")); salFallback = true; } }
       const salSum = (f) => salRows.reduce((n, r) => n + (Number(r[f]) || 0), 0), salAvgBase = salRows.length ? salSum("base") / salRows.length : 0, salExtra = salSum("additional"), salAvgAll = salRows.length ? (salSum("base") + salExtra) / salRows.length : 0;
-      const html = `<div class="budget-flow">${an93Rhythm(d)}${an93Fund(d)}${card("Spese per categoria", `<div class="chart-range" role="group" aria-label="Periodo categorie">${[3, 6, 12].map((n) => `<button data-category-period="${n}" class="${n === range ? "active" : ""}" aria-pressed="${n === range}">${n} mesi</button>`).join("")}</div><p class="hint" data-category-interval></p><div data-period-categories role="status">Caricamento categorie\u2026</div><button data-refresh-categories>Aggiorna categorie</button>`)}${card("Previsione del patrimonio", fcPanel(d))}${card("Patrimonio", `<p class="hint">Dal mese di inizio statistica fino a ${safe(titleMonth(state.year, state.month))}</p>${chart(wealthRows, "Patrimonio", false, true)}`)}${card("Stipendi per competenza", `<p class="hint">Anno solare ${safe(salYear)}${salFallback ? " (ultimo anno con dati)" : ""}</p>${salRows.length ? `<div class="an-stats">${[["Media senza 13ª/14ª", salAvgBase, "stipendio base"], ["Media con 13ª/14ª", salAvgAll, `su ${salRows.length} ${salRows.length === 1 ? "mese" : "mesi"}`], ["13ª e 14ª incassate", salExtra, "totale aggiuntive"], ["Ultimo stipendio", (salRows.at(-1).base || 0) + (salRows.at(-1).additional || 0), safe(shortMonth(salRows.at(-1).month))]].map(([l, v, sub]) => `<div class="an-stat"><small>${l}</small><strong>${state.assetsVisible ? exactEuro(v) : "\u2022\u2022\u2022\u2022"}</strong><span>${sub}</span></div>`).join("")}</div>` : ""}${chart(salRows.map((r) => ({ label: shortMonth(r.month), value: (r.base || 0) + (r.additional || 0), base: r.base || 0, additional: r.additional || 0 })), "Stipendi per competenza", true, false, true)}${salRows.length ? `<details><summary>Base e aggiuntive</summary>${salRows.map((r) => `<div class="kv"><span>${safe(shortMonth(r.month))}</span><strong>${state.assetsVisible ? `Base ${exactEuro(r.base || 0)} \xB7 Aggiuntive ${exactEuro(r.additional || 0)}` : "\u2022\u2022\u2022\u2022"}</strong></div>`).join("")}</details>` : ""}`)}${an93Daily(d)}</div>`;
+      const html = `<div class="budget-flow">${an93StartPicker(d)}${an93Rhythm(d)}${an93Fund(d)}${card("Spese per categoria", `<div class="chart-range" role="group" aria-label="Periodo categorie">${[3, 6, 12].map((n) => `<button data-category-period="${n}" class="${n === range ? "active" : ""}" aria-pressed="${n === range}">${n} mesi</button>`).join("")}</div><p class="hint" data-category-interval></p><div data-period-categories role="status">Caricamento categorie\u2026</div><button data-refresh-categories>Aggiorna categorie</button>`)}${card("Previsione del patrimonio", fcPanel(d))}${card("Patrimonio", `<p class="hint">Dal mese di inizio statistica fino a ${safe(titleMonth(state.year, state.month))}</p>${chart(wealthRows, "Patrimonio", false, true)}`)}${card("Stipendi per competenza", `<p class="hint">Anno solare ${safe(salYear)}${salFallback ? " (ultimo anno con dati)" : ""}</p>${salRows.length ? `<div class="an-stats">${[["Media senza 13ª/14ª", salAvgBase, "stipendio base"], ["Media con 13ª/14ª", salAvgAll, `su ${salRows.length} ${salRows.length === 1 ? "mese" : "mesi"}`], ["13ª e 14ª incassate", salExtra, "totale aggiuntive"], ["Ultimo stipendio", (salRows.at(-1).base || 0) + (salRows.at(-1).additional || 0), safe(shortMonth(salRows.at(-1).month))]].map(([l, v, sub]) => `<div class="an-stat"><small>${l}</small><strong>${state.assetsVisible ? exactEuro(v) : "\u2022\u2022\u2022\u2022"}</strong><span>${sub}</span></div>`).join("")}</div>` : ""}${chart(salRows.map((r) => ({ label: shortMonth(r.month), value: (r.base || 0) + (r.additional || 0), base: r.base || 0, additional: r.additional || 0 })), "Stipendi per competenza", true, false, true)}${salRows.length ? `<details><summary>Base e aggiuntive</summary>${salRows.map((r) => `<div class="kv"><span>${safe(shortMonth(r.month))}</span><strong>${state.assetsVisible ? `Base ${exactEuro(r.base || 0)} \xB7 Aggiuntive ${exactEuro(r.additional || 0)}` : "\u2022\u2022\u2022\u2022"}</strong></div>`).join("")}</details>` : ""}`)}${an93Daily(d)}</div>`;
       if (Array.isArray(d.categories)) cache.set(month, d.categories);
       queueMicrotask(() => { fcLoad(); loadCategories(d); });
       return html;
