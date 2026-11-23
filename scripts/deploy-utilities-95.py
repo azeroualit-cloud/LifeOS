@@ -9,6 +9,9 @@ import hashlib
 import importlib.util
 import subprocess
 
+split_spec = importlib.util.spec_from_file_location('split95', Path(__file__).with_name('deploy-split-95.py'))
+split = importlib.util.module_from_spec(split_spec)
+split_spec.loader.exec_module(split)
 spec = importlib.util.spec_from_file_location('deployment', Path(__file__).with_name('deploy-unified-activities.py'))
 deployment = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(deployment)
@@ -30,10 +33,44 @@ def payload_at(commit):
     return strip(subprocess.check_output(['git', 'show', commit + ':backend/utilities/competence.mjs'], text=True, encoding='utf-8'))
 
 
+FUNCTION = 'function utilityCompetenceContext('
+
+
+def function_text(text):
+    start = text.index(FUNCTION)
+    return text[start:split.function_end(text, start)]
+
+
+def compact(text):
+    return split.compact(text)
+
+
+def bundled(source):
+    """Bundled live Worker (no marker): replace only utilityCompetenceContext, found by name and braces."""
+    if source.count(FUNCTION) != 1:
+        print('COMPETENCE_FUNCTION %d' % source.count(FUNCTION))
+        raise RuntimeError('Modulo competenze non riconosciuto; nessuna scrittura.')
+    a = source.index(FUNCTION)
+    b = split.function_end(source, a)
+    current, replacement = source[a:b], function_text(payload())
+    if current == replacement:
+        return source
+    live = compact(current)
+    needles = ("utilityShares(Math.round(-Number(row.amount)*100),period)", "add(payment.movementId,payment.utilityPeriod)",
+               "add(command.pending?confirmedPendingRow(command,id):command.movementId,command.utilityPeriod)")
+    found = {n: n in live for n in needles}
+    print('COMPETENCE_CHECK ' + ' '.join('%s=%d' % (n.split('(')[0][:20], int(v)) for n, v in found.items()) + ' savings=%d' % live.count('utilitySavingsCents'))
+    if not all(found.values()):
+        raise RuntimeError('Versione competenze differente; nessuna scrittura.')
+    return source[:a] + replacement + source[b:]
+
+
 def transform(source):
     wanted = MARKER + payload()
     if source.endswith(wanted):
         return source
+    if source.count(MARKER) == 0:
+        return bundled(source)
     if source.count(MARKER) != 1:
         print('COMPETENCE_MARKERS %d' % source.count(MARKER))
         raise RuntimeError('Modulo competenze non riconosciuto; nessuna scrittura.')

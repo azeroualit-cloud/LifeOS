@@ -17,4 +17,10 @@ except RuntimeError:
     pass
 else:
     raise AssertionError('An unknown live competence module must be refused')
+# Bundled live Worker without the marker: only utilityCompetenceContext is replaced.
+old_fn = u95.function_text(u95.payload_at('7a52c33'))
+bundled = head + chr(10) + old_fn.replace("'", '"') + chr(10)
+result = u95.transform(bundled)
+assert u95.function_text(u95.payload()) in result and old_fn.replace("'", '"') not in result
+assert u95.transform(result) == result
 print('OK')
