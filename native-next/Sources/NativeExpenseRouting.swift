@@ -17,6 +17,11 @@ struct NativeExpenseRouteSection: View {
     @State private var splitSupported = false
     @State private var planSplitSupported = false
     @State private var billSavingsSupported = false
+    private var billSavingsPart: Int {
+        guard offersBillSplit || (bill.enabled && offersPlanSplit) else { return 0 }
+        let limit = chosen == nil ? amount - 1 : min(amount - 1, uncovered)
+        return min(max(0, split.wrappedValue.savings), max(0, limit))
+    }
     private var offersBillSplit: Bool { billSavingsSupported && bill.enabled && movementID == 0 && amount > 1 }
     private var uncovered: Int { chosen.map { NativeExpenseRouting.split(amount: amount, plan: $0).savings } ?? 0 }
     private var offersPlanSplit: Bool { (bill.enabled ? billSavingsSupported : planSplitSupported) && movementID == 0 && chosen != nil && chosen?.flag("retained") == false && uncovered > 0 }
@@ -78,7 +83,8 @@ struct NativeExpenseRouteSection: View {
                 }
             }
             if bill.enabled { Section("Periodo di competenza") {
-                NativeUtilityPeriodFields(period: $bill, amountCents: amount)
+                // The competence months carry the bill minus the part kept on savings (same as the server).
+                NativeUtilityPeriodFields(period: $bill, amountCents: max(1, amount - billSavingsPart))
             } }
         }.task(id: query) { await load() }
             .onChange(of: selected) { _, value in
