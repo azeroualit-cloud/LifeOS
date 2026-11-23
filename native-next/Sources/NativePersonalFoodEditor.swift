@@ -111,10 +111,10 @@ struct NativePersonalFoodEditor: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button("Annulla") { dismiss() }
+                NativeSheetCancel { dismiss() }
             }
             ToolbarItem(placement: .confirmationAction) {
-                Button("Salva") { if let food { save(food) } }
+                NativeSheetConfirm { if let food { save(food) } }
                     .disabled(food == nil)
                     .accessibilityIdentifier("personal-food-save")
             }

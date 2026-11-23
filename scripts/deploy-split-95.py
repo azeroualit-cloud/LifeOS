@@ -20,6 +20,7 @@ CALL = re.compile(r'\b(?:const|let|var)\s+expenseRouting\s*=\s*createExpenseRout
 
 
 V95_COMMIT = 'd0e5a62'
+V95_COMMITS = ('d0e5a62', '7e7a5b3')  # first split (f9155ce) and plan split (7e7a5b3)
 
 
 def routing_at(commit):
@@ -134,7 +135,7 @@ def transform(source):
         return source
     if 'splitDestination' in current:
         # Build 95 first version (deployed at f9155ce): replaced only when byte for byte that version.
-        if current != routing_at(V95_COMMIT):
+        if current not in [routing_at(c) for c in V95_COMMITS]:
             raise RuntimeError('Ripartizione gia presente ma diversa; nessuna scrittura.')
         return source[:a] + replacement + source[b:]
     live = compact(current)

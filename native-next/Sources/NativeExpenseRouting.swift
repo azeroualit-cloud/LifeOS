@@ -16,8 +16,10 @@ struct NativeExpenseRouteSection: View {
     @State private var plans: [Record] = []
     @State private var splitSupported = false
     @State private var planSplitSupported = false
+    @State private var billSavingsSupported = false
+    private var offersBillSplit: Bool { billSavingsSupported && bill.enabled && movementID == 0 && amount > 1 }
     private var uncovered: Int { chosen.map { NativeExpenseRouting.split(amount: amount, plan: $0).savings } ?? 0 }
-    private var offersPlanSplit: Bool { planSplitSupported && movementID == 0 && chosen != nil && chosen?.flag("retained") == false && uncovered > 0 }
+    private var offersPlanSplit: Bool { (bill.enabled ? billSavingsSupported : planSplitSupported) && movementID == 0 && chosen != nil && chosen?.flag("retained") == false && uncovered > 0 }
     private var offersSplit: Bool { splitSupported && movementID == 0 && !bill.enabled && amount > 1 }
     @State private var loading = false
     @State private var issue: String?
@@ -51,7 +53,8 @@ struct NativeExpenseRouteSection: View {
                         LabeledContent("Dal fondo " + chosen.text("name"), value: (Double(split.fund) / 100).euro)
                         if offersPlanSplit {
                             // REFERENCE-GAPS-95 «Bolletta con piano»: the uncovered part between savings and budget months.
-                            NativeExpenseSplitRows(split: self.split, amount: split.savings, day: day, allowsAll: true, savingsTitle: "Dagli altri risparmi")
+                            NativeExpenseSplitRows(split: self.split, amount: split.savings, day: day, allowsAll: true, savingsTitle: "Dagli altri risparmi",
+                                                   showsMonths: !bill.enabled, budgetTitle: bill.enabled ? "Sui mesi di competenza" : "Budget")
                         } else {
                             LabeledContent("Dagli altri risparmi", value: (Double(split.savings) / 100).euro).accessibilityIdentifier("expense-savings-preview")
                         }
@@ -60,6 +63,10 @@ struct NativeExpenseRouteSection: View {
                         LabeledContent("Dai risparmi", value: (Double(amount) / 100).euro).accessibilityIdentifier("expense-direct-savings-preview")
                     } else if selected == NativeExpenseRouting.ordinary {
                         if offersSplit { NativeExpenseSplitRows(split: split, amount: amount, day: day) }
+                        else if offersBillSplit {
+                            // FUNDING-BLOCK: a bill without a plan, savings part and the rest on its competence months.
+                            NativeExpenseSplitRows(split: split, amount: amount, day: day, showsMonths: false, budgetTitle: "Sui mesi di competenza")
+                        }
                         else { LabeledContent(bill.enabled ? "Pagamento bancario" : "Dal budget mensile", value: (Double(amount) / 100).euro).accessibilityIdentifier("expense-budget-preview") }
                     } else { Text("Scegli il piano").font(NativeDesign.metadata) }
                 }
@@ -123,6 +130,7 @@ struct NativeExpenseRouteSection: View {
                 savingsSupported = true
                 splitSupported = true
                 planSplitSupported = true
+                billSavingsSupported = true
             } else {
                 var payload: Record = ["category": .string(category), "date": .string(day), "amountCents": .int(max(1, amount))]
                 if movementID > 0 { payload["movementId"] = .int(movementID) }
@@ -140,6 +148,7 @@ struct NativeExpenseRouteSection: View {
                 savingsSupported = result.flag("savingsDestination")
                 splitSupported = result.flag("splitDestination")
                 planSplitSupported = result.flag("planSplitDestination")
+                billSavingsSupported = result.flag("billSavingsDestination")
             }
             try Task.checkCancellation()
             plans = rows
@@ -184,8 +193,8 @@ struct NativeExpenseDestinationEditor: View {
             if let issue { NativeInlineMessage(text: issue) }
         }.modifier(NativeListAppearance()).navigationTitle(bill.enabled ? "Bolletta" : "Destinazione").navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Chiudi") { dismiss() }.disabled(saving) }
-                ToolbarItem(placement: .confirmationAction) { Button(submitted ? "Riprova" : "Conferma") { Task { await save() } }.disabled(!ready || selected.isEmpty || saving).accessibilityIdentifier("expense-destination-confirm") }
+                ToolbarItem(placement: .cancellationAction) { NativeSheetCancel(title: "Chiudi") { dismiss() }.disabled(saving) }
+                ToolbarItem(placement: .confirmationAction) { NativeSheetConfirm(title: "Conferma", retry: submitted) { Task { await save() } }.disabled(!ready || selected.isEmpty || saving).accessibilityIdentifier("expense-destination-confirm") }
             }
             .onAppear { months = NativeExpenseRouting.coveredMonths(record); bill = NativeUtilityPeriodDraft(record: record); selected = record.text("financePlanId").isEmpty ? NativeExpenseRouting.ordinary : record.text("financePlanId") }
     }

@@ -577,8 +577,8 @@ private struct NativeBloomComposer: View {
             }
             .navigationTitle(initial.isEmpty ? "Nuova nota" : "Modifica nota")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Annulla") { dismiss() } }
-                ToolbarItem(placement: .confirmationAction) { Button("Salva") {
+                ToolbarItem(placement: .cancellationAction) { NativeSheetCancel { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) { NativeSheetConfirm {
                     var item = initial
                     if item.isEmpty { item = ["id": .string(UUID().uuidString), "kind": .string("text"), "urlString": .string(""), "capturedAt": .number(Date().timeIntervalSinceReferenceDate), "archived": .bool(false), "noteVersion": .int(1)] }
                     if !link.isEmpty {

@@ -53,4 +53,6 @@ for tampered in (previous.replace("savingsDestination: true", "savingsDestinatio
 # The first build 95 routing (live since f9155ce) is upgraded to the current one.
 v95_first = current.replace(new_fn, split.routing_at(split.V95_COMMIT), 1)
 assert v95_first != current and split.transform(v95_first) == current
+v95_plan = current.replace(new_fn, split.routing_at('7e7a5b3'), 1)
+assert v95_plan != current and split.transform(v95_plan) == current
 print('OK')

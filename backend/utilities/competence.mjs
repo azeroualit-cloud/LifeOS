@@ -30,12 +30,16 @@ export function utilityCompetenceContext(state, movements) {
   const rows = new Map(movements.map(r => [Number(r.source_row), r]));
   const imports = new Map(movements.filter(r => r.import_id).map(r => [r.import_id, r]));
   const bills = new Map();
-  const add = (id, period) => {
+  // FUNDING-BLOCK-2026-11-21 (build 95): part of a bill may come from savings; only the rest is split
+  // over the competence months, where it replaces the estimate.
+  const add = (id, period, savingsCents = 0) => {
     if (!period) return;
     const row = rows.get(Number(id));
     if (!row || row.movement_type !== 'Spesa' || row.status !== 'Eseguito' || Number(row.amount) >= 0) return;
     if (!['Trade Republic', 'Revolut'].includes(row.account)) return;
-    const shares = utilityShares(Math.round(-Number(row.amount) * 100), period);
+    const total = Math.round(-Number(row.amount) * 100);
+    const fromSavings = Math.min(Math.max(0, Math.round(Number(savingsCents) || 0)), total - 1);
+    const shares = utilityShares(total - fromSavings, period);
     if (bills.has(Number(id))) throw Error('La bolletta ha più periodi attivi: completa prima la riconciliazione.');
     bills.set(Number(id), { movementId: Number(id), category: row.category, period, shares });
   };
@@ -45,12 +49,12 @@ export function utilityCompetenceContext(state, movements) {
       && String(row.actual_date).slice(0, 10) === entry.date && (!entry.category || row.category === entry.category) ? row.source_row : null;
   };
   for (const [id, payment] of Object.entries(state?.payments || {})) {
-    if (['posted', 'deleting'].includes(payment.status)) add(payment.movementId, payment.utilityPeriod);
-    else if (payment.status === 'pending') add(confirmedPendingRow(payment, payment.requestId || id), payment.utilityPeriod);
+    if (['posted', 'deleting'].includes(payment.status)) add(payment.movementId, payment.utilityPeriod, payment.utilitySavingsCents);
+    else if (payment.status === 'pending') add(confirmedPendingRow(payment, payment.requestId || id), payment.utilityPeriod, payment.utilitySavingsCents);
   }
   for (const [id, command] of Object.entries(state?.expenseRoutingCommands || {})) {
     if (command.kind === 'ordinary' && !command.cancelled && command.active !== false)
-      add(command.pending ? confirmedPendingRow(command, id) : command.movementId, command.utilityPeriod);
+      add(command.pending ? confirmedPendingRow(command, id) : command.movementId, command.utilityPeriod, command.utilitySavingsCents);
   }
   return { version: 1, bills: [...bills.values()], profiles: Object.values(state?.plans || {}).filter(isUtilityCostFund) };
 }

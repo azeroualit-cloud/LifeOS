@@ -291,6 +291,7 @@ struct MovementEditor: View {
     @State private var months = 1
     @State private var treatment = "ordinary"
     @State private var split = NativeExpenseSplit()
+    @ScaledMetric(relativeTo: .largeTitle) private var amountHeroSize = NativeDesign.Layout.budgetAmount
     @State private var recovery = ""
     @State private var recoveryAmount = ""
     @State private var included = false
@@ -315,6 +316,22 @@ struct MovementEditor: View {
                     }.accessibilityIdentifier("movement-manage-plan-payment")
                 }
             }
+            // Cowork preview 93 «Nuova spesa»: the amount large and centred at the top, the description under it.
+            Section {
+                VStack(spacing: NativeDesign.Space.xs) {
+                    TextField("0,00 €", text: $amount)
+                        .font(NativeDesign.budgetValue(size: amountHeroSize)).monospacedDigit().multilineTextAlignment(.center)
+                        .minimumScaleFactor(0.5).lineLimit(1)
+                        .keyboardType(.decimalPad).focused($editingInput, equals: .amount).accessibilityIdentifier("movement-amount")
+                        .accessibilityLabel("Importo")
+                    TextField("es. Esselunga", text: $name).font(.subheadline).foregroundStyle(NativeDesign.secondary).multilineTextAlignment(.center)
+                        .focused($editingInput, equals: .name).accessibilityIdentifier("movement-name")
+                        .accessibilityLabel("Descrizione")
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, NativeDesign.Space.small)
+                .listRowBackground(Color.clear)
+            }.disabled(linkedPayment)
             Section {
                 Picker("Tipo", selection: Binding(get: { type }, set: { value in
                     type = value
@@ -323,13 +340,6 @@ struct MovementEditor: View {
                     if !choices.contains(category) { category = "Altro" }
                 })) {
                     ForEach(editing ? ["Spesa", "Entrata", "Rimborso", "Trasferimento", "Investimento", "Da verificare"] : ["Spesa", "Entrata", "Rimborso", "Trasferimento"], id: \.self) { Text($0) }
-                }
-                LabeledContent("Importo") {
-                    TextField("0,00 €", text: $amount).font(.title.weight(.bold)).monospacedDigit().multilineTextAlignment(.trailing)
-                        .keyboardType(.decimalPad).focused($editingInput, equals: .amount).accessibilityIdentifier("movement-amount")
-                }
-                LabeledContent("Descrizione") {
-                    TextField("es. Esselunga", text: $name).multilineTextAlignment(.trailing).focused($editingInput, equals: .name).accessibilityIdentifier("movement-name")
                 }
                 DatePicker("Data", selection: $date, in: ...Date(), displayedComponents: .date)
                 if editing { Picker("Conto", selection: $account) { ForEach(["Trade Republic", "Revolut", "IsyBank"], id: \.self) { Text($0) } } }
@@ -407,8 +417,8 @@ struct MovementEditor: View {
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) { Spacer(); NativeIconButton(symbol: "keyboard.chevron.compact.down", label: "Nascondi tastiera") { editingInput = nil }.accessibilityIdentifier("movement-hide-keyboard") }
 
-            ToolbarItem(placement: .cancellationAction) { Button("Annulla") { dismiss() }.disabled(saving) }
-            ToolbarItem(placement: .confirmationAction) { Button("Salva") { Task { await save() } }.disabled(linkedPayment || saving || store.busy || !loaded || (!editing && type == "Spesa" && (!routeReady || destination.isEmpty)) || Input.cents(amount) == nil || name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) }
+            ToolbarItem(placement: .cancellationAction) { NativeSheetCancel { dismiss() }.disabled(saving) }
+            ToolbarItem(placement: .confirmationAction) { NativeSheetConfirm { Task { await save() } }.disabled(linkedPayment || saving || store.busy || !loaded || (!editing && type == "Spesa" && (!routeReady || destination.isEmpty)) || Input.cents(amount) == nil || name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) }
         }
         .confirmationDialog("Eliminare il movimento? Eventuali collegamenti finanziari saranno aggiornati dal server.", isPresented: $confirmDelete, titleVisibility: .visible) {
             Button("Elimina", role: .destructive) { Task { do { try await store.perform("deleteMovement", args: [.int(record.integer("row"))]); dismiss() } catch { self.error = error.localizedDescription } } }
@@ -457,7 +467,12 @@ struct MovementEditor: View {
             payload["expectedAvailableCents"] = .int(quotedAvailable)
             payload.merge(bill.payload) { _, value in value }
             // REVIEW-95: savings and budget months chosen by the user (server 'recovery' policy).
-            if destination == NativeExpenseRouting.ordinary && !bill.enabled {
+            if bill.enabled {
+                // FUNDING-BLOCK: the savings part of a bill; the rest goes to its competence months.
+                let limit = destination == NativeExpenseRouting.ordinary ? cents - 1 : min(cents - 1, max(0, cents - quotedAvailable))
+                let part = min(max(0, split.savings), max(0, limit))
+                if part > 0 { payload["utilitySavingsCents"] = .int(part) }
+            } else if destination == NativeExpenseRouting.ordinary {
                 var chosen = split; chosen.change(0, amount: cents)
                 if let extra = chosen.payload(amount: cents, day: CivilDate.day(date)) { payload.merge(extra) { _, value in value } }
             } else if destination != NativeExpenseRouting.ordinary && destination != NativeExpenseRouting.savings {

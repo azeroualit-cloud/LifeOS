@@ -111,8 +111,8 @@ struct NativeActivityEditor: View {
         }.modifier(NativeListAppearance()).scrollDismissesKeyboard(.interactively)
             .navigationTitle(record.integer("id") != 0 ? "Modifica attività" : "Nuova attività").navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Annulla") { dismiss() }.disabled(saving) }
-                ToolbarItem(placement: .confirmationAction) { Button("Salva") { Task { await save() } }.disabled(saving || title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) }
+                ToolbarItem(placement: .cancellationAction) { NativeSheetCancel { dismiss() }.disabled(saving) }
+                ToolbarItem(placement: .confirmationAction) { NativeSheetConfirm { Task { await save() } }.disabled(saving || title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) }
             }
             .onAppear(perform: load)
             .onChange(of: hasTime) { _, enabled in if !enabled { hasEnd = false } }

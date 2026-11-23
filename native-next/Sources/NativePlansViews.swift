@@ -222,9 +222,9 @@ struct NativePlanEditor: View {
             if let error { Section { NativeInlineMessage(text: error) } }
         }.modifier(NativeListAppearance()).navigationTitle("Nuovo piano").navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Annulla") { dismiss() }.disabled(saving) }
+                ToolbarItem(placement: .cancellationAction) { NativeSheetCancel { dismiss() }.disabled(saving) }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(submitted ? "Riprova" : "Salva") { Task { await save() } }.disabled(saving || preview.isEmpty || (draft.kind == .recovery && usesExisting && movement == nil) || store.busy || (!store.isDemo && store.finance.record("plansV2").integer("version") != 2)).accessibilityIdentifier("plan-save")
+                    NativeSheetConfirm(retry: submitted) { Task { await save() } }.disabled(saving || preview.isEmpty || (draft.kind == .recovery && usesExisting && movement == nil) || store.busy || (!store.isDemo && store.finance.record("plansV2").integer("version") != 2)).accessibilityIdentifier("plan-save")
                 }
                 ToolbarItemGroup(placement: .keyboard) { Spacer(); Button("Fine") { editing = false } }
             }
@@ -365,7 +365,8 @@ private struct NativePlanPaymentEditor: View {
                 // REFERENCE-GAPS-95 «Registra pagamento»: the difference between savings and open budget months.
                 Section("Differenza rispetto al previsto") {
                     LabeledContent("In più", value: (Double(extra) / 100).euro)
-                    NativeExpenseSplitRows(split: $difference, amount: extra, day: CivilDate.day(Date()), allowsAll: true)
+                    NativeExpenseSplitRows(split: $difference, amount: extra, day: CivilDate.day(Date()), allowsAll: true,
+                                           showsMonths: !bill.enabled, budgetTitle: bill.enabled ? "Sui mesi di competenza" : "Budget")
                     Text("Quello che resta sui risparmi non pesa sul budget; la parte sul budget si divide sui mesi scelti.").font(.footnote).foregroundStyle(NativeDesign.secondary)
                 }.disabled(submitted)
             }
@@ -375,8 +376,8 @@ private struct NativePlanPaymentEditor: View {
             if let error { Section { NativeInlineMessage(text: error) } }
         }.modifier(NativeListAppearance()).navigationTitle("Registra pagamento").navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Annulla") { dismiss() }.disabled(saving) }
-                ToolbarItem(placement: .confirmationAction) { Button(submitted ? "Riprova" : "Conferma") { Task { await save() } }.disabled(saving || amountCents == nil || (usesExisting && movement == nil) || (NativeUtilityPeriodDraft.isCostFund(plan) && bill.months == nil)).accessibilityIdentifier("plan-payment-confirm") }
+                ToolbarItem(placement: .cancellationAction) { NativeSheetCancel { dismiss() }.disabled(saving) }
+                ToolbarItem(placement: .confirmationAction) { NativeSheetConfirm(title: "Conferma", retry: submitted) { Task { await save() } }.disabled(saving || amountCents == nil || (usesExisting && movement == nil) || (NativeUtilityPeriodDraft.isCostFund(plan) && bill.months == nil)).accessibilityIdentifier("plan-payment-confirm") }
                 ToolbarItemGroup(placement: .keyboard) { Spacer(); Button("Fine") { editing = false } }
             }
             .task { amount = String(format: "%.2f", Double(expectedCents) / 100); competenceMonths = max(1, plan.integer("intervalMonths")); bill.prepare(day: CivilDate.day(date), required: NativeUtilityPeriodDraft.isCostFund(plan)) }
@@ -406,7 +407,15 @@ private struct NativePlanPaymentEditor: View {
             try await store.perform(bill.enabled ? "recordUtilityPlanPayment" : "recordFinancePlanPayment", payload)
             await store.loadFinancePlans()
             var part = difference; part.savings = min(part.savings, extra)
-            if !usesExisting, let split = part.planPayload(uncovered: extra, day: CivilDate.day(Date())) {
+            if !usesExisting, bill.enabled, extra > 0 {
+                // A bill: the savings part of the difference; the rest stays on its competence months.
+                let paid = store.finance.record("plansV2").records("payments").first { $0.text("requestId") == requestID || $0.text("id") == requestID }
+                guard let movementID = paid?.integer("movementId"), movementID > 0 else { throw Message(text: "Pagamento registrato. Riapri il piano per indicare la parte dai risparmi.") }
+                if part.savings > 0 {
+                    try await store.perform("changeExpenseDestination", ["requestId": .string(requestID + "-savings"), "movementId": .int(movementID),
+                                                                         "expenseDestination": .string("billSavings"), "utilitySavingsCents": .int(part.savings)])
+                }
+            } else if !usesExisting, let split = part.planPayload(uncovered: extra, day: CivilDate.day(Date())) {
                 let paid = store.finance.record("plansV2").records("payments").first { $0.text("requestId") == requestID || $0.text("id") == requestID }
                 guard let movementID = paid?.integer("movementId"), movementID > 0 else { throw Message(text: "Pagamento registrato. Riapri il piano per dividere la differenza sul budget.") }
                 var change: Record = ["requestId": .string(requestID + "-split"), "movementId": .int(movementID), "expenseDestination": .string("budgetSplit")]
@@ -524,8 +533,8 @@ private struct NativePlanQuotaEditor: View {
             if let error { Section { NativeInlineMessage(text: error) } }
         }.modifier(NativeListAppearance()).navigationTitle("Modifica piano").navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Annulla") { dismiss() }.disabled(saving) }
-                ToolbarItem(placement: .confirmationAction) { Button(submitted ? "Riprova" : "Salva") { Task { await save() } }.disabled(saving || Input.cents(amount) == nil).accessibilityIdentifier("plan-edit-save") }
+                ToolbarItem(placement: .cancellationAction) { NativeSheetCancel { dismiss() }.disabled(saving) }
+                ToolbarItem(placement: .confirmationAction) { NativeSheetConfirm(retry: submitted) { Task { await save() } }.disabled(saving || Input.cents(amount) == nil).accessibilityIdentifier("plan-edit-save") }
                 ToolbarItemGroup(placement: .keyboard) { Spacer(); Button("Fine") { editing = false } }
             }
             .task { first = max(first, plan.text("startMonth")); amount = String(format: "%.2f", Double(NativePlanRules.rate(plan, month: first)) / 100); last = max(first, plan.text("endMonth")) }

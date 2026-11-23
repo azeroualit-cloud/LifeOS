@@ -48,6 +48,9 @@ struct NativeExpenseSplitRows: View {
     /// Plan payments: the uncovered part may stay entirely on savings (budget 0, no months).
     var allowsAll = false
     var savingsTitle = "Risparmi"
+    /// Bills: the budget part goes to the competence months chosen below, so no month chips here.
+    var showsMonths = true
+    var budgetTitle = "Budget"
     var body: some View {
         let euro: (Int) -> String = { (Double($0) / 100).euro }
         HStack(spacing: NativeDesign.Space.small) {
@@ -63,11 +66,11 @@ struct NativeExpenseSplitRows: View {
         }
         HStack(spacing: NativeDesign.Space.small) {
             Circle().fill(NativeDesign.salaryGroups[3]).frame(width: NativeDesign.Space.small, height: NativeDesign.Space.small).accessibilityHidden(true)
-            Text("Budget")
+            Text(budgetTitle)
             Spacer(minLength: NativeDesign.Space.small)
             Text(euro(split.budget(amount))).monospacedDigit().accessibilityIdentifier("expense-split-budget")
         }
-        if split.budget(amount) > 0 {
+        if showsMonths && split.budget(amount) > 0 {
         VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
             Text("Mesi in cui pesa sul budget").font(.footnote).foregroundStyle(NativeDesign.secondary)
             ScrollView(.horizontal, showsIndicators: false) {

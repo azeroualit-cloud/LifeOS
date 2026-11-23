@@ -74,3 +74,14 @@ test('salary reference ignores unpaid November without looking into future or sk
   assert.equal(salaryReferenceMonth(new Map(), '2026-11'), '2026-11');
   assert.equal(salaryReferenceMonth(new Map([['2026-09', 1800]]), '2026-11'), '2026-11', 'An older unpaid gap must keep the configured fallback');
 });
+
+test('FUNDING-BLOCK build 95: the savings part of a bill never reaches the competence months', () => {
+  const command = { kind: 'ordinary', movementId: 2, utilityPeriod: period, pending: false, utilitySavingsCents: 6000 };
+  let context = utilityCompetenceContext({ expenseRoutingCommands: { first: command } }, [movement()]);
+  const months = ['2026-08', '2026-09', '2026-10'].map(m => utilityMonthlyCost(context, 'Acqua', m, 4000, contribution).amountCents);
+  assert.equal(months.reduce((n, v) => n + v, 0), 22179 - 6000);
+  assert.equal(hasUtilityBill(context, 2), true, 'the bank movement stays out of the month spending');
+  const paid = { status: 'posted', movementId: 2, utilityPeriod: period, utilitySavingsCents: 999999 };
+  context = utilityCompetenceContext({ plans: { water: plan }, payments: { bill: paid } }, [movement()]);
+  assert.equal(['2026-08', '2026-09', '2026-10'].map(m => utilityMonthlyCost(context, 'Acqua', m, 4000, contribution).amountCents).reduce((n, v) => n + v, 0), 1, 'at least one cent stays on the budget');
+});

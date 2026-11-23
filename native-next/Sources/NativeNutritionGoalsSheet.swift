@@ -27,10 +27,10 @@ struct NativeNutritionGoalsSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Annulla") { dismiss() }.accessibilityIdentifier("goals-cancel")
+                    NativeSheetCancel { dismiss() }.accessibilityIdentifier("goals-cancel")
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Salva") { preferences.goals = draft; dismiss() }
+                    NativeSheetConfirm { preferences.goals = draft; dismiss() }
                         .fontWeight(.semibold).accessibilityIdentifier("goals-save")
                 }
             }

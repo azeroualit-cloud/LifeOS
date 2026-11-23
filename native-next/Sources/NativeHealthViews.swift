@@ -143,7 +143,7 @@ struct NativeAddWeightSheet: View {
             }.modifier(NativeListAppearance()).navigationTitle("Aggiungi peso").navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button("Annulla") { dismiss() }.disabled(saving)
+                        NativeSheetCancel { dismiss() }.disabled(saving)
                     }
                     ToolbarItem(placement: .confirmationAction) {
                         Button {

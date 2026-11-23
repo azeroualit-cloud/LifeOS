@@ -399,3 +399,23 @@ struct NativeNumericFeedback: ViewModifier {
             }
     }
 }
+
+/// Sheet header like iOS 26 (Cowork preview 93): glass X on the left, title in the middle, check on the right.
+/// The text stays as the accessibility label, so VoiceOver and the UI tests read «Annulla», «Salva»…
+struct NativeSheetCancel: View {
+    var title = "Annulla"
+    let action: () -> Void
+    var body: some View {
+        Button(action: action) { Image(systemName: "xmark").fontWeight(.semibold) }
+            .accessibilityLabel(title)
+    }
+}
+struct NativeSheetConfirm: View {
+    var title = "Salva"
+    var retry = false
+    let action: () -> Void
+    var body: some View {
+        Button(action: action) { Image(systemName: retry ? "arrow.clockwise" : "checkmark").fontWeight(.semibold) }
+            .accessibilityLabel(retry ? "Riprova" : title)
+    }
+}

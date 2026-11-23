@@ -2,7 +2,7 @@ name: LifeOS expense split 95 (tests, audit, deploy)
 # REVIEW-95 / FUNDING-BLOCK-2026-11-21: an ordinary expense split between savings and chosen budget months.
 # A push that changes this file is the deliberate start. The routing is replaced in both Workers only
 # when the live section is exactly the build 91 version; otherwise nothing is written.
-# Attempt 8 (plan payments: uncovered part split; payment difference split afterwards; parameters may be renamed; live routing is build 90, upgraded with savings and split; !0 for true; bundled live Workers: the function is found by name and braces). The app with the split UI compiles (d0e5a62).
+# Attempt 9 (bills: savings part on the competence; plan payments: uncovered part split; payment difference split afterwards; parameters may be renamed; live routing is build 90, upgraded with savings and split; !0 for true; bundled live Workers: the function is found by name and braces). The app with the split UI compiles (d0e5a62).
 on:
   push:
     branches: ['codex/build93']
@@ -35,6 +35,7 @@ jobs:
           python3 scripts/build-worker-75.py
           python3 backend/utilities/tests/test_transform.py
           python3 backend/expense-routing/tests/test_split_transform.py
+          python3 backend/utilities/tests/test_competence95_transform.py
           node --test backend/utilities/tests/competence.test.mjs backend/utilities/tests/budget.test.mjs backend/utilities/tests/routing.test.mjs
           node --test backend/expense-routing/tests/routing.test.mjs
           node --test backend/activities/tests/worker.test.mjs
@@ -43,7 +44,16 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           LIFEOS_BACKEND_AUDIT_ONLY: '1'
         run: python3 scripts/deploy-split-95.py
+      - name: Compare the live competence module (no writes)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          LIFEOS_BACKEND_AUDIT_ONLY: '1'
+        run: python3 scripts/deploy-utilities-95.py
       - name: Deploy to both Workers with verification and rollback
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: python3 scripts/deploy-split-95.py
+      - name: Deploy the bill competence with savings part to both Workers
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: python3 scripts/deploy-utilities-95.py
