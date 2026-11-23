@@ -91,7 +91,8 @@ struct NativeSupplementStackStrip: View {
                     } label: {
                         Label(stack.name, systemImage: "pills.fill").font(.subheadline.weight(.semibold))
                             .padding(.horizontal, NativeDesign.Space.medium).frame(minHeight: NativeDesign.Layout.compactControl)
-                            .modifier(NativeGlass()).frame(minHeight: NativeDesign.Layout.touchTarget)
+                            .background(Capsule().fill(Color(uiColor: .secondarySystemGroupedBackground))) // flat: glass drew a grey band here
+                            .frame(minHeight: NativeDesign.Layout.touchTarget)
                     }
                     .buttonStyle(NativePressStyle())
                     .disabled(working)
@@ -105,7 +106,8 @@ struct NativeSupplementStackStrip: View {
                 Button { editing = NativeSupplementStack(id: UUID().uuidString, name: "", items: []) } label: {
                     Label("Nuova stack", systemImage: "plus").font(.subheadline)
                         .padding(.horizontal, NativeDesign.Space.medium).frame(minHeight: NativeDesign.Layout.compactControl)
-                        .modifier(NativeGlass()).frame(minHeight: NativeDesign.Layout.touchTarget)
+                        .background(Capsule().fill(Color(uiColor: .secondarySystemGroupedBackground))) // flat: glass drew a grey band here
+                            .frame(minHeight: NativeDesign.Layout.touchTarget)
                 }
                 .buttonStyle(NativePressStyle())
                 .accessibilityIdentifier("supplement-stack-new")

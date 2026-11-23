@@ -31,6 +31,8 @@ final class NativeScreenTourUITests: XCTestCase {
     }
     private func type(_ field: XCUIElement, _ text: String, _ app: XCUIApplication) {
         guard field.waitForExistence(timeout: 5) else { return }
+        for _ in 0..<3 where !field.isHittable { app.swipeUp(velocity: .slow) }
+        guard field.isHittable else { return }
         field.tap()
         let old = field.value as? String ?? ""
         if !old.isEmpty && old != field.placeholderValue { field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: old.count)) }
