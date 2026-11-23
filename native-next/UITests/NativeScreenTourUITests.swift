@@ -72,7 +72,7 @@ final class NativeScreenTourUITests: XCTestCase {
         scroll(app, prefix + " 13 Finanza sotto")
         scroll(app, prefix + " 14 Finanza stipendio")
         // REVIEW-95: a salary group opens its own map.
-        if tap(app.buttons["finance-salary-group-0"]) { shot(prefix + " 14b Stipendio gruppo", app); dismissSheet(app) }
+        if tap(app.buttons["finance-salary-tile-Impegni del mese"]) { shot(prefix + " 14b Stipendio gruppo", app); dismissSheet(app) }
         app.swipeDown(velocity: .fast); app.swipeDown(velocity: .fast)
         if tap(app.buttons["finance-budget"]) { shot(prefix + " 15 Budget", app); back(app) }
         if tap(app.buttons["finance-analysis"]) {

@@ -284,7 +284,6 @@ struct NativeSalaryMapCard: View {
                     NativeSalaryTreemap(entries: groups.map { group in
                         NativeSalaryTreemap.Entry(id: "group-" + String(group.group), title: NativeSalaryMap.groupTitles[group.group], value: group.total, group: group.group)
                     }, salary: salary, hidden: hidden, height: mapHeight) { entry in openGroup = entry.group }
-                    legend(groups, salary: salary)
                     Text("Tocca un gruppo per vedere le sue voci.").font(.footnote).foregroundStyle(NativeDesign.secondary)
                 }
                 .padding(.horizontal, NativeDesign.Layout.compactCardInset).padding(.vertical, NativeDesign.Layout.cardInsetVertical)
@@ -294,25 +293,6 @@ struct NativeSalaryMapCard: View {
         .accessibilityIdentifier("finance-salary-map")
         .sheet(item: Binding(get: { openGroup.map(NativeSalaryGroupID.init) }, set: { openGroup = $0?.group })) { id in
             NativeSalaryGroupSheet(group: id.group, items: items.filter { $0.group == id.group }, salary: salary, hidden: hidden)
-        }
-    }
-    private func legend(_ groups: [(group: Int, total: Double)], salary: Double) -> some View {
-        LazyVGrid(columns: [GridItem(.flexible(), spacing: NativeDesign.Space.small, alignment: .leading), GridItem(.flexible(), spacing: NativeDesign.Space.small, alignment: .leading)],
-                  alignment: .leading, spacing: NativeDesign.Space.xs) {
-            ForEach(groups, id: \.group) { group in
-                Button { openGroup = group.group } label: {
-                    HStack(spacing: NativeDesign.Space.xs) {
-                        Circle().fill(NativeDesign.salaryGroups[group.group]).frame(width: NativeDesign.Space.small, height: NativeDesign.Space.small)
-                        Text(NativeSalaryMap.groupTitles[group.group]).foregroundStyle(.primary).lineLimit(1)
-                        if !hidden { Text(NativeSalaryMap.percent(group.total, of: salary)).fontWeight(.semibold).monospacedDigit().foregroundStyle(.primary) }
-                    }
-                    .font(.footnote)
-                    .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.compactControl, alignment: .leading)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(NativePressStyle())
-                .accessibilityIdentifier("finance-salary-group-" + String(group.group))
-            }
         }
     }
 }
