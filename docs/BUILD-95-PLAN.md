@@ -110,3 +110,9 @@ Mancano o sono diversi:
 76. Nuova spesa: il riferimento ha due righe, Categoria (gruppo) e Voce; la 95 ha un solo menu con i 9 gruppi e le voci.
 77. Ritmo: «Ultimi 30 / 90 giorni» nel riferimento, «Ultimo mese / Ultimi 3 mesi» nella 95.
 78. Impostazioni › Dati sul server: scheda «Trasferimento sul server, una volta sola» e «Fonte dei dati» da verificare nell'app.
+79. Fatti (REFERENCE-GAPS-95-2026-11-23, 7e7a5b3; server 95b verificato su entrambi i Worker; sito 20f388b):
+   - Nuova spesa: righe Categoria (gruppo) e Voce; sul sito categorie raggruppate per gruppo.
+   - Bolletta / spesa con piano: la parte non coperta dal fondo tra «Dagli altri risparmi» (−/+) e mesi di budget.
+   - Registra pagamento: la differenza tra risparmi (−/+) e mesi di budget, per ogni tipo di piano (dopo il pagamento, `changeExpenseDestination` con `budgetSplit`).
+   - Nuovo piano Obiettivo: «Da dove arrivano le quote», parte dai risparmi; le quote coprono il resto. Per i piani che si ripetono (fisso, fondo) la parte dai risparmi non è disponibile: cambierebbe anche le scadenze future.
+   - Ritmo resta «Ultimo mese / Ultimi 3 mesi»: il calcolo è per mesi completi, scrivere 30/90 giorni sarebbe impreciso.
