@@ -106,6 +106,8 @@ struct NativeHealthDetail: View {
             .navigationTitle("Salute")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                // The day ("Oggi") is the page title; the bar keeps only its actions.
+                ToolbarItem(placement: .principal) { Color.clear.frame(width: 1, height: 1).accessibilityHidden(true) }
                 // History in the navigation bar: always reachable, never under the bottom actions.
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { showingHistory = true } label: {
@@ -165,7 +167,7 @@ struct NativeHealthDetail: View {
         return Button { editingGoals = true } label: {
             VStack(spacing: NativeDesign.Space.none) {
                 Text("kcal").font(.footnote).foregroundStyle(NativeDesign.secondary)
-                HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xxs) {
+                HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xs) {
                     Text(kcal).font(.title.weight(.bold)).monospacedDigit()
                     if let goal {
                         Text("/ " + whole(goal)).font(.title.weight(.bold))
@@ -205,7 +207,7 @@ struct NativeHealthDetail: View {
     /// Macro bar colour carries the meaning when there is a goal: green in range, amber under, orange over.
     private func macroColor(_ value: Double?, _ goal: Double?, _ fallback: Color) -> Color {
         guard let goal, goal > 0 else { return fallback }
-        return NativeCalorieBand.of(value, goal: goal).color
+        return NativeCalorieBand.macroColor(value, goal: goal)
     }
 
     /// Andamento: period, four values, weight with forecast, calories of the week.
@@ -342,17 +344,17 @@ struct NativeHealthDetail: View {
         return NativeCard {
             // Programmatic push: closure links stop working next to navigationDestination(item:).
             Button { showingMicronutrients = true } label: {
-                LOCardHeader(title: "Micronutrienti", systemImage: "leaf", section: .nutrition, showsChevron: true, trailing: "in evidenza")
+                LOCardHeader(title: "Micronutrienti", systemImage: "leaf.fill", section: .nutrition, showsChevron: true, trailing: "in evidenza")
                     .contentShape(Rectangle().inset(by: -NativeDesign.Space.medium)) // 44 pt touch without 44 pt of layout
             }
             .buttonStyle(NativePressStyle())
             .accessibilityLabel("Tutti i micronutrienti")
             .accessibilityIdentifier("health-micronutrients")
-            HStack(spacing: NativeDesign.Space.medium) {
-                Text("Fibre").font(.subheadline)
-                Spacer()
+            HStack(spacing: NativeDesign.Space.small) {
+                Text("Fibre").font(.footnote.weight(.semibold))
+                Spacer(minLength: 0)
                 Text(fibre.map { $0.formatted(.number.precision(.fractionLength(0...1))) + " g" } ?? "—")
-                    .font(.subheadline.weight(.semibold)).monospacedDigit()
+                    .font(.footnote).monospacedDigit().foregroundStyle(.secondary)
             }
             .accessibilityElement(children: .combine)
             .accessibilityIdentifier("health-nutrient-" + HKQuantityTypeIdentifier.dietaryFiber.rawValue)

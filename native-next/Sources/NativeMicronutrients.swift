@@ -187,16 +187,21 @@ struct NativeNutrientProgress: View {
 
     var body: some View {
         let target = nutrient.dailyReference
-        let format = Decimal.FormatStyle().precision(.fractionLength(0...2))
-        let current = period.amount.map { (period.estimated ? "≈" : "") + $0.formatted(format) } ?? "—"
-        let value = "\(current) / \(target.formatted(format)) \(nutrient.unit)"
+        // Fewer decimals (point 30): whole numbers from 100, one decimal from 10.
+        let format: (Decimal) -> String = { amount in
+            let size = NSDecimalNumber(decimal: amount).doubleValue
+            let digits = size >= 100 ? 0...0 : size >= 10 ? 0...1 : 0...2
+            return amount.formatted(Decimal.FormatStyle().precision(.fractionLength(digits)))
+        }
+        let current = period.amount.map { (period.estimated ? "≈" : "") + format($0) } ?? "—"
+        let value = "\(current) / \(format(target)) \(nutrient.unit)"
         VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
             ViewThatFits(in: .horizontal) {
                 HStack(spacing: NativeDesign.Space.small) {
                     Text(caption ?? nutrient.title).fontWeight(.semibold)
                     Spacer(minLength: 0)
                     Text(value).monospacedDigit().foregroundStyle(.secondary)
-                }.fixedSize(horizontal: true, vertical: false)
+                }
                 VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
                     Text(caption ?? nutrient.title).fontWeight(.semibold)
                     Text(value).monospacedDigit().foregroundStyle(.secondary)

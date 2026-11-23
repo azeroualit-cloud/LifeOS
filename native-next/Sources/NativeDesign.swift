@@ -35,7 +35,7 @@ enum NativeDesign {
         traits.userInterfaceStyle == .dark ? UIColor(white: 0.018, alpha: 1) : .systemGroupedBackground
     })
     static let calendarTitle = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark ? UIColor(red: 0.95, green: 0.73, blue: 0.53, alpha: 1) : .systemBrown
+        traits.userInterfaceStyle == .dark ? UIColor(red: 0.95, green: 0.73, blue: 0.53, alpha: 1) : UIColor(red: 0.45, green: 0.31, blue: 0.14, alpha: 1)
     })
     static let calendarAccent = Color(uiColor: .systemBlue)
     static func calendarNumber(size: CGFloat) -> Font { .system(size: size, weight: .medium, design: .default) }
@@ -43,7 +43,7 @@ enum NativeDesign {
     static let healthSurface = Color(uiColor: .secondarySystemGroupedBackground)
     // Measured from the populated Apple Health dark reference; adapt in light mode.
     static let healthWeight = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark ? UIColor(red: 219 / 255, green: 52 / 255, blue: 242 / 255, alpha: 1) : .systemPurple
+        traits.userInterfaceStyle == .dark ? UIColor(red: 0.90, green: 0.45, blue: 0.98, alpha: 1) : UIColor(red: 0.50, green: 0.20, blue: 0.68, alpha: 1)
     })
     static let healthAccent = Color(uiColor: .systemOrange)
     // Macro colours of the build 93 preview: protein green, carbohydrates orange, fat purple.
@@ -57,7 +57,11 @@ enum NativeDesign {
     /// Track behind progress bars (#3a3a3c in dark).
     static let barTrack = Color(uiColor: .tertiarySystemFill)
     /// Over a goal: orange like the preview, never red (red is for outflows).
-    static let overGoal = Color(uiColor: .systemOrange)
+    static let overGoal = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? .systemOrange : UIColor(red: 0.70, green: 0.33, blue: 0.0, alpha: 1) })
+    /// Goal reached / inside the recommended range; readable on white (4.5:1) and on black.
+    static let goalMet = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? .systemGreen : UIColor(red: 0.10, green: 0.47, blue: 0.22, alpha: 1) })
+    /// Dots and tracks with nothing logged: at least 3:1 on the card.
+    static let emptyMark = Color(uiColor: UIColor { UIColor(white: $0.userInterfaceStyle == .dark ? 0.42 : 0.56, alpha: 1) })
     /// Estimates and forecasts (FINANCE-PALETTE-2026-11-21 cyan, also used by the weight forecast).
     static let estimate = Color(uiColor: UIColor { traits in
         traits.userInterfaceStyle == .dark ? UIColor(red: 0.36, green: 0.77, blue: 0.88, alpha: 1) : UIColor(red: 0.0, green: 0.45, blue: 0.56, alpha: 1)
@@ -141,6 +145,8 @@ enum NativeDesign {
         static let bottomAction: CGFloat = 44
         /// Drawn height of buttons inside cards, pills and chips; the touch area stays touchTarget.
         static let compactControl: CGFloat = Space.section
+        /// Side inset of the floating tab bar; bottom actions use the same, so their edges align.
+        static let tabBarInset: CGFloat = Space.xLarge
         static let quickRow: CGFloat = 55
         static let nutritionKcalColumn: CGFloat = 64
         /// Segment height; with its 2 pt glass rim the switch is drawn at compactControl (34 pt).

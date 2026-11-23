@@ -98,9 +98,13 @@ struct TasksScreen: View {
                             categoryChip(item.value.text("label"), key: key, identifier: "task-category-" + key)
                         }
                         Button { router.sheet = .categories } label: {
-                            Image(systemName: "folder").frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget)
+                            Image(systemName: "folder").font(.subheadline.weight(.semibold))
+                                .frame(width: NativeDesign.Layout.compactControl, height: NativeDesign.Layout.compactControl)
+                                .modifier(NativeGlass())
+                                .frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget)
+                                .contentShape(Rectangle())
                         }
-                        .buttonStyle(LOGlassButtonStyle())
+                        .buttonStyle(NativePressStyle())
                         .accessibilityLabel("Gestisci categorie")
                         .accessibilityIdentifier("task-category-manage")
                     }

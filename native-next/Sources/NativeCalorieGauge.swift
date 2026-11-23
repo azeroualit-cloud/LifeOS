@@ -15,16 +15,22 @@ enum NativeCalorieBand: Equatable {
         if value > goal * high { return .over }
         return .within
     }
+    /// Two colours only (user, 23/11/2026): green inside the range, warm below it or well above it.
     var color: Color {
         switch self {
-        case .none: Color(uiColor: .tertiaryLabel)
-        case .under: Color(uiColor: .systemYellow)
-        case .within: Color(uiColor: .systemGreen)
-        case .over: NativeDesign.overGoal
+        case .none: NativeDesign.emptyMark
+        case .within: NativeDesign.goalMet
+        case .under, .over: NativeDesign.overGoal
         }
     }
-    /// The arc runs to 130 % of the goal.
-    static let scale = 1.3
+    /// Macros: warm below the goal, green once it is reached or passed.
+    static func macroColor(_ value: Double?, goal: Double?) -> Color {
+        guard let goal, goal > 0 else { return NativeDesign.emptyMark }
+        guard let value, value > 0 else { return NativeDesign.emptyMark }
+        return value >= goal ? NativeDesign.goalMet : NativeDesign.overGoal
+    }
+    /// The arc runs to twice the goal, so the recommended range sits in the middle.
+    static let scale = 2.0
     static func fraction(_ value: Double, goal: Double) -> Double {
         guard goal > 0 else { return 0 }
         return min(max(value / (goal * scale), 0), 1)
@@ -69,7 +75,8 @@ struct NativeCalorieGauge: View {
                     if value > 0 { knobView(band).position(point(value, in: rect)) }
                 }
             }
-            .frame(height: NativeDesign.Space.section + NativeDesign.Space.small)
+            // A taller frame makes a rounder arc, closer to Fitia's.
+            .frame(height: NativeDesign.Space.section + NativeDesign.Space.xLarge + NativeDesign.Space.small)
             if let goal, goal > 0 { rangeLabels(goal) }
         }
         .accessibilityElement(children: .ignore)
@@ -102,7 +109,7 @@ struct NativeCalorieGauge: View {
             Circle().fill(band.color)
             Circle().strokeBorder(Color(uiColor: .secondarySystemGroupedBackground), lineWidth: 2)
             if band == .within {
-                Image(systemName: "checkmark").font(.caption2.weight(.heavy)).imageScale(.small).foregroundStyle(.white)
+                Image(systemName: "checkmark").font(.caption2.weight(.heavy)).imageScale(.small).foregroundStyle(Color(uiColor: .systemBackground))
             }
         }
         .frame(width: knob, height: knob)

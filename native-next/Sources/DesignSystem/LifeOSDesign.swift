@@ -84,7 +84,7 @@ struct LOGlassButtonStyle: ButtonStyle {
         // Drawn at 44 pt as a bottom action, 34 pt elsewhere; the touch area is always 44 pt.
         configuration.label
             .padding(.horizontal, NativeDesign.Space.large)
-            .frame(maxWidth: fillsWidth ? .infinity : nil, minHeight: fillsWidth && !compact ? NativeDesign.Layout.bottomAction : NativeDesign.Layout.compactControl)
+            .frame(maxWidth: fillsWidth ? .infinity : nil, minHeight: fillsWidth ? NativeDesign.Layout.bottomAction : NativeDesign.Layout.compactControl)
             .modifier(NativeGlass())
             .frame(minHeight: NativeDesign.Layout.touchTarget)
             .contentShape(Rectangle())
@@ -98,8 +98,9 @@ extension View {
     /// Pinned actions above the tab bar. On iOS 26 the system bar area keeps the
     /// scroll-edge effect and no background is drawn (no black band behind it).
     @ViewBuilder func loBottomActions<Actions: View>(@ViewBuilder _ actions: () -> Actions) -> some View {
+        // Same side inset as the floating tab bar (21 pt), so both edges line up.
         let bar = HStack(spacing: NativeDesign.Space.small) { actions() }
-            .padding(.horizontal, NativeDesign.Layout.screenInset)
+            .padding(.horizontal, NativeDesign.Layout.tabBarInset)
             .padding(.vertical, NativeDesign.Space.small)
         if #available(iOS 26.0, *) {
             self.safeAreaBar(edge: .bottom, spacing: NativeDesign.Space.none) { bar }
@@ -142,8 +143,8 @@ struct LOStatGrid: View {
                 }
             }
         }
-        .padding(.vertical, NativeDesign.Space.xs)
-        .background(NativeDesign.surface, in: RoundedRectangle(cornerRadius: NativeDesign.cardRadius, style: .continuous))
+        .padding(.vertical, NativeDesign.Layout.cardInsetVertical)
+        .modifier(NativeSurface())
     }
 
     private func spokenLabel(_ stat: LOStat) -> String {

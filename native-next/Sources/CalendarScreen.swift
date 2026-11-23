@@ -256,22 +256,8 @@ struct CalendarScreen: View {
                 if let loadError {
                     HStack { NativeInlineMessage(text: loadError); Button("Riprova") { reload += 1 } }
                 }
-                let entries = agenda
-                let allDay = allDayEntries
-                NativeCard(density: .compact) {
-                    Label("Agenda", systemImage: "calendar")
-                        .font(.headline).foregroundStyle(NativeDesign.calendarTitle)
-                        .accessibilityAddTraits(.isHeader)
-                    if !allDay.isEmpty { allDayStrip(allDay) }
-                    if entries.isEmpty && allDay.isEmpty {
-                        Text("Nessun impegno").font(.subheadline).foregroundStyle(NativeDesign.secondary)
-                            .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.rowHeight, alignment: .leading)
-                    }
-                    ForEach(entries) { node in
-                        if !allDay.isEmpty || node.id != entries.first?.id { Divider() }
-                        NativeCalendarAgendaBlock(node: node, onOpen: openAgendaEntry)
-                    }
-                }
+                // The selected day uses the same rows as the following days (user, 23/11/2026).
+                selectedDayList
                 // Accessibility sizes keep the single-day agenda proven in build 92.
                 if !typeSize.isAccessibilitySize {
                     ForEach(followingDays, id: \.self) { day in followingDay(day) }
@@ -309,22 +295,48 @@ struct CalendarScreen: View {
             .accessibilityElement(children: .combine)
             .accessibilityAddTraits(.isHeader)
             .accessibilityIdentifier("calendar-next-day-" + day)
-            LOListCard {
-                ForEach(Array(events.enumerated()), id: \.offset) { index, event in
-                    agendaRow(time: event.text("start_time").isEmpty ? "Tutto il giorno" : event.text("start_time"),
-                              title: event.text("title", fallback: "Evento"), detail: event.text("location"),
-                              color: dayShift?.color ?? NativeDesign.calendarTitle, isLast: index == events.count - 1 && tasks.isEmpty) {
-                        router.sheet = .event(event)
-                    }
+            followingRows(day)
+        }
+    }
+    /// The rows of one day: time | shift-coloured bar | title with end time or place.
+    private func followingRows(_ day: String) -> some View {
+        let events = (eventsByDay[day] ?? []).filter { $0.text("occurrence_status") != "skipped" }
+            .sorted { ($0.text("start_time").isEmpty ? "00:00" : $0.text("start_time"), $0.integer("id")) < ($1.text("start_time").isEmpty ? "00:00" : $1.text("start_time"), $1.integer("id")) }
+        let tasks = tasksByDay[day] ?? []
+        let dayShift = self.shift(on: day)
+        return LOListCard {
+            ForEach(Array(events.enumerated()), id: \.offset) { index, event in
+                agendaRow(time: event.text("start_time").isEmpty ? "Tutto il giorno" : event.text("start_time"),
+                          title: event.text("title", fallback: "Evento"), detail: eventDetail(event),
+                          color: dayShift?.color ?? NativeDesign.calendarTitle, isLast: index == events.count - 1 && tasks.isEmpty) {
+                    router.sheet = .event(event)
                 }
-                ForEach(Array(tasks.enumerated()), id: \.offset) { index, task in
-                    agendaRow(time: task.text("scheduled_time").isEmpty ? "Attività" : task.text("scheduled_time"),
-                              title: task.text("title"), detail: "", color: NativeDesign.secondary, isLast: index == tasks.count - 1) {
-                        router.sheet = .task(task)
-                    }
+                .accessibilityIdentifier("calendar-timeline-event:" + String(event.integer("id")))
+            }
+            ForEach(Array(tasks.enumerated()), id: \.offset) { index, task in
+                agendaRow(time: task.text("scheduled_time").isEmpty ? "Attività" : task.text("scheduled_time"),
+                          title: task.text("title"), detail: "", color: NativeDesign.secondary, isLast: index == tasks.count - 1) {
+                    router.sheet = .task(task)
                 }
+                .accessibilityIdentifier("calendar-timeline-task:" + String(task.integer("id")))
             }
         }
+    }
+    @ViewBuilder private var selectedDayList: some View {
+        let events = (eventsByDay[selected] ?? []).filter { $0.text("occurrence_status") != "skipped" }
+        if events.isEmpty && (tasksByDay[selected] ?? []).isEmpty {
+            LOListCard {
+                LOListRow(isLast: true) { Text("Nessun impegno").font(.subheadline).foregroundStyle(NativeDesign.secondary) }
+            }
+        } else {
+            followingRows(selected)
+        }
+    }
+    private func eventDetail(_ event: Record) -> String {
+        var parts: [String] = []
+        if !event.text("end_time").isEmpty && !event.text("start_time").isEmpty { parts.append("fino alle " + event.text("end_time")) }
+        if !event.text("location").isEmpty { parts.append(event.text("location")) }
+        return parts.joined(separator: " · ")
     }
     private func agendaRow(time: String, title: String, detail: String, color: Color, isLast: Bool, open: @escaping () -> Void) -> some View {
         Button(action: open) {
@@ -364,7 +376,7 @@ struct CalendarScreen: View {
     }
     private var agenda: [NativeCalendarAgendaNode] {
         let previous = CivilDate.adding(-1, to: selected)
-        return NativeCalendarTimeline.agenda(events: eventsByDay[selected] ?? [], tasks: tasksByDay[selected] ?? [], shift: nil, previousShift: shift(on: previous), previousEvents: eventsByDay[previous] ?? [])
+        return NativeCalendarTimeline.agenda(events: eventsByDay[selected] ?? [], tasks: tasksByDay[selected] ?? [], shift: nil, previousShift: nil, previousEvents: eventsByDay[previous] ?? [])
     }
     private func openAgendaEntry(_ item: NativeCalendarAgendaEntry) {
         router.sheet = item.source == "event" ? .event(item.record) : .task(item.record)

@@ -16,7 +16,7 @@ struct DashboardScreen: View {
         TimelineView(.periodic(from: .now, by: 60)) { context in
             let now = context.date, today = CivilDate.day(now)
             ScrollView {
-                VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
+                VStack(alignment: .leading, spacing: NativeDesign.Space.section) {
                     heading(today: today, now: now)
                     // DASHBOARD-93-2026-11-21: week, things to do, nutrition, finance, appointments.
                     rollingCalendar(today, now: now)
@@ -43,7 +43,7 @@ struct DashboardScreen: View {
     private func rollingCalendar(_ today: String, now: Date) -> some View {
         let days = NativeHomeSummary.rollingDays(today)
         let marked = Set(store.events.map { $0.text("day") } + store.tasks.map { $0.text("scheduled_date") })
-        return NativeCard(density: .compact, topInset: NativeDesign.Space.xs) {
+        return NativeCard(density: .compact) {
             Button { openCalendar(today) } label: {
                 LOCardHeader(title: "Settimana", systemImage: "calendar", section: .calendar, showsChevron: true)
                     .contentShape(Rectangle())
@@ -131,7 +131,7 @@ struct DashboardScreen: View {
         let items = NativeHomeChecklist.rows(events: store.dashboardEvents, routines: store.todayRoutines, today: today)
         return VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
             HStack(spacing: NativeDesign.Space.medium) {
-                Text("Cose da fare").font(.title.bold()).accessibilityAddTraits(.isHeader)
+                Text("Cose da fare").font(.headline).accessibilityAddTraits(.isHeader)
                     .accessibilityIdentifier("home-checklist-heading")
                 Spacer(minLength: NativeDesign.Space.small)
                 Menu {
@@ -141,8 +141,9 @@ struct DashboardScreen: View {
                 } label: {
                     Text("Gestisci").font(.subheadline.weight(.semibold)).foregroundStyle(Color.primary)
                         .padding(.horizontal, NativeDesign.Space.medium)
-                        .frame(minHeight: NativeDesign.Layout.touchTarget)
+                        .frame(minHeight: NativeDesign.Layout.compactControl)
                         .modifier(NativeGlass())
+                        .frame(minHeight: NativeDesign.Layout.touchTarget)
                 }
             }
             if items.isEmpty {
@@ -153,7 +154,7 @@ struct DashboardScreen: View {
                         checklistRow(item)
                             .padding(.leading, NativeDesign.Space.xs)
                             .padding(.trailing, NativeDesign.Space.large)
-                            .padding(.vertical, NativeDesign.Space.xxs)
+                            .padding(.vertical, NativeDesign.Space.small)
                             .frame(minHeight: NativeDesign.Layout.rowHeight)
                             .loRowSeparator(hidden: item.id == items.last?.id, leadingInset: NativeDesign.Layout.touchTarget + NativeDesign.Space.small)
                     }
