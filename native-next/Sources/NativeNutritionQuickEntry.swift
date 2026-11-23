@@ -252,7 +252,9 @@ struct NativeNutritionQuickSheet: View {
                     HStack {
                         if nutrition.busy { ProgressView().accessibilityLabel("Salvataggio") }
                         Text(pending == nil ? "Aggiungi" : "Riprova").font(.headline)
-                    }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.rowHeight)
+                    // The sheet draws this a few percent smaller than its layout (42 pt measured for 44,
+                    // candidate 94): keep a margin so the save button stays at least 44 pt.
+                    }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget + NativeDesign.Space.small)
                 }.buttonStyle(NativeCompactPrimaryButtonStyle(readableDisabled: true))
                     .disabled(nutrition.busy || blocked || (pending ?? draft) == nil)
                     .accessibilityIdentifier("quick-nutrition-save")

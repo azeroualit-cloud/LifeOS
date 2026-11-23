@@ -1,5 +1,5 @@
 name: LifeOS candidate 94 validation and authorized IPA
-# Start 2 for IPA-DELIVERY-94-2026-11-23 (user go-ahead): build 94 with DESIGN-PASS-94; calorie card split for the type checker. Change this line to start a new attempt on the current commit.
+# Start 3 for IPA-DELIVERY-94-2026-11-23 (user go-ahead): build 94 with DESIGN-PASS-94; nutrition save button keeps 44 pt. Change this line to start a new attempt on the current commit.
 on:
   workflow_dispatch:
   push:
