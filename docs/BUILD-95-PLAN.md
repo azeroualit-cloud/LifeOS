@@ -116,3 +116,10 @@ Mancano o sono diversi:
    - Registra pagamento: la differenza tra risparmi (−/+) e mesi di budget, per ogni tipo di piano (dopo il pagamento, `changeExpenseDestination` con `budgetSplit`).
    - Nuovo piano Obiettivo: «Da dove arrivano le quote», parte dai risparmi; le quote coprono il resto. Per i piani che si ripetono (fisso, fondo) la parte dai risparmi non è disponibile: cambierebbe anche le scadenze future.
    - Ritmo resta «Ultimo mese / Ultimi 3 mesi»: il calcolo è per mesi completi, scrivere 30/90 giorni sarebbe impreciso.
+
+## Conversazione Cowork rivista (23/11/2026, https://claude.ai/share/e27b9431-1f4f-433d-a527-25d58f08f239)
+80. Bollette (FUNDING-BLOCK): stessa logica della spesa. Senza piano: Risparmi −/+, il resto sui mesi del periodo di competenza. Con piano: il piano restituisce le quote, dell'eccedenza scegli la parte dai risparmi, il resto sui mesi di competenza. Server: `utilitySavingsCents` su comando o pagamento, la competenza divide solo la parte dal budget (competence.mjs); nessun recupero sopra le bollette (niente doppio conteggio). Deploy verificato (4ec038a) su entrambi i Worker. Nota: online la competenza era ancora la prima versione (solo bollette con piano); ora anche le bollette senza piano pesano sui mesi di competenza.
+81. Fogli: X in vetro a sinistra e spunta a destra (titolo al centro) in spesa, piano, pagamento, attività, Bloom, peso, obiettivi, alimento personale.
+82. Nuova spesa: importo grande al centro in alto, descrizione sotto.
+83. Sito 248d873: bollette nel blocco «Da dove arrivano i soldi» con periodo e parte dai risparmi.
+84. Ancora da confrontare con la Cowork: Macro a mano a metà schermo (griglia 2×2 + tastierino), Peso a metà schermo, Spesa a rate con le colonne dei mesi, Cronologia a colonne per macro (giorni/settimane/mesi/trimestri).
