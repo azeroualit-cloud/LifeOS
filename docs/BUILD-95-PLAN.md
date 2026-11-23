@@ -85,3 +85,15 @@ Galleria privata con le 135 schermate della 94: https://claude.ai/artifact/CvgN9
 57. Nuovo movimento: la barra della ripartizione compare solo con un importo.
 58. Budget: totale del mese in colore primario; nota demo come piè di sezione (niente divisore a metà).
 59. Descrizione di «Fondo senza scadenza» non ripete più il titolo.
+
+## Revisione PDF dell'utente (23/11/2026, REVIEW-95-FEEDBACK-2026-11-23) — commit 381ce82
+60. Pillole sottili (Attività, Movimenti, chip mese, Analisi, «Oggi»): causa trovata, `compactControl` era derivato da `Space.section` (passato da 34 a 21). Ora fisso a 34; `actionCircle` fisso a 55. Test `NativeDesignTokensTests` blocca il ritorno dell'errore.
+61. Schede 16 pt su tutti i lati (SPACING-SYSTEM-2026-11-23, confermato); 16 pt tra macro e Peso/Alimento nella Dashboard.
+62. Calendario: «Oggi» alto come il selettore Mese/Agenda; il tour ora tocca un giorno senza eventi e fotografa l'agenda.
+63. Salute: tolta la barra vuota in alto, Cronologia nella riga di «Oggi».
+64. Budget: controllo del mese compatto (chip di Finanza).
+65. Analisi: titolo, indietro e «Da <mese>» in una riga.
+66. Spese per categoria: scelta delle categorie (tutte o alcune), anche sul sito (75f7cc4).
+67. Movimenti: ricerca e filtri in un blocco compatto (ricerca 36 pt, pillole 34).
+68. Dove va lo stipendio: 4 colori distinti per gruppo (SALARY-MAP-COLORS-2026-11-23, eccezione confermata a FINANCE-PALETTE), un riquadro per gruppo con nome e %, tocco → mappa del gruppo con le voci e il dettaglio.
+69. DA FARE: Nuova spesa con ripartizione scelta dall'utente (risparmi −/+, budget per il resto, mesi di budget) come nell'anteprima 93 (FoglioSpesa, FoglioDividi) e FUNDING-BLOCK-2026-11-21. Richiede una modifica al server (routing e calcolo del budget con risparmi parziali); oggi il server accetta una sola destinazione.
