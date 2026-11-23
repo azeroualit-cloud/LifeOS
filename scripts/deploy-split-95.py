@@ -129,7 +129,7 @@ def transform(source):
     # savings destination was approved on 16/11 but never reached the live Workers).
     v91 = ("savingsDestination:true", "['ordinary','plan','savings'].includes(input.expenseDestination)", "budgetTreatment:kind")
     v90 = ("['ordinary','plan'].includes(input.expenseDestination)", "budgetTreatment:'ordinary'", "version:1,utilityCompetenceVersion")
-    common = ("createExpenseRouting({PlanError,balance,command", "'pay',paymentInput")
+    common = ("'pay',paymentInput", "fail('Scegli la destinazione della spesa.')")  # the bundler may rename parameters (PlanError2)
     found = {n: n in live for n in v91 + v90 + common}
     print('ROUTING_CHECK ' + ' '.join('%s=%d' % (n.split('(')[0].split(':')[0][:24], int(v)) for n, v in found.items()))
     if not (all(found[n] for n in common) and (all(found[n] for n in v91) or all(found[n] for n in v90))):
