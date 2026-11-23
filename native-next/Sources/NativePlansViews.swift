@@ -126,12 +126,35 @@ struct NativePlanEditor: View {
     var body: some View {
         Form {
             Section("Cosa vuoi fare?") {
-                Picker("Tipo di piano", selection: $draft.kind) { ForEach(NativePlanKind.allCases) { Text($0.title).tag($0) } }.pickerStyle(.menu).accessibilityIdentifier("plan-kind")
-                TextField("Nome", text: $draft.name).focused($editing).accessibilityIdentifier("plan-name")
+                ForEach(NativePlanKind.allCases) { kind in
+                    Button { draft.kind = kind } label: {
+                        HStack(spacing: NativeDesign.Space.medium) {
+                            VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
+                                Text(kind.title).font(.subheadline.weight(.semibold)).foregroundStyle(Color.primary)
+                                Text(NativePlanKindText.detail(kind)).font(.footnote).foregroundStyle(NativeDesign.secondary)
+                            }
+                            Spacer(minLength: NativeDesign.Space.small)
+                            if draft.kind == kind { Image(systemName: "checkmark").font(.subheadline.weight(.semibold)).foregroundStyle(NativeDesign.financeTitle) }
+                        }
+                        .frame(minHeight: NativeDesign.Layout.touchTarget)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(kind.title + ", " + NativePlanKindText.detail(kind))
+                    .accessibilityAddTraits(draft.kind == kind ? .isSelected : [])
+                    .accessibilityIdentifier("plan-kind-" + kind.rawValue)
+                }
+            }.disabled(submitted)
+            Section("Dettagli") {
+                LabeledContent("Nome") {
+                    TextField("es. Bolletta luce", text: $draft.name).multilineTextAlignment(.trailing).focused($editing).accessibilityIdentifier("plan-name")
+                }
                 if draft.kind != .advance {
                     Picker("Categoria della spesa", selection: $draft.category) { ForEach(Input.categories, id: \.self) { Text($0) } }
                 }
-                TextField(draft.kind == .estimated ? "Accantonamento mensile €" : draft.kind == .fund ? "Quota mensile €" : draft.kind == .fixed ? "Importo per scadenza €" : "Importo totale €", text: $draft.amount).keyboardType(.decimalPad).focused($editing).accessibilityIdentifier("plan-amount").disabled(draft.kind == .recovery && usesExisting)
+                LabeledContent(draft.kind == .estimated ? "Accantonamento al mese" : draft.kind == .fund ? "Quota al mese" : draft.kind == .fixed ? "Importo per scadenza" : "Importo totale") {
+                    TextField("0 €", text: $draft.amount).multilineTextAlignment(.trailing).keyboardType(.decimalPad).focused($editing).accessibilityIdentifier("plan-amount").disabled(draft.kind == .recovery && usesExisting)
+                }
             }.disabled(submitted)
             Section("Mesi del piano") {
                 if draft.kind == .advance { NativeMonthPicker(title: "Mese beneficiario", selection: $draft.beneficiaryMonth) }
@@ -477,5 +500,20 @@ private struct NativePlanQuotaEditor: View {
             submitted = true
             try await store.perform("editFinancePlan", payload); await store.loadFinancePlans(); dismiss()
         } catch { self.error = error.localizedDescription }
+    }
+}
+
+
+/// One line under each kind of plan, as in the build 93 preview.
+enum NativePlanKindText {
+    static func detail(_ kind: NativePlanKind) -> String {
+        switch kind {
+        case .fixed: return "Affitto e utenze: importo fisso a ogni scadenza"
+        case .estimated: return "Bollette: quota stimata, divisa su più mesi"
+        case .fund: return "Fondo senza scadenza, per esempio l'auto"
+        case .goal: return "Una cifra da raggiungere entro una data"
+        case .advance: return "Usa ora il budget di un mese futuro"
+        case .recovery: return "Una spesa già fatta, recuperata nei mesi"
+        }
     }
 }

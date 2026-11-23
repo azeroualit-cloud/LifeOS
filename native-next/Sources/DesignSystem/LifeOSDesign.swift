@@ -239,9 +239,10 @@ struct LOFilterPill<Options: View>: View {
             .font(.subheadline.weight(.medium))
             .foregroundStyle(.primary)
             .padding(.horizontal, NativeDesign.Space.medium)
-            .frame(minHeight: NativeDesign.Layout.touchTarget)
-            .contentShape(Capsule())
+            .frame(minHeight: NativeDesign.Layout.compactControl)
             .modifier(NativeGlass())
+            .frame(minHeight: NativeDesign.Layout.touchTarget)
+            .contentShape(Rectangle())
         }
         .accessibilityLabel(title + ", " + value)
         .accessibilityIdentifier(identifier)

@@ -161,6 +161,27 @@ enum NativeFinanceAlertRules {
 struct NativeFinanceAlertsScreen: View {
     @ObservedObject private var alerts = NativeFinanceAlerts.shared
     @State private var open: Int?
+    /// A sample notification (example text, not the user's data).
+    private func example(_ title: String, when: String, body: String) -> some View {
+        HStack(alignment: .top, spacing: NativeDesign.Space.medium) {
+            Image(systemName: "chart.bar.fill").font(.subheadline).foregroundStyle(NativeDesign.financeTitle)
+                .frame(width: NativeDesign.Layout.iconTile, height: NativeDesign.Layout.iconTile)
+                .loTileSurface()
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
+                HStack {
+                    Text(title).font(.subheadline.weight(.semibold))
+                    Spacer(minLength: NativeDesign.Space.small)
+                    Text(when).font(.footnote).foregroundStyle(NativeDesign.secondary)
+                }
+                Text(body).font(.footnote).foregroundStyle(NativeDesign.secondary)
+            }
+        }
+        .padding(.horizontal, NativeDesign.Layout.cardInset).padding(.vertical, NativeDesign.Layout.cardInsetVertical)
+        .loCardSurface()
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Esempio di avviso: " + title + ", " + body)
+    }
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: NativeDesign.Space.large) {
@@ -179,6 +200,12 @@ struct NativeFinanceAlertsScreen: View {
                             }
                         }
                     }
+                }
+                // Preview 93: how an alert looks on the lock screen before choosing the rules.
+                VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+                    LOSectionLabel(title: "Come arrivano")
+                    example("Ritmo sopra la norma", when: "adesso", body: "Negli ultimi 3 mesi spendi il 12% sopra la tua norma.")
+                    example("La tua settimana", when: "lunedì " + String(alerts.settings.weeklyHour) + ":00", body: "Spesi 186 € negli ultimi 7 giorni. Spesa la voce più alta.")
                 }
                 VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
                     LOSectionLabel(title: "Quando scattano")

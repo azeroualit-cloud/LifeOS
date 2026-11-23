@@ -169,9 +169,12 @@ struct FinanceScreen: View {
                 Image(systemName: "magnifyingglass").foregroundStyle(NativeDesign.secondary).accessibilityHidden(true)
                 TextField("Cerca movimento", text: $search).accessibilityIdentifier("movements-search")
             }
+            .frame(minHeight: NativeDesign.Layout.touchTarget)
+        }
+        Section {
             HStack(spacing: NativeDesign.Space.small) {
                 LOFilterPill(title: "Categoria", value: movementCategory == "Tutte" ? "Tutte le categorie" : movementCategory, isActive: true, identifier: "movements-category") {
-                    ForEach(["Tutte"] + movementCategories, id: \.self) { name in
+                    ForEach(["Tutte"] + NativeExpenseGroups.grouped(movementCategories).flatMap(\.items), id: \.self) { name in
                         Button { movementCategory = name } label: {
                             if movementCategory == name { Label(name == "Tutte" ? "Tutte le categorie" : name, systemImage: "checkmark") } else { Text(name == "Tutte" ? "Tutte le categorie" : name) }
                         }
@@ -186,7 +189,8 @@ struct FinanceScreen: View {
                 }
                 Spacer(minLength: 0)
             }
-            .listRowBackground(Color.clear).listRowInsets(EdgeInsets())
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets(top: NativeDesign.Space.xs, leading: 0, bottom: NativeDesign.Space.xs, trailing: 0))
         }
         if !store.financialPending.isEmpty {
             Section("Sul dispositivo") {
@@ -213,11 +217,11 @@ struct FinanceScreen: View {
             if rows.isEmpty { Text("Nessun movimento").foregroundStyle(NativeDesign.secondary) }
             ForEach(rows.map { DisplayRecord($0, key: "row") }) { item in
                 Button { router.sheet = .movement(item.value) } label: {
-                    HStack(alignment: .top, spacing: NativeDesign.Space.medium) {
+                    HStack(alignment: .center, spacing: NativeDesign.Space.medium) {
                         NativeIcon(name: NativeCategoryCatalog.symbol(for: item.value.text("displayCategory", fallback: item.value.text("category"))), color: NativeDesign.accent)
                         NativeRowText(title: item.value.text("name"), subtitle: item.value.text("displayCategory", fallback: item.value.text("category")) + " · " + CivilDate.label(item.value.text("date")))
                         Spacer(); MoneyText(amount: item.value.amount("amount")).foregroundStyle(Color.primary)
-                    }.padding(.vertical, NativeDesign.Space.xs)
+                    }
                 }
             }
             if movementCategory != "Tutte" && !rows.isEmpty {
@@ -315,13 +319,40 @@ struct MovementEditor: View {
                 })) {
                     ForEach(editing ? ["Spesa", "Entrata", "Rimborso", "Trasferimento", "Investimento", "Da verificare"] : ["Spesa", "Entrata", "Rimborso", "Trasferimento"], id: \.self) { Text($0) }
                 }
-                TextField("Importo €", text: $amount).keyboardType(.decimalPad).focused($editingInput, equals: .amount).accessibilityIdentifier("movement-amount")
-                TextField("Descrizione", text: $name).focused($editingInput, equals: .name).accessibilityIdentifier("movement-name")
+                LabeledContent("Importo") {
+                    TextField("0,00 €", text: $amount).font(.title.weight(.bold)).monospacedDigit().multilineTextAlignment(.trailing)
+                        .keyboardType(.decimalPad).focused($editingInput, equals: .amount).accessibilityIdentifier("movement-amount")
+                }
+                LabeledContent("Descrizione") {
+                    TextField("es. Esselunga", text: $name).multilineTextAlignment(.trailing).focused($editingInput, equals: .name).accessibilityIdentifier("movement-name")
+                }
                 DatePicker("Data", selection: $date, in: ...Date(), displayedComponents: .date)
                 if editing { Picker("Conto", selection: $account) { ForEach(["Trade Republic", "Revolut", "IsyBank"], id: \.self) { Text($0) } } }
                 else { LabeledContent("Conto", value: type == "Trasferimento" ? "Revolut" : "Trade Republic") }
                 if type == "Trasferimento" { Picker("Destinazione", selection: $counterpart) { ForEach(editing ? ["Trade Republic", "Revolut", "IsyBank"] : ["Trade Republic"], id: \.self) { Text($0) } } }
-                else { Picker("Categoria", selection: Binding(get: { category }, set: { category = $0; bill = NativeUtilityPeriodDraft() })) { ForEach(options, id: \.self) { Text($0) } }.accessibilityIdentifier("movement-category") }
+                else {
+                    // Nine ordered groups with their items (preview 93): the item is what is stored.
+                    Menu {
+                        ForEach(NativeExpenseGroups.grouped(options), id: \.group) { entry in
+                            Section(entry.group) {
+                                ForEach(entry.items, id: \.self) { item in
+                                    Button { category = item; bill = NativeUtilityPeriodDraft() } label: {
+                                        if item == category { Label(item, systemImage: "checkmark") } else { Text(item) }
+                                    }
+                                }
+                            }
+                        }
+                    } label: {
+                        LabeledContent("Categoria") {
+                            HStack(spacing: NativeDesign.Space.xs) {
+                                Text(type == "Entrata" ? category : NativeExpenseGroups.label(category)).foregroundStyle(Color.primary)
+                                Image(systemName: "chevron.up.chevron.down").font(.caption2.weight(.semibold)).foregroundStyle(NativeDesign.secondary)
+                            }
+                        }
+                    }
+                    .accessibilityLabel("Categoria, " + NativeExpenseGroups.label(category))
+                    .accessibilityIdentifier("movement-category")
+                }
             }.disabled(linkedPayment)
             if !editing && type == "Spesa" {
                 NativeExpenseRouteSection(category: category, day: CivilDate.day(date), amount: Input.cents(amount) ?? 0, selected: $destination, competenceMonths: $months, ready: $routeReady, quotedAvailable: $quotedAvailable, bill: $bill)

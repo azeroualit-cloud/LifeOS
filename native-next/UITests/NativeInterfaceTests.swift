@@ -990,8 +990,7 @@ final class NativeInterfaceTests: XCTestCase {
         app.navigationBars.buttons["Fine"].tap()
         app.buttons["plans-add"].tap()
         XCTAssertTrue(app.navigationBars["Nuovo piano"].waitForExistence(timeout: 10))
-        app.buttons["plan-kind"].tap()
-        app.buttons["Anticipa budget"].tap()
+        app.buttons["plan-kind-advance"].tap()
         let name = app.textFields["plan-name"]; name.tap(); name.typeText("Anticipo prova")
         let amount = app.textFields["plan-amount"]; amount.tap(); amount.typeText("250")
         app.buttons["Fine"].tap()
@@ -1031,7 +1030,7 @@ final class NativeInterfaceTests: XCTestCase {
     func testPlansFundCanEditFutureQuotaAndLinkAnExistingMovement() {
         let app = launch(["--dark"])
         app.openOtherDestination("Finanza"); app.buttons["finance-budget"].tap(); app.buttons["plans-add"].tap()
-        app.buttons["plan-kind"].tap(); app.buttons["Fondo senza scadenza"].tap()
+        app.buttons["plan-kind-fund"].tap()
         let name = app.textFields["plan-name"]; name.tap(); name.typeText("Fondo prova")
         let amount = app.textFields["plan-amount"]; amount.tap(); amount.typeText("50")
         app.buttons["Fine"].tap(); app.buttons["plan-save"].tap()
