@@ -1365,6 +1365,24 @@
       "provenance": "Richiesta diretta utente in chat dopo il confronto con l'HTML di riferimento",
       "original_quote": "completa tutti i punti",
       "rule": "Prima della IPA 95 completare i punti mancanti rispetto all'HTML di riferimento: bolletta con piano con ripartizione dell'eccedenza (risparmi −/+ e mesi di budget), quote del piano con parte dai risparmi, registra pagamento con ripartizione della differenza, Nuova spesa con Categoria e Voce su due righe."
+    },
+    {
+      "id": "SUPPLEMENT-STACK-2026-11-23",
+      "status": "ACTIVE",
+      "scope": "Salute/Nutrizione, app e sito",
+      "recorded_on": "2026-11-23",
+      "provenance": "Richiesta utente in chat + risposta alla domanda (multi-scelta)",
+      "original_quote": "volevo anche applicare la possibilità di creare una stack in base agli integratori che ho",
+      "rule": "Si possono creare stack di integratori (nome + integratori con dose) e registrarle con un tocco; le stack si gestiscono anche dal sito."
+    },
+    {
+      "id": "FOOD-QUICK-ADD-2026-11-23",
+      "status": "ACTIVE",
+      "scope": "Aggiungi alimento, app (e sito per parità)",
+      "recorded_on": "2026-11-23",
+      "provenance": "Risposta utente in chat (testo libero + scelte)",
+      "original_quote": "quando clicco aggiungi alimento dovrebbe aprire automaticamente la ricerca, ci dovrebbe essere un campo quantità/grammi da riempire subito, e cercando l'alimento e cliccando sul + aggiunge automaticamente l'alimento con quella qauntità. dici che potrebbe funzionare? voglio anche l'aggiunta tramite macro non la voglio perdere, ma è cmq secondaria",
+      "rule": "Aggiungi alimento apre subito la ricerca con un campo quantità/grammi compilabile prima; il + su un risultato registra l'alimento con quella quantità. L'inserimento a mano dei macro resta, come opzione secondaria. In più: «Ripeti da ieri» nel diario, e Siri/widget per registrare."
     }
   ],
   "pending_confirmations": [

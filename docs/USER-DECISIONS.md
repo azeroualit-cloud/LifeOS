@@ -444,3 +444,5 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 - **SALARY-MAP-COLORS-2026-11-23** (ACTIVE, eccezione limitata a FINANCE-PALETTE-2026-11-21 dopo conferma META-01): solo la mappa dello stipendio ha 4 colori distinti per gruppo; toccando un gruppo si apre la sua mappa, come sul sito.
 - **ACCOUNT-ROW-2026-11-23** (ACTIVE): nel nuovo movimento niente riga Conto, il conto è sempre lo stesso.
 - **REFERENCE-GAPS-95-2026-11-23** (ACTIVE, «completa tutti i punti»): prima della IPA 95 bolletta con piano ripartita, quote del piano dai risparmi, pagamento con differenza ripartita, Categoria e Voce su due righe.
+- **SUPPLEMENT-STACK-2026-11-23** (ACTIVE): stack di integratori registrabili con un tocco, gestibili anche dal sito.
+- **FOOD-QUICK-ADD-2026-11-23** (ACTIVE): Aggiungi alimento apre la ricerca con il campo quantità; il + registra con quella quantità; macro a mano restano come opzione secondaria; Ripeti da ieri; Siri e widget.

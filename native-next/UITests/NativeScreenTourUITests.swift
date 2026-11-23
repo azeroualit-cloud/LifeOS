@@ -22,7 +22,9 @@ final class NativeScreenTourUITests: XCTestCase {
         view.swipeUp(velocity: .slow)
         shot(name, app)
     }
-    private func tap(_ element: XCUIElement) -> Bool {
+    private func tap(_ query: XCUIElement) -> Bool {
+        // A day can appear twice (this month and the next one's leading days): always the first match.
+        let element = query.firstMatch
         guard element.waitForExistence(timeout: 8) else { return false }
         if element.isHittable { element.tap(); return true }
         element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap(); return true
