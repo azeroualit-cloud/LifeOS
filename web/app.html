@@ -1891,6 +1891,7 @@ function fdForm(e) {
   const foods = nb.foods || [], x = e || { name: "", grams: "", kcal: "", protein: "", carbs: "", fat: "", fibre: "", at: fdRomeIso(fd.day, new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Rome", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date())) };
   const num = (k, label, unit) => `<label>${label}<span class="nb-unit"><input type="number" inputmode="decimal" step="0.1" min="0" name="${k}" value="${x[k] ?? ""}"><em>${unit}</em></span></label>`;
   return `<form id="fd-form" class="os-form nb-form" autocomplete="off">
+    ${e ? "" : `<label class="wide">Alimento e grammi<input name="quick" placeholder="es. avena 63" autocomplete="off" list="fd-quick-list"><datalist id="fd-quick-list">${foods.map((f) => `<option value="${nbE(f.name)}">`).join("")}</datalist></label>`}
     ${e ? "" : `<label class="wide">Alimento<select name="food"><option value="">Inserisci i macro a mano</option>${foods.map((f) => `<option value="${nbE(f.id)}">${nbE(f.name)}${f.brand ? " · " + nbE(f.brand) : ""}</option>`).join("")}</select></label>`}
     <label class="wide">Nome<input name="name" value="${nbE(x.name)}" maxlength="160" placeholder="Facoltativo"></label>
     <label>Quantità<span class="nb-unit"><input type="number" inputmode="decimal" step="1" min="0" name="grams" value="${x.grams ?? ""}"><em>${x.ml ? "ml" : "g"}</em></span></label>
@@ -1906,8 +1907,23 @@ function fdOpen(e) {
   if (!nb.foods && !nb.loading) nbLoad("foods");
   host.innerHTML = `<div class="modal fd-pop" role="dialog" aria-modal="true" aria-label="${e ? "Modifica pasto" : "Nuovo pasto"}"><div class="modal-top"><h2>${e ? "Modifica pasto" : "Nuovo pasto"}</h2><button type="button" class="ghost" data-close="1" aria-label="Chiudi">×</button></div>${fdForm(e)}</div>`;
   host.classList.remove("hidden");
-  host.querySelector("input[name=grams], select[name=food]")?.focus({ preventScroll: true });
+  host.querySelector("input[name=quick], input[name=grams], select[name=food]")?.focus({ preventScroll: true });
 }
+/** FOOD-QUICK-ADD-2026-11-24 (parità con l'app): «avena 63» sceglie l'alimento e la quantità in un campo solo. */
+function fdQuick(form) {
+  const text = String(form.elements.quick?.value || "").trim();
+  const m = /^(.*?)[\s]+(\d+(?:[.,]\d+)?)\s*(?:g|gr|grammi|ml)?$/i.exec(text) || /^(\d+(?:[.,]\d+)?)\s*(?:g|gr|grammi|ml)?\s+(.*)$/i.exec(text);
+  const name = (m ? (/^\d/.test(text) ? m[2] : m[1]) : text).trim().toLowerCase(), qty = m ? Number((/^\d/.test(text) ? m[1] : m[2]).replace(",", ".")) : null;
+  if (!name) return;
+  const foods = nb.foods || [];
+  const food = foods.find((f) => f.name.toLowerCase() === name) || foods.find((f) => f.name.toLowerCase().startsWith(name)) || foods.find((f) => f.name.toLowerCase().includes(name));
+  if (!food || !form.elements.food) return;
+  form.elements.food.value = food.id;
+  if (qty > 0) form.elements.grams.value = qty;
+  form.elements.name.value = food.name;
+  fdFromFood(form);
+}
+document.addEventListener("input", (e) => { if (e.target.name === "quick" && e.target.closest("#fd-form")) fdQuick(e.target.form); });
 /** Alimento personale + quantità → macro (valori per 100 g o 100 ml). */
 function fdFromFood(form) {
   const f = (nb.foods || []).find((x) => x.id === form.elements.food?.value), q = Number(form.elements.grams.value);
