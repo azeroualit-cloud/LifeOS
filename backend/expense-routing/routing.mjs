@@ -64,7 +64,7 @@ export function createExpenseRouting({ PlanError, balance, command, completePaym
     }
     const plans = candidates(state, checked);
     if (parseUtilityPeriod && retained && !plans.some(p => p.id === retained.id)) plans.push({ ...retained, retained: true });
-    return { version: 1, savingsDestination: true, utilityCompetenceVersion: parseUtilityPeriod ? 1 : 0, category: checked.category, amountCents:checked.amount, date:checked.date, plans: plans.map(p => {
+    return { version: 1, savingsDestination: true, splitDestination: true, utilityCompetenceVersion: parseUtilityPeriod ? 1 : 0, category: checked.category, amountCents:checked.amount, date:checked.date, plans: plans.map(p => {
       const funds = available(state, p, checked.date.slice(0,7));
       return { id:p.id, name:p.name, kind:p.kind, status:p.status, retained:!!p.retained, availableCents:funds, fromFundCents:Math.min(funds,checked.amount), fromSavingsCents:Math.max(0,checked.amount-funds) };
     }) };
@@ -86,9 +86,21 @@ export function createExpenseRouting({ PlanError, balance, command, completePaym
     if (!['ordinary','plan','savings'].includes(input.expenseDestination)) fail('Scegli la destinazione della spesa.');
     if (input.expenseDestination !== 'plan') {
       // FINANCE-SAVINGS-RESTORE-2026-11-16: same single bank movement, kept out of the monthly budget.
-      const kind = input.expenseDestination === 'savings' ? 'savings' : 'ordinary';
+      // FUNDING-BLOCK-2026-11-21 / REVIEW-95: an ordinary expense can be split by the user. The part
+      // from the budget is recovered in the chosen budget months (existing 'recovery' policy); the rest
+      // stays on savings. One bank movement, no second ledger.
+      const split = input.expenseDestination === 'ordinary' && input.budgetTreatment === 'recovery';
+      const kind = input.expenseDestination === 'savings' ? 'savings' : split ? 'recovery' : 'ordinary';
       if (input.planId) fail('Destinazione e piano non coerenti.');
       if (kind === 'savings' && checked.utilityPeriod) fail('Una bolletta con periodo di competenza non si paga dai risparmi.');
+      if (split) {
+        if (checked.utilityPeriod) fail('Una bolletta con periodo di competenza non si divide tra risparmi e mesi di budget.');
+        const months = Array.isArray(input.recoveryMonths) ? input.recoveryMonths.map(String) : String(input.recoveryMonths ?? '').split(',').map(v => v.trim()).filter(Boolean);
+        if (!months.length || months.length > 12 || new Set(months).size !== months.length || months.some(m => !/^20\d\d-(0[1-9]|1[0-2])$/.test(m) || m < checked.date.slice(0,7)))
+          fail('Scegli da 1 a 12 mesi di budget, dal mese della spesa in avanti.');
+        const fromBudget = Math.round(Number(input.recoveryAmount) * 100);
+        if (!Number.isSafeInteger(fromBudget) || fromBudget <= 0 || fromBudget > checked.amount) fail('La parte dal budget deve essere tra 0,01 € e l’importo della spesa.');
+      }
       // Reserve the routing choice too: a reused request may never debit a second path.
       const key = requestKey(input.requestId), sig = signature(input);
       const reserved = await service.change(state => {

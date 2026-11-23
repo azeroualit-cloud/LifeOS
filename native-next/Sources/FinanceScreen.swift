@@ -290,6 +290,7 @@ struct MovementEditor: View {
     @State private var counterpart = "Trade Republic"
     @State private var months = 1
     @State private var treatment = "ordinary"
+    @State private var split = NativeExpenseSplit()
     @State private var recovery = ""
     @State private var recoveryAmount = ""
     @State private var included = false
@@ -359,7 +360,7 @@ struct MovementEditor: View {
                 }
             }.disabled(linkedPayment)
             if !editing && type == "Spesa" {
-                NativeExpenseRouteSection(category: category, day: CivilDate.day(date), amount: Input.cents(amount) ?? 0, selected: $destination, competenceMonths: $months, ready: $routeReady, quotedAvailable: $quotedAvailable, bill: $bill)
+                NativeExpenseRouteSection(category: category, day: CivilDate.day(date), amount: Input.cents(amount) ?? 0, selected: $destination, competenceMonths: $months, ready: $routeReady, quotedAvailable: $quotedAvailable, bill: $bill, split: $split)
             }
             if editing && type == "Spesa" && account == "Trade Republic" {
                 Section("Destinazione") {
@@ -436,6 +437,11 @@ struct MovementEditor: View {
             payload["competenceMonths"] = .int(months)
             payload["expectedAvailableCents"] = .int(quotedAvailable)
             payload.merge(bill.payload) { _, value in value }
+            // REVIEW-95: savings and budget months chosen by the user (server 'recovery' policy).
+            if destination == NativeExpenseRouting.ordinary && !bill.enabled {
+                var chosen = split; chosen.change(0, amount: cents)
+                if let extra = chosen.payload(amount: cents, day: CivilDate.day(date)) { payload.merge(extra) { _, value in value } }
+            }
         }
         if treatment == "recovery" && type == "Spesa" {
             payload["recoveryMonths"] = .string(recovery)

@@ -11,7 +11,11 @@ struct NativeExpenseRouteSection: View {
     @Binding var ready: Bool
     @Binding var quotedAvailable: Int
     @Binding var bill: NativeUtilityPeriodDraft
+    /// REVIEW-95: savings / budget months chosen by the user for an ordinary expense.
+    var split: Binding<NativeExpenseSplit> = .constant(NativeExpenseSplit())
     @State private var plans: [Record] = []
+    @State private var splitSupported = false
+    private var offersSplit: Bool { splitSupported && movementID == 0 && !bill.enabled && amount > 1 }
     @State private var loading = false
     @State private var issue: String?
     @State private var retry = 0
@@ -47,7 +51,8 @@ struct NativeExpenseRouteSection: View {
                     } else if selected == NativeExpenseRouting.savings {
                         LabeledContent("Dai risparmi", value: (Double(amount) / 100).euro).accessibilityIdentifier("expense-direct-savings-preview")
                     } else if selected == NativeExpenseRouting.ordinary {
-                        LabeledContent(bill.enabled ? "Pagamento bancario" : "Dal budget mensile", value: (Double(amount) / 100).euro).accessibilityIdentifier("expense-budget-preview")
+                        if offersSplit { NativeExpenseSplitRows(split: split, amount: amount, day: day) }
+                        else { LabeledContent(bill.enabled ? "Pagamento bancario" : "Dal budget mensile", value: (Double(amount) / 100).euro).accessibilityIdentifier("expense-budget-preview") }
                     } else { Text("Scegli il piano").font(NativeDesign.metadata) }
                 }
             } header: {
@@ -77,6 +82,7 @@ struct NativeExpenseRouteSection: View {
         }
         if chosen != nil { return (amount, 0, 0) }
         if selected == NativeExpenseRouting.savings { return (0, amount, 0) }
+        if offersSplit { let savings = min(split.wrappedValue.savings, amount); return (0, savings, amount - savings) }
         return (0, 0, amount)
     }
     private var fundingBar: some View {
@@ -84,8 +90,8 @@ struct NativeExpenseRouteSection: View {
         let euro: (Int) -> String = { (Double($0) / 100).euro }
         return LOSplitBar(segments: [
             LOSegment(id: "plan", value: Double(parts.plan), color: NativeDesign.financeGroups[1]),
-            LOSegment(id: "savings", value: Double(parts.savings), color: NativeDesign.financeGroups[0]),
-            LOSegment(id: "budget", value: Double(parts.budget), color: NativeDesign.financeBudget[0])
+            LOSegment(id: "savings", value: Double(parts.savings), color: NativeDesign.salaryGroups[1]),
+            LOSegment(id: "budget", value: Double(parts.budget), color: NativeDesign.salaryGroups[3])
         ], scale: Double(max(amount, 1)), height: NativeDesign.Space.medium,
            accessibilityText: "Piano " + euro(parts.plan) + ", risparmi " + euro(parts.savings) + ", budget " + euro(parts.budget))
         .accessibilityIdentifier("expense-funding-bar")
@@ -103,6 +109,7 @@ struct NativeExpenseRouteSection: View {
             if store.isDemo {
                 rows = NativeExpenseDemo.preview(state: store.state, category: category, day: day, movementID: movementID, bill: bill.enabled)
                 savingsSupported = true
+                splitSupported = true
             } else {
                 var payload: Record = ["category": .string(category), "date": .string(day), "amountCents": .int(max(1, amount))]
                 if movementID > 0 { payload["movementId"] = .int(movementID) }
@@ -118,6 +125,7 @@ struct NativeExpenseRouteSection: View {
                 if movementID > 0 && (result.integer("amountCents") != amount || result.text("date") != day || result.text("category") != category) { throw Message(text: "Il movimento è cambiato. Chiudi e riaprilo.") }
                 rows = result.records("plans")
                 savingsSupported = result.flag("savingsDestination")
+                splitSupported = result.flag("splitDestination")
             }
             try Task.checkCancellation()
             plans = rows

@@ -176,3 +176,17 @@ test('savings choice records one bank movement outside the monthly budget and ca
  await assert.rejects(core.expenseRouting.save({...ctx,input:{...savings,requestId:'unknown-destination-0001',expenseDestination:'other'}}),/Scegli la destinazione/);
  assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM movements').get().n,1);
 });
+
+test('REVIEW-95: an ordinary expense split between savings and chosen budget months keeps one movement',async()=>{
+ const {ctx,payload,sqlite}=await fixture();
+ assert.equal((await core.expenseRouting.preview({...ctx,input:{category:'Acqua',amountCents:3000,date:'2026-10-28'}})).splitDestination,true);
+ const split={...payload,requestId:'split-request-0001',expenseDestination:'ordinary',budgetTreatment:'recovery',recoveryMonths:'2026-10, 2026-11',recoveryAmount:20};delete split.planId;
+ await assert.rejects(core.expenseRouting.save({...ctx,input:{...split,requestId:'split-bad-0001',recoveryMonths:'2026-09'}}),/mesi di budget/);
+ await assert.rejects(core.expenseRouting.save({...ctx,input:{...split,requestId:'split-bad-0002',recoveryAmount:31}}),/parte dal budget/);
+ assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM movements').get().n,0,'invalid splits write nothing');
+ await core.expenseRouting.save({...ctx,input:split});await core.expenseRouting.save({...ctx,input:split});
+ assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM movements').get().n,1);
+ assert.equal(sqlite.prepare('SELECT treatment FROM movement_budget_policies').get().treatment,'recovery');
+ const written=JSON.parse(sqlite.prepare('SELECT fingerprint FROM finance_write_requests').get().fingerprint);
+ assert.equal(written.recoveryMonths,'2026-10, 2026-11');assert.equal(written.recoveryAmount,20);
+});
