@@ -54,7 +54,7 @@ struct NativeSupplementStack: Codable, Identifiable, Equatable, Hashable {
     }
 
     /// Entries of a stack on a day (one per supplement; missing supplements are skipped).
-    static func entries(_ stack: NativeSupplementStack, date: Date, foods: [NativeGenericFood] = supplements()) -> [NativeNutritionEntry] {
+    static func entries(_ stack: NativeSupplementStack, date: Date, foods: [NativeGenericFood]) -> [NativeNutritionEntry] {
         stack.items.compactMap { item in
             guard item.quantity > 0, let food = foods.first(where: { $0.id == item.foodID }) else { return nil }
             return food.portion(id: UUID(), date: date, grams: Decimal(item.quantity))
@@ -65,7 +65,7 @@ struct NativeSupplementStack: Codable, Identifiable, Equatable, Hashable {
     func record(_ stack: NativeSupplementStack, date: Date = .now) async -> Int {
         let nutrition = NativeNutritionUIFixture.current
         var saved = 0
-        for entry in Self.entries(stack, date: date) { if await nutrition.save(entry) { saved += 1 } }
+        for entry in Self.entries(stack, date: date, foods: Self.supplements()) { if await nutrition.save(entry) { saved += 1 } }
         return saved
     }
 }
