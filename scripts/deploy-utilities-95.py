@@ -57,7 +57,7 @@ def bundled(source):
         return source
     live = compact(current)
     needles = ("utilityShares(Math.round(-Number(row.amount)*100),period)", "add(payment.movementId,payment.utilityPeriod)",
-               "add(command.pending?confirmedPendingRow(command,id):command.movementId,command.utilityPeriod)")
+               "confirmedPendingRow(command,", "command.utilityPeriod)")  # the bundler may rename local variables (id2)
     found = {n: n in live for n in needles}
     print('COMPETENCE_CHECK ' + ' '.join('%s=%d' % (n.split('(')[0][:20], int(v)) for n, v in found.items()) + ' savings=%d' % live.count('utilitySavingsCents'))
     if not all(found.values()):
