@@ -8873,6 +8873,22 @@ document.addEventListener("keydown", (e) => {
 const hub = { goals: null, targets: null, alerts: null, log: null, stacks: null, supplements: null, stackEdit: null, busy: "", error: "", editing: null, msg: "" };
 const HUB_PRAYERS = [["fajr", "Fajr (alba)"], ["sunrise", "Sorgere del sole"], ["dhuhr", "Dhuhr (mezzogiorno)"], ["asr", "Asr (pomeriggio)"], ["maghrib", "Maghrib (tramonto)"], ["isha", "Isha (notte)"]];
 const HUB_DAYS = [[1, "L"], [2, "M"], [3, "M"], [4, "G"], [5, "V"], [6, "S"], [7, "D"]];
+/* ALERTS-CLARITY-2026-11-24: come arriva ogni avviso e modelli pronti. */
+const HUB_DELIVERY = { sound: ["Con suono", "Notifica con il suono delle notifiche"], silent: ["Senza suono", "Notifica normale, senza suono"], quiet: ["Discreta", "Nessun suono, non accende lo schermo: solo nel Centro notifiche"] };
+const HUB_TEMPLATES = [
+  ["Proteine indietro alle 18", { type: "nutritionBelow", time: "18:00", params: { nutrient: "protein", percent: 70 } }],
+  ["Calorie basse alle 20", { type: "nutritionBelow", time: "20:00", params: { nutrient: "kcal", percent: 60 } }],
+  ["Budget sotto 50 €", { type: "budgetBelow", time: "09:00", params: { amount: 50 } }],
+  ["Quanto posso spendere oggi", { type: "dailyBudget", time: "08:30", delivery: "quiet" }],
+  ["Benzina oltre 150 €", { type: "categoryOver", time: "19:00", params: { category: "Benzina", amount: 150 } }],
+  ["Turno di domani", { type: "shiftTomorrow", time: "21:00" }],
+  ["Impegni di domani", { type: "eventTomorrow", time: "20:30" }],
+  ["Riepilogo della domenica", { type: "weeklySummary", time: "20:00", days: [7] }],
+  ["Integratori della sera", { type: "custom", time: "21:30", params: { title: "Integratori", body: "Hai preso la stack della sera?" } }],
+  ["Bevi acqua", { type: "custom", time: "15:00", delivery: "silent", params: { title: "Acqua", body: "Un bicchiere d'acqua." } }],
+];
+const HUB_FIN_DEFAULT = { rhythmOn: true, rhythmThreshold: 10, recurringOn: true, recurringPercent: 25, recurringEuro: 15, weeklyOn: true, weeklyHour: 9, frequency: 1 };
+const HUB_FIN_FREQ = ["1 a settimana", "1 per voce al mese", "1 al mese in tutto"];
 const HUB_TYPES = {
   budgetBelow: { label: "Budget del mese sotto una soglia", params: [["amount", "Soglia €", "number", 50]] },
   categoryOver: { label: "Spesa di una categoria oltre una cifra nel mese", params: [["category", "Categoria", "text", "Benzina"], ["amount", "Oltre €", "number", 150]] },
@@ -8996,6 +9012,8 @@ function hubRuleText(r) {
   const days = (r.days || []).length === 7 || !(r.days || []).length ? "ogni giorno" : (r.days || []).map((d) => HUB_DAYS[d - 1][1]).join(" ");
   return `${detail ? detail + " · " : ""}alle ${r.time || "09:00"} · ${days}`;
 }
+function hubDeliveryBadge(d) { const k = HUB_DELIVERY[d] ? d : "sound"; return `<span class="hub-badge hub-badge-${k}" title="${hubE(HUB_DELIVERY[k][1])}">${HUB_DELIVERY[k][0]}</span>`; }
+function hubDeliverySelect(name, value, attr = "") { return `<select name="${name}" ${attr}>${Object.entries(HUB_DELIVERY).map(([k, [l]]) => `<option value="${k}" ${(value || "sound") === k ? "selected" : ""}>${l}</option>`).join("")}</select>`; }
 function hubRuleForm(r) {
   const x = r || { id: "", name: "", type: "budgetBelow", enabled: true, time: "09:00", days: [1, 2, 3, 4, 5, 6, 7], params: {} };
   const t = HUB_TYPES[x.type] || HUB_TYPES.budgetBelow;
@@ -9009,9 +9027,25 @@ function hubRuleForm(r) {
     <label class="wide">Quando avvisarmi<select name="type" data-hub-type>${Object.entries(HUB_TYPES).map(([k, v]) => `<option value="${k}" ${k === x.type ? "selected" : ""}>${v.label}</option>`).join("")}</select></label>
     ${t.params.map(field).join("")}
     <label>Ora<input name="time" type="time" value="${hubE(x.time || "09:00")}" required></label>
+    <label>Come arriva${hubDeliverySelect("delivery", x.delivery)}</label>
     <fieldset class="wide hub-days"><legend>Giorni</legend>${HUB_DAYS.map(([d, l]) => `<label class="nb-chip pick"><input type="checkbox" name="day" value="${d}" ${(x.days || []).includes(d) ? "checked" : ""}>${l}</label>`).join("")}</fieldset>
     <div class="form-actions wide">${x.id ? '<button type="button" class="danger" data-hub-delete>Elimina</button>' : ""}<button type="button" data-hub-cancel>Annulla</button><button class="save" type="submit">Salva avviso</button></div>
   </form>`;
+}
+function hubFinanceHtml(doc) {
+  const f = { ...HUB_FIN_DEFAULT, ...(doc.finance || {}) }, seen = !!doc.finance;
+  const num = (k, min, max, step, suffix) => `<span class="nb-unit"><input type="number" data-hub-fin="${k}" min="${min}" max="${max}" step="${step}" value="${Number(f[k])}"><em>${suffix}</em></span>`;
+  const row = (k, title, detail, params) => `<div class="hub-rule${f[k] ? "" : " off"}"><div class="hub-rule-main static"><b>${title}</b><small>${detail}</small>${f[k] ? `<div class="hub-params">${params}</div>` : ""}</div><span class="hub-rule-side">${hubDeliveryBadge("sound")}<button class="hub-switch" role="switch" aria-checked="${!!f[k]}" data-hub-fin-toggle="${k}" aria-label="${f[k] ? "Spegni" : "Accendi"} ${title}"><i></i></button></span></div>`;
+  return `<section class="card pad adm-wide"><div class="card-title"><h2>Avvisi della Finanza</h2><span class="hub-origin">dall'app</span></div>
+    <p class="hint">Calcolati dall'iPhone sui movimenti. ${seen ? "Le modifiche fatte qui arrivano all'app alla prossima apertura (vince la più recente)." : "Apri l'app una volta per vedere qui le tue impostazioni: per ora sono mostrati i valori di partenza."}</p>
+    <div class="hub-rules">
+      ${row("rhythmOn", "Ritmo sopra la norma", `media 3 mesi oltre il ${f.rhythmThreshold}% della norma`, `<label>Soglia ${num("rhythmThreshold", 5, 30, 5, "%")}</label>`)}
+      ${row("recurringOn", "Spese ricorrenti fuori norma", `bollette e abbonamenti oltre +${f.recurringPercent}% e +${f.recurringEuro} €`, `<label>Oltre la norma ${num("recurringPercent", 10, 60, 5, "%")}</label><label>E almeno ${num("recurringEuro", 5, 50, 5, "€")}</label>`)}
+      ${row("weeklyOn", "Riepilogo del lunedì", `una notifica alle ${f.weeklyHour}:00`, `<label>Ora ${num("weeklyHour", 6, 21, 1, ":00")}</label>`)}
+    </div>
+    <label class="hub-row">Al massimo<select data-hub-fin="frequency">${HUB_FIN_FREQ.map((l, i) => `<option value="${i}" ${Number(f.frequency) === i ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+    <p class="hint">Silenzio fisso dalle 22:00 alle 8:00.</p>
+  </section>`;
 }
 function renderAlerts() {
   const root = document.getElementById("alerts");
@@ -9021,12 +9055,23 @@ function renderAlerts() {
   const rules = doc.rules || [];
   root.innerHTML = `<div class="adm-grid hub-alerts">
     ${hub.error ? `<div class="errorbox adm-wide">${hubE(hub.error)}</div>` : ""}${hub.msg ? `<p class="hint adm-wide" role="status">${hubE(hub.msg)}</p>` : ""}
-    <section class="card pad adm-wide"><div class="card-title"><h2>I tuoi avvisi</h2><button class="save" data-hub-new>+ Nuovo avviso</button></div>
-      ${hub.editing !== null ? hubRuleForm(rules.find((r) => r.id === hub.editing) || null) : ""}
-      ${rules.length ? `<div class="hub-rules">${rules.map((r) => `<div class="hub-rule"><button class="hub-switch" role="switch" aria-checked="${r.enabled !== false}" data-hub-toggle="${hubE(r.id)}" aria-label="${r.enabled !== false ? "Spegni" : "Accendi"} ${hubE(r.name)}"><i></i></button><button class="hub-rule-main" data-hub-edit="${hubE(r.id)}"><b>${hubE(r.name)}</b><small>${hubE(hubRuleText(r))}</small></button></div>`).join("")}</div>` : `<p class="empty">Nessun avviso. Crea il primo: scegli cosa controllare, l'ora e i giorni.</p>`}
+    <section class="card pad adm-wide hub-how"><div class="card-title"><h2>Come arrivano</h2></div>
+      <ul class="hub-facts">
+        <li><b>Solo sull'iPhone</b><span>Sono notifiche dell'app Life OS, programmate quando apri l'app (per i prossimi 2 giorni). Il sito non manda notifiche: qui le scegli.</span></li>
+        <li><b>Suono a scelta</b><span>Per ogni avviso: <em>Con suono</em>, <em>Senza suono</em> o <em>Discreta</em> (solo nel Centro notifiche, schermo spento).</span></li>
+        <li><b>Nessuna sveglia</b><span>Non suonano come una sveglia e non superano la modalità Concentrazione o Silenzioso.</span></li>
+        <li><b>Silenzio e limite</b><span>Dalle ${hubE(doc.quiet?.from || "22:00")} alle ${hubE(doc.quiet?.to || "07:00")} nessun avviso personale; al massimo ${Number(doc.maxPerDay) || 6} al giorno. La preghiera arriva sempre.</span></li>
+      </ul>
     </section>
+    <section class="card pad adm-wide"><div class="card-title"><h2>I tuoi avvisi</h2><button class="save" data-hub-new>+ Nuovo avviso</button></div>
+      <div class="hub-templates" role="group" aria-label="Modelli"><span class="hub-templates-label">Modelli</span>${HUB_TEMPLATES.map(([l], i) => `<button type="button" class="nb-chip" data-hub-template="${i}">${hubE(l)}</button>`).join("")}</div>
+      ${hub.editing !== null ? hubRuleForm(hub.draft || rules.find((r) => r.id === hub.editing) || null) : ""}
+      ${rules.length ? `<div class="hub-rules">${rules.map((r) => `<div class="hub-rule${r.enabled === false ? " off" : ""}"><button class="hub-rule-main" data-hub-edit="${hubE(r.id)}"><b>${hubE(r.name)}</b><small>${hubE(hubRuleText(r))}</small></button><span class="hub-rule-side">${hubDeliveryBadge(r.delivery)}<button class="hub-switch" role="switch" aria-checked="${r.enabled !== false}" data-hub-toggle="${hubE(r.id)}" aria-label="${r.enabled !== false ? "Spegni" : "Accendi"} ${hubE(r.name)}"><i></i></button></span></div>`).join("")}</div>` : `<p class="empty">Nessun avviso personale: parti da un modello qui sopra.</p>`}
+    </section>
+    ${hubFinanceHtml(doc)}
     <section class="card pad"><div class="card-title"><h2>Preghiera</h2><button class="hub-switch" role="switch" aria-checked="${!!p.enabled}" data-hub-prayer-toggle aria-label="Notifiche della preghiera"><i></i></button></div>
       <label class="hub-row">Avvisami<select data-hub-prayer-before>${[0, 5, 10, 15, 20, 30].map((m) => `<option value="${m}" ${Number(p.before) === m ? "selected" : ""}>${m ? m + " minuti prima" : "all'orario"}</option>`).join("")}</select></label>
+      <label class="hub-row">Come arriva${hubDeliverySelect("prayer-delivery", p.delivery, "data-hub-prayer-delivery")}</label>
       <div class="hub-prayers">${HUB_PRAYERS.map(([k, l]) => `<label class="hub-check"><input type="checkbox" data-hub-prayer="${k}" ${p.prayers?.[k] ? "checked" : ""} ${p.enabled ? "" : "disabled"}>${l}</label>`).join("")}</div>
       <p class="hint">Orari calcolati per Empoli come nella Dashboard.</p>
     </section>
@@ -9034,7 +9079,7 @@ function renderAlerts() {
       <label class="hub-row">Silenzio dalle<input type="time" data-hub-quiet="from" value="${hubE(doc.quiet?.from || "22:00")}"></label>
       <label class="hub-row">alle<input type="time" data-hub-quiet="to" value="${hubE(doc.quiet?.to || "07:00")}"></label>
       <label class="hub-row">Al massimo al giorno<input type="number" min="1" max="20" data-hub-max value="${Number(doc.maxPerDay) || 6}"></label>
-      <p class="hint">Le preghiere non rispettano il silenzio: arrivano sempre se accese.</p>
+      <p class="hint">Valgono per i tuoi avvisi. Le preghiere non rispettano il silenzio: arrivano sempre se accese.</p>
     </section>
     <section class="card pad adm-wide"><div class="card-title"><h2>Ultimi avvisi sull'iPhone</h2><button data-hub-reload>Aggiorna</button></div>
       ${(hub.log || []).length ? `<div class="hub-log">${hub.log.map((x) => `<div class="kv"><span>${hubE(x.title)}<small>${hubE(x.body)}</small></span><strong>${hubE(new Date(x.at).toLocaleString("it-IT", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }))}</strong></div>`).join("")}</div>` : `<p class="empty">Ancora nessun avviso mostrato.</p>`}
@@ -9052,10 +9097,13 @@ async function hubSaveAlerts(mutate) {
 document.addEventListener("click", (e) => {
   const t = e.target; if (!t.closest) return;
   if (t.closest("[data-hub-copy]")) { const area = document.getElementById("hub-ai-prompt"); const done = (m) => { const s = document.querySelector("[data-hub-copied]"); if (s) s.textContent = m; }; navigator.clipboard?.writeText(area.value).then(() => done("Copiato."), () => { area.select(); done("Selezionato: premi Ctrl+C."); }); return; }
-  if (t.closest("[data-hub-new]")) { hub.editing = ""; renderAlerts(); return; }
-  if (t.closest("[data-hub-cancel]")) { hub.editing = null; renderAlerts(); return; }
+  if (t.closest("[data-hub-new]")) { hub.editing = ""; hub.draft = null; renderAlerts(); return; }
+  if (t.closest("[data-hub-cancel]")) { hub.editing = null; hub.draft = null; renderAlerts(); return; }
+  const tpl = t.closest("[data-hub-template]");
+  if (tpl) { const [label, base] = HUB_TEMPLATES[Number(tpl.dataset.hubTemplate)]; hub.editing = ""; hub.draft = { id: "", name: label, enabled: true, days: [1, 2, 3, 4, 5, 6, 7], params: {}, delivery: "sound", ...structuredClone(base) }; renderAlerts(); document.getElementById("hub-rule-form")?.scrollIntoView({ block: "nearest" }); return; }
+  const fin = t.closest("[data-hub-fin-toggle]"); if (fin) { const k = fin.dataset.hubFinToggle; hubSaveAlerts((d) => { const cur = { ...HUB_FIN_DEFAULT, ...(d.finance || {}) }; d.finance = { ...cur, [k]: !cur[k] }; d.financeModified = Date.now(); }); return; }
   if (t.closest("[data-hub-reload]")) { hub.alerts = null; hubLoad(true); return; }
-  const edit = t.closest("[data-hub-edit]"); if (edit) { hub.editing = edit.dataset.hubEdit; renderAlerts(); return; }
+  const edit = t.closest("[data-hub-edit]"); if (edit) { hub.editing = edit.dataset.hubEdit; hub.draft = null; renderAlerts(); return; }
   const tog = t.closest("[data-hub-toggle]"); if (tog) { const id = tog.dataset.hubToggle; hubSaveAlerts((d) => { const r = d.rules.find((x) => x.id === id); if (r) r.enabled = r.enabled === false; }); return; }
   if (t.closest("[data-hub-prayer-toggle]")) { hubSaveAlerts((d) => { d.prayer.enabled = !d.prayer.enabled; }); return; }
   if (t.closest("[data-hub-delete]")) { const id = t.closest("form").dataset.rule; if (!confirm("Eliminare questo avviso?")) return; hub.editing = null; hubSaveAlerts((d) => { d.rules = d.rules.filter((x) => x.id !== id); }); return; }
@@ -9064,6 +9112,8 @@ document.addEventListener("change", (e) => {
   const t = e.target;
   if (t.matches && t.matches("[data-hub-type]")) { const form = t.closest("form"); const id = form.dataset.rule; const rules = hub.alerts?.doc?.rules || []; const base = rules.find((r) => r.id === id) || {}; const host = form.parentElement; const tmp = document.createElement("div"); tmp.innerHTML = hubRuleForm({ ...base, id, name: HUB_TYPES[t.value].label, type: t.value, params: {}, time: form.elements.time.value, days: [...form.querySelectorAll("[name=day]:checked")].map((x) => Number(x.value)) }); host.replaceChild(tmp.firstElementChild, form); return; }
   if (t.matches && t.matches("[data-hub-prayer]")) { const k = t.dataset.hubPrayer, on = t.checked; hubSaveAlerts((d) => { d.prayer.prayers[k] = on; }); return; }
+  if (t.matches && t.matches("[data-hub-prayer-delivery]")) { const v = t.value; hubSaveAlerts((d) => { d.prayer.delivery = v; }); return; }
+  if (t.matches && t.matches("[data-hub-fin]")) { const k = t.dataset.hubFin, lim = { rhythmThreshold: [5, 30], recurringPercent: [10, 60], recurringEuro: [5, 50], weeklyHour: [6, 21], frequency: [0, 2] }[k]; const v = Math.max(lim[0], Math.min(lim[1], Math.round(Number(t.value) || 0))); hubSaveAlerts((d) => { d.finance = { ...HUB_FIN_DEFAULT, ...(d.finance || {}), [k]: v }; d.financeModified = Date.now(); }); return; }
   if (t.matches && t.matches("[data-hub-prayer-before]")) { const v = Number(t.value); hubSaveAlerts((d) => { d.prayer.before = v; }); return; }
   if (t.matches && t.matches("[data-hub-quiet]")) { const k = t.dataset.hubQuiet, v = t.value; hubSaveAlerts((d) => { d.quiet = { ...(d.quiet || {}), [k]: v }; }); return; }
   if (t.matches && t.matches("[data-hub-max]")) { const v = Math.max(1, Math.min(20, Number(t.value) || 6)); hubSaveAlerts((d) => { d.maxPerDay = v; }); return; }
@@ -9074,8 +9124,8 @@ document.addEventListener("submit", async (e) => {
     const f = e.target, type = f.elements.type.value, params = {};
     for (const [k, , kind] of HUB_TYPES[type].params) { const v = f.elements["p_" + k].value; params[k] = kind === "number" ? Number(v) : v; }
     const days = [...f.querySelectorAll("[name=day]:checked")].map((x) => Number(x.value));
-    const rule = { id: f.dataset.rule || "rule-" + Date.now().toString(36), name: f.elements.name.value.trim() || HUB_TYPES[type].label, type, enabled: true, time: f.elements.time.value || "09:00", days: days.length ? days : [1, 2, 3, 4, 5, 6, 7], params };
-    hub.editing = null;
+    const rule = { id: f.dataset.rule || "rule-" + Date.now().toString(36), name: f.elements.name.value.trim() || HUB_TYPES[type].label, type, enabled: true, time: f.elements.time.value || "09:00", days: days.length ? days : [1, 2, 3, 4, 5, 6, 7], params, delivery: f.elements.delivery.value || "sound" };
+    hub.editing = null; hub.draft = null;
     await hubSaveAlerts((d) => { const i = d.rules.findIndex((x) => x.id === rule.id); if (i >= 0) d.rules[i] = { ...d.rules[i], ...rule, enabled: d.rules[i].enabled }; else d.rules.push(rule); });
   }
   if (e.target.id === "hub-goals-form") {

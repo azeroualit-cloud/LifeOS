@@ -1482,3 +1482,28 @@ html[data-theme="light"]{--shadow-94:0 5px 13px rgba(0,0,0,.08);--warn-94:#c99a0
 .hub-stack-list li{display:flex;justify-content:space-between;align-items:center;gap:13px;padding:8px 0;border-bottom:1px solid var(--line)}
 .hub-stack-list li span:first-child{display:grid;gap:2px}
 .hub-stack-list small{color:var(--muted,inherit)}
+
+/* ALERTS-CLARITY-2026-11-24: righe con interruttore a destra, badge del suono, modelli, «Come arrivano». */
+.hub-rule{justify-content:space-between}
+.hub-rule.off .hub-rule-main{opacity:.55}
+.hub-rule-main.static{cursor:default}
+.hub-rule-side{display:flex;align-items:center;gap:10px;flex:none}
+.hub-badge{font-size:12px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
+.hub-badge-sound{color:var(--ink)}
+.hub-badge-quiet{background:transparent;border:1px solid var(--line)}
+.hub-origin{font-size:12px;font-weight:600;color:var(--ink-2);padding:3px 8px;border:1px solid var(--line);border-radius:999px}
+.hub-params{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:6px}
+.hub-params label{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2)}
+.hub-params input{width:64px;min-height:32px;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font:inherit;padding:0 6px;text-align:right}
+.hub-templates{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 13px}
+.hub-templates-label{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);margin-right:4px}
+.hub-facts{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:13px}
+.hub-facts li{display:grid;gap:4px;padding:12px;border-radius:12px;background:var(--surface-2)}
+.hub-facts b{font-size:14px}
+.hub-facts span{font-size:13px;color:var(--ink-2);line-height:1.4}
+@media (max-width:560px){.hub-rule{align-items:flex-start}.hub-rule-side{padding-top:8px}}
+.hub-rule-main{justify-content:start;align-content:center;padding:0;min-width:0}
+.hub-row{flex-wrap:nowrap}
+.hub-row>:first-child,.hub-row{white-space:nowrap}
+.hub-row select,.hub-row input{width:auto;min-width:0;max-width:60%;flex:0 1 auto}
+.hub-params .nb-unit{display:inline-flex;align-items:center;gap:4px}
