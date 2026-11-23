@@ -45,7 +45,7 @@ Dalla prova su iPhone della 94 (revisione dell'utente del 23 novembre 2026) e da
 ## Calendario e Bloom
 31. Agenda: via il blocco «Notte · da ieri 00:00–06:00».
 32. Agenda: tutti i giorni nello stesso stile (orario | barretta | titolo), con la riga secondaria sotto l'evento (es. «fino alle 11:30», luogo).
-33. Bloom › luoghi: distanza del posto nella scheda.
+33. ~~Bloom › luoghi: distanza~~ — non richiesta (utente 23/11). Al suo posto: pin della mappa come Google Maps (goccia colorata con icona, punta sul luogo), sempre visibili, senza numeri né raggruppamento.
 
 ## Da chiarire
 34. Dashboard, testata «Settimana»: oggi il problema è il margine di 5 pt (punto 19); confermare se serve altro.

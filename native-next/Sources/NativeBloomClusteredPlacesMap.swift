@@ -195,38 +195,60 @@ final class NativeBloomPlaceClusterView: NativeBloomPlaceAnnotationView {
     }
 }
 
+/// Google-Maps-like pin (user, 23/11/2026): a coloured drop with the place-type icon whose tip
+/// sits on the place; every place always shows, never grouped into a numbered cluster.
 @MainActor
 final class NativeBloomPlacePinView: NativeBloomPlaceAnnotationView {
-    private let ring = UIView()
+    private let drop = CAShapeLayer()
     private let glyph = UIImageView()
+    private static let size = CGSize(width: 34, height: 44)
     override init(annotation: MKAnnotation?, reuseIdentifier: String?) {
         super.init(annotation: annotation, reuseIdentifier: reuseIdentifier)
-        frame = CGRect(x: 0, y: 0, width: 44, height: 44)
-        clusteringIdentifier = "bloom-places"
+        frame = CGRect(origin: .zero, size: Self.size)
+        clusteringIdentifier = nil
+        displayPriority = .required
         collisionMode = .rectangle
-        displayPriority = .defaultLow
-        ring.frame = CGRect(x: 6, y: 6, width: 32, height: 32)
-        ring.backgroundColor = UIColor(NativeDesign.canvas)
-        ring.layer.cornerRadius = 16
-        ring.layer.borderWidth = 2
-        ring.layer.borderColor = UIColor(NativeDesign.accent).cgColor
-        glyph.frame = CGRect(x: 12, y: 12, width: 20, height: 20)
+        // The tip of the drop is the coordinate.
+        centerOffset = CGPoint(x: 0, y: -Self.size.height / 2)
+        drop.path = Self.dropPath(in: CGRect(origin: .zero, size: Self.size)).cgPath
+        drop.lineWidth = 2
+        drop.strokeColor = UIColor.white.cgColor
+        drop.shadowColor = UIColor.black.cgColor
+        drop.shadowOpacity = 0.3
+        drop.shadowRadius = 2
+        drop.shadowOffset = CGSize(width: 0, height: 1)
+        layer.addSublayer(drop)
+        glyph.frame = CGRect(x: (Self.size.width - 18) / 2, y: 8, width: 18, height: 18)
         glyph.contentMode = .scaleAspectFit
-        glyph.tintColor = UIColor(NativeDesign.accent)
-        addSubview(ring); addSubview(glyph)
+        glyph.tintColor = .white
+        addSubview(glyph)
         isAccessibilityElement = true; accessibilityTraits = .button
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    /// Circle on top, narrowing to a point at the bottom centre.
+    private static func dropPath(in rect: CGRect) -> UIBezierPath {
+        let inset = rect.insetBy(dx: 2, dy: 2)
+        let radius = inset.width / 2
+        let centre = CGPoint(x: inset.midX, y: inset.minY + radius)
+        let tip = CGPoint(x: inset.midX, y: inset.maxY)
+        let path = UIBezierPath()
+        let angle = CGFloat.pi / 5
+        path.move(to: tip)
+        path.addLine(to: CGPoint(x: centre.x - radius * sin(angle), y: centre.y + radius * cos(angle)))
+        path.addArc(withCenter: centre, radius: radius, startAngle: .pi / 2 + angle, endAngle: .pi / 2 - angle, clockwise: true)
+        path.close()
+        return path
+    }
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
-        ring.layer.borderWidth = selected ? 4 : 2
+        let scale: CGFloat = selected ? 1.25 : 1
+        let change = { self.transform = CGAffineTransform(scaleX: scale, y: scale).translatedBy(x: 0, y: selected ? -Self.size.height * 0.1 : 0) }
+        if animated && !UIAccessibility.isReduceMotionEnabled { UIView.animate(withDuration: 0.15, animations: change) } else { change() }
+        layer.zPosition = selected ? 1 : 0
     }
     func configure(_ place: NativeBloomPlaceMapAnnotation) {
-        let color = NativeDesign.placeColor(place.kind)
-        ring.backgroundColor = color
-        ring.layer.borderColor = UIColor.white.cgColor
-        glyph.tintColor = .white
-        glyph.image = UIImage(systemName: place.kind.symbol, withConfiguration: UIImage.SymbolConfiguration(pointSize: 14, weight: .semibold))
+        drop.fillColor = NativeDesign.placeColor(place.kind).cgColor
+        glyph.image = UIImage(systemName: place.kind.symbol, withConfiguration: UIImage.SymbolConfiguration(pointSize: 13, weight: .semibold))
         accessibilityIdentifier = "map-marker-\(place.id)"
         accessibilityLabel = "\(place.title ?? "Luogo"), \(place.kind.label), \(NativeBloomMapLabels.noteCount(place.count))"
         accessibilityHint = "Mostra le note salvate in questo luogo"
