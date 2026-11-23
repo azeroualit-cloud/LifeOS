@@ -9,14 +9,13 @@ struct NativeFoodQuickAddSheet: View {
     @ObservedObject private var nutrition = NativeNutritionUIFixture.current
     var initialDate: Date = .now
     var onSaved: () -> Void = {}
-    @State private var quantity = "100"
     @State private var detail: NativeGenericFood?
     @State private var manual = false
     @State private var added: String?
 
     var body: some View {
         NavigationStack {
-            NativeFoodPicker(quickQuantity: $quantity, quickAdd: add, onManual: { manual = true }, confirmation: added,
+            NativeFoodPicker(quickAdd: add, onManual: { manual = true }, confirmation: added,
                              accessory: AnyView(NativeSupplementStackStrip(date: initialDate) { text in added = text; onSaved(); Task { await health.refresh() } })) { food in
                 detail = food
             }
@@ -32,20 +31,26 @@ struct NativeFoodQuickAddSheet: View {
         }
     }
 
-    /// Quantity of a quick add: grams for food, the usual dose for supplements and drinks counted per unit.
-    static func quantity(for food: NativeGenericFood, typed: String) -> Decimal? {
-        if food.cocktail != nil || (food.family == .supplement && !food.quantityUnit.isMassOrVolume) { return food.defaultQuantity ?? 1 }
-        guard let grams = NativeNutritionEntry.grams(typed), grams > 0, grams <= 9999 else { return nil }
-        return grams
+    /// Quantity of a quick add: the number typed («avena 63»); supplements and drinks without a number use
+    /// their usual dose (1 capsule/tablet when unset); a food without a number opens its detail to ask.
+    static func quantity(for food: NativeGenericFood, typed: Decimal?) -> Decimal? {
+        if let typed, typed > 0, typed <= 9999 { return typed }
+        if food.family == .supplement { return food.defaultQuantity ?? (food.quantityUnit.isMassOrVolume ? nil : 1) }
+        if food.cocktail != nil { return food.defaultQuantity ?? 1 }
+        return nil
     }
 
-    private func add(_ food: NativeGenericFood) {
-        guard !nutrition.busy, let amount = Self.quantity(for: food, typed: quantity) else { return }
+    private func add(_ food: NativeGenericFood, _ typed: Decimal?) {
+        guard !nutrition.busy else { return }
+        guard let amount = Self.quantity(for: food, typed: typed) else {
+            detail = food // no quantity: the detail asks for it
+            return
+        }
         let now = Date(), day = Calendar.current.isDate(initialDate, inSameDayAs: now) ? now : initialDate
         guard let entry = food.portion(id: UUID(), date: day, grams: amount) else { return }
         Task {
             if await nutrition.save(entry) {
-                let unit = food.cocktail != nil || (food.family == .supplement && !food.quantityUnit.isMassOrVolume) ? "" : " g"
+                let unit = food.cocktail != nil || (food.family == .supplement && !food.quantityUnit.isMassOrVolume) ? "" : food.quantityUnit == .millilitre ? " ml" : " g"
                 added = food.name + " · " + NSDecimalNumber(decimal: amount).stringValue + unit
                 onSaved()
                 await health.refresh()

@@ -446,3 +446,10 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 - **REFERENCE-GAPS-95-2026-11-23** (ACTIVE, «completa tutti i punti»): prima della IPA 95 bolletta con piano ripartita, quote del piano dai risparmi, pagamento con differenza ripartita, Categoria e Voce su due righe.
 - **SUPPLEMENT-STACK-2026-11-23** (ACTIVE): stack di integratori registrabili con un tocco, gestibili anche dal sito.
 - **FOOD-QUICK-ADD-2026-11-23** (ACTIVE): Aggiungi alimento apre la ricerca con il campo quantità; il + registra con quella quantità; macro a mano restano come opzione secondaria; Ripeti da ieri; Siri e widget.
+- **FOOD-QUICK-ADD-2026-11-24** (ACTIVE, scelta A dell'utente, sostituisce FOOD-QUICK-ADD-2026-11-23): un solo campo «avena 63», il + registra quei grammi, il campo si svuota; senza numero chiede la quantità; integratori con «Dose abituale».
+
+## 2026-11-24
+- **REVIEW-95B-2026-11-24**: macro a mano 2×2 + tastierino; Spesa a rate da proporre con un visual; Cronologia a colonne; niente scheda Trasferimento; contrasto da rimisurare; Ritmo con etichette corte; rivedere tutti i test UI; IPA 95 non ancora.
+- **MICRO-BREAKDOWN-2026-11-24**: toccando un micronutriente si vedono i cibi che lo compongono.
+- **SITE-GRAPHICS-2026-11-24**: il sito deve sfruttare il potenziale grafico del web.
+- **ALERTS-CLARITY-2026-11-24**: tutti gli avvisi visibili, dove e come arrivano (suono, sveglia), più personalizzazione e modelli.

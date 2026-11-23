@@ -21,7 +21,16 @@ import XCTest
     }
     func testQuickAddQuantity() throws {
         let food = try XCTUnwrap(NativeFoodPicker.items(in: .all, personal: []).first { $0.family != .supplement && $0.cocktail == nil })
-        XCTAssertEqual(NativeFoodQuickAddSheet.quantity(for: food, typed: "150"), 150)
-        XCTAssertNil(NativeFoodQuickAddSheet.quantity(for: food, typed: "0"))
+        XCTAssertEqual(NativeFoodQuickAddSheet.quantity(for: food, typed: 150), 150)
+        XCTAssertNil(NativeFoodQuickAddSheet.quantity(for: food, typed: nil), "a food without a number asks for it")
+    }
+    func testOneFieldNameAndQuantity() {
+        XCTAssertEqual(NativeQuickQuery.parse("avena 63"), .init(name: "avena", quantity: 63))
+        XCTAssertEqual(NativeQuickQuery.parse("63 avena"), .init(name: "avena", quantity: 63))
+        XCTAssertEqual(NativeQuickQuery.parse("yogurt greco 150 g"), .init(name: "yogurt greco", quantity: 150))
+        XCTAssertEqual(NativeQuickQuery.parse("latte 200ml"), .init(name: "latte", quantity: 200))
+        XCTAssertEqual(NativeQuickQuery.parse("riso 72,5"), .init(name: "riso", quantity: Decimal(string: "72.5")))
+        XCTAssertEqual(NativeQuickQuery.parse("avena"), .init(name: "avena", quantity: nil))
+        XCTAssertEqual(NativeQuickQuery.parse("63"), .init(name: "63", quantity: nil), "a lone number stays a search (barcode)")
     }
 }

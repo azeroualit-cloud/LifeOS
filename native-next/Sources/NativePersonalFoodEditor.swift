@@ -8,6 +8,8 @@ struct NativePersonalFoodEditor: View {
     @State private var caffeine = ""
     @State private var nutritionNotDeclared = false
     @State private var unit: NativeSupplementUnit = .capsule
+    /// FOOD-QUICK-ADD: the dose recorded by the + and used in stacks (capsules, tablets, g or ml).
+    @State private var dose = ""
     @State private var family: NativeGenericFood.Family = .meal
     @State private var energy = ""
     @State private var protein = ""
@@ -29,6 +31,7 @@ struct NativePersonalFoodEditor: View {
         _nutritionNotDeclared = State(initialValue: original.nutritionNotDeclared == true)
         _family = State(initialValue: original.family)
         _unit = State(initialValue: original.quantityUnit)
+        _dose = State(initialValue: original.family == .supplement ? original.defaultQuantity.map { NSDecimalNumber(decimal: $0).stringValue } ?? "" : "")
         let divisor = original.basisDivisor
         func text(_ value: Decimal) -> String { NSDecimalNumber(decimal: value / divisor).stringValue }
         _energy = State(initialValue: text(original.calories))
@@ -67,6 +70,13 @@ struct NativePersonalFoodEditor: View {
                             Text(value.title).tag(value)
                         }
                     }.accessibilityIdentifier("personal-food-unit")
+                    LabeledContent("Dose abituale") {
+                        HStack(spacing: NativeDesign.Space.xs) {
+                            TextField(unit.isMassOrVolume ? "5" : "1", text: $dose).keyboardType(.decimalPad).multilineTextAlignment(.trailing)
+                                .accessibilityIdentifier("personal-food-dose")
+                            Text(unit == .millilitre ? "ml" : unit == .gram ? "g" : unit.quantityTitle.lowercased()).foregroundStyle(NativeDesign.secondary)
+                        }
+                    }
                     if unit == .legacyServing {
                         Text("Questa voce precedente conserva i valori per dose. Scegli capsule, compresse o grammi e verifica i valori prima di salvare.")
                             .font(.footnote).foregroundStyle(.secondary)
@@ -174,6 +184,7 @@ struct NativePersonalFoodEditor: View {
                      brand: brand.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : brand.trimmingCharacters(in: .whitespacesAndNewlines),
                      sourceURL: original?.sourceURL, barcode: original?.barcode,
                      supplementUnit: family == .supplement ? unit : nil,
-                     defaultQuantity: original?.family == family && (family != .supplement || original?.quantityUnit == unit) ? original?.defaultQuantity : nil)
+                     defaultQuantity: family == .supplement ? (NativeNutritionEntry.grams(dose).flatMap { $0 > 0 ? $0 : nil } ?? (original?.quantityUnit == unit ? original?.defaultQuantity : nil))
+                        : original?.family == family ? original?.defaultQuantity : nil)
     }
 }

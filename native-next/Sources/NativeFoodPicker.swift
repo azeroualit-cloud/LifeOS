@@ -310,7 +310,8 @@ struct NativeFoodPicker: View {
     }
     /// FOOD-QUICK-ADD-2026-11-23: grams typed first, the + on a result records that quantity at once.
     var quickQuantity: Binding<String>? = nil
-    var quickAdd: ((NativeGenericFood) -> Void)? = nil
+    /// FOOD-QUICK-ADD (choice A): one field, «avena 63» — the name filters, the number is the quantity.
+    var quickAdd: ((NativeGenericFood, Decimal?) -> Void)? = nil
     var onManual: (() -> Void)? = nil
     var confirmation: String? = nil
     /// Quick mode extra row (SUPPLEMENT-STACK-2026-11-23: the stacks).
@@ -324,23 +325,21 @@ struct NativeFoodPicker: View {
         let personal = personalFoods
         let personalIDs = Set((personal ?? []).map(\.id))
         let visible = visibleFoods(personal ?? [])
-        let matches = query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            ? visible : NativeGenericFood.matches(query, in: visible)
+        let parsed = quickAdd == nil ? NativeQuickQuery(name: query, quantity: nil) : NativeQuickQuery.parse(query)
+        let matches = parsed.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            ? visible : NativeGenericFood.matches(parsed.name, in: visible)
 
         VStack(spacing: NativeDesign.Space.none) {
             HStack(spacing: NativeDesign.Space.small) {
                 Image(systemName: "magnifyingglass").foregroundStyle(.secondary).accessibilityHidden(true)
-                TextField(scope == .supplements ? "Cerca integratore o marca" : "Cerca alimento, marca o codice a barre", text: $query)
+                TextField(quickAdd != nil ? "es. avena 63" : scope == .supplements ? "Cerca integratore o marca" : "Cerca alimento, marca o codice a barre", text: $query)
                     .focused($searchFocused)
                     .submitLabel(.search)
                     .onSubmit { searchFocused = false }
                     .accessibilityIdentifier("generic-food-search")
-                if let quickQuantity {
-                    Divider().frame(height: NativeDesign.Space.xLarge)
-                    TextField("100", text: quickQuantity).keyboardType(.decimalPad).multilineTextAlignment(.trailing).monospacedDigit()
-                        .frame(width: NativeDesign.Layout.actionCircle)
-                        .accessibilityLabel("Quantità in grammi").accessibilityIdentifier("food-quick-quantity")
-                    Text("g").foregroundStyle(.secondary)
+                if quickAdd != nil, let grams = parsed.quantity {
+                    Text(NSDecimalNumber(decimal: grams).stringValue + " g").font(.subheadline.weight(.semibold)).monospacedDigit()
+                        .foregroundStyle(NativeDesign.nutritionTitle).accessibilityIdentifier("food-quick-quantity")
                 }
             }
             .padding(.horizontal, NativeDesign.Space.medium)
@@ -419,7 +418,7 @@ struct NativeFoodPicker: View {
                             }
                         }.buttonStyle(.plain).accessibilityIdentifier("generic-food-" + food.id)
                         if let quickAdd {
-                            Button { quickAdd(food) } label: {
+                            Button { quickAdd(food, parsed.quantity); query = ""; searchFocused = true } label: {
                                 Image(systemName: "plus.circle.fill").font(.title).foregroundStyle(NativeDesign.nutritionTitle)
                                     .frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget)
                             }
@@ -501,5 +500,27 @@ struct NativeFoodPicker: View {
         personalData = data
         NativeOnlineSync.shared.foodsChanged(old: previous, new: foods)
         return true
+    }
+}
+
+/// «avena 63», «63 avena», «yogurt greco 150 g», «latte 200ml»: name and quantity in one field.
+struct NativeQuickQuery: Equatable {
+    var name: String
+    var quantity: Decimal?
+    static func parse(_ text: String) -> NativeQuickQuery {
+        var words = text.split(whereSeparator: \.isWhitespace).map(String.init)
+        let units: Set<String> = ["g", "gr", "grammi", "grammo", "ml"]
+        func number(_ word: String) -> Decimal? {
+            var w = word.lowercased()
+            for unit in ["grammi", "grammo", "gr", "ml", "g"] where w.hasSuffix(unit) && w.count > unit.count { w.removeLast(unit.count); break }
+            guard w.range(of: "^[0-9]+([.,][0-9]+)?$", options: .regularExpression) != nil,
+                  let value = Decimal(string: w.replacingOccurrences(of: ",", with: "."), locale: Locale(identifier: "en_US_POSIX")),
+                  value > 0, value <= 9999 else { return nil }
+            return value
+        }
+        if let last = words.last, units.contains(last.lowercased()), words.count >= 2, number(words[words.count - 2]) != nil { words.removeLast() }
+        if let last = words.last, let value = number(last), words.count >= 2 { words.removeLast(); return .init(name: words.joined(separator: " "), quantity: value) }
+        if let first = words.first, let value = number(first), words.count >= 2 { words.removeFirst(); return .init(name: words.joined(separator: " "), quantity: value) }
+        return .init(name: text, quantity: nil)
     }
 }

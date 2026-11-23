@@ -1377,12 +1377,58 @@
     },
     {
       "id": "FOOD-QUICK-ADD-2026-11-23",
-      "status": "ACTIVE",
+      "status": "SUPERSEDED",
       "scope": "Aggiungi alimento, app (e sito per parità)",
       "recorded_on": "2026-11-23",
       "provenance": "Risposta utente in chat (testo libero + scelte)",
       "original_quote": "quando clicco aggiungi alimento dovrebbe aprire automaticamente la ricerca, ci dovrebbe essere un campo quantità/grammi da riempire subito, e cercando l'alimento e cliccando sul + aggiunge automaticamente l'alimento con quella qauntità. dici che potrebbe funzionare? voglio anche l'aggiunta tramite macro non la voglio perdere, ma è cmq secondaria",
-      "rule": "Aggiungi alimento apre subito la ricerca con un campo quantità/grammi compilabile prima; il + su un risultato registra l'alimento con quella quantità. L'inserimento a mano dei macro resta, come opzione secondaria. In più: «Ripeti da ieri» nel diario, e Siri/widget per registrare."
+      "rule": "Aggiungi alimento apre subito la ricerca con un campo quantità/grammi compilabile prima; il + su un risultato registra l'alimento con quella quantità. L'inserimento a mano dei macro resta, come opzione secondaria. In più: «Ripeti da ieri» nel diario, e Siri/widget per registrare.",
+      "superseded_by": "FOOD-QUICK-ADD-2026-11-24"
+    },
+    {
+      "id": "FOOD-QUICK-ADD-2026-11-24",
+      "status": "ACTIVE",
+      "scope": "Aggiungi alimento, app (e sito per parità)",
+      "recorded_on": "2026-11-24",
+      "provenance": "Scelta esplicita dell'utente tra le proposte A/B: «implementa la A»; sostituisce il campo grammi separato di FOOD-QUICK-ADD-2026-11-23",
+      "original_quote": "io cambio sempre quantità dei cibi, anche perché li registro al grammo ... implementa la A",
+      "rule": "Aggiungi alimento apre un solo campo con la tastiera: «avena 63» filtra per nome e il + registra 63 g; dopo il + il campo si svuota per il cibo successivo; senza numero il + apre il dettaglio per chiedere la quantità; gli integratori senza numero usano la loro dose abituale (impostabile nell'editor). Macro a mano restano come opzione secondaria; Ripeti da ieri e Siri come prima."
+    },
+    {
+      "id": "REVIEW-95B-2026-11-24",
+      "status": "ACTIVE",
+      "scope": "Build 95, app e sito",
+      "recorded_on": "2026-11-24",
+      "provenance": "Risposta utente in chat alla lista dei punti aperti (24/11)",
+      "original_quote": "4. si aggiunta macro 2x2 e tastierino / 6. boh, pitch what's better, show me a visual / 7. si / 8. a che ci serve ormai? / 9. per ora ok / 10. fallo / 11. ... scegli quello che occupa meno spazio / 12. ok / 13. ok / 14. rivaluta tutti i test allora / 15. non ancora ho altro da proporre",
+      "rule": "Macro a mano con griglia 2×2 e tastierino; Spesa a rate: proposta visiva prima di decidere; Cronologia a colonne per macro (giorni/settimane/mesi/trimestri); niente scheda «Trasferimento sul server»; intestazione Settimana ok così; rifare la misura del contrasto su tutte le schermate; Ritmo con le etichette più corte; widget diretto e Categoria/Voce a due righe sul sito non richiesti; rivedere tutti i test dell'interfaccia; IPA 95 non ancora."
+    },
+    {
+      "id": "MICRO-BREAKDOWN-2026-11-24",
+      "status": "ACTIVE",
+      "scope": "Salute (app e sito)",
+      "recorded_on": "2026-11-24",
+      "provenance": "Risposta utente in chat alla lista dei punti aperti (24/11)",
+      "original_quote": "servirebbe anche la possibilità di vedere da quali cibi è composto il valore di un micronutriente se ci clicco sopra",
+      "rule": "Toccando un micronutriente si vede da quali cibi del giorno arriva il suo valore."
+    },
+    {
+      "id": "SITE-GRAPHICS-2026-11-24",
+      "status": "ACTIVE",
+      "scope": "Sito",
+      "recorded_on": "2026-11-24",
+      "provenance": "Risposta utente in chat alla lista dei punti aperti (24/11)",
+      "original_quote": "il sito si vede che graficamente è dietro quando in realtà il sito è la parte che potrebbe avere le funzioni grafiche più avanzate e flessibili dato che è basato su web, e non penso si stia sfruttando il potenziale grafico pieno",
+      "rule": "Il sito deve sfruttare il potenziale grafico del web, almeno alla pari dell'app e oltre (grafici, interazioni)."
+    },
+    {
+      "id": "ALERTS-CLARITY-2026-11-24",
+      "status": "ACTIVE",
+      "scope": "Avvisi (sito e app)",
+      "recorded_on": "2026-11-24",
+      "provenance": "Risposta utente in chat alla lista dei punti aperti (24/11)",
+      "original_quote": "Gli avvisi, anche qui bug grafici, non mi fa vedere tutti gli avvisi (tipo quelli che già mi avevi messo te), non mi dice se sono avvisi push solo su telefono, se hanno sveglie o suoni ecc ed è tutto incognito. Vorrei ci fosse più personalizzazione e più chiarezza e template.",
+      "rule": "Il pannello Avvisi mostra tutti gli avvisi (anche quelli di Finanza dell'app), dice per ognuno dove arriva (notifica sull'iPhone), con che suono o sveglia, e offre più personalizzazione e modelli pronti."
     }
   ],
   "pending_confirmations": [
