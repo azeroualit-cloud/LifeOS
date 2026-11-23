@@ -61,3 +61,13 @@ Galleria privata con le 135 schermate della 94: https://claude.ai/artifact/CvgN9
 39. Salute: un solo titolo (oggi «Salute» in alto e «Oggi» grande).
 40. Salute › Micronutrienti: tutte le righe con il valore nella stessa posizione (Fibre oggi a destra, le altre accanto al nome).
 41. Grafici e Calendario sulla scala: altezze 150/160/170/190 e misure 4/12/20 del Calendario.
+
+## Contrasto e pulsanti (controllo del 23/11/2026, WCAG: testo 4,5:1, grafica e icone 3:1)
+42. Tema chiaro: arancione (sopra obiettivo) 2,2:1, verde 2,2:1 e giallo 1,5:1 non si leggono come testo e sono sotto 3:1 anche come barre: usare tonalità più scure nel tema chiaro (il tema scuro va bene, 8–12:1).
+43. Tema chiaro: titolo del Calendario (marrone) 3,5:1 sulla scheda e 3,1:1 sullo sfondo: scurire.
+44. Viola del Peso: 3,8:1 sul vetro nel tema scuro e 4,1:1 sulla scheda nel tema chiaro: schiarire nel tema scuro e scurire nel chiaro.
+45. Badge turno Notte: testo scuro su grigio 4,0:1 (scuro) e 4,2:1 (chiaro): grigio più chiaro o testo bianco.
+46. Spunta bianca sul pallino verde dell'arco: 2,0–2,2:1: spunta scura o verde più scuro.
+47. Pallini «senza pasti» e scritte disattivate (grigio terziario) 1,6–2,5:1: per i pallini usare almeno 3:1.
+48. Pulsanti: oggi ci sono 13 stili diversi (vetro, vetro del Calendario, primario compatto, pillole filtro, segmenti, icone senza fondo, cerchi della barra, testo semplice, stili di sistema). Ridurli a cinque famiglie: azione in basso (44 pt, vetro, larga quanto la barra), pulsante nella scheda (44 pt), pillola/segmento (34 pt visibili, tocco 44), icona tonda (34 pt visibili, tocco 44), riga toccabile (44 pt). Togliere gli stili di sistema `.bordered` e `.glass` rimasti.
+49. Ogni pulsante con etichetta ha il testo almeno 4,5:1 sul suo fondo e l'icona almeno 3:1; i disattivati restano riconoscibili (non solo più chiari).
