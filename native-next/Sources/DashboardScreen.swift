@@ -32,12 +32,15 @@ struct DashboardScreen: View {
             .refreshable { await health.refresh() }
 
         }.sensoryFeedback(.success, trigger: routineFeedback)
-        .task { await health.start(demo: NativeHealthLaunchPolicy.simulated) }
+        .task {
+            await health.start(demo: NativeHealthLaunchPolicy.simulated)
+            await NativeHub95.shared.refresh(store: store, health: health)
+        }
         .onChange(of: store.life.records("health"), initial: true) { _, rows in
             health.setLegacyRecords(store.isDemo ? [] : rows)
         }
         .onReceive(NotificationCenter.default.publisher(for: .lifeOSWeightSaved)) { _ in Task { await health.refresh() } }
-        .onChange(of: scenePhase) { _, phase in if phase == .active { Task { await health.refresh() } } }
+        .onChange(of: scenePhase) { _, phase in if phase == .active { Task { await health.refresh(); await NativeHub95.shared.refresh(store: store, health: health) } } }
     }
 
     private func rollingCalendar(_ today: String, now: Date) -> some View {

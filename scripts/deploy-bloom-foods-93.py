@@ -26,9 +26,18 @@ def module():
 def transform(source):
     block = module() + '\n'
     if MARKER in source:
-        if not source.startswith(block) or HOOK not in source:
+        if HOOK not in source or not source.startswith(MARKER):
             raise RuntimeError('Versione Bloom e alimenti diversa; nessuna scrittura.')
-        return source
+        if source.startswith(block):
+            return source
+        # Build 95: replace the older module, which ends with the dispatcher function.
+        tail = '  return BLOOM_FOODS_METHODS[method](env, Array.isArray(args) ? args : []);\n}\n'
+        if source.count(tail) != 1:
+            raise RuntimeError('Fine del modulo precedente non riconosciuta; nessuna scrittura.')
+        end = source.index(tail) + len(tail)
+        if source[end:end + 1] == '\n':
+            end += 1
+        return block + source[end:]
     if source.count(HOOK_BEFORE) != 1:
         raise RuntimeError('Punto di aggancio API non riconosciuto; nessuna scrittura.')
     for name in ['bloomFoodsAction', 'nbTables', 'listFoods', 'getBloom']:

@@ -1318,7 +1318,7 @@
       "recorded_on": "2026-11-23",
       "provenance": "Richiesta diretta utente in chat",
       "original_quote": "poi voglio poter gestire tutto in life os, cibo, micronutrienti, (istruzioni di importazione ad esempio dei cibi sempre presenti anche per utilizzare altri ai dal sito), gestione fibre e obiettivi, rendendo più forte il pannello admin e creando il pannello avvisi sul sito e potendo gestire le notifiche o crearle come voglio io in base a criteri vari. Non voglio necessariamente appensantire l'app se non per le cose essenziali, voglio che sia principalmente il sito a fare alcune di queste cose",
-      "rule": "Il sito diventa il posto dove si gestiscono alimenti, micronutrienti, fibre e obiettivi, con istruzioni di importazione sempre visibili (anche per usare altre AI); pannello Admin più completo; nuovo pannello Avvisi sul sito per creare e gestire notifiche con criteri a scelta. L'app resta leggera: legge dal server obiettivi e regole e mostra le notifiche."
+      "rule": "Il sito diventa il posto dove si gestiscono alimenti, micronutrienti, fibre e obiettivi, con istruzioni di importazione sempre visibili (anche per usare altre AI); pannello Admin più completo; nuovo pannello Avvisi sul sito per creare e gestire notifiche con criteri a scelta. L'app resta leggera: legge dal server obiettivi e regole e mostra le notifiche. Anche le notifiche della preghiera: per quali preghiere, con quanto anticipo, accese o spente (aggiunta utente: «anche poter gestire le notifiche della preghiera e per quali ecc»). Da fare dentro la build 95 (risposta utente: «Dentro la 95»)."
     }
   ],
   "pending_confirmations": [

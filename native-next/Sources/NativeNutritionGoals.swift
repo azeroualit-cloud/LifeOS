@@ -78,7 +78,7 @@ struct NativeNutritionGoals: Codable, Equatable {
     private static let criteriaKey = "native-tdee-criteria-93"
     private let defaults: UserDefaults
 
-    @Published var goals: NativeNutritionGoals { didSet { save(goals, Self.goalsKey) } }
+    @Published var goals: NativeNutritionGoals { didSet { save(goals, Self.goalsKey); NativeHub95.goalsChangedOnPhone() } }
     @Published var criteria: NativeTDEECriteria { didSet { save(criteria.clamped, Self.criteriaKey) } }
 
     init(defaults: UserDefaults = .standard) {

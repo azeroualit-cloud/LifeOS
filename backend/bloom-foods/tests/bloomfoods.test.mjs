@@ -108,3 +108,17 @@ test('food diary: last change wins, deletions travel, day follows Rome time', as
   assert.equal((await bloomFoodsAction(e, 'listFoodDiary', [0])).entries.filter((x) => x.id === 'B1').length, 1, 'repeatable without duplicates');
   await assert.rejects(() => bloomFoodsAction(e, 'saveFoodDiaryEntry', [{ ...base, at: 'ieri' }]), /Data del pasto/);
 });
+
+test('shared settings keep the newest copy and the alert log keeps the latest entries', async () => {
+  const e = env();
+  await assert.rejects(bloomFoodsAction(e, 'getSettings', ['other']));
+  let r = await bloomFoodsAction(e, 'saveSettings', ['nutrition-goals', { kcal: 2400, fibre: 30 }, 2000]);
+  assert.equal(r.saved, true); assert.equal(r.doc.kcal, 2400);
+  r = await bloomFoodsAction(e, 'saveSettings', ['nutrition-goals', { kcal: 1800 }, 1000]);
+  assert.equal(r.saved, false, 'an older copy never overwrites'); assert.equal(r.doc.kcal, 2400);
+  assert.equal((await bloomFoodsAction(e, 'getSettings', ['nutrition-goals'])).modified, 2000);
+  assert.equal((await bloomFoodsAction(e, 'getSettings', ['alerts'])).modified, 0);
+  await bloomFoodsAction(e, 'addAlertLog', [[{ id: 'a1', rule: 'r1', at: '2026-11-23T08:00:00Z', title: 'Budget', body: 'Sotto 50 €' }, { id: 'a1', rule: 'r1', at: '2026-11-23T08:00:00Z' }]]);
+  const log = await bloomFoodsAction(e, 'listAlertLog', [10]);
+  assert.equal(log.entries.length, 1); assert.equal(log.entries[0].title, 'Budget');
+});

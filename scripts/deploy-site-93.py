@@ -20,7 +20,8 @@ ANCHOR = 'async function getFinanceMeta(env) {'
 ROUTE_AFTER = 'if (method === "importBloom") return response(await importBloom(env, args[0]));'
 ROUTES = ''.join('\n      if (method === "%s") return response(await %s(env, %s));' % (m, m, a) for m, a in [
     ('listFoodDiary', 'args[0]'), ('listFoodDiaryDays', 'args[0], args[1]'), ('saveFoodDiaryEntry', 'args[0]'),
-    ('deleteFoodDiaryEntry', 'args[0], args[1]'), ('importFoodDiary', 'args[0]')])
+    ('deleteFoodDiaryEntry', 'args[0], args[1]'), ('importFoodDiary', 'args[0]'),
+    ('getSettings', 'args[0]'), ('saveSettings', 'args[0], args[1], args[2]'), ('addAlertLog', 'args[0]'), ('listAlertLog', 'args[0]')])
 
 
 def diary_block():
@@ -65,7 +66,12 @@ def transform(source):
     block = diary_block()
     if MARKER in source:
         if block not in source:
-            raise RuntimeError('Versione del diario diversa nel Worker online; nessuna scrittura.')
+            # Build 95: an older diary block is replaced in place (it ends right before ANCHOR).
+            start = source.index(MARKER)
+            end = source.index(ANCHOR, start)
+            if source.count(MARKER) != 1 or source.count(ANCHOR) != 1:
+                raise RuntimeError('Blocco del diario non riconosciuto nel Worker online; nessuna scrittura.')
+            source = source[:start] + block + source[end:]
     else:
         for name in ['listFoodDiary', 'saveFoodDiaryEntry', 'ndTables']:
             if re.search(r'\bfunction ' + name + r'\(', source):
@@ -73,10 +79,11 @@ def transform(source):
         if source.count(ANCHOR) != 1:
             raise RuntimeError('Punto di inserimento del diario non riconosciuto; nessuna scrittura.')
         source = source.replace(ANCHOR, block + ANCHOR, 1)
-    if 'method === "listFoodDiary"' not in source:
+    missing = ''.join('\n' + line for line in ROUTES.split('\n') if line.strip() and line.strip() not in source)
+    if missing:
         if source.count(ROUTE_AFTER) != 1:
             raise RuntimeError('Rotte Bloom non trovate; nessuna scrittura.')
-        source = source.replace(ROUTE_AFTER, ROUTE_AFTER + ROUTES, 1)
+        source = source.replace(ROUTE_AFTER, ROUTE_AFTER + missing, 1)
     return source
 
 
