@@ -336,27 +336,46 @@ struct MovementEditor: View {
                 // ACCOUNT-ROW-2026-11-23: a new movement always uses the one account, so no «Conto» row.
                 if type == "Trasferimento" { Picker("Destinazione", selection: $counterpart) { ForEach(editing ? ["Trade Republic", "Revolut", "IsyBank"] : ["Trade Republic"], id: \.self) { Text($0) } } }
                 else {
-                    // Nine ordered groups with their items (preview 93): the item is what is stored.
+                    // REFERENCE-GAPS-95: two rows like the reference, Categoria (the group) and Voce (the item stored).
+                    // Incomes have no groups: each income category is its own «Categoria».
+                    let groups = type == "Entrata" ? options.map { (group: $0, items: [$0]) } : NativeExpenseGroups.grouped(options)
+                    let currentGroup = type == "Entrata" ? category : NativeExpenseGroups.group(of: category)
                     Menu {
-                        ForEach(NativeExpenseGroups.grouped(options), id: \.group) { entry in
-                            Section(entry.group) {
-                                ForEach(entry.items, id: \.self) { item in
-                                    Button { category = item; bill = NativeUtilityPeriodDraft() } label: {
-                                        if item == category { Label(item, systemImage: "checkmark") } else { Text(item) }
-                                    }
-                                }
+                        ForEach(groups, id: \.group) { entry in
+                            Button {
+                                if entry.group != currentGroup { category = entry.items.first ?? entry.group; bill = NativeUtilityPeriodDraft() }
+                            } label: {
+                                if entry.group == currentGroup { Label(entry.group, systemImage: "checkmark") } else { Text(entry.group) }
                             }
                         }
                     } label: {
                         LabeledContent("Categoria") {
                             HStack(spacing: NativeDesign.Space.xs) {
-                                Text(type == "Entrata" ? category : NativeExpenseGroups.label(category)).foregroundStyle(Color.primary)
+                                Text(currentGroup).foregroundStyle(Color.primary)
                                 Image(systemName: "chevron.up.chevron.down").font(.caption2.weight(.semibold)).foregroundStyle(NativeDesign.secondary)
                             }
                         }
                     }
-                    .accessibilityLabel("Categoria, " + NativeExpenseGroups.label(category))
+                    .accessibilityLabel("Categoria, " + currentGroup)
                     .accessibilityIdentifier("movement-category")
+                    if let items = groups.first(where: { $0.group == currentGroup })?.items, items.count > 1 {
+                        Menu {
+                            ForEach(items, id: \.self) { item in
+                                Button { category = item; bill = NativeUtilityPeriodDraft() } label: {
+                                    if item == category { Label(item, systemImage: "checkmark") } else { Text(item) }
+                                }
+                            }
+                        } label: {
+                            LabeledContent("Voce") {
+                                HStack(spacing: NativeDesign.Space.xs) {
+                                    Text(category).foregroundStyle(Color.primary)
+                                    Image(systemName: "chevron.up.chevron.down").font(.caption2.weight(.semibold)).foregroundStyle(NativeDesign.secondary)
+                                }
+                            }
+                        }
+                        .accessibilityLabel("Voce, " + category)
+                        .accessibilityIdentifier("movement-item")
+                    }
                 }
             }.disabled(linkedPayment)
             if !editing && type == "Spesa" {
@@ -441,6 +460,9 @@ struct MovementEditor: View {
             if destination == NativeExpenseRouting.ordinary && !bill.enabled {
                 var chosen = split; chosen.change(0, amount: cents)
                 if let extra = chosen.payload(amount: cents, day: CivilDate.day(date)) { payload.merge(extra) { _, value in value } }
+            } else if destination != NativeExpenseRouting.ordinary && destination != NativeExpenseRouting.savings {
+                // Plan payment: the part not covered by the fund (amount − available) may go partly to budget months.
+                if let extra = split.planPayload(uncovered: max(0, cents - quotedAvailable), day: CivilDate.day(date)) { payload.merge(extra) { _, value in value } }
             }
         }
         if treatment == "recovery" && type == "Spesa" {

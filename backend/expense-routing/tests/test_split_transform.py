@@ -50,4 +50,7 @@ for tampered in (previous.replace("savingsDestination: true", "savingsDestinatio
         pass
     else:
         raise AssertionError('A different live routing must be refused')
+# The first build 95 routing (live since f9155ce) is upgraded to the current one.
+v95_first = current.replace(new_fn, split.routing_at(split.V95_COMMIT), 1)
+assert v95_first != current and split.transform(v95_first) == current
 print('OK')

@@ -191,3 +191,28 @@ test('REVIEW-95: an ordinary expense split between savings and chosen budget mon
  const written=JSON.parse(sqlite.prepare('SELECT fingerprint FROM finance_write_requests').get().fingerprint);
  assert.equal(written.recoveryMonths,'2026-10, 2026-11');assert.equal(written.recoveryAmount,20);
 });
+
+test('REFERENCE-GAPS-95: a bill paid with a plan sends part of the uncovered amount to chosen budget months',async(t)=>{
+ const {ctx,payload,sqlite}=await fixture();
+ if (!(await core.expenseRouting.preview({...ctx,input:{category:'Acqua',amountCents:3000,date:'2026-10-28'}})).planSplitDestination) { t.skip('Worker without plan split'); return; }
+ const bad={...payload,requestId:'plan-split-bad-0001',budgetTreatment:'recovery',recoveryMonths:'2026-10',recoveryAmount:11};
+ await assert.rejects(core.expenseRouting.save({...ctx,input:bad}),/parte non coperta/);
+ assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM movements').get().n,0,'nothing paid when the split is invalid');
+ const ok={...payload,requestId:'plan-split-0001',budgetTreatment:'recovery',recoveryMonths:'2026-11, 2026-10',recoveryAmount:6};
+ await core.expenseRouting.save({...ctx,input:ok});await core.expenseRouting.save({...ctx,input:ok});
+ assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM movements').get().n,1);
+ const policy=sqlite.prepare('SELECT * FROM movement_budget_policies').get();
+ assert.equal(policy.treatment,'recovery');
+ assert.deepEqual(JSON.parse(policy.recovery_json),[{month:'2026-10',amount_cents:300},{month:'2026-11',amount_cents:300}]);
+});
+test('REFERENCE-GAPS-95: the difference of a posted plan payment can be split afterwards',async(t)=>{
+ const {ctx,payload,sqlite}=await fixture();
+ if (!(await core.expenseRouting.preview({...ctx,input:{category:'Acqua',amountCents:3000,date:'2026-10-28'}})).planSplitDestination) { t.skip('Worker without plan split'); return; }
+ await core.expenseRouting.save({...ctx,input:payload});
+ const row=sqlite.prepare('SELECT source_row FROM movements').get().source_row;
+ const split={requestId:'split-after-0001',movementId:row,expenseDestination:'budgetSplit',recoveryMonths:'2026-10',recoveryAmount:10};
+ await assert.rejects(core.expenseRouting.change({...ctx,input:{...split,recoveryAmount:10.01}}),/parte non coperta/);
+ await core.expenseRouting.change({...ctx,input:split});
+ const policy=sqlite.prepare('SELECT * FROM movement_budget_policies').get();
+ assert.equal(policy.treatment,'recovery');assert.deepEqual(JSON.parse(policy.recovery_json),[{month:'2026-10',amount_cents:1000}]);
+});

@@ -113,7 +113,8 @@ final class NativeScreenTourUITests: XCTestCase {
                 if tap(app.buttons["movement-category"]) {
                     shot(prefix + " 23 Categorie", app)
                     app.swipeUp(velocity: .slow); shot(prefix + " 24 Categorie sotto", app)
-                    if app.buttons["Elettricità"].exists { app.buttons["Elettricità"].tap() } else { app.tap() }
+                    if app.buttons["Casa"].exists { app.buttons["Casa"].firstMatch.tap() } else { app.tap() }
+                    if tap(app.buttons["movement-item"]) { shot(prefix + " 24b Voci di Casa", app); if app.buttons["Elettricità"].exists { app.buttons["Elettricità"].tap() } }
                     for _ in 0..<3 { app.swipeUp(velocity: .slow) }
                     shot(prefix + " 25 Bolletta", app)
                     app.swipeUp(velocity: .slow); shot(prefix + " 26 Bolletta sotto", app)

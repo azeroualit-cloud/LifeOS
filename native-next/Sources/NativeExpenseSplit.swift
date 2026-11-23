@@ -34,8 +34,8 @@ struct NativeExpenseSplit: Equatable {
         if set.contains(month) { if set.count > 1 { set.remove(month) } } else if set.count < 12 { set.insert(month) }
         months = set.sorted()
     }
-    mutating func change(_ delta: Int, amount: Int) {
-        savings = min(max(0, savings + delta), max(0, amount - 1))
+    mutating func change(_ delta: Int, amount: Int, allowsAll: Bool = false) {
+        savings = min(max(0, savings + delta), max(0, allowsAll ? amount : amount - 1))
     }
 }
 
@@ -45,18 +45,21 @@ struct NativeExpenseSplitRows: View {
     @Binding var split: NativeExpenseSplit
     let amount: Int
     let day: String
+    /// Plan payments: the uncovered part may stay entirely on savings (budget 0, no months).
+    var allowsAll = false
+    var savingsTitle = "Risparmi"
     var body: some View {
         let euro: (Int) -> String = { (Double($0) / 100).euro }
         HStack(spacing: NativeDesign.Space.small) {
             Circle().fill(NativeDesign.salaryGroups[1]).frame(width: NativeDesign.Space.small, height: NativeDesign.Space.small).accessibilityHidden(true)
-            Text("Risparmi")
+            Text(savingsTitle)
             Spacer(minLength: NativeDesign.Space.small)
-            NativeIconButton(symbol: "minus", label: "Meno dai risparmi") { split.change(-NativeExpenseSplit.step, amount: amount) }
+            NativeIconButton(symbol: "minus", label: "Meno dai risparmi") { split.change(-NativeExpenseSplit.step, amount: amount, allowsAll: allowsAll) }
                 .disabled(split.savings <= 0).accessibilityIdentifier("expense-split-less")
             Text(euro(min(split.savings, amount))).monospacedDigit().frame(minWidth: NativeDesign.Layout.actionCircle)
                 .accessibilityIdentifier("expense-split-savings")
-            NativeIconButton(symbol: "plus", label: "Più dai risparmi") { split.change(NativeExpenseSplit.step, amount: amount) }
-                .disabled(split.savings >= amount - 1).accessibilityIdentifier("expense-split-more")
+            NativeIconButton(symbol: "plus", label: "Più dai risparmi") { split.change(NativeExpenseSplit.step, amount: amount, allowsAll: allowsAll) }
+                .disabled(split.savings >= (allowsAll ? amount : amount - 1)).accessibilityIdentifier("expense-split-more")
         }
         HStack(spacing: NativeDesign.Space.small) {
             Circle().fill(NativeDesign.salaryGroups[3]).frame(width: NativeDesign.Space.small, height: NativeDesign.Space.small).accessibilityHidden(true)
@@ -64,6 +67,7 @@ struct NativeExpenseSplitRows: View {
             Spacer(minLength: NativeDesign.Space.small)
             Text(euro(split.budget(amount))).monospacedDigit().accessibilityIdentifier("expense-split-budget")
         }
+        if split.budget(amount) > 0 {
         VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
             Text("Mesi in cui pesa sul budget").font(.footnote).foregroundStyle(NativeDesign.secondary)
             ScrollView(.horizontal, showsIndicators: false) {
@@ -91,5 +95,17 @@ struct NativeExpenseSplitRows: View {
             }
         }
         .padding(.vertical, NativeDesign.Space.xs)
+        }
+    }
+}
+
+extension NativeExpenseSplit {
+    /// Extra fields for a plan payment: only the budget part of the uncovered amount, nil when all stays on savings.
+    func planPayload(uncovered: Int, day: String) -> Record? {
+        let budget = max(0, uncovered - min(savings, uncovered))
+        guard budget > 0 else { return nil }
+        return ["budgetTreatment": .string("recovery"),
+                "recoveryMonths": .string(chosenMonths(day: day).joined(separator: ", ")),
+                "recoveryAmount": .number(Double(budget) / 100)]
     }
 }

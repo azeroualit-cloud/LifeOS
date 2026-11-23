@@ -17,6 +17,12 @@ enum NativeExpenseDemo {
         var next = state
         let id = payload.text("requestId")
         guard !id.isEmpty else { throw Message(text: "Identificatore mancante.") }
+        if payload.text("expenseDestination") == "budgetSplit" {
+            var rows = next.finance.records("transactions")
+            guard let index = rows.firstIndex(where: { $0.integer("row") == payload.integer("movementId") }) else { throw Message(text: "Movimento non trovato.") }
+            rows[index]["budgetTreatment"] = .string("recovery"); rows[index]["recoveryMonths"] = payload["recoveryMonths"]; rows[index]["recoveryAmount"] = payload["recoveryAmount"]
+            next.finance["transactions"] = .array(rows.map(JSONValue.object)); state = next; return
+        }
         let encoder = JSONEncoder(); encoder.outputFormatting = .sortedKeys
         let signature = method + String(data: try encoder.encode(payload), encoding: .utf8)!
         var commands = next.finance.record("expenseRoutingCommands")

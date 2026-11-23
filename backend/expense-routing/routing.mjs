@@ -4,6 +4,20 @@ export function createExpenseRouting({ PlanError, balance, command, completePaym
   const fail = (message, status = 400) => { throw new PlanError(message, status); };
   const signature = value => fingerprint(value);
   const linked = (state, row) => Object.values(state.payments).filter(p => p.status !== 'deleted' && (p.movementId === row || p.existingMovementId === row));
+  // REVIEW-95 / REFERENCE-GAPS-95: the part from the budget, spread on the chosen months (the existing
+  // 'recovery' policy: the movement stays out of the month's spending, each month gets its share).
+  function budgetSplit(input, firstMonth, maxCents) {
+    const months = Array.isArray(input.recoveryMonths) ? input.recoveryMonths.map(String) : String(input.recoveryMonths ?? '').split(',').map(v => v.trim()).filter(Boolean);
+    if (!months.length || months.length > 12 || new Set(months).size !== months.length || months.some(m => !/^20\d\d-(0[1-9]|1[0-2])$/.test(m) || m < firstMonth))
+      fail('Scegli da 1 a 12 mesi di budget, dal mese della spesa in avanti.');
+    const total = Math.round(Number(input.recoveryAmount) * 100);
+    if (!Number.isSafeInteger(total) || total <= 0 || total > maxCents) fail('La parte dal budget deve essere tra 0,01 € e la parte non coperta.');
+    const sorted = [...months].sort();
+    return sorted.map((month, i) => ({ month, amount_cents: Math.floor(total / sorted.length) + (i < total % sorted.length ? 1 : 0) }));
+  }
+  async function writeSplit(db, movementId, split) {
+    await db.prepare("INSERT INTO movement_budget_policies(movement_source_row,treatment,recovery_json) VALUES (?,'recovery',?) ON CONFLICT(movement_source_row) DO UPDATE SET treatment='recovery',recovery_json=excluded.recovery_json").bind(movementId, JSON.stringify(split)).run();
+  }
   function validate(input, today) {
     const amount = Number(input.amountCents ?? Math.round(Number(input.amount) * 100));
     if (!Number.isSafeInteger(amount) || amount <= 0 || amount > 100000000) fail('Importo non valido.');
@@ -64,7 +78,7 @@ export function createExpenseRouting({ PlanError, balance, command, completePaym
     }
     const plans = candidates(state, checked);
     if (parseUtilityPeriod && retained && !plans.some(p => p.id === retained.id)) plans.push({ ...retained, retained: true });
-    return { version: 1, savingsDestination: true, splitDestination: true, utilityCompetenceVersion: parseUtilityPeriod ? 1 : 0, category: checked.category, amountCents:checked.amount, date:checked.date, plans: plans.map(p => {
+    return { version: 1, savingsDestination: true, splitDestination: true, planSplitDestination: true, utilityCompetenceVersion: parseUtilityPeriod ? 1 : 0, category: checked.category, amountCents:checked.amount, date:checked.date, plans: plans.map(p => {
       const funds = available(state, p, checked.date.slice(0,7));
       return { id:p.id, name:p.name, kind:p.kind, status:p.status, retained:!!p.retained, availableCents:funds, fromFundCents:Math.min(funds,checked.amount), fromSavingsCents:Math.max(0,checked.amount-funds) };
     }) };
@@ -95,11 +109,7 @@ export function createExpenseRouting({ PlanError, balance, command, completePaym
       if (kind === 'savings' && checked.utilityPeriod) fail('Una bolletta con periodo di competenza non si paga dai risparmi.');
       if (split) {
         if (checked.utilityPeriod) fail('Una bolletta con periodo di competenza non si divide tra risparmi e mesi di budget.');
-        const months = Array.isArray(input.recoveryMonths) ? input.recoveryMonths.map(String) : String(input.recoveryMonths ?? '').split(',').map(v => v.trim()).filter(Boolean);
-        if (!months.length || months.length > 12 || new Set(months).size !== months.length || months.some(m => !/^20\d\d-(0[1-9]|1[0-2])$/.test(m) || m < checked.date.slice(0,7)))
-          fail('Scegli da 1 a 12 mesi di budget, dal mese della spesa in avanti.');
-        const fromBudget = Math.round(Number(input.recoveryAmount) * 100);
-        if (!Number.isSafeInteger(fromBudget) || fromBudget <= 0 || fromBudget > checked.amount) fail('La parte dal budget deve essere tra 0,01 € e l’importo della spesa.');
+        budgetSplit(input, checked.date.slice(0,7), checked.amount);
       }
       // Reserve the routing choice too: a reused request may never debit a second path.
       const key = requestKey(input.requestId), sig = signature(input);
@@ -128,6 +138,10 @@ export function createExpenseRouting({ PlanError, balance, command, completePaym
         return {state:next,result:{}}; });
       return true;
     }
+    // REFERENCE-GAPS-95 «Bolletta con piano»: the part not covered by the fund may go partly to budget months.
+    const planSplit = input.budgetTreatment === 'recovery'
+      ? budgetSplit(input, today.slice(0,7) > checked.date.slice(0,7) ? today.slice(0,7) : checked.date.slice(0,7), Math.max(0, checked.amount - Number(input.expectedAvailableCents ?? checked.amount)))
+      : null;
     const paymentInput = { requestId:input.requestId, planId:input.planId, amountCents:checked.amount, date:checked.date, cycleMonth:checked.date.slice(0,7), competenceMonths:checked.competenceMonths,
       ...(checked.utilityPeriod ? { competenceStartMonth: checked.utilityPeriod.start, competenceEndMonth: checked.utilityPeriod.end } : {}),
       originalName:String(input.name ?? ''), originalNote:String(input.note ?? ''), originalIncludedInSnapshot:input.includedInSnapshot===true };
@@ -140,10 +154,28 @@ export function createExpenseRouting({ PlanError, balance, command, completePaym
       return command(state,'pay',paymentInput,today);
     });
     await service.finish(result.paymentId);
+    if (planSplit) {
+      const { state } = await repository.read(), paid = state.payments[result.paymentId];
+      if (!paid?.movementId) fail('Pagamento registrato; ripeti per applicare la parte dal budget.', 503);
+      await writeSplit(db, paid.movementId, planSplit);
+    }
     return true;
   }
   async function change({ input, repository, db, today }) {
     const id=requestKey(input.requestId), rowID=Number(input.movementId), sig=signature(input);
+    if (input.expenseDestination === 'budgetSplit') {
+      // REFERENCE-GAPS-95 «Registra pagamento»: the difference not covered by the plan, split between
+      // savings and open budget months. Plan state and bank movement stay as they are.
+      const row = await movement(db, rowID), { state } = await repository.read();
+      const payments = linked(state, rowID).filter(p => p.status === 'posted');
+      if (payments.length !== 1) fail('Il movimento deve essere il pagamento di un piano.');
+      const plan = state.plans[payments[0].planId], uncovered = balance(state, plan, today.slice(0,7)).fromGeneralSavingsCents;
+      const max = Math.min(Math.round(-Number(row.amount) * 100), uncovered);
+      if (!(max > 0)) fail('Il pagamento è coperto dal fondo: non c’è una differenza da dividere.');
+      const first = String(row.actual_date).slice(0,7) > today.slice(0,7) ? String(row.actual_date).slice(0,7) : today.slice(0,7);
+      await writeSplit(db, rowID, budgetSplit(input, first, max));
+      return true;
+    }
     if (!['ordinary','plan'].includes(input.expenseDestination)) fail('Scegli la destinazione della spesa.');
     for (let attempt=0;attempt<5;attempt++) {
       const { revision,state }=await repository.read(), old=state.expenseRoutingCommands?.[id];

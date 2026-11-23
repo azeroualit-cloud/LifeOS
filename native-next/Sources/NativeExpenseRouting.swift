@@ -15,6 +15,9 @@ struct NativeExpenseRouteSection: View {
     var split: Binding<NativeExpenseSplit> = .constant(NativeExpenseSplit())
     @State private var plans: [Record] = []
     @State private var splitSupported = false
+    @State private var planSplitSupported = false
+    private var uncovered: Int { chosen.map { NativeExpenseRouting.split(amount: amount, plan: $0).savings } ?? 0 }
+    private var offersPlanSplit: Bool { planSplitSupported && movementID == 0 && chosen != nil && chosen?.flag("retained") == false && uncovered > 0 }
     private var offersSplit: Bool { splitSupported && movementID == 0 && !bill.enabled && amount > 1 }
     @State private var loading = false
     @State private var issue: String?
@@ -46,7 +49,12 @@ struct NativeExpenseRouteSection: View {
                     } else {
                         let split = NativeExpenseRouting.split(amount: amount, plan: chosen)
                         LabeledContent("Dal fondo " + chosen.text("name"), value: (Double(split.fund) / 100).euro)
-                        LabeledContent("Dagli altri risparmi", value: (Double(split.savings) / 100).euro).accessibilityIdentifier("expense-savings-preview")
+                        if offersPlanSplit {
+                            // REFERENCE-GAPS-95 «Bolletta con piano»: the uncovered part between savings and budget months.
+                            NativeExpenseSplitRows(split: self.split, amount: split.savings, day: day, allowsAll: true, savingsTitle: "Dagli altri risparmi")
+                        } else {
+                            LabeledContent("Dagli altri risparmi", value: (Double(split.savings) / 100).euro).accessibilityIdentifier("expense-savings-preview")
+                        }
                     }
                     } else if selected == NativeExpenseRouting.savings {
                         LabeledContent("Dai risparmi", value: (Double(amount) / 100).euro).accessibilityIdentifier("expense-direct-savings-preview")
@@ -66,7 +74,11 @@ struct NativeExpenseRouteSection: View {
                 NativeUtilityPeriodFields(period: $bill, amountCents: amount)
             } }
         }.task(id: query) { await load() }
-            .onChange(of: selected) { _, _ in updateReady() }
+            .onChange(of: selected) { _, value in
+                updateReady()
+                if let plan = plans.first(where: { $0.text("id") == value }) { split.wrappedValue = NativeExpenseSplit(savings: NativeExpenseRouting.split(amount: amount, plan: plan).savings) }
+                else if value == NativeExpenseRouting.ordinary { split.wrappedValue = NativeExpenseSplit() }
+            }
             .onChange(of: bill) { _, value in
                 if let months = value.months { competenceMonths = months.count }
                 if value.enabled && selected == NativeExpenseRouting.savings { selected = NativeExpenseRouting.ordinary }
@@ -110,6 +122,7 @@ struct NativeExpenseRouteSection: View {
                 rows = NativeExpenseDemo.preview(state: store.state, category: category, day: day, movementID: movementID, bill: bill.enabled)
                 savingsSupported = true
                 splitSupported = true
+                planSplitSupported = true
             } else {
                 var payload: Record = ["category": .string(category), "date": .string(day), "amountCents": .int(max(1, amount))]
                 if movementID > 0 { payload["movementId"] = .int(movementID) }
@@ -126,10 +139,13 @@ struct NativeExpenseRouteSection: View {
                 rows = result.records("plans")
                 savingsSupported = result.flag("savingsDestination")
                 splitSupported = result.flag("splitDestination")
+                planSplitSupported = result.flag("planSplitDestination")
             }
             try Task.checkCancellation()
             plans = rows
             if selected.isEmpty { selected = NativeExpenseRouting.suggestion(rows) }
+            // A plan payment starts with all the uncovered part on savings, as before.
+            if let plan = rows.first(where: { $0.text("id") == selected }) { split.wrappedValue = NativeExpenseSplit(savings: NativeExpenseRouting.split(amount: amount, plan: plan).savings) }
             else if selected == NativeExpenseRouting.savings { if !offersSavings { selected = NativeExpenseRouting.suggestion(rows) } }
             else if selected != NativeExpenseRouting.ordinary && !rows.contains(where: { $0.text("id") == selected }) { selected = NativeExpenseRouting.suggestion(rows) }
             loading = false; updateReady()

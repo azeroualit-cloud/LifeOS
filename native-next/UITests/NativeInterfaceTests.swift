@@ -494,8 +494,12 @@ final class NativeInterfaceTests: XCTestCase {
         let category = app.buttons["movement-category"]
         for _ in 0..<5 { if category.isHittable { break }; app.collectionViews.firstMatch.swipeUp() }
         category.tap()
-        // A native menu opens around its selected item (Altro). On compact
-        // screens its earlier categories are reached by scrolling the menu.
+        // REFERENCE-GAPS-95: Categoria (Casa) first, then the Voce menu holds Acqua.
+        let home = app.buttons["Casa"].firstMatch
+        XCTAssertTrue(home.waitForExistence(timeout: 5)); home.tap()
+        let item = app.buttons["movement-item"]
+        for _ in 0..<5 { if item.isHittable { break }; app.collectionViews.firstMatch.swipeUp() }
+        item.tap()
         let water = app.buttons["Acqua"]
         for _ in 0..<6 {
             if water.exists && water.isHittable { break }
@@ -1017,9 +1021,11 @@ final class NativeInterfaceTests: XCTestCase {
         let field = app.textFields["plan-payment-amount"]; XCTAssertTrue(field.waitForExistence(timeout: 10)); field.tap()
         field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: (field.value as? String ?? "").count) + "700")
         app.buttons["Fine"].tap()
-        let recovery = app.switches["Recupera la differenza nei budget futuri"]
-        for _ in 0..<5 { if recovery.isHittable { break }; app.collectionViews.firstMatch.swipeUp() }
-        XCTAssertTrue(recovery.isHittable); recovery.tap()
+        // REFERENCE-GAPS-95: the 100 € difference starts on savings; 10 € move to the budget months.
+        let less = app.buttons["expense-split-less"]
+        for _ in 0..<5 { if less.isHittable { break }; app.collectionViews.firstMatch.swipeUp() }
+        XCTAssertTrue(less.isHittable); less.tap(); less.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["expense-split-budget"].label.contains("10"))
         capture("plans-goal-overage")
         app.buttons["plan-payment-confirm"].tap()
         XCTAssertTrue(app.navigationBars["Dettagli piano"].waitForExistence(timeout: 10))

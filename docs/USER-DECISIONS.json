@@ -1356,6 +1356,15 @@
       "provenance": "Richiesta diretta utente in chat (screenshot annotato)",
       "original_quote": "ahi togli conto che tanto é sempre uno",
       "rule": "Nel nuovo movimento non si mostra la riga Conto: il conto è sempre lo stesso."
+    },
+    {
+      "id": "REFERENCE-GAPS-95-2026-11-23",
+      "status": "ACTIVE",
+      "scope": "Build 95, app e sito",
+      "recorded_on": "2026-11-23",
+      "provenance": "Richiesta diretta utente in chat dopo il confronto con l'HTML di riferimento",
+      "original_quote": "completa tutti i punti",
+      "rule": "Prima della IPA 95 completare i punti mancanti rispetto all'HTML di riferimento: bolletta con piano con ripartizione dell'eccedenza (risparmi −/+ e mesi di budget), quote del piano con parte dai risparmi, registra pagamento con ripartizione della differenza, Nuova spesa con Categoria e Voce su due righe."
     }
   ],
   "pending_confirmations": [

@@ -124,10 +124,19 @@ struct NativePlanEditor: View {
     @State private var usesExisting = false
     @State private var movement: Record?
     @FocusState private var editing: Bool
-    private var preview: [Record] { (try? draft.preview()) ?? [] }
+    /// REFERENCE-GAPS-95 «Da dove arrivano le quote»: part of a goal paid from savings; the budget quotes cover the rest.
+    @State private var fromSavings = 0
+    private var totalCents: Int { Input.cents(draft.amount) ?? 0 }
+    private var offersSavings: Bool { draft.kind == .goal && totalCents > 0 }
+    /// The draft the server receives: the amount covered by the budget quotes.
+    private var budgetDraft: NativePlanDraft {
+        guard offersSavings, fromSavings > 0 else { return draft }
+        var copy = draft; copy.amount = String(format: "%.2f", Double(max(0, totalCents - fromSavings)) / 100); return copy
+    }
+    private var preview: [Record] { (try? budgetDraft.preview()) ?? [] }
     private var validationIssue: String? {
         guard !draft.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, !draft.amount.isEmpty else { return nil }
-        do { _ = try draft.payload(requestID: requestID); return nil } catch { return error.localizedDescription }
+        do { _ = try budgetDraft.payload(requestID: requestID); return nil } catch { return error.localizedDescription }
     }
     var body: some View {
         Form {
@@ -178,6 +187,22 @@ struct NativePlanEditor: View {
                     Text(usesExisting ? "Collega il movimento esistente: il saldo non cambia. Sono disponibili le spese dai risparmi e quelle del mese corrente non già collegate." : "Registra una sola spesa dai risparmi e recupera l’importo nei budget scelti.").font(.footnote).foregroundStyle(NativeDesign.secondary)
                 }.disabled(submitted)
             }
+            if offersSavings {
+                Section("Da dove arrivano le quote") {
+                    HStack(spacing: NativeDesign.Space.small) {
+                        Text("Risparmi")
+                        Spacer(minLength: NativeDesign.Space.small)
+                        NativeIconButton(symbol: "minus", label: "Meno dai risparmi") { fromSavings = max(0, fromSavings - NativeExpenseSplit.step) }
+                            .disabled(fromSavings <= 0).accessibilityIdentifier("plan-savings-less")
+                        Text((Double(min(fromSavings, totalCents)) / 100).euro).monospacedDigit().frame(minWidth: NativeDesign.Layout.actionCircle)
+                            .accessibilityIdentifier("plan-savings")
+                        NativeIconButton(symbol: "plus", label: "Più dai risparmi") { fromSavings = min(totalCents - 1, fromSavings + NativeExpenseSplit.step) }
+                            .disabled(fromSavings >= totalCents - 1).accessibilityIdentifier("plan-savings-more")
+                    }
+                    LabeledContent("Budget, divisi sui mesi", value: (Double(max(0, totalCents - fromSavings)) / 100).euro)
+                    Text("La parte dai risparmi non diventa quote: al pagamento la copre il fondo dei risparmi.").font(.footnote).foregroundStyle(NativeDesign.secondary)
+                }.disabled(submitted)
+            }
             Section(draft.kind.finite ? "Anteprima budget" : "Anteprima · primi tre mesi") {
                 ForEach(Array(preview.enumerated()), id: \.offset) { _, row in
                     LabeledContent(CivilDate.monthTitle(row.text("month")), value: (Double(row.integer("deltaCents")) / 100).euro)
@@ -213,7 +238,7 @@ struct NativePlanEditor: View {
     private func save() async {
         saving = true; editing = false; defer { saving = false }
         do {
-            var payload = try draft.payload(requestID: requestID)
+            var payload = try budgetDraft.payload(requestID: requestID)
             if draft.kind == .recovery, usesExisting {
                 guard let movement else { throw Message(text: "Scegli il movimento già registrato.") }
                 payload["movementId"] = movement["row"]
@@ -308,9 +333,7 @@ private struct NativePlanPaymentEditor: View {
     @State private var cycleMonth = CivilDate.month()
     @State private var competenceMonths = 1
     @State private var bill = NativeUtilityPeriodDraft()
-    @State private var recover = false
-    @State private var first = NativePlanRules.adding(1, to: CivilDate.month())
-    @State private var last = NativePlanRules.adding(1, to: CivilDate.month())
+    @State private var difference = NativeExpenseSplit()
     @State private var requestID = UUID().uuidString
     @State private var submitted = false
     @State private var saving = false
@@ -333,12 +356,12 @@ private struct NativePlanPaymentEditor: View {
                 if NativeUtilityPeriodDraft.isCostFund(plan) { NativeUtilityPeriodFields(period: $bill, amountCents: amountCents ?? 0) }
                 Text(usesExisting ? "Collega una spesa esistente senza un secondo addebito. Le quote del piano restano distinte dal saldo." : "Un unico movimento dai risparmi. L’intero pagamento non verrà sottratto una seconda volta dal budget.").font(.footnote).foregroundStyle(NativeDesign.secondary)
             }.disabled(submitted)
-            if plan.text("kind") == "goal", extra > 0 {
+            if extra > 0 && !usesExisting {
+                // REFERENCE-GAPS-95 «Registra pagamento»: the difference between savings and open budget months.
                 Section("Differenza rispetto al previsto") {
                     LabeledContent("In più", value: (Double(extra) / 100).euro)
-                    Toggle("Recupera la differenza nei budget futuri", isOn: $recover)
-                    if recover { NativeMonthPicker(title: "Primo mese", selection: $first); NativeMonthPicker(title: "Ultimo mese", selection: $last) }
-                    Text("Se non attivi il recupero, la differenza resta a carico dei risparmi.").font(.footnote).foregroundStyle(NativeDesign.secondary)
+                    NativeExpenseSplitRows(split: $difference, amount: extra, day: CivilDate.day(Date()), allowsAll: true)
+                    Text("Quello che resta sui risparmi non pesa sul budget; la parte sul budget si divide sui mesi scelti.").font(.footnote).foregroundStyle(NativeDesign.secondary)
                 }.disabled(submitted)
             }
             Section {
@@ -356,6 +379,8 @@ private struct NativePlanPaymentEditor: View {
                 if let value { amount = String(format: "%.2f", Double(value.integer("amountCents")) / 100); date = CivilDate.date(value.text("date")) }
             }
             .interactiveDismissDisabled(saving)
+            // The difference starts all on savings; the user moves part of it to budget months.
+            .onChange(of: extra, initial: true) { _, value in difference = NativeExpenseSplit(savings: value) }
     }
     private func save() async {
         guard let cents = amountCents else { return }
@@ -367,18 +392,23 @@ private struct NativePlanPaymentEditor: View {
                 payload.merge(bill.payload) { _, value in value }
                 payload["cycleMonth"] = .string(CivilDate.month(date))
             }
-            if plan.text("kind") == "goal", extra > 0, recover {
-                _ = try NativePlanRules.months(first, last)
-                guard first >= CivilDate.month() else { throw Message(text: "Il recupero deve iniziare da un mese aperto o futuro.") }
-                payload["recoverDifference"] = .bool(true); payload["recoveryStartMonth"] = .string(first); payload["recoveryEndMonth"] = .string(last)
-            }
+
             if usesExisting {
                 guard let movement else { throw Message(text: "Scegli il movimento già registrato.") }
                 payload["movementId"] = movement["row"]
             }
             submitted = true
             try await store.perform(bill.enabled ? "recordUtilityPlanPayment" : "recordFinancePlanPayment", payload)
-            await store.loadFinancePlans(); dismiss()
+            await store.loadFinancePlans()
+            var part = difference; part.savings = min(part.savings, extra)
+            if !usesExisting, let split = part.planPayload(uncovered: extra, day: CivilDate.day(Date())) {
+                let paid = store.finance.record("plansV2").records("payments").first { $0.text("requestId") == requestID || $0.text("id") == requestID }
+                guard let movementID = paid?.integer("movementId"), movementID > 0 else { throw Message(text: "Pagamento registrato. Riapri il piano per dividere la differenza sul budget.") }
+                var change: Record = ["requestId": .string(requestID + "-split"), "movementId": .int(movementID), "expenseDestination": .string("budgetSplit")]
+                change.merge(split) { _, value in value }
+                try await store.perform("changeExpenseDestination", change)
+            }
+            dismiss()
         } catch { self.error = error.localizedDescription }
     }
 }

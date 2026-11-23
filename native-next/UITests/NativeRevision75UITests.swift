@@ -26,7 +26,7 @@ final class NativeRevision75UITests: XCTestCase {
         app.launchArguments = ["--visual-test", "--dark", "--expense-routing", "--large-text", "--reduce-motion", "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"]
         app.launch(); XCTAssertTrue(app.mainTabBar.buttons["Dashboard"].waitForExistence(timeout: 30))
         app.buttons["primary-add"].tap()
-        selectMenu(app.buttons["movement-category"], title: "Acqua", app: app)
+        selectMenu(app.buttons["movement-category"], title: "Casa", app: app); selectMenu(app.buttons["movement-item"], title: "Acqua", app: app)
         for title in ["Mese iniziale", "Mese finale"] {
             for prefix in ["utility-month-", "utility-year-"] {
                 let control = app.buttons[prefix + title]; reveal(control, app: app)
@@ -50,7 +50,7 @@ final class NativeRevision75UITests: XCTestCase {
         XCTAssertTrue(amount.waitForExistence(timeout: 10)); amount.tap(); amount.typeText("221,79")
         app.textFields["movement-name"].tap(); app.textFields["movement-name"].typeText("Bolletta competenza UI75")
         app.buttons["movement-hide-keyboard"].tap()
-        selectMenu(app.buttons["movement-category"], title: "Acqua", app: app)
+        selectMenu(app.buttons["movement-category"], title: "Casa", app: app); selectMenu(app.buttons["movement-item"], title: "Acqua", app: app)
         let start = app.buttons["utility-month-Mese iniziale"], end = app.buttons["utility-month-Mese finale"]
         for _ in 0..<8 { if start.isHittable { break }; app.collectionViews.firstMatch.swipeUp(velocity: .slow) }
         selectMenu(start, title: "Agosto", app: app); selectMenu(end, title: "Ottobre", app: app)

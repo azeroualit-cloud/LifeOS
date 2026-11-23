@@ -19,6 +19,17 @@ HEAD = 'function createExpenseRouting('
 CALL = re.compile(r'\b(?:const|let|var)\s+expenseRouting\s*=\s*createExpenseRouting\(')
 
 
+V95_COMMIT = 'd0e5a62'
+
+
+def routing_at(commit):
+    import subprocess
+    text = subprocess.check_output(['git', 'show', commit + ':backend/expense-routing/routing.mjs'], text=True, encoding='utf-8')
+    text = text.replace('export function createExpenseRouting', 'function createExpenseRouting', 1)
+    start = text.index(HEAD)
+    return text[start:function_end(text, start)]
+
+
 def routing():
     text = Path('backend/expense-routing/routing.mjs').read_text(encoding='utf-8')
     text = text.replace('export function createExpenseRouting', 'function createExpenseRouting', 1)
@@ -119,10 +130,13 @@ def transform(source):
     if CALL.search(source).start() < b:
         raise RuntimeError('Routing non riconosciuto; nessuna scrittura.')
     current, replacement = source[a:b], routing()
-    if current == replacement or 'splitDestination' in current:
-        if compact(current) != compact(replacement):
-            raise RuntimeError('Ripartizione gia presente ma diversa; nessuna scrittura.')
+    if current == replacement:
         return source
+    if 'splitDestination' in current:
+        # Build 95 first version (deployed at f9155ce): replaced only when byte for byte that version.
+        if current != routing_at(V95_COMMIT):
+            raise RuntimeError('Ripartizione gia presente ma diversa; nessuna scrittura.')
+        return source[:a] + replacement + source[b:]
     live = compact(current)
     # The build 91 routing: savings destination declared, three destinations, plan payments.
     # Known live versions: build 91 (savings destination) or build 90 (budget or plan only; the
