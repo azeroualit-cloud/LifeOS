@@ -83,6 +83,12 @@ final class NativeScreenTourUITests: XCTestCase {
 
         app.openMainTab("Salute")
         shot(prefix + " 07 Salute", app)
+        // FOOD-QUICK-ADD and SUPPLEMENT-STACK: the search with grams, the stacks, the stack editor.
+        if tap(app.buttons["health-add-nutrition"]) {
+            shot(prefix + " 07b Aggiungi alimento", app)
+            if tap(app.buttons["supplement-stack-new"]) { shot(prefix + " 07c Nuova stack", app); dismissSheet(app) }
+            if app.buttons["Fine"].exists { app.buttons["Fine"].firstMatch.tap() } else { dismissSheet(app) }
+        }
         scroll(app, prefix + " 08 Salute sotto")
         scroll(app, prefix + " 09 Salute andamento")
 

@@ -14,9 +14,9 @@ final class NativePersonalFoodUITests: XCTestCase {
         }
         XCTAssertTrue(open.isHittable)
         open.tap()
-        let catalog = app.buttons["quick-nutrition-catalog"]
-        XCTAssertTrue(catalog.waitForExistence(timeout: 10))
-        catalog.tap()
+        // FOOD-QUICK-ADD-2026-11-23: the search opens directly.
+        // FOOD-QUICK-ADD-2026-11-23: the search opens directly.
+        // FOOD-QUICK-ADD-2026-11-23: the search opens directly.
         XCTAssertTrue(app.textFields["generic-food-search"].waitForExistence(timeout: 10))
         return app
     }

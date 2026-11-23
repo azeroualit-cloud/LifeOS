@@ -17,6 +17,7 @@ final class NativeNutritionQuickUITests: XCTestCase {
         XCTAssertFalse(app.textFields["quick-nutrition-Proteine"].exists)
         capture("Nutrition dashboard quick action", app)
         button.tap()
+        let manualEntry = app.buttons["food-quick-manual"].firstMatch; XCTAssertTrue(manualEntry.waitForExistence(timeout: 10)); manualEntry.tap() // FOOD-QUICK-ADD-2026-11-23
         let protein = app.textFields["quick-nutrition-Proteine"], carbs = app.textFields["quick-nutrition-Carboidrati"]
         XCTAssertTrue(protein.waitForExistence(timeout: 10)); XCTAssertTrue(carbs.waitForExistence(timeout: 10))
         if large { XCTAssertEqual(protein.frame.minX, carbs.frame.minX, accuracy: 1, "Accessibility layout must use one column") }
@@ -74,7 +75,7 @@ final class NativeNutritionQuickUITests: XCTestCase {
     }
     func testRenderCocktailAndBoneInPortions() {
         let app = open()
-        app.buttons["quick-nutrition-catalog"].tap()
+        app.buttons["quick-nutrition-catalog"].tap() // open() goes through «Inserisci i macro a mano», where «Cerca alimento» remains
         XCTAssertFalse(app.buttons["Cocktail"].exists)
         XCTAssertTrue(app.buttons["Personali"].exists)
         let initialSearch = app.textFields["generic-food-search"]
@@ -90,7 +91,7 @@ final class NativeNutritionQuickUITests: XCTestCase {
         XCTAssertTrue(alcohol.label.contains("1,3 UA"))
         capture("02 Cocktail portion and estimated alcohol", app)
 
-        app.buttons["quick-nutrition-catalog"].tap()
+        app.buttons["quick-nutrition-catalog"].tap() // open() goes through «Inserisci i macro a mano», where «Cerca alimento» remains
         let search = app.textFields["generic-food-search"]
         XCTAssertTrue(search.waitForExistence(timeout: 5))
         search.tap()
@@ -110,7 +111,7 @@ final class NativeNutritionQuickUITests: XCTestCase {
 
     func testRenderPersonalFoodEditorAndSave() {
         let app = open()
-        app.buttons["quick-nutrition-catalog"].tap()
+        app.buttons["quick-nutrition-catalog"].tap() // open() goes through «Inserisci i macro a mano», where «Cerca alimento» remains
         let create = app.buttons["generic-food-create"]
         XCTAssertTrue(create.waitForExistence(timeout: 10))
         create.tap()
@@ -134,7 +135,7 @@ final class NativeNutritionQuickUITests: XCTestCase {
 
     func testSupermarketFoodsAndSupplementEditor() {
         let app = open()
-        app.buttons["quick-nutrition-catalog"].tap()
+        app.buttons["quick-nutrition-catalog"].tap() // open() goes through «Inserisci i macro a mano», where «Cerca alimento» remains
         let search = app.textFields["generic-food-search"]
         XCTAssertTrue(search.waitForExistence(timeout: 10))
         for name in ["Crescenza", "Provolone", "Patatine", "Gelato", "Vitamina C"] {
@@ -207,7 +208,7 @@ final class NativeNutritionQuickUITests: XCTestCase {
 
     func testSearchFindsGenericBiscottiAndUsesItsPortion() {
         let app = open()
-        app.buttons["quick-nutrition-catalog"].tap()
+        app.buttons["quick-nutrition-catalog"].tap() // open() goes through «Inserisci i macro a mano», where «Cerca alimento» remains
         let search = app.textFields["generic-food-search"]
         XCTAssertTrue(search.waitForExistence(timeout: 10))
         search.tap()
@@ -246,6 +247,7 @@ final class NativeNutritionQuickUITests: XCTestCase {
         save.tap()
         XCTAssertTrue(app.staticTexts["quick-nutrition-notice"].waitForExistence(timeout: 15))
         app.buttons["quick-nutrition-open"].tap()
+        let manualEntry = app.buttons["food-quick-manual"].firstMatch; XCTAssertTrue(manualEntry.waitForExistence(timeout: 10)); manualEntry.tap() // FOOD-QUICK-ADD-2026-11-23
         XCTAssertTrue(app.textFields["quick-nutrition-Proteine"].waitForExistence(timeout: 10))
         XCTAssertFalse(app.buttons["quick-nutrition-save"].isEnabled)
     }

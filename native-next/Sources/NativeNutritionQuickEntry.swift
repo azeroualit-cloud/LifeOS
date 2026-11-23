@@ -52,7 +52,7 @@ struct NativeNutritionQuickEntry: View {
             .padding(.top, NativeDesign.Space.small) // 16 pt from the macros, like the card edges (SPACING-SYSTEM-2026-11-23)
             if let notice { Text(notice).font(.footnote).foregroundStyle(NativeDesign.secondary).accessibilityIdentifier("quick-nutrition-notice") }
         }.sheet(isPresented: $showing) {
-            NavigationStack { NativeNutritionQuickSheet { notice = "Registrazione salvata." } }
+            NativeFoodQuickAddSheet { notice = "Registrazione salvata." }
                 .modifier(NativeVisualTestSize()).modifier(NativeVisualTestMotion())
         }.sheet(isPresented: $addingWeight) {
             NativeAddWeightSheet(health: health)
@@ -83,13 +83,20 @@ struct NativeNutritionQuickSheet: View {
     /// Selected natural unit; nil means grams/ml (FOOD-CATALOG-92).
     @State private var pieceName: String?
     @FocusState private var focus: Field?
-    init(initialDate: Date = .now, onSaved: @escaping () -> Void = {}) {
+    init(initialDate: Date = .now, initialFood: NativeGenericFood? = nil, onSaved: @escaping () -> Void = {}) {
         let calendar = Calendar.current
         let now = Date()
         let date = calendar.isDate(initialDate, inSameDayAs: now) ? now : initialDate
         self._date = State(initialValue: date)
         self._dateSelection = State(initialValue: date)
         self.onSaved = onSaved
+        if let food = initialFood {
+            // Same defaults as choosing the food from the catalog.
+            let piece = food.family == .supplement ? nil : food.pieces?.first?.name
+            self._selectedFood = State(initialValue: food)
+            self._pieceName = State(initialValue: piece)
+            self._portionGrams = State(initialValue: piece != nil ? "1" : food.defaultQuantity.map { NSDecimalNumber(decimal: $0).stringValue } ?? (food.cocktail == nil && food.family != .supplement ? "100" : "1"))
+        }
     }
 
     private enum Field: Hashable { case protein, carbohydrate, fat, fibre, portion }

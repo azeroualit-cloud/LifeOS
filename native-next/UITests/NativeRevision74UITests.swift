@@ -22,6 +22,7 @@ final class NativeRevision74UITests: XCTestCase {
         XCTAssertTrue(add.waitForExistence(timeout: 10))
         for _ in 0..<6 where !add.isHittable { app.scrollViews["health-detail-scroll"].swipeUp() }
         XCTAssertTrue(add.isHittable); add.tap()
+        let manualEntry = app.buttons["food-quick-manual"].firstMatch; XCTAssertTrue(manualEntry.waitForExistence(timeout: 10)); manualEntry.tap() // FOOD-QUICK-ADD-2026-11-23
         XCTAssertTrue(app.staticTexts["Aggiungi nutrienti"].waitForExistence(timeout: 10))
         XCTAssertFalse(app.buttons["quick-nutrition-save"].isEnabled)
         let scroll = app.scrollViews["quick-nutrition-scroll"]

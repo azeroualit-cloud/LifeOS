@@ -56,6 +56,7 @@ final class NativeRevision77UITests: XCTestCase {
         app.launch()
         let open = app.buttons["quick-nutrition-open"]
         reveal(open, app: app); open.tap()
+        let manualEntry = app.buttons["food-quick-manual"].firstMatch; XCTAssertTrue(manualEntry.waitForExistence(timeout: 10)); manualEntry.tap() // FOOD-QUICK-ADD-2026-11-23
         let protein = app.textFields["quick-nutrition-Proteine"]
         XCTAssertTrue(protein.waitForExistence(timeout: 10))
         protein.tap(); protein.typeText("10")

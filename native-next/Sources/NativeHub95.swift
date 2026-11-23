@@ -28,6 +28,7 @@ import UserNotifications
         let read: (String, [JSONValue]) async throws -> JSONValue = { method, args in try await store.read(method, args: args) }
         guard let probe = try? await read("getSettings", [.string("alerts")]) else { return } // Worker not updated yet
         await syncGoals(read)
+        await NativeSupplementStackStore.shared.sync(read)
         await publishTargets(read, health: health)
         await reportDelivered(read)
         schedule(probe.object.record("doc"), store: store, health: health)

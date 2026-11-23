@@ -308,6 +308,13 @@ struct NativeFoodPicker: View {
         case .supplements: NativeGenericFood.catalogSupplements + personal.filter { $0.family == .supplement }
         }
     }
+    /// FOOD-QUICK-ADD-2026-11-23: grams typed first, the + on a result records that quantity at once.
+    var quickQuantity: Binding<String>? = nil
+    var quickAdd: ((NativeGenericFood) -> Void)? = nil
+    var onManual: (() -> Void)? = nil
+    var confirmation: String? = nil
+    /// Quick mode extra row (SUPPLEMENT-STACK-2026-11-23: the stacks).
+    var accessory: AnyView? = nil
     let select: (NativeGenericFood) -> Void
 
     @FocusState private var searchFocused: Bool
@@ -328,6 +335,13 @@ struct NativeFoodPicker: View {
                     .submitLabel(.search)
                     .onSubmit { searchFocused = false }
                     .accessibilityIdentifier("generic-food-search")
+                if let quickQuantity {
+                    Divider().frame(height: NativeDesign.Space.xLarge)
+                    TextField("100", text: quickQuantity).keyboardType(.decimalPad).multilineTextAlignment(.trailing).monospacedDigit()
+                        .frame(width: NativeDesign.Layout.actionCircle)
+                        .accessibilityLabel("Quantità in grammi").accessibilityIdentifier("food-quick-quantity")
+                    Text("g").foregroundStyle(.secondary)
+                }
             }
             .padding(.horizontal, NativeDesign.Space.medium)
             .frame(minHeight: NativeDesign.Layout.touchTarget)
@@ -340,7 +354,25 @@ struct NativeFoodPicker: View {
             .pickerStyle(.segmented)
             .padding(.horizontal, NativeDesign.Layout.screenInset)
             .padding(.vertical, NativeDesign.Space.small)
+            if let accessory { accessory }
+            if let onManual {
+                // Secondary but always visible: the macros typed one by one.
+                HStack {
+                    Spacer()
+                    Button { searchFocused = false; onManual() } label: {
+                        Label("Inserisci i macro a mano", systemImage: "square.and.pencil").font(.footnote)
+                            .frame(minHeight: NativeDesign.Layout.touchTarget)
+                    }
+                    .accessibilityIdentifier("food-quick-manual")
+                }
+                .padding(.horizontal, NativeDesign.Layout.screenInset)
+            }
 
+            if let confirmation {
+                Label(confirmation, systemImage: "checkmark.circle.fill").font(.footnote).foregroundStyle(NativeDesign.nutritionTitle)
+                    .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, NativeDesign.Layout.screenInset)
+                    .accessibilityIdentifier("food-quick-added")
+            }
             List {
                 Button {
                     searchFocused = false
@@ -353,9 +385,10 @@ struct NativeFoodPicker: View {
                 .listRowBackground(NativeDesign.nutritionInput)
                 Section {
                     ForEach(matches) { food in
+                        HStack(spacing: NativeDesign.Space.small) {
                         Button {
                             select(food)
-                            dismiss()
+                            if quickAdd == nil { dismiss() }
                         } label: {
                             HStack(spacing: NativeDesign.Space.medium) {
                                 Text(food.cocktail == nil ? food.family.icon : "🍸").font(.headline).accessibilityHidden(true)
@@ -380,9 +413,21 @@ struct NativeFoodPicker: View {
                                     Text(NSDecimalNumber(decimal: food.calories / food.basisDivisor).doubleValue.formatted(.number.precision(.fractionLength(0))) + " kcal")
                                         .font(.subheadline).monospacedDigit().foregroundStyle(.secondary)
                                 }
-                                Image(systemName: "plus.circle.fill").font(.headline).foregroundStyle(NativeDesign.nutritionTitle).accessibilityHidden(true)
+                                if quickAdd == nil {
+                                    Image(systemName: "plus.circle.fill").font(.headline).foregroundStyle(NativeDesign.nutritionTitle).accessibilityHidden(true)
+                                }
                             }
-                        }.accessibilityIdentifier("generic-food-" + food.id)
+                        }.buttonStyle(.plain).accessibilityIdentifier("generic-food-" + food.id)
+                        if let quickAdd {
+                            Button { quickAdd(food) } label: {
+                                Image(systemName: "plus.circle.fill").font(.title).foregroundStyle(NativeDesign.nutritionTitle)
+                                    .frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget)
+                            }
+                            .buttonStyle(.borderless)
+                            .accessibilityLabel("Aggiungi " + food.name)
+                            .accessibilityIdentifier("generic-food-add-" + food.id)
+                        }
+                        }
                             .listRowBackground(NativeDesign.nutritionInput)
                             .swipeActions {
                                 if personalIDs.contains(food.id) {
@@ -401,6 +446,7 @@ struct NativeFoodPicker: View {
                             .listRowBackground(NativeDesign.nutritionInput)
                     }
                 }
+
             }
             .modifier(NativeListAppearance(background: NativeDesign.nutritionCanvas))
             .scrollDismissesKeyboard(.interactively)

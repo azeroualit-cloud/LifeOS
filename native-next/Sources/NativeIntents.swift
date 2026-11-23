@@ -41,6 +41,8 @@ struct LifeOSShortcuts: AppShortcutsProvider {
         AppShortcut(intent: RecordWeightIntent(), phrases: ["Registra il peso in \(.applicationName)"], shortTitle: "Registra peso", systemImageName: "scalemass")
         AppShortcut(intent: SaveBloomLinkIntent(), phrases: ["Salva un link in \(.applicationName)"], shortTitle: "Salva link", systemImageName: "books.vertical")
         AppShortcut(intent: PrepareTaskIntent(), phrases: ["Prepara un’attività in \(.applicationName)"], shortTitle: "Prepara attività", systemImageName: "checklist")
+        AppShortcut(intent: RecordSupplementStackIntent(), phrases: ["Registra la stack in \(.applicationName)", "Registra \(\.$stack) in \(.applicationName)"], shortTitle: "Registra stack", systemImageName: "pills.fill")
+        AppShortcut(intent: RepeatLastFoodIntent(), phrases: ["Ripeti l’ultimo alimento in \(.applicationName)"], shortTitle: "Ripeti alimento", systemImageName: "arrow.uturn.forward")
     }
 }
 

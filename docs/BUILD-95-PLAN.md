@@ -123,3 +123,5 @@ Mancano o sono diversi:
 82. Nuova spesa: importo grande al centro in alto, descrizione sotto.
 83. Sito 248d873: bollette nel blocco «Da dove arrivano i soldi» con periodo e parte dai risparmi.
 84. Ancora da confrontare con la Cowork: Macro a mano a metà schermo (griglia 2×2 + tastierino), Peso a metà schermo, Spesa a rate con le colonne dei mesi, Cronologia a colonne per macro (giorni/settimane/mesi/trimestri).
+85. SUPPLEMENT-STACK-2026-11-23: stack di integratori (nome + dose) registrate con un tocco in Aggiungi alimento; editor nell'app e in Admin sul sito (0137c28); impostazione condivisa «supplement-stacks» (vince la più recente). Siri/Comandi: «Registra la stack», «Ripeti l'ultimo alimento».
+86. FOOD-QUICK-ADD-2026-11-23: Alimento apre la ricerca con il campo grammi; il + registra subito con quei grammi (integratori a unità: dose abituale); tocco sul nome = dettaglio; «Inserisci i macro a mano» come link secondario. Diario: «Copia da ieri» e «Ripeti oggi» per voce.

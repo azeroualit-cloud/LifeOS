@@ -122,8 +122,9 @@ final class NativeRevision78UITests: XCTestCase {
         let add = app.buttons["health-add-nutrition"]
         XCTAssertTrue(add.waitForExistence(timeout: 10))
         XCTAssertTrue(add.isHittable); add.tap()
+        let manualEntry = app.buttons["food-quick-manual"].firstMatch; XCTAssertTrue(manualEntry.waitForExistence(timeout: 10)); manualEntry.tap() // FOOD-QUICK-ADD-2026-11-23
         XCTAssertTrue(app.staticTexts["Aggiungi nutrienti"].waitForExistence(timeout: 10))
-        app.buttons["quick-nutrition-close"].tap()
+        app.buttons["quick-nutrition-close"].tap(); if app.buttons["Fine"].waitForExistence(timeout: 3) { app.buttons["Fine"].tap() } // FOOD-QUICK-ADD: back from the macros, then close the search
         let history = app.buttons["health-nutrition-history"]
         let surface = app.scrollViews["health-detail-scroll"]
         for _ in 0..<6 where !history.isHittable { surface.swipeUp() }
@@ -188,6 +189,7 @@ final class NativeRevision78UITests: XCTestCase {
         let add = app.buttons["health-add-nutrition"]
         XCTAssertTrue(add.isHittable)
         add.tap()
+        let manualEntry = app.buttons["food-quick-manual"].firstMatch; XCTAssertTrue(manualEntry.waitForExistence(timeout: 10)); manualEntry.tap() // FOOD-QUICK-ADD-2026-11-23
         let date = app.buttons["quick-nutrition-date"]
         XCTAssertTrue(date.waitForExistence(timeout: 10))
         let previousWeekDay = Calendar.current.date(byAdding: .day, value: -7, to: Date())
@@ -196,7 +198,7 @@ final class NativeRevision78UITests: XCTestCase {
         let form = app.scrollViews["quick-nutrition-scroll"]
         for _ in 0..<4 where !date.isHittable { form.swipeUp(velocity: .slow) }
         capture("Review 05 Backdated food entry", app)
-        app.buttons["quick-nutrition-close"].tap()
+        app.buttons["quick-nutrition-close"].tap(); if app.buttons["Fine"].waitForExistence(timeout: 3) { app.buttons["Fine"].tap() } // FOOD-QUICK-ADD: back from the macros, then close the search
 
         app.mainTabBar.buttons["Dashboard"].tap()
         let dashboard = app.scrollViews["dashboard-scroll"]
@@ -226,15 +228,14 @@ final class NativeRevision78UITests: XCTestCase {
         capture("Review 09 Health past diary", app)
 
         app.buttons["health-add-nutrition"].tap()
-        app.buttons["quick-nutrition-catalog"].tap()
+        // FOOD-QUICK-ADD-2026-11-23: the search opens directly.
         let gin = app.buttons["generic-food-cocktail-gin-tonic"]
         let biscuits = app.buttons["generic-food-ciqual-24001"]
         XCTAssertTrue(gin.waitForExistence(timeout: 10))
         XCTAssertTrue(biscuits.isHittable)
         XCTAssertLessThan(gin.frame.minY, biscuits.frame.minY)
         capture("Review 10 Foods ranked by 30 day frequency", app)
-        app.buttons["Fine"].tap()
-        app.buttons["quick-nutrition-close"].tap()
+        app.buttons["Fine"].tap() // FOOD-QUICK-ADD: «Fine» closes the whole search sheet
 
         let micronutrients = app.buttons["health-micronutrients"]
         for _ in 0..<5 where !micronutrients.isHittable { scroll.swipeDown(velocity: .slow) }

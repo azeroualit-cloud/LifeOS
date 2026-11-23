@@ -109,7 +109,7 @@ struct NativeHealthDetail: View {
             .toolbar(.hidden, for: .navigationBar)
             .sheet(isPresented: $addingWeight) { NativeAddWeightSheet(health: health) }
             .sheet(isPresented: $editingGoals) { NativeNutritionGoalsSheet(health: health) }
-            .sheet(isPresented: $showingNutrition) { NavigationStack { NativeNutritionQuickSheet(initialDate: selectedDate) }.environmentObject(health) }
+            .sheet(isPresented: $showingNutrition) { NativeFoodQuickAddSheet(initialDate: selectedDate).environmentObject(health) }
             .confirmationDialog("Eliminare questa registrazione e i suoi campioni LifeOS da Apple Salute?", isPresented: Binding(get: { deletingFood != nil }, set: { if !$0 { deletingFood = nil } })) {
                 Button("Elimina da LifeOS e Apple Salute", role: .destructive) {
                     if let id = deletingFood { removeFood(id) }
@@ -373,6 +373,20 @@ struct NativeHealthDetail: View {
                         Text("Nessun alimento registrato per questo giorno").font(.subheadline).foregroundStyle(NativeDesign.secondary)
                     }
                 }
+                // FOOD-QUICK-ADD-2026-11-23: copy yesterday's foods to this day in one tap.
+                let yesterday = NativeNutritionHistory.foods(on: Calendar.current.date(byAdding: .day, value: -1, to: selectedDate) ?? selectedDate, entries: nutrition.entries).filter { $0.deletionPending != true }
+                if !yesterday.isEmpty {
+                    Button { repeatFoods(yesterday) } label: {
+                        LOListRow(isLast: rows.isEmpty) {
+                            Label("Copia da ieri · " + String(yesterday.count) + (yesterday.count == 1 ? " alimento" : " alimenti"), systemImage: "arrow.uturn.forward")
+                                .font(.subheadline).foregroundStyle(NativeDesign.nutritionTitle)
+                            Spacer(minLength: 0)
+                        }.contentShape(Rectangle())
+                    }
+                    .buttonStyle(NativePressStyle())
+                    .disabled(nutrition.busy)
+                    .accessibilityIdentifier("health-diary-copy-yesterday")
+                }
                 ForEach(rows) { row in
                     LOListRow(isLast: row.id == rows.last?.id) {
                         VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
@@ -385,6 +399,11 @@ struct NativeHealthDetail: View {
                         Spacer(minLength: NativeDesign.Space.small)
                         Text(row.calories.map { $0.formatted(.number.precision(.fractionLength(0))) + " kcal" } ?? "— kcal")
                             .font(.subheadline.weight(.semibold)).monospacedDigit()
+                        if let localID = row.localID, !row.deletionPending, let entry = nutrition.entries.first(where: { $0.id == localID }) {
+                            NativeIconButton(symbol: "arrow.uturn.forward", label: "Ripeti oggi " + row.name) { repeatFoods([entry], on: .now) }
+                                .disabled(nutrition.busy)
+                                .accessibilityIdentifier("health-diary-repeat-" + localID.uuidString)
+                        }
                         if let localID = row.localID {
                             NativeIconButton(symbol: row.deletionPending ? "arrow.clockwise" : "trash", label: row.deletionPending ? "Riprova eliminazione di " + row.name : "Elimina " + row.name) {
                                 if row.deletionPending { removeFood(localID) }
@@ -404,6 +423,16 @@ struct NativeHealthDetail: View {
         }
     }
 
+    /// Saves copies one by one (the store accepts one write at a time) and refreshes Apple Health once.
+    private func repeatFoods(_ entries: [NativeNutritionEntry], on day: Date? = nil) {
+        let target = day ?? selectedDate
+        Task {
+            var saved = 0
+            for entry in entries.sorted(by: { $0.date < $1.date }) { if await nutrition.save(entry.repeated(on: target)) { saved += 1 } }
+            diaryNotice = saved == entries.count ? (saved == 1 ? "Alimento ripetuto." : String(saved) + " alimenti copiati.") : "Copiati " + String(saved) + " di " + String(entries.count) + ". Riprova per gli altri."
+            await health.refresh()
+        }
+    }
     private struct DiaryRow: Identifiable {
         let id: UUID
         let name: String
