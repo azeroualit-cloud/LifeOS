@@ -130,6 +130,17 @@ enum NativeSalaryMap {
         return rects
     }
 
+    /// Group totals, largest first (main map of «Dove va lo stipendio»).
+    static func groups(_ items: [NativeSalaryItem]) -> [(group: Int, total: Double)] {
+        Dictionary(grouping: items, by: \.group).map { (group: $0.key, total: $0.value.reduce(0) { $0 + $1.value }) }
+            .filter { $0.total > 0 }.sorted { $0.total == $1.total ? $0.group < $1.group : $0.total > $1.total }
+    }
+    /// Layout values with a floor, so a tiny share still gets a tile wide enough for its name.
+    static func floored(_ values: [Double], minShare: Double) -> [Double] {
+        let total = values.reduce(0, +)
+        guard total > 0 else { return values }
+        return values.map { $0 > 0 ? max($0, total * minShare) : 0 }
+    }
     /// Groups laid out first (largest first), then each group's items inside its rectangle.
     static func tiles(_ items: [NativeSalaryItem], in rect: CGRect) -> [(item: NativeSalaryItem, rect: CGRect)] {
         let groups = Dictionary(grouping: items, by: \.group)
@@ -251,13 +262,14 @@ struct NativeSalaryMapCard: View {
     let summary: Record
     let categories: [Record]
     let hidden: Bool
-    @State private var selected: String?
-    @ScaledMetric(relativeTo: .body) private var mapHeight: CGFloat = 220
+    @State private var openGroup: Int?
+    @ScaledMetric(relativeTo: .body) private var mapHeight: CGFloat = 200
 
     private var items: [NativeSalaryItem] { NativeSalaryMap.items(summary: summary, categories: categories) }
     var body: some View {
         let items = items
         let salary = NativeSalaryMap.salary(summary: summary, items: items)
+        let groups = NativeSalaryMap.groups(items)
         VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
             HStack(alignment: .firstTextBaseline) {
                 Text("Dove va lo stipendio").font(.headline.bold()).accessibilityAddTraits(.isHeader)
@@ -268,96 +280,155 @@ struct NativeSalaryMapCard: View {
                 Text("Nessun dato del mese").font(.subheadline).foregroundStyle(NativeDesign.secondary)
             } else {
                 VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
-                    map(items, salary: salary)
-                    legend(items, salary: salary)
-                    if let item = items.first(where: { $0.id == selected }) { detail(item, items: items, salary: salary) }
+                    // SALARY-MAP-COLORS-2026-11-23: one coloured tile per group; a tap opens the group's own map.
+                    NativeSalaryTreemap(entries: groups.map { group in
+                        NativeSalaryTreemap.Entry(id: "group-" + String(group.group), title: NativeSalaryMap.groupTitles[group.group], value: group.total, group: group.group)
+                    }, salary: salary, hidden: hidden, height: mapHeight) { entry in openGroup = entry.group }
+                    legend(groups, salary: salary)
+                    Text("Tocca un gruppo per vedere le sue voci.").font(.footnote).foregroundStyle(NativeDesign.secondary)
                 }
                 .padding(.horizontal, NativeDesign.Layout.compactCardInset).padding(.vertical, NativeDesign.Layout.cardInsetVertical)
                 .loCardSurface()
             }
         }
         .accessibilityIdentifier("finance-salary-map")
+        .sheet(item: Binding(get: { openGroup.map(NativeSalaryGroupID.init) }, set: { openGroup = $0?.group })) { id in
+            NativeSalaryGroupSheet(group: id.group, items: items.filter { $0.group == id.group }, salary: salary, hidden: hidden)
+        }
     }
-    private func map(_ items: [NativeSalaryItem], salary: Double) -> some View {
+    private func legend(_ groups: [(group: Int, total: Double)], salary: Double) -> some View {
+        LazyVGrid(columns: [GridItem(.flexible(), spacing: NativeDesign.Space.small, alignment: .leading), GridItem(.flexible(), spacing: NativeDesign.Space.small, alignment: .leading)],
+                  alignment: .leading, spacing: NativeDesign.Space.xs) {
+            ForEach(groups, id: \.group) { group in
+                Button { openGroup = group.group } label: {
+                    HStack(spacing: NativeDesign.Space.xs) {
+                        Circle().fill(NativeDesign.salaryGroups[group.group]).frame(width: NativeDesign.Space.small, height: NativeDesign.Space.small)
+                        Text(NativeSalaryMap.groupTitles[group.group]).foregroundStyle(.primary).lineLimit(1)
+                        if !hidden { Text(NativeSalaryMap.percent(group.total, of: salary)).fontWeight(.semibold).monospacedDigit().foregroundStyle(.primary) }
+                    }
+                    .font(.footnote)
+                    .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.compactControl, alignment: .leading)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(NativePressStyle())
+                .accessibilityIdentifier("finance-salary-group-" + String(group.group))
+            }
+        }
+    }
+}
+struct NativeSalaryGroupID: Identifiable { let group: Int; var id: Int { group } }
+
+/// Treemap with readable labels: values below a minimum share are drawn larger so every tile shows
+/// its name (SITE-PARITY-2026-11-22); the real percentage is always the one written.
+struct NativeSalaryTreemap: View {
+    struct Entry: Identifiable, Equatable { let id: String; let title: String; let value: Double; let group: Int }
+    let entries: [Entry]
+    let salary: Double
+    let hidden: Bool
+    let height: CGFloat
+    var selected: String? = nil
+    let open: (Entry) -> Void
+    var body: some View {
         GeometryReader { proxy in
-            let tiles = NativeSalaryMap.tiles(items, in: CGRect(origin: .zero, size: proxy.size))
+            let rects = NativeSalaryMap.squarify(NativeSalaryMap.floored(entries.map(\.value), minShare: 0.08), in: CGRect(origin: .zero, size: proxy.size))
             ZStack(alignment: .topLeading) {
-                ForEach(tiles, id: \.item.id) { tile in
-                    tileView(tile.item, rect: tile.rect, salary: salary, largest: items.filter { $0.group == tile.item.group }.map(\.value).max() ?? 1)
+                ForEach(Array(entries.enumerated()), id: \.element.id) { index, entry in
+                    tile(entry, rect: rects[index])
                 }
             }
         }
-        .frame(height: mapHeight)
-        .clipShape(RoundedRectangle(cornerRadius: NativeDesign.controlRadius, style: .continuous))
+        .frame(height: height)
     }
-    private func tileView(_ item: NativeSalaryItem, rect: CGRect, salary: Double, largest: Double) -> some View {
-        let on = selected == item.id
-        let big = rect.width > 52 && rect.height > 38
-        let mid = !big && rect.width > 34 && rect.height > 20
-        let color = NativeDesign.financeGroups[min(item.group, NativeDesign.financeGroups.count - 1)]
-        return Button { selected = on ? nil : item.id } label: {
+    private func tile(_ entry: Entry, rect: CGRect) -> some View {
+        let big = rect.height > 52 && rect.width > 70
+        let on = selected == entry.id
+        let shape = RoundedRectangle(cornerRadius: NativeDesign.badgeRadius, style: .continuous)
+        return Button { open(entry) } label: {
             VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
-                if big || mid { Text(item.name).font(.footnote.weight(.semibold)).lineLimit(1).minimumScaleFactor(0.7) }
-                if big && !hidden { Text(NativeSalaryMap.percent(item.value, of: salary)).font(.caption2).monospacedDigit() }
+                Text(entry.title).font(.footnote.weight(.semibold)).lineLimit(2).minimumScaleFactor(0.75)
+                if !hidden {
+                    Text(NativeSalaryMap.percent(entry.value, of: salary)).font(.caption2.weight(.semibold)).monospacedDigit()
+                    if big { Text(entry.value.euro).font(.caption2).monospacedDigit() }
+                }
             }
-            .foregroundStyle(NativeDesign.financeTileText)
-            .padding(NativeDesign.Space.xs)
-            .frame(width: max(0, rect.width - 1), height: max(0, rect.height - 1), alignment: .topLeading)
-            .background(color.opacity(on ? 1 : 0.72 + 0.28 * item.value / max(largest, 0.01)))
-            // With a selection, the other tiles fade so the chosen one stands out even when small.
-            .opacity(selected == nil || on ? 1 : 0.4)
-            .overlay { if on { Rectangle().strokeBorder(Color.primary, lineWidth: NativeDesign.Layout.selectionLine) } }
+            .foregroundStyle(NativeDesign.salaryGroupText[entry.group])
+            .padding(NativeDesign.Space.small)
+            .frame(width: max(0, rect.width - 2), height: max(0, rect.height - 2), alignment: .topLeading)
+            .background(NativeDesign.salaryGroups[entry.group], in: shape)
+            .overlay { if on { shape.strokeBorder(Color.primary, lineWidth: NativeDesign.Layout.selectionLine) } }
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
-        .offset(x: rect.minX, y: rect.minY)
-        .accessibilityLabel(NativeSalaryMap.groupTitles[item.group] + ", " + item.name + (hidden ? "" : ": " + item.value.euro + ", " + NativeSalaryMap.percent(item.value, of: salary) + " dello stipendio"))
+        .buttonStyle(NativePressStyle())
+        .offset(x: rect.minX + 1, y: rect.minY + 1)
+        .accessibilityLabel(entry.title + (hidden ? "" : ": " + entry.value.euro + ", " + NativeSalaryMap.percent(entry.value, of: salary) + " dello stipendio"))
         .accessibilityAddTraits(on ? .isSelected : [])
-        .accessibilityIdentifier("finance-salary-tile-" + item.name)
+        .accessibilityIdentifier("finance-salary-tile-" + entry.title)
     }
-    private func legend(_ items: [NativeSalaryItem], salary: Double) -> some View {
-        let groups = Array(Set(items.map(\.group))).sorted()
-        return ViewThatFits(in: .horizontal) {
-            HStack(spacing: NativeDesign.Space.medium) { ForEach(groups, id: \.self) { chip($0, items: items, salary: salary) } }
-            VStack(alignment: .leading, spacing: NativeDesign.Space.xs) { ForEach(groups, id: \.self) { chip($0, items: items, salary: salary) } }
-        }
-    }
-    private func chip(_ group: Int, items: [NativeSalaryItem], salary: Double) -> some View {
-        let total = items.filter { $0.group == group }.reduce(0) { $0 + $1.value }
-        return HStack(spacing: NativeDesign.Space.xs) {
-            Circle().fill(NativeDesign.financeGroups[min(group, 3)]).frame(width: NativeDesign.Space.small, height: NativeDesign.Space.small)
-            Text(NativeSalaryMap.groupTitles[group]).foregroundStyle(NativeDesign.secondary)
-            if !hidden { Text(NativeSalaryMap.percent(total, of: salary)).fontWeight(.semibold).monospacedDigit() }
-        }
-        .font(.footnote)
-        .accessibilityElement(children: .combine)
-    }
-    private func detail(_ item: NativeSalaryItem, items: [NativeSalaryItem], salary: Double) -> some View {
-        let rows = item.rows.isEmpty ? [NativeSalaryRow(label: item.name, value: item.value)] : item.rows
-        let color = NativeDesign.financeGroups[min(item.group, 3)]
-        return VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-            HStack(alignment: .top, spacing: NativeDesign.Space.small) {
-                Circle().fill(color).frame(width: NativeDesign.Space.small, height: NativeDesign.Space.small).padding(.top, NativeDesign.Space.xs)
-                VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
-                    Text(item.name).font(.headline)
-                    Text(NativeSalaryMap.groupTitles[item.group]).font(.footnote).foregroundStyle(NativeDesign.secondary)
+}
+
+/// The map of one group (site parity): its entries as tiles, the selected entry's composition and the full list.
+struct NativeSalaryGroupSheet: View {
+    let group: Int
+    let items: [NativeSalaryItem]
+    let salary: Double
+    let hidden: Bool
+    @Environment(\.dismiss) private var dismiss
+    @State private var selected: String?
+    var body: some View {
+        let sorted = items.sorted { $0.value > $1.value }
+        let total = sorted.reduce(0) { $0 + $1.value }
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: NativeDesign.Space.large) {
+                    HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.small) {
+                        Circle().fill(NativeDesign.salaryGroups[group]).frame(width: NativeDesign.Space.small, height: NativeDesign.Space.small)
+                        Text(hidden ? "••••" : total.euro).font(.title.bold()).monospacedDigit()
+                        Spacer(minLength: NativeDesign.Space.small)
+                        if !hidden { Text(NativeSalaryMap.percent(total, of: salary) + " dello stipendio").font(.subheadline).foregroundStyle(NativeDesign.secondary) }
+                    }
+                    NativeSalaryTreemap(entries: sorted.map { .init(id: $0.id, title: $0.name, value: $0.value, group: group) },
+                                        salary: salary, hidden: hidden, height: 220, selected: selected) { entry in
+                        selected = selected == entry.id ? nil : entry.id
+                    }
+                    LOListCard {
+                        ForEach(Array(sorted.enumerated()), id: \.element.id) { index, item in
+                            row(item, isLast: index == sorted.count - 1)
+                        }
+                    }
+                    .accessibilityIdentifier("finance-salary-detail")
                 }
-                Spacer(minLength: NativeDesign.Space.small)
-                VStack(alignment: .trailing, spacing: NativeDesign.Space.xxs) {
-                    Text(hidden ? "••••" : item.value.euro).font(.headline).monospacedDigit()
-                    if !hidden { Text(NativeSalaryMap.percent(item.value, of: salary) + " dello stipendio").font(.footnote).foregroundStyle(NativeDesign.secondary) }
+                .padding(.horizontal, NativeDesign.Layout.screenInset).padding(.vertical, NativeDesign.Space.large)
+            }
+            .background(NativeDesign.canvas)
+            .navigationTitle(NativeSalaryMap.groupTitles[group]).navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Fine") { dismiss() } } }
+        }
+        .presentationDetents([.medium, .large])
+    }
+    private func row(_ item: NativeSalaryItem, isLast: Bool) -> some View {
+        let open = selected == item.id
+        return Button { selected = open ? nil : item.id } label: {
+            LOListRow(isLast: isLast) {
+                VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
+                    HStack {
+                        Text(item.name).font(.subheadline.weight(open ? .semibold : .regular)).foregroundStyle(.primary)
+                        Spacer(minLength: NativeDesign.Space.small)
+                        Text(hidden ? "••••" : item.value.euro).font(.subheadline).monospacedDigit().foregroundStyle(.primary)
+                    }
+                    if open {
+                        ForEach(Array(item.rows.enumerated()), id: \.offset) { _, line in
+                            HStack {
+                                Text(line.label)
+                                Spacer()
+                                Text(hidden ? "••••" : line.value.euro).monospacedDigit()
+                            }.font(.footnote).foregroundStyle(NativeDesign.secondary)
+                        }
+                    }
                 }
             }
-            ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
-                HStack {
-                    Text(row.label).foregroundStyle(NativeDesign.secondary)
-                    Spacer()
-                    Text(hidden ? "••••" : row.value.euro).monospacedDigit()
-                }.font(.subheadline)
-            }
+            .contentShape(Rectangle())
         }
-        .padding(.top, NativeDesign.Space.xs)
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("finance-salary-detail")
+        .buttonStyle(NativePressStyle())
+        .accessibilityAddTraits(open ? .isSelected : [])
     }
 }

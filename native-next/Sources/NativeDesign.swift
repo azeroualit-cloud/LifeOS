@@ -71,6 +71,12 @@ enum NativeDesign {
     static let financeGroups: [Color] = [(0x6f8bc4, 0x4e6da7), (0x93aee6, 0x6c8bc5), (0xb9d0ff, 0x8aa9e3), (0xe3ecff, 0xc4d4f2)].map { dark, light in
         Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? hex(dark) : hex(light) })
     }
+    /// Salary map only (SALARY-MAP-COLORS-2026-11-23): Impegni, Messo da parte, Speso, Libero as four distinct hues.
+    /// Light mode: deep fills with white text (≥ 4.5:1); dark mode: light fills with near-black text.
+    static let salaryGroups: [Color] = [(0xb9a0f2, 0x6d4bbf), (0xf2b65c, 0x9a5d0c), (0xf08c82, 0xb03a32), (0x86d3a6, 0x2b7a4f)].map { dark, light in
+        Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? hex(dark) : hex(light) })
+    }
+    static let salaryGroupText: [Color] = Array(repeating: Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor(white: 0.07, alpha: 1) : .white }), count: 4)
     static let financeBudget: [Color] = [(0xa8c7ff, 0x6c8bc5), (0x8aa9e3, 0x4e6da7), (0x6c8bc5, 0x3b5a94), (0x4e6da7, 0x2a4880)].map { dark, light in
         Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? hex(dark) : hex(light) })
     }
@@ -135,8 +141,8 @@ enum NativeDesign {
         static let listInset = Space.large
         static let cardInset = Space.large // was xLarge: less padding (22/11/2026)
         static let compactCardInset = Space.large
-        /// Top and bottom inset of every card (SPACING-SYSTEM-2026-11-22); sides use cardInset.
-        static let cardInsetVertical = Space.medium
+        /// Top and bottom inset of every card: 16 on every side (SPACING-SYSTEM-2026-11-23).
+        static let cardInsetVertical = Space.large
         static let groupedInset = Space.large
         static let nutritionInputLine: CGFloat = 32
         static let nutritionFieldHeight: CGFloat = 72
@@ -144,11 +150,11 @@ enum NativeDesign {
         /// Bottom glass actions, drawn and touched at 44 pt (DESIGN-PASS-94).
         static let bottomAction: CGFloat = 44
         /// Drawn height of buttons inside cards, pills and chips; the touch area stays touchTarget.
-        static let compactControl: CGFloat = Space.section
+        static let compactControl: CGFloat = 34 // fixed: never derived from section spacing (it became 21 by mistake)
         /// Side inset of the floating tab bar; bottom actions use the same, so their edges align.
         static let tabBarInset: CGFloat = Space.xLarge
         /// Glass circle of the Finanza actions (preview 93).
-        static let actionCircle: CGFloat = Space.section + Space.xLarge
+        static let actionCircle: CGFloat = 55
         static let quickRow: CGFloat = 55
         static let nutritionKcalColumn: CGFloat = 64
         /// Segment height; with its 2 pt glass rim the switch is drawn at compactControl (34 pt).

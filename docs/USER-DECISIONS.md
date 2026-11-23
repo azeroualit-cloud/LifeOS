@@ -436,3 +436,9 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 - IPA 0.10.30 build 92 solo a gate verdi sullo stesso commit; prova su iPhone e accettazione restano distinte.
 
 - **HEALTH-FOOD-BUTTON-2026-11-22 — RISOLTO, nessun conflitto.** Chiarimento utente: «io intendevo che alimento deve essere a DESTRA […] COME LO HAI FATTO IN DASHBOARD». In Salute: Peso a sinistra, Alimento a destra, come in Dashboard. Richiesta originale: Testo utente: «non ci credo mi hai lasciato il pulsante alimento sulla scheda salute a sinistra […] devo aspettare di nuovo altre 3 ore adesso per questa cazzata?». Parafrasi: togliere «Alimento» da Salute. In conflitto con HEALTH-TREND-93-2026-11-21 («Peso e Alimento sopra la barra»); domanda META-01 posta il 22 novembre 2026.
+
+
+## 2026-11-23 · revisione PDF della build 95
+- **SPACING-SYSTEM-2026-11-23** (ACTIVE, sostituisce SPACING-SYSTEM-2026-11-22 dopo conferma META-01 «16 su tutti i lati»): schede con 16 pt su tutti i lati, anche tra contenuto e pulsanti nella scheda.
+- **REVIEW-95-FEEDBACK-2026-11-23** (ACTIVE, parafrasi del PDF): pillole non sottili (34 visibili); «Oggi» simmetrico e agenda anche per giorni senza eventi; Salute senza spazio vuoto in alto; mappa dello stipendio con dettaglio per categoria e colori leggibili; controllo del mese del Budget più piccolo; Analisi senza spazio sprecato; Spese per categoria con scelta di mesi e categorie; Movimenti con ricerca e filtri compatti; Nuova spesa con ripartizione scelta dall'utente tra budget, rate e risparmi.
+- **SALARY-MAP-COLORS-2026-11-23** (ACTIVE, eccezione limitata a FINANCE-PALETTE-2026-11-21 dopo conferma META-01): solo la mappa dello stipendio ha 4 colori distinti per gruppo; toccando un gruppo si apre la sua mappa, come sul sito.

@@ -76,7 +76,7 @@ struct NativeCalorieGauge: View {
                 }
             }
             // A taller frame makes a rounder arc, closer to Fitia's.
-            .frame(height: NativeDesign.Space.section + NativeDesign.Space.xLarge + NativeDesign.Space.small)
+            .frame(height: NativeDesign.Space.bottom + NativeDesign.Space.xLarge + NativeDesign.Space.small)
             if let goal, goal > 0 { rangeLabels(goal) }
         }
         .accessibilityElement(children: .ignore)

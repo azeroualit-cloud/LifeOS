@@ -57,9 +57,9 @@ final class NativeNavigationUITests: XCTestCase {
         // Finance has no bar entry: it opens from its Dashboard card.
         app.openOtherDestination("Finanza")
         XCTAssertTrue(app.scrollViews["finance-scroll"].waitForExistence(timeout: 10))
-        let month = app.staticTexts["finance-month"]
+        let month = app.buttons["finance-month"]
         let original = month.label
-        app.buttons["Mese successivo"].tap()
+        month.tap(); app.buttons["Mese successivo"].tap()
         let changed = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label != %@", original), object: month)
         XCTAssertEqual(XCTWaiter.wait(for: [changed], timeout: 10), .completed)
         let nextMonth = month.label

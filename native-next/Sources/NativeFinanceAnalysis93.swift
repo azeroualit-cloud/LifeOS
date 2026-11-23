@@ -324,3 +324,24 @@ struct NativeDailySpendCard: View {
         }
     }
 }
+
+/// Categories compared in «Spese per categoria» (REVIEW-95): empty means all of them.
+enum NativeCategoryChoice {
+    static func decode(_ text: String) -> Set<String> { Set(text.split(separator: "\u{1F}").map(String.init).filter { !$0.isEmpty }) }
+    static func encode(_ set: Set<String>) -> String { set.sorted().joined(separator: "\u{1F}") }
+    static func toggle(_ name: String, in set: Set<String>) -> Set<String> {
+        var next = set
+        if next.contains(name) { next.remove(name) } else { next.insert(name) }
+        return next
+    }
+    static func filter(_ rows: [Record], chosen: Set<String>) -> [Record] {
+        chosen.isEmpty ? rows : rows.filter { chosen.contains($0.text("name")) }
+    }
+    static func label(_ chosen: Set<String>) -> String {
+        switch chosen.count {
+        case 0: return "Tutte le categorie"
+        case 1: return chosen.first ?? ""
+        default: return String(chosen.count) + " categorie"
+        }
+    }
+}

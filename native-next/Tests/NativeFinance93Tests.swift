@@ -30,6 +30,15 @@ final class NativeFinance93Tests: XCTestCase {
         XCTAssertEqual(items.filter { $0.name == "Affitto" }.count, 1)
         XCTAssertEqual(items.filter { $0.group == 2 }.reduce(0) { $0 + $1.value }, 445, accuracy: 0.01)
     }
+    func testSalaryGroupsAndFlooredTilesKeepSmallSharesReadable() {
+        let items = [NativeSalaryItem(name: "Affitto", group: 0, value: 550), NativeSalaryItem(name: "Bollette", group: 0, value: 100),
+                     NativeSalaryItem(name: "Spesa", group: 2, value: 12), NativeSalaryItem(name: "Libero", group: 3, value: 840)]
+        XCTAssertEqual(NativeSalaryMap.groups(items).map(\.group), [3, 0, 2])
+        XCTAssertEqual(NativeSalaryMap.groups(items).first { $0.group == 0 }?.total, 650)
+        let floored = NativeSalaryMap.floored([840, 650, 12], minShare: 0.08)
+        XCTAssertEqual(floored[2], 1502 * 0.08, accuracy: 0.001, "a 0.8% share is drawn at 8% so its name fits")
+        XCTAssertEqual(floored[0], 840)
+    }
     func testAnalysisMonthsAndTypicalDay() {
         XCTAssertEqual(NativeFinanceAnalysis93.months(from: "2026-10", to: "2027-01"), ["2026-10", "2026-11", "2026-12", "2027-01"])
         let typical = NativeFinanceAnalysis93.typicalDaily(["2026-10": [7: 10], "2026-11": [7: 30, 31: 0]])

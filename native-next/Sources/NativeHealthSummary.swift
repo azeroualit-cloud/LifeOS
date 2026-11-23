@@ -105,18 +105,8 @@ struct NativeHealthDetail: View {
             .background(NativeDesign.healthCanvas)
             .navigationTitle("Salute")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                // The day ("Oggi") is the page title; the bar keeps only its actions.
-                ToolbarItem(placement: .principal) { Color.clear.frame(width: 1, height: 1).accessibilityHidden(true) }
-                // History in the navigation bar: always reachable, never under the bottom actions.
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button { showingHistory = true } label: {
-                        Label("Cronologia", systemImage: "chart.bar.xaxis")
-                    }
-                    .accessibilityLabel("Cronologia nutrizione")
-                    .accessibilityIdentifier("health-nutrition-history")
-                }
-            }
+            // REVIEW-95: no empty navigation bar above "Oggi"; the history button sits in the day row.
+            .toolbar(.hidden, for: .navigationBar)
             .sheet(isPresented: $addingWeight) { NativeAddWeightSheet(health: health) }
             .sheet(isPresented: $editingGoals) { NativeNutritionGoalsSheet(health: health) }
             .sheet(isPresented: $showingNutrition) { NavigationStack { NativeNutritionQuickSheet(initialDate: selectedDate) }.environmentObject(health) }
@@ -296,6 +286,8 @@ struct NativeHealthDetail: View {
                 NativeIconButton(symbol: "chevron.right", label: "Settimana successiva") { moveWeek(1) }
                     .accessibilityIdentifier("health-week-next")
                     .disabled(days.contains(today))
+                NativeIconButton(symbol: "chart.bar.xaxis", label: "Cronologia nutrizione") { showingHistory = true }
+                    .accessibilityIdentifier("health-nutrition-history")
             }
             HStack(spacing: NativeDesign.Space.xxs) {
                 ForEach(days, id: \.self) { day in

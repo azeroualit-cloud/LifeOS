@@ -43,7 +43,7 @@ final class NativeRevision74UITests: XCTestCase {
     func testHealthChartsAllowVerticalScrollAndNativeSelection() {
         let app = launch()
         app.mainTabBar.buttons["Salute"].tap()
-        XCTAssertTrue(app.navigationBars["Salute"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["health-nutrition-history"].waitForExistence(timeout: 10)) // REVIEW-95: no navigation bar on the Salute root
         let health = app.buttons["health-summary-weight"]
         XCTAssertTrue(health.waitForExistence(timeout: 10))
         // Build 93: the weight card is in Andamento, below the day (HEALTH-TREND-93-2026-11-21).

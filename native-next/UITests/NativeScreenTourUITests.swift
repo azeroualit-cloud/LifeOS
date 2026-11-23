@@ -27,6 +27,8 @@ final class NativeScreenTourUITests: XCTestCase {
         element.tap(); return true
     }
     private func back(_ app: XCUIApplication) {
+        let custom = app.buttons["finance-analysis-back"]
+        if custom.exists && custom.isHittable { custom.tap(); return }
         let button = app.navigationBars.buttons.firstMatch
         if button.exists && button.isHittable { button.tap() }
     }
@@ -49,6 +51,12 @@ final class NativeScreenTourUITests: XCTestCase {
         app.openMainTab("Calendario")
         shot(prefix + " 05 Calendario mese", app)
         if tap(app.buttons["calendar-view-agenda"]) { shot(prefix + " 06 Calendario agenda", app) }
+        // REVIEW-95: a day without events still opens its agenda.
+        if tap(app.buttons["calendar-view-month"]) {
+            let formatter = DateFormatter(); formatter.dateFormat = "yyyy-MM-dd"; formatter.locale = Locale(identifier: "en_US_POSIX")
+            let later = formatter.string(from: Calendar.current.date(byAdding: .day, value: 26, to: Date()) ?? Date())
+            if tap(app.buttons["calendar-day-" + later]) { shot(prefix + " 06b Calendario giorno", app) }
+        }
 
         app.openMainTab("Salute")
         shot(prefix + " 07 Salute", app)
@@ -63,6 +71,8 @@ final class NativeScreenTourUITests: XCTestCase {
         shot(prefix + " 12 Finanza", app)
         scroll(app, prefix + " 13 Finanza sotto")
         scroll(app, prefix + " 14 Finanza stipendio")
+        // REVIEW-95: a salary group opens its own map.
+        if tap(app.buttons["finance-salary-group-0"]) { shot(prefix + " 14b Stipendio gruppo", app); dismissSheet(app) }
         app.swipeDown(velocity: .fast); app.swipeDown(velocity: .fast)
         if tap(app.buttons["finance-budget"]) { shot(prefix + " 15 Budget", app); back(app) }
         if tap(app.buttons["finance-analysis"]) {

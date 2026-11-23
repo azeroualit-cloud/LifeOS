@@ -2,6 +2,7 @@ import SwiftUI
 import Charts
 
 struct FinanceAnalysisScreen: View {
+    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var store: NativeStore
     @State private var categoryRange = 3
     @State private var categoryCache = NativeCategoryPeriodCache()
@@ -72,9 +73,16 @@ struct FinanceAnalysisScreen: View {
     }
     var body: some View {
         let flows = NativeFinanceAnalysis93.flows(store.finance, before: CivilDate.month()).filter { $0.month >= analysisStart }
+        VStack(spacing: NativeDesign.Space.none) {
+        // REVIEW-95: one row with back, title and the start month (like Finanza), no empty large-title area.
+        HStack(spacing: NativeDesign.Space.small) {
+            NativeToolbarButton(symbol: "chevron.left", label: "Indietro") { dismiss() }.accessibilityIdentifier("finance-analysis-back")
+            Text("Analisi").font(.title.bold()).lineLimit(1).accessibilityAddTraits(.isHeader).accessibilityIdentifier("finance-analysis-heading")
+            Spacer(minLength: NativeDesign.Space.small)
+            startChip
+        }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.top, NativeDesign.Space.small).padding(.bottom, NativeDesign.Space.small)
         ScrollView {
             VStack(alignment: .leading, spacing: NativeDesign.Space.large) {
-                HStack { startChip; Spacer(minLength: 0) }
                 NativeRhythmCard(flows: flows, hidden: hidden)
                 NativeFundRunwayCard(fund: NativeFinanceAnalysis93.fund(store.finance), surplus: NativeFinanceAnalysis93.surplus(store.finance),
                                      norm: NativeFinanceAnalysis93.norm(flows), hidden: hidden)
@@ -91,26 +99,50 @@ struct FinanceAnalysisScreen: View {
             .padding(.horizontal, NativeDesign.Layout.screenInset)
             .padding(.vertical, NativeDesign.Space.medium)
         }
+        }
         .background(NativeDesign.canvas)
+        .toolbar(.hidden, for: .navigationBar)
         .task(id: requestKey) { await loadCategories() }
         .onChange(of: store.finance) { _, _ in
             if !categoryLoading { updateCurrentMonth() }
         }
-        .navigationTitle("Analisi").navigationBarTitleDisplayMode(.large)
+        .navigationTitle("Analisi")
     }
     private var categoryTrailing: String {
         guard let first = months.first, let last = months.last else { return "" }
         return NativeFinanceAnalysis93.shortMonth(first) + " – " + NativeFinanceAnalysis93.shortMonth(last)
+    }
+    @AppStorage("lifeos-analysis-categories") private var chosenCategoriesText = ""
+    private var chosenCategories: Set<String> { NativeCategoryChoice.decode(chosenCategoriesText) }
+    private var categoryPicker: some View {
+        let names = categoryRows.filter { $0.amount("amount") > 0 }.map { $0.text("name") }.sorted()
+        let chosen = chosenCategories
+        return LOFilterPill(title: "Categorie", value: NativeCategoryChoice.label(chosen), isActive: true, identifier: "finance-category-choice") {
+            Button { chosenCategoriesText = "" } label: {
+                if chosen.isEmpty { Label("Tutte le categorie", systemImage: "checkmark") } else { Text("Tutte le categorie") }
+            }
+            Section("Solo queste") {
+                ForEach(names, id: \.self) { name in
+                    Button { chosenCategoriesText = NativeCategoryChoice.encode(NativeCategoryChoice.toggle(name, in: chosen)) } label: {
+                        if chosen.contains(name) { Label(name, systemImage: "checkmark") } else { Text(name) }
+                    }
+                }
+            }
+        }
+        .menuActionDismissBehavior(.disabled)
     }
     private var categories: some View {
         LOAnalysisCard(title: "Spese per categoria", trailing: categoryTrailing, identifier: "finance-categories") {
             LOSegmented(options: [("3 mesi", "3"), ("6 mesi", "6"), ("12 mesi", "12")], selection: Binding(
                 get: { String(categoryRange) + " mesi" },
                 set: { categoryRange = Int($0.prefix(while: { $0.isNumber })) ?? 3 }), identifierPrefix: "category-period-")
+            // REVIEW-95: the categories to compare are chosen here (all by default); the months are the segment above.
+            categoryPicker
+            let shown = NativeCategoryChoice.filter(categoryRows, chosen: chosenCategories)
             if categoryLoading || loadedKey != requestKey { ProgressView("Categorie: \(categoryLoadedMonths) di \(months.count) mesi…") }
             else if let categoryError { NativeInlineMessage(text: categoryError) }
-            else if categoryRows.isEmpty { Text("Nessuna spesa nel periodo").font(.subheadline).foregroundStyle(NativeDesign.secondary) }
-            else { NativeCategoryBars93(rows: categoryRows, months: months.count, hidden: hidden) }
+            else if shown.isEmpty { Text("Nessuna spesa nel periodo").font(.subheadline).foregroundStyle(NativeDesign.secondary) }
+            else { NativeCategoryBars93(rows: shown, months: months.count, hidden: hidden) }
             if store.server != nil, categoryError != nil {
                 Button("Riprova") { retry &+= 1 }.disabled(categoryLoading || loadedKey != requestKey)
             }

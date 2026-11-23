@@ -49,6 +49,7 @@ struct NativeNutritionQuickEntry: View {
                 }.buttonStyle(LOGlassButtonStyle(fillsWidth: true, compact: true)).accessibilityLabel("Aggiungi alimento")
                     .accessibilityIdentifier("quick-nutrition-open")
             }
+            .padding(.top, NativeDesign.Space.small) // 16 pt from the macros, like the card edges (SPACING-SYSTEM-2026-11-23)
             if let notice { Text(notice).font(.footnote).foregroundStyle(NativeDesign.secondary).accessibilityIdentifier("quick-nutrition-notice") }
         }.sheet(isPresented: $showing) {
             NavigationStack { NativeNutritionQuickSheet { notice = "Registrazione salvata." } }

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "LifeOS",
-  "updated_on": "2026-11-22",
+  "updated_on": "2026-11-23",
   "policy": {
     "id": "META-01",
     "status": "ACTIVE",
@@ -1277,12 +1277,13 @@
     },
     {
       "id": "SPACING-SYSTEM-2026-11-22",
-      "status": "ACTIVE",
+      "status": "SUPERSEDED",
       "scope": "Spaziature di tutta l'app (e sito per parità)",
       "recorded_on": "2026-11-22",
       "provenance": "Risposta diretta utente alla proposta di sistema di spaziature",
       "original_quote": "confermo le spaziatura, ma fammi vedere un anteprima di tutte le modifiche, soprattutto la spaziatura",
-      "rule": "Scala aurea con pochi valori: 5 testo-valore/valore-barra; 8 tra righe in una scheda; schede 13 sopra/sotto e 16 ai lati; 13 tra schede; 21 tra sezioni; 16 bordi schermo. Vicinanza (dentro un gruppo meno spazio che tra gruppi), niente testate alte 44 pt dentro le schede: la scheda intera è il tocco. Coerente con GOLDEN-01."
+      "rule": "Scala aurea con pochi valori: 5 testo-valore/valore-barra; 8 tra righe in una scheda; schede 13 sopra/sotto e 16 ai lati; 13 tra schede; 21 tra sezioni; 16 bordi schermo. Vicinanza (dentro un gruppo meno spazio che tra gruppi), niente testate alte 44 pt dentro le schede: la scheda intera è il tocco. Coerente con GOLDEN-01.",
+      "superseded_by": "SPACING-SYSTEM-2026-11-23"
     },
     {
       "id": "DESIGN-PASS-94-2026-11-23",
@@ -1319,6 +1320,33 @@
       "provenance": "Richiesta diretta utente in chat",
       "original_quote": "poi voglio poter gestire tutto in life os, cibo, micronutrienti, (istruzioni di importazione ad esempio dei cibi sempre presenti anche per utilizzare altri ai dal sito), gestione fibre e obiettivi, rendendo più forte il pannello admin e creando il pannello avvisi sul sito e potendo gestire le notifiche o crearle come voglio io in base a criteri vari. Non voglio necessariamente appensantire l'app se non per le cose essenziali, voglio che sia principalmente il sito a fare alcune di queste cose",
       "rule": "Il sito diventa il posto dove si gestiscono alimenti, micronutrienti, fibre e obiettivi, con istruzioni di importazione sempre visibili (anche per usare altre AI); pannello Admin più completo; nuovo pannello Avvisi sul sito per creare e gestire notifiche con criteri a scelta. L'app resta leggera: legge dal server obiettivi e regole e mostra le notifiche. Anche le notifiche della preghiera: per quali preghiere, con quanto anticipo, accese o spente (aggiunta utente: «anche poter gestire le notifiche della preghiera e per quali ecc»). Da fare dentro la build 95 (risposta utente: «Dentro la 95»)."
+    },
+    {
+      "id": "SPACING-SYSTEM-2026-11-23",
+      "status": "ACTIVE",
+      "scope": "Tutta l'app e il sito",
+      "recorded_on": "2026-11-23",
+      "provenance": "Revisione utente (PDF) + conferma META-01 in chat: «16 su tutti i lati»",
+      "original_quote": "troppo poco margine, anche tra parte superiore bottoni nutrizione e macro. Still not quite it overall",
+      "rule": "Come SPACING-SYSTEM-2026-11-22, ma le schede hanno 16 pt su tutti i lati (sopra, sotto, ai lati); anche tra il contenuto e i pulsanti dentro la scheda (es. macro e Peso/Alimento) 16 pt."
+    },
+    {
+      "id": "REVIEW-95-FEEDBACK-2026-11-23",
+      "status": "ACTIVE",
+      "scope": "Build 95, app e sito",
+      "recorded_on": "2026-11-23",
+      "provenance": "PDF di revisione dell'utente (Documento senza titolo.pdf), parafrasi",
+      "rule": "1) Pillole/filtri non sottili (Attività, Movimenti, chip mese/Analisi): altezza visibile 34. 2) Calendario: «Oggi» simmetrico; toccare un giorno senza eventi apre comunque l'agenda. 3) Salute: niente spazio vuoto in alto. 4) Dove va lo stipendio: toccando un riquadro si apre la mappa della categoria (come sul sito); colori e resa devono far capire la suddivisione a colpo d'occhio. 5) Budget: controllo del mese più piccolo. 6) Analisi: niente spazio sprecato (scelta del mese vicino al titolo). 7) Spese per categoria: scegliere mesi e categorie (o tutte). 8) Movimenti: ricerca e filtri senza margini eccessivi. 9) Nuova spesa: scegliere quanta parte della spesa va dal budget, quanta si rateizza e quanta dai risparmi (come FUNDING-BLOCK).",
+      "original_quote": "da dove scelgo i mesi di competenza e la categorie o tutte le categorie da valutare … è dov'è il metodo che abbiamo detto che posso scegliere quale parte della spesa posso sceglierla dal budget e quale da rateizzare e quale dei risparmi ecc? … cant you find a way to stop these errors MULTIPLE TIMES IN A ROW."
+    },
+    {
+      "id": "SALARY-MAP-COLORS-2026-11-23",
+      "status": "ACTIVE",
+      "scope": "Solo la mappa «Dove va lo stipendio» (app e sito); eccezione a FINANCE-PALETTE-2026-11-21, che resta attiva per il resto di Finanza",
+      "recorded_on": "2026-11-23",
+      "provenance": "PDF di revisione + conferma META-01 in chat: «Colori diversi solo nella mappa»",
+      "original_quote": "hope when i click this it shows me a second map of the category, like how it works on the website. Because as for now graphically neither the color nor the render nor the method chosen gives me and suddivisione utile per capire a colpo d’occhio",
+      "rule": "La mappa dello stipendio usa 4 colori distinti per gruppo (Impegni viola, Messo da parte ambra, Speso rosso, Libero verde); toccando un gruppo o un riquadro si apre la mappa della categoria con le sue voci, come sul sito."
     }
   ],
   "pending_confirmations": [
@@ -1474,6 +1502,12 @@
     {
       "date": "2026-11-22",
       "event": "META-01: deploy dei Worker in conflitto con IPA-DELIVERY-93 (i Worker li distribuisce l'utente). Risposta «fai te il deploy ti do il permesso»: eccezione DEPLOY-WORKERS-93-2026-11-22 limitata a lifeos-native-test e lifeos."
+    },
+    {
+      "id": "SPACING-SYSTEM-2026-11-22",
+      "status": "SUPERSEDED",
+      "date": "2026-11-23",
+      "by": "SPACING-SYSTEM-2026-11-23"
     }
   ],
   "historical_inventory": "decision-history/2026-11-04-inventory.json",

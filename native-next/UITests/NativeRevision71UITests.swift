@@ -220,7 +220,7 @@ final class NativeRevision71UITests: XCTestCase {
         reveal(budget, in: surface, app: app); XCTAssertTrue(analysis.exists)
         XCTAssertGreaterThanOrEqual(budget.frame.height.rounded(), 44)
         capture("71-finance-reference-layout")
-        analysis.tap(); XCTAssertTrue(app.navigationBars["Analisi"].waitForExistence(timeout: 10))
+        analysis.tap(); XCTAssertTrue(app.staticTexts["finance-analysis-heading"].waitForExistence(timeout: 10))
         app.navigationBars.buttons.element(boundBy: 0).tap()
         reveal(budget, in: surface, app: app); budget.tap(); XCTAssertTrue(app.navigationBars["Budget"].waitForExistence(timeout: 10))
         app.navigationBars.buttons.element(boundBy: 0).tap()

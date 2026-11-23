@@ -31,7 +31,10 @@ struct NativePlansScreen: View {
     var body: some View {
         List {
             Section {
-                MonthControl(finance: true)
+                // REVIEW-95: the month is the compact chip of Finanza, not a full-width card.
+                NativeFinanceMonthChip().frame(maxWidth: .infinity)
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets(top: NativeDesign.Space.none, leading: 0, bottom: NativeDesign.Space.none, trailing: 0))
                 if store.plansBusy { ProgressView("Aggiorno i piani…") }
                 if let error = store.plansError {
                     NativeInlineMessage(text: error)

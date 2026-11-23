@@ -610,12 +610,13 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertTrue(app.buttons["health-summary-simulation"].waitForExistence(timeout: 10))
         capture("health-forecast-summary")
         app.openOtherDestination("Finanza")
-        let month = app.staticTexts["finance-month"]
+        // Build 95: the month is a chip with a menu (Mese precedente / Mese successivo).
+        let month = app.buttons["finance-month"]
         XCTAssertTrue(month.waitForExistence(timeout: 10))
         let current = month.label
-        for _ in 0..<3 { app.buttons["Mese successivo"].tap() }
+        for _ in 0..<3 { month.tap(); app.buttons["Mese successivo"].tap() }
         XCTAssertNotEqual(month.label, current)
-        for _ in 0..<3 { app.buttons["Mese precedente"].tap() }
+        for _ in 0..<3 { month.tap(); app.buttons["Mese precedente"].tap() }
         XCTAssertEqual(month.label, current)
         capture("finance-returned-to-current-month")
     }
@@ -1080,7 +1081,7 @@ final class NativeInterfaceTests: XCTestCase {
         let app = launch(["--stress-money", "--dark"])
         app.openOtherDestination("Finanza")
         app.buttons["finance-analysis"].tap()
-        XCTAssertTrue(app.navigationBars["Analisi"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["finance-analysis-heading"].waitForExistence(timeout: 10))
         // Build 93 Analisi: cards in the preview order, category periods as a segmented control.
         XCTAssertTrue(app.staticTexts["Ritmo"].waitForExistence(timeout: 10))
         for period in ["3", "6", "12"] {

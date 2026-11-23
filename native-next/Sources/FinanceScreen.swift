@@ -88,7 +88,7 @@ struct FinanceScreen: View {
         // second row with accessibility text (gate 91 run 43999971306).
         let spacing = NativeDesign.Space.small
         let budget = NavigationLink { NativePlansScreen().toolbar(.visible, for: .navigationBar) } label: { financeTile("Budget", symbol: "wallet.bifold") }.accessibilityIdentifier("finance-budget")
-        let analysis = NavigationLink { FinanceAnalysisScreen().toolbar(.visible, for: .navigationBar) } label: { financeTile("Analisi", symbol: "chart.xyaxis.line") }.accessibilityIdentifier("finance-analysis")
+        let analysis = NavigationLink { FinanceAnalysisScreen() } label: { financeTile("Analisi", symbol: "chart.xyaxis.line") }.accessibilityIdentifier("finance-analysis")
         let plan = Button { router.sheet = .financePlan } label: { financeTile("Nuovo piano", symbol: "folder.badge.plus") }.accessibilityIdentifier("finance-new-plan")
         let all = NavigationLink {
             List { movements }.modifier(NativeListAppearance()).navigationTitle("Movimenti").navigationBarTitleDisplayMode(.inline).toolbar(.visible, for: .navigationBar)
@@ -164,14 +164,17 @@ struct FinanceScreen: View {
     }
     @ViewBuilder private var movements: some View {
         // Build 93 Movimenti: search, category and account drop-downs, total of the filter.
+        // REVIEW-95: search and filters in one compact block (no card margins around them).
         Section {
+            VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
             HStack(spacing: NativeDesign.Space.small) {
                 Image(systemName: "magnifyingglass").foregroundStyle(NativeDesign.secondary).accessibilityHidden(true)
                 TextField("Cerca movimento", text: $search).accessibilityIdentifier("movements-search")
             }
-            .frame(minHeight: NativeDesign.Layout.touchTarget)
-        }
-        Section {
+            .font(.subheadline)
+            .padding(.horizontal, NativeDesign.Space.medium)
+            .frame(height: NativeDesign.Layout.toolbarVisual)
+            .background(Capsule().fill(Color(uiColor: .secondarySystemGroupedBackground)))
             HStack(spacing: NativeDesign.Space.small) {
                 LOFilterPill(title: "Categoria", value: movementCategory == "Tutte" ? "Tutte le categorie" : movementCategory, isActive: true, identifier: "movements-category") {
                     ForEach(["Tutte"] + NativeExpenseGroups.grouped(movementCategories).flatMap(\.items), id: \.self) { name in
@@ -189,8 +192,9 @@ struct FinanceScreen: View {
                 }
                 Spacer(minLength: 0)
             }
+            }
             .listRowBackground(Color.clear)
-            .listRowInsets(EdgeInsets(top: NativeDesign.Space.xs, leading: 0, bottom: NativeDesign.Space.xs, trailing: 0))
+            .listRowInsets(EdgeInsets(top: NativeDesign.Space.none, leading: 0, bottom: NativeDesign.Space.none, trailing: 0))
         }
         if !store.financialPending.isEmpty {
             Section("Sul dispositivo") {
