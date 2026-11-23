@@ -221,13 +221,20 @@ struct NativePinnedNutrients: View {
     @AppStorage(NativeNutrientOrdering.storageKey) private var favorites = NativeNutrientOrdering.defaultFavorites
     let entries: [NativeNutritionEntry]
     var date = Date()
+    @State private var sources: NativeTrackedNutrient?
 
     var body: some View {
         let days = NativeNutrientPeriod.recordedDays(entries, count: 1, now: date)
         ForEach(NativeNutrientOrdering.keys(favorites)) { nutrient in
-            NativeNutrientProgress(nutrient: nutrient, period: .init(nutrient, days: days))
-                .accessibilityIdentifier("health-progress-" + nutrient.rawValue)
+            // MICRO-BREAKDOWN-2026-11-24: a tap shows the foods behind the value.
+            Button { sources = nutrient } label: {
+                NativeNutrientProgress(nutrient: nutrient, period: .init(nutrient, days: days)).contentShape(Rectangle())
+            }
+            .buttonStyle(NativePressStyle())
+            .accessibilityHint("Mostra da quali alimenti arriva")
+            .accessibilityIdentifier("health-progress-" + nutrient.rawValue)
         }
+        .sheet(item: $sources) { nutrient in NativeNutrientSourcesSheet(nutrient: nutrient, entries: entries, day: date) }
     }
 }
 
@@ -238,6 +245,7 @@ struct NativeMicronutrientScreen: View {
     @AppStorage(NativeNutrientOrdering.storageKey) private var favorites = NativeNutrientOrdering.defaultFavorites
     @AppStorage(NativeNutrientOrdering.orderKey) private var order = ""
     @State private var editMode: EditMode = .inactive
+    @State private var sources: NativeTrackedNutrient?
 
     var body: some View {
         let pinned = NativeNutrientOrdering.keys(favorites)
@@ -277,6 +285,7 @@ struct NativeMicronutrientScreen: View {
         .environment(\.defaultMinListRowHeight, NativeDesign.Layout.touchTarget)
         .navigationTitle("Micronutrienti")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(item: $sources) { nutrient in NativeNutrientSourcesSheet(nutrient: nutrient, entries: nutrition.entries, day: selectedDate) }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button(editMode.isEditing ? "Fine" : "Riordina") {
@@ -309,6 +318,9 @@ struct NativeMicronutrientScreen: View {
                 .accessibilityIdentifier("micronutrient-star-" + nutrient.rawValue)
             }
             NativeNutrientProgress(nutrient: nutrient, period: day, caption: "Giorno")
+                .contentShape(Rectangle())
+                .onTapGesture { if !editMode.isEditing { sources = nutrient } }
+                .accessibilityAddTraits(.isButton).accessibilityHint("Mostra da quali alimenti arriva")
             NativeNutrientProgress(nutrient: nutrient, period: week, caption: "Media sett.", warning: warning != nil)
             if let warning {
                 Text("Apporto registrato basso · \(warning)").font(.caption2).foregroundStyle(NativeDesign.financialRed)

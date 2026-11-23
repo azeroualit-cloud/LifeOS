@@ -274,6 +274,12 @@ struct NativeNutritionQuickSheet: View {
         .sheet(isPresented: $showingDate) {
             dateSheet
         }
+        // REVIEW-95B «Macro a mano»: opened without a food, the number pad is ready on Proteine (2×2 grid).
+        .task {
+            guard selectedFood == nil, !typeSize.isAccessibilitySize else { return }
+            try? await Task.sleep(nanoseconds: 450_000_000)
+            focus = .protein
+        }
         .sheet(isPresented: $showingCatalog) {
             NavigationStack {
                 NativeFoodPicker { food in

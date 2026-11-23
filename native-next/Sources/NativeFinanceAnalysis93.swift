@@ -158,8 +158,8 @@ struct NativeRhythmCard: View {
                     Text(hidden ? "•••• €" : norm.euro).font(.title.bold()).monospacedDigit()
                     Text("la tua norma al mese").font(.subheadline).foregroundStyle(NativeDesign.secondary)
                 }
-                paceRow("Ultimo mese", NativeFinanceAnalysis93.pace(flows, months: 1))
-                paceRow("Ultimi 3 mesi", NativeFinanceAnalysis93.pace(flows, months: 3))
+                paceRow("1 mese", NativeFinanceAnalysis93.pace(flows, months: 1))
+                paceRow("3 mesi", NativeFinanceAnalysis93.pace(flows, months: 3))
             } else {
                 Text("Nessun mese completo").font(.subheadline).foregroundStyle(NativeDesign.secondary)
             }
