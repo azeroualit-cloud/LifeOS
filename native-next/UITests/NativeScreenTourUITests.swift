@@ -6,7 +6,7 @@ final class NativeScreenTourUITests: XCTestCase {
     private func launch(_ theme: String) -> XCUIApplication {
         continueAfterFailure = true
         let app = XCUIApplication()
-        app.launchArguments = ["--visual-test", "--busy-home", theme, "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"]
+        app.launchArguments = ["--visual-test", "--busy-home", "--expense-routing", theme, "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"]
         app.launch()
         _ = app.mainTabBar.buttons["Dashboard"].waitForExistence(timeout: 20)
         return app
@@ -131,18 +131,7 @@ final class NativeScreenTourUITests: XCTestCase {
                 shot(prefix + " 20c Registra pagamento", app)
                 dismissSheet(app)
             }
-            // A Luce plan with a small fund, so a bill shows the plan and its uncovered part.
             back(app); back(app)
-            if tap(app.buttons["finance-new-plan"]) {
-                _ = tap(app.buttons["plan-kind-estimated"])
-                type(app.textFields["plan-name"], "Luce", app)
-                type(app.textFields["plan-amount"], "40", app)
-                if app.keyboards.count > 0 { app.swipeDown(velocity: .slow) }
-                if tap(app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Categoria della spesa'")).firstMatch) { _ = tap(app.buttons["Elettricità"].firstMatch) }
-                shot(prefix + " 20d Piano Luce", app)
-                _ = tap(app.buttons["plan-save"]); Thread.sleep(forTimeInterval: 1.5)
-                if app.textFields["plan-name"].exists { dismissSheet(app) }
-            }
         }
         if tap(app.buttons["primary-add"]) {
             shot(prefix + " 21 Nuova spesa", app)
@@ -163,9 +152,9 @@ final class NativeScreenTourUITests: XCTestCase {
                     shot(prefix + " 23 Categorie", app)
                     app.swipeUp(velocity: .slow); shot(prefix + " 24 Categorie sotto", app)
                     if app.buttons["Casa"].exists { app.buttons["Casa"].firstMatch.tap() } else { app.tap() }
-                    if tap(app.buttons["movement-item"]) { shot(prefix + " 24b Voci di Casa", app); if app.buttons["Elettricità"].exists { app.buttons["Elettricità"].tap() } }
+                    if tap(app.buttons["movement-item"]) { shot(prefix + " 24b Voci di Casa", app); if app.buttons["Acqua"].exists { app.buttons["Acqua"].firstMatch.tap() } }
                     for _ in 0..<3 { app.swipeUp(velocity: .slow) }
-                    // With the Luce plan the destination is the plan: the uncovered part goes partly to budget months.
+                    // With the Acqua demo plan the destination is the plan: the uncovered part goes partly to budget months.
                     for _ in 0..<5 where app.buttons["expense-split-less"].exists { app.buttons["expense-split-less"].tap() }
                     shot(prefix + " 25 Bolletta", app)
                     app.swipeUp(velocity: .slow); shot(prefix + " 26 Bolletta sotto", app)
