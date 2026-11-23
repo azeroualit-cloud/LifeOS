@@ -2,7 +2,7 @@ name: LifeOS expense split 95 (tests, audit, deploy)
 # REVIEW-95 / FUNDING-BLOCK-2026-11-21: an ordinary expense split between savings and chosen budget months.
 # A push that changes this file is the deliberate start. The routing is replaced in both Workers only
 # when the live section is exactly the build 91 version; otherwise nothing is written.
-# Attempt 11 (renamed locals; competence found by function name in bundled Workers; bills: savings part on the competence; plan payments: uncovered part split; payment difference split afterwards; parameters may be renamed; live routing is build 90, upgraded with savings and split; !0 for true; bundled live Workers: the function is found by name and braces). The app with the split UI compiles (d0e5a62).
+# Attempt 12 (live competence is the first version without ordinary bills; renamed locals; competence found by function name in bundled Workers; bills: savings part on the competence; plan payments: uncovered part split; payment difference split afterwards; parameters may be renamed; live routing is build 90, upgraded with savings and split; !0 for true; bundled live Workers: the function is found by name and braces). The app with the split UI compiles (d0e5a62).
 on:
   push:
     branches: ['codex/build93']

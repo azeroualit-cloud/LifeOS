@@ -60,7 +60,9 @@ def bundled(source):
                "confirmedPendingRow(command,", "command.utilityPeriod)")  # the bundler may rename local variables (id2)
     found = {n: n in live for n in needles}
     print('COMPETENCE_CHECK ' + ' '.join('%s=%d' % (n.split('(')[0][:20], int(v)) for n, v in found.items()) + ' savings=%d' % live.count('utilitySavingsCents'))
-    if not all(found.values()):
+    # Required: the plan-payment bills (every deployed version). The ordinary-bill loop may be absent:
+    # the live Workers still run the first competence version, which only knew plan payments.
+    if not (found[needles[0]] and found[needles[1]]) or 'utilitySavingsCents' in live:
         raise RuntimeError('Versione competenze differente; nessuna scrittura.')
     return source[:a] + replacement + source[b:]
 
