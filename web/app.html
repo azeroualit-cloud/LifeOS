@@ -2273,10 +2273,15 @@ document.addEventListener("keydown", (e) => {
           if (!f || !box || f.dataset.kind !== "transaction") return;
           const type = f.elements.type.value, cents = toCents(f.elements.amount.value);
           f.classList.remove("routing-on");
-          if (type !== "Spesa" || !(cents > 0) || (typeof isUtilityCategory === "function" && isUtilityCategory(f.elements.category.value))) { box.innerHTML = ""; rt.plans = []; renderSpendFlow(); return; }
+          if (type !== "Spesa" || !(cents > 0)) { box.innerHTML = ""; rt.plans = []; renderSpendFlow(); return; }
+          // FUNDING-BLOCK (parità con l'app 95): anche le bollette passano da «Da dove arrivano i soldi».
+          const isBill = typeof isUtilityCategory === "function" && isUtilityCategory(f.elements.category.value);
+          const expenseMonth = String(f.elements.date.value || todayIso()).slice(0, 7);
+          const billStart = f.elements.billStart?.value || expenseMonth, billEnd = f.elements.billEnd?.value || billStart;
           const my = ++rt.seq;
           try {
-            const r = await workerRequest("getExpenseRouting", [{ category: f.elements.category.value, date: f.elements.date.value, amountCents: cents }]);
+            const r = await workerRequest("getExpenseRouting", [{ category: f.elements.category.value, date: f.elements.date.value, amountCents: cents, ...(isBill ? { competenceStartMonth: billStart, competenceEndMonth: billEnd } : {}) }]);
+            if (isBill && !r.billSavingsDestination) { box.innerHTML = ""; rt.plans = []; renderSpendFlow(); return; }
             if (my !== rt.seq || !document.getElementById("routing-box")) return;
             if (r.version !== 1) { box.innerHTML = ""; rt.plans = []; renderSpendFlow(); return; }
             const plans = r.plans || [], keep = f.elements.routingChoice?.value; rt.plans = plans;
@@ -2284,7 +2289,8 @@ document.addEventListener("keydown", (e) => {
             box.innerHTML = `<label>Da dove arrivano i soldi *<select name="routingChoice"><option value="__ordinary">Budget del mese</option>${r.savingsDestination ? `<option value="__savings">Risparmi</option>` : ""}${plans.map((p) => `<option value="${escapeHtml(p.id)}">Piano · ${escapeHtml(p.name)}${p.availableCents != null || p.fundCents != null ? " (disponibile " + planEuro(p.availableCents ?? p.fundCents) + ")" : ""}</option>`).join("")}</select></label>`;
             f.elements.routingChoice.value = [...f.elements.routingChoice.options].some((o) => o.value === keep) ? keep : suggested;
             // REVIEW-95 (parità con l'app): ripartizione tra risparmi e mesi di budget per il budget del mese.
-            rt.split = r.splitDestination === true;
+            rt.split = r.splitDestination === true; rt.isBill = isBill;
+            if (isBill) box.insertAdjacentHTML("beforeend", `<fieldset class="split-box" data-bill-period><legend>Periodo della bolletta: i mesi in cui pesa sul budget</legend><label>Dal mese<input type="month" name="billStart" value="${billStart}"></label><label>Al mese<input type="month" name="billEnd" value="${billEnd}"></label></fieldset>`);
             if (rt.split) {
               const first = String(f.elements.date.value || todayIso()).slice(0, 7), months = Array.from({ length: 12 }, (_, i) => { const [y, mm] = first.split("-").map(Number), d = new Date(Date.UTC(y, mm - 1 + i, 1)); return d.toISOString().slice(0, 7); });
               box.insertAdjacentHTML("beforeend", `<div class="split-box" data-split-box><label>Dai risparmi (€)<input name="splitSavings" type="number" min="0" step="5" inputmode="decimal" value="0"></label><fieldset class="split-months"><legend>Mesi in cui pesa sul budget</legend>${months.map((mo, i) => `<label class="split-month"><input type="checkbox" name="splitMonth" value="${mo}"${i === 0 ? " checked" : ""}><span>${escapeHtml(shortMonth(mo))}</span></label>`).join("")}</fieldset><p class="hint" data-split-summary></p></div>`);
@@ -2295,6 +2301,7 @@ document.addEventListener("keydown", (e) => {
               if (b) {
                 const uncovered = isPlan ? Math.max(0, (toCents(f.elements.amount.value) || 0) - (rt.available[choice] || 0)) : 0;
                 b.hidden = !(choice === "__ordinary" || (isPlan && rt.planSplit && uncovered > 0));
+                const monthsBox = b.querySelector(".split-months"); if (monthsBox) monthsBox.hidden = rt.isBill;
                 b.dataset.planUncovered = isPlan ? String(uncovered) : "";
                 const lab = b.querySelector("label"); if (lab && lab.firstChild) lab.firstChild.textContent = isPlan ? "Dagli altri risparmi (€)" : "Dai risparmi (€)";
                 if (isPlan && f.elements.splitSavings && b.dataset.planFor !== choice) { f.elements.splitSavings.value = String(uncovered / 100); b.dataset.planFor = choice; }
@@ -2322,6 +2329,7 @@ document.addEventListener("keydown", (e) => {
         const out = f.querySelector("[data-split-summary]");
         if (!out) return;
         const s = splitPlan(f);
+        if (rt.isBill) { out.textContent = `Risparmi ${planEuro(s.savings)} · sui mesi della bolletta ${planEuro(s.budget)}`; return; }
         out.textContent = s.months.length ? `Risparmi ${planEuro(s.savings)} · Budget ${planEuro(s.budget)}: ${s.shares.map((x) => shortMonth(x.month) + " " + planEuro(x.cents)).join(", ")}` : "Scegli almeno un mese.";
       }
       function applyRouting(d, f) {
@@ -2332,6 +2340,14 @@ document.addEventListener("keydown", (e) => {
         delete d.routingChoice; delete d.budgetTreatment; delete d.recoveryMonths; delete d.recoveryAmount;
         const isPlan = d.expenseDestination === "plan", sp = (rt.split && d.expenseDestination === "ordinary") || (isPlan && rt.planSplit) ? splitPlan(f) : null;
         delete d.splitSavings; delete d.splitMonth;
+        if (rt.isBill) {
+          // A bill: its period decides the budget months; only the savings part is chosen.
+          d.competenceStartMonth = String(d.billStart || String(d.date || "").slice(0, 7)); d.competenceEndMonth = String(d.billEnd || d.competenceStartMonth); d.utilityCompetenceVersion = 1;
+          delete d.billStart; delete d.billEnd;
+          if (sp && sp.savings > 0 && d.expenseDestination !== "savings") d.utilitySavingsCents = Math.min(sp.savings, Math.round(Number(d.amount) * 100) - 1);
+          if (isPlan) d.expectedAvailableCents = rt.available[d.planId] ?? d.expectedAvailableCents;
+          return d;
+        }
         if (sp && sp.months.length && sp.budget > 0 && (isPlan || sp.savings > 0 || sp.months.join() !== String(d.date || "").slice(0, 7))) {
           d.budgetTreatment = "recovery"; d.recoveryMonths = sp.months.join(", "); d.recoveryAmount = sp.budget / 100;
           if (isPlan) d.expectedAvailableCents = rt.available[d.planId] ?? d.expectedAvailableCents;
