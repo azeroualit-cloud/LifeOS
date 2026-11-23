@@ -148,7 +148,7 @@ struct NativeCheckmark: View {
     let checked: Bool
     var body: some View {
         Image(systemName: checked ? "largecircle.fill.circle" : "circle")
-            .symbolRenderingMode(.monochrome).font(.title.weight(.regular))
+            .symbolRenderingMode(.monochrome).font(.headline.weight(.regular)).imageScale(.large) // ~22 pt like Promemoria (was 28)
             .foregroundStyle(checked ? NativeDesign.accent : NativeDesign.secondary)
             .contentTransition(reduceMotion ? .identity : .symbolEffect(.replace))
             .animation(reduceMotion ? nil : .easeOut(duration: NativeDesign.Motion.selectionDuration), value: checked)
