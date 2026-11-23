@@ -28,7 +28,7 @@ assert split.transform(current) == current
 
 # A bundled live Worker: comments gone, `var`, double-quoted strings inside the routing function.
 bundled_fn = re.sub(r'^\s*//.*\n', '', old_fn, flags=re.M)
-bundled_fn = bundled_fn.replace("['ordinary','plan','savings']", '["ordinary", "plan", "savings"]').replace("command(state,'pay',", 'command(state, "pay", ')
+bundled_fn = bundled_fn.replace('savingsDestination: true', 'savingsDestination: !0').replace("['ordinary','plan','savings']", '["ordinary", "plan", "savings"]').replace("command(state,'pay',", 'command(state, "pay", ')
 bundled = previous.replace(old_fn, bundled_fn, 1)
 bundled = re.sub(r'\bconst expenseRouting = createExpenseRouting\(', 'var expenseRouting = createExpenseRouting(', bundled, count=1)
 result = split.transform(bundled)

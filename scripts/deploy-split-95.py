@@ -105,7 +105,9 @@ def function_end(source, start):
 
 
 def compact(text):
-    return re.sub(r'\s+', '', text).replace('"', "'")
+    # Bundlers print true/false as !0/!1 and may switch quote style.
+    t = re.sub(r'\s+', '', text).replace('"', "'")
+    return re.sub(r'(?<![\w$)\]])!0(?![\w$])', 'true', re.sub(r'(?<![\w$)\]])!1(?![\w$])', 'false', t))
 
 
 def transform(source):
@@ -123,11 +125,13 @@ def transform(source):
         return source
     live = compact(current)
     # The build 91 routing: savings destination declared, three destinations, plan payments.
-    for needle in ("savingsDestination:true", "['ordinary','plan','savings'].includes(input.expenseDestination)",
-                   "budgetTreatment:kind", "command(state,'pay',paymentInput,today)"):
-        if needle not in live:
-            print('ROUTING_EXPECTED_MISSING ' + needle.split('(')[0][:40])
-            raise RuntimeError('Routing live differente dalla versione attesa; nessuna scrittura.')
+    needles = ("savingsDestination:true", "['ordinary','plan','savings'].includes(input.expenseDestination)",
+               "budgetTreatment:kind", "command(state,'pay',paymentInput,today)")
+    missing = [n for n in needles if n not in live]
+    if missing:
+        print('ROUTING_EXPECTED_MISSING ' + ' ; '.join(n.split('(')[0][:40] for n in missing)
+              + ' | has savingsDestination=%d split=%d version=%d' % (live.count('savingsDestination'), live.count('splitDestination'), live.count('version:1')))
+        raise RuntimeError('Routing live differente dalla versione attesa; nessuna scrittura.')
     if 'splitDestination: true' not in replacement or "input.budgetTreatment === 'recovery'" not in replacement:
         raise RuntimeError('Sorgente routing senza ripartizione; nessuna scrittura.')
     return source[:a] + replacement + source[b:]
