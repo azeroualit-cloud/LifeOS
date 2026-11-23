@@ -54,7 +54,7 @@ final class NativeScreenTourUITests: XCTestCase {
         // REVIEW-95: a day without events still opens its agenda.
         if tap(app.buttons["calendar-view-month"]) {
             let formatter = DateFormatter(); formatter.dateFormat = "yyyy-MM-dd"; formatter.locale = Locale(identifier: "en_US_POSIX")
-            let later = formatter.string(from: Calendar.current.date(byAdding: .day, value: 26, to: Date()) ?? Date())
+            let later = formatter.string(from: Calendar.current.date(byAdding: .day, value: -5, to: Date()) ?? Date())
             if tap(app.buttons["calendar-day-" + later]) { shot(prefix + " 06b Calendario giorno", app) }
         }
 
@@ -83,7 +83,22 @@ final class NativeScreenTourUITests: XCTestCase {
         }
         if tap(app.buttons["all-movements"]) { shot(prefix + " 19 Movimenti", app); back(app) }
         if tap(app.buttons["finance-new-plan"]) { shot(prefix + " 20 Nuovo piano", app); dismissSheet(app) }
-        if tap(app.buttons["primary-add"]) { shot(prefix + " 21 Nuova spesa", app); dismissSheet(app) }
+        if tap(app.buttons["primary-add"]) {
+            shot(prefix + " 21 Nuova spesa", app)
+            // REVIEW-95: the split between savings and budget months appears with an amount.
+            let field = app.textFields["movement-amount"]
+            if field.waitForExistence(timeout: 5) {
+                field.tap(); field.typeText("186")
+                if app.buttons["movement-hide-keyboard"].exists { app.buttons["movement-hide-keyboard"].tap() }
+                for _ in 0..<4 where app.buttons["expense-split-more"].exists && !app.buttons["expense-split-more"].isHittable { app.swipeUp(velocity: .slow) }
+                for _ in 0..<6 where app.buttons["expense-split-more"].exists { app.buttons["expense-split-more"].tap() }
+                let next = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'expense-split-month-'")).element(boundBy: 1)
+                if next.exists && next.isHittable { next.tap() }
+                shot(prefix + " 22 Nuova spesa ripartita", app)
+            }
+            dismissSheet(app)
+            if app.buttons["Elimina modifiche"].exists { app.buttons["Elimina modifiche"].tap() }
+        }
     }
 
     func testTourDark() { tour("--dark", "Scuro") }

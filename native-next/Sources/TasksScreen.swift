@@ -131,8 +131,8 @@ struct TasksScreen: View {
                 .foregroundStyle(selected ? Color(uiColor: .systemBackground) : Color.primary)
                 .padding(.horizontal, NativeDesign.Space.medium)
                 .frame(minHeight: NativeDesign.Layout.compactControl)
-                .background { if selected { Capsule().fill(Color.primary) } }
-                .modifier(NativeGlass())
+                // Selected: solid fill without glass on top (the glass washed it out to grey, 1.6:1).
+                .modifier(NativeChipBackground(selected: selected))
                 .frame(minHeight: NativeDesign.Layout.touchTarget)
                 .contentShape(Rectangle())
         }
@@ -350,5 +350,12 @@ struct RoutinesEditor: View {
                 reset()
             } catch { store.error = error.localizedDescription }
         }
+    }
+}
+
+private struct NativeChipBackground: ViewModifier {
+    let selected: Bool
+    @ViewBuilder func body(content: Content) -> some View {
+        if selected { content.background(Capsule().fill(Color.primary)) } else { content.modifier(NativeGlass()) }
     }
 }
