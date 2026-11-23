@@ -52,3 +52,12 @@ Dalla prova su iPhone della 94 (revisione dell'utente del 23 novembre 2026) e da
 
 ## Sito (SITE-PARITY)
 35. Portare sul sito i punti 7–8, 16–17, 27–29 e le altre correzioni di Finanza che esistono anche sul sito.
+
+## Controllo del codice e delle schermate del simulatore (23/11/2026)
+Galleria privata con le 135 schermate della 94: https://claude.ai/artifact/CvgN9yQ9bKHkuXLFTSJykV
+36. Pulsanti in basso (Peso/Alimento, Aggiungi spesa, Aggiungi evento): 21 pt dal bordo come la barra di navigazione (oggi 16).
+37. Spazio tra schede: 13 pt tra schede dello stesso gruppo, 21 tra sezioni, uguale in Dashboard, Finanza e Salute.
+38. Finanza: «Movimenti» allineato agli altri tre pulsanti (icona più bassa).
+39. Salute: un solo titolo (oggi «Salute» in alto e «Oggi» grande).
+40. Salute › Micronutrienti: tutte le righe con il valore nella stessa posizione (Fibre oggi a destra, le altre accanto al nome).
+41. Grafici e Calendario sulla scala: altezze 150/160/170/190 e misure 4/12/20 del Calendario.
