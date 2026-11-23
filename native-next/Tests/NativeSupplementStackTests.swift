@@ -4,7 +4,8 @@ import XCTest
 /// SUPPLEMENT-STACK-2026-11-23: a stack becomes one entry per supplement with its dose.
 @MainActor final class NativeSupplementStackTests: XCTestCase {
     func testStackEntriesUseEachDoseAndSkipMissingSupplements() throws {
-        let supplements = NativeFoodPicker.items(in: .supplements, personal: [])
+        // Any catalog food works for the mapping (the test catalog has no supplements).
+        let supplements = NativeFoodPicker.items(in: .all, personal: [])
         let first = try XCTUnwrap(supplements.first)
         let stack = NativeSupplementStack(id: "s1", name: "Mattina", items: [
             .init(foodID: first.id, name: first.name, quantity: 2),
