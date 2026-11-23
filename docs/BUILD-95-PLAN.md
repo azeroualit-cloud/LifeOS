@@ -40,5 +40,23 @@ Raccolta dalla revisione dell'utente del 23 novembre 2026 (14 screenshot dell'iP
 ## Da chiarire
 25. Dashboard, testata «Settimana»: cerchiata dall'utente; oggi è il margine di 5 pt (punto 11). Confermare se serve altro.
 
+## Anteprima 93 approvata non implementata (controllo del 23/11/2026)
+
+Confronto tra le 37 schermate di «LifeOS build 93 - Finanza e dati online» e il codice dell'app.
+
+27. Finanza › Panoramica: mese come pulsante nella riga del titolo (accanto a occhio e ingranaggio) invece della riga separata; quattro azioni come cerchi di vetro da 60 pt con la scritta sotto, senza scheda; barra del budget divisa per categoria con il segno del giorno.
+28. Nuova spesa: importo grande e nome in alto; Categoria + **Voce** (sottocategoria); Data; Conto; «Da dove arrivano i soldi» con barra Risparmi/Budget; ripartizione sui mesi (nov / dic / gen).
+29. Menu categoria della spesa: nove gruppi in ordine — Casa, Auto, Spesa, Mangiare fuori, Abbonamenti, Salute e sport, Persona, Svago, Altro — ognuno con le sue voci.
+30. Spesa a rate: importo diviso sui mesi con le quote mese per mese (oggi c'è solo una sezione «Rateizza una spesa»).
+31. Bolletta con piano: il piano «restituisce» la quota di ogni mese coperto, il resto da Risparmi e Budget, con le quote per mese.
+32. Nuovo piano: elenco dei cinque tipi con descrizione — Affitto e utenze (fisso o stima, bollette su più mesi), Fondo (senza scadenza), Obiettivo (una cifra entro una data), Anticipa budget (usa ora un mese futuro), Spesa rapida — al posto del selettore attuale.
+33. Piano › quote: Importo da coprire, Scadenza, Si ripete, «Da dove arrivano le quote» e le quote di ogni mese.
+34. Registra pagamento: previsto contro reale, movimento bancario collegato, quanto restituisce il piano e quanto va su Risparmi/Budget.
+35. Avvisi: sezione «Come arrivano» con l'esempio delle notifiche (le regole e i limiti, Al massimo e Silenzio, ci sono già).
+36. Bloom › luoghi: distanza del luogo nella scheda.
+37. Agenda: sotto il titolo dell'evento la riga secondaria (es. «fino alle 11:30», luogo).
+
+Nota: le pillole «Altre voci di …» (punto 8b) erano nell'anteprima approvata; l'utente il 23/11 ha chiesto di toglierle e vale la richiesta nuova.
+
 ## Sito (SITE-PARITY)
 26. Portare sul sito i punti 9, 10, 19–21 e le correzioni di Finanza che hanno un equivalente web.
