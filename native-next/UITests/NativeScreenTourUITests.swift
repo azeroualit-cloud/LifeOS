@@ -23,8 +23,17 @@ final class NativeScreenTourUITests: XCTestCase {
         shot(name, app)
     }
     private func tap(_ element: XCUIElement) -> Bool {
-        guard element.waitForExistence(timeout: 8), element.isHittable else { return false }
-        element.tap(); return true
+        guard element.waitForExistence(timeout: 8) else { return false }
+        if element.isHittable { element.tap(); return true }
+        element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap(); return true
+    }
+    private func type(_ field: XCUIElement, _ text: String, _ app: XCUIApplication) {
+        guard field.waitForExistence(timeout: 5) else { return }
+        field.tap()
+        let old = field.value as? String ?? ""
+        if !old.isEmpty && old != field.placeholderValue { field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: old.count)) }
+        field.typeText(text)
+        if app.buttons["Fine"].exists { app.buttons["Fine"].firstMatch.tap() }
     }
     private func back(_ app: XCUIApplication) {
         let custom = app.buttons["finance-analysis-back"]
@@ -94,10 +103,37 @@ final class NativeScreenTourUITests: XCTestCase {
             back(app)
         }
         if tap(app.buttons["all-movements"]) { shot(prefix + " 19 Movimenti", app); back(app) }
-        if tap(app.buttons["finance-new-plan"]) { shot(prefix + " 20 Nuovo piano", app); dismissSheet(app) }
+        if tap(app.buttons["finance-new-plan"]) {
+            shot(prefix + " 20 Nuovo piano", app)
+            // REFERENCE-GAPS-95: a goal with a part from savings, saved to record a payment with a difference.
+            type(app.textFields["plan-name"], "Vacanza", app)
+            type(app.textFields["plan-amount"], "600", app)
+            for _ in 0..<4 where !app.buttons["plan-savings-more"].isHittable { app.swipeUp(velocity: .slow) }
+            for _ in 0..<20 where app.buttons["plan-savings-more"].exists { app.buttons["plan-savings-more"].tap() }
+            shot(prefix + " 20b Obiettivo dai risparmi", app)
+            _ = tap(app.buttons["plan-save"]); Thread.sleep(forTimeInterval: 1.5)
+            if !app.buttons["finance-budget"].isHittable { app.swipeDown(velocity: .fast) }
+            _ = tap(app.buttons["finance-budget"])
+            if tap(app.staticTexts["Vacanza"].firstMatch), tap(app.buttons["plan-record-payment"]) {
+                type(app.textFields["plan-payment-amount"], "700", app)
+                for _ in 0..<5 where !app.buttons["expense-split-less"].isHittable { app.swipeUp(velocity: .slow) }
+                for _ in 0..<4 where app.buttons["expense-split-less"].exists { app.buttons["expense-split-less"].tap() }
+                shot(prefix + " 20c Registra pagamento", app)
+                dismissSheet(app)
+            }
+            // A Luce plan with a small fund, so a bill shows the plan and its uncovered part.
+            back(app); back(app)
+            if tap(app.buttons["finance-new-plan"]) {
+                _ = tap(app.buttons["plan-kind-estimated"])
+                type(app.textFields["plan-name"], "Luce", app)
+                if tap(app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Categoria della spesa'")).firstMatch) { _ = tap(app.buttons["Elettricità"].firstMatch) }
+                type(app.textFields["plan-amount"], "40", app)
+                _ = tap(app.buttons["plan-save"]); Thread.sleep(forTimeInterval: 1.5)
+            }
+        }
         if tap(app.buttons["primary-add"]) {
             shot(prefix + " 21 Nuova spesa", app)
-            if tap(app.buttons["Tipo"]) { shot(prefix + " 21b Tipo", app); app.buttons["Spesa"].firstMatch.tap() }
+            if tap(app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Tipo'")).firstMatch) { shot(prefix + " 21b Tipo", app); _ = tap(app.buttons["Spesa"].firstMatch) }
             // REVIEW-95: the split between savings and budget months appears with an amount.
             let field = app.textFields["movement-amount"]
             if field.waitForExistence(timeout: 5) {
@@ -116,6 +152,8 @@ final class NativeScreenTourUITests: XCTestCase {
                     if app.buttons["Casa"].exists { app.buttons["Casa"].firstMatch.tap() } else { app.tap() }
                     if tap(app.buttons["movement-item"]) { shot(prefix + " 24b Voci di Casa", app); if app.buttons["Elettricità"].exists { app.buttons["Elettricità"].tap() } }
                     for _ in 0..<3 { app.swipeUp(velocity: .slow) }
+                    // With the Luce plan the destination is the plan: the uncovered part goes partly to budget months.
+                    for _ in 0..<5 where app.buttons["expense-split-less"].exists { app.buttons["expense-split-less"].tap() }
                     shot(prefix + " 25 Bolletta", app)
                     app.swipeUp(velocity: .slow); shot(prefix + " 26 Bolletta sotto", app)
                 }
