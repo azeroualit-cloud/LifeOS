@@ -8838,7 +8838,7 @@ document.addEventListener("keydown", (e) => {
 /* SITE-ADMIN-HUB-2026-11-23: obiettivi condivisi con l'iPhone, istruzioni di importazione, pannello Avvisi
    (regole create dall'utente e notifiche della preghiera). Salvato sul server (web_settings); l'iPhone legge
    regole e obiettivi e mostra le notifiche. */
-const hub = { goals: null, targets: null, alerts: null, log: null, busy: "", error: "", editing: null, msg: "" };
+const hub = { goals: null, targets: null, alerts: null, log: null, stacks: null, supplements: null, stackEdit: null, busy: "", error: "", editing: null, msg: "" };
 const HUB_PRAYERS = [["fajr", "Fajr (alba)"], ["sunrise", "Sorgere del sole"], ["dhuhr", "Dhuhr (mezzogiorno)"], ["asr", "Asr (pomeriggio)"], ["maghrib", "Maghrib (tramonto)"], ["isha", "Isha (notte)"]];
 const HUB_DAYS = [[1, "L"], [2, "M"], [3, "M"], [4, "G"], [5, "V"], [6, "S"], [7, "D"]];
 const HUB_TYPES = {
@@ -8857,8 +8857,9 @@ async function hubLoad(force) {
   if (hub.busy || (!force && hub.alerts && hub.goals)) return;
   hub.busy = "load"; hub.error = "";
   try {
-    const [g, t, a, l] = await Promise.all([workerRequest("getSettings", ["nutrition-goals"]), workerRequest("getSettings", ["nutrition-targets"]), workerRequest("getSettings", ["alerts"]), workerRequest("listAlertLog", [40])]);
-    hub.goals = g; hub.targets = t; hub.alerts = a.modified ? a : { ...a, doc: hubDefaults() }; hub.log = l.entries || [];
+    const [g, t, a, l, st, foods] = await Promise.all([workerRequest("getSettings", ["nutrition-goals"]), workerRequest("getSettings", ["nutrition-targets"]), workerRequest("getSettings", ["alerts"]), workerRequest("listAlertLog", [40]),
+      workerRequest("getSettings", ["supplement-stacks"]).catch(() => null), workerRequest("listFoods", []).catch(() => ({ foods: [] }))]);
+    hub.goals = g; hub.targets = t; hub.stacks = st; hub.supplements = (foods.foods || []).filter((f) => f.family === "supplement"); hub.alerts = a.modified ? a : { ...a, doc: hubDefaults() }; hub.log = l.entries || [];
     hub.alerts.doc = { ...hubDefaults(), ...hub.alerts.doc, prayer: { ...hubDefaults().prayer, ...(hub.alerts.doc.prayer || {}), prayers: { ...hubDefaults().prayer.prayers, ...((hub.alerts.doc.prayer || {}).prayers || {}) } } };
   } catch (e) { hub.error = String(e.message || e); }
   hub.busy = "";
@@ -8870,7 +8871,7 @@ async function hubSave(key, doc) {
   hub.error = ""; hub.msg = "";
   try {
     const r = await workerRequest("saveSettings", [key, doc, Date.now()]);
-    if (key === "alerts") hub.alerts = r; else if (key === "nutrition-goals") hub.goals = r;
+    if (key === "alerts") hub.alerts = r; else if (key === "nutrition-goals") hub.goals = r; else if (key === "supplement-stacks") hub.stacks = r;
     hub.msg = r.saved ? "Salvato. L'iPhone lo applica alla prossima sincronizzazione." : "Nel frattempo è stato cambiato altrove: ricaricata la versione più recente.";
   } catch (e) { hub.error = String(e.message || e); }
 }
@@ -8911,6 +8912,41 @@ function hubImportHtml() {
     <div class="form-actions"><button type="button" class="save" data-hub-copy>Copia il testo</button><span class="hint" data-hub-copied></span></div>
   </section>`;
 }
+/* SUPPLEMENT-STACK-2026-11-23: stack di integratori, condivise con l'app (vince la modifica più recente). */
+function hubStacksHtml() {
+  const stacks = hub.stacks?.doc?.stacks || [], sup = hub.supplements || [];
+  const edit = hub.stackEdit;
+  const unit = (f) => ({ capsule: "capsule", tablet: "compresse", millilitre: "ml" })[f.supplementUnit || f.unit] || "g";
+  const editor = edit ? `<form id="hub-stack-form" class="os-form nb-form"><label class="wide">Nome<input name="name" required maxlength="60" value="${hubE(edit.name)}" placeholder="es. Stack mattina"></label>
+    ${sup.length ? sup.map((f) => { const it = (edit.items || []).find((x) => x.foodID === f.id); return `<label>${hubE(f.name)}<span class="nb-unit"><input type="number" min="0" step="any" name="dose-${hubE(f.id)}" value="${it ? it.quantity : ""}" placeholder="0"><em>${unit(f)}</em></span></label>`; }).join("") : `<p class="hint wide">Nessun integratore tra gli alimenti personali: crealo in Nutrizione › Alimenti personali.</p>`}
+    <div class="form-actions wide"><button type="button" class="ghost" data-hub-stack-cancel>Annulla</button><button class="save" type="submit">Salva stack</button></div></form>` : "";
+  return `<section class="card pad adm-wide" id="hub-stacks"><div class="card-title"><h2>Stack di integratori</h2><button type="button" data-hub-stack-new>Nuova stack</button></div>
+    <p class="hint">Un tocco nell'app (Aggiungi alimento) o «Registra la stack» con Siri registra tutti gli integratori con le loro dosi.</p>
+    ${stacks.length ? `<ul class="hub-stack-list">${stacks.map((x) => `<li><span><b>${hubE(x.name)}</b><small>${(x.items || []).map((i) => hubE(i.name) + " " + i.quantity).join(" · ")}</small></span><span><button type="button" data-hub-stack-edit="${hubE(x.id)}">Modifica</button><button type="button" class="ghost" data-hub-stack-delete="${hubE(x.id)}">Elimina</button></span></li>`).join("")}</ul>` : `<p class="empty">Nessuna stack.</p>`}
+    ${editor}</section>`;
+}
+async function hubSaveStacks(stacks) { await hubSave("supplement-stacks", { stacks }); renderAdmin(); }
+document.addEventListener("click", async (e) => {
+  const neu = e.target.closest("[data-hub-stack-new]"), ed = e.target.closest("[data-hub-stack-edit]"), del = e.target.closest("[data-hub-stack-delete]"), cancel = e.target.closest("[data-hub-stack-cancel]");
+  const stacks = hub.stacks?.doc?.stacks || [];
+  if (neu) { hub.stackEdit = { id: crypto.randomUUID(), name: "", items: [] }; renderAdmin(); }
+  if (ed) { hub.stackEdit = structuredClone(stacks.find((x) => x.id === ed.dataset.hubStackEdit) || null); renderAdmin(); }
+  if (cancel) { hub.stackEdit = null; renderAdmin(); }
+  if (del) await hubSaveStacks(stacks.filter((x) => x.id !== del.dataset.hubStackDelete));
+});
+document.addEventListener("submit", async (e) => {
+  if (e.target.id !== "hub-stack-form") return;
+  e.preventDefault();
+  const f = new FormData(e.target), edit = hub.stackEdit; if (!edit) return;
+  const listed = new Set((hub.supplements || []).map((food) => food.id));
+  // Catalog supplements chosen in the app are not listed here: they stay as they are.
+  const items = (hub.supplements || []).map((food) => ({ foodID: food.id, name: food.name, quantity: Number(String(f.get("dose-" + food.id) || "0").replace(",", ".")) })).filter((x) => x.quantity > 0)
+    .concat((edit.items || []).filter((x) => !listed.has(x.foodID)));
+  if (!items.length) { hub.error = "Indica la dose di almeno un integratore."; renderAdmin(); return; }
+  const next = (hub.stacks?.doc?.stacks || []).filter((x) => x.id !== edit.id).concat([{ id: edit.id, name: String(f.get("name")).trim(), items }]).sort((a, b) => a.name.localeCompare(b.name));
+  hub.stackEdit = null;
+  await hubSaveStacks(next);
+});
 /* Admin: obiettivi e importazione dopo lo stato. */
 const renderAdminBase = renderAdmin;
 renderAdmin = async function () {
@@ -8918,7 +8954,7 @@ renderAdmin = async function () {
   if (!hub.goals && !hub.busy) hubLoad();
   const grid = document.querySelector("#admin .adm-grid");
   if (!grid) return;
-  grid.insertAdjacentHTML("beforeend", (hub.error ? `<div class="errorbox adm-wide">${hubE(hub.error)}</div>` : "") + (hub.msg ? `<p class="hint adm-wide" role="status">${hubE(hub.msg)}</p>` : "") + hubGoalsHtml() + hubImportHtml());
+  grid.insertAdjacentHTML("beforeend", (hub.error ? `<div class="errorbox adm-wide">${hubE(hub.error)}</div>` : "") + (hub.msg ? `<p class="hint adm-wide" role="status">${hubE(hub.msg)}</p>` : "") + hubGoalsHtml() + hubStacksHtml() + hubImportHtml());
 };
 /* Pannello Avvisi. */
 function hubRuleText(r) {
