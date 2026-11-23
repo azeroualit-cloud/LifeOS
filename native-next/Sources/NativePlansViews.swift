@@ -30,19 +30,15 @@ struct NativePlansScreen: View {
     private func money(_ cents: Int) -> String { hidden ? "•••• €" : (Double(cents) / 100).euro }
     var body: some View {
         List {
-            Section {
-                // REVIEW-95: the month is the compact chip of Finanza, not a full-width card.
-                NativeFinanceMonthChip().frame(maxWidth: .infinity)
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: NativeDesign.Space.none, leading: 0, bottom: NativeDesign.Space.none, trailing: 0))
-                if store.plansBusy { ProgressView("Aggiorno i piani…") }
-                if let error = store.plansError {
-                    NativeInlineMessage(text: error)
-                    if let server = store.server { Text(server.host ?? "").font(.footnote).foregroundStyle(NativeDesign.secondary) }
-                    Button("Riprova") { Task { await store.loadFinancePlans() } }
+            if store.plansBusy || store.plansError != nil {
+                Section {
+                    if store.plansBusy { ProgressView("Aggiorno i piani…") }
+                    if let error = store.plansError {
+                        NativeInlineMessage(text: error)
+                        if let server = store.server { Text(server.host ?? "").font(.footnote).foregroundStyle(NativeDesign.secondary) }
+                        Button("Riprova") { Task { await store.loadFinancePlans() } }
+                    }
                 }
-            } footer: {
-                if store.isDemo { Text("Piani demo · nessuna modifica al server") }
             }
             // Build 93 Budget: salary, plans and commitments, budget of the month; then the plans.
             Section {
@@ -52,6 +48,8 @@ struct NativePlansScreen: View {
                     Text(money(flow.salaryCents - flow.rows.reduce(0) { $0 + $1.amountCents })).foregroundStyle(.primary)
                 }.font(.headline).monospacedDigit()
                     .accessibilityIdentifier("budget-month-total")
+            } footer: {
+                if store.isDemo { Text("Piani demo · nessuna modifica al server") }
             }
             Section("Piani del mese") {
                 if flow.rows.isEmpty { Text("Nessun piano per questo mese").foregroundStyle(NativeDesign.secondary) }
@@ -82,6 +80,13 @@ struct NativePlansScreen: View {
             NativeSavingsSection()
         }.modifier(NativeListAppearance()).navigationTitle("Budget").navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                // REVIEW-95: the month chip sits next to the title, no row of its own.
+                ToolbarItem(placement: .principal) {
+                    HStack(spacing: NativeDesign.Space.small) {
+                        Text("Budget").font(.headline).accessibilityAddTraits(.isHeader)
+                        NativeFinanceMonthChip()
+                    }
+                }
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     NativeIconButton(symbol: "info.circle", label: "Come funzionano i piani") { info = true }.accessibilityIdentifier("plans-info")
                     NativeIconButton(symbol: "plus", label: "Nuovo piano") { router.sheet = .financePlan }.accessibilityIdentifier("plans-add")
