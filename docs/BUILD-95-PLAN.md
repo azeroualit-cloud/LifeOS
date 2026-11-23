@@ -11,6 +11,7 @@ Raccolta dalla revisione dell'utente del 23 novembre 2026 (14 screenshot dell'iP
 6. Movimenti: righe troppo alte, importo in alto invece che centrato; ricerca e filtri sovrapposti e disegnati male.
 7. Aggiunta spesa: implementare il modo grafico dell'anteprima 93 (fogli Spesa, Menu spesa, Dividi, Rateizza, Pagamento).
 8. Categorie di spesa: ordine e sottocategorie come nell'anteprima 93.
+8b. «Dove va lo stipendio»: togliere la fila di pillole «Altre voci di Impegni del mese» (Gas, Acqua, Condominio…) sotto la voce selezionata: non richiesta dall'utente.
 
 ## Analisi (FINANCE-ANALYSIS-RANGE-2026-11-23)
 9. Ritmo: mese di inizio scelto dall'utente in app e sito; togliere «da gennaio».
