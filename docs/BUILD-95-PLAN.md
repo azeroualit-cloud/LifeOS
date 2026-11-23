@@ -1,62 +1,54 @@
-# Build 95 — checklist delle correzioni (dalla prova su iPhone della 94)
+# Build 95 — checklist completa
 
-Raccolta dalla revisione dell'utente del 23 novembre 2026 (14 screenshot dell'iPhone e messaggi in chat). Nessuna correzione è ancora applicata. Ogni punto va controllato sugli screenshot del simulatore prima della IPA.
+Dalla prova su iPhone della 94 (revisione dell'utente del 23 novembre 2026) e dal controllo dell'anteprima approvata della 93 («LifeOS build 93 - Finanza e dati online»). Nessun punto è ancora applicato. Ogni punto va controllato sugli screenshot del simulatore prima della IPA.
 
-## Finanza
-1. «Dove va lo stipendio»: Affitto contato due volte; legenda che somma 153 %. Correggere il calcolo.
-2. Mappa delle spese: riquadri minuscoli senza nome; riquadro selezionato quasi invisibile.
-3. Budget rimanente: la seconda parte della barra esce dal bordo destro.
-4. Azioni Budget / Analisi / Nuovo piano / Movimenti: rifare come nell'anteprima approvata della 93 (`LifeOS build 93 - Finanza e dati online`, artboard `Main`); oggi «Movimenti» è tagliato.
-5. Nuovo piano: campi compilati senza etichetta (nome, importo).
-6. Movimenti: righe troppo alte, importo in alto invece che centrato; ricerca e filtri sovrapposti e disegnati male.
-7. Aggiunta spesa: implementare il modo grafico dell'anteprima 93 (fogli Spesa, Menu spesa, Dividi, Rateizza, Pagamento).
-8. Categorie di spesa: ordine e sottocategorie come nell'anteprima 93.
-8b. «Dove va lo stipendio»: togliere la fila di pillole «Altre voci di Impegni del mese» (Gas, Acqua, Condominio…) sotto la voce selezionata: non richiesta dall'utente.
+## Finanza › Panoramica
+1. Intestazione come l'anteprima: il mese è un pulsante nella riga del titolo, accanto a occhio e ingranaggio (via la riga separata).
+2. Budget rimanente: barra divisa per categoria con il segno del giorno; oggi la seconda parte esce dal bordo destro.
+3. Budget / Analisi / Nuovo piano / Movimenti: cerchi di vetro da 60 pt con la scritta sotto, senza scheda; oggi «Movimenti» è tagliato.
+4. «Dove va lo stipendio»: Affitto contato due volte e legenda che somma 153 % — correggere il calcolo.
+5. Mappa delle spese: riquadri minuscoli senza nome; il riquadro selezionato deve vedersi.
+6. Togliere le pillole «Altre voci di …» sotto la voce selezionata (erano nell'anteprima, l'utente le ha tolte il 23/11).
 
-## Analisi (FINANCE-ANALYSIS-RANGE-2026-11-23)
-9. Ritmo: mese di inizio scelto dall'utente in app e sito; togliere «da gennaio».
-10. Giorno per giorno: calendario 1–31 con la spesa tipica di ogni giorno su tutti i mesi scelti; togliere «novembre 2026».
+## Finanza › Spese e piani
+7. Nuova spesa: importo grande e nome; Categoria + Voce (sottocategoria); Data; Conto; «Da dove arrivano i soldi» (Risparmi / Budget); ripartizione sui mesi.
+8. Categorie: nove gruppi in ordine — Casa, Auto, Spesa, Mangiare fuori, Abbonamenti, Salute e sport, Persona, Svago, Altro — ciascuno con le sue voci.
+9. Spesa a rate: importo diviso sui mesi con la quota di ogni mese.
+10. Bolletta con piano: il piano copre la quota di ogni mese coperto, il resto da Risparmi e Budget.
+11. Nuovo piano: elenco dei cinque tipi con descrizione (Affitto e utenze, Fondo, Obiettivo, Anticipa budget, Spesa rapida) al posto del selettore.
+12. Nuovo piano: ogni campo con la sua etichetta (oggi «b» e «58» senza nome).
+13. Quote del piano: importo da coprire, scadenza, «si ripete», da dove arrivano le quote e la quota di ogni mese.
+14. Registra pagamento: previsto contro reale, movimento collegato, quanto copre il piano e quanto Risparmi/Budget.
 
-## Margini e pulsanti (SPACING-SYSTEM / DESIGN-PASS-94)
-11. Margini uguali in tutte le schede: 13 pt sopra/sotto, 16 ai lati. Togliere i 10 margini vecchi da 5 pt (Settimana, schede-elenco come «Cose da fare», Calendario, Finanza, Piani).
-12. «Cose da fare»: titolo troppo grande; prima riga che tocca il bordo.
-13. Pulsanti larghi nelle schede (Peso, Alimento) a 44 pt visibili — in attesa del sì dell'utente (cambia DESIGN-PASS-94).
-14. Nutrizione in Dashboard: spazio vuoto sotto Peso/Alimento.
-15. Peso/Alimento in basso in Salute: larghezza esattamente uguale alla barra di navigazione.
-16. «Oggi» + «Mese / Agenda»: stessi bordi del resto, nessuna asimmetria.
-17. Attività: pulsante cartella grande quanto le altre pillole; categoria scelta più evidente.
-18. Calendario: riga in più sotto «Mese / Agenda» (icona turni e frecce) da compattare.
+## Finanza › Movimenti, Analisi, Avvisi
+15. Movimenti: righe più basse, importo centrato; ricerca e filtri non sovrapposti e nello stile degli altri pulsanti.
+16. Analisi › Ritmo: il mese di partenza lo sceglie l'utente (app e sito); via «da gennaio».
+17. Analisi › Giorno per giorno: calendario 1–31 con la spesa tipica di ogni giorno su tutti i mesi scelti; via «novembre 2026».
+18. Avvisi: sezione «Come arrivano» con l'esempio di notifica.
+
+## Margini e pulsanti (tutta l'app)
+19. Margini uguali in tutte le schede: 13 pt sopra/sotto, 16 ai lati; togliere i 10 margini vecchi da 5 pt (Settimana, «Cose da fare», Calendario, Finanza, Piani).
+20. «Cose da fare»: titolo più piccolo; la prima riga non tocca il bordo.
+21. Peso / Alimento nelle schede a 44 pt visibili (in attesa del sì dell'utente).
+22. Nutrizione in Dashboard: niente spazio vuoto sotto Peso / Alimento.
+23. Peso / Alimento in basso in Salute: esattamente larghi come la barra di navigazione.
+24. «Oggi» + «Mese / Agenda»: stessi bordi del resto, nessuna asimmetria.
+25. Attività: pulsante cartella grande quanto le pillole; categoria scelta più evidente.
+26. Calendario: compattare la riga sotto «Mese / Agenda» (icona turni e frecce).
 
 ## Salute
-19. «3174 / 3166»: spazio prima e dopo la barra.
-20. Colori: macro caldi sotto obiettivo e verdi a obiettivo raggiunto o superato; calorie verdi nel range consigliato, calde se sotto o molto sopra. Solo due colori.
-21. Arco: range consigliato al centro della curva; curva più arcuata come Fitia.
-22. Micronutrienti: meno decimali; icona più chiara.
+27. «3174 / 3166» con lo spazio giusto.
+28. Due colori soli: macro caldi sotto obiettivo e verdi a obiettivo raggiunto o superato; calorie verdi nel range consigliato, calde se sotto o molto sopra.
+29. Arco: range consigliato al centro; curva più arcuata come Fitia.
+30. Micronutrienti: meno decimali; icona più chiara.
 
-## Calendario
-23. Agenda: togliere il blocco «Notte · da ieri 00:00–06:00».
-24. Agenda: il primo giorno con lo stesso stile dei giorni seguenti (orario | barretta | titolo).
+## Calendario e Bloom
+31. Agenda: via il blocco «Notte · da ieri 00:00–06:00».
+32. Agenda: tutti i giorni nello stesso stile (orario | barretta | titolo), con la riga secondaria sotto l'evento (es. «fino alle 11:30», luogo).
+33. Bloom › luoghi: distanza del posto nella scheda.
 
 ## Da chiarire
-25. Dashboard, testata «Settimana»: cerchiata dall'utente; oggi è il margine di 5 pt (punto 11). Confermare se serve altro.
-
-## Anteprima 93 approvata non implementata (controllo del 23/11/2026)
-
-Confronto tra le 37 schermate di «LifeOS build 93 - Finanza e dati online» e il codice dell'app.
-
-27. Finanza › Panoramica: mese come pulsante nella riga del titolo (accanto a occhio e ingranaggio) invece della riga separata; quattro azioni come cerchi di vetro da 60 pt con la scritta sotto, senza scheda; barra del budget divisa per categoria con il segno del giorno.
-28. Nuova spesa: importo grande e nome in alto; Categoria + **Voce** (sottocategoria); Data; Conto; «Da dove arrivano i soldi» con barra Risparmi/Budget; ripartizione sui mesi (nov / dic / gen).
-29. Menu categoria della spesa: nove gruppi in ordine — Casa, Auto, Spesa, Mangiare fuori, Abbonamenti, Salute e sport, Persona, Svago, Altro — ognuno con le sue voci.
-30. Spesa a rate: importo diviso sui mesi con le quote mese per mese (oggi c'è solo una sezione «Rateizza una spesa»).
-31. Bolletta con piano: il piano «restituisce» la quota di ogni mese coperto, il resto da Risparmi e Budget, con le quote per mese.
-32. Nuovo piano: elenco dei cinque tipi con descrizione — Affitto e utenze (fisso o stima, bollette su più mesi), Fondo (senza scadenza), Obiettivo (una cifra entro una data), Anticipa budget (usa ora un mese futuro), Spesa rapida — al posto del selettore attuale.
-33. Piano › quote: Importo da coprire, Scadenza, Si ripete, «Da dove arrivano le quote» e le quote di ogni mese.
-34. Registra pagamento: previsto contro reale, movimento bancario collegato, quanto restituisce il piano e quanto va su Risparmi/Budget.
-35. Avvisi: sezione «Come arrivano» con l'esempio delle notifiche (le regole e i limiti, Al massimo e Silenzio, ci sono già).
-36. Bloom › luoghi: distanza del luogo nella scheda.
-37. Agenda: sotto il titolo dell'evento la riga secondaria (es. «fino alle 11:30», luogo).
-
-Nota: le pillole «Altre voci di …» (punto 8b) erano nell'anteprima approvata; l'utente il 23/11 ha chiesto di toglierle e vale la richiesta nuova.
+34. Dashboard, testata «Settimana»: oggi il problema è il margine di 5 pt (punto 19); confermare se serve altro.
 
 ## Sito (SITE-PARITY)
-26. Portare sul sito i punti 9, 10, 19–21 e le correzioni di Finanza che hanno un equivalente web.
+35. Portare sul sito i punti 7–8, 16–17, 27–29 e le altre correzioni di Finanza che esistono anche sul sito.
