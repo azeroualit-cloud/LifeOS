@@ -1999,24 +1999,34 @@ function renderNutrition() {
       <input type="search" class="search" placeholder="Cerca per nome, marca o alias" value="${nbE(nb.fq)}" data-nb-q="food" aria-label="Cerca alimenti">
       ${fams.length ? `<div class="nb-stack" role="group" aria-label="Catalogo per famiglia">${stack}</div><div class="nb-chips"><button class="nb-chip${nb.fam ? "" : " on"}" data-nb-fam="" aria-pressed="${!nb.fam}">Tutti <b>${foods.length}</b></button>${chips}</div>` : ""}
     </section>
-    ${shown.length ? `<div class="nb-grid">${shown.map((f) => `<button class="card nb-food" data-nb-food="${nbE(f.id)}"><span class="nb-ico" aria-hidden="true">${NB_FAM[f.family]?.[0] || "🍽️"}</span><span class="nb-main"><strong>${nbE(f.name)}</strong><small>${nbE(f.brand || (NB_FAM[f.family]?.[1] !== f.name ? NB_FAM[f.family]?.[1] : "") || "")}${f.brand || NB_FAM[f.family]?.[1] !== f.name ? " · " : ""}${f.basis === "ml" ? "per 100 ml" : "per 100 g"}</small></span><span class="nb-kcal"><b>${f.notDeclared ? "–" : nbN(f.kcal)}</b><small>kcal</small></span><span class="nb-bar">${nbMacroBar(f)}</span></button>`).join("")}</div>`
+    ${shown.length ? `<div class="nb-grid">${shown.map(nbView).map((f) => `<button class="card nb-food" data-nb-food="${nbE(f.id)}"><span class="nb-ico" aria-hidden="true">${NB_FAM[f.family]?.[0] || "🍽️"}</span><span class="nb-main"><strong>${nbE(f.name)}</strong><small>${nbE(f.brand || (NB_FAM[f.family]?.[1] !== f.name ? NB_FAM[f.family]?.[1] : "") || "")}${f.brand || NB_FAM[f.family]?.[1] !== f.name ? " · " : ""}${f.basis === "ml" ? "per 100 ml" : "per 100 g"}</small></span><span class="nb-kcal"><b>${f.notDeclared ? "–" : nbN(f.kcal)}</b><small>kcal</small></span><span class="nb-bar">${nbMacroBar(f)}</span></button>`).join("")}</div>`
       : `<section class="card pad nb-empty"><p>${foods.length ? "Nessun alimento corrisponde alla ricerca." : "Qui gestisci gli alimenti che aggiungi tu: valori per 100 g o 100 ml, macro e micronutrienti."}</p>${foods.length ? "" : '<div class="actions"><button class="save" data-nb-act="new-food">+ Nuovo alimento</button><button data-nb-act="import-foods">Importa da file</button></div>'}</section>`}
   </div>`;
 }
+/** Integratori a capsule/compresse: l'app conserva i valori riferiti a 100 unità (calcolo interno).
+ *  Il sito li mostra e li modifica per 1 unità (bug omega 3: 30.000 mg invece di 300). */
+const NB_UNIT = { capsule: ["capsula", "capsule"], tablet: ["compressa", "compresse"], legacyServing: ["dose", "dosi"] };
+function nbPerUnit(f) { return f && f.family === "supplement" && NB_UNIT[f.app?.supplementUnit] ? NB_UNIT[f.app.supplementUnit] : null; }
+function nbView(f) {
+  if (!nbPerUnit(f)) return f;
+  const d = (v) => v == null || v === "" ? v : Math.round(Number(v) / 100 * 10000) / 10000;
+  return { ...f, kcal: d(f.kcal), protein: d(f.protein), carbs: d(f.carbs), fat: d(f.fat), fibre: d(f.fibre), micro: Object.fromEntries(Object.entries(f.micro || {}).map(([k, v]) => [k, d(v)])) };
+}
 function nbFoodForm(f) {
-  const x = f || { family: "meal", basis: "g", micro: {}, aliases: [] };
+  const unit = nbPerUnit(f);
+  const x = f ? nbView(f) : { family: "meal", basis: "g", micro: {}, aliases: [] };
   const num = (k, label, unit = "g") => `<label>${label}<span class="nb-unit"><input type="number" inputmode="decimal" step="0.1" min="0" name="${k}" value="${x[k] ?? ""}" data-nb-calc><em>${unit}</em></span></label>`;
   return `<form class="os-form nb-form" data-nb-form="food" autocomplete="off">
     <label class="wide">Nome<input name="name" value="${nbE(x.name)}" maxlength="120" required autofocus></label>
     <label>Marca<input name="brand" value="${nbE(x.brand)}" maxlength="80" placeholder="Facoltativa"></label>
     <label>Famiglia<select name="family">${Object.entries(NB_FAM).map(([k, [i, t]]) => `<option value="${k}"${k === x.family ? " selected" : ""}>${i} ${nbE(t)}</option>`).join("")}</select></label>
-    <label>Valori per<select name="basis"><option value="g"${x.basis === "g" ? " selected" : ""}>100 g</option><option value="ml"${x.basis === "ml" ? " selected" : ""}>100 ml</option></select></label>
+    ${unit ? `<label>Valori per<input value="1 ${unit[0]}" readonly><input type="hidden" name="basis" value="${nbE(x.basis || "g")}"><input type="hidden" name="perUnit" value="1"></label>` : `<label>Valori per<select name="basis"><option value="g"${x.basis === "g" ? " selected" : ""}>100 g</option><option value="ml"${x.basis === "ml" ? " selected" : ""}>100 ml</option></select></label>`}
     <label class="nb-check"><input type="checkbox" name="notDeclared" ${x.notDeclared ? "checked" : ""} data-nb-calc> Energia e macro non dichiarati</label>
     <div class="nb-nums wide" data-nb-nums>${num("kcal", "Energia", "kcal")}${num("protein", "Proteine")}${num("carbs", "Carboidrati")}${num("fat", "Grassi")}${num("fibre", "Fibre")}
       <div class="nb-calc" data-nb-calcout></div></div>
     <label class="wide">Alias<input name="aliases" value="${nbE((x.aliases || []).join(", "))}" placeholder="Altri nomi, separati da virgola"></label>
     <label class="wide">Note<textarea name="note" maxlength="500" rows="2">${nbE(x.note)}</textarea></label>
-    <details class="wide nb-micro"><summary>Micronutrienti <small>per 100 ${x.basis === "ml" ? "ml" : "g"}, solo quelli che conosci</small></summary><div class="nb-micro-grid">${NB_MICRO.map(([k, t, u]) => `<label>${t}<span class="nb-unit"><input type="number" inputmode="decimal" step="any" min="0" name="m_${k}" value="${x.micro?.[k] ?? ""}"><em>${u}</em></span></label>`).join("")}</div></details>
+    <details class="wide nb-micro"><summary>Micronutrienti <small>per ${unit ? "1 " + unit[0] : "100 " + (x.basis === "ml" ? "ml" : "g")}, solo quelli che conosci</small></summary><div class="nb-micro-grid">${NB_MICRO.map(([k, t, u]) => `<label>${t}<span class="nb-unit"><input type="number" inputmode="decimal" step="any" min="0" name="m_${k}" value="${x.micro?.[k] ?? ""}"><em>${u}</em></span></label>`).join("")}</div></details>
     <div class="os-form-error" data-nb-err role="alert"></div>
     <div class="form-actions">${f ? '<button type="button" class="danger" data-nb-act="del-food">Elimina</button>' : ""}<button type="button" data-nb-act="close">Annulla</button><button class="save" type="submit">Salva</button></div></form>`;
 }
@@ -2031,7 +2041,13 @@ function nbCalcHint(form) {
 function nbFoodPayload(form) {
   const f = form.elements, nd = f.notDeclared.checked, micro = {};
   for (const [k] of NB_MICRO) if (f["m_" + k]?.value !== "") micro[k] = f["m_" + k].value;
-  return { id: nb.dialog?.id, name: f.name.value, brand: f.brand.value, family: f.family.value, basis: f.basis.value, notDeclared: nd, kcal: f.kcal.value, protein: f.protein.value, carbs: f.carbs.value, fat: f.fat.value, fibre: f.fibre.value, aliases: f.aliases.value.split(",").map((s) => s.trim()).filter(Boolean), note: f.note.value, micro };
+  const out = { id: nb.dialog?.id, name: f.name.value, brand: f.brand.value, family: f.family.value, basis: f.basis.value, notDeclared: nd, kcal: f.kcal.value, protein: f.protein.value, carbs: f.carbs.value, fat: f.fat.value, fibre: f.fibre.value, aliases: f.aliases.value.split(",").map((s) => s.trim()).filter(Boolean), note: f.note.value, micro };
+  if (f.perUnit) {
+    const up = (v) => v === "" || v == null ? v : String(Math.round(Number(String(v).replace(",", ".")) * 100 * 10000) / 10000);
+    for (const k of ["kcal", "protein", "carbs", "fat", "fibre"]) out[k] = up(out[k]);
+    out.micro = Object.fromEntries(Object.entries(out.micro || {}).map(([k, v]) => [k, up(v)]));
+  }
+  return out;
 }
 /* ---------------- Dialog comune ---------------- */
 function nbOpen(title, body, wide) {
