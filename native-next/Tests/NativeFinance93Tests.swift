@@ -30,6 +30,12 @@ final class NativeFinance93Tests: XCTestCase {
         XCTAssertEqual(items.filter { $0.name == "Affitto" }.count, 1)
         XCTAssertEqual(items.filter { $0.group == 2 }.reduce(0) { $0 + $1.value }, 445, accuracy: 0.01)
     }
+    func testAnalysisMonthsAndTypicalDay() {
+        XCTAssertEqual(NativeFinanceAnalysis93.months(from: "2026-10", to: "2027-01"), ["2026-10", "2026-11", "2026-12", "2027-01"])
+        let typical = NativeFinanceAnalysis93.typicalDaily(["2026-10": [7: 10], "2026-11": [7: 30, 31: 0]])
+        XCTAssertEqual(typical[7] ?? 0, 20, accuracy: 0.001)
+        XCTAssertEqual(typical[31] ?? -1, 0, accuracy: 0.001) // only October has a 31st, nothing spent
+    }
     func testSquarifyFillsTheRectangleWithProportionalAreas() {
         let rect = CGRect(x: 0, y: 0, width: 326, height: 220)
         let values: [Double] = [450, 260, 200, 120, 90, 30]

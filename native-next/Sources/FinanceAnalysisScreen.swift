@@ -24,10 +24,57 @@ struct FinanceAnalysisScreen: View {
         let first = NativeCategoryPeriod.months(ending: store.financeMonth, count: 12).first ?? store.financeMonth
         return rows.filter { $0.text("month") >= first && $0.text("month") <= store.financeMonth }.sorted { $0.text("month") < $1.text("month") }
     }
+    /// First month of Ritmo and Giorno per giorno, chosen by the user (app and site).
+    @AppStorage("lifeos-analysis-start") private var analysisStart = "2026-07"
+    @State private var dailyByMonth: [String: [Int: Double]] = [:]
+    @State private var dailyLoading = false
+    private var availableMonths: [String] {
+        let rows = store.finance.records("yearly").filter { $0.flag("hasRecords") || $0.amount("spent") > 0 }.map { $0.text("month") }
+        return Array(Set(rows + [CivilDate.month()])).sorted()
+    }
+    private var startChip: some View {
+        Menu {
+            ForEach(availableMonths, id: \.self) { month in
+                Button(CivilDate.monthTitle(month)) { analysisStart = month }
+            }
+        } label: {
+            HStack(spacing: NativeDesign.Space.xs) {
+                Text("Da " + CivilDate.monthTitle(analysisStart).lowercased()).font(.subheadline.weight(.semibold))
+                Image(systemName: "chevron.up.chevron.down").font(.caption2.weight(.semibold)).foregroundStyle(NativeDesign.secondary)
+            }
+            .foregroundStyle(Color.primary)
+            .padding(.horizontal, NativeDesign.Space.medium)
+            .frame(minHeight: NativeDesign.Layout.compactControl)
+            .modifier(NativeGlass())
+            .frame(minHeight: NativeDesign.Layout.touchTarget)
+            .contentShape(Rectangle())
+        }
+        .accessibilityLabel("Analisi dal mese " + CivilDate.monthTitle(analysisStart))
+        .accessibilityIdentifier("finance-analysis-start")
+    }
+    /// Movements of every chosen month, read once per period (Giorno per giorno).
+    private func loadDaily() async {
+        let months = NativeFinanceAnalysis93.months(from: analysisStart, to: CivilDate.month())
+        dailyLoading = true
+        var result: [String: [Int: Double]] = [:]
+        for month in months {
+            if month == store.financeMonth {
+                result[month] = NativeFinanceAnalysis93.daily(store.transactions, month: month)
+                continue
+            }
+            if let response = try? await store.read("getFinanceData", args: [.int(Int(month.prefix(4)) ?? 2026), .int(Int(month.suffix(2)) ?? 1)]) {
+                result[month] = NativeFinanceAnalysis93.daily(response.object.records("transactions"), month: month)
+            }
+            if Task.isCancelled { return }
+        }
+        dailyByMonth = result
+        dailyLoading = false
+    }
     var body: some View {
-        let flows = NativeFinanceAnalysis93.flows(store.finance, before: CivilDate.month())
+        let flows = NativeFinanceAnalysis93.flows(store.finance, before: CivilDate.month()).filter { $0.month >= analysisStart }
         ScrollView {
             VStack(alignment: .leading, spacing: NativeDesign.Space.large) {
+                HStack { startChip; Spacer(minLength: 0) }
                 NativeRhythmCard(flows: flows, hidden: hidden)
                 NativeFundRunwayCard(fund: NativeFinanceAnalysis93.fund(store.finance), surplus: NativeFinanceAnalysis93.surplus(store.finance),
                                      norm: NativeFinanceAnalysis93.norm(flows), hidden: hidden)
@@ -37,7 +84,8 @@ struct FinanceAnalysisScreen: View {
                 categories
                 incomeAndSpending(flows)
                 salary
-                NativeDailySpendCard(month: store.financeMonth, daily: NativeFinanceAnalysis93.daily(store.transactions, month: store.financeMonth), hidden: hidden)
+                NativeDailySpendCard(typical: NativeFinanceAnalysis93.typicalDaily(dailyByMonth), monthCount: dailyByMonth.count, loading: dailyLoading, hidden: hidden)
+                    .task(id: analysisStart + "|" + sourceScope + "|" + String(store.financeGeneration)) { await loadDaily() }
                 wealth
             }
             .padding(.horizontal, NativeDesign.Layout.screenInset)

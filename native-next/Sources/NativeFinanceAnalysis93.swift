@@ -50,6 +50,26 @@ enum NativeFinanceAnalysis93 {
         guard monthly > 0, fund > 0 else { return nil }
         return fund / monthly
     }
+    /// Months from `start` to `end` included ("2026-07" … "2026-11").
+    static func months(from start: String, to end: String) -> [String] {
+        guard start <= end else { return [end] }
+        var result: [String] = [], month = start
+        while month <= end && result.count < 60 {
+            result.append(month)
+            month = String(CivilDate.adding(1, to: month + "-01", component: .month).prefix(7))
+        }
+        return result
+    }
+    /// Typical spending on each day of the month (1–31) over several months: for each day,
+    /// the total spent on that day divided by the months that have that day.
+    static func typicalDaily(_ perMonth: [String: [Int: Double]]) -> [Int: Double] {
+        var totals: [Int: Double] = [:], counts: [Int: Int] = [:]
+        for (month, days) in perMonth {
+            let length = CivilDate.calendar.range(of: .day, in: .month, for: CivilDate.date(month + "-01"))?.count ?? 31
+            for day in 1...length { totals[day, default: 0] += days[day] ?? 0; counts[day, default: 0] += 1 }
+        }
+        return totals.reduce(into: [:]) { result, entry in result[entry.key] = entry.value / Double(max(1, counts[entry.key] ?? 1)) }
+    }
     /// Spending per day of the selected month from its movements (outflows only).
     static func daily(_ transactions: [Record], month: String) -> [Int: Double] {
         var result: [Int: Double] = [:]
@@ -132,7 +152,7 @@ struct NativeRhythmCard: View {
     let flows: [NativeMonthFlow]
     let hidden: Bool
     var body: some View {
-        LOAnalysisCard(title: "Ritmo", trailing: flows.first.map { "da " + monthName($0.month) } ?? "", identifier: "finance-rhythm") {
+        LOAnalysisCard(title: "Ritmo", trailing: "", identifier: "finance-rhythm") {
             if let norm = NativeFinanceAnalysis93.norm(flows) {
                 HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.small) {
                     Text(hidden ? "•••• €" : norm.euro).font(.title.bold()).monospacedDigit()
@@ -258,30 +278,26 @@ struct NativeCategoryBars93: View {
     }
 }
 
-/// Giorno per giorno: calendar of the month, tap a day for what was spent.
+/// Giorno per giorno (FINANCE-ANALYSIS-RANGE-2026-11-23): the days 1–31 with what is usually
+/// spent on that day over all the chosen months, not a single month.
 struct NativeDailySpendCard: View {
-    let month: String
-    let daily: [Int: Double]
+    let typical: [Int: Double]
+    let monthCount: Int
+    let loading: Bool
     let hidden: Bool
     @State private var selected: Int?
     private let columns = Array(repeating: GridItem(.flexible(), spacing: NativeDesign.Space.xs), count: 7)
     var body: some View {
-        let date = CivilDate.date(month + "-01")
-        let count = CivilDate.calendar.range(of: .day, in: .month, for: date)?.count ?? 30
-        let weekday = CivilDate.calendar.component(.weekday, from: date)
-        let offset = (weekday + 5) % 7
-        let top = max(daily.values.max() ?? 1, 0.01)
-        let spentDays = daily.values.filter { $0 > 0 }
-        let average = spentDays.isEmpty ? 0 : spentDays.reduce(0, +) / Double(count)
-        let day = selected ?? (String(CivilDate.day().prefix(7)) == month ? Int(CivilDate.day().suffix(2)) ?? 1 : 1)
-        LOAnalysisCard(title: "Giorno per giorno", trailing: CivilDate.monthTitle(month).lowercased(), identifier: "finance-daily") {
+        let top = max(typical.values.max() ?? 1, 0.01)
+        let day = selected ?? (Int(CivilDate.day().suffix(2)) ?? 1)
+        let typicalMonth = typical.values.reduce(0, +)
+        LOAnalysisCard(title: "Giorno per giorno", trailing: monthCount > 0 ? (monthCount == 1 ? "1 mese" : String(monthCount) + " mesi") : "", identifier: "finance-daily") {
+            if loading && typical.isEmpty {
+                ProgressView().frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget)
+            }
             LazyVGrid(columns: columns, spacing: NativeDesign.Space.xs) {
-                ForEach(["L", "M", "M", "G", "V", "S", "D"].indices, id: \.self) { index in
-                    Text(["L", "M", "M", "G", "V", "S", "D"][index]).font(.caption2).foregroundStyle(NativeDesign.secondary).accessibilityHidden(true)
-                }
-                ForEach(0..<offset, id: \.self) { _ in Color.clear.frame(height: NativeDesign.Layout.touchTarget) }
-                ForEach(1...count, id: \.self) { number in
-                    let value = daily[number] ?? 0
+                ForEach(1...31, id: \.self) { number in
+                    let value = typical[number] ?? 0
                     Button { selected = number } label: {
                         Text(String(number)).font(.footnote.weight(number == day ? .bold : .regular)).monospacedDigit()
                             .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget)
@@ -291,18 +307,20 @@ struct NativeDailySpendCard: View {
                                 .strokeBorder(number == day ? Color.primary : .clear, lineWidth: NativeDesign.Layout.selectionLine))
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel(String(number) + (hidden ? "" : ", " + value.euro))
+                    .accessibilityLabel("Giorno " + String(number) + (hidden ? "" : ", di solito " + value.euro))
                     .accessibilityAddTraits(number == day ? .isSelected : [])
                 }
             }
             HStack {
                 Text("Il " + String(day) + " del mese").font(.subheadline)
                 Spacer()
-                Text(hidden ? "••••" : (daily[day] ?? 0).euro).font(.subheadline.weight(.semibold)).monospacedDigit()
+                Text(hidden ? "••••" : (typical[day] ?? 0).euro).font(.subheadline.weight(.semibold)).monospacedDigit()
             }
             .accessibilityElement(children: .combine)
             .accessibilityIdentifier("finance-daily-selected")
-            if !hidden { Text("in media " + average.euro + " al giorno nel mese").font(.footnote).foregroundStyle(NativeDesign.secondary) }
+            if !hidden, monthCount > 0 {
+                Text("di solito, sulla media dei mesi scelti · in un mese tipo " + typicalMonth.euro).font(.footnote).foregroundStyle(NativeDesign.secondary)
+            }
         }
     }
 }
