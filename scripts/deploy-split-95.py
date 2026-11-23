@@ -125,12 +125,14 @@ def transform(source):
         return source
     live = compact(current)
     # The build 91 routing: savings destination declared, three destinations, plan payments.
-    needles = ("savingsDestination:true", "['ordinary','plan','savings'].includes(input.expenseDestination)",
-               "budgetTreatment:kind", "command(state,'pay',paymentInput,today)")
-    missing = [n for n in needles if n not in live]
-    if missing:
-        print('ROUTING_EXPECTED_MISSING ' + ' ; '.join(n.split('(')[0][:40] for n in missing)
-              + ' | has savingsDestination=%d split=%d version=%d' % (live.count('savingsDestination'), live.count('splitDestination'), live.count('version:1')))
+    # Known live versions: build 91 (savings destination) or build 90 (budget or plan only; the
+    # savings destination was approved on 16/11 but never reached the live Workers).
+    v91 = ("savingsDestination:true", "['ordinary','plan','savings'].includes(input.expenseDestination)", "budgetTreatment:kind")
+    v90 = ("['ordinary','plan'].includes(input.expenseDestination)", "budgetTreatment:'ordinary'", "version:1,utilityCompetenceVersion")
+    common = ("createExpenseRouting({PlanError,balance,command", "'pay',paymentInput")
+    found = {n: n in live for n in v91 + v90 + common}
+    print('ROUTING_CHECK ' + ' '.join('%s=%d' % (n.split('(')[0].split(':')[0][:24], int(v)) for n, v in found.items()))
+    if not (all(found[n] for n in common) and (all(found[n] for n in v91) or all(found[n] for n in v90))):
         raise RuntimeError('Routing live differente dalla versione attesa; nessuna scrittura.')
     if 'splitDestination: true' not in replacement or "input.budgetTreatment === 'recovery'" not in replacement:
         raise RuntimeError('Sorgente routing senza ripartizione; nessuna scrittura.')

@@ -35,6 +35,13 @@ result = split.transform(bundled)
 assert result.count(new_fn) == 1 and bundled_fn not in result
 assert split.transform(result) == result
 
+# The live Workers still run the build 90 routing (no savings destination): it is upgraded too.
+v90_source = subprocess.check_output(['git', 'show', '04ad889:backend/expense-routing/routing.mjs'], text=True, encoding='utf-8')
+v90_fn = v90_source[v90_source.index('function createExpenseRouting('):]
+v90_fn = v90_fn[:split.function_end(v90_fn, 0)]
+v90 = current.replace(new_fn, v90_fn, 1)
+assert v90 != current and split.transform(v90) == current
+
 for tampered in (previous.replace("savingsDestination: true", "savingsDestination: false", 1),
                  previous.replace('function createExpenseRouting(', 'function otherRouting(', 1)):
     try:
