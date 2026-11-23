@@ -1464,3 +1464,8 @@ html[data-theme="light"]{--shadow-94:0 5px 13px rgba(0,0,0,.08);--warn-94:#c99a0
 .hub-log small{color:var(--ink-2);font-size:13px}
 .hub-steps{margin:0;padding-left:21px;display:grid;gap:5px}
 #hub-ai-prompt{width:100%;font:13px/1.45 ui-monospace,monospace;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);padding:8px}
+
+/* REVIEW-95: scelta delle categorie in Spese per categoria */
+.cat-choice{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 13px}
+.cat-choice button{min-height:34px;padding:0 13px;border-radius:17px;border:1px solid var(--line,rgba(127,127,127,.3));background:var(--surface,transparent);color:inherit;font:inherit;font-size:13px}
+.cat-choice button.active{background:var(--ink);color:var(--surface);border-color:transparent}

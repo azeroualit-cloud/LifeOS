@@ -6874,13 +6874,18 @@ document.addEventListener("keydown", (e) => {
         const rows = aggregateCategories(cache, requested);
         const merged = new Map();
         for (const r of aggregateCategories(cache, requested)) { const k = globalThis.lifeOSNormCategory(r.name); merged.set(k, (merged.get(k) || 0) + r.amount); }
-        const catRows = [...merged].map(([name, amount]) => ({ name, amount })).sort((x, y) => y.amount - x.amount), total = catRows.reduce((n, r) => n + r.amount, 0);
+        const allRows = [...merged].map(([name, amount]) => ({ name, amount })).sort((x, y) => y.amount - x.amount);
+        // REVIEW-95 (parità con l'app): scelta delle categorie da confrontare; vuoto = tutte.
+        let chosenCats = []; try { chosenCats = JSON.parse(localStorage.getItem("lifeos-analysis-categories") || "[]"); } catch { chosenCats = []; }
+        chosenCats = chosenCats.filter((n) => allRows.some((r) => r.name === n));
+        const catRows = chosenCats.length ? allRows.filter((r) => chosenCats.includes(r.name)) : allRows, total = catRows.reduce((n, r) => n + r.amount, 0);
+        const choiceHtml = `<div class="cat-choice" role="group" aria-label="Categorie da confrontare"><button type="button" data-cat-choice="" aria-pressed="${!chosenCats.length}" class="${chosenCats.length ? "" : "active"}">Tutte le categorie</button>${allRows.map((r) => `<button type="button" data-cat-choice="${safe(r.name)}" aria-pressed="${chosenCats.includes(r.name)}" class="${chosenCats.includes(r.name) ? "active" : ""}">${safe(r.name)}</button>`).join("")}</div>`;
         const hideC = !state.assetsVisible, m2 = (v) => hideC ? "\u2022\u2022\u2022\u2022 €" : exactEuro(v), m0 = (v) => hideC ? "\u2022\u2022\u2022\u2022 €" : Math.round(v).toLocaleString("it-IT", { useGrouping: "always" }) + " €";
         const GROUPS = [["Casa", "var(--sec-finance)", ["Casa", "Affitto", "Condominio", "Arredamento e casa", "Utenze", "Elettricità", "Gas", "Acqua", "Abbonamenti"]], ["Auto", "#f5a03c", ["Auto", "Assicurazione", "Bollo", "Manutenzione auto", "Benzina"]], ["Vita quotidiana", "#5cc4e0", ["Alimentari", "Ristorazione", "Shopping", "Svago", "Viaggi", "Palestra"]], ["Salute", "#ee6f8b", ["Salute", "Dentista", "Farmaci e visite"]], ["Altro", "#98989d", ["Altro"]]];
         const groups = GROUPS.map(([name, color, list]) => { const items = catRows.filter((r) => list.includes(r.name)); return { name, color, items, value: items.reduce((n, r) => n + r.amount, 0) }; }).filter((g) => g.value > 0).sort((x, y) => y.value - x.value);
         const stack = groups.map((g) => `<i style="flex:${g.value};--c:${g.color}" title="${safe(g.name)}: ${m2(g.value)}"></i>`).join("");
         const list = groups.map((g, i) => `<details class="cat-g" style="--c:${g.color}"${i === 0 ? " open" : ""}><summary><i></i><span class="cat-gn">${safe(g.name)}<small>${g.items.slice(0, 3).map((x) => safe(x.name)).join(", ")}</small></span><b>${m0(g.value)}</b><em>${Math.round(g.value / total * 100)}%</em></summary><div class="cat-items">${g.items.map((x) => `<div class="cat-it"><span>${safe(x.name)}</span><b>${m2(x.amount)}</b><i style="width:${Math.max(3, x.amount / g.value * 100).toFixed(0)}%"></i></div>`).join("")}</div></details>`).join("");
-        target.innerHTML = catRows.length ? `<div class="cat-wrap"><div class="cat-top"><span>Totale del periodo</span><strong>${m0(total)}</strong></div><div class="cat-stack">${stack}</div><div class="cat-groups">${list}</div></div>` : '<p class="empty">Nessuna spesa nel periodo</p>';
+        target.innerHTML = choiceHtml + (catRows.length ? `<div class="cat-wrap"><div class="cat-top"><span>Totale del periodo</span><strong>${m0(total)}</strong></div><div class="cat-stack">${stack}</div><div class="cat-groups">${list}</div></div>` : '<p class="empty">Nessuna spesa nel periodo</p>');
         refresh.textContent = "Aggiorna categorie";
       } catch (error) {
         if (current()) {
@@ -6892,6 +6897,15 @@ document.addEventListener("keydown", (e) => {
       }
     }
     document.addEventListener("click", (e) => {
+      const choice = e.target.closest("[data-cat-choice]");
+      if (choice) {
+        let list = []; try { list = JSON.parse(localStorage.getItem("lifeos-analysis-categories") || "[]"); } catch { list = []; }
+        const name = choice.dataset.catChoice;
+        list = !name ? [] : list.includes(name) ? list.filter((n) => n !== name) : [...list, name];
+        try { localStorage.setItem("lifeos-analysis-categories", JSON.stringify(list)); } catch {}
+        render();
+        return;
+      }
       const period = e.target.closest("[data-category-period]"), refresh = e.target.closest("[data-refresh-categories]");
       if (period) {
         range = Number(period.dataset.categoryPeriod);
