@@ -85,6 +85,7 @@ final class NativeScreenTourUITests: XCTestCase {
         if tap(app.buttons["finance-new-plan"]) { shot(prefix + " 20 Nuovo piano", app); dismissSheet(app) }
         if tap(app.buttons["primary-add"]) {
             shot(prefix + " 21 Nuova spesa", app)
+            if tap(app.buttons["Tipo"]) { shot(prefix + " 21b Tipo", app); app.buttons["Spesa"].firstMatch.tap() }
             // REVIEW-95: the split between savings and budget months appears with an amount.
             let field = app.textFields["movement-amount"]
             if field.waitForExistence(timeout: 5) {
@@ -95,6 +96,16 @@ final class NativeScreenTourUITests: XCTestCase {
                 let next = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'expense-split-month-'")).element(boundBy: 1)
                 if next.exists && next.isHittable { next.tap() }
                 shot(prefix + " 22 Nuova spesa ripartita", app)
+                // Categories and items (nine groups), then a bill with its period and plan.
+                app.swipeDown(velocity: .slow)
+                if tap(app.buttons["movement-category"]) {
+                    shot(prefix + " 23 Categorie", app)
+                    app.swipeUp(velocity: .slow); shot(prefix + " 24 Categorie sotto", app)
+                    if app.buttons["Elettricità"].exists { app.buttons["Elettricità"].tap() } else { app.tap() }
+                    for _ in 0..<3 { app.swipeUp(velocity: .slow) }
+                    shot(prefix + " 25 Bolletta", app)
+                    app.swipeUp(velocity: .slow); shot(prefix + " 26 Bolletta sotto", app)
+                }
             }
             dismissSheet(app)
             if app.buttons["Elimina modifiche"].exists { app.buttons["Elimina modifiche"].tap() }

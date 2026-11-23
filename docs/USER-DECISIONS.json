@@ -1347,6 +1347,15 @@
       "provenance": "PDF di revisione + conferma META-01 in chat: «Colori diversi solo nella mappa»",
       "original_quote": "hope when i click this it shows me a second map of the category, like how it works on the website. Because as for now graphically neither the color nor the render nor the method chosen gives me and suddivisione utile per capire a colpo d’occhio",
       "rule": "La mappa dello stipendio usa 4 colori distinti per gruppo (Impegni viola, Messo da parte ambra, Speso rosso, Libero verde); toccando un gruppo o un riquadro si apre la mappa della categoria con le sue voci, come sul sito."
+    },
+    {
+      "id": "ACCOUNT-ROW-2026-11-23",
+      "status": "ACTIVE",
+      "scope": "App e sito, Nuova spesa / Nuovo movimento",
+      "recorded_on": "2026-11-23",
+      "provenance": "Richiesta diretta utente in chat (screenshot annotato)",
+      "original_quote": "ahi togli conto che tanto é sempre uno",
+      "rule": "Nel nuovo movimento non si mostra la riga Conto: il conto è sempre lo stesso."
     }
   ],
   "pending_confirmations": [

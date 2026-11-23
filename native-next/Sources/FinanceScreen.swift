@@ -333,7 +333,7 @@ struct MovementEditor: View {
                 }
                 DatePicker("Data", selection: $date, in: ...Date(), displayedComponents: .date)
                 if editing { Picker("Conto", selection: $account) { ForEach(["Trade Republic", "Revolut", "IsyBank"], id: \.self) { Text($0) } } }
-                else { LabeledContent("Conto", value: type == "Trasferimento" ? "Revolut" : "Trade Republic") }
+                // ACCOUNT-ROW-2026-11-23: a new movement always uses the one account, so no «Conto» row.
                 if type == "Trasferimento" { Picker("Destinazione", selection: $counterpart) { ForEach(editing ? ["Trade Republic", "Revolut", "IsyBank"] : ["Trade Republic"], id: \.self) { Text($0) } } }
                 else {
                     // Nine ordered groups with their items (preview 93): the item is what is stored.
