@@ -103,7 +103,19 @@ enum NativeFinanceAlertRules {
     private static let settingsKey = "native-finance-alerts-93", logKey = "native-finance-alerts-log-93"
     private let defaults = UserDefaults.standard
     @Published var settings: NativeFinanceAlertSettings {
-        didSet { if let data = try? JSONEncoder().encode(settings) { defaults.set(data, forKey: Self.settingsKey) } }
+        didSet {
+            if let data = try? JSONEncoder().encode(settings) { defaults.set(data, forKey: Self.settingsKey) }
+            // ALERTS-CLARITY-2026-11-24: the site shows and edits these too (newest copy wins).
+            if !applyingRemote { defaults.set(Date().timeIntervalSince1970 * 1000, forKey: Self.modifiedKey) }
+        }
+    }
+    static let modifiedKey = "native-finance-alerts-modified-95"
+    private var applyingRemote = false
+    var modified: Double { defaults.double(forKey: Self.modifiedKey) }
+    /// Settings that came from the site.
+    func applyRemote(_ value: NativeFinanceAlertSettings, modified: Double) {
+        applyingRemote = true; settings = value.clamped; applyingRemote = false
+        defaults.set(modified, forKey: Self.modifiedKey)
     }
     @Published private(set) var recent: [NativeFinanceAlertCandidate] = []
     private init() {
@@ -238,6 +250,10 @@ struct NativeFinanceAlertsScreen: View {
                         }
                     }
                 }
+                // ALERTS-CLARITY-2026-11-24: say plainly how they arrive and where else they are managed.
+                Text("Notifiche su questo iPhone, con suono; nessuna sveglia. Le vedi e modifichi anche dal sito, in Avvisi, insieme agli avvisi personali e alla preghiera.")
+                    .font(.footnote).foregroundStyle(NativeDesign.secondary).fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("alerts-delivery-note")
             }
             .padding(.horizontal, NativeDesign.Layout.screenInset)
             .padding(.vertical, NativeDesign.Space.medium)

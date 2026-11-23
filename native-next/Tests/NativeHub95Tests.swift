@@ -37,6 +37,14 @@ import XCTest
         XCTAssertFalse(NativeHubPlan.weekdayAllowed(["days": .array([.number(7)])], day: "2026-11-23"))
     }
 
+    func testDeliveryChosenOnTheSiteTravelsWithEachAlert() {
+        let doc: Record = ["rules": .array([
+            .object(["id": .string("a"), "type": .string("custom"), "time": .string("08:00"), "delivery": .string("quiet"), "params": .object(["body": .string("x")])]),
+            .object(["id": .string("b"), "type": .string("custom"), "time": .string("09:00"), "params": .object(["body": .string("y")])]),
+        ])]
+        XCTAssertEqual(NativeHubPlan.make(doc: doc, now: now(), context: context(), days: 1).map(\.delivery), ["quiet", "sound"], "no choice keeps the sound")
+    }
+
     func testPrayerNotificationsOnlyForChosenPrayersAndInAdvance() {
         let doc: Record = ["prayer": .object(["enabled": .bool(true), "before": .number(10),
                                               "prayers": .object(["dhuhr": .bool(true), "maghrib": .bool(true), "fajr": .bool(false)])])]

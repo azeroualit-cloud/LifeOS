@@ -27,11 +27,33 @@ import UserNotifications
         running = true; defer { running = false }
         let read: (String, [JSONValue]) async throws -> JSONValue = { method, args in try await store.read(method, args: args) }
         guard let probe = try? await read("getSettings", [.string("alerts")]) else { return } // Worker not updated yet
+        let doc = await syncFinanceAlerts(probe.object, read)
         await syncGoals(read)
         await NativeSupplementStackStore.shared.sync(read)
         await publishTargets(read, health: health)
         await reportDelivered(read)
-        schedule(probe.object.record("doc"), store: store, health: health)
+        schedule(doc, store: store, health: health)
+    }
+
+    // MARK: Finance alerts (set in the app, shown and edited on the site too)
+
+    /// The alerts doc carries a copy of the app's Finance alerts under «finance» with «financeModified»:
+    /// the newest copy wins; when the phone's is newer it is written back into the doc.
+    private func syncFinanceAlerts(_ remote: Record, _ read: (String, [JSONValue]) async throws -> JSONValue) async -> Record {
+        var doc = remote.record("doc")
+        let alerts = NativeFinanceAlerts.shared
+        let remoteModified = doc.amount("financeModified")
+        if remoteModified > alerts.modified, let data = try? JSONEncoder().encode(doc.record("finance")),
+           let value = try? JSONDecoder().decode(NativeFinanceAlertSettings.self, from: data) {
+            alerts.applyRemote(value, modified: remoteModified)
+            return doc
+        }
+        guard alerts.modified > remoteModified || doc["finance"] == nil,
+              let data = try? JSONEncoder().encode(alerts.settings), let value = try? JSONDecoder().decode(JSONValue.self, from: data) else { return doc }
+        let stamp = max(alerts.modified, 1)
+        doc["finance"] = value; doc["financeModified"] = .number(stamp)
+        _ = try? await read("saveSettings", [.string("alerts"), .object(doc), .number(max(remote.amount("modified"), Date().timeIntervalSince1970 * 1000))])
+        return doc
     }
 
     // MARK: Goals
@@ -116,7 +138,13 @@ import UserNotifications
             }
             for item in plan {
                 let content = UNMutableNotificationContent()
-                content.title = item.title; content.body = item.body; content.sound = .default
+                content.title = item.title; content.body = item.body
+                // ALERTS-CLARITY-2026-11-24: how each alert arrives, chosen on the site.
+                switch item.delivery {
+                case "silent": content.sound = nil
+                case "quiet": content.sound = nil; content.interruptionLevel = .passive // only in the Notification Centre
+                default: content.sound = .default
+                }
                 content.threadIdentifier = item.rule
                 let parts = CivilDate.calendar.dateComponents([.year, .month, .day, .hour, .minute], from: item.date)
                 let request = UNNotificationRequest(identifier: item.id, content: content, trigger: UNCalendarNotificationTrigger(dateMatching: parts, repeats: false))
@@ -174,7 +202,11 @@ struct NativeHubContext {
 
 /// Notifications to schedule for the next days from the site's rules (pure, tested).
 enum NativeHubPlan {
-    struct Item: Equatable { let id: String; let rule: String; let date: Date; let title: String; let body: String }
+    struct Item: Equatable {
+        let id: String; let rule: String; let date: Date; let title: String; let body: String
+        /// «sound» (default), «silent» (no sound), «quiet» (no sound, Notification Centre only).
+        var delivery = "sound"
+    }
     static let prayerKeys = ["fajr", "sunrise", "dhuhr", "asr", "maghrib", "isha"]
     static let prayerNames = ["fajr": "Fajr", "sunrise": "Sorgere del sole", "dhuhr": "Dhuhr", "asr": "Asr", "maghrib": "Maghrib", "isha": "Isha"]
 
@@ -192,7 +224,8 @@ enum NativeHubPlan {
                       !inQuiet(time, from: quiet.text("from"), to: quiet.text("to")), count < maxPerDay,
                       let text = content(rule, day: day, context: context) else { continue }
                 count += 1
-                items.append(Item(id: NativeHub95.prefix + rule.text("id") + "-" + day, rule: rule.text("id"), date: date, title: text.title, body: text.body))
+                items.append(Item(id: NativeHub95.prefix + rule.text("id") + "-" + day, rule: rule.text("id"), date: date, title: text.title, body: text.body,
+                                  delivery: rule.text("delivery", fallback: "sound")))
             }
             let prayer = doc.record("prayer")
             if prayer.flag("enabled") {
@@ -204,7 +237,8 @@ enum NativeHubPlan {
                     guard date > now else { continue }
                     let name = prayerNames[key] ?? key
                     items.append(Item(id: NativeHub95.prefix + "prayer-" + key + "-" + day, rule: "prayer", date: date,
-                                      title: name, body: before > 0 ? name + " tra " + String(Int(before)) + " minuti, alle " + times[index].1 : "È l'ora di " + name + " (" + times[index].1 + ")"))
+                                      title: name, body: before > 0 ? name + " tra " + String(Int(before)) + " minuti, alle " + times[index].1 : "È l'ora di " + name + " (" + times[index].1 + ")",
+                                      delivery: prayer.text("delivery", fallback: "sound")))
                 }
             }
         }
