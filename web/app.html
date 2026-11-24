@@ -1674,6 +1674,9 @@ html[data-theme="light"] .sc-tile>div{background:color-mix(in srgb,var(--c) calc
 .fh-bar.v95 .p{position:absolute;inset:0 auto 0 0;border-radius:var(--r-pill);background:color-mix(in srgb,var(--sec-finance) 44%,transparent)}
 .fh-bar.v95 i.s{position:relative;background:var(--sec-finance);border-radius:var(--r-pill)}
 .fh-legend .p b{width:14px;height:6px;border-radius:3px;background:color-mix(in srgb,var(--sec-finance) 44%,transparent)}
+/* ANALYSIS-START-PICKER: in fondo alla scheda Ritmo. */
+.an93-start{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--line-soft);font-size:13px;font-weight:500;color:var(--ink-2)}
+.an93-start select{width:auto;min-height:32px;border-radius:999px;padding:0 12px}
 </style>
 </head>
   <body class="dashboard-mode">
@@ -7060,9 +7063,11 @@ document.addEventListener("keydown", (e) => {
       an93.byMonth = result;
       an93Refresh();
     }
+    /* ANALYSIS-START-PICKER-2026-11-24: dentro Ritmo, mese e anno liberi (vale anche per il fondo e Giorno per giorno). */
     function an93StartPicker(d) {
-      const months = [...new Set((d.yearly || []).filter((r) => r.hasRecords || Number(r.spent) > 0).map((r) => r.month).concat([todayIso().slice(0, 7)]))].sort();
-      return `<label class="an93-start">Da <select data-an93-start>${months.map((m) => `<option value="${m}" ${m === an93.start ? "selected" : ""}>${an93MonthName(m)} ${m.slice(0, 4)}</option>`).join("")}</select></label>`;
+      const now = todayIso().slice(0, 7), y0 = Number(now.slice(0, 4)), cur = an93.start;
+      const years = Array.from({ length: 6 }, (_, i) => y0 - 5 + i);
+      return `<div class="an93-start"><span>Calcolata da</span><select data-an93-part="m" aria-label="Mese di inizio">${Array.from({ length: 12 }, (_, i) => { const v = String(i + 1).padStart(2, "0"); return `<option value="${v}" ${cur.slice(5) === v ? "selected" : ""}>${an93MonthName("2026-" + v)}</option>`; }).join("")}</select><select data-an93-part="y" aria-label="Anno di inizio">${years.map((y) => `<option ${String(y) === cur.slice(0, 4) ? "selected" : ""}>${y}</option>`).join("")}</select></div>`;
     }
     const an93Hide = () => state.assetsVisible === false;
     const an93Eur = (v) => an93Hide() ? "•••• €" : exactEuro(v);
@@ -7075,11 +7080,11 @@ document.addEventListener("keydown", (e) => {
     }
     function an93Rhythm(d) {
       const flows = an93Flows(d);
-      if (!flows.length) return card("Ritmo", `<p class="empty">Nessun mese completo</p>`);
+      if (!flows.length) return card("Ritmo", `<p class="empty">Nessun mese completo</p>${an93StartPicker(d)}`);
       const norm = flows.reduce((n, f) => n + f.spent, 0) / flows.length;
       const pace = (k) => flows.length >= k && norm > 0 ? flows.slice(-k).reduce((n, f) => n + f.spent, 0) / k / norm - 1 : null;
       const bar = (title, v) => v === null ? "" : `<div class="an93-pace"><span>${title}</span><div class="an93-track" role="img" aria-label="${title}: ${an93Pct(v)} rispetto alla norma"><i class="${v > 0 ? "up" : "down"}" style="${v > 0 ? "left:50%" : "right:50%"};width:${(Math.min(1, Math.abs(v) / 0.3) * 50).toFixed(1)}%"></i><b></b></div><strong class="${v > 0 ? "neg" : "pos"}">${an93Pct(v)}</strong></div>`;
-      return card(`Ritmo`, `<div class="an93-norm"><strong>${an93Eur(norm)}</strong><span>la tua norma al mese</span></div>${bar("1 mese", pace(1))}${bar("3 mesi", pace(3))}`);
+      return card(`Ritmo`, `<div class="an93-norm"><strong>${an93Eur(norm)}</strong><span>la tua norma al mese</span></div>${bar("1 mese", pace(1))}${bar("3 mesi", pace(3))}${an93StartPicker(d)}`);
     }
     function an93Fund(d) {
       const fund = Number(d.planning?.now);
@@ -7103,9 +7108,11 @@ document.addEventListener("keydown", (e) => {
       return card(`Giorno per giorno <small class="an93-sub">${months.length === 1 ? "1 mese" : months.length + " mesi"}</small>`, `<div class="an93-cal">${cells}</div><div class="kv an93-sel"><span>Il ${day} del mese</span><strong>${an93Eur(by[day] || 0)}</strong></div>${an93Hide() ? "" : `<p class="hint">di solito, sulla media dei mesi scelti · in un mese tipo ${exactEuro(monthTotal)}</p>`}`);
     }
     document.addEventListener("change", (e) => {
-      const sel = e.target.closest && e.target.closest("[data-an93-start]");
+      const sel = e.target.closest && e.target.closest("[data-an93-part]");
       if (!sel) return;
-      an93.start = sel.value; an93.byMonth = null; an93.loadingKey = "";
+      const box = sel.closest(".an93-start"), m = box.querySelector("[data-an93-part=m]").value, y = box.querySelector("[data-an93-part=y]").value;
+      const next = y + "-" + m, now = todayIso().slice(0, 7);
+      an93.start = next > now ? now : next; an93.byMonth = null; an93.loadingKey = "";
       try { localStorage.setItem("lifeos-analysis-start", an93.start); } catch (err) {}
       an93Refresh();
     });
@@ -7131,7 +7138,7 @@ document.addEventListener("keydown", (e) => {
       let salYear = String(state.year), salRows = salAll.filter((r) => r.month.startsWith(salYear + "-")), salFallback = false;
       if (!salRows.length) { const prev = [...new Set(salAll.map((r) => r.month.slice(0, 4)))].filter((y) => y < salYear).pop(); if (prev) { salYear = prev; salRows = salAll.filter((r) => r.month.startsWith(prev + "-")); salFallback = true; } }
       const salSum = (f) => salRows.reduce((n, r) => n + (Number(r[f]) || 0), 0), salAvgBase = salRows.length ? salSum("base") / salRows.length : 0, salExtra = salSum("additional"), salAvgAll = salRows.length ? (salSum("base") + salExtra) / salRows.length : 0;
-      const html = `<div class="budget-flow">${an93StartPicker(d)}${an93Rhythm(d)}${an93Fund(d)}${card("Spese per categoria", `<div class="chart-range" role="group" aria-label="Periodo categorie">${[3, 6, 12].map((n) => `<button data-category-period="${n}" class="${n === range ? "active" : ""}" aria-pressed="${n === range}">${n} mesi</button>`).join("")}</div><p class="hint" data-category-interval></p><div data-period-categories role="status">Caricamento categorie\u2026</div><button data-refresh-categories>Aggiorna categorie</button>`)}${card("Previsione del patrimonio", fcPanel(d))}${card("Patrimonio", `<p class="hint">Dal mese di inizio statistica fino a ${safe(titleMonth(state.year, state.month))}</p>${chart(wealthRows, "Patrimonio", false, true)}`)}${card("Stipendi per competenza", `<p class="hint">Anno solare ${safe(salYear)}${salFallback ? " (ultimo anno con dati)" : ""}</p>${salRows.length ? `<div class="an-stats">${[["Media senza 13ª/14ª", salAvgBase, "stipendio base"], ["Media con 13ª/14ª", salAvgAll, `su ${salRows.length} ${salRows.length === 1 ? "mese" : "mesi"}`], ["13ª e 14ª incassate", salExtra, "totale aggiuntive"], ["Ultimo stipendio", (salRows.at(-1).base || 0) + (salRows.at(-1).additional || 0), safe(shortMonth(salRows.at(-1).month))]].map(([l, v, sub]) => `<div class="an-stat"><small>${l}</small><strong>${state.assetsVisible ? exactEuro(v) : "\u2022\u2022\u2022\u2022"}</strong><span>${sub}</span></div>`).join("")}</div>` : ""}${chart(salRows.map((r) => ({ label: shortMonth(r.month), value: (r.base || 0) + (r.additional || 0), base: r.base || 0, additional: r.additional || 0 })), "Stipendi per competenza", true, false, true)}${salRows.length ? `<details><summary>Base e aggiuntive</summary>${salRows.map((r) => `<div class="kv"><span>${safe(shortMonth(r.month))}</span><strong>${state.assetsVisible ? `Base ${exactEuro(r.base || 0)} \xB7 Aggiuntive ${exactEuro(r.additional || 0)}` : "\u2022\u2022\u2022\u2022"}</strong></div>`).join("")}</details>` : ""}`)}${an93Daily(d)}</div>`;
+      const html = `<div class="budget-flow">${an93Rhythm(d)}${an93Fund(d)}${card("Spese per categoria", `<div class="chart-range" role="group" aria-label="Periodo categorie">${[3, 6, 12].map((n) => `<button data-category-period="${n}" class="${n === range ? "active" : ""}" aria-pressed="${n === range}">${n} mesi</button>`).join("")}</div><p class="hint" data-category-interval></p><div data-period-categories role="status">Caricamento categorie\u2026</div><button data-refresh-categories>Aggiorna categorie</button>`)}${card("Previsione del patrimonio", fcPanel(d))}${card("Patrimonio", `<p class="hint">Dal mese di inizio statistica fino a ${safe(titleMonth(state.year, state.month))}</p>${chart(wealthRows, "Patrimonio", false, true)}`)}${card("Stipendi per competenza", `<p class="hint">Anno solare ${safe(salYear)}${salFallback ? " (ultimo anno con dati)" : ""}</p>${salRows.length ? `<div class="an-stats">${[["Media senza 13ª/14ª", salAvgBase, "stipendio base"], ["Media con 13ª/14ª", salAvgAll, `su ${salRows.length} ${salRows.length === 1 ? "mese" : "mesi"}`], ["13ª e 14ª incassate", salExtra, "totale aggiuntive"], ["Ultimo stipendio", (salRows.at(-1).base || 0) + (salRows.at(-1).additional || 0), safe(shortMonth(salRows.at(-1).month))]].map(([l, v, sub]) => `<div class="an-stat"><small>${l}</small><strong>${state.assetsVisible ? exactEuro(v) : "\u2022\u2022\u2022\u2022"}</strong><span>${sub}</span></div>`).join("")}</div>` : ""}${chart(salRows.map((r) => ({ label: shortMonth(r.month), value: (r.base || 0) + (r.additional || 0), base: r.base || 0, additional: r.additional || 0 })), "Stipendi per competenza", true, false, true)}${salRows.length ? `<details><summary>Base e aggiuntive</summary>${salRows.map((r) => `<div class="kv"><span>${safe(shortMonth(r.month))}</span><strong>${state.assetsVisible ? `Base ${exactEuro(r.base || 0)} \xB7 Aggiuntive ${exactEuro(r.additional || 0)}` : "\u2022\u2022\u2022\u2022"}</strong></div>`).join("")}</details>` : ""}`)}${an93Daily(d)}</div>`;
       if (Array.isArray(d.categories)) cache.set(month, d.categories);
       queueMicrotask(() => { fcLoad(); loadCategories(d); });
       return html;

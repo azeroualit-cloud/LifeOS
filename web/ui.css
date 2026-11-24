@@ -1635,3 +1635,6 @@ html[data-theme="light"] .sc-tile>div{background:color-mix(in srgb,var(--c) calc
 .fh-bar.v95 .p{position:absolute;inset:0 auto 0 0;border-radius:var(--r-pill);background:color-mix(in srgb,var(--sec-finance) 44%,transparent)}
 .fh-bar.v95 i.s{position:relative;background:var(--sec-finance);border-radius:var(--r-pill)}
 .fh-legend .p b{width:14px;height:6px;border-radius:3px;background:color-mix(in srgb,var(--sec-finance) 44%,transparent)}
+/* ANALYSIS-START-PICKER: in fondo alla scheda Ritmo. */
+.an93-start{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--line-soft);font-size:13px;font-weight:500;color:var(--ink-2)}
+.an93-start select{width:auto;min-height:32px;border-radius:999px;padding:0 12px}
