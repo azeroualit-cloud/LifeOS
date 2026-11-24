@@ -1495,7 +1495,10 @@
       "provenance": "Messaggio utente in chat Claude, 24/11/2026, su uno screenshot del pannello Avvisi del sito",
       "original_quote": "tra le regole c'era di non usare esplicitamente queste parole",
       "rule": "Nei testi visibili non si usa la parola esplicita per gli orari giornalieri (né nomi arabi): si dice «Orari» / «Prossimo orario», come già verificato dal test di base testHomeRestoresNeutralNextTimeWithoutArabicNames.",
-      "relation": "La regola non era nel registro: ricostruita dal test dell'app di base e ora registrata."
+      "relation": "La regola non era nel registro: ricostruita dal test dell'app di base e ora registrata.",
+      "exceptions": [
+        "CALENDAR-RAMADAN-EID-2026-11-24 (solo i promemoria di Ramadan ed Eid nel calendario)"
+      ]
     },
     {
       "id": "BILL-PAST-MONTHS-2026-11-24",
@@ -1506,6 +1509,70 @@
       "original_quote": "acqua should be 221 divide in 3 months also the preivous ones, but by this logic does that mean i can have perfect months and ruin them after?, because by our logic from the previous months it should only count the accantonati e poi l'eccesso è contato sul mese corrente giusto? (scelgo io se da risparmi o budget) / «how can we take the best of all» / «yes»",
       "rule": "1) I mesi passati non cambiano mai: il periodo di competenza serve solo per la media e per l'Analisi (informativo). 2) La quota del Ricorrente stimato = media degli ultimi 12 mesi, dopo ogni bolletta, senza recupero nascosto. 3) Al pagamento il piano paga quanto accantonato; l'eccedenza la sceglie l'utente: Risparmi, Questo mese, o Prossimi mesi (dal mese corrente in poi, scelta predefinita). 4) Se la bolletta costa meno, il resto resta nel piano e copre per primo la bolletta successiva. Acqua: luglio–settembre invariati, quota 73,93 €, contatore di novembre corretto.",
       "relation": "Sostituisce UTILITY-LEVELLING-2026-11-24 e la clausola sul ricalcolo dei mesi di FUNDING-BLOCK-2026-11-21."
+    },
+    {
+      "id": "GUIDES-INFOGRAPHICS-2026-11-24",
+      "status": "ACTIVE",
+      "scope": "App e sito",
+      "recorded_on": "2026-11-24",
+      "provenance": "Messaggio utente in chat Claude, 24/11/2026",
+      "original_quote": "can you add infographics, tutorials etc on the app and website? also we need the objective for fibers too. On the website avvisa é sia in finanza che in avvisa, keep it only in avvisi. Did you fix preghiera? i also want to be able to see the calendar of preghiera not only todays orario, and also automatic reminder of ramadan and eid in the calendar, and also possibility to add a hidden message in the calendar [dettaglio personale omesso: il repository è pubblico]. Also calendar website sucks, its still a square and colors are shit still",
+      "rule": "Guide e infografiche (tutorial) nell'app e sul sito."
+    },
+    {
+      "id": "FIBRE-GOAL-2026-11-24",
+      "status": "ACTIVE",
+      "scope": "Nutrizione app e sito",
+      "recorded_on": "2026-11-24",
+      "provenance": "Messaggio utente in chat Claude, 24/11/2026",
+      "original_quote": "can you add infographics, tutorials etc on the app and website? also we need the objective for fibers too. On the website avvisa é sia in finanza che in avvisa, keep it only in avvisi. Did you fix preghiera? i also want to be able to see the calendar of preghiera not only todays orario, and also automatic reminder of ramadan and eid in the calendar, and also possibility to add a hidden message in the calendar [dettaglio personale omesso: il repository è pubblico]. Also calendar website sucks, its still a square and colors are shit still",
+      "rule": "Obiettivo anche per le fibre, impostabile e visibile come gli altri."
+    },
+    {
+      "id": "SITE-ALERTS-ONLY-AVVISI-2026-11-24",
+      "status": "ACTIVE",
+      "scope": "Sito",
+      "recorded_on": "2026-11-24",
+      "provenance": "Messaggio utente in chat Claude, 24/11/2026",
+      "original_quote": "can you add infographics, tutorials etc on the app and website? also we need the objective for fibers too. On the website avvisa é sia in finanza che in avvisa, keep it only in avvisi. Did you fix preghiera? i also want to be able to see the calendar of preghiera not only todays orario, and also automatic reminder of ramadan and eid in the calendar, and also possibility to add a hidden message in the calendar [dettaglio personale omesso: il repository è pubblico]. Also calendar website sucks, its still a square and colors are shit still",
+      "rule": "Gli avvisi della Finanza compaiono solo nella sezione Avvisi, non anche in Finanza."
+    },
+    {
+      "id": "TIMES-MONTH-CALENDAR-2026-11-24",
+      "status": "ACTIVE",
+      "scope": "Orari giornalieri, app e sito",
+      "recorded_on": "2026-11-24",
+      "provenance": "Messaggio utente in chat Claude, 24/11/2026",
+      "original_quote": "can you add infographics, tutorials etc on the app and website? also we need the objective for fibers too. On the website avvisa é sia in finanza che in avvisa, keep it only in avvisi. Did you fix preghiera? i also want to be able to see the calendar of preghiera not only todays orario, and also automatic reminder of ramadan and eid in the calendar, and also possibility to add a hidden message in the calendar [dettaglio personale omesso: il repository è pubblico]. Also calendar website sucks, its still a square and colors are shit still",
+      "rule": "Oltre all'orario di oggi, un calendario con gli orari di tutti i giorni."
+    },
+    {
+      "id": "CALENDAR-PRIVATE-ENTRY-2026-11-24",
+      "status": "ACTIVE",
+      "scope": "Calendario app e sito",
+      "recorded_on": "2026-11-24",
+      "provenance": "Messaggio utente in chat Claude, 24/11/2026",
+      "original_quote": "can you add infographics, tutorials etc on the app and website? also we need the objective for fibers too. On the website avvisa é sia in finanza che in avvisa, keep it only in avvisi. Did you fix preghiera? i also want to be able to see the calendar of preghiera not only todays orario, and also automatic reminder of ramadan and eid in the calendar, and also possibility to add a hidden message in the calendar [dettaglio personale omesso: il repository è pubblico]. Also calendar website sucks, its still a square and colors are shit still",
+      "rule": "Voce privata nel calendario: testo nascosto a colpo d'occhio e conteggio consultabile. I contenuti restano solo sul server dell'utente; nessun dettaglio nel repository pubblico."
+    },
+    {
+      "id": "SITE-CALENDAR-REDESIGN-2026-11-24",
+      "status": "ACTIVE",
+      "scope": "Calendario sito",
+      "recorded_on": "2026-11-24",
+      "provenance": "Messaggio utente in chat Claude, 24/11/2026",
+      "original_quote": "can you add infographics, tutorials etc on the app and website? also we need the objective for fibers too. On the website avvisa é sia in finanza che in avvisa, keep it only in avvisi. Did you fix preghiera? i also want to be able to see the calendar of preghiera not only todays orario, and also automatic reminder of ramadan and eid in the calendar, and also possibility to add a hidden message in the calendar [dettaglio personale omesso: il repository è pubblico]. Also calendar website sucks, its still a square and colors are shit still",
+      "rule": "Il calendario del sito va ridisegnato: non un riquadro quadrato, colori migliori."
+    },
+    {
+      "id": "CALENDAR-RAMADAN-EID-2026-11-24",
+      "status": "ACTIVE",
+      "scope": "Calendario app e sito",
+      "recorded_on": "2026-11-24",
+      "provenance": "Messaggio utente + risposta «Explicit names» alla domanda META-01, 24/11/2026",
+      "original_quote": "can you add infographics, tutorials etc on the app and website? also we need the objective for fibers too. On the website avvisa é sia in finanza che in avvisa, keep it only in avvisi. Did you fix preghiera? i also want to be able to see the calendar of preghiera not only todays orario, and also automatic reminder of ramadan and eid in the calendar, and also possibility to add a hidden message in the calendar [dettaglio personale omesso: il repository è pubblico]. Also calendar website sucks, its still a square and colors are shit still",
+      "rule": "Promemoria automatici nel calendario con nomi espliciti: «Ramadan» (inizio e fine), «Eid al-Fitr», «Eid al-Adha».",
+      "relation": "Eccezione limitata a questi eventi del calendario rispetto a NEUTRAL-TIMES-WORDING-2026-11-24, che resta attiva per tutto il resto."
     }
   ],
   "pending_confirmations": [

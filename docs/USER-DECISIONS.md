@@ -461,3 +461,10 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 - **UTILITY-LEVELLING-2026-11-24** (SUPERSEDED da BILL-PAST-MONTHS-2026-11-24): «let's do only the auto levelling. I dont want the free vs earmarked.» La quota del Ricorrente stimato è un impegno (i soldi restano nei risparmi, le bollette si pagano da lì); dopo ogni bolletta quota = media 12 mesi + recupero dello scarto sui mesi successivi (almeno 3), poi torna alla media. Niente vista «liberi vs già destinati».
 - **NEUTRAL-TIMES-WORDING-2026-11-24** (ACTIVE): «tra le regole c'era di non usare esplicitamente queste parole». Testi visibili neutri: «Orari», «Prossimo orario», nessun nome arabo (regola presente nel test di base, ora registrata).
 - **BILL-PAST-MONTHS-2026-11-24** (ACTIVE, confermata «yes»): mesi passati mai modificati (competenza solo per media e Analisi); quota stimata = media 12 mesi; eccedenza scelta al pagamento: Risparmi, Questo mese o Prossimi mesi (predefinito); bolletta più bassa: il resto resta nel piano. Sostituisce UTILITY-LEVELLING-2026-11-24 e la clausola di ricalcolo di FUNDING-BLOCK-2026-11-21.
+- **GUIDES-INFOGRAPHICS-2026-11-24** (ACTIVE): Guide e infografiche (tutorial) nell'app e sul sito.
+- **FIBRE-GOAL-2026-11-24** (ACTIVE): Obiettivo anche per le fibre, impostabile e visibile come gli altri.
+- **SITE-ALERTS-ONLY-AVVISI-2026-11-24** (ACTIVE): Gli avvisi della Finanza compaiono solo nella sezione Avvisi, non anche in Finanza.
+- **TIMES-MONTH-CALENDAR-2026-11-24** (ACTIVE): Oltre all'orario di oggi, un calendario con gli orari di tutti i giorni.
+- **CALENDAR-PRIVATE-ENTRY-2026-11-24** (ACTIVE): voce privata nel calendario, testo nascosto e conteggio consultabile; contenuti solo sul server, nessun dettaglio nel repository pubblico.
+- **SITE-CALENDAR-REDESIGN-2026-11-24** (ACTIVE): Il calendario del sito va ridisegnato: non un riquadro quadrato, colori migliori.
+- **CALENDAR-RAMADAN-EID-2026-11-24** (ACTIVE, risposta «Explicit names»): promemoria automatici con nomi espliciti Ramadan, Eid al-Fitr, Eid al-Adha. Eccezione limitata a questi eventi; NEUTRAL-TIMES-WORDING resta attiva per il resto.
