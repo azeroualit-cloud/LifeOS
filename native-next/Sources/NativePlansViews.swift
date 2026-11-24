@@ -158,27 +158,34 @@ struct NativePlanEditor: View {
     }
     var body: some View {
         Form {
+            // FINANCE-ENTRY-SIMPLIFY-2026-11-24: three kinds only. Obiettivo is gone (a Fondo closed later does the same);
+            // instalments are made from Nuova spesa; «Ricorrente» covers fixed and estimated amounts.
             Section("Cosa vuoi fare?") {
-                ForEach(NativePlanKind.allCases) { kind in
-                    Button { draft.kind = kind } label: {
+                ForEach([NativePlanKind.advance, .fund, .fixed]) { kind in
+                    let selected = kind == .fixed ? [.fixed, .estimated].contains(draft.kind) : draft.kind == kind
+                    Button { if !(kind == .fixed && selected) { draft.kind = kind } } label: {
                         HStack(spacing: NativeDesign.Space.medium) {
                             VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
-                                Text(kind.title).font(.subheadline.weight(.semibold)).foregroundStyle(Color.primary)
-                                Text(NativePlanKindText.detail(kind)).font(.footnote).foregroundStyle(NativeDesign.secondary)
+                                Text(kind == .fixed ? "Ricorrente" : kind.title).font(.subheadline.weight(.semibold)).foregroundStyle(Color.primary)
+                                Text(kind == .fixed ? "Una spesa che torna: affitto, assicurazione, bollette" : NativePlanKindText.detail(kind)).font(.footnote).foregroundStyle(NativeDesign.secondary)
                             }
                             Spacer(minLength: NativeDesign.Space.small)
-                            if draft.kind == kind { Image(systemName: "checkmark").font(.subheadline.weight(.semibold)).foregroundStyle(NativeDesign.financeTitle) }
+                            if selected { Image(systemName: "checkmark").font(.subheadline.weight(.semibold)).foregroundStyle(NativeDesign.financeTitle) }
                         }
                         .frame(minHeight: NativeDesign.Layout.touchTarget)
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel(kind.title + ", " + NativePlanKindText.detail(kind))
-                    .accessibilityAddTraits(draft.kind == kind ? .isSelected : [])
+                    .accessibilityLabel((kind == .fixed ? "Ricorrente" : kind.title) + ", " + NativePlanKindText.detail(kind))
+                    .accessibilityAddTraits(selected ? .isSelected : [])
                     .accessibilityIdentifier("plan-kind-" + kind.rawValue)
                 }
             }.disabled(submitted)
             Section("Dettagli") {
+                if [.fixed, .estimated].contains(draft.kind) {
+                    Picker("Importo", selection: $draft.kind) { Text("Importo fisso").tag(NativePlanKind.fixed); Text("Stimato").tag(NativePlanKind.estimated) }
+                        .pickerStyle(.segmented).accessibilityIdentifier("plan-recurring-amount")
+                }
                 LabeledContent("Nome") {
                     TextField("es. Bolletta luce", text: $draft.name).multilineTextAlignment(.trailing).focused($editing).accessibilityIdentifier("plan-name")
                 }
@@ -251,6 +258,7 @@ struct NativePlanEditor: View {
                 if let value { draft.amount = String(format: "%.2f", Double(value.integer("amountCents")) / 100); draft.paymentDate = value.text("date") }
             }
             .interactiveDismissDisabled(saving)
+            .onAppear { if [.goal, .recovery].contains(draft.kind) { draft.kind = .fund } }
     }
     private var paymentDate: Binding<Date> { Binding(get: { CivilDate.date(draft.paymentDate) }, set: { draft.paymentDate = CivilDate.day($0) }) }
     private func save() async {
