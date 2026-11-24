@@ -11,6 +11,7 @@ Anything unknown: nothing is written. Never logs source or credentials.
 from pathlib import Path
 import importlib.util
 import subprocess
+import hashlib
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -64,7 +65,12 @@ def transform(source):
             print('BILLS95B %s=current' % name)
             continue
         if split.compact(live) != split.compact(old):
-            print('BILLS95B %s=unknown' % name)
+            known = {}
+            for c in ('51fd07b', '7a52c33', '7c24f3f'):
+                text = '\n' + source_at(c, path)
+                known[hashlib.md5(split.compact(text[slice(*function(text, name))]).encode()).hexdigest()[:8]] = c
+            fingerprint = hashlib.md5(split.compact(live).encode()).hexdigest()[:8]
+            print('BILLS95B %s=unknown fingerprint=%s matches=%s' % (name, fingerprint, known.get(fingerprint, 'none')))
             raise RuntimeError('Versione di %s differente; nessuna scrittura.' % name)
         print('BILLS95B %s=replaced' % name)
         source = source[:a] + new + source[b:]
