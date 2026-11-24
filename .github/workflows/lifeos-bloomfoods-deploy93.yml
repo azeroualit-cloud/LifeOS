@@ -1,7 +1,7 @@
 name: Life OS - Bloom e alimenti nel Worker dell'app (build 93)
 # Solo avvio manuale dell'utente. Cambia lifeos-native-test aggiungendo le letture e scritture di Bloom e
 # alimenti personali sulle stesse tabelle del sito. Nessuna altra modifica backend.
-# Attempt 11 (build 95: finance-categories setting, CATEGORY-ADMIN-2026-11-24). DEPLOY-WORKERS-93-2026-11-22: a push that changes this file is the deliberate start
+# Attempt 12 (build 95: private-log setting, CALENDAR-PRIVATE-ENTRY-2026-11-24; finance-categories, CATEGORY-ADMIN-2026-11-24). DEPLOY-WORKERS-93-2026-11-22: a push that changes this file is the deliberate start
 # (a workflow present only on this branch cannot be dispatched).
 on:
   workflow_dispatch:

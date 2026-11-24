@@ -16,10 +16,16 @@ import UserNotifications
     static let prefix = "hub95-"
     private var running = false
 
-    /// Fibre target chosen on the site (nil: none).
+    /// Fibre target (FIBRE-GOAL-2026-11-24): set on the site or in Obiettivi; 30 g until one is chosen.
+    static let defaultFibre = 30.0
     var fibreGoal: Double? {
         let value = defaults.double(forKey: Self.fibreGoalKey)
         return value > 0 ? value : nil
+    }
+    /// Saved from the Obiettivi sheet; the next sync sends it to the site.
+    func setFibreGoal(_ grams: Double) {
+        defaults.set(grams, forKey: Self.fibreGoalKey)
+        Self.goalsChangedOnPhone()
     }
 
     func refresh(store: NativeStore, health: NativeHealthStore) async {
@@ -73,6 +79,7 @@ import UserNotifications
         } else if localModified > remoteModified {
             var merged = doc
             for (key, value) in Self.record(preferences.goals) { merged[key] = value }
+            if let fibre = fibreGoal { merged["fibre"] = .number(fibre) }
             _ = try? await read("saveSettings", [.string("nutrition-goals"), .object(merged), .number(localModified)])
         }
     }

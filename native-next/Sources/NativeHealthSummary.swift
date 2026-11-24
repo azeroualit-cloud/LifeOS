@@ -342,11 +342,16 @@ struct NativeHealthDetail: View {
             .buttonStyle(NativePressStyle())
             .accessibilityLabel("Tutti i micronutrienti")
             .accessibilityIdentifier("health-micronutrients")
-            HStack(spacing: NativeDesign.Space.small) {
-                Text("Fibre").font(.footnote.weight(.semibold))
-                Spacer(minLength: 0)
-                Text(fibre.map { $0.formatted(.number.precision(.fractionLength(0...1))) + " g" } ?? "—")
-                    .font(.footnote).monospacedDigit().foregroundStyle(.secondary)
+            // FIBRE-GOAL-2026-11-24: fibre against its goal, with a bar like the other nutrients.
+            let fibreGoal = NativeHub95.shared.fibreGoal ?? NativeHub95.defaultFibre
+            VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
+                HStack(spacing: NativeDesign.Space.small) {
+                    Text("Fibre").font(.footnote.weight(.semibold))
+                    Spacer(minLength: 0)
+                    Text((fibre.map { $0.formatted(.number.precision(.fractionLength(0...1))) } ?? "—") + " / " + fibreGoal.formatted(.number.precision(.fractionLength(0))) + " g")
+                        .font(.footnote).monospacedDigit().foregroundStyle(.secondary)
+                }
+                ProgressView(value: min(1, (fibre ?? 0) / max(1, fibreGoal))).tint(NativeDesign.nutritionTitle).accessibilityHidden(true)
             }
             .accessibilityElement(children: .combine)
             .accessibilityIdentifier("health-nutrient-" + HKQuantityTypeIdentifier.dietaryFiber.rawValue)

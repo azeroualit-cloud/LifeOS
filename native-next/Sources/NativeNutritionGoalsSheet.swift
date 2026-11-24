@@ -7,6 +7,7 @@ struct NativeNutritionGoalsSheet: View {
     @ObservedObject private var preferences = NativeHealthPreferences.shared
     @Environment(\.dismiss) private var dismiss
     @State private var draft = NativeHealthPreferences.shared.goals
+    @State private var fibre = NativeHub95.shared.fibreGoal ?? NativeHub95.defaultFibre
 
     private var tdee: Double? { health.estimate?.tdee }
     private var weight: Double? { health.goalWeight }
@@ -18,6 +19,7 @@ struct NativeNutritionGoalsSheet: View {
                 VStack(alignment: .leading, spacing: NativeDesign.Space.section) {
                     calories
                     macros
+                    fibreCard
                 }
                 .padding(.horizontal, NativeDesign.Layout.screenInset)
                 .padding(.vertical, NativeDesign.Space.large)
@@ -30,13 +32,32 @@ struct NativeNutritionGoalsSheet: View {
                     NativeSheetCancel { dismiss() }.accessibilityIdentifier("goals-cancel")
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    NativeSheetConfirm { preferences.goals = draft; dismiss() }
+                    NativeSheetConfirm {
+                        preferences.goals = draft
+                        if fibre != NativeHub95.shared.fibreGoal { NativeHub95.shared.setFibreGoal(fibre) }
+                        dismiss()
+                    }
                         .fontWeight(.semibold).accessibilityIdentifier("goals-save")
                 }
             }
         }
         .presentationDetents([.large])
         .accessibilityIdentifier("nutrition-goals-sheet")
+    }
+
+    /// FIBRE-GOAL-2026-11-24: grams of fibre per day, 10–60 g in steps of 1 g.
+    private var fibreCard: some View {
+        VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+            LOSectionLabel(title: "Fibre")
+            NativeCard {
+                LOStepperRow(title: "Fibre al giorno", value: fibre.formatted(.number.precision(.fractionLength(0))) + " g",
+                    decrement: fibre > 10 ? { fibre -= 1 } : nil,
+                    increment: fibre < 60 ? { fibre += 1 } : nil,
+                    identifier: "goals-fibre")
+                Text("Le vedi in Micronutrienti con la barra, come gli altri nutrienti. Vale anche sul sito.")
+                    .font(.footnote).foregroundStyle(NativeDesign.secondary)
+            }
+        }
     }
 
     private var calories: some View {
