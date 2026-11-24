@@ -67,7 +67,11 @@ final class NativeScreenTourUITests: XCTestCase {
                 app.swipeUp(velocity: .slow); shot(prefix + " 03d Avvisi sotto", app)
                 app.swipeUp(velocity: .slow); shot(prefix + " 03e Avvisi fondo", app)
             }
-            dismissSheet(app); if app.buttons["Impostazioni"].firstMatch.exists == false { dismissSheet(app) }
+            // Back to the Dashboard: the back button of Avvisi, then close Impostazioni (a swipe only scrolls the longer Avvisi page).
+            for _ in 0..<4 where !(app.scrollViews["dashboard-scroll"].exists && app.tabBars.firstMatch.isHittable) {
+                let back = app.navigationBars.buttons.firstMatch
+                if back.exists && back.isHittable { back.tap() } else { dismissSheet(app) }
+            }
         }
 
         app.openMainTab("Attività")
