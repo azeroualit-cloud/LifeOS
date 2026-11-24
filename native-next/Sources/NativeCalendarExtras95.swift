@@ -51,7 +51,7 @@ struct NativeTimesMonthScreen: View {
     }
 
     private func cell(_ time: (label: String, time: String)) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .leading, spacing: NativeDesign.Space.none) {
             Text(time.label).font(.caption2).foregroundStyle(NativeDesign.secondary).lineLimit(1).minimumScaleFactor(0.8)
             Text(time.time).font(.footnote.weight(.medium)).monospacedDigit()
         }

@@ -85,7 +85,7 @@ private struct NativeGuideArt: View {
             case "finanza":
                 VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
                     GeometryReader { proxy in
-                        HStack(spacing: 0) {
+                        HStack(spacing: NativeDesign.Space.none) {
                             ForEach(Array(zip(NativeDesign.salaryGroups, [0.4, 0.13, 0.29, 0.18])), id: \.1) { color, share in
                                 Rectangle().fill(color).frame(width: proxy.size.width * share)
                             }
@@ -122,7 +122,7 @@ private struct NativeGuideArt: View {
             default:
                 HStack(spacing: NativeDesign.Space.small) {
                     Image(systemName: "bell.badge.fill").font(.headline).foregroundStyle(topic.tint)
-                    VStack(alignment: .leading, spacing: 0) {
+                    VStack(alignment: .leading, spacing: NativeDesign.Space.none) {
                         Text("Budget sotto 50 €").font(.subheadline.weight(.semibold))
                         Text("Con suono · alle 20:00").font(.footnote).foregroundStyle(NativeDesign.secondary)
                     }
