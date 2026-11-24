@@ -2641,10 +2641,12 @@ document.addEventListener("keydown", (e) => {
             existing.addEventListener("click", () => { const id = f.elements.routingChoice.value; if (!id || id.startsWith("__") || !window.lifeosPlanPay) return; document.getElementById("dialog")?.classList.add("hidden"); window.lifeosPlanPay(id); });
             // REVIEW-95 (parità con l'app): ripartizione tra risparmi e mesi di budget per il budget del mese.
             rt.split = r.splitDestination === true; rt.isBill = isBill;
-            if (isBill) box.insertAdjacentHTML("beforeend", `<fieldset class="split-box" data-bill-period><legend>Periodo della bolletta: i mesi in cui pesa sul budget</legend><label>Dal mese<input type="month" name="billStart" value="${billStart}"></label><label>Al mese<input type="month" name="billEnd" value="${billEnd}"></label></fieldset>`);
+            if (isBill) box.insertAdjacentHTML("beforeend", `<fieldset class="split-box" data-bill-period><legend>Periodo della bolletta: consumo per mese (serve per la media e l’Analisi)</legend><label>Dal mese<input type="month" name="billStart" value="${billStart}"></label><label>Al mese<input type="month" name="billEnd" value="${billEnd}"></label></fieldset>`);
             if (rt.split) {
-              const first = String(f.elements.date.value || todayIso()).slice(0, 7), months = Array.from({ length: 12 }, (_, i) => { const [y, mm] = first.split("-").map(Number), d = new Date(Date.UTC(y, mm - 1 + i, 1)); return d.toISOString().slice(0, 7); });
-              box.insertAdjacentHTML("beforeend", `<div class="split-box" data-split-box><label>Dai risparmi (€)<input name="splitSavings" type="number" min="0" step="5" inputmode="decimal" value="0"></label><fieldset class="split-months"><legend>Mesi in cui pesa sul budget</legend>${months.map((mo, i) => `<label class="split-month"><input type="checkbox" name="splitMonth" value="${mo}"${i === 0 ? " checked" : ""}><span>${escapeHtml(shortMonth(mo))}</span></label>`).join("")}</fieldset><p class="hint" data-split-summary></p></div>`);
+              // BILL-PAST-MONTHS-2026-11-24: a bill's months start from the current month; default «Prossimi mesi».
+              const dateMonth = String(f.elements.date.value || todayIso()).slice(0, 7), nowMonth = todayIso().slice(0, 7);
+              const first = isBill && nowMonth > dateMonth ? nowMonth : dateMonth, months = Array.from({ length: 12 }, (_, i) => { const [y, mm] = first.split("-").map(Number), d = new Date(Date.UTC(y, mm - 1 + i, 1)); return d.toISOString().slice(0, 7); });
+              box.insertAdjacentHTML("beforeend", `<div class="split-box" data-split-box><label>Dai risparmi (€)<input name="splitSavings" type="number" min="0" step="5" inputmode="decimal" value="0"></label><fieldset class="split-months"><legend>Mesi in cui pesa sul budget</legend>${months.map((mo, i) => `<label class="split-month"><input type="checkbox" name="splitMonth" value="${mo}"${i === 0 || isBill && i < 3 ? " checked" : ""}><span>${escapeHtml(shortMonth(mo))}</span></label>`).join("")}</fieldset><p class="hint" data-split-summary></p></div>`);
             }
             rt.planSplit = r.planSplitDestination === true; rt.available = Object.fromEntries(plans.map((p) => [p.id, p.availableCents ?? p.fundCents ?? 0]));
             const showSplit = () => {
@@ -2652,10 +2654,10 @@ document.addEventListener("keydown", (e) => {
               if (b) {
                 const uncovered = isPlan ? Math.max(0, (toCents(f.elements.amount.value) || 0) - (rt.available[choice] || 0)) : 0;
                 b.hidden = !(choice === "__ordinary" || (isPlan && rt.planSplit && uncovered > 0));
-                const monthsBox = b.querySelector(".split-months"); if (monthsBox) monthsBox.hidden = rt.isBill;
+                const monthsBox = b.querySelector(".split-months"); if (monthsBox) monthsBox.hidden = false;
                 b.dataset.planUncovered = isPlan ? String(uncovered) : "";
                 const lab = b.querySelector("label"); if (lab && lab.firstChild) lab.firstChild.textContent = isPlan ? "Dagli altri risparmi (€)" : "Dai risparmi (€)";
-                if (isPlan && f.elements.splitSavings && b.dataset.planFor !== choice) { f.elements.splitSavings.value = String(uncovered / 100); b.dataset.planFor = choice; }
+                if (isPlan && f.elements.splitSavings && b.dataset.planFor !== choice) { f.elements.splitSavings.value = rt.isBill ? "0" : String(uncovered / 100); b.dataset.planFor = choice; }
               }
               splitSummary(f);
             };
@@ -2671,7 +2673,7 @@ document.addEventListener("keydown", (e) => {
       function splitPlan(f) {
         const box = f.querySelector("[data-split-box]"), planPart = box?.dataset.planUncovered ? Number(box.dataset.planUncovered) : null;
         const cents = planPart ?? (toCents(f.elements.amount.value) || 0);
-        const savings = Math.min(Math.max(0, Math.round(Number(f.elements.splitSavings?.value || 0) * 100)), Math.max(0, planPart !== null ? cents : cents - 1));
+        const savings = Math.min(Math.max(0, Math.round(Number(f.elements.splitSavings?.value || 0) * 100)), Math.max(0, planPart !== null || rt.isBill ? cents : cents - 1));
         const months = [...f.querySelectorAll('input[name="splitMonth"]:checked')].map((x) => x.value).sort();
         const budget = cents - savings, n = months.length || 1;
         return { cents, savings, budget, months, shares: months.map((m, i) => ({ month: m, cents: Math.floor(budget / n) + (i < budget % n ? 1 : 0) })) };
@@ -2680,7 +2682,7 @@ document.addEventListener("keydown", (e) => {
         const out = f.querySelector("[data-split-summary]");
         if (!out) return;
         const s = splitPlan(f);
-        if (rt.isBill) { out.textContent = `Risparmi ${planEuro(s.savings)} · sui mesi della bolletta ${planEuro(s.budget)}`; return; }
+        if (rt.isBill) { out.textContent = s.budget > 0 ? `Risparmi ${planEuro(s.savings)} · Budget ${planEuro(s.budget)}: ${s.shares.map((x) => shortMonth(x.month) + " " + planEuro(x.cents)).join(", ")}` : `Tutto dai risparmi: ${planEuro(s.savings)}`; return; }
         out.textContent = s.months.length ? `Risparmi ${planEuro(s.savings)} · Budget ${planEuro(s.budget)}: ${s.shares.map((x) => shortMonth(x.month) + " " + planEuro(x.cents)).join(", ")}` : "Scegli almeno un mese.";
       }
       function applyRouting(d, f) {
@@ -2692,10 +2694,12 @@ document.addEventListener("keydown", (e) => {
         const isPlan = d.expenseDestination === "plan", sp = (rt.split && d.expenseDestination === "ordinary") || (isPlan && rt.planSplit) ? splitPlan(f) : null;
         delete d.splitSavings; delete d.splitMonth;
         if (rt.isBill) {
-          // A bill: its period decides the budget months; only the savings part is chosen.
+          // BILL-PAST-MONTHS-2026-11-24: the period is the consumption; the plan pays what it set aside, the rest
+          // goes to savings and/or the chosen budget months (from the current month on).
           d.competenceStartMonth = String(d.billStart || String(d.date || "").slice(0, 7)); d.competenceEndMonth = String(d.billEnd || d.competenceStartMonth); d.utilityCompetenceVersion = 1;
           delete d.billStart; delete d.billEnd;
-          if (sp && sp.savings > 0 && d.expenseDestination !== "savings") d.utilitySavingsCents = Math.min(sp.savings, Math.round(Number(d.amount) * 100) - 1);
+          if (sp && sp.savings > 0 && d.expenseDestination !== "savings") d.utilitySavingsCents = Math.min(sp.savings, Math.round(Number(d.amount) * 100));
+          if (sp && sp.budget > 0 && sp.months.length && d.expenseDestination !== "savings") d.billBudgetMonths = sp.months;
           if (isPlan) d.expectedAvailableCents = rt.available[d.planId] ?? d.expectedAvailableCents;
           return d;
         }
@@ -7541,11 +7545,9 @@ document.addEventListener("keydown", (e) => {
     function NativeExtraTitle(status) {
       return { Pagato: "Pagata", Programmato: "In corso", Previsto: "Da valutare", Annullato: "Annullata" }[status] || status;
     }
-    // UTILITY-LEVELLING-2026-11-24: after each bill the quota recovers the gap, then returns to the average.
+    // BILL-PAST-MONTHS-2026-11-24: after each bill the estimated quota follows the 12-month average.
     function levelNote(l) {
-      const gap = Number(l.gapCents) || 0, avg = money(l.averageCents);
-      const why = gap < 0 ? `Le bollette hanno superato le quote di ${money(-gap)}: le recuperi nei prossimi mesi.` : gap > 0 ? `Le quote hanno superato le bollette di ${money(gap)}: la quota scende per qualche mese.` : "Quote e bollette sono in pari.";
-      return `<div class="kv"><span>${l.untilMonth ? `Quota livellata fino a ${safe(shortMonth(l.untilMonth))}, poi ${avg} (la media)` : "Quota uguale alla media delle bollette"}</span><strong>${money(l.quotaCents)}</strong></div><p class="hint">${safe(why)} I soldi restano nei risparmi; la bolletta si paga da lì.</p>`;
+      return `<div class="kv"><span>Quota da ${safe(shortMonth(l.fromMonth))}: media delle bollette</span><strong>${money(l.quotaCents)}</strong></div><p class="hint">Dopo ogni bolletta la quota segue la media degli ultimi 12 mesi. I soldi restano nei risparmi e la bolletta si paga da lì; la parte che il piano non copre la scegli quando paghi.</p>`;
     }
     function detail(p, v) {
       let cycle = v.month;
