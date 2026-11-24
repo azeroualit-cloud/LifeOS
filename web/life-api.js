@@ -305,7 +305,7 @@ async function hubTables(env) {
   }
   await hubReady;
 }
-const HUB_KEYS = ["nutrition-goals", "nutrition-targets", "alerts", "supplement-stacks", "finance-categories"]; // CATEGORY-ADMIN-2026-11-24
+const HUB_KEYS = ["nutrition-goals", "nutrition-targets", "alerts", "supplement-stacks", "finance-categories", "private-log"]; // CATEGORY-ADMIN-2026-11-24, CALENDAR-PRIVATE-ENTRY-2026-11-24
 function hubKey(key) {
   const k = String(key || "");
   if (!HUB_KEYS.includes(k)) throw Error("Impostazione sconosciuta.");

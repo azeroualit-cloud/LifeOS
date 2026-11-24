@@ -1746,6 +1746,107 @@ html[data-theme="light"]{--fm-ok:#1a7f3c;--fm-mid:#8a6a00;--fm-low:#9e4a00}
 .fm-panel li i::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--w);background:var(--sec-nutrition);border-radius:2px}
 .card .fm-tile:disabled .fm-pct{color:var(--ink-3)}
 .card .fm-tile.sel{box-shadow:0 0 0 1px var(--ink)}
+
+/* REVIEW-95E: calendar redesign (site). A card with a fine grid, the day number top-left, the shift as a
+   small tinted label, event titles inside the day (dots on narrow screens), today in a filled circle,
+   the details panel as its own card next to the month. Colours: the app's calendar blue, muted shift tints. */
+:root{--cal-accent:#409cff;--cal-grid:color-mix(in srgb,var(--ink) 9%,transparent);--cal-weekend:color-mix(in srgb,var(--ink) 3%,transparent)}
+html[data-theme="light"]{--cal-accent:#0040de;--cal-grid:color-mix(in srgb,var(--ink) 11%,transparent);--cal-weekend:color-mix(in srgb,var(--ink) 3.5%,transparent)}
+main:has(#calendar.active){--section:var(--cal-accent)}
+@media (min-width:1000px){
+  #calendar>.os-card{display:grid;grid-template-columns:minmax(0,1fr) 340px;column-gap:24px;align-items:start}
+  #calendar .os-calendar-details{grid-column:2;grid-row:1/span 4;position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;margin-top:0;border-left:0!important;padding:16px!important;
+    background:var(--surface);border:1px solid var(--line)!important;border-radius:16px;box-shadow:0 1px 2px rgba(0,0,0,.25),0 8px 24px rgba(0,0,0,.18)}
+}
+#calendar .os-month-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+#calendar .os-month-header h2{font-size:22px;font-weight:700;text-transform:capitalize;letter-spacing:-.2px}
+#calendar .os-weekdays{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));margin:0;padding:0 0 6px;font-size:12px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--ink-2)}
+#calendar .os-weekdays span{padding-left:10px;text-align:left}
+#calendar .os-days{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.25),0 8px 24px rgba(0,0,0,.14)}
+#calendar .os-calendar-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:0!important;margin:0!important;border-top:1px solid var(--cal-grid)!important}
+#calendar .os-calendar-week:first-child{border-top:0!important}
+#calendar .os-day{display:flex!important;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:4px!important;height:auto!important;min-height:112px!important;padding:8px!important;
+  border-radius:0!important;border:0;border-right:1px solid var(--cal-grid);background:transparent;text-align:left;min-width:0;box-shadow:none}
+#calendar .os-calendar-week .os-day:nth-child(7n){border-right:0}
+#calendar .os-calendar-week .os-day:nth-child(7n-1),#calendar .os-calendar-week .os-day:nth-child(7n){background:var(--cal-weekend)}
+#calendar .os-day:hover{background:color-mix(in srgb,var(--cal-accent) 7%,transparent)}
+#calendar .os-day>b{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;font-size:14px;font-weight:600;color:var(--ink);background:transparent;align-self:flex-start;font-variant-numeric:tabular-nums}
+#calendar .os-day.other>b{color:var(--ink-3);font-weight:500}
+#calendar .os-day.other .os-day-events,#calendar .os-day.other .os-shift{opacity:.45}
+#calendar .os-day.today>b{background:var(--cal-accent);color:#fff}
+#calendar .os-day.selected{box-shadow:inset 0 0 0 2px var(--cal-accent)!important;background:color-mix(in srgb,var(--cal-accent) 8%,transparent)}
+#calendar .os-day .os-shift,#calendar .os-day[data-kind] .os-shift{display:inline-flex!important;align-items:center;align-self:flex-start;gap:0;height:18px!important;min-width:0!important;padding:0 7px!important;border-radius:6px!important;
+  font-size:11px!important;font-weight:650!important;letter-spacing:.2px;background:color-mix(in srgb,var(--shift-color) 20%,transparent)!important;color:color-mix(in srgb,var(--shift-color) 75%,var(--ink))!important;justify-self:start}
+#calendar .os-day .os-shift.no-shift{display:none!important}
+#calendar .os-day .os-shift::before{display:none!important}
+#calendar .os-day .os-shift .sh-i{display:none}
+#calendar .os-day .os-shift .sh-t{display:inline!important;font-style:normal}
+#calendar .os-day-events{display:grid;gap:3px;min-width:0}
+#calendar .os-day-events i{display:block;font-style:normal;font-size:12px;line-height:16px;padding:1px 6px;border-radius:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  background:color-mix(in srgb,var(--cal-accent) 14%,transparent);color:var(--ink);border-left:2px solid var(--cal-accent)}
+#calendar .os-day-events i.done{opacity:.55;text-decoration:line-through}
+#calendar .os-day-events i em{font-style:normal;font-weight:600;margin-right:4px;color:color-mix(in srgb,var(--cal-accent) 70%,var(--ink));font-variant-numeric:tabular-nums}
+#calendar .os-day-events i.more{background:transparent;border-left:0;color:var(--ink-2);padding-left:2px}
+#calendar .os-day-mark{display:none!important}
+@media (max-width:760px){
+  #calendar .os-day{min-height:64px!important;padding:6px 2px!important;align-items:center}
+  #calendar .os-day>b{align-self:center}
+  #calendar .os-day .os-shift{align-self:center;padding:0 4px!important}
+  #calendar .os-day .os-shift .sh-t{display:none!important}#calendar .os-day .os-shift .sh-i{display:inline!important;font-style:normal}
+  #calendar .os-day-events{display:none}
+  #calendar .os-day-mark{display:flex!important;gap:2px;justify-content:center}
+  #calendar .os-weekdays span{padding-left:0;text-align:center}
+}
+#calendar .os-day .os-shift,#calendar .os-day[data-kind] .os-shift{width:auto!important;max-width:100%!important;overflow:visible!important;flex:none}
+#calendar .os-day .os-shift .sh-t{overflow:visible!important;width:auto!important;max-width:none!important;text-overflow:clip!important;white-space:nowrap}
+#calendar .os-calendar-details .os-day-shift,#calendar .os-next .os-day-shift{display:inline-flex;align-items:center;height:20px;padding:0 8px!important;border-radius:6px!important;font-size:12px!important;font-weight:650;
+  background:color-mix(in srgb,var(--shift-color) 20%,transparent)!important;color:color-mix(in srgb,var(--shift-color) 75%,var(--ink))!important}
+#calendar .os-calendar-details .os-day-shift::before,#calendar .os-next .os-day-shift::before{display:none!important}
+/* FIBRE-GOAL-2026-11-24: four bars (fibre with the macros). */
+.fw-macros{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+@media (max-width:520px){.fw-macros{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+
+/* TIMES-MONTH-CALENDAR-2026-11-24 and CALENDAR-RAMADAN-EID-2026-11-24 */
+:root{--hijri:#2bb39a}html[data-theme="light"]{--hijri:#0b7a66}
+.os-times-month-open{min-height:36px;font-size:13px;margin-top:8px}
+#calendar .os-month-header .os-times-month-open{margin:0 0 0 auto}
+#calendar .os-month-header{flex-wrap:wrap}
+.os-times-modal{max-width:760px;width:min(760px,calc(100vw - 32px))}
+.os-times-modal .modal-top{display:flex;align-items:center;gap:8px}
+.os-times-modal .modal-top h2{flex:1;text-align:center;text-transform:capitalize}
+.os-times-table-wrap{max-height:min(70vh,640px);overflow:auto;border:1px solid var(--line);border-radius:12px}
+.os-times-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:14px}
+.os-times-table th,.os-times-table td{padding:8px 10px;text-align:center;border-bottom:1px solid var(--line-soft);white-space:nowrap}
+.os-times-table thead th{position:sticky;top:0;background:var(--surface);font-size:12px;font-weight:600;color:var(--ink-2);z-index:1}
+.os-times-table tbody th{text-align:left;font-weight:500}
+.os-times-table tbody th b{display:inline-block;min-width:22px;font-weight:650}
+.os-times-table tbody th small{color:var(--ink-2);margin-left:4px}
+.os-times-table tr.we{background:color-mix(in srgb,var(--ink) 3%,transparent)}
+.os-times-table tr.today{background:color-mix(in srgb,var(--cal-accent,#409cff) 16%,transparent)}
+.os-times-table tr.today th b{color:var(--cal-accent,#409cff)}
+.os-hijri{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:5px;font-size:11px;font-weight:600;background:color-mix(in srgb,var(--hijri) 18%,transparent);color:color-mix(in srgb,var(--hijri) 80%,var(--ink))}
+#calendar .os-day-events i.hijri{border-left-color:var(--hijri);background:color-mix(in srgb,var(--hijri) 16%,transparent);font-weight:600}
+@media (max-width:760px){#calendar .os-day-events{display:grid}#calendar .os-day-events i:not(.hijri){display:none}#calendar .os-day-events i.hijri{font-size:9px;padding:0 2px;border-left:0;text-align:center}}
+#calendar .os-month-header{display:grid!important;grid-template-columns:40px minmax(0,1fr) 40px auto;align-items:center;gap:8px}
+#calendar .os-month-header h2{text-align:center;margin:0}
+#calendar .os-month-header>button[data-life-month]{width:40px;height:40px;border-radius:50%;font-size:20px}
+#calendar .os-month-header .os-times-month-open{font-size:13px!important;font-weight:600!important;line-height:1!important;height:36px;min-height:36px;padding:0 14px!important;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);color:var(--ink);margin:0 0 0 8px;letter-spacing:0}
+@media (min-width:1000px){#calendar>.os-card:not(:has(.os-calendar-details)){grid-template-columns:minmax(0,1fr)}}
+#calendar .os-day-events i.hijri{white-space:normal;line-height:14px}
+
+/* CALENDAR-PRIVATE-ENTRY-2026-11-24: a neutral mark, no text. */
+#calendar .os-day{position:relative}
+#calendar .os-private-mark{position:absolute;top:10px;right:10px;width:6px;height:6px;border-radius:50%;background:var(--ink-3)}
+#calendar .os-calendar-details{position:relative}
+#calendar .os-private-open{float:right;min-height:30px;height:30px;padding:0 10px;font-size:12px;border-radius:999px;color:var(--ink-2)}
+.os-private-modal{max-width:520px;width:min(520px,calc(100vw - 32px))}
+.os-private-list{list-style:none;margin:0 0 12px;padding:0;display:grid;gap:8px}
+.os-private-list li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}
+.os-private-list li span{display:grid}.os-private-list small{color:var(--ink-2)}
+.os-private-summary{margin-top:12px;border-top:1px solid var(--line-soft);padding-top:8px}
+.os-private-summary summary{cursor:pointer;font-weight:600;min-height:36px;display:flex;align-items:center}
+.os-private-summary table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:14px}
+.os-private-summary th,.os-private-summary td{padding:6px 8px;border-bottom:1px solid var(--line-soft);text-align:left}
 </style>
 </head>
   <body class="dashboard-mode">
@@ -2014,8 +2115,10 @@ let fdServerTargets;
 function fdLoadTargets() {
   if (fdServerTargets !== undefined || fd.targetsLoading) return;
   fd.targetsLoading = true;
-  workerRequest("getSettings", ["nutrition-targets"]).then((r) => {
+  Promise.all([workerRequest("getSettings", ["nutrition-targets"]), workerRequest("getSettings", ["nutrition-goals"]).catch(() => null)]).then(([r, goals]) => {
     const d = r?.doc || {};
+    // FIBRE-GOAL-2026-11-24: the fibre goal lives with the other goals (Admin or Obiettivi on the phone).
+    fd.fibreGoal = Number(goals?.doc?.fibre) > 0 ? Number(goals.doc.fibre) : 30;
     fdServerTargets = Number(d.calories) > 0 ? { kcal: Number(d.calories), protein: Number(d.protein) || 0, carbs: Number(d.carbohydrate) || 0, fat: Number(d.fat) || 0, fromPhone: true } : null;
   }).catch(() => { fdServerTargets = null; }).finally(() => { fd.targetsLoading = false; if (state.view === "nutrition") renderNutrition(); });
 }
@@ -2081,6 +2184,10 @@ function fdWeekCard() {
     const share = energyTotal > 0 ? Math.round(energy[key] / energyTotal * 100) : 0;
     return `<div class="fw-macro"><small>${label}</small><span><b>${fdNum(v)}</b> <em>g · ${share}%</em></span><i class="fw-bar" title="${share}% delle calorie"><i style="width:${share}%;background:var(--mac-${key})"></i></i></div>`;
   };
+  const fibreMacro = () => {
+    const v = sum("fibre"), goal = fd.fibreGoal || 30, w = Math.min(100, v / goal * 100);
+    return `<div class="fw-macro"><small>Fibre</small><span><b>${fdNum(v)}</b> <em>/ ${fdNum(goal)} g</em></span><i class="fw-bar"><i style="width:${w}%;background:${fdMacroColor(v, goal)}"></i></i></div>`;
+  };
   const title = fd.day === today ? "Oggi" : new Date(fd.day + "T12:00:00Z").toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "short" });
   return `<section class="fw-wrap" aria-label="Settimana e calorie">
     <div class="fw-title"><button type="button" class="fw-today" data-fd-goto="${today}" ${fd.day === today ? "disabled" : ""}>${nbE(title)}${fd.day === today ? "" : " ↺"}</button><span class="fw-arrows"><button type="button" data-fd-day="-7" aria-label="Settimana precedente">‹</button><button type="button" data-fd-day="7" aria-label="Settimana successiva" ${fdShift(from, 7) > today ? "disabled" : ""}>›</button></span></div>
@@ -2088,7 +2195,7 @@ function fdWeekCard() {
     <div class="card fw-card">
       <button type="button" class="fw-kcal" data-fd-goals aria-label="Calorie ${fdNum(kcal)}${g ? " di " + fdNum(g.kcal) : ""}. Imposta obiettivi"><small>kcal</small><strong>${fdNum(kcal)}${g ? `<em> / ${fdNum(g.kcal)}</em>` : ""}</strong>${g ? "" : '<span class="fw-set">Imposta un obiettivo</span>'}</button>
       ${gauge}
-      <div class="fw-macros">${macro("Proteine", "protein", g?.protein)}${macro("Carboidrati", "carbs", g?.carbs)}${macro("Grassi", "fat", g?.fat)}</div>
+      <div class="fw-macros">${macro("Proteine", "protein", g?.protein)}${macro("Carboidrati", "carbs", g?.carbs)}${macro("Grassi", "fat", g?.fat)}${fibreMacro()}</div>
     </div>
   </section>`;
 }
@@ -2932,6 +3039,101 @@ document.addEventListener("keydown", (e) => {
         );
       }
 
+      /** TIMES-MONTH-CALENDAR-2026-11-24: the times of every day of a month (neutral names). */
+      const OS_TIME_COLUMNS = [["fajr", "Prima dell’alba"], ["sunrise", "Alba"], ["dhuhr", "Mezzogiorno"], ["asr", "Pomeriggio"], ["maghrib", "Tramonto"], ["isha", "Notte"]];
+      function osTimesMonthHtml(month) {
+        const [y, m] = month.split("-").map(Number), days = new Date(Date.UTC(y, m, 0)).getUTCDate();
+        const today = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Rome" });
+        const prev = new Date(Date.UTC(y, m - 2, 1)).toISOString().slice(0, 7), next = new Date(Date.UTC(y, m, 1)).toISOString().slice(0, 7);
+        const rows = Array.from({ length: days }, (_, i) => {
+          const day = `${month}-${String(i + 1).padStart(2, "0")}`, t = osPrayerTimes(day), d = new Date(day + "T12:00:00Z");
+          const wd = d.toLocaleDateString("it-IT", { weekday: "short", timeZone: "UTC" }), hj = osIslamicEvents(day);
+          return `<tr class="${day === today ? "today" : ""}${d.getUTCDay() === 0 || d.getUTCDay() === 6 ? " we" : ""}"><th scope="row"><b>${i + 1}</b><small>${wd}</small>${hj.map((e) => `<span class="os-hijri">${osSafe(e)}</span>`).join("")}</th>${OS_TIME_COLUMNS.map(([k]) => `<td>${t[k].label}</td>`).join("")}</tr>`;
+        }).join("");
+        const title = new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString("it-IT", { month: "long", year: "numeric", timeZone: "UTC" });
+        return `<div class="modal os-times-modal" role="dialog" aria-modal="true" aria-label="Calendario degli orari"><div class="modal-top"><button type="button" class="ghost" data-times-month="${prev}" aria-label="Mese precedente">‹</button><h2>${title}</h2><button type="button" class="ghost" data-times-month="${next}" aria-label="Mese successivo">›</button><button type="button" class="ghost" data-close="1" aria-label="Chiudi">×</button></div>
+          <p class="hint">Empoli · orari indicativi calcolati per ogni giorno.</p>
+          <div class="os-times-table-wrap"><table class="os-times-table"><thead><tr><th scope="col">Giorno</th>${OS_TIME_COLUMNS.map(([, l]) => `<th scope="col">${l}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div></div>`;
+      }
+      function osTimesMonthOpen(month) {
+        const host = document.getElementById("dialog");
+        if (!host) return;
+        host.innerHTML = osTimesMonthHtml(month);
+        host.classList.remove("hidden");
+        host.querySelector("tr.today")?.scrollIntoView({ block: "center" });
+      }
+      document.addEventListener("click", (e) => {
+        const b = e.target.closest?.("[data-times-month]");
+        if (b) { e.preventDefault(); osTimesMonthOpen(b.dataset.timesMonth); }
+      });
+      /** CALENDAR-PRIVATE-ENTRY-2026-11-24: private notes kept only in the user's server setting "private-log".
+       *  The month shows a neutral mark; names and notes appear only in this dialog, the summary behind «Mostra». */
+      const osPrivate = { doc: null, loading: false, shown: false };
+      function osPrivateLoad() {
+        if (osPrivate.doc || osPrivate.loading) return;
+        osPrivate.loading = true;
+        workerRequest("getSettings", ["private-log"]).then((r) => { osPrivate.doc = { entries: Array.isArray(r?.doc?.entries) ? r.doc.entries : [] }; osPrivate.modified = Number(r?.modified) || 0; })
+          .catch(() => { osPrivate.doc = { entries: [] }; }).finally(() => { osPrivate.loading = false; if (state.view === "calendar") renderLifeOS(); });
+      }
+      function osPrivateDays() { osPrivateLoad(); return new Set((osPrivate.doc?.entries || []).map((e) => e.day)); }
+      async function osPrivateSave(entries) {
+        const when = Math.max(Date.now(), (osPrivate.modified || 0) + 1), doc = { entries };
+        const r = await workerRequest("saveSettings", ["private-log", doc, when]);
+        osPrivate.doc = { entries: Array.isArray(r?.doc?.entries) ? r.doc.entries : entries }; osPrivate.modified = Number(r?.modified) || when;
+      }
+      function osPrivateHtml(day) {
+        const all = osPrivate.doc?.entries || [], list = all.filter((e) => e.day === day), people = [...new Set(all.map((e) => e.person).filter(Boolean))].sort();
+        const year = day.slice(0, 4), byPerson = new Map();
+        for (const e of all) { const k = e.person || "—", v = byPerson.get(k) || { total: 0, year: 0, last: "" }; v.total++; if (e.day.startsWith(year)) v.year++; if (e.day > v.last) v.last = e.day; byPerson.set(k, v); }
+        const summary = [...byPerson].sort((a, b) => b[1].total - a[1].total).map(([k, v]) => `<tr><th scope="row">${osSafe(k)}</th><td>${v.year}</td><td>${v.total}</td><td>${osSafe(osDate(v.last))}</td></tr>`).join("");
+        return `<div class="modal os-private-modal" role="dialog" aria-modal="true" aria-label="Nota privata"><div class="modal-top"><h2>Privato · ${osSafe(osDate(day))}</h2><button type="button" class="ghost" data-close="1" aria-label="Chiudi">×</button></div>
+          ${list.length ? `<ul class="os-private-list">${list.map((e) => `<li><span><b>${osSafe(e.person || "—")}</b>${e.note ? `<small>${osSafe(e.note)}</small>` : ""}</span><button type="button" class="ghost" data-private-delete="${osSafe(e.id)}">Elimina</button></li>`).join("")}</ul>` : '<p class="hint">Nessuna nota privata in questo giorno.</p>'}
+          <form class="os-form" data-private-form="${day}"><label>Con chi<input name="person" list="os-private-people" maxlength="60" autocomplete="off" required></label><datalist id="os-private-people">${people.map((n) => `<option value="${osSafe(n)}">`).join("")}</datalist>
+          <label class="wide">Nota (facoltativa)<input name="note" maxlength="200" autocomplete="off"></label><div class="form-actions"><button class="save" type="submit">Aggiungi</button></div></form>
+          <details class="os-private-summary" ${osPrivate.shown ? "open" : ""}><summary data-private-toggle>Mostra il riepilogo</summary>${summary ? `<table><thead><tr><th>Con chi</th><th>${year}</th><th>Totale</th><th>Ultima</th></tr></thead><tbody>${summary}</tbody></table>` : '<p class="hint">Ancora nessuna nota.</p>'}</details>
+          <p class="hint">Visibile solo a te: nel calendario resta un punto senza testo.</p></div>`;
+      }
+      function osPrivateOpen(day) {
+        const host = document.getElementById("dialog");
+        if (!host) return;
+        host.innerHTML = osPrivateHtml(day); host.classList.remove("hidden");
+      }
+      document.addEventListener("click", async (e) => {
+        const open = e.target.closest?.("[data-private-day]");
+        if (open) { e.preventDefault(); osPrivateLoad(); osPrivateOpen(open.dataset.privateDay); return; }
+        const del = e.target.closest?.("[data-private-delete]");
+        if (del) {
+          const entry = (osPrivate.doc?.entries || []).find((x) => x.id === del.dataset.privateDelete);
+          if (!entry) return;
+          if (del.dataset.confirm !== "1") { del.dataset.confirm = "1"; del.textContent = "Confermi?"; return; }
+          await osPrivateSave(osPrivate.doc.entries.filter((x) => x.id !== entry.id)); osPrivateOpen(entry.day); renderLifeOS(); return;
+        }
+        if (e.target.closest?.("[data-private-toggle]")) osPrivate.shown = !osPrivate.shown;
+      });
+      document.addEventListener("submit", async (e) => {
+        const f = e.target.closest?.("form[data-private-form]");
+        if (!f) return;
+        e.preventDefault();
+        const day = f.dataset.privateForm, person = f.elements.person.value.trim(), note = f.elements.note.value.trim();
+        if (!person) return;
+        const entry = { id: (crypto.randomUUID?.() || String(Date.now())), day, person, ...(note ? { note } : {}) };
+        await osPrivateSave([...(osPrivate.doc?.entries || []), entry]); osPrivateOpen(day); renderLifeOS();
+      });
+
+      /** CALENDAR-RAMADAN-EID-2026-11-24: dates from the Umm al-Qura calendar of the browser (explicit names, user's choice). */
+      function osIslamicEvents(day) {
+        try {
+          const f = new Intl.DateTimeFormat("en-u-ca-islamic-umalqura", { day: "numeric", month: "numeric", timeZone: "UTC" });
+          const parts = (d) => Object.fromEntries(f.formatToParts(new Date(d + "T12:00:00Z")).filter((p) => p.type === "day" || p.type === "month").map((p) => [p.type, Number(p.value)]));
+          const h = parts(day), next = parts(new Date(Date.parse(day + "T12:00:00Z") + 864e5).toISOString().slice(0, 10)), out = [];
+          if (h.month === 9 && h.day === 1) out.push("Inizio Ramadan");
+          if (h.month === 9 && next.month === 10) out.push("Fine Ramadan");
+          if (h.month === 10 && h.day === 1) out.push("Eid al-Fitr");
+          if (h.month === 12 && h.day === 10) out.push("Eid al-Adha");
+          return out;
+        } catch (err) { return []; }
+      }
+
       /** Markup degli orari locali; conserva lo stato del dettaglio aperto. */
       function osPrayerCard(day, now = new Date(), expanded = false) {
         const times = osPrayerTimes(day),
@@ -2965,7 +3167,7 @@ document.addEventListener("keydown", (e) => {
         const lead = next
           ? "Prossimo · " + next[1] + " " + times[next[0]].label
           : "Ciclo di oggi";
-        return `<div class="os-sunline" aria-label="Fasi del giorno a Empoli"><div class="os-sunline-meta"><span>Empoli · alba ${times.sunrise.label}</span><strong>${lead}</strong></div><details class="os-home-times" data-home-times ${expanded ? "open" : ""}><summary>Tutti gli orari</summary><div class="os-prayer-list">${prayers.map(([key, label]) => `<div class="os-prayer ${next?.[0] === key ? "next" : ""}"><span>${label}</span><time>${times[key].label}</time></div>`).join("")}</div></details></div>`;
+        return `<div class="os-sunline" aria-label="Fasi del giorno a Empoli"><div class="os-sunline-meta"><span>Empoli · alba ${times.sunrise.label}</span><strong>${lead}</strong></div><details class="os-home-times" data-home-times ${expanded ? "open" : ""}><summary>Tutti gli orari</summary><button type="button" class="ghost os-times-month-open" data-times-month="${day.slice(0, 7)}">Calendario degli orari</button><div class="os-prayer-list">${prayers.map(([key, label]) => `<div class="os-prayer ${next?.[0] === key ? "next" : ""}"><span>${label}</span><time>${times[key].label}</time></div>`).join("")}</div></details></div>`;
       }
 
       const life = {
@@ -3380,8 +3582,17 @@ document.addEventListener("keydown", (e) => {
           shift = shiftMap.get(life.selected);
         const eventCounts = new Map(),
           taskDays = new Set();
-        for (const event of life.data.events)
+        const dayEvents = new Map();
+        for (const event of life.data.events) {
           eventCounts.set(event.day, (eventCounts.get(event.day) || 0) + 1);
+          if (event.occurrence_status !== "skipped") dayEvents.set(event.day, [...(dayEvents.get(event.day) || []), event]);
+        }
+        // REVIEW-95E: up to two titles per day (time first), then «+N».
+        const chips = (day) => {
+          const list = (dayEvents.get(day) || []).sort((a, b) => (a.start_time || "").localeCompare(b.start_time || ""));
+          return osIslamicEvents(day).map((t) => `<i class="ev hijri">${osSafe(t)}</i>`).join("") + list.slice(0, 2).map((e) => `<i class="ev${e.occurrence_status === "done" ? " done" : ""}">${e.start_time ? `<em>${osSafe(e.start_time)}</em>` : ""}${osSafe(e.title)}</i>`).join("")
+            + (list.length > 2 ? `<i class="more">+${list.length - 2}</i>` : "");
+        };
         for (const task of life.data.tasks)
           if (task.status !== "done") {
             if (task.scheduled_date) taskDays.add(task.scheduled_date);
@@ -3396,14 +3607,14 @@ document.addEventListener("keydown", (e) => {
             dayEventCount = eventCounts.get(day) || 0,
             hasTask = taskDays.has(day);
           if (i % 7 === 0) cells += '<div class="os-calendar-week">';
-          cells += `<button class="os-day ${date.getUTCMonth() !== month - 1 ? "other" : ""} ${day === life.data.today ? "today" : ""} ${day === life.selected ? "selected" : ""}" data-life-day="${day}" data-kind="${kind || ""}" aria-label="${osDate(day)}${kind ? " · " + osShift[kind] : ""}${dayEventCount ? " · " + dayEventCount + " eventi" : ""}${hasTask ? " · attività" : ""}" title="${day}${kind ? " · " + osShift[kind] : ""}"><b>${date.getUTCDate()}</b><span class="os-shift ${kind ? "" : "no-shift"}">${kind ? `<i class="sh-i">${osShiftInitial[kind]}</i><i class="sh-t">${osShiftAbbr[kind] || ""}</i>` : ""}</span><span class="os-day-mark" aria-hidden="true">${"<i></i>".repeat(Math.min(dayEventCount, 3))}${hasTask ? '<i class="t"></i>' : ""}</span></button>`;
+          cells += `<button class="os-day ${date.getUTCMonth() !== month - 1 ? "other" : ""} ${day === life.data.today ? "today" : ""} ${day === life.selected ? "selected" : ""}" data-life-day="${day}" data-kind="${kind || ""}" aria-label="${osDate(day)}${kind ? " · " + osShift[kind] : ""}${dayEventCount ? " · " + dayEventCount + " eventi" : ""}${hasTask ? " · attività" : ""}" title="${day}${kind ? " · " + osShift[kind] : ""}"><b>${date.getUTCDate()}</b><span class="os-shift ${kind ? "" : "no-shift"}">${kind ? `<i class="sh-i">${osShiftInitial[kind]}</i><i class="sh-t">${osShiftAbbr[kind] || ""}</i>` : ""}</span><span class="os-day-mark" aria-hidden="true">${"<i></i>".repeat(Math.min(dayEventCount, 3))}${hasTask ? '<i class="t"></i>' : ""}</span><span class="os-day-events" aria-hidden="true">${chips(day)}</span>${osPrivateDays().has(day) ? '<span class="os-private-mark" aria-hidden="true"></span>' : ""}</button>`;
           if (i % 7 === 6) cells += "</div>";
         }
         document.body.style.setProperty(
           "--calendar-rows",
           Math.ceil((offset + days) / 7),
         );
-        return `<div class="os-card"><div class="os-month-header"><button data-life-month="-1" aria-label="Mese precedente">‹</button><h2>${first.toLocaleDateString("it-IT", { month: "long", year: "numeric", timeZone: "UTC" })}</h2><button data-life-month="1" aria-label="Mese successivo">›</button></div><div class="os-weekdays">${["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"].map((x) => `<span>${x}</span>`).join("")}</div><div class="os-days">${cells}</div>${life.selected ? `<div class="os-calendar-details">` : ""}${life.selected ? `<h3>${osDate(life.selected)}${shift ? `<span class="os-day-shift" data-kind="${shift}" title="${osShiftAbbr[shift] || ""}">${osShiftInitial[shift] || ""}</span>` : ""}</h3>${events.length ? events.map((e) => `<div class="os-mini"><div><strong>${osSafe(e.title)}</strong><small>${e.start_time || "Tutto il giorno"}${e.end_time ? "–" + e.end_time : ""}${e.location ? " · " + osSafe(e.location) : ""}${e.occurrence_status === "done" ? " · Fatto" : ""}</small></div><button class="os-row-action" ${e.day < life.data.today ? `data-life-event="${e.id}"` : `data-life-occurrence="${e.id}:${e.day}:${e.occurrence_status === "done" ? "open" : "done"}"`}>${e.day < life.data.today ? "Riprogramma" : e.occurrence_status === "done" ? "Riapri" : "Fatto"}</button><details class="os-event-options"><summary aria-label="Opzioni evento">Opzioni</summary><button class="os-row-action" data-life-occurrence="${e.id}:${e.day}:skipped" aria-label="Elimina questa occorrenza">Elimina questa</button>${e.frequency && e.frequency !== "none" ? `<button class="os-row-action" data-life-split-event="${e.id}:${e.day}">Modifica da qui</button>` : ""}<button class="os-row-action" data-life-event="${e.id}" aria-label="Modifica serie">Modifica</button></details></div>`).join("") : '<p class="os-empty">Nessun evento.</p>'}${tasks.length ? '<div class="os-section-label">Attività</div>' + tasks.map((t) => `<div class="os-mini"><strong>${osSafe(t.title)}</strong><button class="os-row-action" data-life-task="${t.id}" aria-label="Modifica attività">···</button></div>`).join("") : ""}` : ""}${life.selected ? osNextDays() + "</div>" : ""}${osEventForm()}</div><details class="os-palette-wrap os-tools-drawer" ${life.paletteOpen || life.tool ? "open" : ""}><summary>Dipingi turni${life.tool ? " · " + osSafe(osShiftAbbr[life.tool] || life.tool) : ""}</summary><div class="os-palette-state" role="status">${life.tool ? `Pennello attivo: <strong>${osSafe(osShiftAbbr[life.tool] || (life.tool === "event" ? "Evento" : "Cancella"))}</strong>` : "Scegli un turno, poi tocca i giorni."}</div><div class="os-palette" aria-label="Pennello calendario">${Object.entries(
+        return `<div class="os-card"><div class="os-month-header"><button data-life-month="-1" aria-label="Mese precedente">‹</button><h2>${first.toLocaleDateString("it-IT", { month: "long", year: "numeric", timeZone: "UTC" })}</h2><button data-life-month="1" aria-label="Mese successivo">›</button><button type="button" class="ghost os-times-month-open" data-times-month="${life.month}">Orari del mese</button></div><div class="os-weekdays">${["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"].map((x) => `<span>${x}</span>`).join("")}</div><div class="os-days">${cells}</div>${life.selected ? `<div class="os-calendar-details">` : ""}${life.selected ? `<button type="button" class="ghost os-private-open" data-private-day="${life.selected}" aria-label="Nota privata">${osPrivateDays().has(life.selected) ? "● Privato" : "Privato"}</button><h3>${osDate(life.selected)}${shift ? `<span class="os-day-shift" data-kind="${shift}" title="${osShiftAbbr[shift] || ""}">${osShiftInitial[shift] || ""}</span>` : ""}</h3>${events.length ? events.map((e) => `<div class="os-mini"><div><strong>${osSafe(e.title)}</strong><small>${e.start_time || "Tutto il giorno"}${e.end_time ? "–" + e.end_time : ""}${e.location ? " · " + osSafe(e.location) : ""}${e.occurrence_status === "done" ? " · Fatto" : ""}</small></div><button class="os-row-action" ${e.day < life.data.today ? `data-life-event="${e.id}"` : `data-life-occurrence="${e.id}:${e.day}:${e.occurrence_status === "done" ? "open" : "done"}"`}>${e.day < life.data.today ? "Riprogramma" : e.occurrence_status === "done" ? "Riapri" : "Fatto"}</button><details class="os-event-options"><summary aria-label="Opzioni evento">Opzioni</summary><button class="os-row-action" data-life-occurrence="${e.id}:${e.day}:skipped" aria-label="Elimina questa occorrenza">Elimina questa</button>${e.frequency && e.frequency !== "none" ? `<button class="os-row-action" data-life-split-event="${e.id}:${e.day}">Modifica da qui</button>` : ""}<button class="os-row-action" data-life-event="${e.id}" aria-label="Modifica serie">Modifica</button></details></div>`).join("") : '<p class="os-empty">Nessun evento.</p>'}${tasks.length ? '<div class="os-section-label">Attività</div>' + tasks.map((t) => `<div class="os-mini"><strong>${osSafe(t.title)}</strong><button class="os-row-action" data-life-task="${t.id}" aria-label="Modifica attività">···</button></div>`).join("") : ""}` : ""}${life.selected ? osNextDays() + "</div>" : ""}${osEventForm()}</div><details class="os-palette-wrap os-tools-drawer" ${life.paletteOpen || life.tool ? "open" : ""}><summary>Dipingi turni${life.tool ? " · " + osSafe(osShiftAbbr[life.tool] || life.tool) : ""}</summary><div class="os-palette-state" role="status">${life.tool ? `Pennello attivo: <strong>${osSafe(osShiftAbbr[life.tool] || (life.tool === "event" ? "Evento" : "Cancella"))}</strong>` : "Scegli un turno, poi tocca i giorni."}</div><div class="os-palette" aria-label="Pennello calendario">${Object.entries(
           osShift,
         )
           .map(
@@ -5069,7 +5280,7 @@ document.addEventListener("keydown", (e) => {
         const s = faSettings(), ign = faIgnored(), list = faCandidates(d, s).filter((a) => ign[a.key] !== a.body);
         if (!list.length) return "";
         const rows = list.map((a) => `<li class="fa-row${a.quiet ? " quiet" : ""}"><span class="fa-text"><b>${escapeHtml(a.title)}</b><span>${escapeHtml(a.body)}</span></span><button type="button" class="ghost fa-ignore" data-fa-ignore="${escapeHtml(a.key)}" data-fa-body="${escapeHtml(a.body)}" aria-label="Ignora ${escapeHtml(a.title)}">Ignora</button></li>`).join("");
-        return `<section class="os-card fa-card hw-wide"><div class="card-title"><h2>Avvisi</h2><button type="button" class="ghost" data-fa-open aria-haspopup="dialog">Gestisci</button></div><ul class="fa-list">${rows}</ul></section>`;
+        return `<section class="os-card fa-card hw-wide"><div class="card-title"><h2>Avvisi</h2><button type="button" class="ghost" data-view="alerts">Gestisci</button></div><ul class="fa-list">${rows}</ul></section>`;
       }
       function faRefresh() {
         const old = document.querySelector(".fa-card"), html = financeAlertsCard(faData());
@@ -5117,7 +5328,7 @@ document.addEventListener("keydown", (e) => {
         const recent = (d.transactions || []).slice(0, 3);
         return `<div class="finance-open">
         ${finHero(d, daily)}
-        <div class="finance-actions"><button data-new-transaction="Spesa" class="primary-pill"><span aria-hidden="true">+</span>Nuova spesa</button><button data-new-extra><span aria-hidden="true">+</span>Nuovo piano</button><button data-view="budget"><span aria-hidden="true">◔</span>Budget</button><button data-view="analysis"><span aria-hidden="true">≋</span>Analisi</button><button type="button" data-fa-open aria-haspopup="dialog"><span aria-hidden="true">!</span>Avvisi</button></div>
+        <div class="finance-actions"><button data-new-transaction="Spesa" class="primary-pill"><span aria-hidden="true">+</span>Nuova spesa</button><button data-new-extra><span aria-hidden="true">+</span>Nuovo piano</button><button data-view="budget"><span aria-hidden="true">◔</span>Budget</button><button data-view="analysis"><span aria-hidden="true">≋</span>Analisi</button></div>
         ${budgetSankey(d)}
         <section class="finance-recent"><div class="finance-heading"><h2>Ultimi movimenti</h2><button data-view="movements">Vedi tutti</button></div>${recent.length ? recent.map(t => `<button class="finance-movement" data-edit-movement="${Number(t.row)}"><span><strong>${escapeHtml(t.name)}</strong><small>${escapeHtml(t.date || '')} · ${escapeHtml(t.category || t.type || '')}</small></span><b class="${amountClass(t.amount)}">${state.assetsVisible ? exactEuro(t.amount) : '•••• €'}</b></button>`).join('') : '<p class="empty">Nessun movimento nel mese.</p>'}</section>${overviewCharts(d)}</div>`;
       }

@@ -1707,3 +1707,104 @@ html[data-theme="light"]{--fm-ok:#1a7f3c;--fm-mid:#8a6a00;--fm-low:#9e4a00}
 .fm-panel li i::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--w);background:var(--sec-nutrition);border-radius:2px}
 .card .fm-tile:disabled .fm-pct{color:var(--ink-3)}
 .card .fm-tile.sel{box-shadow:0 0 0 1px var(--ink)}
+
+/* REVIEW-95E: calendar redesign (site). A card with a fine grid, the day number top-left, the shift as a
+   small tinted label, event titles inside the day (dots on narrow screens), today in a filled circle,
+   the details panel as its own card next to the month. Colours: the app's calendar blue, muted shift tints. */
+:root{--cal-accent:#409cff;--cal-grid:color-mix(in srgb,var(--ink) 9%,transparent);--cal-weekend:color-mix(in srgb,var(--ink) 3%,transparent)}
+html[data-theme="light"]{--cal-accent:#0040de;--cal-grid:color-mix(in srgb,var(--ink) 11%,transparent);--cal-weekend:color-mix(in srgb,var(--ink) 3.5%,transparent)}
+main:has(#calendar.active){--section:var(--cal-accent)}
+@media (min-width:1000px){
+  #calendar>.os-card{display:grid;grid-template-columns:minmax(0,1fr) 340px;column-gap:24px;align-items:start}
+  #calendar .os-calendar-details{grid-column:2;grid-row:1/span 4;position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;margin-top:0;border-left:0!important;padding:16px!important;
+    background:var(--surface);border:1px solid var(--line)!important;border-radius:16px;box-shadow:0 1px 2px rgba(0,0,0,.25),0 8px 24px rgba(0,0,0,.18)}
+}
+#calendar .os-month-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+#calendar .os-month-header h2{font-size:22px;font-weight:700;text-transform:capitalize;letter-spacing:-.2px}
+#calendar .os-weekdays{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));margin:0;padding:0 0 6px;font-size:12px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--ink-2)}
+#calendar .os-weekdays span{padding-left:10px;text-align:left}
+#calendar .os-days{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.25),0 8px 24px rgba(0,0,0,.14)}
+#calendar .os-calendar-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:0!important;margin:0!important;border-top:1px solid var(--cal-grid)!important}
+#calendar .os-calendar-week:first-child{border-top:0!important}
+#calendar .os-day{display:flex!important;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:4px!important;height:auto!important;min-height:112px!important;padding:8px!important;
+  border-radius:0!important;border:0;border-right:1px solid var(--cal-grid);background:transparent;text-align:left;min-width:0;box-shadow:none}
+#calendar .os-calendar-week .os-day:nth-child(7n){border-right:0}
+#calendar .os-calendar-week .os-day:nth-child(7n-1),#calendar .os-calendar-week .os-day:nth-child(7n){background:var(--cal-weekend)}
+#calendar .os-day:hover{background:color-mix(in srgb,var(--cal-accent) 7%,transparent)}
+#calendar .os-day>b{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;font-size:14px;font-weight:600;color:var(--ink);background:transparent;align-self:flex-start;font-variant-numeric:tabular-nums}
+#calendar .os-day.other>b{color:var(--ink-3);font-weight:500}
+#calendar .os-day.other .os-day-events,#calendar .os-day.other .os-shift{opacity:.45}
+#calendar .os-day.today>b{background:var(--cal-accent);color:#fff}
+#calendar .os-day.selected{box-shadow:inset 0 0 0 2px var(--cal-accent)!important;background:color-mix(in srgb,var(--cal-accent) 8%,transparent)}
+#calendar .os-day .os-shift,#calendar .os-day[data-kind] .os-shift{display:inline-flex!important;align-items:center;align-self:flex-start;gap:0;height:18px!important;min-width:0!important;padding:0 7px!important;border-radius:6px!important;
+  font-size:11px!important;font-weight:650!important;letter-spacing:.2px;background:color-mix(in srgb,var(--shift-color) 20%,transparent)!important;color:color-mix(in srgb,var(--shift-color) 75%,var(--ink))!important;justify-self:start}
+#calendar .os-day .os-shift.no-shift{display:none!important}
+#calendar .os-day .os-shift::before{display:none!important}
+#calendar .os-day .os-shift .sh-i{display:none}
+#calendar .os-day .os-shift .sh-t{display:inline!important;font-style:normal}
+#calendar .os-day-events{display:grid;gap:3px;min-width:0}
+#calendar .os-day-events i{display:block;font-style:normal;font-size:12px;line-height:16px;padding:1px 6px;border-radius:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  background:color-mix(in srgb,var(--cal-accent) 14%,transparent);color:var(--ink);border-left:2px solid var(--cal-accent)}
+#calendar .os-day-events i.done{opacity:.55;text-decoration:line-through}
+#calendar .os-day-events i em{font-style:normal;font-weight:600;margin-right:4px;color:color-mix(in srgb,var(--cal-accent) 70%,var(--ink));font-variant-numeric:tabular-nums}
+#calendar .os-day-events i.more{background:transparent;border-left:0;color:var(--ink-2);padding-left:2px}
+#calendar .os-day-mark{display:none!important}
+@media (max-width:760px){
+  #calendar .os-day{min-height:64px!important;padding:6px 2px!important;align-items:center}
+  #calendar .os-day>b{align-self:center}
+  #calendar .os-day .os-shift{align-self:center;padding:0 4px!important}
+  #calendar .os-day .os-shift .sh-t{display:none!important}#calendar .os-day .os-shift .sh-i{display:inline!important;font-style:normal}
+  #calendar .os-day-events{display:none}
+  #calendar .os-day-mark{display:flex!important;gap:2px;justify-content:center}
+  #calendar .os-weekdays span{padding-left:0;text-align:center}
+}
+#calendar .os-day .os-shift,#calendar .os-day[data-kind] .os-shift{width:auto!important;max-width:100%!important;overflow:visible!important;flex:none}
+#calendar .os-day .os-shift .sh-t{overflow:visible!important;width:auto!important;max-width:none!important;text-overflow:clip!important;white-space:nowrap}
+#calendar .os-calendar-details .os-day-shift,#calendar .os-next .os-day-shift{display:inline-flex;align-items:center;height:20px;padding:0 8px!important;border-radius:6px!important;font-size:12px!important;font-weight:650;
+  background:color-mix(in srgb,var(--shift-color) 20%,transparent)!important;color:color-mix(in srgb,var(--shift-color) 75%,var(--ink))!important}
+#calendar .os-calendar-details .os-day-shift::before,#calendar .os-next .os-day-shift::before{display:none!important}
+/* FIBRE-GOAL-2026-11-24: four bars (fibre with the macros). */
+.fw-macros{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+@media (max-width:520px){.fw-macros{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+
+/* TIMES-MONTH-CALENDAR-2026-11-24 and CALENDAR-RAMADAN-EID-2026-11-24 */
+:root{--hijri:#2bb39a}html[data-theme="light"]{--hijri:#0b7a66}
+.os-times-month-open{min-height:36px;font-size:13px;margin-top:8px}
+#calendar .os-month-header .os-times-month-open{margin:0 0 0 auto}
+#calendar .os-month-header{flex-wrap:wrap}
+.os-times-modal{max-width:760px;width:min(760px,calc(100vw - 32px))}
+.os-times-modal .modal-top{display:flex;align-items:center;gap:8px}
+.os-times-modal .modal-top h2{flex:1;text-align:center;text-transform:capitalize}
+.os-times-table-wrap{max-height:min(70vh,640px);overflow:auto;border:1px solid var(--line);border-radius:12px}
+.os-times-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:14px}
+.os-times-table th,.os-times-table td{padding:8px 10px;text-align:center;border-bottom:1px solid var(--line-soft);white-space:nowrap}
+.os-times-table thead th{position:sticky;top:0;background:var(--surface);font-size:12px;font-weight:600;color:var(--ink-2);z-index:1}
+.os-times-table tbody th{text-align:left;font-weight:500}
+.os-times-table tbody th b{display:inline-block;min-width:22px;font-weight:650}
+.os-times-table tbody th small{color:var(--ink-2);margin-left:4px}
+.os-times-table tr.we{background:color-mix(in srgb,var(--ink) 3%,transparent)}
+.os-times-table tr.today{background:color-mix(in srgb,var(--cal-accent,#409cff) 16%,transparent)}
+.os-times-table tr.today th b{color:var(--cal-accent,#409cff)}
+.os-hijri{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:5px;font-size:11px;font-weight:600;background:color-mix(in srgb,var(--hijri) 18%,transparent);color:color-mix(in srgb,var(--hijri) 80%,var(--ink))}
+#calendar .os-day-events i.hijri{border-left-color:var(--hijri);background:color-mix(in srgb,var(--hijri) 16%,transparent);font-weight:600}
+@media (max-width:760px){#calendar .os-day-events{display:grid}#calendar .os-day-events i:not(.hijri){display:none}#calendar .os-day-events i.hijri{font-size:9px;padding:0 2px;border-left:0;text-align:center}}
+#calendar .os-month-header{display:grid!important;grid-template-columns:40px minmax(0,1fr) 40px auto;align-items:center;gap:8px}
+#calendar .os-month-header h2{text-align:center;margin:0}
+#calendar .os-month-header>button[data-life-month]{width:40px;height:40px;border-radius:50%;font-size:20px}
+#calendar .os-month-header .os-times-month-open{font-size:13px!important;font-weight:600!important;line-height:1!important;height:36px;min-height:36px;padding:0 14px!important;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);color:var(--ink);margin:0 0 0 8px;letter-spacing:0}
+@media (min-width:1000px){#calendar>.os-card:not(:has(.os-calendar-details)){grid-template-columns:minmax(0,1fr)}}
+#calendar .os-day-events i.hijri{white-space:normal;line-height:14px}
+
+/* CALENDAR-PRIVATE-ENTRY-2026-11-24: a neutral mark, no text. */
+#calendar .os-day{position:relative}
+#calendar .os-private-mark{position:absolute;top:10px;right:10px;width:6px;height:6px;border-radius:50%;background:var(--ink-3)}
+#calendar .os-calendar-details{position:relative}
+#calendar .os-private-open{float:right;min-height:30px;height:30px;padding:0 10px;font-size:12px;border-radius:999px;color:var(--ink-2)}
+.os-private-modal{max-width:520px;width:min(520px,calc(100vw - 32px))}
+.os-private-list{list-style:none;margin:0 0 12px;padding:0;display:grid;gap:8px}
+.os-private-list li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}
+.os-private-list li span{display:grid}.os-private-list small{color:var(--ink-2)}
+.os-private-summary{margin-top:12px;border-top:1px solid var(--line-soft);padding-top:8px}
+.os-private-summary summary{cursor:pointer;font-weight:600;min-height:36px;display:flex;align-items:center}
+.os-private-summary table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:14px}
+.os-private-summary th,.os-private-summary td{padding:6px 8px;border-bottom:1px solid var(--line-soft);text-align:left}
