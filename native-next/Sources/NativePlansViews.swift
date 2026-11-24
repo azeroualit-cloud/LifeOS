@@ -326,6 +326,9 @@ struct NativePlanDetail: View {
                 else { Text("Senza scadenza").font(.footnote).foregroundStyle(NativeDesign.secondary) }
                 if plan.text("kind") == "advance" { LabeledContent("Mese beneficiario", value: CivilDate.monthTitle(plan.text("beneficiaryMonth"))) }
                 LabeledContent((NativeUtilityPeriodDraft.isCostFund(plan) ? "Accantonato in " : "Budget di ") + CivilDate.monthTitle(store.financeMonth), value: (Double(plan.integer("contributionCents")) * (NativeUtilityPeriodDraft.isCostFund(plan) ? 1 : -1) / 100).euro)
+                if plan.text("kind") == "estimated", plan.text("status") == "active", !plan.record("levelling").isEmpty {
+                    NativeLevellingNote(levelling: plan.record("levelling"))
+                }
                 if !["advance", "recovery"].contains(plan.text("kind")) {
                     LabeledContent("Disponibile nel fondo", value: (Double(plan.integer("fundCents")) / 100).euro)
                     if plan.integer("fromGeneralSavingsCents") > 0 { LabeledContent("Pagato dagli altri risparmi", value: (Double(plan.integer("fromGeneralSavingsCents")) / 100).euro) }
@@ -655,5 +658,29 @@ enum NativeInstalments {
         func index(_ m: String) -> Int? { let p = m.split(separator: "-").compactMap { Int($0) }; return p.count == 2 ? p[0] * 12 + p[1] : nil }
         guard let a = index(first), let b = index(last), b >= a else { return 0 }
         return b - a + 1
+    }
+}
+
+/// UTILITY-LEVELLING-2026-11-24: after each bill the estimated quota recovers the gap, then returns to the average.
+struct NativeLevellingNote: View {
+    let levelling: Record
+
+    private var gap: Int { levelling.integer("gapCents") }
+    private var average: String { (Double(levelling.integer("averageCents")) / 100).euro }
+    private var title: String {
+        let until = levelling.text("untilMonth")
+        return until.isEmpty ? "Quota uguale alla media delle bollette" : "Quota livellata fino a " + CivilDate.monthTitle(until) + ", poi " + average + " (la media)"
+    }
+    private var reason: String {
+        let amount = (Double(abs(gap)) / 100).euro
+        let why = gap < 0 ? "Le bollette hanno superato le quote di \(amount): le recuperi nei prossimi mesi."
+            : gap > 0 ? "Le quote hanno superato le bollette di \(amount): la quota scende per qualche mese." : "Quote e bollette sono in pari."
+        return why + " I soldi restano nei risparmi; la bolletta si paga da lì."
+    }
+
+    var body: some View {
+        LabeledContent(title, value: (Double(levelling.integer("quotaCents")) / 100).euro)
+            .accessibilityIdentifier("plan-levelling")
+        Text(reason).font(.footnote).foregroundStyle(NativeDesign.secondary)
     }
 }
