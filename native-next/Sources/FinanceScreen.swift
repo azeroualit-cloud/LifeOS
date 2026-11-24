@@ -336,7 +336,7 @@ struct MovementEditor: View {
                 Picker("Tipo", selection: Binding(get: { type }, set: { value in
                     type = value
                     bill = NativeUtilityPeriodDraft()
-                    let choices = value == "Entrata" ? NativeCategoryCatalog.incomeChoices : Input.categories
+                    let choices = value == "Entrata" ? NativeCategoryCatalog.incomeChoices : NativeFinanceCategories.expenseChoices
                     if !choices.contains(category) { category = "Altro" }
                 })) {
                     ForEach(editing ? ["Spesa", "Entrata", "Rimborso", "Trasferimento", "Investimento", "Da verificare"] : ["Spesa", "Entrata", "Rimborso", "Trasferimento"], id: \.self) { Text($0) }

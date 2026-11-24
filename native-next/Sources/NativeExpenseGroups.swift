@@ -4,7 +4,12 @@ import Foundation
 /// categoria»). The stored category stays the item («Benzina»), so the server is unchanged; the
 /// group («Auto») is derived for menus, filters and labels.
 enum NativeExpenseGroups {
-    static let order: [(group: String, items: [String])] = [
+    /// CATEGORY-ADMIN-2026-11-24: the groups edited in Admin on the site, else the built-in ones.
+    static var order: [(group: String, items: [String])] {
+        if let doc = NativeFinanceCategories.current { return doc.groups.map { ($0.name, $0.items) } }
+        return builtIn
+    }
+    static let builtIn: [(group: String, items: [String])] = [
         ("Casa", ["Affitto", "Condominio", "Utenze", "Elettricità", "Gas", "Acqua", "Arredamento e casa", "Casa"]),
         ("Auto", ["Benzina", "Assicurazione", "Bollo", "Manutenzione auto", "Auto"]),
         ("Spesa", ["Alimentari"]),

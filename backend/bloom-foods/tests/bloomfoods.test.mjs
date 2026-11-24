@@ -119,6 +119,7 @@ test('shared settings keep the newest copy and the alert log keeps the latest en
   assert.equal((await bloomFoodsAction(e, 'getSettings', ['nutrition-goals'])).modified, 2000);
   assert.equal((await bloomFoodsAction(e, 'getSettings', ['alerts'])).modified, 0);
   assert.equal((await bloomFoodsAction(e, 'getSettings', ['supplement-stacks'])).modified, 0);
+  assert.equal((await bloomFoodsAction(e, 'getSettings', ['finance-categories'])).modified, 0); // CATEGORY-ADMIN-2026-11-24
   await bloomFoodsAction(e, 'addAlertLog', [[{ id: 'a1', rule: 'r1', at: '2026-11-23T08:00:00Z', title: 'Budget', body: 'Sotto 50 €' }, { id: 'a1', rule: 'r1', at: '2026-11-23T08:00:00Z' }]]);
   const log = await bloomFoodsAction(e, 'listAlertLog', [10]);
   assert.equal(log.entries.length, 1); assert.equal(log.entries[0].title, 'Budget');
