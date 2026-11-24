@@ -452,6 +452,7 @@ struct MovementEditor: View {
         account = r.text("account", fallback: "Trade Republic"); category = r.text("category", fallback: "Altro")
         date = CivilDate.date(r.text("actual_date", fallback: r.text("date", fallback: CivilDate.day())))
         note = r.text("notes", fallback: r.text("note")); months = NativeExpenseRouting.coveredMonths(r)
+        if !r.text("planPreset").isEmpty { destination = r.text("planPreset") } // FINANCE-ENTRY-SIMPLIFY: from «Paga con Nuova spesa»
         treatment = editing ? r.text("budgetTreatment", fallback: "auto") : "ordinary"; recovery = r.text("recoveryMonths"); recoveryAmount = String(r.amount("recoveryAmount")); counterpart = r.text("counterparty_account", fallback: r.text("counterpart", fallback: "Trade Republic"))
     }
     private func save() async {

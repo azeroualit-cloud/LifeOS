@@ -14,6 +14,8 @@ struct NativeExpenseRouteSection: View {
     /// REVIEW-95: savings / budget months chosen by the user for an ordinary expense.
     var split: Binding<NativeExpenseSplit> = .constant(NativeExpenseSplit())
     @State private var plans: [Record] = []
+    @State private var linking: Record?
+    @Environment(\.dismiss) private var dismissEditor
     @State private var splitSupported = false
     @State private var planSplitSupported = false
     @State private var billSavingsSupported = false
@@ -34,6 +36,19 @@ struct NativeExpenseRouteSection: View {
     private var offersSavings: Bool { savingsSupported && movementID == 0 && !bill.enabled }
     private var query: String { category + day + String(movementID) + String(bill.enabled) + String(retry) }
     private var chosen: Record? { plans.first { $0.text("id") == selected } }
+    /// The plan with all its fields (the routing rows are a summary).
+    private var fullPlan: Record? { store.finance.record("plansV2").records("plans").first { $0.text("id") == selected } }
+    private var mode: Binding<String> {
+        Binding(get: {
+            selected == NativeExpenseRouting.ordinary ? "budget" : selected == NativeExpenseRouting.savings ? "savings" : selected.isEmpty ? "" : "plan"
+        }, set: { value in
+            switch value {
+            case "budget": selected = NativeExpenseRouting.ordinary
+            case "savings": selected = NativeExpenseRouting.savings
+            default: if chosen == nil { selected = plans.first?.text("id") ?? NativeExpenseRouting.ordinary }
+            }
+        })
+    }
     var body: some View {
         Group {
             // FUNDING-BLOCK-2026-11-21: "Da dove arrivano i soldi" with the split between plan, savings and budget.
@@ -43,12 +58,22 @@ struct NativeExpenseRouteSection: View {
                     NativeInlineMessage(text: issue)
                     Button("Riprova") { retry += 1 }
                 } else {
-                    Picker("Destinazione", selection: $selected) {
-                        if selected.isEmpty { Text("Scegli un piano o il budget").tag("") }
-                        Text("Budget mensile").tag(NativeExpenseRouting.ordinary)
-                        if offersSavings || selected == NativeExpenseRouting.savings { Text("Risparmi").tag(NativeExpenseRouting.savings) }
-                        ForEach(plans.indices, id: \.self) { index in Text("Piano · " + plans[index].text("name")).tag(plans[index].text("id")) }
-                    }.accessibilityIdentifier("expense-destination")
+                    // FINANCE-ENTRY-SIMPLIFY-2026-11-24: one standard choice, Budget / Risparmi / Piano.
+                    Picker("Da dove", selection: mode) {
+                        Text("Budget").tag("budget")
+                        if offersSavings || selected == NativeExpenseRouting.savings { Text("Risparmi").tag("savings") }
+                        if !plans.isEmpty { Text("Piano").tag("plan") }
+                    }
+                    .pickerStyle(.segmented).accessibilityIdentifier("expense-destination-mode")
+                    if mode.wrappedValue == "plan" {
+                        Picker("Piano", selection: $selected) {
+                            ForEach(plans.indices, id: \.self) { index in Text(plans[index].text("name")).tag(plans[index].text("id")) }
+                        }.accessibilityIdentifier("expense-destination")
+                        if movementID == 0, let full = fullPlan, NativePlanKind(rawValue: full.text("kind"))?.payable == true {
+                            Button("Già registrata? Collega la spesa esistente") { linking = full }
+                                .font(.subheadline).accessibilityIdentifier("expense-plan-existing")
+                        }
+                    }
                     if !selected.isEmpty && amount > 0 { fundingBar }
                     if let chosen {
                     if chosen.flag("retained") {
@@ -86,7 +111,11 @@ struct NativeExpenseRouteSection: View {
                 // The competence months carry the bill minus the part kept on savings (same as the server).
                 NativeUtilityPeriodFields(period: $bill, amountCents: max(1, amount - billSavingsPart))
             } }
-        }.task(id: query) { await load() }
+        }
+        .sheet(item: Binding(get: { linking.map(NativeLinkingPlan.init) }, set: { if $0 == nil { linking = nil } })) { item in
+            NavigationStack { NativePlanPaymentEditor(plan: item.plan, startsWithExisting: true) { linking = nil; dismissEditor() } }
+        }
+        .task(id: query) { await load() }
             .onChange(of: selected) { _, value in
                 updateReady()
                 if let plan = plans.first(where: { $0.text("id") == value }) { split.wrappedValue = NativeExpenseSplit(savings: NativeExpenseRouting.split(amount: amount, plan: plan).savings) }
@@ -224,3 +253,6 @@ struct NativeExpenseDestinationEditor: View {
         }
     }
 }
+
+/// Identifiable wrapper for the «Già registrato» sheet.
+struct NativeLinkingPlan: Identifiable { let plan: Record; var id: String { plan.text("id") } }

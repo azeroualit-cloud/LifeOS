@@ -119,20 +119,19 @@ final class NativeScreenTourUITests: XCTestCase {
         if tap(app.buttons["all-movements"]) { shot(prefix + " 19 Movimenti", app); back(app) }
         if tap(app.buttons["finance-new-plan"]) {
             shot(prefix + " 20 Nuovo piano", app)
-            // REFERENCE-GAPS-95: a goal with a part from savings, saved to record a payment with a difference.
+            // FINANCE-ENTRY-SIMPLIFY: three kinds; «Ricorrente» with fixed or estimated amount. A fund is paid with Nuova spesa.
+            if tap(app.buttons["plan-kind-fixed"]) { shot(prefix + " 20b Piano ricorrente", app) }
+            _ = tap(app.buttons["plan-kind-fund"])
             type(app.textFields["plan-name"], "Vacanza", app)
-            type(app.textFields["plan-amount"], "600", app)
-            for _ in 0..<4 where !app.buttons["plan-savings-more"].isHittable { app.swipeUp(velocity: .slow) }
-            for _ in 0..<20 where app.buttons["plan-savings-more"].exists { app.buttons["plan-savings-more"].tap() }
-            shot(prefix + " 20b Obiettivo dai risparmi", app)
+            type(app.textFields["plan-amount"], "50", app)
             _ = tap(app.buttons["plan-save"]); Thread.sleep(forTimeInterval: 1.5)
             if !app.buttons["finance-budget"].isHittable { app.swipeDown(velocity: .fast) }
             _ = tap(app.buttons["finance-budget"])
+            shot(prefix + " 20c Budget con spese a rate", app)
             if tap(app.staticTexts["Vacanza"].firstMatch), tap(app.buttons["plan-record-payment"]) {
-                type(app.textFields["plan-payment-amount"], "700", app)
-                for _ in 0..<5 where !app.buttons["expense-split-less"].isHittable { app.swipeUp(velocity: .slow) }
-                for _ in 0..<4 where app.buttons["expense-split-less"].exists { app.buttons["expense-split-less"].tap() }
-                shot(prefix + " 20c Registra pagamento", app)
+                type(app.textFields["movement-amount"], "120", app)
+                for _ in 0..<5 where !app.buttons["expense-plan-existing"].isHittable { app.swipeUp(velocity: .slow) }
+                shot(prefix + " 20d Paga con Nuova spesa", app)
                 dismissSheet(app)
             }
             back(app); back(app)

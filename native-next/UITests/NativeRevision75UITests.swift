@@ -59,7 +59,7 @@ final class NativeRevision75UITests: XCTestCase {
         selectMenu(start, title: "Agosto", app: app); selectMenu(end, title: "Ottobre", app: app)
         // FUNDING-BLOCK: with the demo Acqua plan the savings part is taken off the competence months;
         // on «Budget mensile» with no savings part the whole bill is split over the three months.
-        selectMenu(app.buttons["expense-destination"], title: "Budget mensile", app: app)
+        let budget = app.segmentedControls.buttons.visible("Budget"); reveal(budget, app: app); budget.tap()
         let year = Calendar.current.component(.year, from: Date())
         for month in ["08", "09", "10"] {
             let row = app.descendants(matching: .any).matching(identifier: "utility-share-\(year)-" + month).firstMatch

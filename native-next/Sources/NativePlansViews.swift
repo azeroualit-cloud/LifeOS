@@ -333,8 +333,15 @@ struct NativePlanDetail: View {
                 if plan.text("status") == "active", plan.text("startMonth") <= CivilDate.month(), NativePlanKind(rawValue: plan.text("kind"))?.payable == true {
                     if NativePlanRules.isPaid(plan, payments: payments, month: store.financeMonth) { Text("Pagamento registrato").font(.subheadline).foregroundStyle(NativeDesign.secondary) }
                     else {
-                    Button(plan.text("kind") == "goal" ? "Paga dai risparmi e chiudi il piano" : "Registra un pagamento") { paying = true }
-                        .accessibilityIdentifier("plan-record-payment")
+                    if plan.text("kind") == "goal" {
+                        Button("Paga dai risparmi e chiudi il piano") { paying = true }.accessibilityIdentifier("plan-record-payment")
+                    } else {
+                        // FINANCE-ENTRY-SIMPLIFY-2026-11-24: one way for money going out, Nuova spesa with this plan chosen.
+                        Button("Paga con Nuova spesa") {
+                            router.sheet = .movement(["type": .string("Spesa"), "category": .string(plan.text("category", fallback: "Altro")),
+                                                      "description": .string(plan.text("name")), "planPreset": .string(planID)])
+                        }.accessibilityIdentifier("plan-record-payment")
+                    }
                     }
                 }
             }
@@ -377,10 +384,13 @@ struct NativePlanDetail: View {
     }
 }
 
-private struct NativePlanPaymentEditor: View {
+struct NativePlanPaymentEditor: View {
     @EnvironmentObject var store: NativeStore
     @Environment(\.dismiss) private var dismiss
     let plan: Record
+    /// FINANCE-ENTRY-SIMPLIFY-2026-11-24: opened from Nuova spesa › Piano › «Già registrato».
+    var startsWithExisting = false
+    var onSaved: () -> Void = {}
     @State private var amount = ""
     @State private var date = Date()
     @State private var cycleMonth = CivilDate.month()
@@ -422,7 +432,8 @@ private struct NativePlanPaymentEditor: View {
                 Text(plan.text("kind") == "goal" ? "Il piano si chiude e le quote future si annullano. Il denaro non utilizzato rimane nei risparmi." : "Il piano rimane attivo dopo il pagamento. Il fondo residuo e le quote future continuano.").font(.footnote).foregroundStyle(NativeDesign.secondary)
             }
             if let error { Section { NativeInlineMessage(text: error) } }
-        }.modifier(NativeListAppearance()).navigationTitle("Registra pagamento").navigationBarTitleDisplayMode(.inline)
+        }.modifier(NativeListAppearance()).navigationTitle(startsWithExisting ? "Spesa già registrata" : "Registra pagamento").navigationBarTitleDisplayMode(.inline)
+            .onAppear { if startsWithExisting { usesExisting = true } }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { NativeSheetCancel { dismiss() }.disabled(saving) }
                 ToolbarItem(placement: .confirmationAction) { NativeSheetConfirm(title: "Conferma", retry: submitted) { Task { await save() } }.disabled(saving || amountCents == nil || (usesExisting && movement == nil) || (NativeUtilityPeriodDraft.isCostFund(plan) && bill.months == nil)).accessibilityIdentifier("plan-payment-confirm") }
@@ -454,6 +465,7 @@ private struct NativePlanPaymentEditor: View {
             submitted = true
             try await store.perform(bill.enabled ? "recordUtilityPlanPayment" : "recordFinancePlanPayment", payload)
             await store.loadFinancePlans()
+            defer { onSaved() }
             var part = difference; part.savings = min(part.savings, extra)
             if !usesExisting, bill.enabled, extra > 0 {
                 // A bill: the savings part of the difference; the rest stays on its competence months.

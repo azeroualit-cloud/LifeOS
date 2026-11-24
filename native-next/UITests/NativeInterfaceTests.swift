@@ -529,10 +529,11 @@ final class NativeInterfaceTests: XCTestCase {
         let change = app.buttons["movement-change-destination"]
         revealExpenseFormElement(change, in: app)
         XCTAssertTrue(change.isHittable); change.tap()
-        let destination = app.buttons["expense-destination"]
+        let destination = app.segmentedControls.firstMatch
         revealExpenseFormElement(destination, in: app)
         XCTAssertTrue(destination.waitForExistence(timeout: 10)); XCTAssertTrue(destination.isHittable)
-        destination.tap(); app.buttons["Budget mensile"].tap()
+        _ = destination // FINANCE-ENTRY-SIMPLIFY: Budget / Risparmi / Piano is a segment
+        app.segmentedControls.buttons.visible("Budget").tap()
         capture("expense-change-existing-destination")
         let confirm = app.buttons["expense-destination-confirm"]
         XCTAssertTrue(confirm.isEnabled); confirm.tap()
@@ -996,7 +997,11 @@ final class NativeInterfaceTests: XCTestCase {
         app.buttons["plans-add"].tap()
         XCTAssertTrue(app.navigationBars["Nuovo piano"].waitForExistence(timeout: 10))
         app.buttons["plan-kind-advance"].tap()
-        let name = app.textFields["plan-name"]; name.tap(); name.typeText("Anticipo prova")
+        let name = app.textFields["plan-name"]
+        // The kind change re-lays out the form: wait for the field, then tap until it has the keyboard.
+        XCTAssertTrue(name.waitForExistence(timeout: 5))
+        for _ in 0..<3 where (name.value(forKey: "hasKeyboardFocus") as? Bool) != true { name.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap() }
+        name.typeText("Anticipo prova")
         let amount = app.textFields["plan-amount"]; amount.tap(); amount.typeText("250")
         app.buttons["Fine"].tap()
         XCTAssertEqual(app.datePickers.count, 0, "Budget periods must never expose a day picker")
@@ -1008,31 +1013,21 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertFalse(app.buttons["plan-record-payment"].exists)
         capture("plans-advance-detail")
     }
-    func testPlansGoalPaymentWithOptionalOverageRecovery() {
+    /// FINANCE-ENTRY-SIMPLIFY-2026-11-24 (replaces the goal payment test): only Anticipo, Fondo and Ricorrente.
+    func testNewPlanOffersThreeKindsAndRecurringHasFixedOrEstimated() {
         let app = launch(["--dark"])
         app.openOtherDestination("Finanza"); app.buttons["finance-budget"].tap()
         app.buttons["plans-add"].tap()
-        let name = app.textFields["plan-name"]; XCTAssertTrue(name.waitForExistence(timeout: 10)); name.tap(); name.typeText("Obiettivo prova")
-        let amount = app.textFields["plan-amount"]; amount.tap(); amount.typeText("600")
-        app.buttons["Fine"].tap(); app.buttons["plan-save"].tap()
-        XCTAssertTrue(app.navigationBars["Budget"].waitForExistence(timeout: 10))
-        app.staticTexts["Obiettivo prova"].tap()
-        app.buttons["plan-record-payment"].tap()
-        let field = app.textFields["plan-payment-amount"]; XCTAssertTrue(field.waitForExistence(timeout: 10)); field.tap()
-        field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: (field.value as? String ?? "").count) + "700")
-        app.buttons["Fine"].tap()
-        // REFERENCE-GAPS-95: the 100 € difference starts on savings; 10 € move to the budget months.
-        let less = app.buttons["expense-split-less"]
-        for _ in 0..<5 { if less.isHittable { break }; app.collectionViews.firstMatch.swipeUp() }
-        XCTAssertTrue(less.isHittable); less.tap(); less.tap()
-        XCTAssertTrue(app.descendants(matching: .any)["expense-split-budget"].label.contains("10"))
-        capture("plans-goal-overage")
-        app.buttons["plan-payment-confirm"].tap()
-        XCTAssertTrue(app.navigationBars["Dettagli piano"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.staticTexts["plan-status"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.staticTexts["plan-status"].label.hasSuffix("Concluso"))
-        XCTAssertFalse(app.buttons["plan-record-payment"].exists)
-        capture("plans-goal-closed")
+        XCTAssertTrue(app.buttons["plan-kind-fund"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["plan-kind-advance"].exists); XCTAssertTrue(app.buttons["plan-kind-fixed"].exists)
+        XCTAssertFalse(app.buttons["plan-kind-goal"].exists); XCTAssertFalse(app.buttons["plan-kind-recovery"].exists)
+        XCTAssertFalse(app.buttons["plan-kind-estimated"].exists, "fixed and estimated are one kind, «Ricorrente»")
+        app.buttons["plan-kind-fixed"].tap()
+        let amount = app.segmentedControls["plan-recurring-amount"]
+        XCTAssertTrue(amount.waitForExistence(timeout: 5))
+        amount.buttons["Stimato"].tap()
+        XCTAssertTrue(app.buttons["plan-kind-fixed"].isSelected, "«Ricorrente» stays selected for an estimated amount")
+        capture("plans-three-kinds")
     }
     func testPlansFundCanEditFutureQuotaAndLinkAnExistingMovement() {
         let app = launch(["--dark"])
@@ -1048,9 +1043,13 @@ final class NativeInterfaceTests: XCTestCase {
         quota.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: (quota.value as? String ?? "").count) + "80")
         app.buttons["Fine"].tap(); app.buttons["plan-edit-save"].tap()
         XCTAssertTrue(app.navigationBars["Dettagli piano"].waitForExistence(timeout: 10))
+        // FINANCE-ENTRY-SIMPLIFY: «Paga con Nuova spesa» opens Nuova spesa with the plan; «Già registrata?» links a movement.
         let pay = app.buttons["plan-record-payment"]; reveal(pay, in: app); pay.tap()
-        XCTAssertTrue(app.navigationBars["Registra pagamento"].waitForExistence(timeout: 10))
-        app.segmentedControls.buttons["Già registrato"].tap()
+        XCTAssertTrue(app.navigationBars["Nuovo movimento"].waitForExistence(timeout: 10))
+        let existing = app.buttons["expense-plan-existing"]
+        for _ in 0..<6 { if existing.isHittable { break }; app.collectionViews.firstMatch.swipeUp() }
+        XCTAssertTrue(existing.isHittable); existing.tap()
+        XCTAssertTrue(app.navigationBars["Spesa già registrata"].waitForExistence(timeout: 10))
         let movement = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plan-link-movement-")).firstMatch
         XCTAssertTrue(movement.waitForExistence(timeout: 10)); reveal(movement, in: app)
         assertMinimumTouchTarget(movement)
