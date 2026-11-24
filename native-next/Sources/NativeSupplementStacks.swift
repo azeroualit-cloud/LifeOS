@@ -75,9 +75,14 @@ struct NativeSupplementStackStrip: View {
     @ObservedObject private var stacks = NativeSupplementStackStore.shared
     var date: Date = .now
     var onRecorded: (String) -> Void = { _ in }
+    /// false in «Aggiungi alimento»: «Nuova stack» is one of the three equal action tiles there.
+    var showsNew = true
     @State private var editing: NativeSupplementStack?
     @State private var working = false
     var body: some View {
+        if stacks.stacks.isEmpty && !showsNew { EmptyView() } else { strip }
+    }
+    private var strip: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: NativeDesign.Space.small) {
                 ForEach(stacks.stacks) { stack in
@@ -103,6 +108,7 @@ struct NativeSupplementStackStrip: View {
                     .accessibilityHint("Registra tutti gli integratori della stack")
                     .accessibilityIdentifier("supplement-stack-" + stack.id)
                 }
+                if showsNew {
                 Button { editing = NativeSupplementStack(id: UUID().uuidString, name: "", items: []) } label: {
                     Label("Nuova stack", systemImage: "plus").font(.subheadline)
                         .padding(.horizontal, NativeDesign.Space.medium).frame(minHeight: NativeDesign.Layout.compactControl)
@@ -111,6 +117,7 @@ struct NativeSupplementStackStrip: View {
                 }
                 .buttonStyle(NativePressStyle())
                 .accessibilityIdentifier("supplement-stack-new")
+                }
             }
             .padding(.horizontal, NativeDesign.Layout.screenInset)
         }

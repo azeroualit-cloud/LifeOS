@@ -313,12 +313,30 @@ struct NativeFoodPicker: View {
     /// FOOD-QUICK-ADD (choice A): one field, «avena 63» — the name filters, the number is the quantity.
     var quickAdd: ((NativeGenericFood, Decimal?) -> Void)? = nil
     var onManual: (() -> Void)? = nil
+    /// REVIEW-95C: «Nuova stack» lives in the same row as «Macro a mano» and «Nuovo alimento».
+    var onNewStack: (() -> Void)? = nil
     var confirmation: String? = nil
     /// Quick mode extra row (SUPPLEMENT-STACK-2026-11-23: the stacks).
     var accessory: AnyView? = nil
     let select: (NativeGenericFood) -> Void
 
     @FocusState private var searchFocused: Bool
+
+    /// Equal tile of the quick actions row: icon above a short label, same size and surface for all three.
+    private func quickTile(_ title: String, _ icon: String, id: String, _ action: @escaping () -> Void) -> some View {
+        Button { searchFocused = false; action() } label: {
+            VStack(spacing: NativeDesign.Space.xs) {
+                Image(systemName: icon).font(.headline).accessibilityHidden(true)
+                Text(title).font(.footnote.weight(.medium)).lineLimit(1).minimumScaleFactor(0.85)
+            }
+            .foregroundStyle(Color.primary)
+            .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.actionCircle)
+            .loTileSurface(NativeDesign.nutritionInput)
+            .contentShape(RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
+        }
+        .buttonStyle(NativePressStyle())
+        .accessibilityIdentifier(id)
+    }
 
     var body: some View {
         // Decode the personal list once per render, not once per row.
@@ -353,8 +371,18 @@ struct NativeFoodPicker: View {
             .pickerStyle(.segmented)
             .padding(.horizontal, NativeDesign.Layout.screenInset)
             .padding(.vertical, NativeDesign.Space.small)
+            if quickAdd != nil {
+                // REVIEW-95C-2026-11-24: the three secondary actions as one symmetric row of equal tiles.
+                HStack(spacing: NativeDesign.Space.small) {
+                    if let onNewStack { quickTile("Nuova stack", "pills", id: "supplement-stack-new", onNewStack) }
+                    if let onManual { quickTile("Macro a mano", "square.and.pencil", id: "food-quick-manual", onManual) }
+                    quickTile(scope == .supplements ? "Nuovo integratore" : "Nuovo alimento", "plus", id: "food-quick-create") { creating = true }
+                }
+                .padding(.horizontal, NativeDesign.Layout.screenInset)
+                .padding(.bottom, NativeDesign.Space.small)
+            }
             if let accessory { accessory }
-            if let onManual {
+            if quickAdd == nil, let onManual {
                 // Secondary but always visible: the macros typed one by one.
                 HStack {
                     Spacer()
@@ -373,6 +401,7 @@ struct NativeFoodPicker: View {
                     .accessibilityIdentifier("food-quick-added")
             }
             List {
+                if quickAdd == nil {
                 Button {
                     searchFocused = false
                     creating = true
@@ -380,8 +409,9 @@ struct NativeFoodPicker: View {
                     Label(scope == .supplements ? "Crea integratore" : "Crea alimento personale", systemImage: "plus.circle")
                         .frame(minHeight: NativeDesign.Layout.touchTarget)
                 }
-                .accessibilityIdentifier(quickAdd != nil ? "food-quick-create" : "generic-food-create")
+                .accessibilityIdentifier("generic-food-create")
                 .listRowBackground(NativeDesign.nutritionInput)
+                }
                 Section {
                     ForEach(matches) { food in
                         HStack(spacing: NativeDesign.Space.small) {

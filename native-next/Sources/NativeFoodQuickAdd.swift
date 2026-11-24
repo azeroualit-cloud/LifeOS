@@ -12,11 +12,14 @@ struct NativeFoodQuickAddSheet: View {
     @State private var detail: NativeGenericFood?
     @State private var manual = false
     @State private var added: String?
+    @State private var newStack: NativeSupplementStack?
 
     var body: some View {
         NavigationStack {
-            NativeFoodPicker(quickAdd: add, onManual: { manual = true }, confirmation: added,
-                             accessory: AnyView(NativeSupplementStackStrip(date: initialDate) { text in added = text; onSaved(); Task { await health.refresh() } })) { food in
+            NativeFoodPicker(quickAdd: add, onManual: { manual = true },
+                             onNewStack: { newStack = NativeSupplementStack(id: UUID().uuidString, name: "", items: []) }, confirmation: added,
+                             accessory: AnyView(NativeSupplementStackStrip(date: initialDate, showsNew: false) { text in added = text; onSaved(); Task { await health.refresh() } }
+                                .padding(.bottom, NativeDesign.Space.small))) { food in
                 detail = food
             }
             .navigationTitle("Aggiungi alimento")
@@ -25,6 +28,7 @@ struct NativeFoodQuickAddSheet: View {
             NavigationStack { NativeNutritionQuickSheet(initialDate: initialDate, initialFood: food) { onSaved(); dismiss() } }
                 .environmentObject(health)
         }
+        .sheet(item: $newStack) { stack in NavigationStack { NativeSupplementStackEditor(stack: stack) } }
         .sheet(isPresented: $manual) {
             NavigationStack { NativeNutritionQuickSheet(initialDate: initialDate) { onSaved(); dismiss() } }
                 .environmentObject(health)
