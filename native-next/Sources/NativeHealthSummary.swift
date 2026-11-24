@@ -196,8 +196,7 @@ struct NativeHealthDetail: View {
 
     /// Macro bar colour carries the meaning when there is a goal: green in range, amber under, orange over.
     private func macroColor(_ value: Double?, _ goal: Double?, _ fallback: Color) -> Color {
-        guard let goal, goal > 0 else { return fallback }
-        return NativeCalorieBand.macroColor(value, goal: goal)
+        NativeCalorieBand.macroColor(value, goal: goal, base: fallback, limit: fallback == NativeDesign.macroProtein ? NativeNutritionLimits.protein : NativeNutritionLimits.macro)
     }
 
     /// Andamento: period, four values, weight with forecast, calories of the week.

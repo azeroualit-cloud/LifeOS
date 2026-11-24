@@ -1573,6 +1573,16 @@
       "original_quote": "can you add infographics, tutorials etc on the app and website? also we need the objective for fibers too. On the website avvisa é sia in finanza che in avvisa, keep it only in avvisi. Did you fix preghiera? i also want to be able to see the calendar of preghiera not only todays orario, and also automatic reminder of ramadan and eid in the calendar, and also possibility to add a hidden message in the calendar [dettaglio personale omesso: il repository è pubblico]. Also calendar website sucks, its still a square and colors are shit still",
       "rule": "Promemoria automatici nel calendario con nomi espliciti: «Ramadan» (inizio e fine), «Eid al-Fitr», «Eid al-Adha».",
       "relation": "Eccezione limitata a questi eventi del calendario rispetto a NEUTRAL-TIMES-WORDING-2026-11-24, che resta attiva per tutto il resto."
+    },
+    {
+      "id": "NUTRITION-TOLERANT-2026-11-24",
+      "status": "ACTIVE",
+      "scope": "Nutrizione app e sito (barre e arco)",
+      "recorded_on": "2026-11-24",
+      "provenance": "Messaggio utente in chat Claude con screenshot della scheda Nutrizione (proteine 127/126 arancioni), 24/11/2026",
+      "original_quote": "non ha senso cbiare colore a questi solo perché sforano di un grammo, devono essere molto permissivi (tipo valore non ottimali e pericolosi alla salute)",
+      "rule": "Barre e arco tengono il loro colore; l'avviso arancio solo per valori lontani dall'obiettivo: calorie oltre +25 %, proteine oltre il doppio, carboidrati/grassi oltre +50 %. Sotto l'obiettivo nessun colore di avviso.",
+      "relation": "Sostituisce il punto 28 di BUILD-95-PLAN (macro caldi sotto l'obiettivo, calorie calde sopra +10 %), che non era nel registro."
     }
   ],
   "pending_confirmations": [

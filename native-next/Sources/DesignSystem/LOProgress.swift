@@ -9,10 +9,12 @@ struct LOProgressBar: View {
     let total: Double?
     var color: Color = .primary
     var height: CGFloat = NativeDesign.Space.small
+    /// NUTRITION-TOLERANT-2026-11-24: the warning colour only well above the goal (default +50 %).
+    var warnAbove: Double = NativeNutritionLimits.macro
 
     var body: some View {
         let fraction = total.map { $0 > 0 ? value / $0 : 0 } ?? 0
-        let over = fraction > 1
+        let over = fraction > warnAbove
         GeometryReader { proxy in
             ZStack(alignment: .leading) {
                 Capsule().fill(NativeDesign.barTrack)
@@ -88,7 +90,8 @@ struct LOMacroValue: View {
                     .font(.subheadline).foregroundStyle(NativeDesign.secondary).monospacedDigit().lineLimit(1).minimumScaleFactor(0.8)
             }
             // Without a goal the track stays empty: a full bar would suggest a target met.
-            LOProgressBar(value: value ?? 0, total: goal, color: color, height: NativeDesign.Space.xs)
+            LOProgressBar(value: value ?? 0, total: goal, color: color, height: NativeDesign.Space.xs,
+                          warnAbove: color == NativeDesign.macroProtein ? NativeNutritionLimits.protein : NativeNutritionLimits.macro)
         }
         .frame(maxWidth: .infinity, alignment: centered ? .center : .leading)
         .accessibilityElement(children: .ignore)

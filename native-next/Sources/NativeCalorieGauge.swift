@@ -12,7 +12,8 @@ enum NativeCalorieBand: Equatable {
         guard let value, value > 0 else { return .none }
         guard let goal, goal > 0 else { return .within }
         if value < goal * low { return .under }
-        if value > goal * high { return .over }
+        // NUTRITION-TOLERANT-2026-11-24: a little over the range is fine; the warning starts at +25 %.
+        if value > goal * NativeNutritionLimits.calories { return .over }
         return .within
     }
     /// Two colours only (user, 23/11/2026): green inside the range, warm below it or well above it.
@@ -20,14 +21,14 @@ enum NativeCalorieBand: Equatable {
         switch self {
         case .none: NativeDesign.emptyMark
         case .within: NativeDesign.goalMet
-        case .under, .over: NativeDesign.overGoal
+        case .under: NativeDesign.nutritionTitle // still filling up during the day: no warning
+        case .over: NativeDesign.overGoal
         }
     }
-    /// Macros: warm below the goal, green once it is reached or passed.
-    static func macroColor(_ value: Double?, goal: Double?) -> Color {
-        guard let goal, goal > 0 else { return NativeDesign.emptyMark }
-        guard let value, value > 0 else { return NativeDesign.emptyMark }
-        return value >= goal ? NativeDesign.goalMet : NativeDesign.overGoal
+    /// Macros (NUTRITION-TOLERANT-2026-11-24): their own colour, the warning only when really excessive.
+    static func macroColor(_ value: Double?, goal: Double?, base: Color, limit: Double = NativeNutritionLimits.macro) -> Color {
+        guard let goal, goal > 0, let value, value > 0 else { return base }
+        return value > goal * limit ? NativeDesign.overGoal : base
     }
     /// The arc runs to twice the goal, so the recommended range sits in the middle.
     static let scale = 2.0
@@ -120,4 +121,12 @@ struct NativeCalorieGauge: View {
             .font(.caption2.weight(.medium)).foregroundStyle(NativeDesign.secondary).monospacedDigit()
             .frame(maxWidth: .infinity)
     }
+}
+
+/// NUTRITION-TOLERANT-2026-11-24: colours change only for values far from the goal (non-optimal or harmful),
+/// never for a few grams. Calories +25 %, protein double the goal, other macros +50 %.
+enum NativeNutritionLimits {
+    static let calories = 1.25
+    static let protein = 2.0
+    static let macro = 1.5
 }

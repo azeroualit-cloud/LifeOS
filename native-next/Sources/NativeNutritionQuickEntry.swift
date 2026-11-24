@@ -30,7 +30,7 @@ struct NativeNutritionQuickEntry: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Nutrizione, calorie di oggi " + (kcal == nil ? "nessun dato" : kcalText) + (targets.map { " di " + $0.calories.formatted(.number.precision(.fractionLength(0))) } ?? ""))
             .accessibilityIdentifier("home-nutrition")
-            LOProgressBar(value: kcal ?? 0, total: targets?.calories, color: NativeDesign.nutritionTitle)
+            LOProgressBar(value: kcal ?? 0, total: targets?.calories, color: NativeDesign.nutritionTitle, warnAbove: NativeNutritionLimits.calories)
             macroLayout {
                 LOMacroValue(title: "Proteine", value: values[.dietaryProtein], goal: targets?.protein, unit: "g", color: NativeDesign.macroProtein, identifier: "home-nutrient-protein")
                 LOMacroValue(title: "Carbo", value: values[.dietaryCarbohydrates], goal: targets?.carbohydrate, unit: "g", color: NativeDesign.macroCarbohydrate, identifier: "home-nutrient-carbohydrate")
