@@ -1677,6 +1677,29 @@ html[data-theme="light"] .sc-tile>div{background:color-mix(in srgb,var(--c) calc
 /* ANALYSIS-START-PICKER: in fondo alla scheda Ritmo. */
 .an93-start{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--line-soft);font-size:13px;font-weight:500;color:var(--ink-2)}
 .an93-start select{width:auto;min-height:32px;border-radius:999px;padding:0 12px}
+/* CATEGORY-ADMIN-2026-11-24 */
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:8px}
+.cat-group{border:1px solid var(--line-soft);border-radius:var(--r-md);padding:10px 12px;display:grid;gap:8px;align-content:start;background:var(--surface-2)}
+.cat-group-head{display:flex;align-items:center;gap:8px}
+.cat-group-head b{font-size:14px}
+.cat-group-name{font-weight:650;min-height:32px;background:transparent;border-color:transparent;box-shadow:none;padding:0 6px}
+.cat-group-name:hover{border-color:var(--line)}
+.cat-x{width:32px;min-width:32px;min-height:32px;padding:0;color:var(--ink-2)}
+.cat-chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.cat-chip{min-height:30px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:500;background:var(--surface);border:1px solid var(--line-soft);color:var(--ink)}
+.cat-chip.on{border-color:var(--focus);box-shadow:0 0 0 2px color-mix(in srgb,var(--focus) 25%,transparent)}
+.cat-add{width:110px;min-height:30px;border-radius:999px;font-size:13px;padding:0 10px}
+.cat-edit{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:end;padding:12px;margin:8px 0;border-radius:var(--r-md);background:var(--surface-2);border:1px solid var(--line)}
+.cat-edit-actions{grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px}
+.cat-inactive{margin-top:18px;padding-top:14px;border-top:1px solid var(--line-soft)}
+.cat-inactive h3{font-size:14px}
+.cat-inactive-list{display:grid;gap:0}
+.cat-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line-soft)}
+.cat-row span{display:grid;gap:2px;min-width:0}
+.cat-row small{color:var(--ink-2);font-size:12px}
+.cat-to{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2)}
+.cat-to select{width:auto;max-width:220px}
+@media (max-width:640px){.cat-row{grid-template-columns:minmax(0,1fr)}.cat-edit{grid-template-columns:minmax(0,1fr)}}
 </style>
 </head>
   <body class="dashboard-mode">
@@ -4649,8 +4672,8 @@ document.addEventListener("keydown", (e) => {
       });
 
       // Compact manual catalog. Legacy values remain intact until explicitly reclassified.
-      const financeManualCategories = lifeOSContract.expenseCategories;
-      const financeIncomeCategories = lifeOSContract.incomeCategories;
+      const financeManualCategories = [...lifeOSContract.expenseCategories];
+      const financeIncomeCategories = [...lifeOSContract.incomeCategories];
       function financialCommittedCategories() {
         const recurring=state.data?.recurring || life.finance?.recurring || [];
         return [...new Set(["Affitto", ...recurring.filter(r=>r.treatment==="Vincolata" && r.name!=="Benzina").map(r=>r.name).filter(Boolean)])];
@@ -4658,6 +4681,18 @@ document.addEventListener("keydown", (e) => {
       function financeCategoryLabel(value) { return String(value || ""); }
       // REFERENCE-GAPS-95 (parità con l'app): categorie in 9 gruppi, ogni voce sotto il suo gruppo.
       const EXPENSE_GROUPS = [["Casa", ["Affitto", "Condominio", "Utenze", "Elettricità", "Gas", "Acqua", "Arredamento e casa", "Casa"]], ["Auto", ["Benzina", "Assicurazione", "Bollo", "Manutenzione auto", "Auto"]], ["Spesa", ["Alimentari"]], ["Mangiare fuori", ["Ristorazione"]], ["Abbonamenti", ["Abbonamenti"]], ["Salute e sport", ["Palestra", "Dentista", "Farmaci e visite", "Salute"]], ["Persona", ["Shopping"]], ["Svago", ["Svago", "Viaggi"]], ["Altro", ["Altro"]]];
+      /* CATEGORY-ADMIN-2026-11-24: gruppi e voci decisi in Admin (impostazione «finance-categories»), letti anche dall'app.
+         Senza impostazione restano quelli di sempre. */
+      window.lifeosApplyFinanceCategories = (doc) => {
+        const groups = (doc && Array.isArray(doc.groups) ? doc.groups : []).filter((g) => g && g.name && Array.isArray(g.items) && g.items.length);
+        if (!groups.length) return false;
+        EXPENSE_GROUPS.splice(0, EXPENSE_GROUPS.length, ...groups.map((g) => [String(g.name), g.items.map(String)]));
+        financeManualCategories.splice(0, financeManualCategories.length, ...new Set(groups.flatMap((g) => g.items.map(String))));
+        if (Array.isArray(doc.income) && doc.income.length) financeIncomeCategories.splice(0, financeIncomeCategories.length, ...doc.income.map(String));
+        return true;
+      };
+      window.lifeosFinanceCategories = () => ({ groups: EXPENSE_GROUPS.map(([name, items]) => ({ name, items: [...items] })), income: [...financeIncomeCategories] });
+      workerRequest("getSettings", ["finance-categories"]).then((r) => window.lifeosApplyFinanceCategories(r && r.doc)).catch(() => {});
       function categoryOptionsHtml(values,value="") {
         const choices=[...new Set([...values,...(value?[value]:[])])];
         const opt=x=>`<option value="${escapeHtml(x)}" ${x===value?"selected":""}>${escapeHtml(x)}</option>`;
@@ -9344,6 +9379,186 @@ document.addEventListener("submit", async (e) => {
     renderAdmin();
   }
 });
+</script>
+
+<script id="lifeos-categories95">
+/* CATEGORY-ADMIN-2026-11-24: categorie della Finanza in Admin. Gruppi e voci si salvano nell'impostazione
+   «finance-categories» (letta anche dall'app senza aggiornarla). Le categorie non attive si cercano nei movimenti
+   e i loro movimenti si spostano nella categoria scelta (classifyMovement, uno alla volta). */
+const CAT_PROPOSAL = {
+  groups: [
+    { name: "Casa", items: ["Affitto", "Condominio", "Elettricità", "Gas", "Acqua", "Internet e telefono", "Arredamento e casa", "Pulizia e lavanderia", "Manutenzione casa"] },
+    { name: "Auto e trasporti", items: ["Benzina", "Assicurazione", "Bollo", "Manutenzione auto", "Pedaggi e parcheggi", "Mezzi pubblici"] },
+    { name: "Spesa", items: ["Alimentari"] },
+    { name: "Mangiare fuori", items: ["Ristorazione", "Bar e distributori"] },
+    { name: "Abbonamenti", items: ["Abbonamenti", "Software e AI"] },
+    { name: "Salute e sport", items: ["Farmaci e visite", "Dentista", "Integratori", "Palestra", "Sport"] },
+    { name: "Persona", items: ["Abbigliamento", "Cura personale", "Elettronica", "Shopping"] },
+    { name: "Svago e viaggi", items: ["Svago", "Viaggi", "Hobby"] },
+    { name: "Regali", items: ["Regali", "Donazioni"] },
+    { name: "Tasse e banca", items: ["Imposte e tasse", "Commissioni bancarie", "Prelievi contanti", "Trasferimenti a terzi"] },
+    { name: "Altro", items: ["Altro"] },
+  ],
+  income: ["Stipendio", "Interessi", "Rimborsi", "Investimenti", "Altre entrate"],
+};
+const cat = { saved: null, draft: null, modified: 0, loaded: false, busy: "", msg: "", error: "", edit: null, scan: null, scanning: "", moving: null };
+const catE = (v) => (typeof hubE === "function" ? hubE(v) : String(v ?? ""));
+const catClone = (x) => JSON.parse(JSON.stringify(x));
+const catCurrent = () => (cat.draft || cat.saved || (window.lifeosFinanceCategories ? window.lifeosFinanceCategories() : { groups: [], income: [] }));
+const catAll = (doc) => [...doc.groups.flatMap((g) => g.items), ...(doc.income || [])];
+async function catLoad() {
+  if (cat.loaded || cat.busy) return;
+  cat.busy = "load";
+  try { const r = await workerRequest("getSettings", ["finance-categories"]); cat.modified = r.modified || 0; cat.saved = r.doc && Array.isArray(r.doc.groups) && r.doc.groups.length ? r.doc : null; }
+  catch (e) { cat.error = String(e.message || e); }
+  cat.loaded = true; cat.busy = ""; catRender();
+}
+function catDirty() { return !!cat.draft && JSON.stringify(cat.draft) !== JSON.stringify(cat.saved || (window.lifeosFinanceCategories ? window.lifeosFinanceCategories() : null)); }
+function catChip(item, where, gi) {
+  const on = cat.edit && cat.edit.item === item;
+  return `<button type="button" class="cat-chip${on ? " on" : ""}" data-cat-chip="${catE(item)}" data-cat-where="${where}" data-cat-gi="${gi}" aria-label="Modifica ${catE(item)}">${catE(item)}</button>`;
+}
+function catEditor(doc) {
+  const e = cat.edit; if (!e) return "";
+  const groups = doc.groups.map((g, i) => `<option value="${i}" ${e.where === "g" && Number(e.gi) === i ? "selected" : ""}>${catE(g.name)}</option>`).join("");
+  return `<div class="cat-edit" role="group" aria-label="Modifica voce"><label>Nome<input data-cat-edit-name value="${catE(e.item)}" maxlength="60"></label>
+    <label>Gruppo<select data-cat-edit-group>${groups}<option value="income" ${e.where === "i" ? "selected" : ""}>Entrate</option></select></label>
+    <div class="cat-edit-actions"><button type="button" class="ghost danger" data-cat-edit-delete>Togli</button><button type="button" class="ghost" data-cat-edit-cancel>Annulla</button><button type="button" class="save" data-cat-edit-ok>Applica</button></div></div>`;
+}
+function catHtml() {
+  if (!cat.loaded) { catLoad(); return `<section class="card pad adm-wide" id="cat95"><div class="card-title"><h2>Categorie della Finanza</h2></div><p class="empty">Caricamento…</p></section>`; }
+  const doc = catCurrent(), dirty = catDirty();
+  const groups = doc.groups.map((g, gi) => `<div class="cat-group"><div class="cat-group-head"><input class="cat-group-name" data-cat-group-name="${gi}" value="${catE(g.name)}" maxlength="40" aria-label="Nome del gruppo">
+      <button type="button" class="ghost cat-x" data-cat-group-delete="${gi}" aria-label="Elimina il gruppo ${catE(g.name)}" ${g.items.length ? "disabled title=\"Prima sposta o togli le voci\"" : ""}>×</button></div>
+      <div class="cat-chips">${g.items.map((i) => catChip(i, "g", gi)).join("")}<input class="cat-add" data-cat-add="${gi}" placeholder="+ voce" maxlength="60" aria-label="Nuova voce in ${catE(g.name)}"></div></div>`).join("");
+  const income = `<div class="cat-group"><div class="cat-group-head"><b>Entrate</b></div><div class="cat-chips">${(doc.income || []).map((i) => catChip(i, "i", -1)).join("")}<input class="cat-add" data-cat-add="income" placeholder="+ voce" maxlength="60" aria-label="Nuova categoria di entrata"></div></div>`;
+  return `<section class="card pad adm-wide" id="cat95"><div class="card-title"><div><h2>Categorie della Finanza</h2><small>${cat.saved ? "Elenco personalizzato" : "Elenco di partenza"} · arriva anche nell'app all'apertura, senza aggiornarla</small></div>
+      <div class="actions"><button type="button" data-cat-proposal>Carica la proposta</button>${cat.draft ? `<button type="button" class="ghost" data-cat-discard>Annulla modifiche</button>` : ""}<button type="button" class="save" data-cat-save ${dirty ? "" : "disabled"}>Salva</button></div></div>
+    ${cat.error ? `<div class="errorbox">${catE(cat.error)}</div>` : ""}${cat.msg ? `<p class="hint" role="status">${catE(cat.msg)}</p>` : ""}
+    ${catEditor(doc)}
+    <div class="cat-grid">${groups}${income}</div>
+    <div class="form-actions"><button type="button" data-cat-group-new>+ Nuovo gruppo</button></div>
+    <div class="cat-inactive"><div class="card-title"><div><h3>Categorie non attive</h3><small>Usate dai movimenti ma assenti dall'elenco qui sopra</small></div><button type="button" data-cat-scan ${cat.scanning ? "disabled" : ""}>${cat.scanning ? catE(cat.scanning) : cat.scan ? "Cerca di nuovo" : "Cerca nei movimenti"}</button></div>
+      ${catInactiveHtml(doc)}</div>
+  </section>`;
+}
+function catInactiveHtml(doc) {
+  if (!cat.scan) return `<p class="hint">Legge i movimenti degli ultimi 3 anni (resta tutto qui, non cambia niente finché non sposti).</p>`;
+  const active = new Set(catAll(doc)), rows = [...cat.scan.entries()].filter(([name]) => !active.has(name)).sort((a, b) => b[1].rows.size - a[1].rows.size);
+  if (!rows.length) return `<p class="empty">Nessuna categoria non attiva: tutti i movimenti usano categorie dell'elenco.</p>`;
+  const options = (sel) => doc.groups.map((g) => `<optgroup label="${catE(g.name)}">${g.items.map((i) => `<option ${i === sel ? "selected" : ""}>${catE(i)}</option>`).join("")}</optgroup>`).join("") + `<optgroup label="Entrate">${(doc.income || []).map((i) => `<option>${catE(i)}</option>`).join("")}</optgroup>`;
+  return `<div class="cat-inactive-list">${rows.map(([name, v]) => { const busy = cat.moving && cat.moving.from === name;
+    return `<div class="cat-row"><span><b>${catE(name)}</b><small>${v.rows.size} movimenti · ${catE(v.first)} – ${catE(v.last)} · ${catE([...v.types].join(", "))}</small></span>
+      <label class="cat-to">Sposta in<select data-cat-target="${catE(name)}">${options(catSuggest(name, doc))}</select></label>
+      <button type="button" class="save" data-cat-move="${catE(name)}" ${cat.moving ? "disabled" : ""}>${busy ? catE(cat.moving.text) : "Sposta"}</button></div>`; }).join("")}</div>
+    <p class="hint">«Sposta» cambia la categoria dei movimenti uno per uno e la segna come scelta a mano: le regole automatiche non la cambiano più. Per tenere una categoria, aggiungila come voce in un gruppo.</p>`;
+}
+/* Suggerimento iniziale: la stessa voce, o la più vicina della proposta. */
+function catSuggest(name, doc) {
+  const map = { "Trasferimenti a terzi": "Trasferimenti a terzi", "Imposte": "Imposte e tasse", "Imposte e servizi": "Imposte e tasse", "Contanti": "Prelievi contanti", "Commissioni": "Commissioni bancarie", "Trasporti": "Mezzi pubblici", "Cura personale": "Cura personale", "Reddito": "Stipendio", "Investimenti": "Investimenti", "Pedaggi": "Pedaggi e parcheggi", "Sport": "Sport", "Elettronica": "Elettronica", "Affitto e ingresso casa": "Affitto", "Pagamenti non dettagliati": "Altro", "Casa": "Arredamento e casa", "Auto": "Manutenzione auto", "Salute": "Farmaci e visite", "Utenze": "Elettricità" };
+  const all = catAll(doc), want = map[name];
+  return want && all.includes(want) ? want : all.includes("Altro") ? "Altro" : all[0];
+}
+async function catScan() {
+  const found = new Map(), now = new Date(), seen = new Set();
+  for (let back = 35; back >= 0; back--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - back, 1), y = d.getFullYear(), m = d.getMonth() + 1;
+    cat.scanning = `Lettura ${String(m).padStart(2, "0")}/${y}…`; catRender();
+    let data = null;
+    for (let attempt = 0; attempt < 3 && !data; attempt++) { try { data = await workerRequest("getFinanceData", [y, m]); } catch (e) { await new Promise((r) => setTimeout(r, 1500 * (attempt + 1))); } }
+    for (const t of (data && data.transactions) || []) {
+      const key = String(t.row) + "|" + t.date; if (seen.has(key) || !t.row) continue; seen.add(key);
+      const names = new Set([t.category, t.displayCategory].filter(Boolean).map(String));
+      for (const name of names) {
+        const v = found.get(name) || { rows: new Map(), types: new Set(), first: t.date, last: t.date };
+        v.rows.set(Number(t.row), t.category); v.types.add(t.type || ""); if (t.date < v.first) v.first = t.date; if (t.date > v.last) v.last = t.date;
+        found.set(name, v);
+      }
+    }
+  }
+  cat.scan = found; cat.scanning = ""; catRender();
+}
+async function catMove(from, to) {
+  const v = cat.scan && cat.scan.get(from); if (!v || !to) return;
+  const rows = [...v.rows.keys()]; let done = 0, failed = 0;
+  cat.moving = { from, text: "0/" + rows.length }; cat.error = ""; catRender();
+  for (const row of rows) {
+    try { await workerRequest("classifyMovement", [row, to]); done++; } catch (e) { failed++; }
+    cat.moving.text = done + failed + "/" + rows.length; catRender();
+  }
+  cat.moving = null;
+  cat.msg = `${from} → ${to}: ${done} movimenti spostati${failed ? `, ${failed} non riusciti (riprova)` : ""}.`;
+  for (const row of rows) { const t = cat.scan.get(to) || { rows: new Map(), types: new Set(v.types), first: v.first, last: v.last }; t.rows.set(row, to); cat.scan.set(to, t); }
+  if (!failed) cat.scan.delete(from);
+  catRender();
+}
+function catRender() {
+  const host = document.getElementById("cat95");
+  if (host) host.outerHTML = catHtml();
+}
+function catMutate(fn) { const doc = catClone(catCurrent()); fn(doc); cat.draft = doc; cat.msg = ""; catRender(); }
+document.addEventListener("click", async (e) => {
+  const t = e.target; if (!t.closest || !t.closest("#cat95")) return;
+  const chip = t.closest("[data-cat-chip]");
+  if (chip) { cat.edit = { item: chip.dataset.catChip, where: chip.dataset.catWhere, gi: chip.dataset.catGi }; catRender(); document.querySelector("[data-cat-edit-name]")?.focus(); return; }
+  if (t.closest("[data-cat-edit-cancel]")) { cat.edit = null; catRender(); return; }
+  if (t.closest("[data-cat-edit-delete]") || t.closest("[data-cat-edit-ok]")) {
+    const e2 = cat.edit, del = !!t.closest("[data-cat-edit-delete]");
+    const name = (document.querySelector("[data-cat-edit-name]")?.value || "").trim(), target = document.querySelector("[data-cat-edit-group]")?.value;
+    catMutate((doc) => {
+      doc.groups.forEach((g) => { g.items = g.items.filter((i) => i !== e2.item); });
+      doc.income = (doc.income || []).filter((i) => i !== e2.item);
+      if (del || !name) return;
+      doc.groups.forEach((g) => { g.items = g.items.filter((i) => i !== name); }); doc.income = doc.income.filter((i) => i !== name);
+      if (target === "income") doc.income.push(name); else if (doc.groups[Number(target)]) doc.groups[Number(target)].items.push(name);
+    });
+    cat.edit = null; catRender(); return;
+  }
+  const gdel = t.closest("[data-cat-group-delete]"); if (gdel) { catMutate((doc) => { doc.groups.splice(Number(gdel.dataset.catGroupDelete), 1); }); return; }
+  if (t.closest("[data-cat-group-new]")) { catMutate((doc) => { doc.groups.push({ name: "Nuovo gruppo", items: [] }); }); return; }
+  if (t.closest("[data-cat-proposal]")) { cat.draft = catClone(CAT_PROPOSAL); cat.proposal = true; cat.edit = null; cat.msg = "Proposta caricata: non è salvata finché non premi Salva, e puoi cambiarla prima."; catRender(); return; }
+  if (t.closest("[data-cat-discard]")) { cat.draft = null; cat.proposal = false; cat.edit = null; cat.msg = ""; catRender(); return; }
+  if (t.closest("[data-cat-save]")) {
+    const doc = catCurrent();
+    const clean = { groups: doc.groups.map((g) => ({ name: g.name.trim(), items: g.items })).filter((g) => g.name && g.items.length), income: doc.income || [] };
+    if (!clean.groups.length) { cat.error = "Serve almeno un gruppo con una voce."; catRender(); return; }
+    try { const r = await workerRequest("saveSettings", ["finance-categories", clean, Date.now()]); cat.saved = r.doc || clean; cat.modified = r.modified || Date.now(); cat.draft = null; cat.proposal = false; cat.error = "";
+      cat.msg = "Salvato. Il sito le usa già; l'iPhone alla prossima apertura."; window.lifeosApplyFinanceCategories && window.lifeosApplyFinanceCategories(cat.saved); }
+    catch (err) { cat.error = String(err.message || err); }
+    catRender(); return;
+  }
+  if (t.closest("[data-cat-scan]")) { catScan(); return; }
+  const mv = t.closest("[data-cat-move]");
+  if (mv) {
+    const from = mv.dataset.catMove, to = document.querySelector(`[data-cat-target="${CSS.escape(from)}"]`)?.value;
+    if (!to || to === from) return;
+    if (!confirm(`Spostare ${cat.scan.get(from)?.rows.size || 0} movimenti da «${from}» a «${to}»?`)) return;
+    catMove(from, to); return;
+  }
+});
+document.addEventListener("keydown", (e) => {
+  const input = e.target.closest && e.target.closest("[data-cat-add]");
+  if (!input || e.key !== "Enter") return;
+  e.preventDefault();
+  const name = input.value.trim(); if (!name) return;
+  const where = input.dataset.catAdd;
+  catMutate((doc) => {
+    doc.groups.forEach((g) => { g.items = g.items.filter((i) => i !== name); }); doc.income = (doc.income || []).filter((i) => i !== name);
+    if (where === "income") doc.income.push(name); else doc.groups[Number(where)].items.push(name);
+  });
+  document.querySelector(`[data-cat-add="${where}"]`)?.focus();
+});
+document.addEventListener("change", (e) => {
+  const gname = e.target.closest && e.target.closest("[data-cat-group-name]");
+  if (gname) { const i = Number(gname.dataset.catGroupName), v = gname.value.trim(); if (v) catMutate((doc) => { doc.groups[i].name = v; }); }
+});
+/* In Admin, sotto obiettivi e stack. */
+const renderAdminCat95 = renderAdmin;
+renderAdmin = async function () {
+  await renderAdminCat95();
+  const grid = document.querySelector("#admin .adm-grid");
+  if (grid && !document.getElementById("cat95")) grid.insertAdjacentHTML("beforeend", catHtml());
+};
 </script>
 
 </body>

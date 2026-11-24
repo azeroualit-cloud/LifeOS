@@ -1638,3 +1638,26 @@ html[data-theme="light"] .sc-tile>div{background:color-mix(in srgb,var(--c) calc
 /* ANALYSIS-START-PICKER: in fondo alla scheda Ritmo. */
 .an93-start{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--line-soft);font-size:13px;font-weight:500;color:var(--ink-2)}
 .an93-start select{width:auto;min-height:32px;border-radius:999px;padding:0 12px}
+/* CATEGORY-ADMIN-2026-11-24 */
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:8px}
+.cat-group{border:1px solid var(--line-soft);border-radius:var(--r-md);padding:10px 12px;display:grid;gap:8px;align-content:start;background:var(--surface-2)}
+.cat-group-head{display:flex;align-items:center;gap:8px}
+.cat-group-head b{font-size:14px}
+.cat-group-name{font-weight:650;min-height:32px;background:transparent;border-color:transparent;box-shadow:none;padding:0 6px}
+.cat-group-name:hover{border-color:var(--line)}
+.cat-x{width:32px;min-width:32px;min-height:32px;padding:0;color:var(--ink-2)}
+.cat-chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.cat-chip{min-height:30px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:500;background:var(--surface);border:1px solid var(--line-soft);color:var(--ink)}
+.cat-chip.on{border-color:var(--focus);box-shadow:0 0 0 2px color-mix(in srgb,var(--focus) 25%,transparent)}
+.cat-add{width:110px;min-height:30px;border-radius:999px;font-size:13px;padding:0 10px}
+.cat-edit{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:end;padding:12px;margin:8px 0;border-radius:var(--r-md);background:var(--surface-2);border:1px solid var(--line)}
+.cat-edit-actions{grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px}
+.cat-inactive{margin-top:18px;padding-top:14px;border-top:1px solid var(--line-soft)}
+.cat-inactive h3{font-size:14px}
+.cat-inactive-list{display:grid;gap:0}
+.cat-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line-soft)}
+.cat-row span{display:grid;gap:2px;min-width:0}
+.cat-row small{color:var(--ink-2);font-size:12px}
+.cat-to{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2)}
+.cat-to select{width:auto;max-width:220px}
+@media (max-width:640px){.cat-row{grid-template-columns:minmax(0,1fr)}.cat-edit{grid-template-columns:minmax(0,1fr)}}
