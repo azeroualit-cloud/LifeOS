@@ -12,9 +12,10 @@ final class NativeRevision75UITests: XCTestCase {
     private func selectMenu(_ button: XCUIElement, title: String, app: XCUIApplication) {
         reveal(button, app: app)
         XCTAssertTrue(button.waitForExistence(timeout: 10)); button.tap()
-        let choice = app.buttons[title]
+        var choice = app.buttons.visible(title)
         // Large text makes the grouped Categoria menu longer than the screen: look downwards first, then upwards.
         for step in 0..<12 {
+            choice = app.buttons.visible(title)
             if choice.exists && choice.isHittable { break }
             let (from, to): (CGFloat, CGFloat) = step < 6 ? (0.75, 0.35) : (0.35, 0.75)
             app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: from))

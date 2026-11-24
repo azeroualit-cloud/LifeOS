@@ -64,9 +64,22 @@ struct NativePlansScreen: View {
             } footer: {
                 if store.isDemo { Text("Piani demo · nessuna modifica al server") }
             }
+            // FINANCE-ENTRY-SIMPLIFY-2026-11-24: instalments are expenses split over months, not plans. Same rows
+            // and amounts as before (the server computes them); only shown apart, as «Spese a rate».
+            let instalments = flow.rows.filter { NativeInstalments.isInstalment($0, plans: plans) }
+            let planRows = flow.rows.filter { !NativeInstalments.isInstalment($0, plans: plans) }
+            if !instalments.isEmpty {
+                Section("Spese a rate") {
+                    ForEach(instalments) { row in
+                        if let id = row.planID {
+                            NavigationLink { NativePlanDetail(planID: id) } label: { instalmentRow(row) }.accessibilityIdentifier("instalment-" + id)
+                        } else { instalmentRow(row) }
+                    }
+                }
+            }
             Section("Piani del mese") {
-                if flow.rows.isEmpty { Text("Nessun piano per questo mese").foregroundStyle(NativeDesign.secondary) }
-                ForEach(flow.rows) { row in
+                if planRows.isEmpty { Text("Nessun piano per questo mese").foregroundStyle(NativeDesign.secondary) }
+                ForEach(planRows) { row in
                     if let id = row.planID {
                         NavigationLink { NativePlanDetail(planID: id) } label: { budgetRow(row) }.accessibilityIdentifier("plan-" + id)
                     } else { budgetRow(row) }
@@ -111,9 +124,23 @@ struct NativePlansScreen: View {
             .onAppear { router.financeSection = "Budget" }
             .onDisappear { router.financeSection = "Panoramica" }
     }
+    private func instalmentRow(_ row: NativeBudgetFlow.Row) -> some View {
+        let text = NativeInstalments.title(row, plans: plans, month: store.financeMonth)
+        return HStack(spacing: NativeDesign.Space.medium) {
+            Circle().fill(NativeDesign.financeGroups[2]).frame(width: NativeDesign.Space.small, height: NativeDesign.Space.small)
+            VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
+                Text(text.name)
+                if !text.detail.isEmpty { Text(text.detail).font(.footnote).foregroundStyle(NativeDesign.secondary).monospacedDigit() }
+            }
+            Spacer(minLength: NativeDesign.Space.small)
+            Text(money(row.amountCents)).monospacedDigit()
+        }
+        .padding(.vertical, NativeDesign.Space.xs)
+        .accessibilityElement(children: .combine)
+    }
     private func budgetRow(_ row: NativeBudgetFlow.Row) -> some View {
         let plan = row.planID.flatMap { id in plans.first { $0.text("id") == id } }
-        let kinds = ["advance": "anticipo", "goal": "obiettivo", "fund": "fondo", "fixed": "fisso", "estimated": "stima", "recovery": "spesa a rate"]
+        let kinds = ["advance": "anticipo", "goal": "obiettivo", "fund": "fondo", "fixed": "ricorrente", "estimated": "ricorrente stimata", "recovery": "spesa a rate"]
         let kind = plan.flatMap { kinds[$0.text("kind")] } ?? ""
         return HStack(spacing: NativeDesign.Space.medium) {
             Circle().fill(NativeDesign.financeGroups[plan == nil ? 0 : 1]).frame(width: NativeDesign.Space.small, height: NativeDesign.Space.small)
@@ -586,5 +613,35 @@ enum NativePlanKindText {
         case .advance: return "Usa ora il budget di un mese futuro"
         case .recovery: return "Una spesa già fatta, recuperata nei mesi"
         }
+    }
+}
+
+/// FINANCE-ENTRY-SIMPLIFY-2026-11-24: which budget rows are instalments and how they read («rata 2 di 6»).
+enum NativeInstalments {
+    static let movementPrefix = "Recupero · "
+    static func isInstalment(_ row: NativeBudgetFlow.Row, plans: [Record]) -> Bool {
+        if let id = row.planID { return plans.first { $0.text("id") == id }?.text("kind") == "recovery" }
+        return row.name.hasPrefix(movementPrefix)
+    }
+    /// «Recupero · 3/3 Rata Divano Klarna» → («Rata Divano Klarna», «rata 3 di 3»); a plan → its name and the rata of this month.
+    static func title(_ row: NativeBudgetFlow.Row, plans: [Record], month: String) -> (name: String, detail: String) {
+        if let id = row.planID, let plan = plans.first(where: { $0.text("id") == id }) {
+            let total = count(plan.text("startMonth"), plan.text("endMonth")), index = count(plan.text("startMonth"), month)
+            return (plan.text("name"), total > 0 && index >= 1 && index <= total ? "rata " + String(index) + " di " + String(total) : "")
+        }
+        guard row.name.hasPrefix(movementPrefix) else { return (row.name, "") }
+        let rest = String(row.name.dropFirst(movementPrefix.count))
+        let parts = rest.split(separator: " ", maxSplits: 1).map(String.init)
+        if parts.count == 2, parts[0].range(of: "^[0-9]+/[0-9]+$", options: .regularExpression) != nil {
+            let n = parts[0].split(separator: "/")
+            return (parts[1], "rata " + n[0] + " di " + n[1])
+        }
+        return (rest, "")
+    }
+    /// Months from `first` to `last` included (0 when unreadable).
+    static func count(_ first: String, _ last: String) -> Int {
+        func index(_ m: String) -> Int? { let p = m.split(separator: "-").compactMap { Int($0) }; return p.count == 2 ? p[0] * 12 + p[1] : nil }
+        guard let a = index(first), let b = index(last), b >= a else { return 0 }
+        return b - a + 1
     }
 }

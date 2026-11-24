@@ -58,3 +58,13 @@ extension XCUIApplication {
         }
     }
 }
+
+extension XCUIElementQuery {
+    /// When a sheet is open over another one (quick add over the catalog, a menu over a form) the same identifier or
+    /// label can match twice: this returns the one the user can actually touch, else the last (top-most) match.
+    func visible(_ key: String) -> XCUIElement {
+        let matches = matching(NSPredicate(format: "identifier == %@ OR label == %@", key, key))
+        let all = matches.allElementsBoundByIndex
+        return all.first(where: { $0.exists && $0.isHittable }) ?? all.last ?? matches.firstMatch
+    }
+}

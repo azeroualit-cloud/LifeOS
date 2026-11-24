@@ -147,7 +147,7 @@ final class NativeNutritionQuickUITests: XCTestCase {
             search.typeText(name)
             capture("Supermercato " + name, app)
         }
-        app.segmentedControls.buttons["Integratori"].tap()
+        app.segmentedControls.buttons.visible("Integratori").tap()
         // SUPPLEMENTS-PERSONAL-ONLY-92: the tab starts empty; the user creates his own.
         XCTAssertFalse(app.buttons["generic-food-supplement-vitamin-c"].exists)
         app.buttons["generic-food-create"].tap()
@@ -213,8 +213,8 @@ final class NativeNutritionQuickUITests: XCTestCase {
         XCTAssertTrue(search.waitForExistence(timeout: 10))
         search.tap()
         search.typeText("Biscotti")
-        let biscuits = app.buttons["generic-food-ciqual-24001"]
-        XCTAssertTrue(biscuits.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["generic-food-ciqual-24001"].firstMatch.waitForExistence(timeout: 5))
+        let biscuits = app.buttons.visible("generic-food-ciqual-24001") // the quick-add list under the catalog has the same row
         XCTAssertTrue(biscuits.isHittable)
         capture("Generic food search for Biscotti", app)
         biscuits.tap()
