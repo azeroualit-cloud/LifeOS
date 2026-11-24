@@ -27,6 +27,13 @@ struct NativeExpenseSplit: Equatable {
                 "recoveryMonths": .string(chosenMonths(day: day).joined(separator: ", ")),
                 "recoveryAmount": .number(Double(budget(amount)) / 100)]
     }
+    /// BILL-PAST-MONTHS-2026-11-24: a bill's budget months start from the current month, never a past one.
+    static func billDay(_ day: String) -> String { max(day, CivilDate.day()) }
+    /// Default for a bill's excess: «Prossimi mesi», this month and the next two.
+    static func forBill(day: String, savings: Int = 0) -> NativeExpenseSplit {
+        let first = billDay(day)
+        return NativeExpenseSplit(savings: savings, months: (0..<3).map { String(CivilDate.adding($0, to: String(first.prefix(7)) + "-01", component: .month).prefix(7)) })
+    }
     /// The 12 months offered, from the month of the expense.
     static func offered(day: String) -> [String] { (0..<12).map { CivilDate.adding($0, to: String(day.prefix(7)) + "-01", component: .month).prefix(7).description } }
     mutating func toggle(_ month: String, day: String) {

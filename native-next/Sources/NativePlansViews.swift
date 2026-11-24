@@ -661,26 +661,14 @@ enum NativeInstalments {
     }
 }
 
-/// UTILITY-LEVELLING-2026-11-24: after each bill the estimated quota recovers the gap, then returns to the average.
+/// BILL-PAST-MONTHS-2026-11-24: after each bill the estimated quota follows the 12-month average.
 struct NativeLevellingNote: View {
     let levelling: Record
 
-    private var gap: Int { levelling.integer("gapCents") }
-    private var average: String { (Double(levelling.integer("averageCents")) / 100).euro }
-    private var title: String {
-        let until = levelling.text("untilMonth")
-        return until.isEmpty ? "Quota uguale alla media delle bollette" : "Quota livellata fino a " + CivilDate.monthTitle(until) + ", poi " + average + " (la media)"
-    }
-    private var reason: String {
-        let amount = (Double(abs(gap)) / 100).euro
-        let why = gap < 0 ? "Le bollette hanno superato le quote di \(amount): le recuperi nei prossimi mesi."
-            : gap > 0 ? "Le quote hanno superato le bollette di \(amount): la quota scende per qualche mese." : "Quote e bollette sono in pari."
-        return why + " I soldi restano nei risparmi; la bolletta si paga da lì."
-    }
-
     var body: some View {
-        LabeledContent(title, value: (Double(levelling.integer("quotaCents")) / 100).euro)
+        LabeledContent("Quota da " + CivilDate.monthTitle(levelling.text("fromMonth")) + ": media delle bollette", value: (Double(levelling.integer("quotaCents")) / 100).euro)
             .accessibilityIdentifier("plan-levelling")
-        Text(reason).font(.footnote).foregroundStyle(NativeDesign.secondary)
+        Text("Dopo ogni bolletta la quota segue la media degli ultimi 12 mesi. I soldi restano nei risparmi e la bolletta si paga da lì; la parte che il piano non copre la scegli quando paghi.")
+            .font(.footnote).foregroundStyle(NativeDesign.secondary)
     }
 }

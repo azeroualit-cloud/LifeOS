@@ -15,7 +15,7 @@ struct NativeUtilityPeriodFields: View {
                     .accessibilityElement(children: .combine)
                     .accessibilityIdentifier("utility-share-" + share.month)
             }
-            Text("Le quote sostituiscono le stime nei mesi indicati, anche passati. Il pagamento resta un’unica uscita alla data effettiva; gli accantonamenti del fondo rimangono separati.")
+            Text("Consumo per mese: serve per la media della quota e per l’Analisi. I mesi passati non cambiano; la parte che il piano non copre la scegli sopra.")
                 .font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
         }
     }

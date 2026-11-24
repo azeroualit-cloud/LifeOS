@@ -469,10 +469,12 @@ struct MovementEditor: View {
             payload.merge(bill.payload) { _, value in value }
             // REVIEW-95: savings and budget months chosen by the user (server 'recovery' policy).
             if bill.enabled {
-                // FUNDING-BLOCK: the savings part of a bill; the rest goes to its competence months.
-                let limit = destination == NativeExpenseRouting.ordinary ? cents - 1 : min(cents - 1, max(0, cents - quotedAvailable))
+                // BILL-PAST-MONTHS-2026-11-24: the plan pays what it set aside; of the rest, the savings part
+                // and the budget months chosen from the current month on. Past months never change.
+                let limit = destination == NativeExpenseRouting.ordinary ? cents : max(0, cents - quotedAvailable)
                 let part = min(max(0, split.savings), max(0, limit))
                 if part > 0 { payload["utilitySavingsCents"] = .int(part) }
+                if limit - part > 0 { payload["billBudgetMonths"] = .array(split.chosenMonths(day: NativeExpenseSplit.billDay(CivilDate.day(date))).map { JSONValue.string($0) }) }
             } else if destination == NativeExpenseRouting.ordinary {
                 var chosen = split; chosen.change(0, amount: cents)
                 if let extra = chosen.payload(amount: cents, day: CivilDate.day(date)) { payload.merge(extra) { _, value in value } }
