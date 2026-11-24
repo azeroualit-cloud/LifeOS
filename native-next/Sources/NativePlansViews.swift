@@ -9,14 +9,24 @@ struct NativeMonthPicker: View {
         let current = Int(CivilDate.month().prefix(4))!, selected = Int(selection.prefix(4)) ?? current
         return min(current, selected)...min(2099, max(current + 20, selected))
     }
+    // REVIEW-95C: month names never wrap («Novem-bre»); when the row is too narrow the pickers go under the title.
     var body: some View {
-        HStack {
-            Text(title).fixedSize(horizontal: false, vertical: true)
-            Spacer(minLength: NativeDesign.Space.small)
+        ViewThatFits(in: .horizontal) {
+            HStack {
+                Text(title).fixedSize(horizontal: true, vertical: false)
+                Spacer(minLength: NativeDesign.Space.small)
+                pickers
+            }
+            VStack(alignment: .leading, spacing: NativeDesign.Space.small) { Text(title); pickers }
+        }
+    }
+    private var pickers: some View {
+        HStack(spacing: NativeDesign.Space.small) {
             Picker("Mese · " + title, selection: month) {
                 ForEach(1...12, id: \.self) { value in Text(CivilDate.monthTitle(String(format: "2026-%02d", value)).components(separatedBy: " ")[0]).tag(value) }
-            }.labelsHidden().pickerStyle(.menu)
-            Picker("Anno · " + title, selection: year) { ForEach(Array(years), id: \.self) { Text(String($0)).tag($0) } }.labelsHidden().pickerStyle(.menu)
+            }.labelsHidden().pickerStyle(.menu).lineLimit(1).fixedSize(horizontal: true, vertical: false)
+            Picker("Anno · " + title, selection: year) { ForEach(Array(years), id: \.self) { Text(String($0)).tag($0) } }
+                .labelsHidden().pickerStyle(.menu).lineLimit(1).fixedSize(horizontal: true, vertical: false)
         }
     }
 }
