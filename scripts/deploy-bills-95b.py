@@ -12,6 +12,7 @@ from pathlib import Path
 import importlib.util
 import subprocess
 import hashlib
+import re
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -31,6 +32,11 @@ levelling = load('levelling95', 'deploy-levelling-95.py')
 
 def strip(text):
     return text.replace('export async function ', 'async function ').replace('export function ', 'function ')
+
+
+def normal(text):
+    # The bundler may rename locals with a numeric suffix (month -> month2, id -> id2): ignore it.
+    return re.sub(r'(?<![\w$])([A-Za-z_$][A-Za-z_$]*)\d+(?![\w$])', r'\1', split.compact(text))
 
 
 def function(text, name):
@@ -64,12 +70,12 @@ def transform(source):
         if live == new:
             print('BILLS95B %s=current' % name)
             continue
-        if split.compact(live) != split.compact(old):
+        if normal(live) != normal(old):
             known = {}
-            for c in ('51fd07b', '7a52c33', '7c24f3f'):
+            for c in ('51fd07b', '7a52c33', '7c24f3f', 'bd425c7'):
                 text = '\n' + source_at(c, path)
-                known[hashlib.md5(split.compact(text[slice(*function(text, name))]).encode()).hexdigest()[:8]] = c
-            fingerprint = hashlib.md5(split.compact(live).encode()).hexdigest()[:8]
+                known[hashlib.md5(normal(text[slice(*function(text, name))]).encode()).hexdigest()[:8]] = c
+            fingerprint = hashlib.md5(normal(live).encode()).hexdigest()[:8]
             print('BILLS95B %s=unknown fingerprint=%s matches=%s' % (name, fingerprint, known.get(fingerprint, 'none')))
             raise RuntimeError('Versione di %s differente; nessuna scrittura.' % name)
         print('BILLS95B %s=replaced' % name)
