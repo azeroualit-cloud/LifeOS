@@ -19,7 +19,10 @@ enum DemoData {
         }
         let life: Record = ["categories": .array(categories), "tasks": .array(tasks), "routines": .array(routines),
             "shifts": .array([.object(["day": .string(today), "kind": .string("morning")]), .object(["day": .string(CivilDate.adding(1, to: today)), "kind": .string("rest")])]),
-            "events": .array([.object(["id": .int(1), "title": .string("Allenamento"), "day": .string(CivilDate.adding(1, to: today)), "start_time": .string("18:00"), "end_time": .string("19:00"), "frequency": .string("weekly"), "location": .string("Palestra"), "notes": .string("")])]),
+            "events": .array([.object(["id": .int(1), "title": .string("Allenamento"), "day": .string(CivilDate.adding(1, to: today)), "start_time": .string("18:00"), "end_time": .string("19:00"), "frequency": .string("weekly"), "location": .string("Palestra"), "notes": .string("")]),
+                // AGENDA-TIMELINE-2026-11-24: two timed entries today, so the demo shows the connecting line.
+                .object(["id": .int(2), "title": .string("Colazione con Sara"), "day": .string(today), "start_time": .string("09:30"), "end_time": .string("10:30"), "frequency": .string("none"), "location": .string(""), "notes": .string("")]),
+                .object(["id": .int(3), "title": .string("Dentista"), "day": .string(today), "start_time": .string("16:00"), "end_time": .string("17:00"), "frequency": .string("none"), "location": .string("Studio"), "notes": .string("")])]),
             "occurrences": .object([:]), "today": .string(today), "month": .string(month)]
         let summary: Record = ["budget": .number(1000), "committedCurrent": .number(200), "remainingFree": .number(800),
             "account": .string("Trade Republic"), "revolutBalance": .number(0), "monthlySalary": .number(1800),

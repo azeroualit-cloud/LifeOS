@@ -227,13 +227,24 @@ struct CalendarScreen: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityAddTraits(.isHeader)
                     .accessibilityIdentifier("calendar-day-heading")
-                if let shift = selectedShift {
-                    Label(shift.time.isEmpty ? shift.title : shift.title + " · " + shift.time, systemImage: shift.symbol)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(shift.color)
-                        .padding(.horizontal, NativeDesign.Space.medium)
-                        .padding(.vertical, NativeDesign.Space.xs)
-                        .background(shift.color.opacity(0.12), in: Capsule())
+                // The shift, the Ramadan/Eid tags and a discreet «Privato» share one row (user, 25/11/2026: no empty gap).
+                HStack(spacing: NativeDesign.Space.small) {
+                    if let shift = selectedShift {
+                        Label(shift.time.isEmpty ? shift.title : shift.title + " · " + shift.time, systemImage: shift.symbol)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(shift.color)
+                            .padding(.horizontal, NativeDesign.Space.medium)
+                            .padding(.vertical, NativeDesign.Space.xs)
+                            .background(shift.color.opacity(0.12), in: Capsule())
+                    }
+                    ForEach(NativeIslamicDays.events(on: selected), id: \.self) { NativeIslamicTag(title: $0) }
+                    Spacer(minLength: NativeDesign.Space.none)
+                    Button { privateDay = NativePrivateDay(day: selected) } label: {
+                        Text("Privato").font(.footnote).foregroundStyle(NativeDesign.secondary)
+                            .frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle())
+                    }
+                    .buttonStyle(NativePressStyle())
+                    .accessibilityIdentifier("calendar-private")
                 }
             }
             .padding(.horizontal, NativeDesign.Layout.screenInset)
@@ -249,6 +260,7 @@ struct CalendarScreen: View {
             .buttonStyle(LOGlassButtonStyle(fillsWidth: true))
             .accessibilityIdentifier("calendar-add-event")
         }
+        .sheet(item: $privateDay) { item in NativePrivateDaySheet(day: item.day) }
     }
 
     private var agendaContent: some View {
@@ -256,17 +268,6 @@ struct CalendarScreen: View {
             VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
                 if let loadError {
                     HStack { NativeInlineMessage(text: loadError); Button("Riprova") { reload += 1 } }
-                }
-                // CALENDAR-RAMADAN-EID / CALENDAR-PRIVATE-ENTRY (24/11/2026): tags of the day and a discreet «Privato».
-                HStack(spacing: NativeDesign.Space.small) {
-                    ForEach(NativeIslamicDays.events(on: selected), id: \.self) { NativeIslamicTag(title: $0) }
-                    Spacer(minLength: 0)
-                    Button { privateDay = NativePrivateDay(day: selected) } label: {
-                        Text("Privato").font(.footnote).foregroundStyle(NativeDesign.secondary)
-                            .frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle())
-                    }
-                    .buttonStyle(NativePressStyle())
-                    .accessibilityIdentifier("calendar-private")
                 }
                 // The selected day uses the same rows as the following days (user, 23/11/2026).
                 selectedDayList
@@ -279,7 +280,6 @@ struct CalendarScreen: View {
             .padding(.vertical, NativeDesign.Space.medium)
         }
         .scrollBounceBehavior(.basedOnSize)
-        .sheet(item: $privateDay) { item in NativePrivateDaySheet(day: item.day) }
         .accessibilityIdentifier("calendar-day-pane")
         .id(selected)
     }
