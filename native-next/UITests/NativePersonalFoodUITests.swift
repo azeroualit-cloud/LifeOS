@@ -14,10 +14,8 @@ final class NativePersonalFoodUITests: XCTestCase {
         }
         XCTAssertTrue(open.isHittable)
         open.tap()
-        // FOOD-QUICK-ADD-2026-11-23: the search opens directly.
-        // FOOD-QUICK-ADD-2026-11-23: the search opens directly.
-        // FOOD-QUICK-ADD-2026-11-23: the search opens directly.
-        XCTAssertTrue(app.textFields["generic-food-search"].waitForExistence(timeout: 10))
+        // FOOD-QUICK-ADD-2026-11-23: the search opens directly (quick sheet: «food-quick-*» identifiers).
+        XCTAssertTrue(app.textFields["food-quick-search"].waitForExistence(timeout: 10))
         return app
     }
 
@@ -66,7 +64,7 @@ final class NativePersonalFoodUITests: XCTestCase {
 
     func testEditingPersonalFoodKeepsIdentityAndUpdatesPortion() {
         let app = openCatalog()
-        app.buttons["generic-food-create"].tap()
+        app.buttons["food-quick-create"].tap()
         let suffix = String(UUID().uuidString.prefix(6))
         let originalName = "Crema iniziale " + suffix
         let editedName = "Crema aggiornata " + suffix
@@ -111,7 +109,7 @@ final class NativePersonalFoodUITests: XCTestCase {
 
     func testCommunityBrandSearchShowsSourceAndPortion() {
         let app = openCatalog()
-        replace(app.textFields["generic-food-search"], with: "Barilla", app: app)
+        replace(app.textFields["food-quick-search"], with: "Barilla", app: app)
         let product = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS[c] %@ AND label CONTAINS[c] %@", "generic-food-", "Barilla", "Open Food Facts")).firstMatch
         XCTAssertTrue(product.waitForExistence(timeout: 15))
         capture("Ricerca marca nota con provenienza collaborativa")
@@ -127,14 +125,14 @@ final class NativePersonalFoodUITests: XCTestCase {
 
     func testSupplementTabSeparatesFoodsAndSearchesKnownBrands() {
         let app = openCatalog()
-        let search = app.textFields["generic-food-search"]
+        let search = app.textFields["food-quick-search"]
         app.segmentedControls.buttons["Integratori"].tap()
         // SUPPLEMENTS-PERSONAL-ONLY-92: no preset supplement, only the user's own.
         for query in ["vit4ever", "Proteine whey", "Vitamina C"] {
             replace(search, with: query, app: app)
             XCTAssertFalse(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND NOT identifier BEGINSWITH %@ AND NOT identifier IN %@", "generic-food-", "generic-food-personal-", ["generic-food-create", "generic-food-search", "generic-food-scope"])).firstMatch.exists, "Preset supplement for " + query)
         }
-        XCTAssertTrue(app.buttons["generic-food-create"].exists)
+        XCTAssertTrue(app.buttons["food-quick-create"].exists)
         capture("Scheda Integratori con sole voci personali")
         app.segmentedControls.buttons["Tutti"].tap()
         replace(search, with: "Milka", app: app)
@@ -149,7 +147,7 @@ final class NativePersonalFoodUITests: XCTestCase {
 
     func testCoopSpesottiMilkUsesMillilitresAndBrand() {
         let app = openCatalog()
-        replace(app.textFields["generic-food-search"], with: "Spesotti latte", app: app)
+        replace(app.textFields["food-quick-search"], with: "Spesotti latte", app: app)
         let milk = app.buttons["generic-food-coop-ean-8001120653314"]
         XCTAssertTrue(milk.waitForExistence(timeout: 10))
         XCTAssertTrue(milk.label.contains("Gli Spesotti"))

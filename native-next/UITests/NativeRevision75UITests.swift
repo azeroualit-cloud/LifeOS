@@ -13,10 +13,12 @@ final class NativeRevision75UITests: XCTestCase {
         reveal(button, app: app)
         XCTAssertTrue(button.waitForExistence(timeout: 10)); button.tap()
         let choice = app.buttons[title]
-        for _ in 0..<6 {
+        // Large text makes the grouped Categoria menu longer than the screen: look downwards first, then upwards.
+        for step in 0..<12 {
             if choice.exists && choice.isHittable { break }
-            app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.35))
-                .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.75)))
+            let (from, to): (CGFloat, CGFloat) = step < 6 ? (0.75, 0.35) : (0.35, 0.75)
+            app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: from))
+                .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: to)))
         }
         XCTAssertTrue(choice.isHittable); choice.tap()
     }
@@ -54,6 +56,9 @@ final class NativeRevision75UITests: XCTestCase {
         let start = app.buttons["utility-month-Mese iniziale"], end = app.buttons["utility-month-Mese finale"]
         for _ in 0..<8 { if start.isHittable { break }; app.collectionViews.firstMatch.swipeUp(velocity: .slow) }
         selectMenu(start, title: "Agosto", app: app); selectMenu(end, title: "Ottobre", app: app)
+        // FUNDING-BLOCK: with the demo Acqua plan the savings part is taken off the competence months;
+        // on «Budget mensile» with no savings part the whole bill is split over the three months.
+        selectMenu(app.buttons["expense-destination"], title: "Budget mensile", app: app)
         let year = Calendar.current.component(.year, from: Date())
         for month in ["08", "09", "10"] {
             let row = app.descendants(matching: .any).matching(identifier: "utility-share-\(year)-" + month).firstMatch

@@ -336,7 +336,7 @@ struct NativeFoodPicker: View {
                     .focused($searchFocused)
                     .submitLabel(.search)
                     .onSubmit { searchFocused = false }
-                    .accessibilityIdentifier("generic-food-search")
+                    .accessibilityIdentifier(quickAdd != nil ? "food-quick-search" : "generic-food-search")
                 if quickAdd != nil, let grams = parsed.quantity {
                     Text(NSDecimalNumber(decimal: grams).stringValue + " g").font(.subheadline.weight(.semibold)).monospacedDigit()
                         .foregroundStyle(NativeDesign.nutritionTitle).accessibilityIdentifier("food-quick-quantity")
@@ -380,7 +380,7 @@ struct NativeFoodPicker: View {
                     Label(scope == .supplements ? "Crea integratore" : "Crea alimento personale", systemImage: "plus.circle")
                         .frame(minHeight: NativeDesign.Layout.touchTarget)
                 }
-                .accessibilityIdentifier("generic-food-create")
+                .accessibilityIdentifier(quickAdd != nil ? "food-quick-create" : "generic-food-create")
                 .listRowBackground(NativeDesign.nutritionInput)
                 Section {
                     ForEach(matches) { food in

@@ -20,8 +20,8 @@ final class NativeNutritionQuickUITests: XCTestCase {
         let manualEntry = app.buttons["food-quick-manual"].firstMatch; XCTAssertTrue(manualEntry.waitForExistence(timeout: 10)); manualEntry.tap() // FOOD-QUICK-ADD-2026-11-23
         let protein = app.textFields["quick-nutrition-Proteine"], carbs = app.textFields["quick-nutrition-Carboidrati"]
         XCTAssertTrue(protein.waitForExistence(timeout: 10)); XCTAssertTrue(carbs.waitForExistence(timeout: 10))
-        if large { XCTAssertEqual(protein.frame.minX, carbs.frame.minX, accuracy: 1, "Accessibility layout must use one column") }
-        else { XCTAssertGreaterThan(carbs.frame.minX, protein.frame.maxX, "Standard layout must use two columns") }
+        // REVIEW-95B-2026-11-24: macros in a 2×2 grid also with large text.
+        XCTAssertGreaterThan(carbs.frame.minX, protein.frame.maxX, "Macros must use the 2×2 grid")
         capture(large ? "Nutrition accessibility sheet initial" : "Nutrition standard sheet initial", app)
         return app
     }
