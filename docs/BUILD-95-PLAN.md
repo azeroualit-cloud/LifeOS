@@ -125,3 +125,10 @@ Mancano o sono diversi:
 84. Ancora da confrontare con la Cowork: Macro a mano a metà schermo (griglia 2×2 + tastierino), Peso a metà schermo, Spesa a rate con le colonne dei mesi, Cronologia a colonne per macro (giorni/settimane/mesi/trimestri).
 85. SUPPLEMENT-STACK-2026-11-23: stack di integratori (nome + dose) registrate con un tocco in Aggiungi alimento; editor nell'app e in Admin sul sito (0137c28); impostazione condivisa «supplement-stacks» (vince la più recente). Siri/Comandi: «Registra la stack», «Ripeti l'ultimo alimento».
 86. FOOD-QUICK-ADD-2026-11-23: Alimento apre la ricerca con il campo grammi; il + registra subito con quei grammi (integratori a unità: dose abituale); tocco sul nome = dettaglio; «Inserisci i macro a mano» come link secondario. Diario: «Copia da ieri» e «Ripeti oggi» per voce.
+
+## Revisione del 24/11/2026 (REVIEW-95B, MICRO-BREAKDOWN, SITE-GRAPHICS, ALERTS-CLARITY)
+87. Micronutrienti: un tocco su una voce (Micronutrienti fissati, Giorno nella scheda del nutriente) apre «Da quali alimenti» con quantità e quota per alimento. Sito 0c41dce: card «Micronutrienti» sotto il Diario, ogni voce si apre con gli alimenti.
+88. Macro a mano: si apre con il tastierino sulle proteine. Ritmo: «1 mese / 3 mesi» (app e sito).
+89. Sito, integratori a capsule/compresse: valori mostrati e modificati per 1 unità (omega 3 non più ×100). Dose abituale visibile sul sito, si imposta nell'app (il Worker del sito non scrive la parte app dell'alimento).
+90. Avvisi (sito 02ebb81 + app): card «Come arrivano» (solo notifiche iPhone programmate all'apertura dell'app, nessuna sveglia, non superano Concentrazione); scelta per avviso e preghiera «Con suono / Senza suono / Discreta»; 10 modelli pronti; gli avvisi Finanza dell'app sono visibili e modificabili sul sito (copia in `alerts.finance`, vince la più recente); righe con interruttore a destra (prima il testo era centrato lontano dall'interruttore).
+91. Da fare: Spesa a rate (proposta visiva), audit contrasto su tutte le schermate, proposta grafica del sito, rivalutazione dei test UI. IPA 95 non ancora (attesa dell'utente).
