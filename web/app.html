@@ -2138,9 +2138,11 @@ function fdLoadTargets() {
   }).catch(() => { fdServerTargets = null; }).finally(() => { fd.targetsLoading = false; if (state.view === "nutrition") renderNutrition(); });
 }
 function fdGoals() { if (fdServerTargets) return fdServerTargets; try { const g = JSON.parse(localStorage.getItem(FD_GOALS) || "null"); return g && g.kcal > 0 ? g : null; } catch (e) { return null; } }
-function fdBand(v, goal) { if (!(v > 0)) return "none"; if (!(goal > 0)) return "within"; return v < goal * 0.9 ? "under" : v > goal * 1.1 ? "over" : "within"; }
-const FD_BAND_COLOR = { none: "var(--ink-3)", under: "var(--over-94)", within: "var(--ok-94)", over: "var(--over-94)" };
-const fdMacroColor = (v, goal) => !(goal > 0) || !(v > 0) ? "var(--ink-3)" : v >= goal ? "var(--ok-94)" : "var(--over-94)";
+// NUTRITION-TOLERANT-2026-11-24: colours change only far from the goal (non-optimal or harmful), never for a few grams.
+const FD_LIMIT = { kcal: 1.25, protein: 2, macro: 1.5 };
+function fdBand(v, goal) { if (!(v > 0)) return "none"; if (!(goal > 0)) return "within"; return v < goal * 0.9 ? "under" : v > goal * FD_LIMIT.kcal ? "over" : "within"; }
+const FD_BAND_COLOR = { none: "var(--ink-3)", under: "var(--sec-nutrition,#3fbf7f)", within: "var(--ok-94)", over: "var(--over-94)" };
+const fdMacroColor = (v, goal, base = "var(--sec-nutrition,#3fbf7f)", limit = FD_LIMIT.macro) => goal > 0 && v > goal * limit ? "var(--over-94)" : base;
 function fdMonday(day) { const t = new Date(day + "T12:00:00Z"); const k = (t.getUTCDay() + 6) % 7; return fdShift(day, -k); }
 async function fdLoadWeek(from) {
   if (fd.weekLoading === from) return;
@@ -2194,14 +2196,14 @@ function fdWeekCard() {
     const v = sum(key);
     if (goal > 0) {
       const w = Math.min(100, (v / goal) * 100);
-      return `<div class="fw-macro"><small>${label}</small><span><b>${fdNum(v)}</b> <em>/ ${fdNum(goal)} g</em></span><i class="fw-bar"><i style="width:${w}%;background:${fdMacroColor(v, goal)}"></i></i></div>`;
+      return `<div class="fw-macro"><small>${label}</small><span><b>${fdNum(v)}</b> <em>/ ${fdNum(goal)} g</em></span><i class="fw-bar"><i style="width:${w}%;background:${fdMacroColor(v, goal, `var(--mac-${key})`, key === "protein" ? FD_LIMIT.protein : FD_LIMIT.macro)}"></i></i></div>`;
     }
     const share = energyTotal > 0 ? Math.round(energy[key] / energyTotal * 100) : 0;
     return `<div class="fw-macro"><small>${label}</small><span><b>${fdNum(v)}</b> <em>g · ${share}%</em></span><i class="fw-bar" title="${share}% delle calorie"><i style="width:${share}%;background:var(--mac-${key})"></i></i></div>`;
   };
   const fibreMacro = () => {
     const v = sum("fibre"), goal = fd.fibreGoal || 30, w = Math.min(100, v / goal * 100);
-    return `<div class="fw-macro"><small>Fibre</small><span><b>${fdNum(v)}</b> <em>/ ${fdNum(goal)} g</em></span><i class="fw-bar"><i style="width:${w}%;background:${fdMacroColor(v, goal)}"></i></i></div>`;
+    return `<div class="fw-macro"><small>Fibre</small><span><b>${fdNum(v)}</b> <em>/ ${fdNum(goal)} g</em></span><i class="fw-bar"><i style="width:${w}%;background:${fdMacroColor(v, goal, "var(--sec-nutrition,#3fbf7f)")}"></i></i></div>`;
   };
   const title = fd.day === today ? "Oggi" : new Date(fd.day + "T12:00:00Z").toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "short" });
   return `<section class="fw-wrap" aria-label="Settimana e calorie">
