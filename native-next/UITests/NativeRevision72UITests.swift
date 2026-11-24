@@ -62,25 +62,7 @@ final class NativeRevision72UITests: XCTestCase {
         capture("day-navigation-and-event-action")
         back.tap(); XCTAssertTrue(app.scrollViews["calendar-scroll"].waitForExistence(timeout: 10))
     }
-    func testLongEventIsCompactAndContainsItsInnerEventAndDayScrollReachesMidnight() {
-        let app = launch(); openDay(app)
-        let long = app.descendants(matching: .any).matching(identifier: "calendar-agenda-block-event:301:" + day()).firstMatch
-        let inner = app.buttons["calendar-timeline-event:302:" + day()]
-        XCTAssertTrue(long.waitForExistence(timeout: 10)); XCTAssertTrue(inner.exists)
-        XCTAssertLessThan(long.frame.height, 310)
-        XCTAssertGreaterThanOrEqual(inner.frame.minY, long.frame.minY)
-        // XCTest and SwiftUI can round the same screen coordinate differently.
-        XCTAssertLessThanOrEqual(inner.frame.maxY, long.frame.maxY + 0.5)
-        let strip = app.scrollViews["calendar-all-day-strip"]
-        XCTAssertTrue(strip.exists); XCTAssertLessThanOrEqual(strip.frame.height, 60)
-        XCTAssertFalse(app.staticTexts["07:00"].exists, "Intermediate hour rows must not consume space")
-        capture("72-compact-long-event-and-chips")
-        let last = app.buttons["calendar-timeline-event:304:" + day()]
-        for _ in 0..<5 { if last.isHittable { break }; app.scrollViews["calendar-day-pane"].swipeUp() }
-        XCTAssertTrue(last.isHittable); last.tap()
-        XCTAssertTrue(app.navigationBars["Modifica attività"].waitForExistence(timeout: 10))
-        XCTAssertEqual(app.textFields["activity-title"].value as? String, "Ultimo impegno")
-    }
+    // Retired with the build 95 day list (no nested timeline blocks): testLongEventIsCompactAndContainsItsInnerEventAndDayScrollReachesMidnight.
     func testFinanceBudgetIsSmallerAndReferenceRoutesStillWork() {
         let app = launch(); app.openOtherDestination("Finanza")
         let amount = app.staticTexts["finance-budget-value"]

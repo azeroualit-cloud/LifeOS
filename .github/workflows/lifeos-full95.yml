@@ -1,5 +1,5 @@
 name: LifeOS build 95 full suite (no IPA)
-# Start 1 (REVIEW-95B point 14, 24/11/2026: «rivaluta tutti i test»). Change this line to rerun every unit and UI test on the current commit. Never packages or releases (IPA-GATE-01).
+# Start 2 (REVIEW-95B point 14, 24/11/2026: «rivaluta tutti i test»). Change this line to rerun every unit and UI test on the current commit. Never packages or releases (IPA-GATE-01).
 on:
   push:
     branches: ['codex/build93']

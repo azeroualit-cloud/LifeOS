@@ -686,7 +686,7 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertFalse(app.buttons["Trattamento"].exists)
         description.tap(); description.typeText("Verifica interfaccia")
         capture("movement-keyboard")
-        let amount = app.textFields["Importo €"]
+        let amount = app.textFields["movement-amount"] // REVIEW-95: the amount is the centred hero field
         amount.tap(); amount.typeText("2")
         app.buttons["Salva"].tap()
         let all = app.buttons["all-movements"]
@@ -835,12 +835,12 @@ final class NativeInterfaceTests: XCTestCase {
         app.buttons["calendar-today"].tap()
         revealCalendarDay(selectedDay, in: app)
         app.buttons["calendar-day-" + selectedDay].tap()
-        let strip = app.scrollViews["calendar-all-day-strip"]
-        let foundStrip = strip.waitForExistence(timeout: 10)
-        let event = app.buttons["Evento dopo scorrimento"]
-        print("CALENDAR_DATE_DIAGNOSTIC selectedCivilDay=\(selectedDay) matchingAgendaStrip=\(foundStrip) eventExists=\(event.exists)")
-        if !foundStrip || !event.exists { capture("calendar-date-event-not-found") }
-        XCTAssertTrue(foundStrip)
+        // Build 95 day list: the all-day event is a row of the selected day.
+        let event = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "calendar-timeline-event:", "Evento dopo scorrimento")).firstMatch
+        let found = event.waitForExistence(timeout: 10)
+        print("CALENDAR_DATE_DIAGNOSTIC selectedCivilDay=\(selectedDay) eventExists=\(found)")
+        if !found { capture("calendar-date-event-not-found") }
+        XCTAssertTrue(found)
         XCTAssertTrue(event.isHittable); assertMinimumTouchTarget(event)
         capture("calendar-event-after-scroll")
         event.tap()

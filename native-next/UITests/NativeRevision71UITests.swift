@@ -101,11 +101,11 @@ final class NativeRevision71UITests: XCTestCase {
         app.openOtherDestination("Calendario")
         let today = app.buttons["calendar-day-" + day()]
         reveal(today, in: app.scrollViews["calendar-scroll"], app: app); today.tap()
-        let allDay = app.scrollViews["calendar-all-day-strip"]
-        XCTAssertTrue(exists(allDay, app: app))
-        XCTAssertLessThanOrEqual(allDay.frame.height, 60)
-        XCTAssertFalse(app.scrollViews["calendar-all-day-pane"].exists)
-        let event = app.buttons["Evento oggi"]
+        // Build 95 day list: an all-day event is a row with «Giornata» as its time (no separate strip).
+        XCTAssertFalse(app.scrollViews["calendar-all-day-strip"].exists)
+        let event = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "calendar-timeline-event:", "Evento oggi")).firstMatch
+        XCTAssertTrue(exists(event, app: app))
+        XCTAssertTrue(event.label.contains("Giornata"), "All-day events show «Giornata» in place of the time")
         XCTAssertTrue(event.isHittable)
         event.tap(); XCTAssertTrue(app.navigationBars["Modifica attività"].waitForExistence(timeout: 10))
     }
@@ -221,7 +221,7 @@ final class NativeRevision71UITests: XCTestCase {
         XCTAssertGreaterThanOrEqual(budget.frame.height.rounded(), 44)
         capture("71-finance-reference-layout")
         analysis.tap(); XCTAssertTrue(app.staticTexts["finance-analysis-heading"].waitForExistence(timeout: 10))
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.buttons["finance-analysis-back"].tap() // REVIEW-95: Analisi has its own back button, no navigation bar
         reveal(budget, in: surface, app: app); budget.tap(); XCTAssertTrue(app.navigationBars["Budget"].waitForExistence(timeout: 10))
         app.navigationBars.buttons.element(boundBy: 0).tap()
         app.buttons["finance-new-plan"].tap()
@@ -267,7 +267,8 @@ final class NativeRevision71UITests: XCTestCase {
         let today = app.buttons["calendar-day-" + day()]
         reveal(today, in: app.scrollViews["calendar-scroll"], app: app); today.tap()
         let slot = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "calendar-timeline-event:", "Slot completato test")).firstMatch
-        XCTAssertTrue(exists(slot, app: app)); XCTAssertEqual(slot.value as? String, "Completata")
+        // The build 95 day list shows the activity at its time; completion is kept in Attività (checked above).
+        XCTAssertTrue(exists(slot, app: app)); XCTAssertTrue(slot.label.contains("Slot completato test"))
         capture("71-completed-timed-activity")
     }
     func testReducedMotionAndLargeTextKeepMonthDayAndEditorUsable() {
