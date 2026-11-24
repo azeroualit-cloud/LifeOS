@@ -225,7 +225,7 @@ struct NativeFinanceAlertsScreen: View {
                         rule(0, "Ritmo sopra la norma", "media 3 mesi oltre il " + String(alerts.settings.rhythmThreshold) + "% della norma", isOn: $alerts.settings.rhythmOn) {
                             stepper("Soglia", String(alerts.settings.rhythmThreshold) + "%", value: $alerts.settings.rhythmThreshold, range: 5...30, step: 5, id: "alerts-rhythm")
                         }
-                        rule(1, "Spese ricorrenti fuori norma", "bollette e abbonamenti oltre +" + String(alerts.settings.recurringPercent) + "% e +" + String(alerts.settings.recurringEuro) + " €", isOn: $alerts.settings.recurringOn) {
+                        rule(1, "Spese ricorrenti fuori norma", "bollette e abbonamenti oltre +" + String(alerts.settings.recurringPercent) + "% e +" + String(alerts.settings.recurringEuro) + "\u{00A0}€", isOn: $alerts.settings.recurringOn) {
                             stepper("Oltre la norma", "+" + String(alerts.settings.recurringPercent) + "%", value: $alerts.settings.recurringPercent, range: 10...60, step: 5, id: "alerts-recurring-percent")
                             stepper("E almeno", String(alerts.settings.recurringEuro) + " €", value: $alerts.settings.recurringEuro, range: 5...50, step: 5, id: "alerts-recurring-euro")
                         }
