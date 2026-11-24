@@ -164,6 +164,8 @@ struct LOAnalysisCard<Content: View>: View {
 struct NativeRhythmCard: View {
     let flows: [NativeMonthFlow]
     let hidden: Bool
+    /// ANALYSIS-START-PICKER-2026-11-24: the first month of the norm, chosen freely (also the fund and Giorno per giorno).
+    var start: Binding<String>? = nil
     var body: some View {
         LOAnalysisCard(title: "Ritmo", trailing: "", identifier: "finance-rhythm") {
             if let norm = NativeFinanceAnalysis93.norm(flows) {
@@ -175,6 +177,14 @@ struct NativeRhythmCard: View {
                 paceRow("3 mesi", NativeFinanceAnalysis93.pace(flows, months: 3))
             } else {
                 Text("Nessun mese completo").font(.subheadline).foregroundStyle(NativeDesign.secondary)
+            }
+            if let start {
+                Divider()
+                NativeMonthPicker(title: "Calcolata da", selection: Binding(get: { start.wrappedValue }, set: { value in
+                    start.wrappedValue = min(value, CivilDate.month()) // never a month still to come
+                }), pastOnly: true)
+                .font(.subheadline).foregroundStyle(NativeDesign.secondary)
+                .accessibilityIdentifier("finance-analysis-start")
             }
         }
     }

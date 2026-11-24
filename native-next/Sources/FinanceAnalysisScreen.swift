@@ -29,30 +29,6 @@ struct FinanceAnalysisScreen: View {
     @AppStorage("lifeos-analysis-start") private var analysisStart = "2026-07"
     @State private var dailyByMonth: [String: [Int: Double]] = [:]
     @State private var dailyLoading = false
-    private var availableMonths: [String] {
-        let rows = store.finance.records("yearly").filter { $0.flag("hasRecords") || $0.amount("spent") > 0 }.map { $0.text("month") }
-        return Array(Set(rows + [CivilDate.month()])).sorted()
-    }
-    private var startChip: some View {
-        Menu {
-            ForEach(availableMonths, id: \.self) { month in
-                Button(CivilDate.monthTitle(month)) { analysisStart = month }
-            }
-        } label: {
-            HStack(spacing: NativeDesign.Space.xs) {
-                Text("Da " + CivilDate.monthTitle(analysisStart).lowercased()).font(.subheadline.weight(.semibold))
-                Image(systemName: "chevron.up.chevron.down").font(.caption2.weight(.semibold)).foregroundStyle(NativeDesign.secondary)
-            }
-            .foregroundStyle(Color.primary)
-            .padding(.horizontal, NativeDesign.Space.medium)
-            .frame(minHeight: NativeDesign.Layout.compactControl)
-            .modifier(NativeGlass())
-            .frame(minHeight: NativeDesign.Layout.touchTarget)
-            .contentShape(Rectangle())
-        }
-        .accessibilityLabel("Analisi dal mese " + CivilDate.monthTitle(analysisStart))
-        .accessibilityIdentifier("finance-analysis-start")
-    }
     /// Movements of every chosen month, read once per period (Giorno per giorno).
     private func loadDaily() async {
         let months = NativeFinanceAnalysis93.months(from: analysisStart, to: CivilDate.month())
@@ -79,11 +55,10 @@ struct FinanceAnalysisScreen: View {
             NativeToolbarButton(symbol: "chevron.left", label: "Indietro") { dismiss() }.accessibilityIdentifier("finance-analysis-back")
             Text("Analisi").font(.title.bold()).lineLimit(1).accessibilityAddTraits(.isHeader).accessibilityIdentifier("finance-analysis-heading")
             Spacer(minLength: NativeDesign.Space.small)
-            startChip
         }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.top, NativeDesign.Space.small).padding(.bottom, NativeDesign.Space.small)
         ScrollView {
             VStack(alignment: .leading, spacing: NativeDesign.Space.large) {
-                NativeRhythmCard(flows: flows, hidden: hidden)
+                NativeRhythmCard(flows: flows, hidden: hidden, start: $analysisStart)
                 NativeFundRunwayCard(fund: NativeFinanceAnalysis93.fund(store.finance), surplus: NativeFinanceAnalysis93.surplus(store.finance),
                                      norm: NativeFinanceAnalysis93.norm(flows), hidden: hidden)
                 LOAnalysisCard(title: "Stima patrimonio", trailing: "6 mesi prima · 6 dopo", identifier: "finance-wealth-estimate") {

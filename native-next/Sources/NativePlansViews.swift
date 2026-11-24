@@ -3,10 +3,13 @@ import SwiftUI
 struct NativeMonthPicker: View {
     let title: String
     @Binding var selection: String
+    /// Months already gone (Analisi start): years up to the current one, the last five before it.
+    var pastOnly = false
     private var month: Binding<Int> { Binding(get: { Int(selection.suffix(2)) ?? 1 }, set: { selection = String(selection.prefix(4)) + String(format: "-%02d", $0) }) }
     private var year: Binding<Int> { Binding(get: { Int(selection.prefix(4)) ?? 2026 }, set: { selection = String($0) + "-" + String(selection.suffix(2)) }) }
     private var years: ClosedRange<Int> {
         let current = Int(CivilDate.month().prefix(4))!, selected = Int(selection.prefix(4)) ?? current
+        if pastOnly { return min(current - 5, selected)...current }
         return min(current, selected)...min(2099, max(current + 20, selected))
     }
     // REVIEW-95C: month names never wrap («Novem-bre»); when the row is too narrow the pickers go under the title.
