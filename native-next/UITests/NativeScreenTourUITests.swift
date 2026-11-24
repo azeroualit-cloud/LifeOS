@@ -59,8 +59,24 @@ final class NativeScreenTourUITests: XCTestCase {
         scroll(app, prefix + " 03 Dashboard fondo")
         // Avvisi: always reachable from Impostazioni, also when every alert was ignored.
         app.swipeDown(velocity: .fast); app.swipeDown(velocity: .fast)
+        // REVIEW-95E: the next time opens its sheet, then the month of times.
+        if tap(app.buttons["home-next-time"]) {
+            shot(prefix + " 01b Orari", app)
+            if tap(app.buttons["times-month-open"]) { shot(prefix + " 01c Calendario degli orari", app) }
+            for _ in 0..<3 where !app.tabBars.firstMatch.isHittable {
+                let back = app.navigationBars.buttons.firstMatch
+                if back.exists && back.isHittable { back.tap() } else { dismissSheet(app) }
+            }
+        }
         if tap(app.buttons["Impostazioni"].firstMatch) {
             shot(prefix + " 03b Impostazioni", app)
+            if tap(app.buttons["settings-guide"]) {
+                shot(prefix + " 03f Guida", app)
+                app.swipeUp(velocity: .slow); shot(prefix + " 03g Guida sotto", app)
+                app.swipeUp(velocity: .slow); shot(prefix + " 03h Guida fondo", app)
+                let back = app.navigationBars.buttons.firstMatch
+                if back.exists && back.isHittable { back.tap() }
+            }
             for _ in 0..<3 where !app.buttons["settings-finance-alerts"].isHittable { app.swipeUp(velocity: .slow) }
             if tap(app.buttons["settings-finance-alerts"]) {
                 shot(prefix + " 03c Avvisi", app)
@@ -84,7 +100,10 @@ final class NativeScreenTourUITests: XCTestCase {
         if tap(app.buttons["calendar-view-month"]) {
             let formatter = DateFormatter(); formatter.dateFormat = "yyyy-MM-dd"; formatter.locale = Locale(identifier: "en_US_POSIX")
             let later = formatter.string(from: Calendar.current.date(byAdding: .day, value: -5, to: Date()) ?? Date())
-            if tap(app.buttons["calendar-day-" + later]) { shot(prefix + " 06b Calendario giorno", app) }
+            if tap(app.buttons["calendar-day-" + later]) {
+                shot(prefix + " 06b Calendario giorno", app)
+                if tap(app.buttons["calendar-private"]) { shot(prefix + " 06c Privato", app); dismissSheet(app) }
+            }
         }
 
         app.openMainTab("Salute")

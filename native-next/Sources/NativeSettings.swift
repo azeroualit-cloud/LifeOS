@@ -25,6 +25,11 @@ struct NativeSettings: View {
                     do { backup = JSONDocument(data: try online.fullBackup(app: try store.backupData())); exporting = true } catch { message = error.localizedDescription }
                 }.accessibilityIdentifier("settings-full-backup")
             }
+            // GUIDES-INFOGRAPHICS-2026-11-24
+            Section("Guida") {
+                NavigationLink { NativeGuideScreen() } label: { Label("Come funziona LifeOS", systemImage: "book") }
+                    .accessibilityIdentifier("settings-guide")
+            }
             Section("Aspetto") {
                 Picker("Tema", selection: $theme) { Text("Automatico").tag("system"); Text("Chiaro").tag("light"); Text("Scuro").tag("dark") }
             }
