@@ -1,0 +1,55 @@
+name: Life OS - categorie nel database (solo lettura)
+# Attempt 1. Read-only audit requested on 24/11/2026 («il db è pieno di categorie che non esistono»).
+# Lists the category options the server offers and, month by month, how many movements use each
+# category. Writes nothing; logs only category names, counts and months (no names of movements, no amounts).
+on:
+  push:
+    branches: ['codex/build93']
+    paths: ['.github/workflows/lifeos-category-audit95.yml']
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Categorie usate e offerte
+        env:
+          LIFEOS_TEST_PASSWORD: ${{ secrets.LIFEOS_TEST_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import os,json,http.cookiejar,urllib.request,datetime,collections
+          origin='https://lifeos-native-test.a-zeroual-it.workers.dev'
+          client=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+          def post(path,payload):
+              request=urllib.request.Request(origin+path,data=json.dumps(payload).encode(),method='POST',headers={'Origin':origin,'Content-Type':'application/json','User-Agent':'LifeOS-Category-Audit/1.0'})
+              with client.open(request,timeout=90) as response:return json.loads(response.read())
+          post('/auth/login',{'user':'nas','password':os.environ['LIFEOS_TEST_PASSWORD']})
+          options=post('/api/getFinanceCategoryOptions',[])
+          print('OPTIONS', json.dumps(options, ensure_ascii=False))
+          today=datetime.date.today(); counts=collections.Counter(); months=collections.defaultdict(set); kinds=collections.defaultdict(collections.Counter)
+          display=collections.Counter()
+          y,m=today.year-3,today.month
+          while (y,m)<=(today.year,today.month):
+              try:
+                  data=post('/api/getFinanceData',[y,m])
+              except Exception as e:
+                  print('MONTH_FAIL',y,m,type(e).__name__); data={}
+              for t in data.get('transactions',[]) or []:
+                  c=str(t.get('category') or '(vuota)'); counts[c]+=1; months[c].add('%04d-%02d'%(y,m)); kinds[c][str(t.get('type') or '')]+=1
+                  d=t.get('displayCategory')
+                  if d and d!=c: display[(c,str(d))]+=1
+              m+=1
+              if m>12: y,m=y+1,1
+          opts=set(options if isinstance(options,list) else options.get('options',[]) if isinstance(options,dict) else [])
+          print('CATEGORIES_IN_MOVEMENTS')
+          for c,n in counts.most_common():
+              ms=sorted(months[c]); print('CAT|%s|%d|%s..%s|in_options=%s|types=%s'%(c,n,ms[0],ms[-1],c in opts,dict(kinds[c])))
+          print('OPTIONS_NOT_USED', sorted(opts-set(counts)))
+          for (c,d),n in display.most_common(): print('DISPLAY|%s|%s|%d'%(c,d,n))
+          json.dump({'options':sorted(opts),'counts':counts,'months':{k:sorted(v) for k,v in months.items()},'display':[[c,d,n] for (c,d),n in display.items()]},open('category-audit.json','w'),ensure_ascii=False,indent=1)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: category-audit-${{ github.sha }}
+          path: category-audit.json
+          retention-days: 7
