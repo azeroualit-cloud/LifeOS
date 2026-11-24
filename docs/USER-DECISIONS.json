@@ -1449,11 +1449,26 @@
       "original_quote": "Una sola strada: togliere «Registra pagamento» e lasciare tutto in Nuovo movimento. Lì aggiungerei la scelta «già registrato» quando scegli un piano. — tutta la questione di aggiunta e pagamento finanza è stra confusionaria, dovremmo avere nuova spesa con un sistema standardizzato di poter dividere la spesa tra risparmi e budget mensile e rateizzazione, se è un utenza pure. Mentre piano è solo per anticipo budget, fondo senza scadenza, spesa ricorrente fissa e utenza con quota stimata possono essere fusi? e rateizzazione spesa togliamo da li. Così piano è usato più salturariamente, e invece Spesa più spesso. Ma non bisogna avere 40 schermate incomprensibili e confusionarie",
       "rule": "Una sola strada per i soldi che escono: Nuova spesa, con un blocco standard per dividere tra risparmi, budget mensile e rate (anche per le bollette) e la scelta «già registrato» quando si sceglie un piano; «Registra pagamento» sparisce. Il piano serve solo per anticipo di budget, fondo senza scadenza e spesa ricorrente (fissa o stimata, da fondere se possibile); la spesa a rate esce dai piani. Poche schermate chiare. Proposta visiva prima dell'implementazione.",
       "relation": "Compatibile con FUNDING-BLOCK-2026-11-21 (il blocco «Da dove arrivano i soldi» resta, in Nuova spesa). Sostituisce l'ingresso «Registra pagamento» di REFERENCE-GAPS-95 mantenendone la funzione (differenza ripartita) dentro Nuova spesa.",
-      "open_questions": [
-        "Fondere fissa e stimata in un solo tipo «Ricorrente»?",
-        "Il piano Obiettivo resta?",
-        "Cosa fare dei piani a rate già esistenti"
-      ]
+      "answers_2026_11_24": "Obiettivo tolto (si usa il Fondo: chiudendolo i soldi vanno nei risparmi). I 6 piani a rate attivi restano ma si vedono come spese rateizzate, non piani; da ora le rate sono spese rateizzate."
+    },
+    {
+      "id": "CATEGORY-ADMIN-2026-11-24",
+      "status": "ACTIVE",
+      "scope": "Categorie Finanza (sito Admin e app)",
+      "recorded_on": "2026-11-24",
+      "provenance": "Messaggio utente in chat, 24/11/2026",
+      "original_quote": "Per quanto riguarda le categorie, visto che tanto ancora l'IPA non c'è, implementiamo questa cosa allora. E magari preparami anche le categorie che non sono attive, così che faccia io automaticamente il cambio e lo spostamento di un certo tipo di categoria o movimento in delle nuove categorie che scelgo io. Magari proponimi delle categorie che con le loro sottocategorie ovviamente ci deve essere la gestione completa, che magari possibilmente potrebbero mancare al giorno d'oggi nella versione attuale.",
+      "rule": "In Admin sul sito: gestione completa di gruppi e voci delle categorie, salvata sul server e letta dall'app senza nuova IPA; elenco delle categorie non attive trovate nei movimenti, con spostamento dei movimenti nella categoria scelta dall'utente; proposta di categorie e sottocategorie mancanti, da applicare solo se l'utente la sceglie."
+    },
+    {
+      "id": "ANALYSIS-START-PICKER-2026-11-24",
+      "status": "ACTIVE",
+      "scope": "Analisi Finanza (app e sito)",
+      "recorded_on": "2026-11-24",
+      "provenance": "Messaggio utente in chat, 24/11/2026",
+      "original_quote": "Per quanto riguarda la 3, spostala, va bene, ma invece di usare un da gennaio o da luglio, fammi scegliere a me magari il mese e l'anno da cui iniziare, invece di fare questa roba statica.",
+      "rule": "Il mese di inizio dell'Analisi si sceglie dentro la scheda Ritmo con mese e anno liberi, non con un elenco fisso in alto.",
+      "relation": "Precisa FINANCE-ANALYSIS-RANGE-2026-11-23."
     }
   ],
   "pending_confirmations": [
