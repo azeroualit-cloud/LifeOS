@@ -1518,6 +1518,18 @@
       "conflicts_with": "HEALTH-TREND-93-2026-11-21 (Peso e Alimento sopra la barra)",
       "note": "Parafrasi: togliere il pulsante Alimento da Salute. Domanda META-01 posta.",
       "resolution": "Chiarimento utente: «io intendevo che alimento deve essere a DESTRA [...] COME LO HAI FATTO IN DASHBOARD». Nessun conflitto con HEALTH-TREND-93: in Salute Peso a sinistra e Alimento a destra, come in Dashboard."
+    },
+    {
+      "id": "BILL-PAST-MONTHS-2026-11-24",
+      "status": "PENDING_CONFIRMATION",
+      "recorded_on": "2026-11-24",
+      "provenance": "Messaggio utente in chat Claude, 24/11/2026",
+      "original_quote": "acqua should be 221 divide in 3 months also the preivous ones, but by this logic does that mean i can have perfect months and ruin them after?, because by our logic from the previous months it should only count the accantonati e poi l'eccesso è contato sul mese corrente giusto? (scelgo io se da risparmi o budget)",
+      "proposed_rule": "I mesi passati non cambiano mai: contano solo quanto hanno accantonato. Alla bolletta l'eccedenza (o tutto, se non c'era quota) va sul mese corrente, e l'utente sceglie risparmi o budget. Il periodo di competenza serve solo a calcolare la media. Il livellamento aggiorna solo la media, senza recupero automatico dello scarto.",
+      "conflicts_with": [
+        "UTILITY-LEVELLING-2026-11-24 (recupero automatico dello scarto nei mesi successivi)",
+        "FUNDING-BLOCK-2026-11-21 («Cambiare il periodo di competenza ricalcola i mesi toccati», anche passati)"
+      ]
     }
   ],
   "history": [
