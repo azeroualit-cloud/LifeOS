@@ -35,7 +35,8 @@ def strip(text):
 
 
 def normal(text):
-    # The bundler may rename locals with a numeric suffix (month -> month2, id -> id2): ignore it.
+    # The bundler renames locals with a numeric suffix (month -> month2) and wraps single arrow parameters in parentheses.
+    text = re.sub(r'(?<![\w$)])\(([A-Za-z_$][\w$]*)\)\s*=>', r'\1=>', text)
     return re.sub(r'(?<![\w$])([A-Za-z_$][A-Za-z_$]*)\d+(?![\w$])', r'\1', split.compact(text))
 
 

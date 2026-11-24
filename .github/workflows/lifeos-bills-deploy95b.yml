@@ -2,7 +2,7 @@ name: LifeOS bills 95b (tests, audit, deploy)
 # BILL-PAST-MONTHS-2026-11-24: bills never change past months; the excess goes on savings or the chosen months;
 # the estimated quota follows the 12-month average. A push that changes this file is the deliberate start
 # (DEPLOY-WORKERS-93). Both Workers; only the known previous versions are replaced, otherwise nothing is written.
-# Attempt 3 (bundler renames like month2 are ignored when comparing)
+# Attempt 4 (bundler renames and arrow parentheses are ignored when comparing; live = 7c24f3f)
 on:
   push:
     branches: ['codex/build93']
