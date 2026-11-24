@@ -318,18 +318,26 @@ struct CalendarScreen: View {
             .sorted { ($0.text("start_time").isEmpty ? "00:00" : $0.text("start_time"), $0.integer("id")) < ($1.text("start_time").isEmpty ? "00:00" : $1.text("start_time"), $1.integer("id")) }
         let tasks = tasksByDay[day] ?? []
         let dayShift = self.shift(on: day)
+        // AGENDA-TIMELINE-2026-11-24: one circle per entry, joined by a line through the timed entries of the day.
+        let timed = events.map { !$0.text("start_time").isEmpty } + tasks.map { !$0.text("scheduled_time").isEmpty }
+        let line = dayShift?.color ?? NativeDesign.calendarTitle
+        let links: (Int) -> (up: Bool, down: Bool) = { i in
+            (timed[i] && i > 0 && timed[i - 1], timed[i] && i + 1 < timed.count && timed[i + 1])
+        }
         return LOListCard {
             ForEach(Array(events.enumerated()), id: \.offset) { index, event in
                 agendaRow(time: event.text("start_time").isEmpty ? "Giornata" : event.text("start_time"),
                           title: event.text("title", fallback: "Evento"), detail: eventDetail(event),
-                          color: dayShift?.color ?? NativeDesign.calendarTitle, isLast: index == events.count - 1 && tasks.isEmpty) {
+                          color: line, isLast: index == events.count - 1 && tasks.isEmpty,
+                          link: links(index), done: event.text("occurrence_status") == "done") {
                     router.sheet = .event(event)
                 }
                 .accessibilityIdentifier("calendar-timeline-event:" + String(event.integer("id")))
             }
             ForEach(Array(tasks.enumerated()), id: \.offset) { index, task in
                 agendaRow(time: task.text("scheduled_time").isEmpty ? "Attività" : task.text("scheduled_time"),
-                          title: task.text("title"), detail: "", color: NativeDesign.secondary, isLast: index == tasks.count - 1) {
+                          title: task.text("title"), detail: "", color: NativeDesign.secondary, isLast: index == tasks.count - 1,
+                          link: links(events.count + index), done: task.text("status") == "done") {
                     router.sheet = .task(task)
                 }
                 .accessibilityIdentifier("calendar-timeline-task:" + String(task.integer("id")))
@@ -352,13 +360,14 @@ struct CalendarScreen: View {
         if !event.text("location").isEmpty { parts.append(event.text("location")) }
         return parts.joined(separator: " · ")
     }
-    private func agendaRow(time: String, title: String, detail: String, color: Color, isLast: Bool, open: @escaping () -> Void) -> some View {
+    private func agendaRow(time: String, title: String, detail: String, color: Color, isLast: Bool,
+                           link: (up: Bool, down: Bool) = (false, false), done: Bool = false, open: @escaping () -> Void) -> some View {
         Button(action: open) {
-            LOListRow(isLast: isLast) {
+            // The separator starts after the time and the timeline, so it never crosses the line.
+            LOListRow(isLast: isLast, leadingInset: NativeDesign.Space.large + NativeDesign.Layout.categoryWidth * 0.7 + NativeDesign.Space.medium * 2 + NativeDesign.Space.medium) {
                 Text(time).font(.subheadline).monospacedDigit().foregroundStyle(NativeDesign.secondary)
                     .frame(width: NativeDesign.Layout.categoryWidth * 0.7, alignment: .leading)
-                Capsule().fill(color).frame(width: NativeDesign.Space.xs, height: NativeDesign.Layout.toolbarVisual - NativeDesign.Space.xxs)
-                    .accessibilityHidden(true)
+                NativeTimelineMark(color: color, up: link.up, down: link.down, done: done)
                 VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
                     Text(title).font(.subheadline).foregroundStyle(.primary).lineLimit(2)
                     if !detail.isEmpty { Text(detail).font(.footnote).foregroundStyle(NativeDesign.secondary) }
@@ -801,4 +810,29 @@ enum CalendarMetrics92 {
 /// How far the agenda looks ahead of the selected day.
 enum NativeCalendarAgendaRange {
     static let days = 30
+}
+
+
+/// AGENDA-TIMELINE-2026-11-24: a small circle (filled when done) with the line to the entries above and below.
+/// It reaches the row edges (the row's vertical padding) so consecutive rows form one line.
+struct NativeTimelineMark: View {
+    let color: Color
+    let up: Bool
+    let down: Bool
+    let done: Bool
+
+    var body: some View {
+        VStack(spacing: NativeDesign.Space.none) {
+            Rectangle().fill(up ? color.opacity(0.6) : .clear).frame(width: NativeDesign.Space.xxs).frame(maxHeight: .infinity)
+            ZStack {
+                Circle().fill(done ? color : NativeDesign.canvas)
+                Circle().strokeBorder(color, lineWidth: NativeDesign.Space.xxs)
+            }
+            .frame(width: NativeDesign.Space.medium, height: NativeDesign.Space.medium)
+            Rectangle().fill(down ? color.opacity(0.6) : .clear).frame(width: NativeDesign.Space.xxs).frame(maxHeight: .infinity)
+        }
+        .frame(width: NativeDesign.Space.medium)
+        .padding(.vertical, -NativeDesign.Space.small)
+        .accessibilityHidden(true)
+    }
 }
