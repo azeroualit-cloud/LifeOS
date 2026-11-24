@@ -75,7 +75,7 @@ enum NativeIslamicDays {
         c.timeZone = TimeZone(identifier: "Europe/Rome") ?? .current
         return c
     }()
-    private static func date(_ day: String) -> Date? {
+    private static func noon(_ day: String) -> Date? {
         let parts = day.split(separator: "-").compactMap { Int($0) }
         guard parts.count == 3 else { return nil }
         var g = Calendar(identifier: .gregorian); g.timeZone = calendar.timeZone
@@ -84,7 +84,7 @@ enum NativeIslamicDays {
 
     /// «Inizio Ramadan», «Fine Ramadan», «Eid al-Fitr», «Eid al-Adha» on the matching days.
     static func events(on day: String) -> [String] {
-        guard let date = date(day), let next = date(CivilDate.adding(1, to: day)) else { return [] }
+        guard let date = noon(day), let next = noon(CivilDate.adding(1, to: day)) else { return [] }
         let h = calendar.dateComponents([.month, .day], from: date), n = calendar.dateComponents([.month], from: next)
         var out: [String] = []
         if h.month == 9 && h.day == 1 { out.append("Inizio Ramadan") }
