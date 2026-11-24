@@ -188,17 +188,17 @@ struct DashboardScreen: View {
                 .sheet(isPresented: $showingTimes) {
                     NavigationStack {
                         List {
+                            // TIMES-MONTH-CALENDAR-2026-11-24: every day of the month, not only today.
+                            Section {
+                                NavigationLink { NativeTimesMonthScreen() } label: { Label("Calendario degli orari", systemImage: "calendar") }
+                                    .accessibilityIdentifier("times-month-open")
+                            }
                             ForEach(Array(Set([CivilDate.day(now), next.day])).sorted(), id: \.self) { day in
                                 Section("Empoli · " + CivilDate.label(day)) {
                                     ForEach(NativeNextTime.schedule(day: day), id: \.label) { time in
                                         LabeledContent(time.label, value: time.time).monospacedDigit()
                                     }
                                 }
-                            }
-                            // TIMES-MONTH-CALENDAR-2026-11-24: every day of the month, not only today.
-                            Section {
-                                NavigationLink { NativeTimesMonthScreen() } label: { Label("Calendario degli orari", systemImage: "calendar") }
-                                    .accessibilityIdentifier("times-month-open")
                             }
                             Section { Text("Empoli · Europe/Rome").font(.footnote).foregroundStyle(NativeDesign.secondary) }
                         }.modifier(NativeListAppearance()).navigationTitle("Orari").navigationBarTitleDisplayMode(.inline).toolbar { DoneButton() }

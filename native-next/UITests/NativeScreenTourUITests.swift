@@ -95,14 +95,16 @@ final class NativeScreenTourUITests: XCTestCase {
 
         app.openMainTab("Calendario")
         shot(prefix + " 05 Calendario mese", app)
-        if tap(app.buttons["calendar-view-agenda"]) { shot(prefix + " 06 Calendario agenda", app) }
+        if tap(app.buttons["calendar-view-agenda"]) {
+            shot(prefix + " 06 Calendario agenda", app)
+            if tap(app.buttons["calendar-private"]) { shot(prefix + " 06c Privato", app); dismissSheet(app) }
+        }
         // REVIEW-95: a day without events still opens its agenda.
         if tap(app.buttons["calendar-view-month"]) {
             let formatter = DateFormatter(); formatter.dateFormat = "yyyy-MM-dd"; formatter.locale = Locale(identifier: "en_US_POSIX")
             let later = formatter.string(from: Calendar.current.date(byAdding: .day, value: -5, to: Date()) ?? Date())
             if tap(app.buttons["calendar-day-" + later]) {
                 shot(prefix + " 06b Calendario giorno", app)
-                if tap(app.buttons["calendar-private"]) { shot(prefix + " 06c Privato", app); dismissSheet(app) }
             }
         }
 
