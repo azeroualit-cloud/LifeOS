@@ -17,6 +17,8 @@ final class NativeRevision75UITests: XCTestCase {
         for step in 0..<12 {
             choice = app.buttons.visible(title)
             if choice.exists && choice.isHittable { break }
+            let any = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@ AND elementType != %d", title, XCUIElement.ElementType.staticText.rawValue)).firstMatch
+            if any.exists && any.isHittable { choice = any; break }
             let (from, to): (CGFloat, CGFloat) = step < 6 ? (0.75, 0.35) : (0.35, 0.75)
             app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: from))
                 .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: to)))

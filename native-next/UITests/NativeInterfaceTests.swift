@@ -513,7 +513,8 @@ final class NativeInterfaceTests: XCTestCase {
         revealExpenseFormElement(initialDestination, in: app)
         XCTAssertTrue(initialDestination.isHittable)
         XCTAssertTrue(initialDestination.label.contains("Acqua"))
-        let savings = app.descendants(matching: .any).matching(identifier: "expense-savings-preview").firstMatch
+        // BILL-PAST-MONTHS-2026-11-24: a bill with a plan shows «Dagli altri risparmi» with − / + and the budget months.
+        let savings = app.descendants(matching: .any).matching(NSPredicate(format: "identifier IN %@", ["expense-savings-preview", "expense-split-savings"])).firstMatch
         revealExpenseFormElement(savings, in: app)
         XCTAssertTrue(savings.isHittable)
         XCTAssertTrue(app.staticTexts["Dagli altri risparmi"].exists)
@@ -1002,7 +1003,9 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertTrue(name.waitForExistence(timeout: 5))
         for _ in 0..<3 where (name.value(forKey: "hasKeyboardFocus") as? Bool) != true { name.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap() }
         name.typeText("Anticipo prova")
-        let amount = app.textFields["plan-amount"]; amount.tap(); amount.typeText("250")
+        let amount = app.textFields["plan-amount"]
+        for _ in 0..<3 where (amount.value(forKey: "hasKeyboardFocus") as? Bool) != true { amount.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap() }
+        amount.typeText("250")
         app.buttons["Fine"].tap()
         XCTAssertEqual(app.datePickers.count, 0, "Budget periods must never expose a day picker")
         capture("plans-advance-preview")
@@ -1046,6 +1049,9 @@ final class NativeInterfaceTests: XCTestCase {
         // FINANCE-ENTRY-SIMPLIFY: «Paga con Nuova spesa» opens Nuova spesa with the plan; «Già registrata?» links a movement.
         let pay = app.buttons["plan-record-payment"]; reveal(pay, in: app); pay.tap()
         XCTAssertTrue(app.navigationBars["Nuovo movimento"].waitForExistence(timeout: 10))
+        let payAmount = app.textFields["movement-amount"]
+        XCTAssertTrue(payAmount.waitForExistence(timeout: 10)); payAmount.tap(); payAmount.typeText("40")
+        app.collectionViews.firstMatch.swipeDown(velocity: .slow) // scrolling closes the keyboard
         let existing = app.buttons["expense-plan-existing"]
         for _ in 0..<6 { if existing.isHittable { break }; app.collectionViews.firstMatch.swipeUp() }
         XCTAssertTrue(existing.isHittable); existing.tap()
