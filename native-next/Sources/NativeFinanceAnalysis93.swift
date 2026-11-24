@@ -129,13 +129,26 @@ struct LOAnalysisCard<Content: View>: View {
     let title: String
     var trailing = ""
     var identifier: String
+    /// REVIEW-95C: a header control on the right (the text of `trailing` then goes under the title).
+    var accessory: AnyView? = nil
     @ViewBuilder var content: Content
     var body: some View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
-            HStack(alignment: .firstTextBaseline) {
-                Text(title).font(.headline).foregroundStyle(NativeDesign.financeTitle).accessibilityAddTraits(.isHeader)
-                Spacer(minLength: NativeDesign.Space.small)
-                if !trailing.isEmpty { Text(trailing).font(.footnote).foregroundStyle(NativeDesign.secondary) }
+            if let accessory {
+                HStack(alignment: .center, spacing: NativeDesign.Space.small) {
+                    VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
+                        Text(title).font(.headline).foregroundStyle(NativeDesign.financeTitle).accessibilityAddTraits(.isHeader)
+                        if !trailing.isEmpty { Text(trailing).font(.footnote).foregroundStyle(NativeDesign.secondary) }
+                    }
+                    Spacer(minLength: NativeDesign.Space.small)
+                    accessory
+                }
+            } else {
+                HStack(alignment: .firstTextBaseline) {
+                    Text(title).font(.headline).foregroundStyle(NativeDesign.financeTitle).accessibilityAddTraits(.isHeader)
+                    Spacer(minLength: NativeDesign.Space.small)
+                    if !trailing.isEmpty { Text(trailing).font(.footnote).foregroundStyle(NativeDesign.secondary) }
+                }
             }
             content
         }
@@ -337,6 +350,8 @@ enum NativeCategoryChoice {
     static func filter(_ rows: [Record], chosen: Set<String>) -> [Record] {
         chosen.isEmpty ? rows : rows.filter { chosen.contains($0.text("name")) }
     }
+    /// Short label for the header control: «Tutte», the one category, or «3 categorie».
+    static func shortLabel(_ chosen: Set<String>) -> String { chosen.isEmpty ? "Tutte" : label(chosen) }
     static func label(_ chosen: Set<String>) -> String {
         switch chosen.count {
         case 0: return "Tutte le categorie"

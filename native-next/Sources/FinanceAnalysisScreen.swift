@@ -117,7 +117,7 @@ struct FinanceAnalysisScreen: View {
     private var categoryPicker: some View {
         let names = categoryRows.filter { $0.amount("amount") > 0 }.map { $0.text("name") }.sorted()
         let chosen = chosenCategories
-        return LOFilterPill(title: "Categorie", value: NativeCategoryChoice.label(chosen), isActive: true, identifier: "finance-category-choice") {
+        return Menu {
             Button { chosenCategoriesText = "" } label: {
                 if chosen.isEmpty { Label("Tutte le categorie", systemImage: "checkmark") } else { Text("Tutte le categorie") }
             }
@@ -128,16 +128,29 @@ struct FinanceAnalysisScreen: View {
                     }
                 }
             }
+        } label: {
+            // REVIEW-95C: a compact header control instead of a pill floating under the segments.
+            HStack(spacing: NativeDesign.Space.xs) {
+                Text(NativeCategoryChoice.shortLabel(chosen)).lineLimit(1)
+                Image(systemName: "chevron.up.chevron.down").font(.caption2.weight(.semibold))
+            }
+            .font(.subheadline.weight(.medium)).foregroundStyle(Color.primary)
+            .padding(.horizontal, NativeDesign.Space.medium)
+            .frame(minHeight: NativeDesign.Layout.compactControl)
+            .loTileSurface(NativeDesign.actionSurface, capsule: true)
+            .frame(minHeight: NativeDesign.Layout.touchTarget)
+            .contentShape(Rectangle())
         }
         .menuActionDismissBehavior(.disabled)
+        .accessibilityLabel("Categorie, " + NativeCategoryChoice.label(chosen))
+        .accessibilityIdentifier("finance-category-choice")
     }
     private var categories: some View {
-        LOAnalysisCard(title: "Spese per categoria", trailing: categoryTrailing, identifier: "finance-categories") {
+        LOAnalysisCard(title: "Spese per categoria", trailing: categoryTrailing, identifier: "finance-categories", accessory: AnyView(categoryPicker)) {
             LOSegmented(options: [("3 mesi", "3"), ("6 mesi", "6"), ("12 mesi", "12")], selection: Binding(
                 get: { String(categoryRange) + " mesi" },
                 set: { categoryRange = Int($0.prefix(while: { $0.isNumber })) ?? 3 }), identifierPrefix: "category-period-")
-            // REVIEW-95: the categories to compare are chosen here (all by default); the months are the segment above.
-            categoryPicker
+            // REVIEW-95: the categories to compare are chosen in the header (all by default); the months are the segment.
             let shown = NativeCategoryChoice.filter(categoryRows, chosen: chosenCategories)
             if categoryLoading || loadedKey != requestKey { ProgressView("Categorie: \(categoryLoadedMonths) di \(months.count) mesi…") }
             else if let categoryError { NativeInlineMessage(text: categoryError) }
