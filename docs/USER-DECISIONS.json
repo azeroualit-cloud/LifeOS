@@ -1176,7 +1176,12 @@
       "rule": "Ogni spesa, rateizzazione, bolletta, piano o pagamento mostra il blocco «Da dove arrivano i soldi»: i mesi del piano restituiscono quanto avevano accantonato (prestito), l'eccedenza la divide l'utente tra risparmi e budget, scegliendo i mesi di budget. Cambiare il periodo di competenza ricalcola i mesi toccati. Sostituisce UTILITY-CURRENT-BUDGET-01 (conferma META-01).",
       "supersedes": [
         "UTILITY-CURRENT-BUDGET-01"
-      ]
+      ],
+      "partially_superseded": {
+        "by": "BILL-PAST-MONTHS-2026-11-24",
+        "clause": "«Cambiare il periodo di competenza ricalcola i mesi toccati»: ora i mesi passati non cambiano; il periodo serve per la media e per l'Analisi.",
+        "on": "2026-11-24"
+      }
     },
     {
       "id": "FINANCE-PALETTE-2026-11-21",
@@ -1472,13 +1477,15 @@
     },
     {
       "id": "UTILITY-LEVELLING-2026-11-24",
-      "status": "ACTIVE",
+      "status": "SUPERSEDED",
       "scope": "Piani Ricorrente stimato (bollette) — server, app e sito",
       "recorded_on": "2026-11-24",
       "provenance": "Messaggio utente in chat Claude, 24/11/2026, risposta alla proposta «quota auto-livellante» e «risparmi liberi vs già destinati»",
       "original_quote": "let's do only the auto levelling. I dont want the free vs earmarked.",
       "rule": "La quota mensile di un piano Ricorrente stimato è un impegno: i soldi non spesi restano nei risparmi e le bollette si pagano da lì. Dopo ogni bolletta la quota = media degli ultimi 12 mesi + recupero dello scarto (bollette dei mesi coperti meno quote accantonate per gli stessi mesi), distribuito sui mesi successivi (almeno 3, o la durata tipica della bolletta). Poi la quota torna alla media. Nessuna vista «liberi vs già destinati».",
-      "relation": "Precisa FUNDING-BLOCK-2026-11-21 e FINANCE-ENTRY-SIMPLIFY-2026-11-24; la vista risparmi liberi/destinati è esplicitamente esclusa."
+      "relation": "Precisa FUNDING-BLOCK-2026-11-21 e FINANCE-ENTRY-SIMPLIFY-2026-11-24; la vista risparmi liberi/destinati è esplicitamente esclusa.",
+      "superseded_by": "BILL-PAST-MONTHS-2026-11-24",
+      "superseded_on": "2026-11-24"
     },
     {
       "id": "NEUTRAL-TIMES-WORDING-2026-11-24",
@@ -1489,6 +1496,16 @@
       "original_quote": "tra le regole c'era di non usare esplicitamente queste parole",
       "rule": "Nei testi visibili non si usa la parola esplicita per gli orari giornalieri (né nomi arabi): si dice «Orari» / «Prossimo orario», come già verificato dal test di base testHomeRestoresNeutralNextTimeWithoutArabicNames.",
       "relation": "La regola non era nel registro: ricostruita dal test dell'app di base e ora registrata."
+    },
+    {
+      "id": "BILL-PAST-MONTHS-2026-11-24",
+      "status": "ACTIVE",
+      "scope": "Bollette, piani Ricorrente stimato, budget dei mesi (server, app, sito)",
+      "recorded_on": "2026-11-24",
+      "provenance": "Proposta «il meglio di tutto» in chat Claude; conferma utente «yes», 24/11/2026 (META-01)",
+      "original_quote": "acqua should be 221 divide in 3 months also the preivous ones, but by this logic does that mean i can have perfect months and ruin them after?, because by our logic from the previous months it should only count the accantonati e poi l'eccesso è contato sul mese corrente giusto? (scelgo io se da risparmi o budget) / «how can we take the best of all» / «yes»",
+      "rule": "1) I mesi passati non cambiano mai: il periodo di competenza serve solo per la media e per l'Analisi (informativo). 2) La quota del Ricorrente stimato = media degli ultimi 12 mesi, dopo ogni bolletta, senza recupero nascosto. 3) Al pagamento il piano paga quanto accantonato; l'eccedenza la sceglie l'utente: Risparmi, Questo mese, o Prossimi mesi (dal mese corrente in poi, scelta predefinita). 4) Se la bolletta costa meno, il resto resta nel piano e copre per primo la bolletta successiva. Acqua: luglio–settembre invariati, quota 73,93 €, contatore di novembre corretto.",
+      "relation": "Sostituisce UTILITY-LEVELLING-2026-11-24 e la clausola sul ricalcolo dei mesi di FUNDING-BLOCK-2026-11-21."
     }
   ],
   "pending_confirmations": [
@@ -1518,18 +1535,6 @@
       "conflicts_with": "HEALTH-TREND-93-2026-11-21 (Peso e Alimento sopra la barra)",
       "note": "Parafrasi: togliere il pulsante Alimento da Salute. Domanda META-01 posta.",
       "resolution": "Chiarimento utente: «io intendevo che alimento deve essere a DESTRA [...] COME LO HAI FATTO IN DASHBOARD». Nessun conflitto con HEALTH-TREND-93: in Salute Peso a sinistra e Alimento a destra, come in Dashboard."
-    },
-    {
-      "id": "BILL-PAST-MONTHS-2026-11-24",
-      "status": "PENDING_CONFIRMATION",
-      "recorded_on": "2026-11-24",
-      "provenance": "Messaggio utente in chat Claude, 24/11/2026",
-      "original_quote": "acqua should be 221 divide in 3 months also the preivous ones, but by this logic does that mean i can have perfect months and ruin them after?, because by our logic from the previous months it should only count the accantonati e poi l'eccesso è contato sul mese corrente giusto? (scelgo io se da risparmi o budget)",
-      "proposed_rule": "I mesi passati non cambiano mai: contano solo quanto hanno accantonato. Alla bolletta l'eccedenza (o tutto, se non c'era quota) va sul mese corrente, e l'utente sceglie risparmi o budget. Il periodo di competenza serve solo a calcolare la media. Il livellamento aggiorna solo la media, senza recupero automatico dello scarto.",
-      "conflicts_with": [
-        "UTILITY-LEVELLING-2026-11-24 (recupero automatico dello scarto nei mesi successivi)",
-        "FUNDING-BLOCK-2026-11-21 («Cambiare il periodo di competenza ricalcola i mesi toccati», anche passati)"
-      ]
     }
   ],
   "history": [

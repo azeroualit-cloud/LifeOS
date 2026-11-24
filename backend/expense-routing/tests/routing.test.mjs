@@ -221,20 +221,34 @@ test('FUNDING-BLOCK build 95: bills never get a recovery on top of their compete
  const {ctx,payload}=await fixture();
  if (!(await core.expenseRouting.preview({...ctx,input:{category:'Acqua',amountCents:3000,date:'2026-10-28'}})).billSavingsDestination) { t.skip('Worker without bill savings'); return; }
  const bill={...payload,requestId:'bill-recovery-0001',competenceStartMonth:'2026-09',competenceEndMonth:'2026-10',utilityCompetenceVersion:1,budgetTreatment:'recovery',recoveryMonths:'2026-10',recoveryAmount:5};
- await assert.rejects(core.expenseRouting.save({...ctx,input:bill}),/periodo di competenza/);
+ await assert.rejects(core.expenseRouting.save({...ctx,input:bill}),/periodo di competenza|Prossimi mesi/);
  const ordinary={...bill,expenseDestination:'ordinary'};delete ordinary.planId;
- await assert.rejects(core.expenseRouting.save({...ctx,input:ordinary}),/periodo di competenza/);
+ await assert.rejects(core.expenseRouting.save({...ctx,input:ordinary}),/periodo di competenza|Prossimi mesi/);
 });
 test('FUNDING-BLOCK build 95: the savings part of a bill is kept on the command or on the plan payment',async(t)=>{
  const {ctx,payload,repository}=await fixture();
  if (!(await core.expenseRouting.preview({...ctx,input:{category:'Acqua',amountCents:3000,date:'2026-10-28'}})).billSavingsDestination) { t.skip('Worker without bill savings'); return; }
  const base={...payload,competenceStartMonth:'2026-09',competenceEndMonth:'2026-10',utilityCompetenceVersion:1};
  const ordinary={...base,requestId:'bill-savings-0001',expenseDestination:'ordinary',utilitySavingsCents:1200};delete ordinary.planId;
- await assert.rejects(core.expenseRouting.save({...ctx,input:{...ordinary,requestId:'bill-savings-bad',utilitySavingsCents:3000}}),/risparmi della bolletta/);
+ await assert.rejects(core.expenseRouting.save({...ctx,input:{...ordinary,requestId:'bill-savings-bad',utilitySavingsCents:3001}}),/risparmi della bolletta/);
  await core.expenseRouting.save({...ctx,input:ordinary});
  let {state}=await repository.read();assert.equal(state.expenseRoutingCommands['bill-savings-0001'].utilitySavingsCents,1200);
  const planned={...base,requestId:'bill-savings-0002',utilitySavingsCents:400};
  await assert.rejects(core.expenseRouting.save({...ctx,input:{...planned,requestId:'bill-savings-bad2',utilitySavingsCents:1001}}),/risparmi della bolletta/);
  await core.expenseRouting.save({...ctx,input:planned});
  ({state}=await repository.read());assert.equal(state.payments['bill-savings-0002'].utilitySavingsCents,400);
+});
+test('BILL-PAST-MONTHS: a bill keeps the chosen months for its excess and what the plan covered',async(t)=>{
+ const {ctx,payload,repository}=await fixture();
+ if (!(await core.expenseRouting.preview({...ctx,input:{category:'Acqua',amountCents:3000,date:'2026-10-28'}})).billMonthsDestination) { t.skip('Worker without bill months'); return; }
+ const base={...payload,competenceStartMonth:'2026-08',competenceEndMonth:'2026-10',utilityCompetenceVersion:1};
+ const ordinary={...base,requestId:'bill-months-0001',expenseDestination:'ordinary',utilitySavingsCents:3000};delete ordinary.planId;
+ await core.expenseRouting.save({...ctx,input:ordinary});
+ let {state}=await repository.read();assert.equal(state.expenseRoutingCommands['bill-months-0001'].utilitySavingsCents,3000,'the whole bill may stay on savings');
+ assert.equal(state.expenseRoutingCommands['bill-months-0001'].billRule,2);
+ await assert.rejects(core.expenseRouting.save({...ctx,input:{...ordinary,requestId:'bill-months-bad',utilitySavingsCents:0,billBudgetMonths:['2026-09']}}),/dal mese corrente/);
+ const planned={...base,requestId:'bill-months-0002',utilitySavingsCents:200,billBudgetMonths:['2026-11','2026-10']};
+ await core.expenseRouting.save({...ctx,input:planned});
+ ({state}=await repository.read());const paid=state.payments['bill-months-0002'];
+ assert.deepEqual([paid.billRule,paid.coveredCents,paid.utilitySavingsCents,paid.billBudgetMonths],[2,2000,200,['2026-10','2026-11']]);
 });

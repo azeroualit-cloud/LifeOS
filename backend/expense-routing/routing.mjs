@@ -15,7 +15,15 @@ export function createExpenseRouting({ PlanError, balance, command, completePaym
     const sorted = [...months].sort();
     return sorted.map((month, i) => ({ month, amount_cents: Math.floor(total / sorted.length) + (i < total % sorted.length ? 1 : 0) }));
   }
-  /** Savings part of a bill, in cents: 0 ≤ part < limit (at least 1 cent stays on the competence months). */
+  /** BILL-PAST-MONTHS-2026-11-24: budget months for the excess of a bill, from the current month on (never past). */
+  function billMonths(input, firstMonth) {
+    if (input.billBudgetMonths == null) return null;
+    const months = Array.isArray(input.billBudgetMonths) ? input.billBudgetMonths.map(String) : String(input.billBudgetMonths).split(',').map(v => v.trim()).filter(Boolean);
+    if (!months.length || months.length > 12 || new Set(months).size !== months.length || months.some(m => !/^20\d\d-(0[1-9]|1[0-2])$/.test(m) || m < firstMonth))
+      fail('Scegli da 1 a 12 mesi di budget, dal mese corrente in avanti.');
+    return [...months].sort();
+  }
+  /** Savings part of a bill, in cents: 0 ≤ part ≤ limit. */
   function billSavings(input, limit) {
     if (input.utilitySavingsCents == null || input.utilitySavingsCents === 0) return 0;
     const cents = Number(input.utilitySavingsCents);
@@ -85,7 +93,7 @@ export function createExpenseRouting({ PlanError, balance, command, completePaym
     }
     const plans = candidates(state, checked);
     if (parseUtilityPeriod && retained && !plans.some(p => p.id === retained.id)) plans.push({ ...retained, retained: true });
-    return { version: 1, savingsDestination: true, splitDestination: true, planSplitDestination: true, billSavingsDestination: true, utilityCompetenceVersion: parseUtilityPeriod ? 1 : 0, category: checked.category, amountCents:checked.amount, date:checked.date, plans: plans.map(p => {
+    return { version: 1, savingsDestination: true, splitDestination: true, planSplitDestination: true, billSavingsDestination: true, billMonthsDestination: true, utilityCompetenceVersion: parseUtilityPeriod ? 1 : 0, category: checked.category, amountCents:checked.amount, date:checked.date, plans: plans.map(p => {
       const funds = available(state, p, checked.date.slice(0,7));
       return { id:p.id, name:p.name, kind:p.kind, status:p.status, retained:!!p.retained, availableCents:funds, fromFundCents:Math.min(funds,checked.amount), fromSavingsCents:Math.max(0,checked.amount-funds) };
     }) };
@@ -115,10 +123,12 @@ export function createExpenseRouting({ PlanError, balance, command, completePaym
       if (input.planId) fail('Destinazione e piano non coerenti.');
       if (kind === 'savings' && checked.utilityPeriod) fail('Una bolletta con periodo di competenza non si paga dai risparmi.');
       if (split) {
-        if (checked.utilityPeriod) fail('Per una bolletta i mesi di budget sono il periodo di competenza: indica solo la parte dai risparmi.');
+        if (checked.utilityPeriod) fail('Per una bolletta scegli i mesi di budget con «Prossimi mesi».');
         budgetSplit(input, checked.date.slice(0,7), checked.amount);
       }
-      const utilitySavingsCents = checked.utilityPeriod && kind === 'ordinary' ? billSavings(input, checked.amount - 1) : 0;
+      const utilitySavingsCents = checked.utilityPeriod && kind === 'ordinary' ? billSavings(input, checked.amount) : 0;
+      const firstOpen = today.slice(0,7) > checked.date.slice(0,7) ? today.slice(0,7) : checked.date.slice(0,7);
+      const billBudgetMonths = checked.utilityPeriod && kind === 'ordinary' ? billMonths(input, firstOpen) : null;
       // Reserve the routing choice too: a reused request may never debit a second path.
       const key = requestKey(input.requestId), sig = signature(input);
       const reserved = await service.change(state => {
@@ -128,6 +138,7 @@ export function createExpenseRouting({ PlanError, balance, command, completePaym
         if (old && !old.pending) return { state, result: { complete: true } };
         const next = structuredClone(state); next.expenseRoutingCommands ??= {};
         next.expenseRoutingCommands[key] = { signature:sig, kind, pending:true, utilityPeriod: checked.utilityPeriod, ...(utilitySavingsCents ? { utilitySavingsCents } : {}),
+          ...(checked.utilityPeriod ? { billRule: 2, ...(billBudgetMonths ? { billBudgetMonths } : {}) } : {}),
           amountCents: checked.amount, date: checked.date, category: checked.category };
         return { state:next,result:{} };
       });
@@ -147,8 +158,9 @@ export function createExpenseRouting({ PlanError, balance, command, completePaym
       return true;
     }
     // REFERENCE-GAPS-95 «Bolletta con piano»: the part not covered by the fund may go partly to budget months.
-    if (checked.utilityPeriod && input.budgetTreatment === 'recovery') fail('Per una bolletta i mesi di budget sono il periodo di competenza: indica solo la parte dai risparmi.');
-    const planBillSavings = checked.utilityPeriod ? billSavings(input, Math.min(checked.amount - 1, Math.max(0, checked.amount - Number(input.expectedAvailableCents ?? checked.amount)))) : 0;
+    if (checked.utilityPeriod && input.budgetTreatment === 'recovery') fail('Per una bolletta scegli i mesi di budget con «Prossimi mesi».');
+    const planBillSavings = checked.utilityPeriod ? billSavings(input, Math.max(0, checked.amount - Number(input.expectedAvailableCents ?? checked.amount))) : 0;
+    const planBillMonths = checked.utilityPeriod ? billMonths(input, today.slice(0,7) > checked.date.slice(0,7) ? today.slice(0,7) : checked.date.slice(0,7)) : null;
     const planSplit = input.budgetTreatment === 'recovery'
       ? budgetSplit(input, today.slice(0,7) > checked.date.slice(0,7) ? today.slice(0,7) : checked.date.slice(0,7), Math.max(0, checked.amount - Number(input.expectedAvailableCents ?? checked.amount)))
       : null;
@@ -164,13 +176,14 @@ export function createExpenseRouting({ PlanError, balance, command, completePaym
       return command(state,'pay',paymentInput,today);
     });
     await service.finish(result.paymentId);
-    if (planBillSavings) {
-      // Bill with a plan: the plan returns its quotas, this part of the excess stays on savings,
-      // the rest of the excess lands on the competence months.
+    if (checked.utilityPeriod) {
+      // BILL-PAST-MONTHS-2026-11-24: the plan pays what it had set aside, this part of the excess stays on
+      // savings, the rest is added to the chosen budget months (the payment month by default).
+      const coveredCents = Math.min(checked.amount, Math.max(0, Number(input.expectedAvailableCents) || 0));
       await service.change(state => {
         const next = structuredClone(state), paid = next.payments[result.paymentId];
         if (!paid) fail('Pagamento non trovato.', 503);
-        paid.utilitySavingsCents = planBillSavings;
+        Object.assign(paid, { billRule: 2, coveredCents }, planBillSavings ? { utilitySavingsCents: planBillSavings } : {}, planBillMonths ? { billBudgetMonths: planBillMonths } : {});
         return { state: next, result: {} };
       });
     }
@@ -188,11 +201,13 @@ export function createExpenseRouting({ PlanError, balance, command, completePaym
       const row = await movement(db, rowID), { state } = await repository.read();
       const payments = linked(state, rowID).filter(p => p.status === 'posted' && p.utilityPeriod);
       if (payments.length !== 1) fail('Il movimento deve essere una bolletta pagata con un piano.');
-      const cents = billSavings(input, Math.round(-Number(row.amount) * 100) - 1);
+      const cents = billSavings(input, Math.round(-Number(row.amount) * 100));
+      const months = billMonths(input, String(row.actual_date).slice(0,7) > today.slice(0,7) ? String(row.actual_date).slice(0,7) : today.slice(0,7));
       await service.change(current => {
         const next = structuredClone(current), paid = next.payments[payments[0].id];
         if (!paid || paid.status !== 'posted') fail('Pagamento non trovato.', 409);
         paid.utilitySavingsCents = cents;
+        if (months) paid.billBudgetMonths = months;
         return { state: next, result: {} };
       });
       return true;
@@ -203,7 +218,7 @@ export function createExpenseRouting({ PlanError, balance, command, completePaym
       const row = await movement(db, rowID), { state } = await repository.read();
       const payments = linked(state, rowID).filter(p => p.status === 'posted');
       if (payments.length !== 1) fail('Il movimento deve essere il pagamento di un piano.');
-      if (payments[0].utilityPeriod) fail('Per una bolletta i mesi di budget sono il periodo di competenza: indica solo la parte dai risparmi.');
+      if (payments[0].utilityPeriod) fail('Per una bolletta scegli i mesi di budget con «Prossimi mesi».');
       const plan = state.plans[payments[0].planId], uncovered = balance(state, plan, today.slice(0,7)).fromGeneralSavingsCents;
       const max = Math.min(Math.round(-Number(row.amount) * 100), uncovered);
       if (!(max > 0)) fail('Il pagamento è coperto dal fondo: non c’è una differenza da dividere.');

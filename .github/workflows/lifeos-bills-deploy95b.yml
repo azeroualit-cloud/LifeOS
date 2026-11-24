@@ -1,0 +1,37 @@
+name: LifeOS bills 95b (tests, audit, deploy)
+# BILL-PAST-MONTHS-2026-11-24: bills never change past months; the excess goes on savings or the chosen months;
+# the estimated quota follows the 12-month average. A push that changes this file is the deliberate start
+# (DEPLOY-WORKERS-93). Both Workers; only the known previous versions are replaced, otherwise nothing is written.
+# Attempt 1
+on:
+  push:
+    branches: ['codex/build93']
+    paths: ['.github/workflows/lifeos-bills-deploy95b.yml']
+permissions:
+  contents: read
+concurrency:
+  group: lifeos-utility-code-deployment
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: github.repository == 'azeroualit-cloud/LifeOS' && github.ref == 'refs/heads/codex/build93'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Bill and levelling tests
+        run: node --test backend/utilities/tests/bills95b.test.mjs backend/utilities/tests/levelling.test.mjs
+      - name: Check both live Workers (no writes)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          LIFEOS_BACKEND_AUDIT_ONLY: '1'
+        run: python3 scripts/deploy-bills-95b.py
+      - name: Deploy to both Workers with verification and rollback
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: python3 scripts/deploy-bills-95b.py
