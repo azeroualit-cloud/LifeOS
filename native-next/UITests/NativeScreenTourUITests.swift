@@ -143,7 +143,7 @@ final class NativeScreenTourUITests: XCTestCase {
             let field = app.textFields["movement-amount"]
             if field.waitForExistence(timeout: 5) {
                 field.tap(); field.typeText("186")
-                if app.buttons["movement-hide-keyboard"].exists { app.buttons["movement-hide-keyboard"].tap() }
+                if app.keyboards.count > 0 { app.collectionViews.firstMatch.swipeDown(velocity: .slow) }
                 for _ in 0..<4 where app.buttons["expense-split-more"].exists && !app.buttons["expense-split-more"].isHittable { app.swipeUp(velocity: .slow) }
                 for _ in 0..<6 where app.buttons["expense-split-more"].exists { app.buttons["expense-split-more"].tap() }
                 let next = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'expense-split-month-'")).element(boundBy: 1)

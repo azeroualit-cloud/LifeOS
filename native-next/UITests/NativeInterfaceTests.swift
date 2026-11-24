@@ -490,7 +490,7 @@ final class NativeInterfaceTests: XCTestCase {
         let amount = app.textFields["movement-amount"]
         XCTAssertTrue(amount.waitForExistence(timeout: 10)); amount.tap(); amount.typeText("30")
         let name = app.textFields["movement-name"]; name.tap(); name.typeText("Acqua UI67")
-        app.buttons["movement-hide-keyboard"].tap()
+        app.collectionViews.firstMatch.swipeDown(velocity: .slow) // scrolling closes the keyboard (no hide key)
         let category = app.buttons["movement-category"]
         for _ in 0..<5 { if category.isHittable { break }; app.collectionViews.firstMatch.swipeUp() }
         category.tap()

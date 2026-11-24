@@ -413,10 +413,10 @@ struct MovementEditor: View {
         }
     }
     var body: some View {
-        editorForm.modifier(NativeListAppearance()).navigationTitle(editing ? "Modifica movimento" : "Nuovo movimento").navigationBarTitleDisplayMode(.inline)
+        // REVIEW-95C (choice 1): no floating «hide keyboard» key, it covered the form; scrolling the form closes the keyboard.
+        editorForm.modifier(NativeListAppearance()).scrollDismissesKeyboard(.immediately)
+        .navigationTitle(editing ? "Modifica movimento" : "Nuovo movimento").navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItemGroup(placement: .keyboard) { Spacer(); NativeIconButton(symbol: "keyboard.chevron.compact.down", label: "Nascondi tastiera") { editingInput = nil }.accessibilityIdentifier("movement-hide-keyboard") }
-
             ToolbarItem(placement: .cancellationAction) { NativeSheetCancel { dismiss() }.disabled(saving) }
             ToolbarItem(placement: .confirmationAction) { NativeSheetConfirm { Task { await save() } }.disabled(linkedPayment || saving || store.busy || !loaded || (!editing && type == "Spesa" && (!routeReady || destination.isEmpty)) || Input.cents(amount) == nil || name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) }
         }

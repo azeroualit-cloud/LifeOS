@@ -52,7 +52,7 @@ final class NativeRevision75UITests: XCTestCase {
         let amount = app.textFields["movement-amount"]
         XCTAssertTrue(amount.waitForExistence(timeout: 10)); amount.tap(); amount.typeText("221,79")
         app.textFields["movement-name"].tap(); app.textFields["movement-name"].typeText("Bolletta competenza UI75")
-        app.buttons["movement-hide-keyboard"].tap()
+        app.collectionViews.firstMatch.swipeDown(velocity: .slow) // scrolling closes the keyboard (no hide key)
         selectMenu(app.buttons["movement-category"], title: "Casa", app: app); selectMenu(app.buttons["movement-item"], title: "Acqua", app: app)
         let start = app.buttons["utility-month-Mese iniziale"], end = app.buttons["utility-month-Mese finale"]
         for _ in 0..<8 { if start.isHittable { break }; app.collectionViews.firstMatch.swipeUp(velocity: .slow) }

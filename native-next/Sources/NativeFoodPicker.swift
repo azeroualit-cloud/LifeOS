@@ -325,11 +325,13 @@ struct NativeFoodPicker: View {
     /// Equal tile of the quick actions row: icon above a short label, same size and surface for all three.
     private func quickTile(_ title: String, _ icon: String, id: String, _ action: @escaping () -> Void) -> some View {
         Button { searchFocused = false; action() } label: {
+            // REVIEW-95C: same icon box and same text size in all three tiles, with an inner margin (no shrunk label).
             VStack(spacing: NativeDesign.Space.xs) {
-                Image(systemName: icon).font(.headline).accessibilityHidden(true)
+                Image(systemName: icon).font(.headline).frame(height: NativeDesign.Space.xLarge).accessibilityHidden(true)
                 Text(title).font(.footnote.weight(.medium)).lineLimit(1).minimumScaleFactor(0.85)
             }
             .foregroundStyle(Color.primary)
+            .padding(.horizontal, NativeDesign.Space.small)
             .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.actionCircle)
             .loTileSurface(NativeDesign.nutritionInput)
             .contentShape(RoundedRectangle(cornerRadius: NativeDesign.controlRadius))
@@ -376,7 +378,7 @@ struct NativeFoodPicker: View {
                 HStack(spacing: NativeDesign.Space.small) {
                     if let onNewStack { quickTile("Nuova stack", "pills", id: "supplement-stack-new", onNewStack) }
                     if let onManual { quickTile("Macro a mano", "square.and.pencil", id: "food-quick-manual", onManual) }
-                    quickTile(scope == .supplements ? "Nuovo integratore" : "Nuovo alimento", "plus", id: "food-quick-create") { creating = true }
+                    quickTile("Crea nuovo", "plus", id: "food-quick-create") { creating = true }
                 }
                 .padding(.horizontal, NativeDesign.Layout.screenInset)
                 .padding(.bottom, NativeDesign.Space.small)
