@@ -1865,6 +1865,28 @@ function fdSection() {
     ${fd.error ? `<div class="errorbox">${nbE(fd.error)} <button type="button" data-fd-retry>Riprova</button></div>` : ""}
     <div class="fd-totals"><div><b>${fdNum(sum("kcal"))}</b><small>kcal</small></div><div><b>${fdNum(sum("protein"))}</b><small>proteine g</small></div><div><b>${fdNum(sum("carbs"))}</b><small>carboidrati g</small></div><div><b>${fdNum(sum("fat"))}</b><small>grassi g</small></div></div>
     ${fd.loading && fd.entries === null ? `<p class="empty">Caricamento…</p>` : list.length ? `<div class="fd-list">${rows}</div>` : `<p class="empty">Nessun pasto registrato</p>`}
+  </section>` + fdMicroCard(list);
+}
+/* MICRO-BREAKDOWN-2026-11-24: micronutrienti del giorno; aprendo una voce si vede da quali alimenti arriva il valore.
+   I valori vengono dalla parte app di ogni voce (nutrientValues); i pasti inseriti solo dal sito non ne hanno. */
+function fdMicroValue(e, k) {
+  const v = e.app?.nutrientValues || {}, x = v[k] || (k === "folate" ? v.folateMass : null);
+  const n = Number(x && typeof x === "object" ? x.amount : x);
+  return Number.isFinite(n) && n > 0 ? { amount: n, estimated: !!(x && x.estimateSource) } : null;
+}
+function fdMicroCard(list) {
+  if (typeof NB_MICRO === "undefined" || !list.length) return "";
+  const goals = (typeof hub !== "undefined" && hub.goals?.doc?.micro) || {};
+  const fmt = (n) => new Intl.NumberFormat("it-IT", { maximumFractionDigits: n < 10 ? 1 : 0 }).format(n);
+  const rows = NB_MICRO.map(([k, label, unit]) => {
+    const parts = list.map((e) => ({ e, v: fdMicroValue(e, k) })).filter((x) => x.v).sort((a, b) => b.v.amount - a.v.amount);
+    const total = parts.reduce((n, x) => n + x.v.amount, 0);
+    return { k, label, unit, parts, total, goal: Number(goals[k]) || 0 };
+  }).filter((r) => r.total > 0);
+  if (!rows.length) return `<section class="card pad fd-micro"><div class="card-title"><h2>Micronutrienti</h2></div><p class="empty">Nessun micronutriente nei pasti di questo giorno.</p></section>`;
+  return `<section class="card pad fd-micro" aria-label="Micronutrienti del giorno"><div class="card-title"><h2>Micronutrienti</h2><small>apri una voce per vedere da quali alimenti arriva</small></div>
+    ${rows.map((r) => `<details class="fd-micro-row"><summary><span>${nbE(r.label)}</span><b>${fmt(r.total)} ${r.unit}${r.goal ? ` <small>/ ${fmt(r.goal)}</small>` : ""}</b>${r.goal ? `<i class="fd-micro-bar" style="--w:${Math.min(100, Math.round(r.total / r.goal * 100))}%"></i>` : ""}</summary>
+      <ul>${r.parts.map(({ e, v }) => { const share = Math.round(v.amount / r.total * 100); return `<li><span>${nbE(e.name || "Pasto")}</span><b>${v.estimated ? "≈" : ""}${fmt(v.amount)} ${r.unit}</b><small>${share}%</small><i style="--w:${share}%"></i></li>`; }).join("")}</ul></details>`).join("")}
   </section>`;
 }
 /* SITE-94: Dashboard finance card like the app: remaining, per day, spent/left bar, legend, last 2 expenses. */
@@ -2021,6 +2043,7 @@ function nbFoodForm(f) {
     <label>Marca<input name="brand" value="${nbE(x.brand)}" maxlength="80" placeholder="Facoltativa"></label>
     <label>Famiglia<select name="family">${Object.entries(NB_FAM).map(([k, [i, t]]) => `<option value="${k}"${k === x.family ? " selected" : ""}>${i} ${nbE(t)}</option>`).join("")}</select></label>
     ${unit ? `<label>Valori per<input value="1 ${unit[0]}" readonly><input type="hidden" name="basis" value="${nbE(x.basis || "g")}"><input type="hidden" name="perUnit" value="1"></label>` : `<label>Valori per<select name="basis"><option value="g"${x.basis === "g" ? " selected" : ""}>100 g</option><option value="ml"${x.basis === "ml" ? " selected" : ""}>100 ml</option></select></label>`}
+    ${x.family === "supplement" ? `<label>Dose abituale<input value="${f?.app?.defaultQuantity ? nbE(f.app.defaultQuantity) + " " + (unit ? (Number(f.app.defaultQuantity) === 1 ? unit[0] : unit[1]) : "g") : "non impostata"}" readonly title="Si imposta nell'app: Aggiungi alimento › Integratori › Modifica"><small class="hint">Si imposta nell'app (Modifica integratore).</small></label>` : ""}
     <label class="nb-check"><input type="checkbox" name="notDeclared" ${x.notDeclared ? "checked" : ""} data-nb-calc> Energia e macro non dichiarati</label>
     <div class="nb-nums wide" data-nb-nums>${num("kcal", "Energia", "kcal")}${num("protein", "Proteine")}${num("carbs", "Carboidrati")}${num("fat", "Grassi")}${num("fibre", "Fibre")}
       <div class="nb-calc" data-nb-calcout></div></div>
