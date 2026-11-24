@@ -452,4 +452,5 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 - **REVIEW-95B-2026-11-24**: macro a mano 2×2 + tastierino; Spesa a rate da proporre con un visual; Cronologia a colonne; niente scheda Trasferimento; contrasto da rimisurare; Ritmo con etichette corte; rivedere tutti i test UI; IPA 95 non ancora.
 - **MICRO-BREAKDOWN-2026-11-24**: toccando un micronutriente si vedono i cibi che lo compongono.
 - **SITE-GRAPHICS-2026-11-24**: il sito deve sfruttare il potenziale grafico del web.
+- **SITE-GRAPHICS-STYLE-2026-11-24** (ACTIVE): «tutto il sito deve essere graficamente avanzato, e ciò non significa mettere glow a caso, basta un design minimal ma studiato e con shadows e contrasti adatti». Tutte le sezioni; niente aloni decorativi; ombre misurate e contrasti adeguati.
 - **ALERTS-CLARITY-2026-11-24**: tutti gli avvisi visibili, dove e come arrivano (suono, sveglia), più personalizzazione e modelli.

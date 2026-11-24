@@ -1422,6 +1422,16 @@
       "rule": "Il sito deve sfruttare il potenziale grafico del web, almeno alla pari dell'app e oltre (grafici, interazioni)."
     },
     {
+      "id": "SITE-GRAPHICS-STYLE-2026-11-24",
+      "status": "ACTIVE",
+      "scope": "Sito, tutte le sezioni",
+      "recorded_on": "2026-11-24",
+      "provenance": "Messaggio utente in chat dopo la proposta grafica del sito (24/11)",
+      "original_quote": "tutto il sito deve essere graficamente avanzato, e ciò non significa mettere glow a caso, basta un design minimal ma studiato e con shadows e contrasti adatti",
+      "rule": "Completa SITE-GRAPHICS: tutto il sito, stile minimal ma studiato; niente aloni/glow decorativi; profondità con ombre misurate e contrasti adeguati.",
+      "relation": "Precisa SITE-GRAPHICS-2026-11-24, nessun conflitto."
+    },
+    {
       "id": "ALERTS-CLARITY-2026-11-24",
       "status": "ACTIVE",
       "scope": "Avvisi (sito e app)",
