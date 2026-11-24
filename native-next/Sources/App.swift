@@ -35,7 +35,7 @@ import UIKit
     var body: some Scene {
         WindowGroup {
             // DESIGN-PASS-94: running text is 15 pt (subheadline) unless a view picks one of the five sizes.
-            rootContent.environmentObject(store).environmentObject(health).environmentObject(router).tint(NativeDesign.accent)
+            rootContent.environmentObject(store).environmentObject(health).environmentObject(router).tint(NativeDesign.accent).toggleStyle(NativeSwitchStyle())
                 .font(.subheadline)
                 .environment(\.calendar, CivilDate.calendar)
                 .environment(\.timeZone, CivilDate.calendar.timeZone)
@@ -271,7 +271,7 @@ struct NativeRoot: View {
         }
         .environment(\.calendar, CivilDate.calendar)
         .environment(\.timeZone, CivilDate.calendar.timeZone)
-        .tint(NativeDesign.accent)
+        .tint(NativeDesign.accent).toggleStyle(NativeSwitchStyle())
         .modifier(NativeVisualTestSize()).modifier(NativeVisualTestMotion())
         .sensoryFeedback(.selection, trigger: router.tab)
     }

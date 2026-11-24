@@ -7,6 +7,9 @@ enum NativeDesign {
         trait.userInterfaceStyle == .dark ? UIColor(red: 0.949, green: 0.949, blue: 0.969, alpha: 1) : UIColor(red: 0.110, green: 0.110, blue: 0.118, alpha: 1)
     })
     static let onAccent = Color(uiColor: .systemBackground)
+    /// Contrast audit 24/11: switches «on» in a neutral grey. With the near-white accent the white knob vanished on
+    /// the track in dark mode; grey keeps UI-LOOK-92 (no accent colour) and the knob stays visible.
+    static let switchTint = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor(white: 0.52, alpha: 1) : UIColor(red: 0.110, green: 0.110, blue: 0.118, alpha: 1) })
     // System grouped colours: they follow Increase Contrast and dark mode by themselves.
     static let canvas = Color(uiColor: .systemGroupedBackground)
     static let surface = Color(uiColor: .secondarySystemGroupedBackground)
@@ -243,4 +246,11 @@ enum NativeDesign {
     static let body = Font.system(.body, weight: .regular)
     static let metadata = Font.system(.footnote, weight: .regular)
     static let symbol = Font.system(.body, weight: .medium)
+}
+
+/// Every Toggle of the app: system switch with the neutral switch tint (set once at the root).
+struct NativeSwitchStyle: ToggleStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        Toggle(configuration).toggleStyle(.switch).tint(NativeDesign.switchTint)
+    }
 }
