@@ -31,6 +31,7 @@ import UserNotifications
     func refresh(store: NativeStore, health: NativeHealthStore) async {
         guard !running, !store.isDemo, store.server != nil else { return }
         running = true; defer { running = false }
+        await NativeIslamicDays.scheduleReminders() // CALENDAR-RAMADAN-EID-2026-11-24
         let read: (String, [JSONValue]) async throws -> JSONValue = { method, args in try await store.read(method, args: args) }
         guard let probe = try? await read("getSettings", [.string("alerts")]) else { return } // Worker not updated yet
         let doc = await syncFinanceAlerts(probe.object, read)

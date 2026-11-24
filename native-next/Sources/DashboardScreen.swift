@@ -195,6 +195,11 @@ struct DashboardScreen: View {
                                     }
                                 }
                             }
+                            // TIMES-MONTH-CALENDAR-2026-11-24: every day of the month, not only today.
+                            Section {
+                                NavigationLink { NativeTimesMonthScreen() } label: { Label("Calendario degli orari", systemImage: "calendar") }
+                                    .accessibilityIdentifier("times-month-open")
+                            }
                             Section { Text("Empoli · Europe/Rome").font(.footnote).foregroundStyle(NativeDesign.secondary) }
                         }.modifier(NativeListAppearance()).navigationTitle("Orari").navigationBarTitleDisplayMode(.inline).toolbar { DoneButton() }
                     }.presentationDetents([.medium, .large])

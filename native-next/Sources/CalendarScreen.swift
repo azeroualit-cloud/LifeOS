@@ -12,6 +12,7 @@ struct CalendarScreen: View {
     /// main thread never idles (spindumps of runs 43708179109 and 43722940589).
     /// Build 92: the month ignores the system tab bar's bottom safe area for
     /// the same reason and keeps a fixed clearance instead.
+    @State private var privateDay: NativePrivateDay?
     @State private var showingDay = false
     @State private var monthReturnDay: String?
     private var selected: String {
@@ -256,6 +257,17 @@ struct CalendarScreen: View {
                 if let loadError {
                     HStack { NativeInlineMessage(text: loadError); Button("Riprova") { reload += 1 } }
                 }
+                // CALENDAR-RAMADAN-EID / CALENDAR-PRIVATE-ENTRY (24/11/2026): tags of the day and a discreet «Privato».
+                HStack(spacing: NativeDesign.Space.small) {
+                    ForEach(NativeIslamicDays.events(on: selected), id: \.self) { NativeIslamicTag(title: $0) }
+                    Spacer(minLength: 0)
+                    Button { privateDay = NativePrivateDay(day: selected) } label: {
+                        Text("Privato").font(.footnote).foregroundStyle(NativeDesign.secondary)
+                            .frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle())
+                    }
+                    .buttonStyle(NativePressStyle())
+                    .accessibilityIdentifier("calendar-private")
+                }
                 // The selected day uses the same rows as the following days (user, 23/11/2026).
                 selectedDayList
                 // Accessibility sizes keep the single-day agenda proven in build 92.
@@ -267,6 +279,7 @@ struct CalendarScreen: View {
             .padding(.vertical, NativeDesign.Space.medium)
         }
         .scrollBounceBehavior(.basedOnSize)
+        .sheet(item: $privateDay) { item in NativePrivateDaySheet(day: item.day) }
         .accessibilityIdentifier("calendar-day-pane")
         .id(selected)
     }
@@ -277,7 +290,7 @@ struct CalendarScreen: View {
         (1...NativeCalendarAgendaRange.days).map { CivilDate.adding($0, to: selected) }.filter { day in
             guard monthData[String(day.prefix(7))] != nil else { return false }
             let events = (eventsByDay[day] ?? []).filter { $0.text("occurrence_status") != "skipped" }
-            return !events.isEmpty || !(tasksByDay[day] ?? []).isEmpty
+            return !events.isEmpty || !(tasksByDay[day] ?? []).isEmpty || !NativeIslamicDays.events(on: day).isEmpty
         }
     }
     private func followingDay(_ day: String) -> some View {
@@ -291,6 +304,7 @@ struct CalendarScreen: View {
                 if let dayShift {
                     Text(dayShift.title).font(.subheadline.weight(.semibold)).foregroundStyle(dayShift.color)
                 }
+                ForEach(NativeIslamicDays.events(on: day), id: \.self) { NativeIslamicTag(title: $0) }
             }
             .accessibilityElement(children: .combine)
             .accessibilityAddTraits(.isHeader)
