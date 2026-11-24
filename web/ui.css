@@ -15,7 +15,7 @@
   --canvas:#070708;--surface:#0e0e10;--surface-2:#141416;--surface-3:#1d1d21;
   --line:#1f1f23;--line-soft:#151518;
   /* testo */
-  --ink:#e4e4e7;--ink-2:#a1a1a8;--ink-3:#6b6b73;
+  --ink:#e4e4e7;--ink-2:#a1a1a8;--ink-3:#8a8a92;/* audit 24/11: ≥4,5:1 */
   /* interazione */
   --accent:#cfcfd3;--on-accent:#111113;--focus:#4f9be6;
   /* semantica finanziaria (solo direzione) */
@@ -41,7 +41,7 @@ html[data-theme="light"]{
   color-scheme:light;
   --canvas:#f2f2f7;--surface:#ffffff;--surface-2:#f0f0f4;--surface-3:#e4e4ea;
   --line:#dcdce2;--line-soft:#e9e9ee;
-  --ink:#1b1b1f;--ink-2:#5e5e66;--ink-3:#8b8b93;
+  --ink:#1b1b1f;--ink-2:#5e5e66;--ink-3:#66666e;
   --accent:#3b3b3b;--on-accent:#ffffff;--focus:#2f7fd1;
   --pos:#66cc70;--neg:#f2546b;--warn:#f5a03c;--pos-t:#2e8f4b;--neg-t:#d0344f;--warn-t:#a85f10;
   --sec-finance:#4f9be6;--sec-nutrition:#66cc70;--sec-calendar:#f5a03c;
