@@ -87,6 +87,8 @@ enum NativeDesign {
     }
     /// Text on the lighter finance tiles.
     static let financeTileText = Color(uiColor: UIColor(white: 0.06, alpha: 1))
+    /// REVIEW-95C: the part of the month gone by, a soft band under the spending in the budget bar.
+    static let financePace = financeBudget[0].opacity(0.38)
     private static func hex(_ value: Int) -> UIColor {
         UIColor(red: CGFloat((value >> 16) & 0xff) / 255, green: CGFloat((value >> 8) & 0xff) / 255, blue: CGFloat(value & 0xff) / 255, alpha: 1)
     }

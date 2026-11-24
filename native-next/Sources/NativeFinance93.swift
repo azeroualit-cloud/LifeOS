@@ -201,6 +201,10 @@ struct NativeBudgetHero93: View {
             HStack {
                 Text(hidden ? "speso ••••" : "speso " + spent.euro + " di " + total.euro)
                 Spacer(minLength: NativeDesign.Space.small)
+                if dayShare != nil {
+                    Capsule().fill(NativeDesign.financePace)
+                        .frame(width: NativeDesign.Space.medium, height: NativeDesign.Space.small).accessibilityHidden(true)
+                }
                 Text(dayLabel)
             }
             .font(.footnote).monospacedDigit().foregroundStyle(NativeDesign.secondary)
@@ -235,6 +239,13 @@ struct NativeBudgetHero93: View {
             let gap = NativeDesign.Space.xxs
             ZStack(alignment: .leading) {
                 Capsule().fill(NativeDesign.barTrack)
+                // REVIEW-95C: the month gone by as a soft band under the spending, instead of a hairline marker:
+                // spending past the band = ahead of the month, inside it = behind.
+                if let marker {
+                    Capsule().fill(NativeDesign.financePace)
+                        .frame(width: max(NativeDesign.Space.medium, width * CGFloat(min(max(marker, 0), 1))))
+                        .accessibilityHidden(true)
+                }
                 HStack(spacing: gap) {
                     ForEach(Array(values.enumerated()), id: \.offset) { index, value in
                         Rectangle().fill(NativeDesign.financeBudget[min(index, NativeDesign.financeBudget.count - 1)])
@@ -243,12 +254,6 @@ struct NativeBudgetHero93: View {
                 }
                 .frame(width: width, alignment: .leading)
                 .clipShape(Capsule())
-                if let marker {
-                    Capsule().fill(Color.primary)
-                        .frame(width: NativeDesign.Space.xxs, height: NativeDesign.Space.xLarge)
-                        .offset(x: min(max(0, width * CGFloat(marker) - 1), width - NativeDesign.Space.xxs))
-                        .accessibilityHidden(true)
-                }
             }
         }
         .frame(height: NativeDesign.Space.medium)
