@@ -1,5 +1,5 @@
 name: Life OS - categorie nel database (solo lettura)
-# Attempt 1. Read-only audit requested on 24/11/2026 («il db è pieno di categorie che non esistono»).
+# Attempt 2. Read-only audit requested on 24/11/2026 («il db è pieno di categorie che non esistono»).
 # Lists the category options the server offers and, month by month, how many movements use each
 # category. Writes nothing; logs only category names, counts and months (no names of movements, no amounts).
 on:
@@ -48,8 +48,38 @@ jobs:
           for (c,d),n in display.most_common(): print('DISPLAY|%s|%s|%d'%(c,d,n))
           json.dump({'options':sorted(opts),'counts':counts,'months':{k:sorted(v) for k,v in months.items()},'display':[[c,d,n] for (c,d),n in display.items()]},open('category-audit.json','w'),ensure_ascii=False,indent=1)
           PY
+      - name: Tabelle delle categorie nel D1 (solo SELECT)
+        if: always()
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import os,json,urllib.request
+          ACCOUNT='1728c3b1b852eb6285646842db7256de'; DATABASE='a90a8c6d-d6eb-4dc6-8fdb-382e4ad4485a'
+          def q(sql):
+              assert sql.lstrip().upper().startswith('SELECT')
+              r=urllib.request.Request('https://api.cloudflare.com/client/v4/accounts/'+ACCOUNT+'/d1/database/'+DATABASE+'/query',data=json.dumps({'sql':sql}).encode(),headers={'Authorization':'Bearer '+os.environ['CLOUDFLARE_API_TOKEN'].strip(),'Content-Type':'application/json'},method='POST')
+              with urllib.request.urlopen(r,timeout=60) as resp: return json.loads(resp.read())['result'][0]['results']
+          out={}
+          for key,sql in [
+            ('groups',"SELECT id,name,sort_order FROM financial_categories ORDER BY sort_order"),
+            ('mappings',"SELECT detail_category,category_id FROM financial_category_mappings ORDER BY category_id,detail_category"),
+            ('rules_by_detail',"SELECT detail_category,COUNT(*) n FROM financial_category_rules GROUP BY detail_category ORDER BY n DESC"),
+            ('movement_category',"SELECT COALESCE(category,'(vuota)') category,COUNT(*) n,MIN(date) first,MAX(date) last FROM movements GROUP BY 1 ORDER BY n DESC"),
+            ('resolved',"SELECT c.detail_category,c.category_id,COALESCE(c.source_category,'') source_category,COUNT(*) n FROM movement_financial_categories c GROUP BY 1,2,3 ORDER BY n DESC"),
+            ('unresolved',"SELECT COUNT(*) n FROM movements m LEFT JOIN movement_financial_categories c ON c.movement_source_row=m.source_row WHERE c.movement_source_row IS NULL"),
+            ('tables',"SELECT name FROM sqlite_master WHERE type='table' AND (name LIKE '%categor%' OR name LIKE '%budget%' OR name LIKE '%recurring%') ORDER BY name"),
+          ]:
+              try: out[key]=q(sql)
+              except Exception as e: out[key]='ERR '+type(e).__name__
+              print('==',key); print(json.dumps(out[key],ensure_ascii=False))
+          json.dump(out,open('category-d1.json','w'),ensure_ascii=False,indent=1)
+          PY
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: category-audit-${{ github.sha }}
-          path: category-audit.json
+          path: |
+            category-audit.json
+            category-d1.json
           retention-days: 7
