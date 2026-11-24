@@ -1,0 +1,36 @@
+name: LifeOS levelling 95 (tests, audit, deploy)
+# UTILITY-LEVELLING-2026-11-24: after every bill the "Ricorrente stimato" quota = 12-month average plus the
+# recovery of the gap, spread over the next months (at least 3), then back to the average.
+# A push that changes this file is the deliberate start (DEPLOY-WORKERS-93). Both Workers; if the three plan
+# functions are not found exactly once, nothing is written. Upload verified, rollback on failure.
+# Attempt 1
+on:
+  push:
+    branches: ['codex/build93']
+    paths: ['.github/workflows/lifeos-levelling-deploy95.yml']
+permissions:
+  contents: read
+concurrency:
+  group: lifeos-utility-code-deployment
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: github.repository == 'azeroualit-cloud/LifeOS' && github.ref == 'refs/heads/codex/build93'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Levelling tests
+        run: node --test backend/utilities/tests/levelling.test.mjs
+      - name: Check both live Workers (no writes)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          LIFEOS_BACKEND_AUDIT_ONLY: '1'
+        run: python3 scripts/deploy-levelling-95.py
+      - name: Deploy to both Workers with verification and rollback
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: python3 scripts/deploy-levelling-95.py
