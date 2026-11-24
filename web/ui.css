@@ -1526,3 +1526,107 @@ html[data-theme="light"]{--shadow-94:0 5px 13px rgba(0,0,0,.08);--warn-94:#c99a0
 .fd-micro-row summary::after{display:none}
 .fd-micro-row summary>span::before{content:"›";display:inline-block;width:12px;margin-right:4px;color:var(--ink-2);transition:transform .15s}
 .fd-micro-row[open] summary>span::before{transform:rotate(90deg)}
+
+/* =====================================================================
+   SITE-GRAPHICS-STYLE-2026-11-24 · livello «v4» per tutto il sito.
+   Minimal ma studiato: niente aloni; profondità solo con superfici a gradini,
+   filetti sottili e ombre misurate (3 livelli); contrasto testo ≥ 4,5:1.
+   ===================================================================== */
+:root{
+  /* superfici: 4 gradini distinguibili anche al buio */
+  --canvas:#0a0a0c;--surface:#141417;--surface-2:#1c1c20;--surface-3:#26262b;
+  --line:#2a2a30;--line-soft:#202025;
+  --hairline:inset 0 1px 0 rgba(255,255,255,.045);
+  /* elevazione: e1 schede, e2 hover/menu, e3 fogli */
+  --e1:0 1px 2px rgba(0,0,0,.45),0 2px 8px rgba(0,0,0,.25);
+  --e2:0 2px 4px rgba(0,0,0,.45),0 8px 24px rgba(0,0,0,.35);
+  --e3:0 12px 32px rgba(0,0,0,.55),0 32px 80px rgba(0,0,0,.45);
+  --shadow:var(--hairline),var(--e1);
+  --r-md:10px;--r-lg:14px;--r-xl:18px;
+}
+html[data-theme="light"]{
+  --canvas:#f3f3f6;--surface:#ffffff;--surface-2:#f4f4f7;--surface-3:#e9e9ee;
+  --line:#dddde3;--line-soft:#e9e9ee;
+  --hairline:inset 0 0 0 1px rgba(20,20,30,.05);
+  --e1:0 1px 2px rgba(20,20,30,.06),0 2px 10px rgba(20,20,30,.05);
+  --e2:0 2px 6px rgba(20,20,30,.08),0 10px 28px rgba(20,20,30,.08);
+  --e3:0 12px 32px rgba(20,20,30,.12),0 32px 80px rgba(20,20,30,.12);
+  --shadow:var(--hairline),var(--e1);
+}
+body{background:var(--canvas);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+
+/* Tipografia: scala fissa, titoli stretti, cifre allineate */
+h1{font-size:28px;letter-spacing:-.02em;font-weight:700;text-wrap:balance}
+h2{font-size:15px;letter-spacing:-.005em;font-weight:650}
+.card-title h2,.os-topline h2{font-size:15px}
+.card-title small,.card-title .hint{font-size:13px;color:var(--ink-2)}
+.os-section-label,.hub-templates-label,.dash-kpi small{letter-spacing:.06em}
+b,strong,td,.kv>strong{font-variant-numeric:tabular-nums}
+
+/* Schede: superficie + filetto + ombra e1; hover solo dove si clicca */
+.card,.os-card,.extra-card,.overview-essential>section:not(.overview-flow),.overview-flow>div,.dash-kpi{
+  background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r-lg);box-shadow:var(--shadow)}
+html[data-theme="light"] .card,html[data-theme="light"] .os-card,html[data-theme="light"] .extra-card,html[data-theme="light"] .dash-kpi{border-color:transparent}
+button.card,a.card,.dash-kpi:not([aria-disabled]),.nb-food{transition:box-shadow var(--t),transform var(--t),background-color var(--t)}
+button.card:hover:not(:disabled),.dash-kpi:hover:not(:disabled):not([aria-disabled]),.nb-food:hover{box-shadow:var(--hairline),var(--e2);transform:translateY(-1px);background:var(--surface)}
+.card .card,.card .os-card{box-shadow:none;background:var(--surface-2);border-color:transparent}
+
+/* Barra laterale: piano unico, separata da un filetto, voce attiva con barra di sezione */
+.sidebar{background:var(--surface);border-right:1px solid var(--line-soft);box-shadow:1px 0 0 rgba(0,0,0,.15)}
+.nav button,#admin-link{position:relative;border-radius:var(--r-md);transition:background-color var(--t-fast),color var(--t-fast)}
+.nav button.active::before,#admin-link.active::before{content:"";position:absolute;left:-6px;top:9px;bottom:9px;width:3px;border-radius:2px;background:currentColor}
+
+/* Pulsanti: primario con ombra corta, secondario su superficie con filetto */
+button{border-radius:var(--r-md)}
+.save,.primary,.os-button.primary,.fab-button{box-shadow:0 1px 2px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.12)}
+.save:active:not(:disabled),.primary:active:not(:disabled){box-shadow:none}
+.card button:not(.save):not(.primary):not(.ghost):not(.danger):not(.hub-switch):not(.nb-chip):not(.hub-rule-main):not(.card):not(.fd-row):not(.os-icon-button):not(.small-arrow){
+  background:var(--surface-2);border-color:var(--line-soft)}
+.card button:not(.save):not(.primary):not(.ghost):not(.danger):not(.hub-switch):not(.nb-chip):not(.hub-rule-main):not(.card):not(.fd-row):not(.os-icon-button):not(.small-arrow):hover:not(:disabled){background:var(--surface-3)}
+
+/* Campi: incassati di un gradino, filetto, anello di fuoco netto */
+input,select,textarea{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:inset 0 1px 1px rgba(0,0,0,.12)}
+html[data-theme="light"] input,html[data-theme="light"] select,html[data-theme="light"] textarea{background:#fff;box-shadow:inset 0 1px 1px rgba(20,20,30,.04)}
+input:hover:not(:focus):not(:disabled),select:hover:not(:focus):not(:disabled),textarea:hover:not(:focus):not(:disabled){border-color:color-mix(in srgb,var(--ink) 22%,var(--line))}
+input:focus,select:focus,textarea:focus{border-color:var(--focus);box-shadow:0 0 0 3px color-mix(in srgb,var(--focus) 28%,transparent)}
+
+/* Chip e segmenti: piatti, selezionato in rilievo e1 */
+.nb-chip{border-color:var(--line-soft);background:var(--surface-2)}
+.nb-chip.on,.nb-chip[aria-pressed="true"]{background:var(--surface);color:var(--ink);border-color:var(--line);box-shadow:var(--e1)}
+
+/* Fogli e menu: e3, sfondo oscurato senza sfocatura pesante */
+.modal-wrap{background:rgba(0,0,0,.55);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+html[data-theme="light"] .modal-wrap{background:rgba(20,20,30,.28)}
+.modal{border-radius:var(--r-xl);border:1px solid var(--line-soft);box-shadow:var(--hairline),var(--e3)}
+
+/* Righe e separatori: filetti sottili, mai doppi */
+.kv{border-bottom-color:var(--line-soft)}
+hr{border:0;height:1px;background:var(--line-soft)}
+
+/* Grafici: binari e griglie neutri, mai più forti dei dati */
+svg [stroke="var(--line)"]{stroke:var(--line-soft)}
+.track,.fd-micro-bar,.fd-micro-row li i{background:var(--surface-3)}
+
+/* Interruttori: pomello con ombra reale */
+.hub-switch{background:var(--surface-3);box-shadow:inset 0 0 0 1px var(--line)}
+.hub-switch i{box-shadow:0 1px 3px rgba(0,0,0,.35),0 0 0 .5px rgba(0,0,0,.08)}
+
+/* Telefono: niente ombre sotto le schede (troppo rumore su schermo piccolo), restano filetti */
+@media (max-width:640px){
+  .card,.os-card,.extra-card,.dash-kpi{box-shadow:var(--hairline)}
+  h1{font-size:26px}
+}
+/* Mappa dello stipendio: stessa tavolozza dell'app (SALARY-MAP-COLORS), tenue al buio e più profonda in chiaro. */
+:root{--sal-fixed:#b9a0f2;--sal-save:#f2b65c;--sal-spent:#f08c82;--sal-free:#86d3a6;--sal-ink:#121214}
+html[data-theme="light"]{--sal-fixed:#6d4bbf;--sal-save:#9a5d0c;--sal-spent:#b03a32;--sal-free:#2b7a4f;--sal-ink:#ffffff}
+.sc-tile>div{color:var(--sal-ink)}
+html[data-theme="light"] .sc-tile>div{background:color-mix(in srgb,var(--c) calc(60% + var(--k) * .4%),#fff)}
+/* Barra in basso del telefono: le voci visibili (7 con Avvisi) stanno su una riga. */
+@media(max-width:760px){
+  .nav{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}
+  .nav button{min-width:0;padding:0 2px;font-size:10.5px;letter-spacing:-.02em}
+  .nav button.active::before{display:none}
+  .hub-facts{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .hub-facts li{padding:10px}
+}
+@media(max-width:380px){.nav button{font-size:10px;letter-spacing:-.03em}}
