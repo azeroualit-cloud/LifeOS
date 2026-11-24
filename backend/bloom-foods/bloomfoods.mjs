@@ -329,7 +329,7 @@ async function importFoodDiary(env, list) {
 }
 
 // LIFEOS_HUB_95 (SITE-ADMIN-HUB-2026-11-23): impostazioni condivise fra sito e app (obiettivi di
-// nutrizione, regole degli avvisi, notifiche della preghiera) e registro degli avvisi scattati.
+// nutrizione, regole degli avvisi, notifiche degli orari) e registro degli avvisi scattati.
 // Tabelle create se mancanti; vale la modifica più recente.
 let hubReady = null;
 async function hubTables(env) {

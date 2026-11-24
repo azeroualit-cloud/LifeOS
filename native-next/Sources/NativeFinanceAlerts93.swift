@@ -251,7 +251,7 @@ struct NativeFinanceAlertsScreen: View {
                     }
                 }
                 // ALERTS-CLARITY-2026-11-24: say plainly how they arrive and where else they are managed.
-                Text("Notifiche su questo iPhone, con suono; nessuna sveglia. Le vedi e modifichi anche dal sito, in Avvisi, insieme agli avvisi personali e alla preghiera.")
+                Text("Notifiche su questo iPhone, con suono; nessuna sveglia. Le vedi e modifichi anche dal sito, in Avvisi, insieme agli avvisi personali e agli orari.")
                     .font(.footnote).foregroundStyle(NativeDesign.secondary).fixedSize(horizontal: false, vertical: true)
                     .accessibilityIdentifier("alerts-delivery-note")
             }
