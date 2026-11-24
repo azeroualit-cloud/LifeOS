@@ -1661,3 +1661,49 @@ html[data-theme="light"] .sc-tile>div{background:color-mix(in srgb,var(--c) calc
 .cat-to{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2)}
 .cat-to select{width:auto;max-width:220px}
 @media (max-width:640px){.cat-row{grid-template-columns:minmax(0,1fr)}.cat-edit{grid-template-columns:minmax(0,1fr)}}
+
+/* REVIEW-95D: switches like the app (NativeSwitchStyle): fixed 51x31 track, knob centred, neutral tint, not system green. */
+:root{--switch-on:#858585}
+html[data-theme="light"]{--switch-on:#1c1c1e}
+.card .hub-switch,.hub-switch{width:51px;height:31px;min-height:31px;min-width:51px;padding:0;align-self:center;box-sizing:border-box}
+.hub-switch i{top:2px;left:2px}
+.hub-switch[aria-checked="true"]{background:var(--switch-on);box-shadow:none}
+.hub-switch[aria-checked="true"] i{left:22px}
+.hub-rule-side{gap:10px;align-items:center}
+.hub-badge{line-height:16px;display:inline-flex;align-items:center}
+/* REVIEW-95D: macro colours of the app (NativeDesign macroProtein / macroCarbohydrate / macroFat). */
+:root{--mac-protein:#8ce0b5;--mac-carbs:#f5a13d;--mac-fat:#b58ceb}
+html[data-theme="light"]{--mac-protein:#146647;--mac-carbs:#995400;--mac-fat:#7345b3}
+.fw-bar{height:6px}
+
+/* REVIEW-95D: micronutrient tiles (share of the daily reference, lowest first). */
+:root{--fm-ok:#30d158;--fm-mid:#ffd60a;--fm-low:#ff9f0a}
+html[data-theme="light"]{--fm-ok:#1a7f3c;--fm-mid:#8a6a00;--fm-low:#9e4a00}
+.fm-summary{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.fm-summary span{font-size:13px;color:var(--ink-2);padding:4px 10px;border-radius:999px;background:var(--surface-2)}
+.fm-summary b{color:var(--ink);font-variant-numeric:tabular-nums;margin-right:2px}
+.fm-summary .ok b{color:var(--fm-ok)}.fm-summary .low b{color:var(--fm-low)}
+.fm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px}
+.card .fm-tile,.fm-tile{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:6px 8px;text-align:left;padding:10px 12px;min-height:0;height:auto;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font:inherit;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.18)}
+.card .fm-tile:hover:not(:disabled){border-color:color-mix(in srgb,var(--ink) 22%,transparent);background:var(--surface-2)}
+.card .fm-tile.sel{border-color:var(--ink)}
+.card .fm-tile:disabled{cursor:default;opacity:.55}
+.fm-name{font-size:13px;color:var(--ink-2);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fm-pct{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums}
+.fm-tile small{grid-column:1/-1;font-size:11px;color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fm-bar{grid-column:1/-1;display:block;height:5px;border-radius:3px;background:var(--track-94);overflow:hidden}
+.fm-bar>i{display:block;height:100%;border-radius:3px;background:var(--ink-3)}
+.fm-tile.ok .fm-pct{color:var(--fm-ok)}.fm-tile.ok .fm-bar>i{background:var(--fm-ok)}
+.fm-tile.mid .fm-pct{color:var(--fm-mid)}.fm-tile.mid .fm-bar>i{background:var(--fm-mid)}
+.fm-tile.low .fm-pct,.fm-tile.warn .fm-pct{color:var(--fm-low)}.fm-tile.low .fm-bar>i,.fm-tile.warn .fm-bar>i{background:var(--fm-low)}
+.fm-panel{margin-top:12px;padding:12px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line)}
+.fm-panel-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.fm-panel ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.fm-panel li{display:grid;grid-template-columns:minmax(0,1fr) auto 44px;gap:4px 10px;align-items:center;font-size:14px}
+.fm-panel li span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fm-panel li b{font-weight:600;font-variant-numeric:tabular-nums}
+.fm-panel li small{color:var(--ink-2);text-align:right;font-variant-numeric:tabular-nums}
+.fm-panel li i{grid-column:1/-1;display:block;height:4px;border-radius:2px;background:var(--surface-3);position:relative;overflow:hidden}
+.fm-panel li i::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--w);background:var(--sec-nutrition);border-radius:2px}
+.card .fm-tile:disabled .fm-pct{color:var(--ink-3)}
+.card .fm-tile.sel{box-shadow:0 0 0 1px var(--ink)}

@@ -1700,6 +1700,52 @@ html[data-theme="light"] .sc-tile>div{background:color-mix(in srgb,var(--c) calc
 .cat-to{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2)}
 .cat-to select{width:auto;max-width:220px}
 @media (max-width:640px){.cat-row{grid-template-columns:minmax(0,1fr)}.cat-edit{grid-template-columns:minmax(0,1fr)}}
+
+/* REVIEW-95D: switches like the app (NativeSwitchStyle): fixed 51x31 track, knob centred, neutral tint, not system green. */
+:root{--switch-on:#858585}
+html[data-theme="light"]{--switch-on:#1c1c1e}
+.card .hub-switch,.hub-switch{width:51px;height:31px;min-height:31px;min-width:51px;padding:0;align-self:center;box-sizing:border-box}
+.hub-switch i{top:2px;left:2px}
+.hub-switch[aria-checked="true"]{background:var(--switch-on);box-shadow:none}
+.hub-switch[aria-checked="true"] i{left:22px}
+.hub-rule-side{gap:10px;align-items:center}
+.hub-badge{line-height:16px;display:inline-flex;align-items:center}
+/* REVIEW-95D: macro colours of the app (NativeDesign macroProtein / macroCarbohydrate / macroFat). */
+:root{--mac-protein:#8ce0b5;--mac-carbs:#f5a13d;--mac-fat:#b58ceb}
+html[data-theme="light"]{--mac-protein:#146647;--mac-carbs:#995400;--mac-fat:#7345b3}
+.fw-bar{height:6px}
+
+/* REVIEW-95D: micronutrient tiles (share of the daily reference, lowest first). */
+:root{--fm-ok:#30d158;--fm-mid:#ffd60a;--fm-low:#ff9f0a}
+html[data-theme="light"]{--fm-ok:#1a7f3c;--fm-mid:#8a6a00;--fm-low:#9e4a00}
+.fm-summary{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.fm-summary span{font-size:13px;color:var(--ink-2);padding:4px 10px;border-radius:999px;background:var(--surface-2)}
+.fm-summary b{color:var(--ink);font-variant-numeric:tabular-nums;margin-right:2px}
+.fm-summary .ok b{color:var(--fm-ok)}.fm-summary .low b{color:var(--fm-low)}
+.fm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px}
+.card .fm-tile,.fm-tile{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:6px 8px;text-align:left;padding:10px 12px;min-height:0;height:auto;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font:inherit;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.18)}
+.card .fm-tile:hover:not(:disabled){border-color:color-mix(in srgb,var(--ink) 22%,transparent);background:var(--surface-2)}
+.card .fm-tile.sel{border-color:var(--ink)}
+.card .fm-tile:disabled{cursor:default;opacity:.55}
+.fm-name{font-size:13px;color:var(--ink-2);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fm-pct{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums}
+.fm-tile small{grid-column:1/-1;font-size:11px;color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fm-bar{grid-column:1/-1;display:block;height:5px;border-radius:3px;background:var(--track-94);overflow:hidden}
+.fm-bar>i{display:block;height:100%;border-radius:3px;background:var(--ink-3)}
+.fm-tile.ok .fm-pct{color:var(--fm-ok)}.fm-tile.ok .fm-bar>i{background:var(--fm-ok)}
+.fm-tile.mid .fm-pct{color:var(--fm-mid)}.fm-tile.mid .fm-bar>i{background:var(--fm-mid)}
+.fm-tile.low .fm-pct,.fm-tile.warn .fm-pct{color:var(--fm-low)}.fm-tile.low .fm-bar>i,.fm-tile.warn .fm-bar>i{background:var(--fm-low)}
+.fm-panel{margin-top:12px;padding:12px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line)}
+.fm-panel-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.fm-panel ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.fm-panel li{display:grid;grid-template-columns:minmax(0,1fr) auto 44px;gap:4px 10px;align-items:center;font-size:14px}
+.fm-panel li span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fm-panel li b{font-weight:600;font-variant-numeric:tabular-nums}
+.fm-panel li small{color:var(--ink-2);text-align:right;font-variant-numeric:tabular-nums}
+.fm-panel li i{grid-column:1/-1;display:block;height:4px;border-radius:2px;background:var(--surface-3);position:relative;overflow:hidden}
+.fm-panel li i::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--w);background:var(--sec-nutrition);border-radius:2px}
+.card .fm-tile:disabled .fm-pct{color:var(--ink-3)}
+.card .fm-tile.sel{box-shadow:0 0 0 1px var(--ink)}
 </style>
 </head>
   <body class="dashboard-mode">
@@ -1962,7 +2008,18 @@ async function fdLoad() {
 /* SITE-94: Fitia-like week and calorie card (parity with app build 94). Goals live in this browser
    until the app shares its goals: the range is ±10 % of the calorie goal. */
 const FD_GOALS = "lifeos-nutrition-goals-94";
-function fdGoals() { try { const g = JSON.parse(localStorage.getItem(FD_GOALS) || "null"); return g && g.kcal > 0 ? g : null; } catch (e) { return null; } }
+// REVIEW-95D: the iPhone publishes its computed targets (kcal and grams) in the shared setting "nutrition-targets";
+// the site uses them first, then its own goals saved in this browser.
+let fdServerTargets;
+function fdLoadTargets() {
+  if (fdServerTargets !== undefined || fd.targetsLoading) return;
+  fd.targetsLoading = true;
+  workerRequest("getSettings", ["nutrition-targets"]).then((r) => {
+    const d = r?.doc || {};
+    fdServerTargets = Number(d.calories) > 0 ? { kcal: Number(d.calories), protein: Number(d.protein) || 0, carbs: Number(d.carbohydrate) || 0, fat: Number(d.fat) || 0, fromPhone: true } : null;
+  }).catch(() => { fdServerTargets = null; }).finally(() => { fd.targetsLoading = false; if (state.view === "nutrition") renderNutrition(); });
+}
+function fdGoals() { if (fdServerTargets) return fdServerTargets; try { const g = JSON.parse(localStorage.getItem(FD_GOALS) || "null"); return g && g.kcal > 0 ? g : null; } catch (e) { return null; } }
 function fdBand(v, goal) { if (!(v > 0)) return "none"; if (!(goal > 0)) return "within"; return v < goal * 0.9 ? "under" : v > goal * 1.1 ? "over" : "within"; }
 const FD_BAND_COLOR = { none: "var(--ink-3)", under: "var(--over-94)", within: "var(--ok-94)", over: "var(--over-94)" };
 const fdMacroColor = (v, goal) => !(goal > 0) || !(v > 0) ? "var(--ink-3)" : v >= goal ? "var(--ok-94)" : "var(--over-94)";
@@ -1998,7 +2055,8 @@ function fdWeekCard() {
   }).join("");
   const list = fd.entries || [], sum = (k) => list.reduce((n, e) => n + (Number(e[k]) || 0), 0);
   const kcal = sum("kcal"), band = fdBand(kcal, g?.kcal);
-  let gauge = "";
+  fdLoadTargets();
+  let gauge = '<svg class="fw-gauge" viewBox="0 0 300 66" aria-hidden="true"><path d="M12 62 Q150 -22 288 62" fill="none" stroke="var(--track-94)" stroke-width="6" stroke-linecap="round"/></svg>';
   if (g) {
     const share = (v) => Math.min(Math.max(v / (g.kcal * 2), 0), 1);
     const lo = fdArcPoint(share(g.kcal * 0.9)), hi = fdArcPoint(share(g.kcal * 1.1)), k = fdArcPoint(share(kcal));
@@ -2012,9 +2070,16 @@ function fdWeekCard() {
       <text x="150" y="77" text-anchor="middle">Consigliate ${fdNum(g.kcal * 0.9)}–${fdNum(g.kcal * 1.1)}</text>
     </svg>`;
   }
+  // Without goals each bar shows the macro's share of the calories, in its own colour (as in the app).
+  const energy = { protein: sum("protein") * 4, carbs: sum("carbs") * 4, fat: sum("fat") * 9 }, energyTotal = energy.protein + energy.carbs + energy.fat;
   const macro = (label, key, goal) => {
-    const v = sum(key), b = fdBand(v, goal), w = goal > 0 ? Math.min(100, (v / goal) * 100) : 0;
-    return `<div class="fw-macro"><small>${label}</small><span><b>${fdNum(v)}</b>${goal > 0 ? ` <em>/ ${fdNum(goal)} g</em>` : " <em>g</em>"}</span><i class="fw-bar"><i style="width:${w}%;background:${fdMacroColor(v, goal)}"></i></i></div>`;
+    const v = sum(key);
+    if (goal > 0) {
+      const w = Math.min(100, (v / goal) * 100);
+      return `<div class="fw-macro"><small>${label}</small><span><b>${fdNum(v)}</b> <em>/ ${fdNum(goal)} g</em></span><i class="fw-bar"><i style="width:${w}%;background:${fdMacroColor(v, goal)}"></i></i></div>`;
+    }
+    const share = energyTotal > 0 ? Math.round(energy[key] / energyTotal * 100) : 0;
+    return `<div class="fw-macro"><small>${label}</small><span><b>${fdNum(v)}</b> <em>g · ${share}%</em></span><i class="fw-bar" title="${share}% delle calorie"><i style="width:${share}%;background:var(--mac-${key})"></i></i></div>`;
   };
   const title = fd.day === today ? "Oggi" : new Date(fd.day + "T12:00:00Z").toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "short" });
   return `<section class="fw-wrap" aria-label="Settimana e calorie">
@@ -2042,6 +2107,8 @@ document.addEventListener("click", (e) => {
   const go = t.closest("[data-fd-goto]");
   if (go && !go.disabled) { fd.day = go.dataset.fdGoto; fd.entries = null; renderNutrition(); return; }
   if (t.closest("[data-fd-goals]")) fdGoalsOpen();
+  const micro = t.closest("[data-fd-micro]");
+  if (micro && !micro.disabled) { fd.microOpen = fd.microOpen === micro.dataset.fdMicro ? null : micro.dataset.fdMicro; renderNutrition(); }
 });
 document.addEventListener("submit", (e) => {
   if (e.target.id !== "fd-goals") return;
@@ -2071,19 +2138,44 @@ function fdMicroValue(e, k) {
   const n = Number(x && typeof x === "object" ? x.amount : x);
   return Number.isFinite(n) && n > 0 ? { amount: n, estimated: !!(x && x.estimateSource) } : null;
 }
+// REVIEW-95D: micronutrients at a glance. Each tile shows the share of the daily reference (the app's
+// NativeTrackedNutrient.dailyReference, LARN adult men; EFSA for potassium and EPA + DHA), lowest first.
+// The user's own micro goals (Admin) replace the reference. A tile opens the foods it comes from.
+const FD_MICRO_REF = { vitaminC: 105, zinc: 12, vitaminA: 750, vitaminD: 15, vitaminE: 13, vitaminK: 135, vitaminB1: 1, vitaminB2: 1.6, vitaminB3: 18, vitaminB5: 5,
+  vitaminB6: 1.6, folate: 330, vitaminB12: 4, calcium: 950, chloride: 2300, copper: 1.4, iron: 10, iodine: 150, magnesium: 350, manganese: 2.5, phosphorus: 550,
+  potassium: 3500, selenium: 55, sodium: 1500, ala: 1250, epaDha: 250 };
+const FD_MICRO_LIMIT = new Set(["sodium"]); // more is not better: over the reference is the warning
 function fdMicroCard(list) {
   if (typeof NB_MICRO === "undefined" || !list.length) return "";
   const goals = (typeof hub !== "undefined" && hub.goals?.doc?.micro) || {};
   const fmt = (n) => new Intl.NumberFormat("it-IT", { maximumFractionDigits: n < 10 ? 1 : 0 }).format(n);
-  const rows = NB_MICRO.map(([k, label, unit]) => {
-    const parts = list.map((e) => ({ e, v: fdMicroValue(e, k) })).filter((x) => x.v).sort((a, b) => b.v.amount - a.v.amount);
-    const total = parts.reduce((n, x) => n + x.v.amount, 0);
-    return { k, label, unit, parts, total, goal: Number(goals[k]) || 0 };
-  }).filter((r) => r.total > 0);
-  if (!rows.length) return `<section class="card pad fd-micro"><div class="card-title"><h2>Micronutrienti</h2></div><p class="empty">Nessun micronutriente nei pasti di questo giorno.</p></section>`;
-  return `<section class="card pad fd-micro" aria-label="Micronutrienti del giorno"><div class="card-title"><h2>Micronutrienti</h2><small>apri una voce per vedere da quali alimenti arriva</small></div>
-    ${rows.map((r) => `<details class="fd-micro-row"><summary><span>${nbE(r.label)}</span><b>${fmt(r.total)} ${r.unit}${r.goal ? ` <small>/ ${fmt(r.goal)}</small>` : ""}</b>${r.goal ? `<i class="fd-micro-bar" style="--w:${Math.min(100, Math.round(r.total / r.goal * 100))}%"></i>` : ""}</summary>
-      <ul>${r.parts.map(({ e, v }) => { const share = Math.round(v.amount / r.total * 100); return `<li><span>${nbE(e.name || "Pasto")}</span><b>${v.estimated ? "≈" : ""}${fmt(v.amount)} ${r.unit}</b><small>${share}%</small><i style="--w:${share}%"></i></li>`; }).join("")}</ul></details>`).join("")}
+  const units = Object.fromEntries(NB_MICRO.map(([k, , u]) => [k, u]));
+  const pair = (e, x, y) => { const a = fdMicroValue(e, x), b = fdMicroValue(e, y); return a || b ? { amount: (a?.amount || 0) + (b?.amount || 0), estimated: !!(a?.estimated || b?.estimated) } : null; };
+  const value = (e, k) => k === "vitaminK" ? (fdMicroValue(e, "vitaminK") || pair(e, "vitaminK1", "vitaminK2")) : k === "epaDha" ? pair(e, "epa", "dha") : fdMicroValue(e, k);
+  const labels = { vitaminK: "Vitamina K", epaDha: "EPA + DHA", chloride: "Cloruro" };
+  const keys = [...NB_MICRO.map(([k]) => k).filter((k) => !["vitaminK1", "vitaminK2", "epa", "dha", "caffeine", "vitaminK"].includes(k)), "vitaminK", "epaDha"];
+  const label = (k) => (labels[k] || (NB_MICRO.find(([x]) => x === k) || [k, k])[1]).replace(/^Vitamina /, "Vit. ");
+  const rows = keys.map((k) => {
+    const parts = list.map((e) => ({ e, v: value(e, k) })).filter((x) => x.v).sort((p1, p2) => p2.v.amount - p1.v.amount);
+    const total = parts.reduce((n, x) => n + x.v.amount, 0), ref = Number(goals[k]) || FD_MICRO_REF[k] || 0;
+    return { k, label: label(k), unit: units[k] || (k === "vitaminK" ? "µg" : "mg"), parts, total, ref, pct: ref ? Math.round(total / ref * 100) : 0, limit: FD_MICRO_LIMIT.has(k), estimated: parts.some((x) => x.v.estimated) };
+  }).filter((r) => r.ref);
+  if (!rows.some((r) => r.total > 0)) return `<section class="card pad fd-micro"><div class="card-title"><h2>Micronutrienti</h2></div><p class="empty">Nessun micronutriente nei pasti di questo giorno.</p></section>`;
+  const tone = (r) => r.limit ? (r.pct > 100 ? "warn" : "ok") : r.pct >= 100 ? "ok" : r.pct >= 50 ? "mid" : "low";
+  const measured = rows.filter((r) => !r.limit), reached = measured.filter((r) => r.pct >= 100).length, low = measured.filter((r) => r.pct < 50).length;
+  const order = [...rows].sort((x, y) => ((x.total > 0) - (y.total > 0)) * -1 || (x.limit - y.limit) || (x.pct - y.pct));
+  const open = rows.find((r) => r.k === fd.microOpen && r.total > 0);
+  const caffeine = list.reduce((n, e) => n + (fdMicroValue(e, "caffeine")?.amount || 0), 0);
+  const tile = (r) => `<button type="button" class="fm-tile ${tone(r)}${open?.k === r.k ? " sel" : ""}" data-fd-micro="${r.k}" ${r.total > 0 ? "" : "disabled"} aria-pressed="${open?.k === r.k}" aria-label="${nbE(r.label)} ${fmt(r.total)} ${r.unit}, ${r.pct}% del riferimento">
+      <span class="fm-name">${nbE(r.label)}</span><b class="fm-pct">${r.total > 0 ? r.pct + "%" : "–"}</b>
+      <i class="fm-bar"><i style="width:${Math.min(100, r.pct)}%"></i></i>
+      <small>${r.estimated ? "≈" : ""}${fmt(r.total)} / ${fmt(r.ref)} ${r.unit}${r.limit ? " max" : ""}</small></button>`;
+  const panel = open ? `<div class="fm-panel"><div class="fm-panel-head"><b>${nbE(open.label)}: da dove arriva</b><button type="button" class="ghost" data-fd-micro="${open.k}">Chiudi</button></div>
+      <ul>${open.parts.map(({ e, v }) => { const share = Math.round(v.amount / open.total * 100); return `<li><span>${nbE(e.name || "Pasto")}</span><b>${v.estimated ? "≈" : ""}${fmt(v.amount)} ${open.unit}</b><small>${share}%</small><i style="--w:${share}%"></i></li>`; }).join("")}</ul></div>` : "";
+  return `<section class="card pad fd-micro" aria-label="Micronutrienti del giorno"><div class="card-title"><h2>Micronutrienti</h2><small>% del fabbisogno del giorno</small></div>
+    <div class="fm-summary"><span class="ok"><b>${reached}</b> ${reached === 1 ? "coperto" : "coperti"}</span><span class="low"><b>${low}</b> sotto la metà</span><span><b>${measured.length}</b> in totale</span></div>
+    <div class="fm-grid">${order.map(tile).join("")}</div>${panel}
+    <p class="hint">Tocca un riquadro per vedere da quali alimenti arriva. Riferimenti LARN per adulto${Object.keys(goals).length ? "; dove hai un obiettivo in Admin vale il tuo" : ""}.${caffeine ? ` Caffeina ${fmt(caffeine)} mg.` : ""}</p>
   </section>`;
 }
 /* SITE-94: Dashboard finance card like the app: remaining, per day, spent/left bar, legend, last 2 expenses. */
@@ -9135,7 +9227,7 @@ document.addEventListener("keydown", (e) => {
 })();
 </script><script>window.dispatchEvent(new Event("lifeos-ready"));</script><script id="lifeos-hub95">
 /* SITE-ADMIN-HUB-2026-11-23: obiettivi condivisi con l'iPhone, istruzioni di importazione, pannello Avvisi
-   (regole create dall'utente e notifiche della preghiera). Salvato sul server (web_settings); l'iPhone legge
+   (regole create dall'utente e notifiche degli orari). Salvato sul server (web_settings); l'iPhone legge
    regole e obiettivi e mostra le notifiche. */
 const hub = { goals: null, targets: null, alerts: null, log: null, stacks: null, supplements: null, stackEdit: null, busy: "", error: "", editing: null, msg: "" };
 const HUB_PRAYERS = [["fajr", "Fajr (alba)"], ["sunrise", "Sorgere del sole"], ["dhuhr", "Dhuhr (mezzogiorno)"], ["asr", "Asr (pomeriggio)"], ["maghrib", "Maghrib (tramonto)"], ["isha", "Isha (notte)"]];
@@ -9327,7 +9419,7 @@ function renderAlerts() {
         <li><b>Solo sull'iPhone</b><span>Sono notifiche dell'app Life OS, programmate quando apri l'app (per i prossimi 2 giorni). Il sito non manda notifiche: qui le scegli.</span></li>
         <li><b>Suono a scelta</b><span>Per ogni avviso: <em>Con suono</em>, <em>Senza suono</em> o <em>Discreta</em> (solo nel Centro notifiche, schermo spento).</span></li>
         <li><b>Nessuna sveglia</b><span>Non suonano come una sveglia e non superano la modalità Concentrazione o Silenzioso.</span></li>
-        <li><b>Silenzio e limite</b><span>Dalle ${hubE(doc.quiet?.from || "22:00")} alle ${hubE(doc.quiet?.to || "07:00")} nessun avviso personale; al massimo ${Number(doc.maxPerDay) || 6} al giorno. La preghiera arriva sempre.</span></li>
+        <li><b>Silenzio e limite</b><span>Dalle ${hubE(doc.quiet?.from || "22:00")} alle ${hubE(doc.quiet?.to || "07:00")} nessun avviso personale; al massimo ${Number(doc.maxPerDay) || 6} al giorno. Gli orari arrivano sempre.</span></li>
       </ul>
     </section>
     <section class="card pad adm-wide"><div class="card-title"><h2>I tuoi avvisi</h2><button class="save" data-hub-new>+ Nuovo avviso</button></div>
@@ -9336,7 +9428,7 @@ function renderAlerts() {
       ${rules.length ? `<div class="hub-rules">${rules.map((r) => `<div class="hub-rule${r.enabled === false ? " off" : ""}"><button class="hub-rule-main" data-hub-edit="${hubE(r.id)}"><b>${hubE(r.name)}</b><small>${hubE(hubRuleText(r))}</small></button><span class="hub-rule-side">${hubDeliveryBadge(r.delivery)}<button class="hub-switch" role="switch" aria-checked="${r.enabled !== false}" data-hub-toggle="${hubE(r.id)}" aria-label="${r.enabled !== false ? "Spegni" : "Accendi"} ${hubE(r.name)}"><i></i></button></span></div>`).join("")}</div>` : `<p class="empty">Nessun avviso personale: parti da un modello qui sopra.</p>`}
     </section>
     ${hubFinanceHtml(doc)}
-    <section class="card pad"><div class="card-title"><h2>Preghiera</h2><button class="hub-switch" role="switch" aria-checked="${!!p.enabled}" data-hub-prayer-toggle aria-label="Notifiche della preghiera"><i></i></button></div>
+    <section class="card pad"><div class="card-title"><h2>Orari</h2><button class="hub-switch" role="switch" aria-checked="${!!p.enabled}" data-hub-prayer-toggle aria-label="Notifiche degli orari"><i></i></button></div>
       <label class="hub-row">Avvisami<select data-hub-prayer-before>${[0, 5, 10, 15, 20, 30].map((m) => `<option value="${m}" ${Number(p.before) === m ? "selected" : ""}>${m ? m + " minuti prima" : "all'orario"}</option>`).join("")}</select></label>
       <label class="hub-row">Come arriva${hubDeliverySelect("prayer-delivery", p.delivery, "data-hub-prayer-delivery")}</label>
       <div class="hub-prayers">${HUB_PRAYERS.map(([k, l]) => `<label class="hub-check"><input type="checkbox" data-hub-prayer="${k}" ${p.prayers?.[k] ? "checked" : ""} ${p.enabled ? "" : "disabled"}>${l}</label>`).join("")}</div>
@@ -9346,7 +9438,7 @@ function renderAlerts() {
       <label class="hub-row">Silenzio dalle<input type="time" data-hub-quiet="from" value="${hubE(doc.quiet?.from || "22:00")}"></label>
       <label class="hub-row">alle<input type="time" data-hub-quiet="to" value="${hubE(doc.quiet?.to || "07:00")}"></label>
       <label class="hub-row">Al massimo al giorno<input type="number" min="1" max="20" data-hub-max value="${Number(doc.maxPerDay) || 6}"></label>
-      <p class="hint">Valgono per i tuoi avvisi. Le preghiere non rispettano il silenzio: arrivano sempre se accese.</p>
+      <p class="hint">Valgono per i tuoi avvisi. Gli orari non rispettano il silenzio: arrivano sempre se accesi.</p>
     </section>
     <section class="card pad adm-wide"><div class="card-title"><h2>Ultimi avvisi sull'iPhone</h2><button data-hub-reload>Aggiorna</button></div>
       ${(hub.log || []).length ? `<div class="hub-log">${hub.log.map((x) => `<div class="kv"><span>${hubE(x.title)}<small>${hubE(x.body)}</small></span><strong>${hubE(new Date(x.at).toLocaleString("it-IT", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }))}</strong></div>`).join("")}</div>` : `<p class="empty">Ancora nessun avviso mostrato.</p>`}
