@@ -1439,6 +1439,21 @@
       "provenance": "Risposta utente in chat alla lista dei punti aperti (24/11)",
       "original_quote": "Gli avvisi, anche qui bug grafici, non mi fa vedere tutti gli avvisi (tipo quelli che già mi avevi messo te), non mi dice se sono avvisi push solo su telefono, se hanno sveglie o suoni ecc ed è tutto incognito. Vorrei ci fosse più personalizzazione e più chiarezza e template.",
       "rule": "Il pannello Avvisi mostra tutti gli avvisi (anche quelli di Finanza dell'app), dice per ognuno dove arriva (notifica sull'iPhone), con che suono o sveglia, e offre più personalizzazione e modelli pronti."
+    },
+    {
+      "id": "FINANCE-ENTRY-SIMPLIFY-2026-11-24",
+      "status": "ACTIVE",
+      "scope": "Finanza: Nuova spesa, piani, pagamenti (app e sito)",
+      "recorded_on": "2026-11-24",
+      "provenance": "Scelta utente in chat (opzione 1) e messaggio successivo, 24/11/2026",
+      "original_quote": "Una sola strada: togliere «Registra pagamento» e lasciare tutto in Nuovo movimento. Lì aggiungerei la scelta «già registrato» quando scegli un piano. — tutta la questione di aggiunta e pagamento finanza è stra confusionaria, dovremmo avere nuova spesa con un sistema standardizzato di poter dividere la spesa tra risparmi e budget mensile e rateizzazione, se è un utenza pure. Mentre piano è solo per anticipo budget, fondo senza scadenza, spesa ricorrente fissa e utenza con quota stimata possono essere fusi? e rateizzazione spesa togliamo da li. Così piano è usato più salturariamente, e invece Spesa più spesso. Ma non bisogna avere 40 schermate incomprensibili e confusionarie",
+      "rule": "Una sola strada per i soldi che escono: Nuova spesa, con un blocco standard per dividere tra risparmi, budget mensile e rate (anche per le bollette) e la scelta «già registrato» quando si sceglie un piano; «Registra pagamento» sparisce. Il piano serve solo per anticipo di budget, fondo senza scadenza e spesa ricorrente (fissa o stimata, da fondere se possibile); la spesa a rate esce dai piani. Poche schermate chiare. Proposta visiva prima dell'implementazione.",
+      "relation": "Compatibile con FUNDING-BLOCK-2026-11-21 (il blocco «Da dove arrivano i soldi» resta, in Nuova spesa). Sostituisce l'ingresso «Registra pagamento» di REFERENCE-GAPS-95 mantenendone la funzione (differenza ripartita) dentro Nuova spesa.",
+      "open_questions": [
+        "Fondere fissa e stimata in un solo tipo «Ricorrente»?",
+        "Il piano Obiettivo resta?",
+        "Cosa fare dei piani a rate già esistenti"
+      ]
     }
   ],
   "pending_confirmations": [

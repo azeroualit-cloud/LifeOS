@@ -454,3 +454,4 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 - **SITE-GRAPHICS-2026-11-24**: il sito deve sfruttare il potenziale grafico del web.
 - **SITE-GRAPHICS-STYLE-2026-11-24** (ACTIVE): «tutto il sito deve essere graficamente avanzato, e ciò non significa mettere glow a caso, basta un design minimal ma studiato e con shadows e contrasti adatti». Tutte le sezioni; niente aloni decorativi; ombre misurate e contrasti adeguati.
 - **ALERTS-CLARITY-2026-11-24**: tutti gli avvisi visibili, dove e come arrivano (suono, sveglia), più personalizzazione e modelli.
+- **FINANCE-ENTRY-SIMPLIFY-2026-11-24** (ACTIVE): una sola strada, Nuova spesa, con divisione standard risparmi / budget / rate (anche bollette) e «già registrato» per i piani; via «Registra pagamento»; piano solo per anticipo di budget, fondo senza scadenza, spesa ricorrente (fissa/stimata da fondere); rate fuori dai piani; poche schermate. Proposta visiva prima di implementare.
