@@ -1630,3 +1630,8 @@ html[data-theme="light"] .sc-tile>div{background:color-mix(in srgb,var(--c) calc
   .hub-facts li{padding:10px}
 }
 @media(max-width:380px){.nav button{font-size:10px;letter-spacing:-.03em}}
+/* REVIEW-95C: barra del budget come nell'app: binario, banda del mese trascorso, spesa in blu Finanza. */
+.fh-bar.v95{position:relative;display:block;gap:0}
+.fh-bar.v95 .p{position:absolute;inset:0 auto 0 0;border-radius:var(--r-pill);background:color-mix(in srgb,var(--sec-finance) 44%,transparent)}
+.fh-bar.v95 i.s{position:relative;background:var(--sec-finance);border-radius:var(--r-pill)}
+.fh-legend .p b{width:14px;height:6px;border-radius:3px;background:color-mix(in srgb,var(--sec-finance) 44%,transparent)}

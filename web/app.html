@@ -1669,6 +1669,11 @@ html[data-theme="light"] .sc-tile>div{background:color-mix(in srgb,var(--c) calc
   .hub-facts li{padding:10px}
 }
 @media(max-width:380px){.nav button{font-size:10px;letter-spacing:-.03em}}
+/* REVIEW-95C: barra del budget come nell'app: binario, banda del mese trascorso, spesa in blu Finanza. */
+.fh-bar.v95{position:relative;display:block;gap:0}
+.fh-bar.v95 .p{position:absolute;inset:0 auto 0 0;border-radius:var(--r-pill);background:color-mix(in srgb,var(--sec-finance) 44%,transparent)}
+.fh-bar.v95 i.s{position:relative;background:var(--sec-finance);border-radius:var(--r-pill)}
+.fh-legend .p b{width:14px;height:6px;border-radius:3px;background:color-mix(in srgb,var(--sec-finance) 44%,transparent)}
 </style>
 </head>
   <body class="dashboard-mode">
@@ -5025,7 +5030,13 @@ document.addEventListener("keydown", (e) => {
           spark = `<svg class="fh-spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Andamento del saldo"><polyline points="${ser.map((v, i) => `${x(i)},${y(v)}`).join(" ")}"/></svg><small>${hide ? "••••" : (delta >= 0 ? "+" : "−") + exactEuro(Math.abs(delta))} in ${ser.length - 1} mesi</small>`;
         } else spark = `<div class="fh-spark-empty"></div><small>Andamento non ancora disponibile</small>`;
         const per = daily.days ? `${fmt(daily.low)} al giorno · ${daily.days} giorni${`${state.year}-${String(state.month).padStart(2, "0")}` === todayIso().slice(0, 7) ? ", incluso oggi" : ""}` : "Mese concluso";
-        return `<div class="fin-hero"><section class="fh-card"><h2>Budget rimanente</h2><strong class="fh-val ${amountClass(rem)}">${fmt(rem)}</strong><p>${per}</p><div class="fh-g"><div class="fh-bar" role="img" aria-label="Speso ${spentPct}% e rimanente ${left}% del budget spendibile"><i class="s" style="width:${spentPct}%"></i><i class="r" style="width:${left}%"></i></div><div class="fh-legend"><span class="s"><b></b>Speso ${fmt(spent)} · ${spentPct}%</span>${rem < 0 ? `<span class="o"><b></b>Sforato ${fmt(-rem)}</span>` : `<span class="r"><b></b>Rimane ${fmt(rem)} · ${left}%</span>`}</div></div></section><section class="fh-card"><h2>Saldo attuale</h2>${privacyButton()}<strong class="fh-val">${fmt(s.budget)}</strong><p>Ultima sincronizzazione, non legato al mese scelto</p><div class="fh-g">${spark}</div></section></div>`;
+        return `<div class="fin-hero"><section class="fh-card"><h2>Budget rimanente</h2><strong class="fh-val ${amountClass(rem)}">${fmt(rem)}</strong><p>${per}</p><div class="fh-g">${(() => {
+          /* REVIEW-95C: come nell'app, la parte di mese trascorsa è una banda tenue sotto la spesa (non una lineetta). */
+          const cur = `${state.year}-${String(state.month).padStart(2, "0")}` === todayIso().slice(0, 7);
+          const dim = new Date(state.year, state.month, 0).getDate(), day = Number(todayIso().slice(8, 10));
+          const pace = cur ? Math.min(100, Math.max(4, day / dim * 100)) : 0;
+          return `<div class="fh-bar v95" role="img" aria-label="Speso ${spentPct}% del budget${cur ? `, giorno ${day} di ${dim}` : ""}">${cur ? `<span class="p" style="width:${pace.toFixed(1)}%"></span>` : ""}<i class="s" style="width:${Math.min(100, spentPct)}%"></i></div><div class="fh-legend"><span>${rem < 0 ? `Sforato ${fmt(-rem)}` : `speso ${fmt(spent)} di ${fmt(spent + Math.max(0, rem))}`}</span>${cur ? `<span class="p"><b></b>giorno ${day} di ${dim}</span>` : ""}</div>`;
+        })()}</div></section><section class="fh-card"><h2>Saldo attuale</h2>${privacyButton()}<strong class="fh-val">${fmt(s.budget)}</strong><p>Ultima sincronizzazione, non legato al mese scelto</p><div class="fh-g">${spark}</div></section></div>`;
       }
       /** Layout squarified: restituisce i rettangoli (x,y,w,h) nello spazio W x H, area proporzionale al valore. */
       function tmLayout(list, W, H) {
