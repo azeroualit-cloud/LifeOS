@@ -37,7 +37,8 @@ enum NativeDesign {
     static let calendarTitle = Color(uiColor: UIColor { traits in
         traits.userInterfaceStyle == .dark ? UIColor(red: 0.95, green: 0.73, blue: 0.53, alpha: 1) : UIColor(red: 0.45, green: 0.31, blue: 0.14, alpha: 1)
     })
-    static let calendarAccent = Color(uiColor: .systemBlue)
+    // Contrast audit 24/11: system blue is 3.6:1 on the light canvas; the high-contrast blues read on every surface.
+    static let calendarAccent = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor(red: 0.25, green: 0.61, blue: 1, alpha: 1) : UIColor(red: 0.0, green: 0.25, blue: 0.87, alpha: 1) })
     static func calendarNumber(size: CGFloat) -> Font { .system(size: size, weight: .medium, design: .default) }
     static let healthCanvas = Color(uiColor: .systemGroupedBackground)
     static let healthSurface = Color(uiColor: .secondarySystemGroupedBackground)
@@ -45,23 +46,24 @@ enum NativeDesign {
     static let healthWeight = Color(uiColor: UIColor { traits in
         traits.userInterfaceStyle == .dark ? UIColor(red: 0.90, green: 0.45, blue: 0.98, alpha: 1) : UIColor(red: 0.50, green: 0.20, blue: 0.68, alpha: 1)
     })
-    static let healthAccent = Color(uiColor: .systemOrange)
+    // Contrast audit 24/11: system orange is 2:1 on white; the light theme uses a darker orange (≥ 4.5:1).
+    static let healthAccent = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? .systemOrange : UIColor(red: 0.72, green: 0.33, blue: 0.0, alpha: 1) })
     // Macro colours of the build 93 preview: protein green, carbohydrates orange, fat purple.
     static let macroProtein = nutritionTitle
     static let macroCarbohydrate = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark ? UIColor(red: 0.96, green: 0.63, blue: 0.24, alpha: 1) : UIColor(red: 0.66, green: 0.36, blue: 0.0, alpha: 1)
+        traits.userInterfaceStyle == .dark ? UIColor(red: 0.96, green: 0.63, blue: 0.24, alpha: 1) : UIColor(red: 0.60, green: 0.33, blue: 0.0, alpha: 1)
     })
     static let macroFat = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark ? UIColor(red: 0.66, green: 0.48, blue: 0.88, alpha: 1) : UIColor(red: 0.45, green: 0.27, blue: 0.70, alpha: 1)
+        traits.userInterfaceStyle == .dark ? UIColor(red: 0.71, green: 0.55, blue: 0.92, alpha: 1) : UIColor(red: 0.45, green: 0.27, blue: 0.70, alpha: 1)
     })
     /// Track behind progress bars (#3a3a3c in dark).
     static let barTrack = Color(uiColor: .tertiarySystemFill)
     /// Over a goal: orange like the preview, never red (red is for outflows).
-    static let overGoal = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? .systemOrange : UIColor(red: 0.70, green: 0.33, blue: 0.0, alpha: 1) })
+    static let overGoal = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? .systemOrange : UIColor(red: 0.62, green: 0.29, blue: 0.0, alpha: 1) })
     /// Goal reached / inside the recommended range; readable on white (4.5:1) and on black.
     static let goalMet = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? .systemGreen : UIColor(red: 0.10, green: 0.47, blue: 0.22, alpha: 1) })
     /// Dots and tracks with nothing logged: at least 3:1 on the card.
-    static let emptyMark = Color(uiColor: UIColor { UIColor(white: $0.userInterfaceStyle == .dark ? 0.42 : 0.56, alpha: 1) })
+    static let emptyMark = Color(uiColor: UIColor { UIColor(white: $0.userInterfaceStyle == .dark ? 0.47 : 0.50, alpha: 1) })
     /// Estimates and forecasts (FINANCE-PALETTE-2026-11-21 cyan, also used by the weight forecast).
     static let estimate = Color(uiColor: UIColor { traits in
         traits.userInterfaceStyle == .dark ? UIColor(red: 0.36, green: 0.77, blue: 0.88, alpha: 1) : UIColor(red: 0.0, green: 0.45, blue: 0.56, alpha: 1)
@@ -222,7 +224,8 @@ enum NativeDesign {
     static let warning = Color(uiColor: UIColor { traits in
         traits.userInterfaceStyle == .dark ? UIColor(red: 0.95, green: 0.68, blue: 0.25, alpha: 1) : UIColor(red: 0.52, green: 0.28, blue: 0.02, alpha: 1)
     })
-    static let danger = Color(uiColor: .systemRed)
+    // Contrast audit 24/11: system red is 3.2:1 on the light canvas; high-contrast reds as text.
+    static let danger = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor(red: 1, green: 0.41, blue: 0.38, alpha: 1) : UIColor(red: 0.80, green: 0.0, blue: 0.07, alpha: 1) })
     static let success = financialGreen
     static let gap = Space.large
     static let cardRadius: CGFloat = 21
