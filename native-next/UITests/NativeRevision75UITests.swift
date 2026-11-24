@@ -21,7 +21,7 @@ final class NativeRevision75UITests: XCTestCase {
             app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: from))
                 .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: to)))
         }
-        XCTAssertTrue(choice.isHittable); choice.tap()
+        XCTAssertTrue(choice.isHittable, "Voce «\(title)» non raggiungibile nel menu \(button.identifier)"); choice.tap()
     }
     func testBillMonthControlsFitWithLargeText() {
         continueAfterFailure = false; executionTimeAllowance = 180
@@ -65,7 +65,7 @@ final class NativeRevision75UITests: XCTestCase {
             let row = app.descendants(matching: .any).matching(identifier: "utility-share-\(year)-" + month).firstMatch
             for _ in 0..<8 { if row.exists && row.isHittable { break }; app.collectionViews.firstMatch.swipeUp(velocity: .slow) }
             XCTAssertTrue(row.waitForExistence(timeout: 10))
-            XCTAssertTrue(row.debugDescription.contains("73,93"), "La quota mostrata deve essere 73,93 €")
+            XCTAssertTrue(row.debugDescription.contains("73,93"), "La quota mostrata deve essere 73,93 €, letta: \(row.label) \(String(describing: row.value))")
         }
         let shot = XCTAttachment(screenshot: XCUIScreen.main.screenshot()); shot.name = "75-utility-three-shares"; shot.lifetime = .keepAlways; add(shot)
         app.buttons["Salva"].tap()
