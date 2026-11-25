@@ -34,6 +34,7 @@ STATES = [  # (pattern, label) checked on name, then on detail
     (r'\bsode\b', 'Sode'), (r'\bless[aeiotu]+\b|\blessat[aeio]\b|\bbollit[aeio]\b', 'Lesso'),
     (r'\bsecc[aheio]+\b', 'Secco'), (r'\bcott[aeio]\b', 'Cotto'), (r'\bcrud[aeio]\b', 'Crudo'),
 ]
+STATE_ORDER = ['Crudo', 'Fresco', 'Cotto', 'Lesso', 'Al vapore', 'Alla piastra', 'Al forno', 'Al tegamino', 'Sode', 'Secco']
 SKIN = [(r'\bsenza pelle\b', 'Senza pelle'), (r'\bcon pelle\b', 'Con pelle')]
 
 def clean(text, patterns):
@@ -88,6 +89,19 @@ def main():
             seen.add(key)
             m['group'] = base
             m['variant'] = m['_variant']
+    # FOOD-VARIANT-DEFAULT-2026-11-25: raw first, cooked second, then the other preparations.
+    rank = {v: i for i, v in enumerate(STATE_ORDER)}
+    ordered, done = [], set()
+    for m in out:
+        g = m.get('group')
+        if not g: ordered.append(m); continue
+        key = (g, m['family'])
+        if key in done: continue
+        done.add(key)
+        members = [x for x in out if x.get('group') == g and x['family'] == m['family']]
+        members.sort(key=lambda x: (rank.get(x['variant'].get('Stato'), 50), 0 if x['variant'].get('Pelle') != 'Con pelle' else 1))
+        ordered.extend(members)
+    out = ordered
     for m in out:
         m.pop('_base'); m.pop('_variant')
         if m.get('detail') is None: m.pop('detail', None)

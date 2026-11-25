@@ -360,7 +360,7 @@ struct NativeFoodPicker: View {
         let found = parsed.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             ? visible : NativeGenericFood.matches(parsed.name, in: visible)
         // One row per food: its versions are chosen after tapping it (FOOD-DB-RESET-2026-11-25).
-        let collapsed = NativeFoodVariants.collapse(found)
+        let collapsed = NativeFoodVariants.collapse(found, preferDefault: parsed.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         let matches = collapsed.map(\.food)
         let variantCounts = Dictionary(collapsed.map { ($0.food.id, $0.count) }, uniquingKeysWith: { a, _ in a })
 

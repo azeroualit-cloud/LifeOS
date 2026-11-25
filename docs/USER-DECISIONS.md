@@ -487,3 +487,5 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 - **FOOD-DB-RESET-2026-11-25 — ACTIVE.** Richiesta diretta (testo originale nel JSON). DB alimenti da zero con base curata (304 alimenti, 38 con varianti Stato/Pelle, pesatura con osso), sfoltibile dal sito; integratori dell'utente conservati; backup prima di cancellare; varianti scelte con pulsanti nell'app e sul sito; cataloghi di marca e Open Food Facts non più proposti.
 
 - **TRANSCRIBE-SITE-2026-11-25 — ACTIVE.** «puoi aggiungermi questo solo nel sito?»: sezione Trascrivi solo sul sito; trascrizione nel browser con Whisper (transformers.js), audio mai inviato a server, modello scaricato una volta da Hugging Face.
+
+- **FOOD-VARIANT-DEFAULT-2026-11-25 — ACTIVE.** «di default preferisce mostrarmeli crudi e come seconda opzione cotti»: variante proposta cruda/fresca, poi cotta, poi le altre; cercando «lessa» si apre quella. FOOD-DB-RESET eseguito subito su indicazione dell'utente (continuità: la base entra nello stesso passaggio).

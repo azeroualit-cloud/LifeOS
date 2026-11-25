@@ -4,20 +4,33 @@ import Foundation
 /// after tapping it, with the bone weighing that already existed.
 enum NativeFoodVariants {
     static let axisOrder = ["Stato", "Pelle"]
+    /// FOOD-VARIANT-DEFAULT-2026-11-25: raw first, cooked second, then the other preparations.
+    static let stateOrder = ["Crudo", "Fresco", "Cotto", "Lesso", "Al vapore", "Alla piastra", "Al forno", "Al tegamino", "Sode", "Secco"]
     struct Row { let food: NativeGenericFood; let count: Int }
     struct Axis: Identifiable { let name: String; let values: [String]; var id: String { name } }
 
     /// Keeps the first food of each group (the best ranked or best matching) and counts its versions.
-    static func collapse(_ foods: [NativeGenericFood]) -> [Row] {
+    /// With `preferDefault` (no search typed) the row opens on the raw version; while searching it
+    /// opens on the version that matched best («coscia lessa» opens on Lesso).
+    static func collapse(_ foods: [NativeGenericFood], preferDefault: Bool = false) -> [Row] {
         var counts: [String: Int] = [:]
-        for food in foods { if let key = groupKey(food) { counts[key, default: 0] += 1 } }
+        var best: [String: NativeGenericFood] = [:]
+        for food in foods {
+            guard let key = groupKey(food) else { continue }
+            counts[key, default: 0] += 1
+            if preferDefault, let current = best[key] { if rank(food) < rank(current) { best[key] = food } } else if best[key] == nil { best[key] = food }
+        }
         var seen = Set<String>()
         var out: [Row] = []
         for food in foods {
             guard let key = groupKey(food) else { out.append(Row(food: food, count: 1)); continue }
-            if seen.insert(key).inserted { out.append(Row(food: food, count: counts[key] ?? 1)) }
+            if seen.insert(key).inserted { out.append(Row(food: best[key] ?? food, count: counts[key] ?? 1)) }
         }
         return out
+    }
+    static func rank(_ food: NativeGenericFood) -> Int {
+        let state = stateOrder.firstIndex(of: food.variant?["Stato"] ?? "") ?? 50
+        return state * 2 + (food.variant?["Pelle"] == "Con pelle" ? 1 : 0)
     }
     private static func groupKey(_ food: NativeGenericFood) -> String? {
         guard let group = food.group, food.variant?.isEmpty == false else { return nil }
@@ -45,6 +58,10 @@ enum NativeFoodVariants {
                 if !names.contains(axis) { names.append(axis) }
                 if !(values[axis] ?? []).contains(value) { values[axis, default: []].append(value) }
             }
+        }
+        if var states = values["Stato"] {
+            states.sort { (stateOrder.firstIndex(of: $0) ?? 50) < (stateOrder.firstIndex(of: $1) ?? 50) }
+            values["Stato"] = states
         }
         names.sort { a, b in
             let ia = axisOrder.firstIndex(of: a) ?? 99, ib = axisOrder.firstIndex(of: b) ?? 99

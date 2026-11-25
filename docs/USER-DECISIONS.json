@@ -988,12 +988,22 @@
       "rule": "Solo sul sito (non nell'app): sezione Trascrivi per trascrivere vocali, audio e video, più file insieme, con lingua, qualità, tempi facoltativi, copia e download .txt. Trascrizione nel browser (Whisper via transformers.js): l'audio non viene inviato a server; il modello si scarica una volta da Hugging Face."
     },
     {
+      "id": "FOOD-VARIANT-DEFAULT-2026-11-25",
+      "status": "ACTIVE",
+      "scope": "Alimenti con varianti: variante proposta",
+      "recorded_on": "2026-11-25",
+      "provenance": "Richiesta diretta utente",
+      "original_quote": "per gli alimenti facciamo che di default preferisce mostrarmeli crudi e come seconmda opzione cotti",
+      "rule": "Negli alimenti con varianti si propone prima la versione cruda (o fresca), poi la cotta, poi le altre preparazioni; nella ricerca con parole come «lessa» si apre la variante cercata."
+    },
+    {
       "id": "FOOD-DB-RESET-2026-11-25",
       "status": "ACTIVE",
       "scope": "Database alimenti (server, app, sito)",
       "recorded_on": "2026-11-25",
       "provenance": "Richiesta diretta utente; scelta «Base curata da te»",
       "original_quote": "il con osso e senza osso e con pelle e senza pelle deve essere anche nell'app. Cmq facciamo che il DB lo rifacciamo da zero perché è pieno di alimenti che non mi interessano. / Base curata da te / mantieni tutti i miei integratori aggiunti d ame però",
+      "run_decision": "Esecuzione subito (risposta utente: «se lo fai subito e dopo che differenza fa? a me basta non rimanere senza alimenti, va mantenuta la continuità»): la base sostituisce gli alimenti nello stesso passaggio, quindi non si resta mai senza.",
       "rule": "Il DB alimenti riparte da una base curata dall'assistente (alimenti comuni, varianti raggruppate: Stato, Pelle; pesatura con osso), che l'utente può sfoltire dal sito. Si conservano tutti gli integratori aggiunti dall'utente; gli altri alimenti vanno in tabelle di backup prima della cancellazione. Varianti con osso/pelle/cottura visibili come scelte sia nell'app sia sul sito. I vecchi cataloghi di marca e Open Food Facts non sono più proposti."
     },
     {
