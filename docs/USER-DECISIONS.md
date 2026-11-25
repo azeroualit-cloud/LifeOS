@@ -493,3 +493,6 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 - **IPA-DELIVERY-95-2026-11-25 — ACTIVE.** IPA 95 ora (0.10.33 build 95) con quanto pronto; Finanza ridotta e layout Dashboard dal sito nella 96. Controllo completo e test su più runner in parallelo («use the tactic … run multiple threads … as fast as possible»). Accettazione solo dell'utente.
 
 - **FOOD-LOG-EDIT-2026-11-25 — ACTIVE.** «u need to add the feature to edit already logged in foods, per evitare di eliminare un cibo e rimetterlo solo perché ho sbagliato qualche grammo»: tocco sulla riga del diario → foglio Modifica (quantità, ora), valori ricalcolati in proporzione, aggiorna Apple Salute e sito. Entra nell'IPA 95; mockup https://claude.ai/artifact/PvtumJuet68b5X6ATm7BaP approvato («Yes, go ahead»).
+
+## 2026-11-25 · Finanza, contanti
+- **FINANCE-CASH-ON-SPEND-2026-11-25** (ACTIVE): «i contanti non li conto come prelievi perché li conto quando li spendo come contanti». I prelievi non si registrano; le spese in contanti si registrano quando avvengono. Il saldo dell'app sul conto include i contanti non ancora spesi; le riconciliazioni confrontano saldo banca + contanti.

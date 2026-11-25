@@ -1720,6 +1720,16 @@
       "original_quote": "wait wait wait u need to add the feature to edit already logged in foods, per evitare di eliminare un cibo e rimetterlo solo perché ho sbagliato qualche grammo",
       "rule": "Le registrazioni del diario si modificano (quantità e ora) senza eliminarle e reinserirle; valori ricalcolati in proporzione. Richiesta prima dell'IPA 95 (mockup approvato: «Yes, go ahead»).",
       "relation": "Si aggiunge a IPA-DELIVERY-95-2026-11-25 (ritarda l'IPA, nessun conflitto)."
+    },
+    {
+      "id": "FINANCE-CASH-ON-SPEND-2026-11-25",
+      "status": "ACTIVE",
+      "scope": "Finanza: contanti",
+      "recorded_on": "2026-11-25",
+      "provenance": "Messaggio utente in chat Claude, 25/11/2026",
+      "original_quote": "i contanti non li conto come prelievi perché li conto quando li spendo come contanti",
+      "rule": "I prelievi di contanti non si registrano come movimento; ogni spesa in contanti si registra quando avviene, sul conto da cui è stato prelevato. Il saldo dell'app sul conto include quindi i contanti non ancora spesi; nelle riconciliazioni il confronto va fatto con saldo banca + contanti in tasca.",
+      "relation": "Nessun conflitto con regole attive."
     }
   ],
   "pending_confirmations": [
