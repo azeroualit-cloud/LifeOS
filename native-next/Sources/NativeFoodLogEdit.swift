@@ -86,14 +86,14 @@ struct NativeFoodLogEditSheet: View {
                     HStack {
                         TextField(quantity.title, text: $text)
                             .keyboardType(.decimalPad).focused($focused)
-                            .font(.title2.weight(.semibold)).monospacedDigit()
+                            .font(.title.weight(.semibold)).monospacedDigit()
                             .accessibilityIdentifier("food-edit-quantity")
                         Text(quantity.unit).foregroundStyle(NativeDesign.secondary)
                     }
                     HStack(spacing: NativeDesign.Space.small) {
                         ForEach(quantity.steps.flatMap { [-$0] } + quantity.steps.reversed(), id: \.self) { step in
                             Button(step > 0 ? "+" + Self.format(step) : "−" + Self.format(-step)) { nudge(step, maximum: quantity.maximum) }
-                                .buttonStyle(.bordered).frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget)
+                                .buttonStyle(LOGlassButtonStyle(fillsWidth: true))
                                 .accessibilityIdentifier("food-edit-step-" + (step > 0 ? "plus-" : "minus-") + Self.format(step > 0 ? step : -step))
                         }
                     }
@@ -136,7 +136,7 @@ struct NativeFoodLogEditSheet: View {
     }
 
     private func value(_ label: String, _ now: Decimal, _ before: Decimal, digits: Int = 1) -> some View {
-        VStack(spacing: 2) {
+        VStack(spacing: NativeDesign.Space.xxs) {
             Text(Self.number(now, digits)).font(.headline).monospacedDigit()
             Text(label).font(.caption2).foregroundStyle(NativeDesign.secondary)
             if now != before { Text(Self.number(before, digits)).font(.caption2).strikethrough().foregroundStyle(NativeDesign.secondary) }

@@ -551,7 +551,7 @@ private struct NativePlanMovementPicker: View {
                         Spacer()
                         Text((Double(item.value.integer("amountCents")) / 100).euro).monospacedDigit()
                         if selection?.integer("row") == item.value.integer("row") { Image(systemName: "checkmark") }
-                    }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading).padding(.vertical, 2).contentShape(Rectangle()) // 44 pt minimum even after pixel rounding (start 3: 43.67)
+                    }.frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading).padding(.vertical, NativeDesign.Space.xxs).contentShape(Rectangle()) // 44 pt minimum even after pixel rounding (start 3: 43.67)
                 }.buttonStyle(NativePressStyle()).accessibilityIdentifier("plan-link-movement-\(item.value.integer("row"))")
             }
         }
