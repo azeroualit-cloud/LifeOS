@@ -1603,6 +1603,26 @@
       "original_quote": "Incontri ma con un altra icona / flame is the best but too direct like hearts / scelgo 6",
       "rule": "La voce si chiama «Incontri» con l'icona sparkles (SF Symbol; sul sito un disegno equivalente). Niente cuori o fiamme.",
       "relation": "Cambia solo nome e icona di CALENDAR-PRIVATE-ENTRY-2026-11-24 (testo nascosto, riepilogo dietro Face ID restano)."
+    },
+    {
+      "id": "SITE-FIRST-CUSTOM-2026-11-25",
+      "status": "ACTIVE",
+      "scope": "Prodotto: app iOS e sito",
+      "recorded_on": "2026-11-25",
+      "provenance": "Messaggio utente in chat Claude, 25/11/2026",
+      "original_quote": "volevo rendere quasi ogni parte dell'app che ha senso customizzare, renderla customizzabile [...] queste cose, invece che magari lasciarle sull'app, volevo più metterle nel sito, visto che lì è molto più veloce, e sull'app tenere solo le cose effettivamente essenziali",
+      "rule": "Ciò che ha senso personalizzare diventa personalizzabile, preferibilmente dal sito (rilascio rapido); l'app tiene l'essenziale. Le modifiche frequenti non devono richiedere una nuova IPA.",
+      "relation": "Direzione generale. La parte che toglie Statistiche dall'app è in attesa (STATS-SITE-ONLY-2026-11-25)."
+    },
+    {
+      "id": "ANALYSIS-DEEP-2026-11-25",
+      "status": "ACTIVE",
+      "scope": "Analisi dati (Statistiche)",
+      "recorded_on": "2026-11-25",
+      "provenance": "Messaggio utente in chat Claude, 25/11/2026",
+      "original_quote": "mi hai messo solo quanto mangio e quanto spendo in base al turno. Io volevo molto di più, mi aspetto molto di più da te",
+      "rule": "L'analisi non si limita a spese e calorie per turno: deve poter combinare liberamente i dati (non solo confronti predefiniti).",
+      "relation": "Estende LIFE-STATS-2026-11-25; giudizio dell'utente: la versione attuale è insufficiente."
     }
   ],
   "pending_confirmations": [
@@ -1632,6 +1652,16 @@
       "conflicts_with": "HEALTH-TREND-93-2026-11-21 (Peso e Alimento sopra la barra)",
       "note": "Parafrasi: togliere il pulsante Alimento da Salute. Domanda META-01 posta.",
       "resolution": "Chiarimento utente: «io intendevo che alimento deve essere a DESTRA [...] COME LO HAI FATTO IN DASHBOARD». Nessun conflitto con HEALTH-TREND-93: in Salute Peso a sinistra e Alimento a destra, come in Dashboard."
+    },
+    {
+      "id": "STATS-SITE-ONLY-2026-11-25",
+      "status": "PENDING_CONFIRMATION",
+      "scope": "Statistiche: solo sito invece di app + sito",
+      "recorded": "2026-11-25",
+      "source": "utente",
+      "text": "queste cose, invece che magari lasciarle sull'app, volevo più metterle nel sito",
+      "conflicts_with": "LIFE-STATS-2026-11-25 (Statistiche anche nell'app, Dashboard)",
+      "note": "Parafrasi: spostare le statistiche sul sito e togliere la schermata dall'app. Domanda META-01 posta il 25/11/2026."
     }
   ],
   "history": [
