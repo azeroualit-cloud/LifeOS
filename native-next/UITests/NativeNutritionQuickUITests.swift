@@ -96,12 +96,16 @@ final class NativeNutritionQuickUITests: XCTestCase {
         XCTAssertTrue(search.waitForExistence(timeout: 5))
         search.tap()
         search.typeText("Sovracoscia di pollo al forno con pelle")
-        let cut = app.buttons["generic-food-estimate-sovracoscia-forno-pelle"]
+        // FOOD-DB-RESET: one row per food; the version is chosen in the sheet.
+        let cut = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "generic-food-base-", "Sovracoscia")).firstMatch
         XCTAssertTrue(cut.waitForExistence(timeout: 5))
         cut.tap()
+        for choice in ["Al forno", "Con pelle"] {
+            let button = app.buttons[choice].firstMatch
+            if button.waitForExistence(timeout: 5) { button.tap() }
+        }
         let weighing = app.descendants(matching: .any)["quick-nutrition-weighing"]
-        XCTAssertTrue(weighing.waitForExistence(timeout: 5))
-        weighing.tap()
+        XCTAssertTrue(weighing.waitForExistence(timeout: 5)) // segmented since FOOD-DB-RESET: «Con osso» is tapped directly
         let bone = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Con osso")).firstMatch
         XCTAssertTrue(bone.waitForExistence(timeout: 10))
         bone.tap()
@@ -213,12 +217,12 @@ final class NativeNutritionQuickUITests: XCTestCase {
         XCTAssertTrue(search.waitForExistence(timeout: 10))
         search.tap()
         search.typeText("Biscotti")
-        XCTAssertTrue(app.buttons["generic-food-ciqual-24001"].firstMatch.waitForExistence(timeout: 5))
-        let biscuits = app.buttons.visible("generic-food-ciqual-24001") // the quick-add list under the catalog has the same row
+        XCTAssertTrue(app.buttons["generic-food-base-ciqual-24001"].firstMatch.waitForExistence(timeout: 5))
+        let biscuits = app.buttons.visible("generic-food-base-ciqual-24001") // the quick-add list under the catalog has the same row
         XCTAssertTrue(biscuits.isHittable)
         capture("Generic food search for Biscotti", app)
         biscuits.tap()
-        XCTAssertTrue(app.staticTexts["Generic"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Biscotti"].firstMatch.waitForExistence(timeout: 5))
         // FOOD-CATALOG-92: biscuits open by the piece (1 biscotto, 8 g of 438 kcal/100 g).
         XCTAssertTrue(app.descendants(matching: .any)["quick-nutrition-unit"].exists)
         XCTAssertEqual(app.textFields["quick-nutrition-Pezzi"].value as? String, "1")

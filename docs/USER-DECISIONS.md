@@ -489,3 +489,5 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 - **TRANSCRIBE-SITE-2026-11-25 — ACTIVE.** «puoi aggiungermi questo solo nel sito?»: sezione Trascrivi solo sul sito; trascrizione nel browser con Whisper (transformers.js), audio mai inviato a server, modello scaricato una volta da Hugging Face.
 
 - **FOOD-VARIANT-DEFAULT-2026-11-25 — ACTIVE.** «di default preferisce mostrarmeli crudi e come seconda opzione cotti»: variante proposta cruda/fresca, poi cotta, poi le altre; cercando «lessa» si apre quella. FOOD-DB-RESET eseguito subito su indicazione dell'utente (continuità: la base entra nello stesso passaggio).
+
+- **IPA-DELIVERY-95-2026-11-25 — ACTIVE.** IPA 95 ora (0.10.33 build 95) con quanto pronto; Finanza ridotta e layout Dashboard dal sito nella 96. Controllo completo e test su più runner in parallelo («use the tactic … run multiple threads … as fast as possible»). Accettazione solo dell'utente.

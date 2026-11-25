@@ -107,22 +107,6 @@ final class NativePersonalFoodUITests: XCTestCase {
         capture("Porzione del personale modificato")
     }
 
-    func testCommunityBrandSearchShowsSourceAndPortion() {
-        let app = openCatalog()
-        replace(app.textFields["food-quick-search"], with: "Barilla", app: app)
-        let product = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS[c] %@ AND label CONTAINS[c] %@", "generic-food-", "Barilla", "Open Food Facts")).firstMatch
-        XCTAssertTrue(product.waitForExistence(timeout: 15))
-        capture("Ricerca marca nota con provenienza collaborativa")
-        product.tap()
-        XCTAssertTrue(app.descendants(matching: .any)["nutrition-product-source"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.descendants(matching: .any)["nutrition-source-license"].exists)
-        let portion = app.textFields["quick-nutrition-Porzione"]
-        XCTAssertTrue(portion.waitForExistence(timeout: 10))
-        replace(portion, with: "150", app: app)
-        XCTAssertTrue(app.buttons["quick-nutrition-save"].isEnabled)
-        capture("Prodotto di marca con fonte licenza e porzione")
-    }
-
     func testSupplementTabSeparatesFoodsAndSearchesKnownBrands() {
         let app = openCatalog()
         let search = app.textFields["food-quick-search"]
@@ -135,33 +119,11 @@ final class NativePersonalFoodUITests: XCTestCase {
         XCTAssertTrue(app.buttons["food-quick-create"].exists)
         capture("Scheda Integratori con sole voci personali")
         app.segmentedControls.buttons["Tutti"].tap()
-        replace(search, with: "Milka", app: app)
-        let milka = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS[c] %@", "generic-food-", "Milka")).firstMatch
-        XCTAssertTrue(milka.waitForExistence(timeout: 10))
-        capture("Ricerca prodotti Milka nel catalogo ampliato")
-        replace(search, with: "Pepsi", app: app)
-        let pepsi = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS[c] %@", "generic-food-", "Pepsi")).firstMatch
-        XCTAssertTrue(pepsi.waitForExistence(timeout: 10))
-        capture("Ricerca prodotti Pepsi con marca e unità")
-    }
-
-    func testCoopSpesottiMilkUsesMillilitresAndBrand() {
-        let app = openCatalog()
-        replace(app.textFields["food-quick-search"], with: "Spesotti latte", app: app)
-        let milk = app.buttons["generic-food-coop-ean-8001120653314"]
-        XCTAssertTrue(milk.waitForExistence(timeout: 10))
-        XCTAssertTrue(milk.label.contains("Gli Spesotti"))
-        XCTAssertFalse(milk.label.contains("Generic"))
-        capture("Catalogo Spesotti con marca e valori per 100 ml")
-        milk.tap()
-        let portion = app.textFields["quick-nutrition-Porzione"]
-        XCTAssertTrue(portion.waitForExistence(timeout: 10))
-        XCTAssertTrue(portion.label.contains("millilitri"))
-        let energy = app.staticTexts["quick-nutrition-calories"]
-        XCTAssertEqual(energy.label, "47 kcal")
-        replace(portion, with: "250", app: app)
-        XCTAssertEqual(energy.label.replacingOccurrences(of: ",", with: "."), "117.5 kcal")
-        capture("Latte Spesotti porzione 250 ml")
+        // FOOD-DB-RESET-2026-11-25: the base replaces the branded catalogs; a food with versions is one row.
+        replace(search, with: "Coscia", app: app)
+        let thigh = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS[c] %@", "generic-food-base-", "varianti")).firstMatch
+        XCTAssertTrue(thigh.waitForExistence(timeout: 10))
+        capture("Base: una riga per alimento con le varianti")
     }
 
 }

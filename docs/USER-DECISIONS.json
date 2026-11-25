@@ -979,6 +979,15 @@
       "rule": "Barra: Dashboard, Attività, Calendario, Salute fissi; quinto tab Finanza o Bloom, scelto in Admin sul sito (impostazione app-layout, chiave tabSlot) e letto dall'app senza nuova IPA alla prossima apertura. Quello non in barra si apre dalla sua scheda in Dashboard. Predefinito Finanza; ultima scelta conservata sul telefono se il server non risponde. Sostituisce NAVIGATION-FIVE-2026-11-16."
     },
     {
+      "id": "IPA-DELIVERY-95-2026-11-25",
+      "status": "ACTIVE",
+      "scope": "Build 95: candidato completo e IPA",
+      "recorded_on": "2026-11-25",
+      "provenance": "Alla domanda «Should I make IPA 95 now, or add Finanza and the Dashboard layout first?» l'utente ha risposto",
+      "original_quote": "ok, do a recursive overall check to make sure nothing will fail, and use the tactic we tought about days ago to run mutiple threads so taht we get the ipa as soon and as fast as possible",
+      "rule": "Produrre ora l'IPA 95 (versione 0.10.33, build 95) con quanto pronto; Finanza ridotta e layout della Dashboard dal sito vanno nella 96. Controllo completo prima del pacchetto; test divisi su più runner in parallelo (candidato 95: controllo mirato, sei shard e avvii Release contemporanei). Nessuna accettazione dedotta dai test."
+    },
+    {
       "id": "TRANSCRIBE-SITE-2026-11-25",
       "status": "ACTIVE",
       "scope": "Sito: trascrizione di vocali e audio",

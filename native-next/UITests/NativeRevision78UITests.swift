@@ -230,7 +230,7 @@ final class NativeRevision78UITests: XCTestCase {
         app.buttons["health-add-nutrition"].tap()
         // FOOD-QUICK-ADD-2026-11-23: the search opens directly.
         let gin = app.buttons["generic-food-cocktail-gin-tonic"]
-        let biscuits = app.buttons["generic-food-ciqual-24001"]
+        let biscuits = app.buttons["generic-food-base-ciqual-24001"]
         XCTAssertTrue(gin.waitForExistence(timeout: 10))
         XCTAssertTrue(biscuits.isHittable)
         XCTAssertLessThan(gin.frame.minY, biscuits.frame.minY)
