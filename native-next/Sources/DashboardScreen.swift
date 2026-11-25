@@ -7,6 +7,7 @@ struct DashboardScreen: View {
     @State private var routineBusy: Int?
     @State private var routineFeedback = false
     @State private var showingTimes = false
+    @State private var showingStats = false
     @EnvironmentObject private var health: NativeHealthStore
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.nativeReduceMotion) private var reduceMotion
@@ -24,6 +25,7 @@ struct DashboardScreen: View {
                     NativeNutritionQuickEntry()
                     financeOverview
                     upcomingAppointments(today: today)
+                    statsCard
                     NativeConnectionBadge()
                     if let notice = store.notice { Text(notice).font(.footnote).foregroundStyle(NativeDesign.secondary) }
                 }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.top, NativeDesign.Space.small).padding(.bottom, NativeDesign.Layout.scrollClearance)
@@ -41,6 +43,19 @@ struct DashboardScreen: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .lifeOSWeightSaved)) { _ in Task { await health.refresh() } }
         .onChange(of: scenePhase) { _, phase in if phase == .active { Task { await health.refresh(); await NativeHub95.shared.refresh(store: store, health: health) } } }
+    }
+
+    /// LIFE-STATS-2026-11-25: shifts, spending, calories and the private log of the same days.
+    private var statsCard: some View {
+        NativeCard(density: .compact) {
+            Button { showingStats = true } label: {
+                VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
+                    LOCardHeader(title: "Statistiche", systemImage: "chart.bar.xaxis", section: .calendar, showsChevron: true)
+                    Text("Turni, spese, calorie e privato degli stessi giorni, messi a confronto.").font(.footnote).foregroundStyle(NativeDesign.secondary)
+                }.contentShape(Rectangle())
+            }.buttonStyle(NativePressStyle()).accessibilityIdentifier("home-stats")
+        }
+        .fullScreenCover(isPresented: $showingStats) { NativeLifeStatsScreen().environmentObject(store) }
     }
 
     private func rollingCalendar(_ today: String, now: Date) -> some View {

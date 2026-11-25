@@ -469,3 +469,4 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 - **SITE-CALENDAR-REDESIGN-2026-11-24** (ACTIVE): Il calendario del sito va ridisegnato: non un riquadro quadrato, colori migliori.
 - **CALENDAR-RAMADAN-EID-2026-11-24** (ACTIVE, risposta «Explicit names»): promemoria automatici con nomi espliciti Ramadan, Eid al-Fitr, Eid al-Adha. Eccezione limitata a questi eventi; NEUTRAL-TIMES-WORDING resta attiva per il resto.
 - **NUTRITION-TOLERANT-2026-11-24** (ACTIVE): «devono essere molto permissivi». Avviso solo oltre +25 % calorie, doppio delle proteine, +50 % degli altri macro; sotto l'obiettivo nessun avviso.
+- **LIFE-STATS-2026-11-25** (ACTIVE): «i want the statistics i told u about». Sezione Statistiche (app: Dashboard; sito: vista Statistiche): turni per mese, spese e calorie medie per tipo di giornata, note private per mese/persona/tipo di giornata dietro Face ID; frasi sulle differenze, mai cause. Non sostituisce Avvisi.

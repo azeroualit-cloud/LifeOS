@@ -57,6 +57,16 @@ final class NativeScreenTourUITests: XCTestCase {
         shot(prefix + " 01 Dashboard", app)
         scroll(app, prefix + " 02 Dashboard sotto")
         scroll(app, prefix + " 03 Dashboard fondo")
+        // LIFE-STATS-2026-11-25: Statistiche at the bottom of the Dashboard.
+        for _ in 0..<3 where !(app.buttons["home-stats"].exists && app.buttons["home-stats"].isHittable) { app.swipeUp(velocity: .slow) }
+        if tap(app.buttons["home-stats"]) {
+            shot(prefix + " 03i Statistiche", app)
+            app.swipeUp(velocity: .slow); shot(prefix + " 03j Statistiche sotto", app)
+            if tap(app.buttons["stats-private-unlock"]) {
+                app.swipeUp(velocity: .slow); shot(prefix + " 03k Statistiche privato", app)
+            }
+            if app.buttons["stats-back"].exists { app.buttons["stats-back"].tap() }
+        }
         // Avvisi: always reachable from Impostazioni, also when every alert was ignored.
         app.swipeDown(velocity: .fast); app.swipeDown(velocity: .fast)
         // REVIEW-95E: the next time opens its sheet, then the month of times.
@@ -97,7 +107,12 @@ final class NativeScreenTourUITests: XCTestCase {
         shot(prefix + " 05 Calendario mese", app)
         if tap(app.buttons["calendar-view-agenda"]) {
             shot(prefix + " 06 Calendario agenda", app)
-            if tap(app.buttons["calendar-private"]) { shot(prefix + " 06c Privato", app); dismissSheet(app) }
+            if tap(app.buttons["calendar-private"]) {
+                shot(prefix + " 06c Privato", app)
+                // LIFE-STATS-2026-11-25: the summary opens (no Face ID on the simulator).
+                if tap(app.buttons["private-unlock"]) { app.swipeUp(velocity: .slow); shot(prefix + " 06d Privato riepilogo", app) }
+                dismissSheet(app)
+            }
         }
         // REVIEW-95: a day without events still opens its agenda.
         if tap(app.buttons["calendar-view-month"]) {

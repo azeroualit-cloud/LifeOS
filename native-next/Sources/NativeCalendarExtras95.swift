@@ -209,7 +209,7 @@ struct NativePrivateDaySheet: View {
     }
 
     private func load() async {
-        guard !store.isDemo else { return }
+        guard !store.isDemo else { entries = NativePrivateLog.demo(); return }
         do {
             let r = try await store.read("getSettings", args: [.string("private-log")]).object
             entries = r.record("doc").records("entries"); modified = r.amount("modified")
@@ -230,5 +230,32 @@ struct NativePrivateDaySheet: View {
         context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "Mostra il riepilogo privato") { ok, _ in
             Task { @MainActor in unlocked = ok }
         }
+    }
+}
+
+/// The private log (server setting «private-log»), shared by the calendar mark, the sheet and Statistiche.
+enum NativePrivateLog {
+    static func load(_ store: NativeStore) async -> [Record] {
+        if store.isDemo { return demo() }
+        return (try? await store.read("getSettings", args: [.string("private-log")]).object.record("doc").records("entries")) ?? []
+    }
+    /// Demo only: neutral names, a few entries in the last months (tour and screenshots).
+    static func demo(today: String = CivilDate.day()) -> [Record] {
+        let offsets: [(Int, String)] = [(0, "Persona A"), (-2, "Persona A"), (-5, "Persona B"), (-9, "Persona A"), (-12, "Persona A"),
+                                        (-16, "Persona B"), (-20, "Persona A"), (-23, "Persona A"), (-30, "Persona B"), (-34, "Persona A"),
+                                        (-41, "Persona A"), (-47, "Persona C"), (-52, "Persona A"), (-60, "Persona A"), (-66, "Persona B"),
+                                        (-73, "Persona A"), (-80, "Persona A"), (-88, "Persona B")]
+        return offsets.enumerated().map { index, item in
+            ["id": .string("demo-\(index)"), "day": .string(CivilDate.adding(item.0, to: today)), "person": .string(item.1)]
+        }
+    }
+}
+
+/// A small neutral ring under the day number: the day has a private note, without any text (CALENDAR-PRIVATE-ENTRY).
+struct NativePrivateMark: View {
+    var body: some View {
+        Circle().strokeBorder(NativeDesign.secondary, lineWidth: NativeDesign.Space.hairline)
+            .frame(width: NativeDesign.Space.small, height: NativeDesign.Space.small)
+            .accessibilityHidden(true)
     }
 }

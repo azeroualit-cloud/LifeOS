@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "LifeOS",
-  "updated_on": "2026-11-24",
+  "updated_on": "2026-11-25",
   "policy": {
     "id": "META-01",
     "status": "ACTIVE",
@@ -1583,6 +1583,16 @@
       "original_quote": "non ha senso cbiare colore a questi solo perché sforano di un grammo, devono essere molto permissivi (tipo valore non ottimali e pericolosi alla salute)",
       "rule": "Barre e arco tengono il loro colore; l'avviso arancio solo per valori lontani dall'obiettivo: calorie oltre +25 %, proteine oltre il doppio, carboidrati/grassi oltre +50 %. Sotto l'obiettivo nessun colore di avviso.",
       "relation": "Sostituisce il punto 28 di BUILD-95-PLAN (macro caldi sotto l'obiettivo, calorie calde sopra +10 %), che non era nel registro."
+    },
+    {
+      "id": "LIFE-STATS-2026-11-25",
+      "status": "ACTIVE",
+      "scope": "App (Dashboard › Statistiche) e sito (vista Statistiche)",
+      "recorded_on": "2026-11-25",
+      "provenance": "Messaggi utente in chat Claude del 24/11/2026 (idea di una sezione di analisi dati generale con correlazioni tra turni, nutrizione e dati privati; parafrasi sanificata) e del 25/11/2026",
+      "original_quote": "i want the statistics i told u about",
+      "rule": "Una sezione Statistiche mette a confronto, per tipo di giornata (turno), spese, calorie e note private degli stessi giorni, con conteggio dei turni per mese e frasi brevi sulle differenze più nette. La parte privata resta nascosta finché non si apre con Face ID/codice. Le frasi descrivono cosa va insieme, mai una causa.",
+      "relation": "Sezione nuova accanto ad Avvisi: non sostituisce Avvisi né SITE-ALERTS-ONLY-AVVISI. Nessun dettaglio privato nel repository pubblico (dati demo con nomi neutri)."
     }
   ],
   "pending_confirmations": [

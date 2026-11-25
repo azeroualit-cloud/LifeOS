@@ -13,6 +13,7 @@ struct CalendarScreen: View {
     /// Build 92: the month ignores the system tab bar's bottom safe area for
     /// the same reason and keeps a fixed clearance instead.
     @State private var privateDay: NativePrivateDay?
+    @State private var privateDays: Set<String> = []
     @State private var showingDay = false
     @State private var monthReturnDay: String?
     private var selected: String {
@@ -85,6 +86,10 @@ struct CalendarScreen: View {
         .onChange(of: NativeCalendarSource(life: store.life, demo: store.isDemo, origin: store.server?.absoluteString)) { old, new in
             if let changes = new.shiftChanges(from: old) { patchShifts(changes) }
             else { monthData = [:]; seedSnapshot(); rebuildMonth(); reload += 1 }
+        }
+        .task(id: privateDay == nil) {
+            guard privateDay == nil else { return }
+            privateDays = Set(await NativePrivateLog.load(store).map { $0.text("day") })
         }
         .task(id: loadTarget + "-" + String(reload)) {
             let target = loadTarget
@@ -567,7 +572,8 @@ struct CalendarScreen: View {
                 HStack(alignment: .top, spacing: CalendarMetrics92.xs) {
                     ForEach(0..<7, id: \.self) { index in
                         let item = days[week * 7 + index]
-                        let displayed = CalendarDayPresentation(day: item.day, label: item.label, shift: item.shift, eventCount: item.eventCount, isToday: item.isToday, isWeekend: item.isWeekend, isCurrentMonth: true)
+                        let displayed = CalendarDayPresentation(day: item.day, label: item.label, shift: item.shift, eventCount: item.eventCount, isToday: item.isToday, isWeekend: item.isWeekend, isCurrentMonth: true,
+                                                                isPrivate: privateDays.contains(item.day))
                             Button {
                                 if !store.busy { store.calendarMonth = String(item.day.prefix(7)) }
                                 selected = item.day
@@ -708,6 +714,8 @@ struct CalendarDayPresentation: Equatable {
     let isToday: Bool
     let isWeekend: Bool
     let isCurrentMonth: Bool
+    /// CALENDAR-PRIVATE-ENTRY: a neutral ring, never any text.
+    var isPrivate = false
 }
 enum NativeCalendarDayAppearance { case month, week }
 
@@ -749,6 +757,7 @@ struct CalendarDayCell: View, Equatable {
                 }
             }
             eventDots
+            if item.isPrivate && appearance == .month { NativePrivateMark() }
         }.frame(maxWidth: .infinity)
             .frame(minHeight: NativeDesign.Layout.calendarDayHeight, alignment: appearance == .month ? .top : .center)
             .contentShape(Rectangle()).opacity(appearance != .month || item.isCurrentMonth ? 1 : 0.38)
