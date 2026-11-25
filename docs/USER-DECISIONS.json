@@ -1623,6 +1623,36 @@
       "original_quote": "mi hai messo solo quanto mangio e quanto spendo in base al turno. Io volevo molto di più, mi aspetto molto di più da te",
       "rule": "L'analisi non si limita a spese e calorie per turno: deve poter combinare liberamente i dati (non solo confronti predefiniti).",
       "relation": "Estende LIFE-STATS-2026-11-25; giudizio dell'utente: la versione attuale è insufficiente."
+    },
+    {
+      "id": "APP-ESSENTIALS-2026-11-25",
+      "status": "ACTIVE",
+      "scope": "App iOS",
+      "recorded_on": "2026-11-25",
+      "provenance": "Messaggio utente in chat Claude, 25/11/2026",
+      "original_quote": "l'app mantiene solo le cose essenziali, ma comunque anche un minimo di essenzialità di analisi va tenuto [...] nella finanza è un po' eccessivo, quindi magari ridurre le cose di analisi in finanza [...] toglierei le cose ripetitive e manterrei solo le cose effettivamente utili",
+      "rule": "L'app tiene l'essenziale più uno sguardo veloce alle analisi utili per decidere. In Finanza si tolgono le analisi ripetitive e si tengono solo quelle utili. Nessuna pagina Analisi del sito dentro l'app.",
+      "relation": "Precisa SITE-FIRST-CUSTOM-2026-11-25."
+    },
+    {
+      "id": "SITE-LAYOUT-CONFIG-2026-11-25",
+      "status": "ACTIVE",
+      "scope": "Sito e app: impostazioni lette dal server",
+      "recorded_on": "2026-11-25",
+      "provenance": "Messaggio utente in chat Claude, 25/11/2026",
+      "original_quote": "Il dashboard layout, se intendi che cambia solo nel sito, sì, potremmo valutarlo [...] Possibilmente anche dimensioni, colori, eccetera, come se fosse un ITSM",
+      "rule": "Da valutare/progettare: il sito configura layout della Dashboard dell'app (ordine, visibilità, dimensioni, colori) e le impostazioni rare (categorie ecc.); l'app le legge dal server senza nuova IPA.",
+      "relation": "Direzione approvata in linea di principio; il dettaglio va proposto."
+    },
+    {
+      "id": "ANALYSIS-SITE-FREEHAND-2026-11-25",
+      "status": "ACTIVE",
+      "scope": "Analisi sul sito",
+      "recorded_on": "2026-11-25",
+      "provenance": "Messaggio utente in chat Claude, 25/11/2026",
+      "original_quote": "fai te quello che ti pare, aumentando di molto il livello attuale, e poi eventualmente ne parleremo in futuro",
+      "rule": "Mano libera per un'analisi molto più ricca e personalizzabile sul sito.",
+      "relation": "Attua ANALYSIS-DEEP-2026-11-25."
     }
   ],
   "pending_confirmations": [
@@ -1655,13 +1685,14 @@
     },
     {
       "id": "STATS-SITE-ONLY-2026-11-25",
-      "status": "PENDING_CONFIRMATION",
+      "status": "RESOLVED_NOT_CONFIRMED",
       "scope": "Statistiche: solo sito invece di app + sito",
       "recorded": "2026-11-25",
       "source": "utente",
       "text": "queste cose, invece che magari lasciarle sull'app, volevo più metterle nel sito",
       "conflicts_with": "LIFE-STATS-2026-11-25 (Statistiche anche nell'app, Dashboard)",
-      "note": "Parafrasi: spostare le statistiche sul sito e togliere la schermata dall'app. Domanda META-01 posta il 25/11/2026."
+      "note": "Parafrasi: spostare le statistiche sul sito e togliere la schermata dall'app. Domanda META-01 posta il 25/11/2026.",
+      "resolution": "Risposta utente 25/11/2026: «anche un minimo di essenzialità di analisi va tenuto [...] l'app come sta per essere prodotta non è male» e «Non c'è bisogno di avere un'opzione analisi nell'app, non la voglio» (riferito alla pagina del sito dentro l'app). Interpretazione: LIFE-STATS resta attiva nell'app; nessuna vista web di Analisi nell'app."
     }
   ],
   "history": [
@@ -1860,6 +1891,12 @@
       "recorded_on": "2026-11-04",
       "original_quote": "magari anche dividendo il lavoro e facendo utilizzo di sottoagenti cosicchè possa utilizzare magari un modello cheap ? dici che è fattibile?",
       "proposal": "Valutare nel piano divisione in task delimitati e sottoagenti con modello meno costoso per le parti adatte, coordinamento e revisione delle parti delicate. Nessuna garanzia di risparmio; nessuna nuova configurazione globale o esecuzione autonoma avviata qui."
+    },
+    {
+      "id": "NAV-OPTIONS-2026-11-25",
+      "status": "UNDER_EVALUATION",
+      "recorded_on": "2026-11-25",
+      "text": "Valutare opzioni della barra con simulazione grafica realistica e pro/contro. Se accettata: Dashboard, Calendario, Salute, Finanza, Bloom, in questo ordine (solo dopo decisione). NAVIGATION-FIVE-2026-11-16 resta attiva fino ad allora."
     }
   ],
   "current_ipa_delivery_authorization": {

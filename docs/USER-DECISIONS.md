@@ -473,5 +473,9 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 - **INCONTRI-NAME-2026-11-25** (ACTIVE): «Incontri ma con un altra icona» … «scelgo 6». La voce ex «Privato» si chiama «Incontri» con icona sparkles in app e sito; niente cuori o fiamme. Resto di CALENDAR-PRIVATE-ENTRY invariato.
 - **SITE-FIRST-CUSTOM-2026-11-25** (ACTIVE): «volevo rendere quasi ogni parte dell'app che ha senso customizzare, renderla customizzabile [...] metterle nel sito [...] sull'app tenere solo le cose effettivamente essenziali». Le modifiche frequenti non devono richiedere una nuova IPA.
 - **ANALYSIS-DEEP-2026-11-25** (ACTIVE): «Io volevo molto di più». L'analisi deve combinare liberamente i dati, non solo spese/calorie per turno.
-- **STATS-SITE-ONLY-2026-11-25** (PENDING_CONFIRMATION): togliere Statistiche dall'app e tenerle sul sito; in conflitto con LIFE-STATS-2026-11-25 (anche nell'app). Domanda META-01 posta.
+- **STATS-SITE-ONLY-2026-11-25** (RESOLVED_NOT_CONFIRMED: «anche un minimo di essenzialità di analisi va tenuto»; LIFE-STATS resta nell'app): togliere Statistiche dall'app e tenerle sul sito; in conflitto con LIFE-STATS-2026-11-25 (anche nell'app). Domanda META-01 posta.
 - Nota non decisionale 25/11: l'utente chiede di valutare Finanza nella barra e l'unione Calendario + Attività («valutiamo, dimmi te»); NAVIGATION-FIVE-2026-11-16 resta attiva.
+- **APP-ESSENTIALS-2026-11-25** (ACTIVE): l'app tiene l'essenziale e uno sguardo veloce alle analisi utili; in Finanza togliere le analisi ripetitive. «Non c'è bisogno di avere un'opzione analisi nell'app, non la voglio».
+- **SITE-LAYOUT-CONFIG-2026-11-25** (ACTIVE, da progettare): layout Dashboard (ordine, visibilità, dimensioni, colori) e impostazioni rare configurati dal sito, letti dall'app senza IPA.
+- **ANALYSIS-SITE-FREEHAND-2026-11-25** (ACTIVE): «fai te quello che ti pare, aumentando di molto il livello attuale».
+- **NAV-OPTIONS-2026-11-25** (in valutazione): simulazione realistica delle opzioni di barra con pro/contro; se accettata l'ordine sarà Dashboard, Calendario, Salute, Finanza, Bloom.
