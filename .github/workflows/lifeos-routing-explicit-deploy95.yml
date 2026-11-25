@@ -3,7 +3,7 @@ name: LifeOS site expense destination 95 (audit, deploy)
 # Deploy authorized by the user on 25/11/2026 («Sì, correggi il sito»), limited to this patch.
 # A push that changes this file is the deliberate start. Both Workers; if the three page fragments are not
 # found exactly once, nothing is written. Upload verified, rollback on failure.
-# Attempt 2: the page can sit in another module or as plain text in the app Worker (attempt 1: p1=p2=p3=0 there; nothing written)
+# Attempt 3 (attempt 2: the source map also matched; skipped now). Attempt 2: the page can sit in another module or as plain text in the app Worker (attempt 1: p1=p2=p3=0 there; nothing written)
 on:
   push:
     branches: ['codex/build93']

@@ -50,6 +50,8 @@ def page_module(entry, parts):
     Prints only module counts and kinds, never source."""
     holders = []
     for name, kind, data in parts:
+        if 'source-map' in kind or name.endswith('.map'):
+            continue  # the source map repeats the page text but is not executed
         text = data.decode('utf-8', 'ignore')
         if 'routingChoice' in text or MARKER in text:
             holders.append((name, kind))
