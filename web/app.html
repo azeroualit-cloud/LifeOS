@@ -2969,8 +2969,8 @@ document.addEventListener("keydown", (e) => {
             if (my !== rt.seq || !document.getElementById("routing-box")) return;
             if (r.version !== 1) { box.innerHTML = ""; rt.plans = []; renderSpendFlow(); return; }
             const plans = r.plans || [], keep = f.elements.routingChoice?.value; rt.plans = plans;
-            const suggested = plans.length === 1 ? plans[0].id : "__ordinary";
-            box.innerHTML = `<label>Da dove arrivano i soldi *<select name="routingChoice"><option value="__ordinary">Budget del mese</option>${r.savingsDestination ? `<option value="__savings">Risparmi</option>` : ""}${plans.map((p) => `<option value="${escapeHtml(p.id)}">Piano · ${escapeHtml(p.name)}${p.availableCents != null || p.fundCents != null ? " (disponibile " + planEuro(p.availableCents ?? p.fundCents) + ")" : ""}</option>`).join("")}</select></label>`;
+            const suggested = !plans.length ? "__ordinary" : plans.length === 1 && ["fixed", "estimated"].includes(plans[0].kind) ? plans[0].id : ""; /* EXPENSE-ROUTING-EXPLICIT-2026-11-25 */
+            box.innerHTML = `<label>Da dove arrivano i soldi *<select name="routingChoice" required><option value="" disabled>Scegli: budget o piano</option><option value="__ordinary">Budget del mese</option>${r.savingsDestination ? `<option value="__savings">Risparmi</option>` : ""}${plans.map((p) => `<option value="${escapeHtml(p.id)}">Piano · ${escapeHtml(p.name)}${p.kind === "goal" ? " · chiude l’obiettivo" : ""}${p.availableCents != null || p.fundCents != null ? " (disponibile " + planEuro(p.availableCents ?? p.fundCents) + ")" : ""}</option>`).join("")}</select></label>`;
             const preset = window.lifeosPlanPreset && window.lifeosPlanPreset.id, has = (v) => [...f.elements.routingChoice.options].some((o) => o.value === v);
             f.elements.routingChoice.value = has(keep) ? keep : preset && has(preset) ? preset : suggested;
             if (preset && has(preset)) window.lifeosPlanPreset = null;
