@@ -203,7 +203,10 @@ import SwiftUI
             demo.finance["summary"] = .object([:])
         } else {
             let today = CivilDate.day()
-            demo.life["events"] = .array((1...12).map { i in .object(["id": .int(i), "day": .string(CivilDate.adding(i % 5, to: today)), "title": .string("Appuntamento \(i)"), "frequency": .string("none")]) })
+            // AGENDA-TIMELINE-2026-11-24: tomorrow's three entries have a time, so the tour shows the connecting line.
+            let times = [1: "09:00", 6: "13:30", 11: "18:00"]
+            demo.life["events"] = .array((1...12).map { i in .object(["id": .int(i), "day": .string(CivilDate.adding(i % 5, to: today)), "title": .string("Appuntamento \(i)"), "frequency": .string("none"),
+                                                                       "start_time": .string(times[i] ?? "")]) })
             demo.life["routines"] = .array((1...8).map { i in .object(["id": .int(i), "title": .string(i == 1 ? "Abitudine con un nome molto lungo da leggere senza sovrapposizioni" : "Abitudine \(i)"), "checked": .bool(i % 2 == 0)]) })
         }
         try? save(demo)
