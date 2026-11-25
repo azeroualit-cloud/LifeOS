@@ -46,6 +46,7 @@ import UIKit
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--apple-health-reference-seed") { NativeAppleHealthReferenceSeed() }
         else if ProcessInfo.processInfo.arguments.contains("--widget-preview") { NativeWidgetPreview() }
+        else if ProcessInfo.processInfo.arguments.contains("--icon-gallery") { NativeIconGallery95() }
         else if ProcessInfo.processInfo.arguments.contains("--signin-preview") { NavigationStack { NativeSignInScreen {} } }
         else { NativeRoot() }
         #else

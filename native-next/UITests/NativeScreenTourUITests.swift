@@ -204,6 +204,17 @@ final class NativeScreenTourUITests: XCTestCase {
         }
     }
 
+    func testIconGallery() {
+        for theme in ["--dark", "--light"] {
+            let app = XCUIApplication()
+            app.launchArguments = ["--visual-test", "--icon-gallery", theme, "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"]
+            app.launch()
+            _ = app.otherElements["icon-1"].waitForExistence(timeout: 20)
+            shot("00 Icone " + (theme == "--dark" ? "Scuro" : "Chiaro"), app)
+            app.swipeUp(velocity: .slow); shot("00 Icone sotto " + (theme == "--dark" ? "Scuro" : "Chiaro"), app)
+            app.terminate()
+        }
+    }
     func testTourDark() { tour("--dark", "Scuro") }
     func testTourLight() { tour("--light", "Chiaro") }
 }
