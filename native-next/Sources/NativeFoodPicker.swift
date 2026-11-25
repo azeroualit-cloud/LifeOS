@@ -314,9 +314,9 @@ struct NativeFoodPicker: View {
         // Until the first sync brings the base from the server, the bundled copy stands in.
         let base = personal.contains { $0.origin == "base" } ? [] : NativeGenericFood.baseFoods
         switch scope {
-        case .all: NativeGenericFood.catalogFoods + base + personal.filter { $0.family != .supplement }
-        case .personal: personal.filter { $0.origin != "base" }
-        case .supplements: NativeGenericFood.catalogSupplements + personal.filter { $0.family == .supplement }
+        case .all: return NativeGenericFood.catalogFoods + base + personal.filter { $0.family != .supplement }
+        case .personal: return personal.filter { $0.origin != "base" }
+        case .supplements: return NativeGenericFood.catalogSupplements + personal.filter { $0.family == .supplement }
         }
     }
     /// FOOD-QUICK-ADD-2026-11-23: grams typed first, the + on a result records that quantity at once.
