@@ -15,8 +15,13 @@ enum NativeExpenseRouting {
             (bill && NativeUtilityPeriodDraft.isCostFund(p) || !["fixed", "estimated"].contains(p.text("kind")) || !NativePlanRules.isPaid(p, payments: payments, month: String(day.prefix(7))))
         }.sorted { $0.text("name") < $1.text("name") }
     }
+    /// EXPENSE-ROUTING-EXPLICIT-2026-11-25: only a single recurring due (fixed / estimated) is preselected.
+    /// Goals and funds are never chosen for the user: paying a goal closes it, so an unrelated expense
+    /// of the same category must not be linked to them silently.
     static func suggestion(_ plans: [Record]) -> String {
-        plans.isEmpty ? ordinary : plans.count == 1 ? plans[0].text("id") : ""
+        if plans.isEmpty { return ordinary }
+        if plans.count == 1, ["fixed", "estimated"].contains(plans[0].text("kind")) { return plans[0].text("id") }
+        return ""
     }
     static func available(_ plan: Record) -> Int { max(0, plan.integer(plan["availableCents"] == nil ? "fundCents" : "availableCents")) }
     static func split(amount: Int, plan: Record) -> (fund: Int, savings: Int) {

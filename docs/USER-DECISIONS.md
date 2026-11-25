@@ -496,3 +496,4 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 
 ## 2026-11-25 · Finanza, contanti
 - **FINANCE-CASH-ON-SPEND-2026-11-25** (ACTIVE): «i contanti non li conto come prelievi perché li conto quando li spendo come contanti». I prelievi non si registrano; le spese in contanti si registrano quando avvengono. Il saldo dell'app sul conto include i contanti non ancora spesi; le riconciliazioni confrontano saldo banca + contanti.
+- **EXPENSE-ROUTING-EXPLICIT-2026-11-25** (ACTIVE, risposta «Sì, entrambi» alla proposta dell'assistente): il modulo spesa preseleziona un piano solo se è l'unico candidato ed è ricorrente (fisso/stimato). Obiettivi e fondi solo su scelta esplicita, con avviso se il pagamento chiude l'obiettivo. «Paga con Nuova spesa» resta preimpostato. App corretta; sito ancora con la preselezione: il deploy richiede autorizzazione separata.

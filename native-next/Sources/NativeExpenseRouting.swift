@@ -88,6 +88,12 @@ struct NativeExpenseRouteSection: View {
                     } else {
                         let split = NativeExpenseRouting.split(amount: amount, plan: chosen)
                         LabeledContent("Dal fondo " + chosen.text("name"), value: (Double(split.fund) / 100).euro)
+                        if chosen.text("kind") == "goal" {
+                            // EXPENSE-ROUTING-EXPLICIT-2026-11-25: say it before confirming, not after.
+                            Text("Questa spesa chiude l’obiettivo «" + chosen.text("name") + "»: le quote future si annullano.")
+                                .font(NativeDesign.metadata).foregroundStyle(NativeDesign.secondary)
+                                .accessibilityIdentifier("expense-goal-closes")
+                        }
                         if offersPlanSplit {
                             // REFERENCE-GAPS-95 «Bolletta con piano»: the uncovered part between savings and budget months.
                             NativeExpenseSplitRows(split: self.split, amount: split.savings, day: bill.enabled ? NativeExpenseSplit.billDay(day) : day, allowsAll: true, savingsTitle: "Dagli altri risparmi")
@@ -104,7 +110,7 @@ struct NativeExpenseRouteSection: View {
                             NativeExpenseSplitRows(split: split, amount: amount, day: NativeExpenseSplit.billDay(day), allowsAll: true)
                         }
                         else { LabeledContent(bill.enabled ? "Pagamento bancario" : "Dal budget mensile", value: (Double(amount) / 100).euro).accessibilityIdentifier("expense-budget-preview") }
-                    } else { Text("Scegli il piano").font(NativeDesign.metadata) }
+                    } else { Text(plans.isEmpty ? "Scegli il piano" : "Scegli se pagarla dal Budget o da un Piano").font(NativeDesign.metadata).accessibilityIdentifier("expense-destination-required") }
                 }
             } header: {
                 HStack {

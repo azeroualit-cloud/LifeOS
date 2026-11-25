@@ -10,10 +10,19 @@ final class NativeExpenseRoutingTests: XCTestCase {
         XCTAssertTrue(offline.contains("Controlla la rete"))
         XCTAssertFalse(offline.contains("Occorre aggiornarlo"))
     }
-    func testSuggestionRequiresChoiceForMultipleMatchesAndSplitNeverExceedsPayment() {
+    func testSuggestionPreselectsOnlyASingleRecurringDue() {
         XCTAssertEqual(NativeExpenseRouting.suggestion([]), NativeExpenseRouting.ordinary)
-        XCTAssertEqual(NativeExpenseRouting.suggestion([["id": .string("a")]]), "a")
-        XCTAssertEqual(NativeExpenseRouting.suggestion([["id": .string("a")],["id": .string("b")]]), "")
+        XCTAssertEqual(NativeExpenseRouting.suggestion([["id": .string("a"), "kind": .string("estimated")]]), "a")
+        XCTAssertEqual(NativeExpenseRouting.suggestion([["id": .string("a"), "kind": .string("fixed")]]), "a")
+        XCTAssertEqual(NativeExpenseRouting.suggestion([["id": .string("a"), "kind": .string("fixed")],["id": .string("b"), "kind": .string("fixed")]]), "")
+    }
+    /// EXPENSE-ROUTING-EXPLICIT-2026-11-25: an unrelated expense closed a goal of the same category because
+    /// the only plan of the category was preselected. Goals and funds always need an explicit choice.
+    func testGoalOrFundIsNeverPreselected() {
+        XCTAssertEqual(NativeExpenseRouting.suggestion([["id": .string("goal-a"), "kind": .string("goal")]]), "")
+        XCTAssertEqual(NativeExpenseRouting.suggestion([["id": .string("fondo"), "kind": .string("fund")]]), "")
+    }
+    func testSplitNeverExceedsPayment() {
         XCTAssertEqual(NativeExpenseRouting.split(amount: 3000, plan: ["availableCents": .int(2000)]).fund, 2000)
         XCTAssertEqual(NativeExpenseRouting.split(amount: 3000, plan: ["availableCents": .int(2000)]).savings, 1000)
         XCTAssertEqual(NativeExpenseRouting.split(amount: 3000, plan: ["availableCents": .int(9000)]).fund, 3000)

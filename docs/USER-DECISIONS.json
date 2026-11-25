@@ -1730,6 +1730,16 @@
       "original_quote": "i contanti non li conto come prelievi perché li conto quando li spendo come contanti",
       "rule": "I prelievi di contanti non si registrano come movimento; ogni spesa in contanti si registra quando avviene, sul conto da cui è stato prelevato. Il saldo dell'app sul conto include quindi i contanti non ancora spesi; nelle riconciliazioni il confronto va fatto con saldo banca + contanti in tasca.",
       "relation": "Nessun conflitto con regole attive."
+    },
+    {
+      "id": "EXPENSE-ROUTING-EXPLICIT-2026-11-25",
+      "status": "ACTIVE",
+      "scope": "Finanza: destinazione di una nuova spesa (app; sito da allineare)",
+      "recorded_on": "2026-11-25",
+      "provenance": "Risposta utente «Sì, entrambi» in chat Claude, 25/11/2026, alla proposta dell'assistente: non preselezionare mai un obiettivo o un fondo; destinazione esplicita, con avviso se il pagamento chiude il piano.",
+      "original_quote": "Sì, entrambi",
+      "rule": "Parafrasi: il modulo spesa preseleziona un piano solo se è l'unico candidato ed è una scadenza ricorrente (fissa o stimata). Obiettivi e fondi richiedono sempre una scelta esplicita; se si sceglie un obiettivo, il modulo avvisa che il pagamento lo chiude. Il flusso «Paga con Nuova spesa» resta preimpostato sul piano.",
+      "relation": "Nessun conflitto: precisa FINANCE-ENTRY-SIMPLIFY-2026-11-24. Il deploy del sito richiede autorizzazione separata (FINAL-CANDIDATE: nessun deploy backend)."
     }
   ],
   "pending_confirmations": [
