@@ -149,7 +149,7 @@ struct NativePrivateDaySheet: View {
             List {
                 Section(CivilDate.agendaTitle(day)) {
                     let list = entries.filter { $0.text("day") == day }
-                    if list.isEmpty { Text("Nessuna nota privata in questo giorno.").font(.footnote).foregroundStyle(NativeDesign.secondary) }
+                    if list.isEmpty { Text("Nessun incontro in questo giorno.").font(.footnote).foregroundStyle(NativeDesign.secondary) }
                     ForEach(Array(list.enumerated()), id: \.offset) { _, entry in
                         VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
                             Text(entry.text("person", fallback: "—")).font(.headline)
@@ -182,9 +182,9 @@ struct NativePrivateDaySheet: View {
                 Section("Riepilogo") {
                     if unlocked {
                         ForEach(summary, id: \.name) { row in
-                            LabeledContent(row.name, value: "\(row.year) quest'anno · \(row.total) in tutto")
+                            LabeledContent(row.name, value: NativeLifeStats.count(row.year, "incontro", "incontri") + " quest'anno · " + String(row.total) + " in tutto")
                         }
-                        if summary.isEmpty { Text("Ancora nessuna nota.").font(.footnote) }
+                        if summary.isEmpty { Text("Ancora nessun incontro.").font(.footnote) }
                     } else {
                         Button("Mostra il riepilogo") { unlock() }.accessibilityIdentifier("private-unlock")
                     }
@@ -213,7 +213,7 @@ struct NativePrivateDaySheet: View {
         do {
             let r = try await store.read("getSettings", args: [.string("private-log")]).object
             entries = r.record("doc").records("entries"); modified = r.amount("modified")
-        } catch { message = "Note private non disponibili: aggiorna il server." }
+        } catch { message = "Incontri non disponibili: aggiorna il server." }
     }
     private func save(_ list: [Record]) async {
         if store.isDemo { entries = list; return }

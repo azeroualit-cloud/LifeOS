@@ -38,6 +38,12 @@ final class NativeLifeStatsTests: XCTestCase {
         XCTAssertTrue(NativeLifeStats.insights(flat, includePrivate: true, hideMoney: false).isEmpty)
     }
 
+    func testCountUsesSingularAndPlural() {
+        XCTAssertEqual(NativeLifeStats.count(1, "incontro", "incontri"), "1 incontro")
+        XCTAssertEqual(NativeLifeStats.count(0, "incontro", "incontri"), "0 incontri")
+        XCTAssertEqual(NativeLifeStats.count(3, "giorno", "giorni"), "3 giorni")
+    }
+
     func testDaysStopAtToday() {
         XCTAssertEqual(NativeLifeStats.days(months: ["2026-11"], today: "2026-11-03"), ["2026-11-01", "2026-11-02", "2026-11-03"])
         XCTAssertEqual(NativeLifeStats.days(months: ["2026-02"], today: "2026-12-01").count, 28)

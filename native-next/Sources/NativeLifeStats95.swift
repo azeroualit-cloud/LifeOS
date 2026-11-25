@@ -7,6 +7,8 @@ import LocalAuthentication
 // The numbers show how things go together on the same days; they never claim a cause.
 
 enum NativeLifeStats {
+    /// «1 incontro», «3 incontri» (INCONTRI-NAME: singular and plural where needed).
+    static func count(_ n: Int, _ one: String, _ many: String) -> String { String(n) + " " + (n == 1 ? one : many) }
     static let kinds = ["morning", "afternoon", "night", "rest", "holiday", "none"]
 
     static func title(_ kind: String) -> String { kind == "none" ? "Senza turno" : ShiftKind(rawValue: kind)?.title ?? kind }
@@ -211,7 +213,7 @@ struct NativeLifeStatsScreen: View {
                         Capsule().fill(NativeLifeStats.color(group.kind)).frame(width: NativeDesign.Space.xs, height: NativeDesign.Space.large)
                         Text(NativeLifeStats.title(group.kind)).font(.subheadline.weight(.semibold))
                         Spacer(minLength: NativeDesign.Space.small)
-                        Text(String(group.days) + " giorni").font(.footnote).foregroundStyle(NativeDesign.secondary)
+                        Text(NativeLifeStats.count(group.days, "giorno", "giorni")).font(.footnote).foregroundStyle(NativeDesign.secondary)
                     }
                     bar(label: hideMoney ? "••••" : group.spend.euro, fraction: group.spend / topSpend, color: NativeDesign.financeTitle)
                     bar(label: group.kcal.map { String(Int($0.rounded())) + " kcal" } ?? "— kcal", fraction: (group.kcal ?? 0) / topKcal, color: NativeDesign.nutritionTitle)
@@ -240,7 +242,7 @@ struct NativeLifeStatsScreen: View {
                     BarMark(x: .value("Mese", NativeLifeStats.shortMonth(item.0)), y: .value("Volte", item.1)).foregroundStyle(NativeDesign.secondary)
                 }
                 .frame(height: NativeDesign.Layout.categoryWidth * 1.2)
-                Text(String(inPeriod.count) + " in " + String(range) + " mesi · " + String(privateEntries.count) + " in tutto").font(.subheadline.weight(.semibold))
+                Text(NativeLifeStats.count(inPeriod.count, "incontro", "incontri") + " in " + String(range) + " mesi · " + String(privateEntries.count) + " in tutto").font(.subheadline.weight(.semibold))
                 ForEach(people, id: \.0) { person in
                     LabeledContent(person.0, value: String(person.1)).font(.subheadline)
                 }
