@@ -1856,3 +1856,11 @@ main:has(#calendar.active){--section:var(--cal-accent)}
 
 /* INCONTRI-2026-11-25 */
 .os-private-open{display:inline-flex;align-items:center;gap:5px}.os-spark{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}
+
+/* NAV-E-SLOT-2026-11-25: barra dell'iPhone in Admin */
+.al-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--s2,8px);padding:var(--s2,8px);border-radius:var(--r-lg,16px);background:var(--surface-2);font-size:13px;text-align:center}
+.al-bar span{padding:8px 4px;border-radius:var(--r-md,10px);color:var(--ink-2);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.al-bar .al-slot{background:color-mix(in srgb,var(--accent,#5b8def) 14%,transparent);color:var(--ink);font-weight:600}
+.al-form fieldset{display:flex;gap:var(--s3,13px);border:0;padding:0;margin:var(--s3,13px) 0 0}
+.al-form legend{font-size:13px;color:var(--ink-2);margin-bottom:var(--s2,8px)}
+.al-opt{display:inline-flex;align-items:center;gap:6px;cursor:pointer}

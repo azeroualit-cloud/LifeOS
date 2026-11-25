@@ -10103,5 +10103,46 @@ renderAdmin = async function () {
 };
 </script>
 
+<script id="lifeos-applayout95">
+/* NAV-E-SLOT-2026-11-25: barra dell'iPhone Dashboard · Attività · Calendario · Salute · quinto tab.
+   Il quinto tab (Finanza o Bloom) si sceglie qui; l'app lo legge senza aggiornarla. L'altro resta nella Dashboard. */
+const appLayout = { doc: null, modified: 0, msg: "", error: "", loading: false };
+function appLayoutSlot() { return appLayout.doc && appLayout.doc.tabSlot === "bloom" ? "bloom" : "finance"; }
+async function appLayoutLoad() {
+  if (appLayout.loading) return; appLayout.loading = true;
+  try { const r = await workerRequest("getSettings", ["app-layout"]); appLayout.doc = r.doc || {}; appLayout.modified = Number(r.modified) || 0; }
+  catch (e) { appLayout.error = String(e.message || e); appLayout.doc = {}; }
+  appLayout.loading = false;
+  if (state.view === "admin") renderAdmin();
+}
+function appLayoutHtml() {
+  const slot = appLayoutSlot(), name = { finance: "Finanza", bloom: "Bloom" }, other = slot === "finance" ? "bloom" : "finance";
+  const opt = (v) => `<label class="al-opt"><input type="radio" name="tabSlot" value="${v}" ${slot === v ? "checked" : ""}><span>${name[v]}</span></label>`;
+  const tabs = ["Dashboard", "Attività", "Calendario", "Salute"].map((t) => `<span>${t}</span>`).join("") + `<span class="al-slot">${name[slot]}</span>`;
+  return `<section class="card pad adm-wide" id="app-layout95"><div class="card-title"><h2>Barra dell'iPhone</h2><small>${appLayout.modified ? "aggiornata " + new Date(appLayout.modified).toLocaleString("it-IT") : "predefinita"}</small></div>
+    <div class="al-bar" aria-label="Anteprima della barra">${tabs}</div>
+    <form id="app-layout-form" class="al-form"><fieldset><legend>Quinto tab</legend>${opt("finance")}${opt("bloom")}</fieldset>
+    <p class="hint">${name[other]} si apre dalla sua scheda nella Dashboard. L'iPhone applica la scelta alla prossima apertura dell'app.</p></form>
+    ${appLayout.error ? `<p class="errorbox">${escapeHtml(appLayout.error)}</p>` : ""}${appLayout.msg ? `<p class="hint" role="status">${escapeHtml(appLayout.msg)}</p>` : ""}</section>`;
+}
+document.addEventListener("change", async (e) => {
+  if (!e.target.closest("#app-layout-form") || e.target.name !== "tabSlot") return;
+  appLayout.error = ""; appLayout.msg = "";
+  try {
+    const r = await workerRequest("saveSettings", ["app-layout", { ...(appLayout.doc || {}), tabSlot: e.target.value }, Date.now()]);
+    appLayout.doc = r.doc; appLayout.modified = Number(r.modified) || Date.now();
+    appLayout.msg = r.saved ? "Salvato. L'iPhone cambia la barra alla prossima apertura." : "Nel frattempo è stata cambiata altrove: ricaricata la versione più recente.";
+  } catch (err) { appLayout.error = String(err.message || err); }
+  renderAdmin();
+});
+const renderAdminLayout95 = renderAdmin;
+renderAdmin = async function () {
+  await renderAdminLayout95();
+  if (!appLayout.doc) { appLayoutLoad(); }
+  const grid = document.querySelector("#admin .adm-grid");
+  if (grid && !document.getElementById("app-layout95")) grid.insertAdjacentHTML("afterbegin", appLayoutHtml());
+};
+</script>
+
 </body>
 </html>
