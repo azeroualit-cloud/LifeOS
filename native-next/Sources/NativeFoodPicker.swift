@@ -464,7 +464,7 @@ struct NativeFoodPicker: View {
                                 if quickAdd == nil {
                                     Image(systemName: "plus.circle.fill").font(.headline).foregroundStyle(NativeDesign.nutritionTitle).accessibilityHidden(true)
                                 }
-                            }
+                            }.contentShape(Rectangle()) // the empty middle of the row opens the food too
                         }.buttonStyle(.plain).accessibilityIdentifier("generic-food-" + food.id)
                         if let quickAdd {
                             Button { quickAdd(food, parsed.quantity); query = ""; searchFocused = true } label: {

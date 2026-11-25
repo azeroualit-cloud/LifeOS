@@ -74,6 +74,11 @@ struct NativeExpenseRouteSection: View {
                         if movementID == 0, let full = fullPlan, NativePlanKind(rawValue: full.text("kind"))?.payable == true {
                             Button("Già registrata? Collega la spesa esistente") { linking = full }
                                 .font(.subheadline).accessibilityIdentifier("expense-plan-existing")
+                                // On the button, not on the Group: a modifier on a Group of Sections is copied to each
+                                // Section, and two presenters of the same sheet closed it as soon as it opened.
+                                .sheet(item: Binding(get: { linking.map(NativeLinkingPlan.init) }, set: { if $0 == nil { linking = nil } })) { item in
+                                    NavigationStack { NativePlanPaymentEditor(plan: item.plan, startsWithExisting: true) { linking = nil; dismissEditor() } }
+                                }
                         }
                     }
                     if !selected.isEmpty && amount > 0 { fundingBar }
@@ -113,9 +118,6 @@ struct NativeExpenseRouteSection: View {
                 // BILL-PAST-MONTHS-2026-11-24: the period shows the consumption per month (average and Analisi).
                 NativeUtilityPeriodFields(period: $bill, amountCents: amount)
             } }
-        }
-        .sheet(item: Binding(get: { linking.map(NativeLinkingPlan.init) }, set: { if $0 == nil { linking = nil } })) { item in
-            NavigationStack { NativePlanPaymentEditor(plan: item.plan, startsWithExisting: true) { linking = nil; dismissEditor() } }
         }
         .task(id: query) { await load() }
             .onChange(of: selected) { _, value in

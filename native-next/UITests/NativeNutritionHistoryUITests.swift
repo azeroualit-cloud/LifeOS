@@ -17,6 +17,9 @@ final class NativeNutritionHistoryUITests: XCTestCase {
         XCTAssertTrue(meal.isHittable)
         XCTAssertEqual(app.staticTexts.matching(identifier: "Pasto di prova").count, 1, "Preview must show only the selected day's food")
         let remove = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "health-diary-delete-")).firstMatch
+        // The delete button must also clear the floating «Peso / Alimento» bar, which isHittable does not see.
+        let bar = app.buttons["health-add-nutrition"]
+        for _ in 0..<6 where remove.exists && bar.exists && remove.frame.maxY > bar.frame.minY - 4 { scroll.swipeUp(velocity: .slow) }
         guard remove.waitForExistence(timeout: 10), remove.isHittable else {
             let hierarchy = XCTAttachment(string: app.debugDescription)
             hierarchy.name = "Diary delete control diagnostic"; hierarchy.lifetime = .keepAlways; add(hierarchy)

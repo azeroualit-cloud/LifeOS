@@ -82,8 +82,8 @@ final class NativeNutritionQuickUITests: XCTestCase {
         XCTAssertTrue(initialSearch.waitForExistence(timeout: 10))
         initialSearch.tap()
         initialSearch.typeText("Gin Tonic")
-        let gin = app.buttons["generic-food-cocktail-gin-tonic"]
-        XCTAssertTrue(gin.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["generic-food-cocktail-gin-tonic"].firstMatch.waitForExistence(timeout: 5))
+        let gin = app.buttons.visible("generic-food-cocktail-gin-tonic") // the quick-add list under the catalog lists cocktails too
         capture("01 Cocktail catalog", app)
         gin.tap()
         let alcohol = app.staticTexts["quick-nutrition-alcohol"]
