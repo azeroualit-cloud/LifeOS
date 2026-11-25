@@ -1734,12 +1734,22 @@
     {
       "id": "EXPENSE-ROUTING-EXPLICIT-2026-11-25",
       "status": "ACTIVE",
-      "scope": "Finanza: destinazione di una nuova spesa (app; sito da allineare)",
+      "scope": "Finanza: destinazione di una nuova spesa (app e sito)",
       "recorded_on": "2026-11-25",
       "provenance": "Risposta utente «Sì, entrambi» in chat Claude, 25/11/2026, alla proposta dell'assistente: non preselezionare mai un obiettivo o un fondo; destinazione esplicita, con avviso se il pagamento chiude il piano.",
       "original_quote": "Sì, entrambi",
       "rule": "Parafrasi: il modulo spesa preseleziona un piano solo se è l'unico candidato ed è una scadenza ricorrente (fissa o stimata). Obiettivi e fondi richiedono sempre una scelta esplicita; se si sceglie un obiettivo, il modulo avvisa che il pagamento lo chiude. Il flusso «Paga con Nuova spesa» resta preimpostato sul piano.",
       "relation": "Nessun conflitto: precisa FINANCE-ENTRY-SIMPLIFY-2026-11-24. Il deploy del sito richiede autorizzazione separata (FINAL-CANDIDATE: nessun deploy backend)."
+    },
+    {
+      "id": "BACKEND-DEPLOY-ROUTING-EXPLICIT-2026-11-25",
+      "status": "ACTIVE",
+      "scope": "Autorizzazione puntuale: deploy dei due Worker limitato alla patch del modulo spesa del sito (EXPENSE-ROUTING-EXPLICIT-2026-11-25)",
+      "recorded_on": "2026-11-25",
+      "provenance": "Risposta utente in chat Claude, 25/11/2026, alla domanda «Autorizzi la correzione e il deploy del sito per la stessa preselezione?»",
+      "original_quote": "Sì, correggi il sito",
+      "rule": "Eccezione limitata a FINAL-CANDIDATE-2026-11-12 (nessun deploy backend): solo questa patch del modulo web, via lifeos-routing-explicit-deploy95.yml. Nessun'altra modifica backend autorizzata.",
+      "relation": "Eccezione d'ambito approvata dall'utente; FINAL-CANDIDATE resta ACTIVE per il resto."
     }
   ],
   "pending_confirmations": [

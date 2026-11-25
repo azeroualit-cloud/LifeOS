@@ -1,6 +1,6 @@
 # LifeOS — stato corrente
 
-**25 novembre (ramo `codex/build93`):** corretta nell'app la preselezione automatica dei piani nella Nuova spesa (EXPENSE-ROUTING-EXPLICIT-2026-11-25, vedi OPEN-ISSUES). Solo compilazione e test unitari in CI; nessuna prova al simulatore, nessuna IPA, nessun deploy. Il sito conserva il difetto finché non viene autorizzato un deploy.
+**25 novembre (ramo `codex/build93`):** corretta nell'app la preselezione automatica dei piani nella Nuova spesa (EXPENSE-ROUTING-EXPLICIT-2026-11-25, vedi OPEN-ISSUES). Solo compilazione e test unitari in CI; nessuna prova al simulatore, nessuna IPA, nessun deploy. Sito: deploy della stessa correzione autorizzato dall'utente (BACKEND-DEPLOY-ROUTING-EXPLICIT-2026-11-25), esito da verificare.
 
 **Build 93, fase 2 in corso (21 novembre 2026, ramo `codex/build93`).** Schede della fase 2 riscritte secondo l'anteprima: Salute (obiettivi, Andamento, TDEE con criteri, Simulazione peso, Cronologia a barre), Dashboard, Attività, Calendario e Agenda, fogli Peso, Nuova abitudine e Orari. Sostituite dopo conferma META-01: MACRO-NO-GOALS-92, HEALTH-GRID-3X2-92, DASHBOARD-ORDER-92. Restano i fogli alimento/quantità/macro nella forma 92. Dettagli in [BUILD-93-PLAN.md](BUILD-93-PLAN.md#fase-2---stato-21-novembre-2026-sessione-claude). Verifica: compilazione e 358 test unitari verdi (run 44949689104, commit `9367df7`); suite UI e revisione al simulatore non ancora fatte; nessuna IPA, nessun deploy.
 
