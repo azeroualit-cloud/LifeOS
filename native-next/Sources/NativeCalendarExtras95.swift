@@ -234,7 +234,7 @@ struct NativePrivateDaySheet: View {
 }
 
 /// The private log (server setting «private-log»), shared by the calendar mark, the sheet and Statistiche.
-enum NativePrivateLog {
+@MainActor enum NativePrivateLog {
     static func load(_ store: NativeStore) async -> [Record] {
         if store.isDemo { return demo() }
         return (try? await store.read("getSettings", args: [.string("private-log")]).object.record("doc").records("entries")) ?? []
