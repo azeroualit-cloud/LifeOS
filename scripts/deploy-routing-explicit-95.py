@@ -56,6 +56,8 @@ def page_module(entry, parts):
         if 'routingChoice' in text or MARKER in text:
             holders.append((name, kind))
     print('ROUTING_EXPLICIT_MODULES count=%d kinds=%s' % (len(holders), ','.join(sorted({k for _, k in holders}))))
+    if not holders:
+        return None  # this Worker does not serve the expense form (the app gateway): left untouched
     if len(holders) != 1:
         raise RuntimeError('Modulo della pagina non univoco (%d); nessuna scrittura.' % len(holders))
     return holders[0][0]
