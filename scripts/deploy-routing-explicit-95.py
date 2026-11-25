@@ -22,19 +22,41 @@ PATCHES = (
 )
 
 
+def styles():
+    """Escaped page string (site Worker) and plain source (a Worker that keeps the page as a text/template module)."""
+    plain = lambda t: t.replace('\\"', '"').replace('\\u00b7', '\u00b7').replace('\\u2019', '\u2019')
+    return {'escaped': PATCHES, 'plain': tuple((plain(o), plain(n)) for o, n in PATCHES)}
+
+
 def transform(source):
     if MARKER in source:
-        if all(new in source for _, new in PATCHES):
-            print('ROUTING_EXPLICIT_CHECK already=1')
-            return source
+        for patches in styles().values():
+            if all(new in source for _, new in patches):
+                print('ROUTING_EXPLICIT_CHECK already=1')
+                return source
         raise RuntimeError('Patch della destinazione incompleta; nessuna scrittura.')
-    counts = [source.count(old) for old, _ in PATCHES]
-    print('ROUTING_EXPLICIT_CHECK ' + ' '.join('p%d=%d' % (i + 1, c) for i, c in enumerate(counts)))
-    if any(c != 1 for c in counts):
-        raise RuntimeError('Modulo spesa del sito non riconosciuto; nessuna scrittura.')
-    for old, new in PATCHES:
-        source = source.replace(old, new, 1)
-    return source
+    for style, patches in styles().items():
+        counts = [source.count(old) for old, _ in patches]
+        print('ROUTING_EXPLICIT_CHECK ' + style + ' ' + ' '.join('p%d=%d' % (i + 1, c) for i, c in enumerate(counts)))
+        if all(c == 1 for c in counts):
+            for old, new in patches:
+                source = source.replace(old, new, 1)
+            return source
+    raise RuntimeError('Modulo spesa del sito non riconosciuto; nessuna scrittura.')
+
+
+def page_module(entry, parts):
+    """The module that holds the expense form, wherever the bundle put it (the activity module may differ).
+    Prints only module counts and kinds, never source."""
+    holders = []
+    for name, kind, data in parts:
+        text = data.decode('utf-8', 'ignore')
+        if 'routingChoice' in text or MARKER in text:
+            holders.append((name, kind))
+    print('ROUTING_EXPLICIT_MODULES count=%d kinds=%s' % (len(holders), ','.join(sorted({k for _, k in holders}))))
+    if len(holders) != 1:
+        raise RuntimeError('Modulo della pagina non univoco (%d); nessuna scrittura.' % len(holders))
+    return holders[0][0]
 
 
 if __name__ == '__main__':
@@ -42,6 +64,7 @@ if __name__ == '__main__':
     deployment = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(deployment)
     deployment.transform = transform
+    deployment.active_module = page_module
     try:
         deployment.main(label='ROUTING_EXPLICIT_95_DEPLOYED_AND_VERIFIED')
     except Exception as error:
