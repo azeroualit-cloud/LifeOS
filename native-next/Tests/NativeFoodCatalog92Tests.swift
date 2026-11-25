@@ -31,7 +31,7 @@ final class NativeFoodCatalog92Tests: XCTestCase {
     }
 
     func testBrandedProductsCarryEstimatedMicronutrients() throws {
-        let estimated = NativeGenericFood.catalog.filter { $0.nutrientEstimateFrom != nil }
+        let estimated = NativeGenericFood.withEstimatedNutrients(NativeGenericFood.brandedFoods + NativeGenericFood.italianBrands + NativeGenericFood.communityFoods).filter { $0.nutrientEstimateFrom != nil }
         XCTAssertGreaterThan(estimated.count, 1000)
         let sample = try XCTUnwrap(estimated.first { $0.nutrientValues?["zinc"] != nil })
         XCTAssertTrue(sample.nutrientValues?["zinc"]?.estimateSource?.hasPrefix("stima:generico:") == true)

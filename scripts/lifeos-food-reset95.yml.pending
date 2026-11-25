@@ -1,0 +1,22 @@
+name: Life OS - alimenti da zero con base curata (FOOD-DB-RESET)
+# Attempt 1. Requested by the user on 25/11/2026: new food database from a curated base, keeping
+# every supplement he added. Backup tables first; logs only counts. Started by a push of this file.
+on:
+  push:
+    branches: ['codex/build93']
+    paths: ['.github/workflows/lifeos-food-reset95.yml']
+concurrency:
+  group: lifeos-food-reset95
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  reset:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Backup, keep supplements, import the base
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          LIFEOS_TEST_PASSWORD: ${{ secrets.LIFEOS_TEST_PASSWORD }}
+        run: python3 scripts/reset-food-base-95.py

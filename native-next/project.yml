@@ -21,6 +21,8 @@ targets:
       - path: Resources/generic-foods.json
       - path: Resources/cocktails.json
         buildPhase: resources
+      - path: Resources/base-foods.json
+        buildPhase: resources
       - path: Resources/open-food-facts-italy.json
         buildPhase: resources
       - path: Resources/italian-brands.json

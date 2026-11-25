@@ -152,12 +152,26 @@ struct NativeNutritionQuickSheet: View {
                                 Link("Database Open Food Facts · licenza ODbL", destination: license).font(.footnote).accessibilityIdentifier("nutrition-source-license")
                             }
                         }
+                        // FOOD-DB-RESET-2026-11-25: cooking and skin as visible choices, then bone weighing.
+                        let siblings = NativeFoodVariants.siblings(of: selectedFood, in: NativeFoodVariants.pool())
+                        ForEach(NativeFoodVariants.axes(siblings)) { axis in
+                            Picker(axis.name, selection: Binding(get: { selectedFood.variant?[axis.name] ?? "" }, set: { value in
+                                guard let next = NativeFoodVariants.pick(siblings, from: selectedFood, axis: axis.name, value: value) else { return }
+                                self.selectedFood = next
+                                if next.boneInEdiblePercent == nil { weighedWithBone = false }
+                            })) {
+                                ForEach(axis.values, id: \.self) { Text($0).tag($0) }
+                            }
+                            .pickerStyle(.segmented)
+                            .accessibilityIdentifier("quick-nutrition-variant-" + axis.name)
+                            .disabled(nutrition.busy || pending != nil)
+                        }
                         if selectedFood.boneInEdiblePercent != nil {
                             Picker("Pesatura", selection: $weighedWithBone) {
                                 Text("Senza osso").tag(false)
                                 Text("Con osso").tag(true)
                             }
-                            .pickerStyle(.menu)
+                            .pickerStyle(.segmented)
                             .accessibilityIdentifier("quick-nutrition-weighing")
                             .disabled(nutrition.busy || pending != nil)
                         }

@@ -41,7 +41,7 @@ import XCTest
 
     func testCatalogPartitionKeepsThePickerOrder() {
         let catalog = NativeGenericFood.catalog
-        XCTAssertEqual(NativeFoodPicker.items(in: .all, personal: []).map(\.id), catalog.filter { $0.family != .supplement }.map(\.id))
+        XCTAssertEqual(NativeFoodPicker.items(in: .all, personal: []).map(\.id), catalog.filter { $0.family != .supplement }.map(\.id) + NativeGenericFood.baseFoods.map(\.id))
         XCTAssertTrue(NativeFoodPicker.items(in: .supplements, personal: []).isEmpty, "No preset supplements (SUPPLEMENTS-PERSONAL-ONLY-92)")
         XCTAssertFalse(catalog.contains { $0.family == .supplement })
         XCTAssertEqual(NativeGenericFood.catalogFoods.count + NativeGenericFood.catalogSupplements.count, catalog.count)

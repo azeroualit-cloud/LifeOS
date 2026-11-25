@@ -175,7 +175,7 @@ struct NativePersonalFoodEditor: View {
                 ("fat", fat * factor, original.fat), ("fibre", fibreValue * factor, original.fibre ?? 0)]
             for (key, value, previous) in values where value != previous { bounds?.removeValue(forKey: key) }
         }
-        return .init(id: identifier, name: title, detail: "Personale", family: family,
+        var made = NativeGenericFood(id: identifier, name: title, detail: "Personale", family: family,
                      boneInEdiblePercent: original?.family == family ? original?.boneInEdiblePercent : nil, nutrientValues: nutrients.isEmpty ? nil : nutrients,
                      cocktail: original?.family == family ? original?.cocktail : nil, aliases: original?.aliases, protein: protein * factor, carbohydrate: carbs * factor, fat: fat * factor,
                      fibre: fibre.isEmpty ? nil : fibreValue * factor, calories: calories * factor,
@@ -186,5 +186,8 @@ struct NativePersonalFoodEditor: View {
                      supplementUnit: family == .supplement ? unit : nil,
                      defaultQuantity: family == .supplement ? (NativeNutritionEntry.grams(dose).flatMap { $0 > 0 ? $0 : nil } ?? (original?.quantityUnit == unit ? original?.defaultQuantity : nil))
                         : original?.family == family ? original?.defaultQuantity : nil)
+        // FOOD-DB-RESET-2026-11-25: editing a base food keeps it in its group of versions.
+        if let original, original.id == identifier { made.group = original.group; made.variant = original.variant; made.origin = original.origin }
+        return made
     }
 }

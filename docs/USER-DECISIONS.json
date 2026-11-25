@@ -979,6 +979,15 @@
       "rule": "Barra: Dashboard, Attività, Calendario, Salute fissi; quinto tab Finanza o Bloom, scelto in Admin sul sito (impostazione app-layout, chiave tabSlot) e letto dall'app senza nuova IPA alla prossima apertura. Quello non in barra si apre dalla sua scheda in Dashboard. Predefinito Finanza; ultima scelta conservata sul telefono se il server non risponde. Sostituisce NAVIGATION-FIVE-2026-11-16."
     },
     {
+      "id": "FOOD-DB-RESET-2026-11-25",
+      "status": "ACTIVE",
+      "scope": "Database alimenti (server, app, sito)",
+      "recorded_on": "2026-11-25",
+      "provenance": "Richiesta diretta utente; scelta «Base curata da te»",
+      "original_quote": "il con osso e senza osso e con pelle e senza pelle deve essere anche nell'app. Cmq facciamo che il DB lo rifacciamo da zero perché è pieno di alimenti che non mi interessano. / Base curata da te / mantieni tutti i miei integratori aggiunti d ame però",
+      "rule": "Il DB alimenti riparte da una base curata dall'assistente (alimenti comuni, varianti raggruppate: Stato, Pelle; pesatura con osso), che l'utente può sfoltire dal sito. Si conservano tutti gli integratori aggiunti dall'utente; gli altri alimenti vanno in tabelle di backup prima della cancellazione. Varianti con osso/pelle/cottura visibili come scelte sia nell'app sia sul sito. I vecchi cataloghi di marca e Open Food Facts non sono più proposti."
+    },
+    {
       "id": "FOOD-SYNC-DELTA-2026-11-25",
       "status": "ACTIVE",
       "scope": "Alimenti personali: sincronizzazione telefono-sito",

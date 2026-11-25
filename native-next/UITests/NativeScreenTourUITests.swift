@@ -129,6 +129,18 @@ final class NativeScreenTourUITests: XCTestCase {
         if tap(app.buttons["health-add-nutrition"]) {
             shot(prefix + " 07b Aggiungi alimento", app)
             if tap(app.buttons["supplement-stack-new"]) { shot(prefix + " 07c Nuova stack", app); dismissSheet(app) }
+            // FOOD-DB-RESET: one row per food, then cooking/skin/bone as choices.
+            let search = app.textFields["food-quick-search"]
+            if search.waitForExistence(timeout: 5) {
+                search.tap(); search.typeText("coscia")
+                shot(prefix + " 07d Ricerca coscia", app)
+                let row = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "generic-food-base-")).firstMatch
+                if tap(row) {
+                    shot(prefix + " 07e Varianti", app)
+                    if tap(app.buttons["Al forno"]) { shot(prefix + " 07f Variante al forno", app) }
+                    dismissSheet(app)
+                }
+            }
             if app.buttons["Fine"].exists { app.buttons["Fine"].firstMatch.tap() } else { dismissSheet(app) }
         }
         scroll(app, prefix + " 08 Salute sotto")

@@ -87,6 +87,12 @@ struct NativeGenericFood: Codable, Identifiable {
     /// Branded products rarely declare micronutrients: the catalog points them
     /// at the closest generic food and the values are shown as estimates.
     var nutrientEstimateFrom: String? = nil
+    /// FOOD-DB-RESET-2026-11-25: versions of one food (e.g. «Coscia di pollo») share `group`;
+    /// `variant` names the version on each axis («Stato»: Al forno, «Pelle»: Con pelle).
+    var group: String? = nil
+    var variant: [String: String]? = nil
+    /// «base» for the curated base on the server; nil for the user's own foods.
+    var origin: String? = nil
     struct Piece: Codable, Hashable, Identifiable {
         let name: String
         let grams: Decimal
@@ -209,8 +215,11 @@ struct NativeGenericFood: Codable, Identifiable {
 
     static let foods = loadCatalog("generic-foods")
     static let cocktails = loadCatalog("cocktails")
-    /// No preset supplements (SUPPLEMENTS-PERSONAL-ONLY-92): the user adds his own.
-    static let catalog = withEstimatedNutrients(foods + cocktails + brandedFoods + italianBrands + communityFoods).filter { $0.family != .supplement && NativeFoodCatalogPolicy.includes($0) }
+    /// FOOD-DB-RESET-2026-11-25: the food list is the curated base on the server (synced with the
+    /// personal foods); this bundled copy is shown only until the first sync. The old branded and
+    /// community catalogs are no longer offered. No preset supplements (SUPPLEMENTS-PERSONAL-ONLY-92).
+    static let baseFoods = loadCatalog("base-foods").filter { $0.family != .supplement }
+    static let catalog = withEstimatedNutrients(cocktails).filter { $0.family != .supplement && NativeFoodCatalogPolicy.includes($0) }
 
     /// FOOD-CATALOG-92: fill undeclared micronutrients from the referenced generic
     /// food, marked as estimates so totals show the "stimato" state.
@@ -298,13 +307,15 @@ struct NativeFoodPicker: View {
         switch scope {
         case .all: NativeGenericFood.ranked(Self.items(in: .all, personal: personal), entries: nutrition.entries)
         case .supplements: NativeGenericFood.ranked(Self.items(in: .supplements, personal: personal), entries: nutrition.entries)
-        case .personal: personal
+        case .personal: personal.filter { $0.origin != "base" }
         }
     }
     static func items(in scope: Scope, personal: [NativeGenericFood]) -> [NativeGenericFood] {
+        // Until the first sync brings the base from the server, the bundled copy stands in.
+        let base = personal.contains { $0.origin == "base" } ? [] : NativeGenericFood.baseFoods
         switch scope {
-        case .all: NativeGenericFood.catalogFoods + personal.filter { $0.family != .supplement }
-        case .personal: personal
+        case .all: NativeGenericFood.catalogFoods + base + personal.filter { $0.family != .supplement }
+        case .personal: personal.filter { $0.origin != "base" }
         case .supplements: NativeGenericFood.catalogSupplements + personal.filter { $0.family == .supplement }
         }
     }
@@ -346,8 +357,12 @@ struct NativeFoodPicker: View {
         let personalIDs = Set((personal ?? []).map(\.id))
         let visible = visibleFoods(personal ?? [])
         let parsed = quickAdd == nil ? NativeQuickQuery(name: query, quantity: nil) : NativeQuickQuery.parse(query)
-        let matches = parsed.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let found = parsed.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             ? visible : NativeGenericFood.matches(parsed.name, in: visible)
+        // One row per food: its versions are chosen after tapping it (FOOD-DB-RESET-2026-11-25).
+        let collapsed = NativeFoodVariants.collapse(found)
+        let matches = collapsed.map(\.food)
+        let variantCounts = Dictionary(collapsed.map { ($0.food.id, $0.count) }, uniquingKeysWith: { a, _ in a })
 
         VStack(spacing: NativeDesign.Space.none) {
             HStack(spacing: NativeDesign.Space.small) {
@@ -424,8 +439,10 @@ struct NativeFoodPicker: View {
                             HStack(spacing: NativeDesign.Space.medium) {
                                 Text(food.cocktail == nil ? food.family.icon : "🍸").font(.headline).accessibilityHidden(true)
                                 VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-                                    Text(food.name)
-                                    if let detail = food.displayDetail {
+                                    Text(variantCounts[food.id, default: 1] > 1 ? (food.group ?? food.name) : food.name)
+                                    if variantCounts[food.id, default: 1] > 1 {
+                                        Text(String(variantCounts[food.id, default: 1]) + " varianti").font(.subheadline).foregroundStyle(.secondary)
+                                    } else if let detail = food.displayDetail {
                                         Text(detail).font(.subheadline).foregroundStyle(.secondary)
                                     }
                                     if food.isCommunitySourced {
@@ -435,7 +452,7 @@ struct NativeFoodPicker: View {
                                         Text("≈ \(NSDecimalNumber(decimal: food.calories)) kcal · \(cocktail.volumeML) ml / bicchiere")
                                             .font(.footnote).foregroundStyle(.secondary)
                                     } else {
-                                        Text((food.nutritionNotDeclared == true ? "Energia e macro non dichiarati" : "per \(food.quantityUnit.basisTitle)") + " · " + (personalIDs.contains(food.id) ? "Personale" : "Catalogo"))
+                                        Text((food.nutritionNotDeclared == true ? "Energia e macro non dichiarati" : "per \(food.quantityUnit.basisTitle)") + " · " + (food.origin == "base" ? "Base" : personalIDs.contains(food.id) ? "Personale" : "Catalogo"))
                                             .font(.footnote).foregroundStyle(.secondary)
                                     }
                                 }.frame(minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
