@@ -11,7 +11,7 @@ concurrency:
 permissions:
   contents: read
 env:
-  SITE_COMMIT: 28cf15dc37c886a52436362c29d0e4d70657f809
+  SITE_COMMIT: 81816fec2b423f3e5a01527306c896de1d1036b3
 jobs:
   deploy:
     if: github.repository == 'azeroualit-cloud/LifeOS' && github.ref == 'refs/heads/codex/build93'

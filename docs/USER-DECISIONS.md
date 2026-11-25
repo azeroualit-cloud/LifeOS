@@ -485,3 +485,5 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 - **FOOD-SYNC-DELTA-2026-11-25 — ACTIVE.** Richiesta diretta (testo originale nel JSON). Alimenti sincronizzati telefono ⇄ sito: il sito legge dal cloud, il telefono tiene una copia locale e scarica solo le modifiche, senza bloccare l'app e senza rileggere tutto a ogni accesso (limiti gratuiti). Implementata con `listFoodChanges` (stamp), tombstone tramite trigger D1, controllo al massimo ogni 5 minuti salvo modifiche da inviare.
 
 - **FOOD-DB-RESET-2026-11-25 — ACTIVE.** Richiesta diretta (testo originale nel JSON). DB alimenti da zero con base curata (304 alimenti, 38 con varianti Stato/Pelle, pesatura con osso), sfoltibile dal sito; integratori dell'utente conservati; backup prima di cancellare; varianti scelte con pulsanti nell'app e sul sito; cataloghi di marca e Open Food Facts non più proposti.
+
+- **TRANSCRIBE-SITE-2026-11-25 — ACTIVE.** «puoi aggiungermi questo solo nel sito?»: sezione Trascrivi solo sul sito; trascrizione nel browser con Whisper (transformers.js), audio mai inviato a server, modello scaricato una volta da Hugging Face.

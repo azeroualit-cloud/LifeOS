@@ -979,6 +979,15 @@
       "rule": "Barra: Dashboard, Attività, Calendario, Salute fissi; quinto tab Finanza o Bloom, scelto in Admin sul sito (impostazione app-layout, chiave tabSlot) e letto dall'app senza nuova IPA alla prossima apertura. Quello non in barra si apre dalla sua scheda in Dashboard. Predefinito Finanza; ultima scelta conservata sul telefono se il server non risponde. Sostituisce NAVIGATION-FIVE-2026-11-16."
     },
     {
+      "id": "TRANSCRIBE-SITE-2026-11-25",
+      "status": "ACTIVE",
+      "scope": "Sito: trascrizione di vocali e audio",
+      "recorded_on": "2026-11-25",
+      "provenance": "Richiesta diretta utente («puoi aggiungermi questo solo nel sito?», riferito a un trascrittore locale di audio)",
+      "original_quote": "puoi aggiungermi questo solo nel sito?",
+      "rule": "Solo sul sito (non nell'app): sezione Trascrivi per trascrivere vocali, audio e video, più file insieme, con lingua, qualità, tempi facoltativi, copia e download .txt. Trascrizione nel browser (Whisper via transformers.js): l'audio non viene inviato a server; il modello si scarica una volta da Hugging Face."
+    },
+    {
       "id": "FOOD-DB-RESET-2026-11-25",
       "status": "ACTIVE",
       "scope": "Database alimenti (server, app, sito)",
