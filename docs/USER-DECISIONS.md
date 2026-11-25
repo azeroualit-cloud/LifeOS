@@ -491,3 +491,5 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 - **FOOD-VARIANT-DEFAULT-2026-11-25 — ACTIVE.** «di default preferisce mostrarmeli crudi e come seconda opzione cotti»: variante proposta cruda/fresca, poi cotta, poi le altre; cercando «lessa» si apre quella. FOOD-DB-RESET eseguito subito su indicazione dell'utente (continuità: la base entra nello stesso passaggio).
 
 - **IPA-DELIVERY-95-2026-11-25 — ACTIVE.** IPA 95 ora (0.10.33 build 95) con quanto pronto; Finanza ridotta e layout Dashboard dal sito nella 96. Controllo completo e test su più runner in parallelo («use the tactic … run multiple threads … as fast as possible»). Accettazione solo dell'utente.
+
+- **FOOD-LOG-EDIT-2026-11-25 — ACTIVE.** «u need to add the feature to edit already logged in foods, per evitare di eliminare un cibo e rimetterlo solo perché ho sbagliato qualche grammo»: tocco sulla riga del diario → foglio Modifica (quantità, ora), valori ricalcolati in proporzione, aggiorna Apple Salute e sito. Entra nell'IPA 95; mockup https://claude.ai/artifact/PvtumJuet68b5X6ATm7BaP approvato («Yes, go ahead»).

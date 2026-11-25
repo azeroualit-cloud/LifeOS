@@ -59,6 +59,8 @@ struct NativeHealthDetail: View {
     @State private var openedMetric: NativeHealthMetric?
     @State private var showingNutrition = false
     @State private var deletingFood: UUID?
+    @State private var editingFood: NativeNutritionEntry?
+    @State private var deleteAfterEdit: UUID?
     @State private var diaryNotice: String?
     @Environment(\.dynamicTypeSize) private var typeSize
     @ObservedObject private var nutrition = NativeNutritionUIFixture.current
@@ -110,6 +112,11 @@ struct NativeHealthDetail: View {
             .sheet(isPresented: $addingWeight) { NativeAddWeightSheet(health: health) }
             .sheet(isPresented: $editingGoals) { NativeNutritionGoalsSheet(health: health) }
             .sheet(isPresented: $showingNutrition) { NativeFoodQuickAddSheet(initialDate: selectedDate).environmentObject(health) }
+            // FOOD-LOG-EDIT-2026-11-25: quantity and time of a logged food, without deleting it.
+            // «Elimina registrazione» asks for confirmation only after the sheet has gone.
+            .sheet(item: $editingFood, onDismiss: { if let id = deleteAfterEdit { deleteAfterEdit = nil; deletingFood = id } }) { entry in
+                NavigationStack { NativeFoodLogEditSheet(entry: entry) { deleteAfterEdit = entry.id } }.environmentObject(health)
+            }
             .confirmationDialog("Eliminare questa registrazione e i suoi campioni LifeOS da Apple Salute?", isPresented: Binding(get: { deletingFood != nil }, set: { if !$0 { deletingFood = nil } })) {
                 Button("Elimina da LifeOS e Apple Salute", role: .destructive) {
                     if let id = deletingFood { removeFood(id) }
@@ -392,17 +399,27 @@ struct NativeHealthDetail: View {
                     .accessibilityIdentifier("health-diary-copy-yesterday")
                 }
                 ForEach(rows) { row in
+                    let editable = row.localID.flatMap { id in row.deletionPending ? nil : nutrition.entries.first(where: { $0.id == id }) }
                     LOListRow(isLast: row.id == rows.last?.id) {
-                        VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
-                            Text(row.name).font(.subheadline).lineLimit(2)
-                            Text(row.detail).font(.footnote).foregroundStyle(NativeDesign.secondary)
-                            if row.deletionPending {
-                                Text("Eliminazione da completare").font(.footnote).foregroundStyle(NativeDesign.overGoal)
-                            }
+                        // FOOD-LOG-EDIT-2026-11-25: tapping the name or the kcal opens Modifica. A tap gesture (not a
+                        // Button) keeps the texts visible to VoiceOver and to the UI tests that look them up.
+                        HStack(spacing: NativeDesign.Space.small) {
+                                VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
+                                    Text(row.name).font(.subheadline).lineLimit(2).foregroundStyle(.primary)
+                                    Text(row.detail).font(.footnote).foregroundStyle(NativeDesign.secondary)
+                                    if row.deletionPending {
+                                        Text("Eliminazione da completare").font(.footnote).foregroundStyle(NativeDesign.overGoal)
+                                    }
+                                }
+                                Spacer(minLength: NativeDesign.Space.small)
+                                Text(row.calories.map { $0.formatted(.number.precision(.fractionLength(0))) + " kcal" } ?? "— kcal")
+                                    .font(.subheadline.weight(.semibold)).monospacedDigit().foregroundStyle(.primary)
                         }
-                        Spacer(minLength: NativeDesign.Space.small)
-                        Text(row.calories.map { $0.formatted(.number.precision(.fractionLength(0))) + " kcal" } ?? "— kcal")
-                            .font(.subheadline.weight(.semibold)).monospacedDigit()
+                        .frame(minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle())
+                        .onTapGesture { if let editable, !nutrition.busy { editingFood = editable } }
+                        .accessibilityElement(children: .contain)
+                        .accessibilityAction(named: Text("Modifica quantità e ora")) { if let editable, !nutrition.busy { editingFood = editable } }
+                        .accessibilityIdentifier("health-diary-edit-" + (row.localID?.uuidString ?? row.id.uuidString))
                         if let localID = row.localID, !row.deletionPending, let entry = nutrition.entries.first(where: { $0.id == localID }) {
                             NativeIconButton(symbol: "arrow.uturn.forward", label: "Ripeti oggi " + row.name) { repeatFoods([entry], on: .now) }
                                 .disabled(nutrition.busy)

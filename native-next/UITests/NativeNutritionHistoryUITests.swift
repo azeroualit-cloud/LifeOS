@@ -58,4 +58,34 @@ final class NativeNutritionHistoryUITests: XCTestCase {
         screenshot.lifetime = .keepAlways
         add(screenshot)
     }
+
+    /// FOOD-LOG-EDIT-2026-11-25: tapping a diary row opens Modifica; +10 g and Salva update the same row.
+    func testDiaryRowEditsQuantityWithoutDeleting() {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments = ["--visual-test", "--busy-home", "--dark", "--health-week-review", "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"]
+        app.launch()
+        XCTAssertTrue(app.mainTabBar.buttons["Salute"].waitForExistence(timeout: 20))
+        app.mainTabBar.buttons["Salute"].tap()
+        let scroll = app.scrollViews["health-detail-scroll"]
+        XCTAssertTrue(scroll.waitForExistence(timeout: 10))
+        let meal = app.staticTexts["Pasto di prova"]
+        let bar = app.buttons["health-add-nutrition"]
+        for _ in 0..<8 where !meal.isHittable || (bar.exists && meal.frame.maxY > bar.frame.minY - 4) { scroll.swipeUp(velocity: .slow) }
+        XCTAssertTrue(meal.isHittable)
+        meal.tap()
+        let quantity = app.textFields["food-edit-quantity"]
+        XCTAssertTrue(quantity.waitForExistence(timeout: 10))
+        XCTAssertEqual(quantity.value as? String, "300")
+        XCTAssertFalse(app.buttons["food-edit-save"].isEnabled, "nothing changed yet")
+        app.buttons["food-edit-step-plus-10"].tap()
+        XCTAssertEqual(quantity.value as? String, "310")
+        let shot = XCTAttachment(screenshot: app.screenshot()); shot.name = "Modifica alimento"; shot.lifetime = .keepAlways; add(shot)
+        XCTAssertTrue(app.buttons["food-edit-save"].isEnabled)
+        app.buttons["food-edit-save"].tap()
+        expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: quantity); waitForExpectations(timeout: 10)
+        let updated = app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "310 g")).firstMatch
+        XCTAssertTrue(updated.waitForExistence(timeout: 10), "the same diary row shows the new grams")
+        XCTAssertEqual(app.staticTexts.matching(identifier: "Pasto di prova").count, 1, "edited, not duplicated")
+    }
 }

@@ -18,6 +18,7 @@ import Foundation
                   var item = NativeNutritionEntry.direct(id: UUID(), date: date, protein: 32,
                                                          carbohydrate: 65, fat: 18, fibre: 8) else { continue }
             item.foodName = "Pasto di prova"
+            item.portionGrams = 300 // FOOD-LOG-EDIT-2026-11-25: the quantity the edit test changes
             item.nutrientValues = [
                 "vitaminC": .init(amount: 25, estimateSource: nil),
                 "zinc": .init(amount: 11, estimateSource: nil),

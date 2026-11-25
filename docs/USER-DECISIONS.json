@@ -1710,6 +1710,16 @@
       "original_quote": "fai te quello che ti pare, aumentando di molto il livello attuale, e poi eventualmente ne parleremo in futuro",
       "rule": "Mano libera per un'analisi molto più ricca e personalizzabile sul sito.",
       "relation": "Attua ANALYSIS-DEEP-2026-11-25."
+    },
+    {
+      "id": "FOOD-LOG-EDIT-2026-11-25",
+      "status": "ACTIVE",
+      "scope": "Diario alimenti nell'app",
+      "recorded_on": "2026-11-25",
+      "provenance": "Messaggio utente in chat Claude, 25/11/2026",
+      "original_quote": "wait wait wait u need to add the feature to edit already logged in foods, per evitare di eliminare un cibo e rimetterlo solo perché ho sbagliato qualche grammo",
+      "rule": "Le registrazioni del diario si modificano (quantità e ora) senza eliminarle e reinserirle; valori ricalcolati in proporzione. Richiesta prima dell'IPA 95 (mockup approvato: «Yes, go ahead»).",
+      "relation": "Si aggiunge a IPA-DELIVERY-95-2026-11-25 (ritarda l'IPA, nessun conflitto)."
     }
   ],
   "pending_confirmations": [

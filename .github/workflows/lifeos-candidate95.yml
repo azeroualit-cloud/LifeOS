@@ -1,5 +1,5 @@
 name: LifeOS candidate 95 validation and authorized IPA
-# Start 3 for IPA-DELIVERY-95-2026-11-25 (start 1: stale SPACING id, known UI test issues, tours in the gate; start 2: food row tappable only on its text, «Già registrata?» sheet closing at once, diary trash under the action bar, duplicate Gin Tonic rows) («run multiple threads so that we get the ipa as soon and as fast as possible»):
+# Start 4 for IPA-DELIVERY-95-2026-11-25 with FOOD-LOG-EDIT-2026-11-25 (start 3: link row 43.67 pt instead of 44, one shard without runner; start 1: stale SPACING id, known UI test issues, tours in the gate; start 2: food row tappable only on its text, «Già registrata?» sheet closing at once, diary trash under the action bar, duplicate Gin Tonic rows) («run multiple threads so that we get the ipa as soon and as fast as possible»):
 # targeted check, six test shards and the Release launches all start at once; packaging waits for every gate.
 on:
   workflow_dispatch:
