@@ -97,9 +97,16 @@ import Foundation
         try JSONDecoder().decode(JSONValue.self, from: JSONEncoder().encode(food))
     }
 
+    /// FOOD-SYNC-DELTA-2026-11-25: the phone keeps its copy and asks only for what changed since the
+    /// last stamp (site or app edits and deletions). With no change the server reads no rows. The check
+    /// runs at most every few minutes unless this phone has edits to send; it never blocks the app.
+    static let foodsStampKey = "lifeos-online-foods-stamp-95"
+    private static let foodsCheckedKey = "lifeos-online-foods-checked-95"
+    static let foodsCheckInterval: TimeInterval = 300
+
     private func syncFoods(_ read: Reader) async throws {
-        _ = try await read("listFoods", []) // also tells whether the server offers these methods
         if !defaults.bool(forKey: Self.foodsTransferredKey) {
+            _ = try await read("listFoods", []) // also tells whether the server offers these methods
             let foods = localFoods()
             for start in stride(from: 0, to: foods.count, by: 200) {
                 let chunk = try foods[start..<min(foods.count, start + 200)].map(appJSON)
@@ -110,6 +117,7 @@ import Foundation
         }
         let local = Dictionary(localFoods().map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
         var remaining: [FoodChange] = []
+        let hadPending = !pendingFoods.isEmpty
         for change in pendingFoods {
             do {
                 if change.delete { _ = try await read("deleteFood", [.string(change.id)]) }
@@ -119,10 +127,45 @@ import Foundation
             } catch { remaining.append(change) }
         }
         pendingFoods = remaining
-        let value = try await read("listFoods", [])
-        guard remaining.isEmpty else { return } // keep unsent edits visible until they reach the server
-        let foods = value.object.records("foods").compactMap(Self.food)
-        defaults.set(try JSONEncoder().encode(foods), forKey: Self.foodsKey)
+        let stamp = defaults.string(forKey: Self.foodsStampKey)
+        let checked = defaults.double(forKey: Self.foodsCheckedKey)
+        let now = Date().timeIntervalSince1970
+        guard hadPending || stamp == nil || now - checked >= Self.foodsCheckInterval else { return }
+        let value: JSONValue
+        do { value = try await read("listFoodChanges", [stamp.map(JSONValue.string) ?? .null]) }
+        catch let error as NativeRequestRejected where error.message.contains("Operazione non disponibile") {
+            // Gateway not updated yet: the old full download, without blocking local edits.
+            let all = try await read("listFoods", [])
+            if remaining.isEmpty { defaults.set(try JSONEncoder().encode(all.object.records("foods").compactMap(Self.food)), forKey: Self.foodsKey) }
+            return
+        }
+        defaults.set(now, forKey: Self.foodsCheckedKey)
+        let changes = value.object
+        let unsent = Set(remaining.map(\.id)) // edits still on this phone win until they reach the server
+        let merged = Self.merge(local: localFoods(), changes: changes, keeping: unsent)
+        if let merged { defaults.set(try JSONEncoder().encode(merged), forKey: Self.foodsKey) }
+        let next = changes.text("stamp")
+        if !next.isEmpty { defaults.set(next, forKey: Self.foodsStampKey) }
+    }
+
+    /// Applies a server answer to the phone copy: a full list replaces it, a delta adds, updates and
+    /// removes. Foods with edits not yet sent are left as they are. Nil when nothing changed.
+    nonisolated static func merge(local: [NativeGenericFood], changes: Record, keeping unsent: Set<String>) -> [NativeGenericFood]? {
+        let incoming = changes.records("foods").compactMap(Self.food)
+        let deleted = Set((changes["deleted"]?.array ?? []).map(\.string).filter { !$0.isEmpty })
+        if changes.flag("full") {
+            let kept = local.filter { unsent.contains($0.id) }
+            return kept + incoming.filter { !unsent.contains($0.id) }
+        }
+        guard !incoming.isEmpty || !deleted.isEmpty else { return nil }
+        var byID = Dictionary(local.map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
+        var order = local.map(\.id)
+        for id in deleted where !unsent.contains(id) { byID.removeValue(forKey: id) }
+        for food in incoming where !unsent.contains(food.id) {
+            if byID[food.id] == nil { order.append(food.id) }
+            byID[food.id] = food
+        }
+        return order.compactMap { byID.removeValue(forKey: $0) }
     }
 
     /// Server row → app food. App-only fields (pieces, units…) come from `app`, the

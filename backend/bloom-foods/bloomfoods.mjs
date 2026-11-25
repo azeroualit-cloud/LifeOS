@@ -10,6 +10,13 @@ async function nbTables(env) {
       env.DB.prepare("CREATE TABLE IF NOT EXISTS web_bloom_collections (id TEXT PRIMARY KEY, name TEXT NOT NULL, doc TEXT NOT NULL DEFAULT '{}', updated_at TEXT NOT NULL)"),
       env.DB.prepare("CREATE TABLE IF NOT EXISTS web_bloom_items (id TEXT PRIMARY KEY, kind TEXT NOT NULL DEFAULT 'note', title TEXT NOT NULL DEFAULT '', url TEXT NOT NULL DEFAULT '', body TEXT NOT NULL DEFAULT '', notes TEXT NOT NULL DEFAULT '', tags TEXT NOT NULL DEFAULT '[]', place TEXT NOT NULL DEFAULT '', archived INTEGER NOT NULL DEFAULT 0, trashed_at REAL, modified_at REAL NOT NULL DEFAULT 0, files TEXT NOT NULL DEFAULT '[]', doc TEXT NOT NULL DEFAULT '{}')"),
       env.DB.prepare("CREATE TABLE IF NOT EXISTS web_foods_app (id TEXT PRIMARY KEY, app TEXT NOT NULL DEFAULT '{}')"),
+      // FOOD-SYNC-DELTA-2026-11-25: il telefono chiede solo le modifiche dall'ultima volta. Le cancellazioni
+      // (dal sito o dall'app) restano come tombstone grazie a un trigger, così vale per entrambi i Worker.
+      env.DB.prepare("CREATE INDEX IF NOT EXISTS web_foods_updated ON web_foods(updated_at)"),
+      env.DB.prepare("CREATE TABLE IF NOT EXISTS web_food_tombstones (id TEXT PRIMARY KEY, at TEXT NOT NULL)"),
+      env.DB.prepare("CREATE INDEX IF NOT EXISTS web_food_tombstones_at ON web_food_tombstones(at)"),
+      env.DB.prepare("CREATE TRIGGER IF NOT EXISTS web_foods_tombstone AFTER DELETE ON web_foods BEGIN INSERT OR REPLACE INTO web_food_tombstones(id, at) VALUES (old.id, strftime('%Y-%m-%dT%H:%M:%fZ','now')); END"),
+      env.DB.prepare("CREATE TRIGGER IF NOT EXISTS web_foods_revive AFTER INSERT ON web_foods BEGIN DELETE FROM web_food_tombstones WHERE id = new.id; END"),
       env.DB.prepare("CREATE TABLE IF NOT EXISTS web_bloom_app (id TEXT PRIMARY KEY, app TEXT NOT NULL DEFAULT '{}')"),
       // FOOD-DIARY-SERVER-2026-11-22: diario alimentare condiviso (telefono e sito). Il peso resta in Apple Salute.
       env.DB.prepare("CREATE TABLE IF NOT EXISTS web_food_diary (id TEXT PRIMARY KEY, day TEXT NOT NULL, at TEXT NOT NULL, name TEXT NOT NULL DEFAULT '', grams REAL, ml REAL, kcal REAL, protein REAL, carbs REAL, fat REAL, fibre REAL, revision INTEGER NOT NULL DEFAULT 0, modified REAL NOT NULL DEFAULT 0, deleted INTEGER NOT NULL DEFAULT 0, app TEXT NOT NULL DEFAULT '{}')"),
@@ -105,6 +112,33 @@ async function listFoods(env) {
   await nbTables(env);
   const [{ results }, extras] = await Promise.all([env.DB.prepare("SELECT * FROM web_foods ORDER BY name COLLATE NOCASE LIMIT 5000").all(), nbExtrasMap(env, "web_foods_app")]);
   return { foods: results.map((r) => ({ ...nbFoodRow(r), app: extras.get(r.id) || {} })) };
+}
+/** FOOD-SYNC-DELTA-2026-11-25: senza «since» tutto l'elenco; con «since» solo le righe cambiate e gli id cancellati
+ *  dopo quel momento (letture su indice: nessuna modifica = nessuna riga letta). «stamp» è il prossimo «since». */
+async function listFoodChanges(env, since) {
+  await nbTables(env);
+  const from = typeof since === "string" && /^\d{4}-\d\d-\d\dT/.test(since) ? since : "";
+  if (!from) {
+    const all = await listFoods(env);
+    const { results } = await env.DB.prepare("SELECT MAX(updated_at) AS m FROM web_foods").all();
+    const tomb = await env.DB.prepare("SELECT MAX(at) AS m FROM web_food_tombstones").all();
+    const stamp = [results[0]?.m || "", tomb.results[0]?.m || ""].sort().pop() || new Date(0).toISOString();
+    return { full: true, foods: all.foods, deleted: [], stamp };
+  }
+  const [{ results: rows }, { results: gone }] = await Promise.all([
+    env.DB.prepare("SELECT * FROM web_foods WHERE updated_at > ? ORDER BY updated_at LIMIT 2000").bind(from).all(),
+    env.DB.prepare("SELECT id, at FROM web_food_tombstones WHERE at > ? ORDER BY at LIMIT 2000").bind(from).all()]);
+  let extras = new Map();
+  if (rows.length) {
+    const ids = rows.map((r) => r.id);
+    for (let i = 0; i < ids.length; i += 90) {
+      const part = ids.slice(i, i + 90);
+      const { results } = await env.DB.prepare("SELECT id,app FROM web_foods_app WHERE id IN (" + part.map(() => "?").join(",") + ")").bind(...part).all();
+      for (const r of results) extras.set(r.id, nbJson(r.app, {}));
+    }
+  }
+  const stamp = [from, ...rows.map((r) => r.updated_at), ...gone.map((g) => g.at)].sort().pop();
+  return { full: false, foods: rows.map((r) => ({ ...nbFoodRow(r), app: extras.get(r.id) || {} })), deleted: gone.map((g) => g.id), stamp };
 }
 async function saveFood(env, input) {
   await nbTables(env);
@@ -342,7 +376,7 @@ async function hubTables(env) {
   }
   await hubReady;
 }
-const HUB_KEYS = ["nutrition-goals", "nutrition-targets", "alerts", "supplement-stacks", "finance-categories", "private-log"]; // CATEGORY-ADMIN-2026-11-24
+const HUB_KEYS = ["nutrition-goals", "nutrition-targets", "alerts", "supplement-stacks", "finance-categories", "private-log", "app-layout"]; // CATEGORY-ADMIN-2026-11-24, NAV-E-SLOT-2026-11-25
 function hubKey(key) {
   const k = String(key || "");
   if (!HUB_KEYS.includes(k)) throw Error("Impostazione sconosciuta.");
@@ -396,6 +430,7 @@ async function listAlertLog(env, limit) {
 /** Gateway dell'app: stesse tabelle del sito, nessun metodo arbitrario. Restituisce undefined se il metodo non è suo. */
 const BLOOM_FOODS_METHODS = {
   listFoods: (env) => listFoods(env),
+  listFoodChanges: (env, a) => listFoodChanges(env, a[0]),
   saveFood: (env, a) => saveFood(env, a[0]),
   deleteFood: (env, a) => deleteFood(env, a[0]),
   importFoods: (env, a) => importFoods(env, a[0]),

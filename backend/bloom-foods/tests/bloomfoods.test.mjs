@@ -124,3 +124,27 @@ test('shared settings keep the newest copy and the alert log keeps the latest en
   const log = await bloomFoodsAction(e, 'listAlertLog', [10]);
   assert.equal(log.entries.length, 1); assert.equal(log.entries[0].title, 'Budget');
 });
+
+test('food changes: only rows changed since the stamp, deletions from any worker included', async () => {
+  const e = env();
+  await bloomFoodsAction(e, 'importFoods', [[{ id: 'a', name: 'Skyr', calories: 63, protein: 11, carbohydrate: 4, fat: 0.2 }, { id: 'b', name: 'Avena', calories: 372, protein: 13, carbohydrate: 59, fat: 7 }]]);
+  const first = await bloomFoodsAction(e, 'listFoodChanges', [null]);
+  assert.equal(first.full, true); assert.equal(first.foods.length, 2);
+  const quiet = await bloomFoodsAction(e, 'listFoodChanges', [first.stamp]);
+  assert.equal(quiet.foods.length, 0); assert.equal(quiet.deleted.length, 0); assert.equal(quiet.stamp, first.stamp);
+  await new Promise((r) => setTimeout(r, 5));
+  e.sqlite.prepare("DELETE FROM web_foods WHERE id = 'b'").run(); // as the site Worker does
+  await bloomFoodsAction(e, 'saveFood', [{ id: 'c', name: 'Riso', calories: 351, protein: 7, carbohydrate: 78, fat: 0.6, pieces: [{ name: 'tazza', grams: 90 }] }]);
+  const delta = await bloomFoodsAction(e, 'listFoodChanges', [quiet.stamp]);
+  assert.deepEqual(delta.deleted, ['b']); assert.deepEqual(delta.foods.map((f) => f.id), ['c']);
+  assert.equal(delta.foods[0].app.pieces[0].name, 'tazza');
+  assert.ok(delta.stamp > quiet.stamp);
+  const after = await bloomFoodsAction(e, 'listFoodChanges', [delta.stamp]);
+  assert.equal(after.foods.length + after.deleted.length, 0);
+});
+
+test('app-layout setting is accepted by the app gateway', async () => {
+  const e = env();
+  const r = await bloomFoodsAction(e, 'saveSettings', ['app-layout', { tabSlot: 'bloom' }, Date.now()]);
+  assert.equal(r.doc.tabSlot, 'bloom');
+});

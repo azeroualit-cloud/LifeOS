@@ -481,3 +481,5 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 - **NAV-OPTIONS-2026-11-25** (in valutazione): simulazione realistica delle opzioni di barra con pro/contro; se accettata l'ordine sarà Dashboard, Calendario, Salute, Finanza, Bloom.
 
 - **NAV-E-SLOT-2026-11-25 — ACTIVE, conflitto con NAVIGATION-FIVE-2026-11-16 confermato.** Testo originale: «E con quinto tab variabile (Finanza o Bloom, scelto dal sito), confermo». Barra: Dashboard, Attività, Calendario, Salute fissi; quinto tab Finanza o Bloom scelto in Admin sul sito (impostazione `app-layout`), letto dall'app alla prossima apertura senza IPA. L'altro si apre dalla sua scheda in Dashboard. Predefinito Finanza. NAV-OPTIONS-2026-11-25 risolta.
+
+- **FOOD-SYNC-DELTA-2026-11-25 — ACTIVE.** Richiesta diretta (testo originale nel JSON). Alimenti sincronizzati telefono ⇄ sito: il sito legge dal cloud, il telefono tiene una copia locale e scarica solo le modifiche, senza bloccare l'app e senza rileggere tutto a ogni accesso (limiti gratuiti). Implementata con `listFoodChanges` (stamp), tombstone tramite trigger D1, controllo al massimo ogni 5 minuti salvo modifiche da inviare.

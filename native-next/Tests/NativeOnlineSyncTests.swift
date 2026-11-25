@@ -12,6 +12,11 @@ import XCTest
         var items: [String: Record] = [:]
         var collections: [String: Record] = [:]
         var clock = 2_000_000_000.0
+        var delta = false // FOOD-SYNC-DELTA: offers listFoodChanges
+        var tick = 0
+        var changedAt: [String: String] = [:]
+        var tombstones: [String: String] = [:]
+        func stamp() -> String { tick += 1; return "2026-11-25T00:00:00." + String(format: "%06d", tick) }
         func handle(_ method: String, _ args: [JSONValue]) throws -> JSONValue {
             calls.append(method)
             guard offers else { throw NativeRequestRejected(status: 400, message: "Operazione non disponibile.") }
@@ -21,10 +26,17 @@ import XCTest
                 for value in list {
                     let a = value.object
                     var app = a; for k in ["id", "name", "brand", "family", "measurementBasis", "calories", "protein", "carbohydrate", "fat", "fibre", "nutritionNotDeclared", "nutrientValues", "aliases", "dataNote"] { app.removeValue(forKey: k) }
+                    changedAt[a.text("id")] = stamp(); tombstones.removeValue(forKey: a.text("id"))
                     foods[a.text("id")] = ["id": a["id"]!, "name": a["name"]!, "brand": a["brand"] ?? .string(""), "family": a["family"]!, "basis": .string("g"), "kcal": a["calories"]!, "protein": a["protein"]!, "carbs": a["carbohydrate"]!, "fat": a["fat"]!, "fibre": a["fibre"] ?? .null, "micro": .object([:]), "aliases": .array([]), "note": .string(""), "app": .object(app)]
                 }
                 return .object(["imported": .int(list.count)])
-            case "deleteFood": foods.removeValue(forKey: args[0].string); return .object(["ok": .bool(true)])
+            case "deleteFood": siteDeleteFood(args[0].string); return .object(["ok": .bool(true)])
+            case "listFoodChanges" where delta:
+                let since = args.first?.string ?? ""
+                let rows = foods.filter { since.isEmpty || (changedAt[$0.key] ?? "") > since }.map(\.value)
+                let gone = since.isEmpty ? [] : tombstones.filter { $0.value > since }.map(\.key)
+                let last = ([since] + changedAt.values + tombstones.values).max() ?? ""
+                return .object(["full": .bool(since.isEmpty), "foods": .array(rows.map(JSONValue.object)), "deleted": .array(gone.map(JSONValue.string)), "stamp": .string(last)])
             case "listFoods": return .object(["foods": .array(foods.values.map(JSONValue.object))])
             case "importBloom":
                 let p = args[0].object
@@ -51,6 +63,11 @@ import XCTest
             default: throw NativeRequestRejected(status: 400, message: "Operazione non disponibile.")
             }
         }
+        func siteAddFood(_ id: String, _ name: String) {
+            changedAt[id] = stamp()
+            foods[id] = ["id": .string(id), "name": .string(name), "family": .string("meal"), "basis": .string("g"), "kcal": .number(100), "protein": .number(5), "carbs": .number(10), "fat": .number(2), "fibre": .null, "micro": .object([:]), "aliases": .array([]), "note": .string(""), "app": .object([:])]
+        }
+        func siteDeleteFood(_ id: String) { foods.removeValue(forKey: id); changedAt.removeValue(forKey: id); tombstones[id] = stamp() }
         func row(_ i: Record) -> Record {
             var app = i; for k in ["id", "kind", "title", "urlString", "text", "notes", "tagIDs", "place", "archived", "trashedAt", "modifiedAt", "expectModifiedAt", "data"] { app.removeValue(forKey: k) }
             return ["id": i["id"]!, "kind": i["kind"] ?? .string("text"), "title": i["title"] ?? .string(""), "url": i["urlString"] ?? .string(""), "body": i["text"] ?? .string(""), "bodyLength": .int(i.text("text").count), "notes": i["notes"] ?? .string(""), "tags": i["tagIDs"] ?? .array([]), "place": i["place"] ?? .null, "archived": i["archived"] ?? .bool(false), "trashedAt": i["trashedAt"] ?? .null, "modifiedAt": .number(i.amount("modifiedAt") > 0 ? i.amount("modifiedAt") : clock), "app": .object(app)]
@@ -132,6 +149,35 @@ import XCTest
         // A site note can be edited and saved on the device.
         var edit = try XCTUnwrap(bloom.archive.items.first); edit["title"] = .string("Modificata")
         XCTAssertNoThrow(try bloom.save(edit))
+    }
+
+    /// FOOD-SYNC-DELTA-2026-11-25: one full read, then only changes, and no check before the interval.
+    func testFoodsAreFetchedAsChangesOnly() async throws {
+        let (sync, _, server, defaults, root) = try setup()
+        defer { try? FileManager.default.removeItem(at: root) }
+        server.delta = true
+        server.siteAddFood("site-1", "Pane del sito"); server.siteAddFood("site-2", "Riso del sito")
+        await sync.run()
+        func names() -> [String] {
+            ((defaults.data(forKey: NativeOnlineSync.foodsKey)).flatMap { try? JSONDecoder().decode([NativeGenericFood].self, from: $0) } ?? []).map(\.name).sorted()
+        }
+        XCTAssertEqual(names(), ["Pane del sito", "Riso del sito"])
+        server.calls = []
+        server.siteAddFood("site-3", "Avena del sito"); server.siteDeleteFood("site-1")
+        await sync.run()
+        XCTAssertFalse(server.calls.contains("listFoodChanges"), "no check before the interval")
+        XCTAssertFalse(server.calls.contains("listFoods"))
+        defaults.removeObject(forKey: "lifeos-online-foods-checked-95")
+        await sync.run()
+        XCTAssertEqual(names(), ["Avena del sito", "Riso del sito"])
+        XCTAssertFalse(server.calls.contains("listFoods"), "never the whole list again")
+    }
+
+    func testMergeKeepsUnsentPhoneEdits() throws {
+        let mine = try XCTUnwrap(NativeOnlineSync.food(["id": .string("a"), "name": .string("Mia"), "family": .string("meal"), "kcal": .number(1), "protein": .number(1), "carbs": .number(1), "fat": .number(1)]))
+        let server: Record = ["full": .bool(false), "foods": .array([.object(["id": .string("a"), "name": .string("Vecchia"), "family": .string("meal"), "kcal": .number(1), "protein": .number(1), "carbs": .number(1), "fat": .number(1)])]), "deleted": .array([.string("a")])]
+        XCTAssertEqual(NativeOnlineSync.merge(local: [mine], changes: server, keeping: ["a"])?.map(\.name), ["Mia"])
+        XCTAssertNil(NativeOnlineSync.merge(local: [mine], changes: ["full": .bool(false), "foods": .array([]), "deleted": .array([])], keeping: []))
     }
 
     func testOldServerChangesNothingOnTheDevice() async throws {

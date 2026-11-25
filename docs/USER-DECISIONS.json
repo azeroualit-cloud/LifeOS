@@ -979,6 +979,15 @@
       "rule": "Barra: Dashboard, Attività, Calendario, Salute fissi; quinto tab Finanza o Bloom, scelto in Admin sul sito (impostazione app-layout, chiave tabSlot) e letto dall'app senza nuova IPA alla prossima apertura. Quello non in barra si apre dalla sua scheda in Dashboard. Predefinito Finanza; ultima scelta conservata sul telefono se il server non risponde. Sostituisce NAVIGATION-FIVE-2026-11-16."
     },
     {
+      "id": "FOOD-SYNC-DELTA-2026-11-25",
+      "status": "ACTIVE",
+      "scope": "Alimenti personali: sincronizzazione telefono-sito",
+      "recorded_on": "2026-11-25",
+      "provenance": "Richiesta diretta utente in chat Claude",
+      "original_quote": "il db inizialmente è stato importato su tel, adesso che abbiamo in seuito implementato l'aggiunta da sito devono sincronizzarsi entrambi senza bloccare l'app all'accesso, magari con una sincronizzzazione avanzata telefono - sito dove il sito ottiene tutto dal cloud, il telefono pure però ha una copia locale che aggiorna solo quando  ci sono modifiche e non a ogni accesso altrimenti sputtaniamo i free limits",
+      "rule": "Alimenti sincronizzati nei due sensi. Il sito legge tutto dal cloud; il telefono tiene una copia locale e scarica solo le modifiche (nuovi, modificati, cancellati) dall'ultimo controllo, senza bloccare l'app e senza rileggere tutto a ogni accesso, per restare nei limiti gratuiti. Implementazione: listFoodChanges con stamp, tombstone via trigger, controllo al massimo ogni 5 minuti salvo modifiche locali da inviare."
+    },
+    {
       "id": "BLOOM-REDESIGN-2026-11-16",
       "status": "SUPERSEDED",
       "scope": "Sezione Bloom",
