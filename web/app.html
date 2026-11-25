@@ -1895,6 +1895,32 @@ main:has(#calendar.active){--section:var(--cal-accent)}
 
 /* INCONTRI-2026-11-25 */
 .os-private-open{display:inline-flex;align-items:center;gap:5px}.os-spark{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}
+
+/* NAV-E-SLOT-2026-11-25: barra dell'iPhone in Admin */
+.al-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--s2,8px);padding:var(--s2,8px);border-radius:var(--r-lg,16px);background:var(--surface-2);font-size:13px;text-align:center}
+.al-bar span{padding:8px 4px;border-radius:var(--r-md,10px);color:var(--ink-2);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.al-bar .al-slot{background:color-mix(in srgb,var(--accent,#5b8def) 14%,transparent);color:var(--ink);font-weight:600}
+.al-form fieldset{display:flex;gap:var(--s3,13px);border:0;padding:0;margin:var(--s3,13px) 0 0}
+.al-form legend{font-size:13px;color:var(--ink-2);margin-bottom:var(--s2,8px)}
+.al-opt{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+
+/* TRANSCRIBE-SITE-2026-11-25 */
+.tr-wrap{display:grid;gap:var(--s3,13px);max-width:860px}
+.tr-drop{display:grid;justify-items:center;gap:6px;padding:34px 13px;border:1.5px dashed var(--line,#3a3a40);border-radius:var(--r-lg,16px);cursor:pointer;text-align:center;color:var(--ink-2);transition:background-color .15s,border-color .15s}
+.tr-drop:hover,.tr-drop.on,.tr-drop:focus-visible{background:var(--surface-2);border-color:var(--ink-2);outline:none}
+.tr-drop svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
+.tr-drop b{color:var(--ink);font-size:16px}
+.tr-opts{display:flex;flex-wrap:wrap;gap:13px;align-items:end;margin-top:13px}
+.tr-opts label{min-width:0}
+.tr-check{display:flex;align-items:center;gap:8px;min-height:40px}
+.tr-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.tr-text{white-space:pre-wrap;word-break:break-word;font:inherit;line-height:1.6;margin:8px 0;padding:13px;background:var(--surface-2);border-radius:var(--r-md,10px);max-height:420px;overflow:auto}
+.tr-wait,.tr-bar{height:4px;border-radius:2px;background:var(--surface-2);overflow:hidden;margin-top:8px}
+.tr-wait i{display:block;height:100%;width:30%;background:var(--ink-2);border-radius:2px;animation:tr-slide 1.4s ease-in-out infinite}
+.tr-bar i{display:block;height:100%;background:var(--ink-2)}
+@keyframes tr-slide{0%{transform:translateX(-100%)}100%{transform:translateX(340%)}}
+@media (prefers-reduced-motion:reduce){.tr-wait i{animation:none;width:100%;opacity:.4}}
+.tr-opts .tr-check{flex-direction:row;display:flex}.tr-opts .tr-check input{width:auto;height:auto;min-height:0;margin:0}
 </style>
 </head>
   <body class="dashboard-mode">
@@ -1969,6 +1995,7 @@ main:has(#calendar.active){--section:var(--cal-accent)}
           <button data-view="bloom"><svg class="nav-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h10a1 1 0 0 1 1 1v17l-6-4-6 4V4a1 1 0 0 1 1-1Z"/></svg><span>Bloom</span></button>
           <button type="button" data-view="alerts"><svg class="nav-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>Avvisi</button>
           <button type="button" data-view="stats"><svg class="nav-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Statistiche</button>
+          <button type="button" data-view="transcribe"><svg class="nav-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>Trascrivi</button>
           <button type="button" data-view="guide"><svg class="nav-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M9 8h7M9 12h5"/></svg>Guida</button>
           <button id="admin-link" type="button" data-view="admin"><svg class="nav-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>Admin</button>
         </nav>
@@ -2007,7 +2034,7 @@ main:has(#calendar.active){--section:var(--cal-accent)}
         <section id="overview" class="view"></section>
         <section id="movements" class="view"></section>
 
-        <section id="budget" class="view"></section><section id="analysis" class="view"></section><section id="admin" class="view"></section><section id="guide" class="view"></section><section id="stats" class="view"></section><section id="alerts" class="view"></section><section id="nutrition" class="view"></section><section id="bloom" class="view"></section><section id="extras" class="view"></section>
+        <section id="budget" class="view"></section><section id="analysis" class="view"></section><section id="admin" class="view"></section><section id="guide" class="view"></section><section id="stats" class="view"></section><section id="transcribe" class="view"></section><section id="alerts" class="view"></section><section id="nutrition" class="view"></section><section id="bloom" class="view"></section><section id="extras" class="view"></section>
       </main>
     </div>
     <script id="lifeos-admin">
@@ -4531,6 +4558,7 @@ document.addEventListener("keydown", (e) => {
             "alerts",
             "guide",
             "stats",
+            "transcribe",
             "nutrition",
             "bloom",
           ].includes(view)
@@ -4569,6 +4597,7 @@ document.addEventListener("keydown", (e) => {
           alerts: "Avvisi",
           guide: "Guida",
           stats: "Statistiche",
+          transcribe: "Trascrivi",
           nutrition: "Nutrizione",
           bloom: "Bloom",
         }[view];
@@ -4614,6 +4643,7 @@ document.addEventListener("keydown", (e) => {
         if (view === "alerts" && typeof renderAlerts === "function") renderAlerts();
         if (view === "guide" && typeof renderGuide === "function") renderGuide();
         if (view === "stats" && typeof renderStats === "function") renderStats();
+        if (view === "transcribe" && typeof renderTranscribe === "function") renderTranscribe();
         if (view === "nutrition" && typeof renderNutrition === "function") renderNutrition();
         if (view === "bloom" && typeof renderBloom === "function") renderBloom();
         if (view !== "calendar") life.tool = null;
@@ -10142,6 +10172,161 @@ renderAdmin = async function () {
   const grid = document.querySelector("#admin .adm-grid");
   if (grid && !document.getElementById("app-layout95")) grid.insertAdjacentHTML("afterbegin", appLayoutHtml());
 };
+</script>
+
+<script id="lifeos-transcribe95">
+/* TRANSCRIBE-SITE-2026-11-25: trascrizione di vocali e audio solo sul sito. Tutto nel browser (Whisper con
+   transformers.js): l'audio non viene inviato a nessun server. Il modello si scarica da Hugging Face la prima volta
+   e resta nella cache del browser. */
+const TR_LIB = "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2";
+const TR_MODELS = { base: ["onnx-community/whisper-base", "Veloce · circa 80 MB"], small: ["onnx-community/whisper-small", "Precisa · circa 250 MB"] };
+const TR_LANGS = [["", "Automatica"], ["italian", "Italiano"], ["english", "Inglese"], ["arabic", "Arabo"], ["french", "Francese"], ["spanish", "Spagnolo"]];
+const tr = { files: [], busy: false, worker: null, quality: "small", language: "italian", timestamps: false, load: null, error: "" };
+const TR_WORKER_SRC = [
+  'import { pipeline, env } from "' + TR_LIB + '";',
+  "env.allowLocalModels = false;",
+  'let asr = null, current = "";',
+  "async function make(model, device) {",
+  '  return pipeline("automatic-speech-recognition", model, { device, dtype: device === "webgpu" ? "fp32" : "q8",',
+  '    progress_callback: (p) => self.postMessage({ type: "load", p }) });',
+  "}",
+  "self.onmessage = async (e) => {",
+  "  const { id, audio, model, language, timestamps } = e.data;",
+  "  try {",
+  "    if (!asr || current !== model) {",
+  "      asr = null;",
+  '      if ("gpu" in navigator) { try { asr = await make(model, "webgpu"); } catch (x) { asr = null; } }',
+  '      if (!asr) asr = await make(model, "wasm");',
+  "      current = model;",
+  '      self.postMessage({ type: "ready" });',
+  "    }",
+  '    self.postMessage({ id, type: "start" });',
+  '    const opts = { task: "transcribe", chunk_length_s: 30, stride_length_s: 5, return_timestamps: !!timestamps };',
+  "    if (language) opts.language = language;",
+  "    const out = await asr(audio, opts);",
+  '    self.postMessage({ id, type: "done", text: (out.text || "").trim(), chunks: out.chunks || [] });',
+  '  } catch (err) { self.postMessage({ id, type: "error", message: String((err && err.message) || err) }); }',
+  "};",
+].join("\n");
+const trE = (v) => String(v ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const trTime = (s) => { s = Math.max(0, Math.round(Number(s) || 0)); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
+function trText(f) {
+  if (!tr.timestamps || !f.chunks || !f.chunks.length) return f.text || "";
+  return f.chunks.map((c) => "[" + trTime(c.timestamp && c.timestamp[0]) + "] " + String(c.text || "").trim()).join("\n");
+}
+function trWorker() {
+  if (tr.worker) return tr.worker;
+  const url = URL.createObjectURL(new Blob([TR_WORKER_SRC], { type: "text/javascript" }));
+  tr.worker = new Worker(url, { type: "module" });
+  tr.worker.onmessage = (e) => {
+    const m = e.data, f = tr.files.find((x) => x.id === m.id);
+    if (m.type === "load") { if (m.p && m.p.status === "progress" && m.p.total) { tr.load = { pct: Math.round((m.p.loaded / m.p.total) * 100) }; trPaint(); } return; }
+    if (m.type === "ready") { tr.load = null; trPaint(); return; }
+    if (!f) return;
+    if (m.type === "start") f.status = "trascrizione";
+    if (m.type === "done") { f.status = "fatto"; f.text = m.text; f.chunks = m.chunks; tr.busy = false; trNext(); }
+    if (m.type === "error") { f.status = "errore"; f.error = m.message; tr.busy = false; trNext(); }
+    trPaint();
+  };
+  tr.worker.onerror = () => {
+    tr.error = "Il trascrittore non si è avviato: il browser o il sito bloccano la libreria esterna.";
+    for (const f of tr.files) if (["attesa modello", "trascrizione"].includes(f.status)) { f.status = "errore"; f.error = tr.error; }
+    tr.busy = false; tr.worker = null; trPaint();
+  };
+  return tr.worker;
+}
+async function trDecode(file) {
+  const buf = await file.arrayBuffer();
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  const ctx = new Ctx({ sampleRate: 16000 });
+  try {
+    const a = await ctx.decodeAudioData(buf);
+    const out = new Float32Array(a.length);
+    for (let c = 0; c < a.numberOfChannels; c++) { const d = a.getChannelData(c); for (let i = 0; i < d.length; i++) out[i] += d[i] / a.numberOfChannels; }
+    return { audio: out, seconds: a.duration };
+  } finally { ctx.close(); }
+}
+async function trNext() {
+  if (tr.busy) return;
+  const f = tr.files.find((x) => x.status === "in coda");
+  if (!f) return;
+  tr.busy = true; f.status = "lettura"; trPaint();
+  try {
+    const { audio, seconds } = await trDecode(f.file);
+    f.seconds = seconds; f.status = "attesa modello"; trPaint();
+    trWorker().postMessage({ id: f.id, audio, model: TR_MODELS[tr.quality][0], language: tr.language, timestamps: tr.timestamps }, [audio.buffer]);
+  } catch (e) { f.status = "errore"; f.error = "Formato non leggibile dal browser. Prova a convertirlo in mp3 o wav."; tr.busy = false; trPaint(); trNext(); }
+}
+function trAdd(list) {
+  for (const file of list) tr.files.push({ id: crypto.randomUUID(), file, name: file.name, status: "in coda", text: "", chunks: [] });
+  trPaint(); trNext();
+}
+function trDownload(name, text) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" }));
+  a.download = name.replace(/\.[^.]+$/, "") + ".txt"; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+function trCard(f) {
+  const working = ["lettura", "attesa modello", "trascrizione"].includes(f.status);
+  const label = { "in coda": "In coda", lettura: "Lettura dell'audio…", "attesa modello": "Preparo il modello…", trascrizione: "Trascrizione in corso…", fatto: "Fatto", errore: "Errore" }[f.status];
+  return `<article class="card pad tr-file" data-tr="${f.id}">
+    <div class="card-title"><h2 class="tr-name">${trE(f.name)}</h2><small>${f.seconds ? trTime(f.seconds) + " · " : ""}${label}</small></div>
+    ${working ? '<div class="tr-wait"><i></i></div>' : ""}
+    ${f.status === "errore" ? `<p class="errorbox">${trE(f.error)}</p>` : ""}
+    ${f.status === "fatto" ? `<pre class="tr-text">${trE(trText(f)) || "<em>Nessun parlato riconosciuto.</em>"}</pre>
+      <div class="form-actions"><button type="button" class="ghost" data-tr-copy="${f.id}">Copia</button><button type="button" class="ghost" data-tr-save="${f.id}">Scarica .txt</button><button type="button" class="ghost" data-tr-remove="${f.id}">Togli</button></div>` : ""}
+  </article>`;
+}
+function trPaint() {
+  const host = document.getElementById("transcribe"); if (!host || !host.querySelector(".tr-list")) return;
+  host.querySelector(".tr-list").innerHTML = tr.files.map(trCard).join("") || '<p class="hint">Nessun file. Trascina qui i vocali o scegli dei file.</p>';
+  host.querySelector(".tr-all").hidden = tr.files.filter((f) => f.status === "fatto").length < 2;
+  host.querySelector(".tr-load").innerHTML = tr.load ? `Scarico il modello (solo la prima volta): ${tr.load.pct}%<div class="tr-bar"><i style="width:${tr.load.pct}%"></i></div>` : "";
+  host.querySelector(".tr-error").innerHTML = tr.error ? `<p class="errorbox">${trE(tr.error)}</p>` : "";
+}
+function renderTranscribe() {
+  const host = document.getElementById("transcribe"); if (!host) return;
+  if (!host.querySelector(".tr-list")) {
+    const sel = (name, value, opts) => `<select name="${name}">${opts.map(([v, l]) => `<option value="${v}" ${v === value ? "selected" : ""}>${l}</option>`).join("")}</select>`;
+    host.innerHTML = `<div class="tr-wrap">
+      <section class="card pad">
+        <label class="tr-drop" tabindex="0"><input type="file" multiple accept="audio/*,video/*,.ogg,.opus,.m4a" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+          <b>Trascina qui vocali e audio</b><span>o clicca per sceglierli · WhatsApp, mp3, m4a, wav, video</span></label>
+        <form class="tr-opts os-form">
+          <label>Lingua${sel("language", tr.language, TR_LANGS)}</label>
+          <label>Qualità${sel("quality", tr.quality, Object.entries(TR_MODELS).map(([k, v]) => [k, v[1]]))}</label>
+          <label class="tr-check"><input type="checkbox" name="timestamps" ${tr.timestamps ? "checked" : ""}> Mostra i tempi</label>
+        </form>
+        <p class="hint">Tutto avviene in questo browser: l'audio non lascia il computer. La prima volta il modello si scarica da Hugging Face e poi resta salvato.</p>
+        <div class="tr-load hint"></div><div class="tr-error"></div>
+      </section>
+      <div class="form-actions tr-all" hidden><button type="button" class="ghost" data-tr-copyall>Copia tutto</button><button type="button" class="ghost" data-tr-saveall>Scarica tutto</button></div>
+      <div class="tr-list"></div></div>`;
+    const drop = host.querySelector(".tr-drop"), input = drop.querySelector("input");
+    input.addEventListener("change", () => { trAdd([...input.files]); input.value = ""; });
+    drop.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); input.click(); } });
+    for (const ev of ["dragenter", "dragover"]) drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add("on"); });
+    for (const ev of ["dragleave", "drop"]) drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove("on"); });
+    drop.addEventListener("drop", (e) => trAdd([...((e.dataTransfer && e.dataTransfer.files) || [])]));
+    host.querySelector(".tr-opts").addEventListener("change", (e) => {
+      const t = e.target; if (t.name === "timestamps") tr.timestamps = t.checked; else tr[t.name] = t.value; trPaint();
+    });
+    host.addEventListener("click", async (e) => {
+      const b = e.target.closest("button"); if (!b) return;
+      const f = tr.files.find((x) => x.id === (b.dataset.trCopy || b.dataset.trSave || b.dataset.trRemove));
+      const copy = async (text) => { try { await navigator.clipboard.writeText(text); b.textContent = "Copiato"; setTimeout(() => trPaint(), 1200); } catch (x) { b.textContent = "Copia non riuscita"; } };
+      if (b.dataset.trCopy && f) await copy(trText(f));
+      if (b.dataset.trSave && f) trDownload(f.name, trText(f));
+      if (b.dataset.trRemove && f) { tr.files = tr.files.filter((x) => x !== f); trPaint(); }
+      const all = () => tr.files.filter((x) => x.status === "fatto").map((x) => "## " + x.name + "\n\n" + trText(x)).join("\n\n");
+      if (b.hasAttribute("data-tr-copyall")) await copy(all());
+      if (b.hasAttribute("data-tr-saveall")) trDownload("trascrizioni.txt", all());
+    });
+  }
+  trPaint();
+}
 </script>
 
 </body>

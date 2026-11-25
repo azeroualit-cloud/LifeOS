@@ -1864,3 +1864,21 @@ main:has(#calendar.active){--section:var(--cal-accent)}
 .al-form fieldset{display:flex;gap:var(--s3,13px);border:0;padding:0;margin:var(--s3,13px) 0 0}
 .al-form legend{font-size:13px;color:var(--ink-2);margin-bottom:var(--s2,8px)}
 .al-opt{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+
+/* TRANSCRIBE-SITE-2026-11-25 */
+.tr-wrap{display:grid;gap:var(--s3,13px);max-width:860px}
+.tr-drop{display:grid;justify-items:center;gap:6px;padding:34px 13px;border:1.5px dashed var(--line,#3a3a40);border-radius:var(--r-lg,16px);cursor:pointer;text-align:center;color:var(--ink-2);transition:background-color .15s,border-color .15s}
+.tr-drop:hover,.tr-drop.on,.tr-drop:focus-visible{background:var(--surface-2);border-color:var(--ink-2);outline:none}
+.tr-drop svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
+.tr-drop b{color:var(--ink);font-size:16px}
+.tr-opts{display:flex;flex-wrap:wrap;gap:13px;align-items:end;margin-top:13px}
+.tr-opts label{min-width:0}
+.tr-check{display:flex;align-items:center;gap:8px;min-height:40px}
+.tr-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.tr-text{white-space:pre-wrap;word-break:break-word;font:inherit;line-height:1.6;margin:8px 0;padding:13px;background:var(--surface-2);border-radius:var(--r-md,10px);max-height:420px;overflow:auto}
+.tr-wait,.tr-bar{height:4px;border-radius:2px;background:var(--surface-2);overflow:hidden;margin-top:8px}
+.tr-wait i{display:block;height:100%;width:30%;background:var(--ink-2);border-radius:2px;animation:tr-slide 1.4s ease-in-out infinite}
+.tr-bar i{display:block;height:100%;background:var(--ink-2)}
+@keyframes tr-slide{0%{transform:translateX(-100%)}100%{transform:translateX(340%)}}
+@media (prefers-reduced-motion:reduce){.tr-wait i{animation:none;width:100%;opacity:.4}}
+.tr-opts .tr-check{flex-direction:row;display:flex}.tr-opts .tr-check input{width:auto;height:auto;min-height:0;margin:0}
