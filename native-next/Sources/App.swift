@@ -77,7 +77,7 @@ enum NativeTab: Int, CaseIterable, Hashable, Identifiable {
         }
     }
 }
-enum NativeDashboardDestination: Hashable { case finance, calendar }
+enum NativeDashboardDestination: Hashable { case finance, calendar, bloom }
 enum NativeSheet: Identifiable {
     case weight(NativeWeightTransfer?)
     case financePlan, settings, task(Record), event(Record), movement(Record), extra(Record), routines, categories, budget, recurring(Record), planning
@@ -121,6 +121,12 @@ enum NativeSheet: Identifiable {
         requestedCalendarDay = alreadyOpen ? nil : day; calendarDay = day; tab = .dashboard
         dashboardPath = [.calendar]; calendarFocusRequest = UUID()
     }
+    /// NAV-E-SLOT-2026-11-25: Finanza and Bloom open as a tab when they are the fifth tab,
+    /// otherwise from the Dashboard.
+    func open(_ destination: NativeTab) {
+        guard destination == .finance || destination == .bloom, !NativeAppLayout.shared.inBar(destination) else { tab = destination; return }
+        tab = .dashboard; dashboardPath = [destination == .finance ? .finance : .bloom]
+    }
 }
 struct NativeRoot: View {
     @EnvironmentObject var store: NativeStore
@@ -131,6 +137,7 @@ struct NativeRoot: View {
     @State private var returnedFromBackground = false
     @EnvironmentObject private var health: NativeHealthStore
     @AppStorage("native-reminders-enabled") private var remindersEnabled = false
+    @ObservedObject private var layout = NativeAppLayout.shared
     var body: some View {
         nativeTabs
         .symbolVariant(.none).symbolRenderingMode(.monochrome)
@@ -220,7 +227,7 @@ struct NativeRoot: View {
                 guard let target = URL(string: raw), ["https", "http"].contains(target.scheme?.lowercased() ?? ""), target.host != nil else { store.error = "Link Bloom non valido."; return }
                 router.bloomCaptureURL = raw
             }
-            NativeIntentDraft.pendingURL = nil; router.tab = .bloom
+            NativeIntentDraft.pendingURL = nil; router.open(.bloom)
             return
         }
         if url.scheme == "lifeos", url.host == "weight", url.query != nil {
@@ -245,11 +252,11 @@ struct NativeRoot: View {
         case .dashboard: router.tab = .dashboard
         }
     }
-    /// Finance lives inside the Dashboard stack (NAVIGATION-FIVE-2026-11-16), so the
-    /// bar never selects it. Tapping the selected destination again returns the
+    /// The fifth tab is Finanza or Bloom (NAV-E-SLOT-2026-11-25); the other lives in the Dashboard
+    /// stack, so the bar never selects it. Tapping the selected destination again returns the
     /// Dashboard to its root, as the previous bar did.
     private var tabSelection: Binding<NativeTab> {
-        Binding(get: { router.tab == .finance ? .dashboard : router.tab }, set: { selected in
+        Binding(get: { layout.inBar(router.tab) ? router.tab : .dashboard }, set: { selected in
             if selected == router.tab, selected == .dashboard { router.dashboardPath = [] }
             #if DEBUG
             if ProcessInfo.processInfo.arguments.contains("--visual-test") {
@@ -263,7 +270,7 @@ struct NativeRoot: View {
     /// areas are the system's. No screen reserves space for it.
     private var nativeTabs: some View {
         TabView(selection: tabSelection) {
-            ForEach(NativeTab.barOrder) { tab in
+            ForEach(layout.barOrder) { tab in
                 tabContent(tab)
                     .tabItem { Label(tab.title, systemImage: tab.symbol) }
                     .tag(tab)
@@ -343,6 +350,7 @@ private struct NativeDashboardStack: View {
                 switch destination {
                 case .finance: FinanceScreen()
                 case .calendar: CalendarScreen()
+                case .bloom: NativeBloomScreen()
                 }
             }
         }

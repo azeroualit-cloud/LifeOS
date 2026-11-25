@@ -12,6 +12,7 @@ struct DashboardScreen: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.nativeReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
+    @ObservedObject private var layout = NativeAppLayout.shared
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 60)) { context in
@@ -24,6 +25,7 @@ struct DashboardScreen: View {
                     checklist(today: today)
                     NativeNutritionQuickEntry()
                     financeOverview
+                    if !layout.inBar(.bloom) { bloomCard }
                     upcomingAppointments(today: today)
                     statsCard
                     NativeConnectionBadge()
@@ -43,6 +45,18 @@ struct DashboardScreen: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .lifeOSWeightSaved)) { _ in Task { await health.refresh() } }
         .onChange(of: scenePhase) { _, phase in if phase == .active { Task { await health.refresh(); await NativeHub95.shared.refresh(store: store, health: health) } } }
+    }
+
+    /// NAV-E-SLOT-2026-11-25: when Finanza is the fifth tab, Bloom opens from here.
+    private var bloomCard: some View {
+        NativeCard(density: .compact) {
+            Button { router.open(.bloom) } label: {
+                VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
+                    LOCardHeader(title: "Bloom", systemImage: "books.vertical", showsChevron: true)
+                    Text("Note, letture e raccolte.").font(.footnote).foregroundStyle(NativeDesign.secondary)
+                }.contentShape(Rectangle())
+            }.buttonStyle(NativePressStyle()).accessibilityIdentifier("home-bloom")
+        }
     }
 
     /// LIFE-STATS-2026-11-25: shifts, spending, calories and the private log of the same days.
@@ -231,7 +245,7 @@ struct DashboardScreen: View {
         let daily = hiddenMoney ? "•••• €" : overview.daily.euro
         // Explicit path write, like the Calendar entry: a value link did not push
         // after a programmatic Calendar visit (gate 91 run 43999971306).
-        return Button { router.dashboardPath = [.finance] } label: {
+        return Button { router.open(.finance) } label: {
             VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
                 LOCardHeader(title: "Finanza", systemImage: "chart.bar", section: .finance, showsChevron: true)
                 ViewThatFits(in: .horizontal) {

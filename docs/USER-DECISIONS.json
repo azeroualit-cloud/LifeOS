@@ -960,12 +960,23 @@
     },
     {
       "id": "NAVIGATION-FIVE-2026-11-16",
-      "status": "ACTIVE",
+      "status": "SUPERSEDED",
       "scope": "Barra di navigazione principale",
       "recorded_on": "2026-11-16",
       "provenance": "Domanda META-01 sul conflitto con NAVIGATION-SIX-GLASS-2026-11-13; risposta dell'utente: «Togli Finanza»",
       "original_quote": "secondo me forse 6 cose nella barra delle applicazioni è un po' troppo, forse dovremmo puntare a 5",
-      "rule": "Cinque destinazioni visibili: Dashboard, Attività, Calendario, Salute, Bloom. Finanza esce dalla barra e si apre dalla scheda Finanza in Dashboard. Sostituisce NAVIGATION-SIX-GLASS-2026-11-13. Non implementata: da fare dopo la chiusura del candidato 90, che resta a sei voci."
+      "rule": "Cinque destinazioni visibili: Dashboard, Attività, Calendario, Salute, Bloom. Finanza esce dalla barra e si apre dalla scheda Finanza in Dashboard. Sostituisce NAVIGATION-SIX-GLASS-2026-11-13. Non implementata: da fare dopo la chiusura del candidato 90, che resta a sei voci.",
+      "superseded_by": "NAV-E-SLOT-2026-11-25"
+    },
+    {
+      "id": "NAV-E-SLOT-2026-11-25",
+      "status": "ACTIVE",
+      "scope": "Barra di navigazione principale (app iPhone) e Admin del sito",
+      "recorded_on": "2026-11-25",
+      "provenance": "Simulazione grafica opzioni A-E; domanda META-01 sul conflitto con NAVIGATION-FIVE-2026-11-16; conferma esplicita dell'utente",
+      "original_quote": "E con quinto tab variabile (Finanza o Bloom, scelto dal sito), confermo",
+      "context_quote": "dato che bloom lo uso poco, ma mi ispira anche B e D, dipende dal periodo della mia vita potrei volere nella dashboard finanza per un mese e magari per un altro mese bloom. Però penso che E è la migliore logicamente parlando.",
+      "rule": "Barra: Dashboard, Attività, Calendario, Salute fissi; quinto tab Finanza o Bloom, scelto in Admin sul sito (impostazione app-layout, chiave tabSlot) e letto dall'app senza nuova IPA alla prossima apertura. Quello non in barra si apre dalla sua scheda in Dashboard. Predefinito Finanza; ultima scelta conservata sul telefono se il server non risponde. Sostituisce NAVIGATION-FIVE-2026-11-16."
     },
     {
       "id": "BLOOM-REDESIGN-2026-11-16",
@@ -1894,7 +1905,8 @@
     },
     {
       "id": "NAV-OPTIONS-2026-11-25",
-      "status": "UNDER_EVALUATION",
+      "status": "RESOLVED",
+      "resolution": "Scelta E con quinto tab variabile: vedi NAV-E-SLOT-2026-11-25.",
       "recorded_on": "2026-11-25",
       "text": "Valutare opzioni della barra con simulazione grafica realistica e pro/contro. Se accettata: Dashboard, Calendario, Salute, Finanza, Bloom, in questo ordine (solo dopo decisione). NAVIGATION-FIVE-2026-11-16 resta attiva fino ad allora."
     }

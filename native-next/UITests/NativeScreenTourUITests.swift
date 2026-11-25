@@ -204,6 +204,20 @@ final class NativeScreenTourUITests: XCTestCase {
         }
     }
 
+    /// NAV-E-SLOT-2026-11-25: Finanza as the fifth tab, Bloom from its Dashboard card.
+    func testTourFinanceSlot() {
+        continueAfterFailure = true
+        let app = XCUIApplication()
+        app.launchArguments = ["--visual-test", "--busy-home", "--dark", "-lifeos.tab.slot", "finance", "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"]
+        app.launch()
+        _ = app.mainTabBar.buttons["Dashboard"].waitForExistence(timeout: 20)
+        shot("30 Barra con Finanza", app)
+        for _ in 0..<4 where !app.buttons["home-bloom"].isHittable { app.swipeUp(velocity: .slow) }
+        shot("31 Scheda Bloom in Dashboard", app)
+        if tap(app.buttons["home-bloom"]) { shot("32 Bloom dalla Dashboard", app) }
+        if tap(app.mainTabBar.buttons["Finanza"]) { shot("33 Finanza come tab", app) }
+        if tap(app.mainTabBar.buttons["Dashboard"]) { shot("34 Ritorno alla Dashboard", app) }
+    }
     func testTourDark() { tour("--dark", "Scuro") }
     func testTourLight() { tour("--light", "Chiaro") }
 }

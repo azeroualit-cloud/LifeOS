@@ -39,6 +39,8 @@ import UserNotifications
         await NativeSupplementStackStore.shared.sync(read)
         // CATEGORY-ADMIN-2026-11-24: categories edited in Admin on the site.
         if let categories = try? await read("getSettings", [.string("finance-categories")]).object { NativeFinanceCategories.store(categories.record("doc")) }
+        // NAV-E-SLOT-2026-11-25: fifth tab chosen in Admin on the site.
+        if let layout = try? await read("getSettings", [.string("app-layout")]).object { NativeAppLayout.shared.apply(layout.record("doc")) }
         await publishTargets(read, health: health)
         await reportDelivered(read)
         schedule(doc, store: store, health: health)

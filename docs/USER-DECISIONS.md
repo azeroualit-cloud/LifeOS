@@ -397,7 +397,7 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 
 - **PERF-AUTONOMY-2026-11-16 — ACTIVE.** «Allora ti lascio carta libera per quanto riguarda l'efficientamento dell'applicazione finché non cambiano le funzionalità.» Le modifiche di sola efficienza non richiedono approvazione preventiva DEV-02. IPA-GATE-01 e il divieto di deploy backend restano validi. Stato del lavoro in [PERF-EFFICIENCY-01.md](PERF-EFFICIENCY-01.md).
 - **UI-DESIGN-PREVIEW-2026-11-16 — ACTIVE.** «Lato UI e UX possibilmente magari le modifiche che vuoi fare me le mostri tramite Claude Design.» Precisa DEV-02.
-- **NAVIGATION-FIVE-2026-11-16 — ACTIVE, conflitto confermato.** Alla domanda META-01 sul conflitto con NAVIGATION-SIX-GLASS-2026-11-13 l'utente ha risposto «Togli Finanza». Cinque voci: Dashboard, Attività, Calendario, Salute, Bloom. Finanza si apre dalla scheda in Dashboard. NAVIGATION-SIX-GLASS-2026-11-13 diventa SUPERSEDED. Non implementata: il candidato 90 resta a sei voci.
+- **NAVIGATION-FIVE-2026-11-16 — SUPERSEDED da NAV-E-SLOT-2026-11-25 (25/11).** Alla domanda META-01 sul conflitto con NAVIGATION-SIX-GLASS-2026-11-13 l'utente ha risposto «Togli Finanza». Cinque voci: Dashboard, Attività, Calendario, Salute, Bloom. Finanza si apre dalla scheda in Dashboard. NAVIGATION-SIX-GLASS-2026-11-13 diventa SUPERSEDED. Non implementata: il candidato 90 resta a sei voci.
 - **BLOOM-REDESIGN-2026-11-16 — SUPERSEDED da BLOOM-CATEGORIES-92.** Obiettivo dell'utente: salvare da web e social e ritrovare velocemente con manutenzione minima; le categorie attuali si sovrappongono. Due varianti mostrate in Claude Design; risposta «approvo fai te». Scelta delegata all'assistente: variante B, sola ricerca con filtri automatici, senza categorie da assegnare. Non implementata.
 
 ## Decisioni del 16 novembre 2026, pomeriggio (chat Claude)
@@ -479,3 +479,5 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 - **SITE-LAYOUT-CONFIG-2026-11-25** (ACTIVE, da progettare): layout Dashboard (ordine, visibilità, dimensioni, colori) e impostazioni rare configurati dal sito, letti dall'app senza IPA.
 - **ANALYSIS-SITE-FREEHAND-2026-11-25** (ACTIVE): «fai te quello che ti pare, aumentando di molto il livello attuale».
 - **NAV-OPTIONS-2026-11-25** (in valutazione): simulazione realistica delle opzioni di barra con pro/contro; se accettata l'ordine sarà Dashboard, Calendario, Salute, Finanza, Bloom.
+
+- **NAV-E-SLOT-2026-11-25 — ACTIVE, conflitto con NAVIGATION-FIVE-2026-11-16 confermato.** Testo originale: «E con quinto tab variabile (Finanza o Bloom, scelto dal sito), confermo». Barra: Dashboard, Attività, Calendario, Salute fissi; quinto tab Finanza o Bloom scelto in Admin sul sito (impostazione `app-layout`), letto dall'app alla prossima apertura senza IPA. L'altro si apre dalla sua scheda in Dashboard. Predefinito Finanza. NAV-OPTIONS-2026-11-25 risolta.
