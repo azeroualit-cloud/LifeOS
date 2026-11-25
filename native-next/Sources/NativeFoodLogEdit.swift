@@ -33,11 +33,16 @@ extension NativeNutritionEntry {
         copy.date = date
         guard let quantity, let current = loggedQuantity, quantity != current.value else { return copy }
         guard !quantity.isNaN, quantity > 0, quantity <= current.maximum else { return nil }
-        let factor = quantity / current.value
-        func scale(_ value: Decimal?) -> Decimal? { value.map { $0 * factor } }
-        copy.protein = protein * factor
-        copy.carbohydrate = carbohydrate * factor
-        copy.fat = fat * factor
+        // Multiply first, divide last, then round: 180 g → 150 g must give 150, not 149.999… (start 5).
+        func exact(_ value: Decimal) -> Decimal {
+            var raw = value * quantity / current.value, rounded = Decimal()
+            NSDecimalRound(&rounded, &raw, 4, .plain)
+            return rounded
+        }
+        func scale(_ value: Decimal?) -> Decimal? { value.map(exact) }
+        copy.protein = exact(protein)
+        copy.carbohydrate = exact(carbohydrate)
+        copy.fat = exact(fat)
         copy.fibre = scale(fibre)
         copy.labelCalories = scale(labelCalories)
         copy.portionGrams = scale(portionGrams)
@@ -46,7 +51,13 @@ extension NativeNutritionEntry {
         copy.supplementQuantity = scale(supplementQuantity)
         copy.cocktailServings = scale(cocktailServings)
         copy.alcoholGrams = scale(alcoholGrams)
-        copy.nutrientValues = nutrientValues?.mapValues { NativeNutrientAmount(amount: $0.amount * factor, estimateSource: $0.estimateSource) }
+        copy.nutrientValues = nutrientValues?.mapValues { NativeNutrientAmount(amount: exact($0.amount), estimateSource: $0.estimateSource) }
+        // The quantity the user typed is stored as typed.
+        if (boneInWeightGrams ?? 0) > 0 { copy.boneInWeightGrams = quantity }
+        else if (supplementQuantity ?? 0) > 0 { copy.supplementQuantity = quantity }
+        else if (cocktailServings ?? 0) > 0 { copy.cocktailServings = quantity }
+        else if (portionMillilitres ?? 0) > 0 { copy.portionMillilitres = quantity }
+        else { copy.portionGrams = quantity }
         return copy
     }
 }
