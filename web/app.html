@@ -1870,6 +1870,28 @@ main:has(#calendar.active){--section:var(--cal-accent)}
 #calendar .os-next-ev.timed:has(+ .os-next-ev.timed)::after,#calendar .os-mini.timed:has(+ .os-mini.timed)::after{content:"";position:absolute;left:-12px;top:50%;bottom:-6px;width:2px;background:color-mix(in srgb,var(--tl-c) 60%,transparent)}
 #calendar .os-next-ev.timed + .os-next-ev.timed::before,#calendar .os-mini.timed + .os-mini.timed::before{content:"";position:absolute;left:-12px;top:-6px;height:50%;width:2px;background:color-mix(in srgb,var(--tl-c) 60%,transparent)}
 #calendar .os-next-ev,#calendar .os-mini{box-shadow:none!important}
+
+/* LIFE-STATS-2026-11-25 */
+#stats{max-width:1100px;--st-morning:#4f9be6;--st-afternoon:#66cc70;--st-night:#8a8e9c;--st-rest:#f5a03c;--st-holiday:#f3c84b}
+.st-head{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between;margin-bottom:16px}.st-head h1{font-size:28px}.st-head p{color:var(--ink-2);margin-top:4px}
+.st-range{display:inline-flex;padding:3px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line)}
+.st-range button{border:0;background:transparent;color:var(--ink-2);padding:6px 14px;border-radius:999px;font-weight:600;min-height:32px;height:auto}
+.st-range button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.st-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:16px}
+.st-card{display:grid;gap:12px;align-content:start;padding:20px;border-radius:16px;min-width:0}.st-card h2{font-size:18px}.st-wide{grid-column:1/-1}
+.st-sub{color:var(--ink-2);font-size:14px;margin-top:-6px}
+.st-lines{list-style:none;margin:0;padding:0;display:grid;gap:8px}.st-lines li{position:relative;padding-left:18px}.st-lines li::before{content:"";position:absolute;left:0;top:.5em;width:8px;height:8px;border-radius:50%;background:var(--cal-accent,#409cff)}
+.st-columns{display:flex;gap:10px;align-items:end}.st-col{flex:1;display:grid;gap:6px;justify-items:center;min-width:0}.st-col span{font-size:12px;color:var(--ink-2)}
+.st-stack{width:100%;max-width:44px;display:flex;flex-direction:column-reverse;border-radius:6px;overflow:hidden;background:var(--track-94,var(--surface-2))}
+.st-stack i{display:block;width:100%;opacity:1}#stats [data-kind="morning"]{--shift-color:var(--st-morning)}#stats [data-kind="afternoon"]{--shift-color:var(--st-afternoon)}#stats [data-kind="night"]{--shift-color:var(--st-night)}#stats [data-kind="rest"]{--shift-color:var(--st-rest)}#stats [data-kind="holiday"]{--shift-color:var(--st-holiday)}.st-stack i[data-kind]{background:var(--st-c,var(--shift-color))}
+.st-legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--ink-2)}.st-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;background:var(--shift-color,var(--ink-3));vertical-align:-1px}
+.st-kind{display:grid;gap:6px;padding-bottom:10px;border-bottom:1px solid var(--line)}.st-kind:last-child{border-bottom:0;padding-bottom:0}
+.st-kind header{display:flex;align-items:center;gap:8px}.st-kind header i{width:4px;height:18px;border-radius:2px;background:var(--shift-color,var(--ink-3))}.st-kind header small{margin-left:auto;color:var(--ink-2)}
+.st-bar{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:10px;align-items:center}.st-bar>span{height:6px;border-radius:3px;background:var(--track-94,var(--surface-2));overflow:hidden}.st-bar>span i{display:block;height:100%;border-radius:3px}
+.st-bar b{font-size:13px;font-weight:500;color:var(--ink-2);text-align:right;font-variant-numeric:tabular-nums}
+.st-people{display:grid;gap:6px}.st-people div{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line)}.st-people b{font-variant-numeric:tabular-nums}
+.st-hide{justify-self:start}
+.st-note{color:var(--ink-2);font-size:13px;margin-top:16px;max-width:70ch}
 </style>
 </head>
   <body class="dashboard-mode">
@@ -1943,6 +1965,7 @@ main:has(#calendar.active){--section:var(--cal-accent)}
           <button data-view="nutrition"><svg class="nav-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7c-2-2-6-1-6 4 0 5 3 9 6 9s6-4 6-9c0-5-4-6-6-4Z"/><path d="M12 7c0-2 1-3 3-4"/></svg><span>Nutrizione</span></button>
           <button data-view="bloom"><svg class="nav-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h10a1 1 0 0 1 1 1v17l-6-4-6 4V4a1 1 0 0 1 1-1Z"/></svg><span>Bloom</span></button>
           <button type="button" data-view="alerts"><svg class="nav-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>Avvisi</button>
+          <button type="button" data-view="stats"><svg class="nav-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Statistiche</button>
           <button type="button" data-view="guide"><svg class="nav-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M9 8h7M9 12h5"/></svg>Guida</button>
           <button id="admin-link" type="button" data-view="admin"><svg class="nav-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>Admin</button>
         </nav>
@@ -1981,7 +2004,7 @@ main:has(#calendar.active){--section:var(--cal-accent)}
         <section id="overview" class="view"></section>
         <section id="movements" class="view"></section>
 
-        <section id="budget" class="view"></section><section id="analysis" class="view"></section><section id="admin" class="view"></section><section id="guide" class="view"></section><section id="alerts" class="view"></section><section id="nutrition" class="view"></section><section id="bloom" class="view"></section><section id="extras" class="view"></section>
+        <section id="budget" class="view"></section><section id="analysis" class="view"></section><section id="admin" class="view"></section><section id="guide" class="view"></section><section id="stats" class="view"></section><section id="alerts" class="view"></section><section id="nutrition" class="view"></section><section id="bloom" class="view"></section><section id="extras" class="view"></section>
       </main>
     </div>
     <script id="lifeos-admin">
@@ -2696,6 +2719,128 @@ document.addEventListener("keydown", (e) => {
 });
     </script>
 
+
+    <script id="lifeos-stats95">
+      /* LIFE-STATS-2026-11-25: shifts, spending, calories and the private log of the same days (same rules as the app's Statistiche).
+         The sentences show what goes together on the same days, never a cause. */
+      const ST_KINDS = ["morning", "afternoon", "night", "rest", "holiday", "none"];
+      const ST_TITLE = { morning: "Mattina", afternoon: "Pomeriggio", night: "Notte", rest: "Riposo", holiday: "Ferie", none: "Senza turno" };
+      const ST_MONTHS = ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"];
+      const st = { range: 3, data: null, loadingKey: null, open: false };
+      try { st.range = Number(localStorage.getItem("lifeos-stats-months")) || 3; } catch (e) {}
+      const stMoney = (v) => state.assetsVisible === false ? "•••• €" : new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" }).format(v || 0);
+      const stPer10 = (r) => (r * 10).toFixed(1).replace(".", ",");
+      function stMonths(range) {
+        const now = todayIso().slice(0, 7), out = [];
+        let [y, m] = now.split("-").map(Number);
+        for (let i = 0; i < range; i++) { out.unshift(`${y}-${String(m).padStart(2, "0")}`); m -= 1; if (!m) { m = 12; y -= 1; } }
+        return out;
+      }
+      function stDays(months) {
+        const today = todayIso(), out = [];
+        for (const month of months) {
+          const [y, m] = month.split("-").map(Number), n = new Date(Date.UTC(y, m, 0)).getUTCDate();
+          for (let d = 1; d <= n; d++) { const day = `${month}-${String(d).padStart(2, "0")}`; if (day <= today) out.push(day); }
+        }
+        return out;
+      }
+      function stGroups(days, shifts, privateDays, spend, kcal) {
+        const by = {};
+        for (const day of days) { const k = ST_KINDS.includes(shifts[day]) ? shifts[day] : "none"; (by[k] ||= []).push(day); }
+        return ST_KINDS.filter((k) => by[k]?.length).map((kind) => {
+          const list = by[kind], logged = list.map((d) => kcal[d]).filter((v) => v > 0);
+          const privateCount = list.reduce((a, d) => a + (privateDays[d] || 0), 0);
+          return { kind, days: list.length, privateCount, privateRate: privateCount / list.length,
+            spend: list.reduce((a, d) => a + (spend[d] || 0), 0) / list.length,
+            kcal: logged.length ? logged.reduce((a, v) => a + v, 0) / logged.length : null };
+        });
+      }
+      function stInsights(groups, withPrivate) {
+        const solid = groups.filter((g) => g.days >= 4), total = groups.reduce((a, g) => a + g.days, 0), out = [];
+        if (!total || !solid.length) return out;
+        const avg = groups.reduce((a, g) => a + g.spend * g.days, 0) / total;
+        const top = [...solid].sort((a, b) => b.spend - a.spend)[0];
+        if (avg > 0 && top.spend >= avg * 1.2) out.push(`Nei giorni di ${ST_TITLE[top.kind]} spendi di più: ${stMoney(top.spend)} al giorno contro ${stMoney(avg)} di media.`);
+        const k = solid.filter((g) => g.kcal != null).sort((a, b) => b.kcal - a.kcal);
+        if (k.length >= 2 && k[0].kcal >= k[k.length - 1].kcal * 1.1) out.push(`Mangi di più nei giorni di ${ST_TITLE[k[0].kind]} (${Math.round(k[0].kcal)} kcal) che in quelli di ${ST_TITLE[k[k.length - 1].kind]} (${Math.round(k[k.length - 1].kcal)} kcal).`);
+        if (withPrivate) {
+          const count = groups.reduce((a, g) => a + g.privateCount, 0), rate = count / total;
+          const p = [...solid].sort((a, b) => b.privateRate - a.privateRate)[0];
+          if (count >= 3 && p.privateRate >= rate * 1.3) out.push(`Privato: più spesso nei giorni di ${ST_TITLE[p.kind]} (${stPer10(p.privateRate)} ogni 10 giorni, in media ${stPer10(rate)}).`);
+        }
+        return out;
+      }
+      async function stLoad() {
+        const months = stMonths(st.range), key = months.join(",");
+        if (st.loadingKey === key) return;
+        st.loadingKey = key;
+        const days = stDays(months), shifts = {}, spend = {}, kcal = {};
+        for (const month of months) {
+          try { for (const r of (await workerRequest("getLifeData", [month])).shifts || []) if (String(r.day).startsWith(month)) shifts[r.day] = r.kind; } catch (e) {}
+          try {
+            const data = await workerRequest("getFinanceData", [Number(month.slice(0, 4)), Number(month.slice(5, 7))]);
+            for (const t of data.transactions || []) if (String(t.date || "").startsWith(month) && t.amount < 0 && t.type !== "Entrata") { const d = t.date.slice(0, 10); spend[d] = (spend[d] || 0) - t.amount; }
+          } catch (e) {}
+        }
+        try { for (const e of (await workerRequest("listFoodDiaryDays", [days[0], days[days.length - 1]])).entries || []) { const d = fdRomeDay(new Date(e.at)); kcal[d] = (kcal[d] || 0) + (Number(e.kcal) || 0); } } catch (e) {}
+        let entries = [];
+        try { const r = await workerRequest("getSettings", ["private-log"]); entries = Array.isArray(r?.doc?.entries) ? r.doc.entries : []; } catch (e) {}
+        st.data = { key, months, days, shifts, spend, kcal, entries };
+        st.loadingKey = null;
+        if (state.view === "stats") renderStats();
+      }
+      function stBar(label, share, color) {
+        return `<div class="st-bar"><span><i style="width:${Math.round(Math.max(0, Math.min(1, share)) * 100)}%;background:${color}"></i></span><b>${label}</b></div>`;
+      }
+      function renderStats() {
+        const host = document.getElementById("stats");
+        if (!host) return;
+        const months = stMonths(st.range), key = months.join(",");
+        if (!st.data || st.data.key !== key) stLoad();
+        const d = st.data && st.data.key === key ? st.data : null;
+        const head = `<header class="st-head"><div><p>Turni, spese, calorie e privato degli stessi giorni, messi a confronto.</p></div>
+          <div class="st-range" role="group" aria-label="Periodo">${[3, 6, 12].map((n) => `<button type="button" data-st-range="${n}" aria-pressed="${n === st.range}">${n} mesi</button>`).join("")}</div></header>`;
+        if (!d) { host.innerHTML = head + `<p class="os-empty" role="status">Sto leggendo i dati…</p>`; stBind(host); return; }
+        const inPeriod = d.entries.filter((e) => d.days.includes(e.day));
+        const privateDays = {}; for (const e of inPeriod) privateDays[e.day] = (privateDays[e.day] || 0) + 1;
+        const groups = stGroups(d.days, d.shifts, privateDays, d.spend, d.kcal);
+        const lines = stInsights(groups, st.open);
+        const work = ["morning", "afternoon", "night"];
+        const perMonth = d.months.map((m) => ({ m, c: work.map((k) => Object.entries(d.shifts).filter(([day, v]) => day.startsWith(m) && v === k).length) }));
+        const maxMonth = Math.max(1, ...perMonth.map((r) => r.c.reduce((a, v) => a + v, 0)));
+        const worked = perMonth.reduce((a, r) => a + r.c.reduce((x, v) => x + v, 0), 0);
+        const topSpend = Math.max(1, ...groups.map((g) => g.spend)), topKcal = Math.max(1, ...groups.map((g) => g.kcal || 0));
+        const people = Object.entries(inPeriod.reduce((a, e) => { const n = e.person || "—"; a[n] = (a[n] || 0) + 1; return a; }, {})).sort((a, b) => b[1] - a[1]);
+        const topRate = Math.max(0.01, ...groups.map((g) => g.privateRate));
+        const privMonth = d.months.map((m) => ({ m, c: inPeriod.filter((e) => e.day.startsWith(m)).length })), maxPriv = Math.max(1, ...privMonth.map((r) => r.c));
+        const monthLabel = (m) => ST_MONTHS[Number(m.slice(5)) - 1];
+        host.innerHTML = head + `<div class="st-grid">
+          <article class="card st-card st-wide"><h2>In breve</h2><p class="st-sub">Le differenze più nette tra i tipi di giornata.</p>
+            ${lines.length ? `<ul class="st-lines">${lines.map((l) => `<li>${nbE(l)}</li>`).join("")}</ul>` : `<p class="os-empty">Ancora troppi pochi giorni per vedere differenze.</p>`}</article>
+          <article class="card st-card"><h2>Turni</h2><p class="st-sub">${worked} turni lavorati in ${st.range} mesi</p>
+            <div class="st-columns">${perMonth.map((r) => `<div class="st-col"><div class="st-stack" style="height:140px">${r.c.map((v, i) => v ? `<i data-kind="${work[i]}" style="height:${(v / maxMonth) * 100}%" title="${ST_TITLE[work[i]]} ${v}"></i>` : "").join("")}</div><span>${monthLabel(r.m)}</span></div>`).join("")}</div>
+            <div class="st-legend">${work.map((k) => `<span data-kind="${k}"><i></i>${ST_TITLE[k]}</span>`).join("")}${groups.filter((g) => ["rest", "holiday"].includes(g.kind)).map((g) => `<span data-kind="${g.kind}"><i></i>${ST_TITLE[g.kind]} ${g.days}</span>`).join("")}</div></article>
+          <article class="card st-card"><h2>Per tipo di giornata</h2><p class="st-sub">Media al giorno: spese e calorie.</p>
+            ${groups.map((g) => `<div class="st-kind" data-kind="${g.kind === "none" ? "" : g.kind}"><header><i></i><b>${ST_TITLE[g.kind]}</b><small>${g.days} giorni</small></header>
+              ${stBar(stMoney(g.spend), g.spend / topSpend, "var(--sec-finance,#3b82f6)")}${stBar(g.kcal == null ? "— kcal" : Math.round(g.kcal) + " kcal", (g.kcal || 0) / topKcal, "var(--sec-nutrition,#3fbf7f)")}</div>`).join("")}</article>
+          <article class="card st-card"><h2>Privato</h2>
+            ${st.open ? `<p class="st-sub">${inPeriod.length} in ${st.range} mesi · ${d.entries.length} in tutto</p>
+              <div class="st-columns">${privMonth.map((r) => `<div class="st-col"><div class="st-stack" style="height:90px">${r.c ? `<i style="height:${(r.c / maxPriv) * 100}%;background:var(--ink-3)" title="${r.c}"></i>` : ""}</div><span>${monthLabel(r.m)}</span></div>`).join("")}</div>
+              <div class="st-people">${people.map(([n, c]) => `<div><span>${nbE(n)}</span><b>${c}</b></div>`).join("") || '<p class="os-empty">Nessuna nota nel periodo.</p>'}</div>
+              <p class="st-sub">Ogni 10 giorni, per tipo di giornata</p>
+              ${groups.map((g) => stBar(`${ST_TITLE[g.kind]} ${stPer10(g.privateRate)}`, g.privateRate / topRate, g.kind === "none" ? "var(--ink-3)" : `var(--st-${g.kind})`)).join("")}
+              <button type="button" class="os-button st-hide" data-st-private="0">Nascondi</button>`
+            : `<p class="st-sub">Nascosto finché non lo apri.</p><button type="button" class="os-button" data-st-private="1">Mostra</button>`}</article>
+        </div><p class="st-note">Le statistiche mettono vicini dati dello stesso giorno: mostrano cosa va insieme, non il perché. Calorie solo dei giorni con il diario.</p>`;
+        stBind(host);
+      }
+      function stBind(host) {
+        host.querySelectorAll("[data-st-range]").forEach((b) => b.addEventListener("click", () => {
+          st.range = Number(b.dataset.stRange); try { localStorage.setItem("lifeos-stats-months", String(st.range)); } catch (e) {} renderStats();
+        }));
+        host.querySelectorAll("[data-st-private]").forEach((b) => b.addEventListener("click", () => { st.open = b.dataset.stPrivate === "1"; renderStats(); }));
+      }
+    </script>
     <script id="lifeos-guide95">
       /* GUIDES-INFOGRAPHICS-2026-11-24: one illustrated sheet per area, three steps each. Same content as the app's Guida. */
       const GUIDE = [
@@ -4382,6 +4527,7 @@ document.addEventListener("keydown", (e) => {
             "admin",
             "alerts",
             "guide",
+            "stats",
             "nutrition",
             "bloom",
           ].includes(view)
@@ -4419,6 +4565,7 @@ document.addEventListener("keydown", (e) => {
           admin: "Admin",
           alerts: "Avvisi",
           guide: "Guida",
+          stats: "Statistiche",
           nutrition: "Nutrizione",
           bloom: "Bloom",
         }[view];
@@ -4463,6 +4610,7 @@ document.addEventListener("keydown", (e) => {
         if (view === "admin" && typeof renderAdmin === "function") renderAdmin();
         if (view === "alerts" && typeof renderAlerts === "function") renderAlerts();
         if (view === "guide" && typeof renderGuide === "function") renderGuide();
+        if (view === "stats" && typeof renderStats === "function") renderStats();
         if (view === "nutrition" && typeof renderNutrition === "function") renderNutrition();
         if (view === "bloom" && typeof renderBloom === "function") renderBloom();
         if (view !== "calendar") life.tool = null;
