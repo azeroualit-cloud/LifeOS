@@ -2,7 +2,7 @@ import XCTest
 @testable import LifeOSProbe
 final class NativeNutritionEntryTests: XCTestCase {
     func testSupermarketCatalogueAndSupplementDoseRoundTrip() throws {
-        for name in ["Crescenza", "Provolone", "Patatine in busta", "Cola zero", "Gelato", "Caramelle gommose"] {
+        for name in ["Crescenza", "Provolone", "Patatine in busta", "Cola zero", "Gelato", "Panna cotta"] {
             XCTAssertEqual(NativeGenericFood.matches(name).first?.name, name)
         }
         let supplement = NativeGenericFood(id: "personal-test", name: "Vitamina C di prova",
@@ -65,13 +65,13 @@ final class NativeNutritionEntryTests: XCTestCase {
     func testGenericSearchPrefersCommonItalianNamesAndKeepsPreparationDistinct() {
         let biscuits = NativeGenericFood.matches("  BISCOTTI  ").first
         XCTAssertEqual(biscuits?.name, "Biscotti")
-        XCTAssertEqual(biscuits?.detail, "Generic")
+        XCTAssertNil(biscuits?.detail) // FOOD-DB-RESET: the base drops the «Generic» label
         XCTAssertEqual(NativeGenericFood.matches("biscotto").first?.id, biscuits?.id)
 
         let chicken = NativeGenericFood.matches("Petto di pollo").first
-        XCTAssertEqual(chicken?.id, "ciqual-36017")
+        XCTAssertEqual(chicken?.id, "base-ciqual-36017")
         XCTAssertEqual(NativeGenericFood.matches("petto pollo").first?.id, chicken?.id)
-        XCTAssertEqual(NativeGenericFood.matches("petto di pollo cotto").first?.id, "ciqual-36018")
+        XCTAssertEqual(NativeGenericFood.matches("petto di pollo cotto").first?.id, "base-ciqual-36018")
         XCTAssertEqual(NativeGenericFood.matches("caffe").first?.name, "Caffè espresso")
         XCTAssertTrue(NativeGenericFood.matches("alimento inesistente").isEmpty)
     }
@@ -89,10 +89,10 @@ final class NativeNutritionEntryTests: XCTestCase {
         for query in ["maiale", "prosciutto", "salame"] {
             XCTAssertTrue(NativeGenericFood.matches(query, in: NativeGenericFood.foods).isEmpty)
         }
-        XCTAssertEqual(NativeGenericFood.matches("couscous").first?.id, "ciqual-9683")
-        XCTAssertEqual(NativeGenericFood.matches("couscous senza carne").first?.id, "ciqual-25150")
-        XCTAssertEqual(NativeGenericFood.matches("couscous con carne").first?.id, "ciqual-25138")
-        XCTAssertEqual(NativeGenericFood.matches("tagine pollo").first?.id, "ciqual-25204")
+        XCTAssertEqual(NativeGenericFood.matches("couscous").first?.id, "base-ciqual-9683")
+        XCTAssertEqual(NativeGenericFood.matches("couscous senza carne").first?.id, "base-ciqual-25150")
+        XCTAssertEqual(NativeGenericFood.matches("couscous con carne").first?.id, "base-ciqual-25138")
+        XCTAssertEqual(NativeGenericFood.matches("tagine pollo").first?.id, "base-ciqual-25204")
     }
 
     func testNutrientsUseEdiblePortionAndReportMissingDays() throws {

@@ -172,13 +172,13 @@ struct NativeGenericFood: Codable, Identifiable {
         catalog.map { ($0.id, SearchDocument($0)) }, uniquingKeysWith: { first, _ in first })
 
     static func matches(_ query: String, in foods: [Self]? = nil) -> [Self] {
-        let foods = foods ?? catalog
+        let foods = foods ?? (catalog + baseFoods) // FOOD-DB-RESET: the base is what the user searches
         let words = searchWords(query)
         guard !words.isEmpty else { return Array(foods.prefix(24)) }
         let barcodeQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
         return foods.enumerated().compactMap { index, food -> (food: Self, rank: Int, index: Int)? in
             if food.barcode == barcodeQuery { return (food, 0, index) }
-            let document = food.id.hasPrefix("personal-") ? SearchDocument(food) : (searchIndex[food.id] ?? SearchDocument(food))
+            let document = food.id.hasPrefix("personal-") || food.origin == "base" ? SearchDocument(food) : (searchIndex[food.id] ?? SearchDocument(food))
             if words == document.name { return (food, 1, index) }
             if document.aliases.contains(words) { return (food, 2, index) }
             guard words.allSatisfy({ word in document.fields.contains { $0.hasPrefix(word) } }) else { return nil }

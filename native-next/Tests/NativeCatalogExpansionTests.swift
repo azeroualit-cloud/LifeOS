@@ -14,8 +14,8 @@ import XCTest
             XCTAssertNotNil(food.portion(id: UUID(), date: .now, grams: 100), food.id)
         }
         let barilla = try XCTUnwrap(foods.first { $0.brand?.localizedCaseInsensitiveContains("Barilla") == true })
-        XCTAssertTrue(NativeGenericFood.matches("barilla").contains { $0.id == barilla.id })
-        XCTAssertTrue(NativeGenericFood.matches(try XCTUnwrap(barilla.barcode)).contains { $0.id == barilla.id })
+        XCTAssertTrue(NativeGenericFood.matches("barilla", in: foods).contains { $0.id == barilla.id })
+        XCTAssertTrue(NativeGenericFood.matches(try XCTUnwrap(barilla.barcode), in: foods).contains { $0.id == barilla.id })
     }
 
     func testCommunitySourceIsExplicitAndDoesNotTrustSimilarHostNames() throws {
