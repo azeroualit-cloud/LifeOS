@@ -1,5 +1,5 @@
 name: LifeOS candidate 95 validation and authorized IPA
-# Start 6 for IPA-DELIVERY-95-2026-11-25 with FOOD-LOG-EDIT-2026-11-25 (start 5: edited grams 309.999… from Decimal division; start 4: numeric spacing/padding, title2 font and .bordered buttons rejected by the design checks; start 3: link row 43.67 pt instead of 44, one shard without runner; start 1: stale SPACING id, known UI test issues, tours in the gate; start 2: food row tappable only on its text, «Già registrata?» sheet closing at once, diary trash under the action bar, duplicate Gin Tonic rows) («run multiple threads so that we get the ipa as soon and as fast as possible»):
+# Start 6 for IPA-DELIVERY-95-2026-11-25 with FOOD-LOG-EDIT-2026-11-25 (gate artifacts from any attempt, so a shard without a runner can be re-run alone; start 5: edited grams 309.999… from Decimal division; start 4: numeric spacing/padding, title2 font and .bordered buttons rejected by the design checks; start 3: link row 43.67 pt instead of 44, one shard without runner; start 1: stale SPACING id, known UI test issues, tours in the gate; start 2: food row tappable only on its text, «Già registrata?» sheet closing at once, diary trash under the action bar, duplicate Gin Tonic rows) («run multiple threads so that we get the ipa as soon and as fast as possible»):
 # targeted check, six test shards and the Release launches all start at once; packaging waits for every gate.
 on:
   workflow_dispatch:
@@ -164,11 +164,12 @@ jobs:
         run: python3 scripts/select-compatible-xcode76.py
       - uses: actions/download-artifact@v4
         with:
-          name: lifeos-candidate95-preflight-${{ github.sha }}-${{ github.run_attempt }}
+          pattern: lifeos-candidate95-preflight-${{ github.sha }}-*
+          merge-multiple: true
           path: app/build
       - uses: actions/download-artifact@v4
         with:
-          pattern: lifeos-candidate95-shard*-${{ github.sha }}-${{ github.run_attempt }}
+          pattern: lifeos-candidate95-shard*-${{ github.sha }}-*
           path: shards
       - name: Merge the six shards into one result and verify every case once
         run: |
@@ -287,7 +288,8 @@ jobs:
           path: candidate95-evidence/tests
       - uses: actions/download-artifact@v4
         with:
-          name: lifeos-candidate95-release-proof-${{ github.sha }}-${{ github.run_attempt }}
+          pattern: lifeos-candidate95-release-proof-${{ github.sha }}-*
+          merge-multiple: true
           path: candidate95-evidence/release
       - name: Require passing gates from this exact commit and run attempt
         run: |
