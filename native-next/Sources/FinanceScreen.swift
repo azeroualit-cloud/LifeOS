@@ -434,6 +434,10 @@ struct MovementEditor: View {
                 do { let r = try await store.read("getMovement", args: [.int(record.integer("row"))]); populate(r.object); loaded = true }
                 catch { self.error = error.localizedDescription }
             } else { populate(record); loaded = true }
+            #if DEBUG
+            // Large-text UI test: the long grouped category menu is not what it checks, the bill month controls are.
+            if !editing, ProcessInfo.processInfo.arguments.contains("--prefill-water-bill") { category = "Acqua"; bill = NativeUtilityPeriodDraft() }
+            #endif
         }
     }
     private var destinationUnchanged: Bool {

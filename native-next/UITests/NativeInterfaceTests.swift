@@ -1053,7 +1053,8 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertTrue(payAmount.waitForExistence(timeout: 10)); payAmount.tap(); payAmount.typeText("40")
         app.collectionViews.firstMatch.swipeDown(velocity: .slow) // scrolling closes the keyboard
         let existing = app.buttons["expense-plan-existing"]
-        for _ in 0..<6 { if existing.isHittable { break }; app.collectionViews.firstMatch.swipeUp() }
+        XCTAssertTrue(existing.waitForExistence(timeout: 10))
+        for step in 0..<12 { if existing.isHittable { break }; if step < 6 { app.collectionViews.firstMatch.swipeUp(velocity: .slow) } else { app.collectionViews.firstMatch.swipeDown(velocity: .slow) } }
         XCTAssertTrue(existing.isHittable); existing.tap()
         XCTAssertTrue(app.navigationBars["Spesa già registrata"].waitForExistence(timeout: 10))
         let movement = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plan-link-movement-")).firstMatch

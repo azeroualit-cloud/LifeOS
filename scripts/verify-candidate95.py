@@ -122,7 +122,8 @@ def tests(build):
     print("CANDIDATE95_TEST_GATE_PASSED", proof["totalPassed"], "unique fresh cases; targeted cases not repeated")
 
 
-EXCLUDED_CLASSES = {"NativeAppleHealthReferenceUITests"}  # drives the external Health app (17 nov)
+EXCLUDED_CLASSES = {"NativeAppleHealthReferenceUITests",  # drives the external Health app (17 nov)
+                    "NativeScreenTourUITests"}  # screenshot walk for reviews, run by lifeos-screens.yml; never a product assertion
 
 def discover(app_root):
     """Every UI test method of the app (one selector each) plus the unit test target."""
@@ -223,7 +224,7 @@ def authorization():
         elif isinstance(value, list):
             for v in value: visit(v)
     visit(data)
-    for identifier in ("IPA-DELIVERY-95", "DESIGN-PASS-94-2026-11-23", "SPACING-SYSTEM-2026-11-22", "SUPPLEMENTS-PERSONAL-ONLY-92", "NAV-E-SLOT-2026-11-25", "FOOD-DB-RESET-2026-11-25"):
+    for identifier in ("IPA-DELIVERY-95", "DESIGN-PASS-94-2026-11-23", "SPACING-SYSTEM-2026-11-23", "SUPPLEMENTS-PERSONAL-ONLY-92", "NAV-E-SLOT-2026-11-25", "FOOD-DB-RESET-2026-11-25"):
         assert any(str(r.get("id", "")).startswith(identifier) and r.get("status") == "ACTIVE" for r in rules), identifier
     # FOOD-DIARY-SERVER-2026-11-22: build 95 ships only with the shared food diary.
     assert Path("native-next/Sources/NativeFoodDiarySync.swift").is_file(), "Diario condiviso non ancora implementato: niente IPA senza diario"

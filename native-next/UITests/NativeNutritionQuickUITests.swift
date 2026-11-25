@@ -224,7 +224,7 @@ final class NativeNutritionQuickUITests: XCTestCase {
         biscuits.tap()
         XCTAssertTrue(app.staticTexts["Biscotti"].firstMatch.waitForExistence(timeout: 5))
         // FOOD-CATALOG-92: biscuits open by the piece (1 biscotto, 8 g of 438 kcal/100 g).
-        XCTAssertTrue(app.descendants(matching: .any)["quick-nutrition-unit"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["quick-nutrition-unit"].waitForExistence(timeout: 10))
         XCTAssertEqual(app.textFields["quick-nutrition-Pezzi"].value as? String, "1")
         XCTAssertEqual(app.staticTexts["quick-nutrition-calories"].label, "35 kcal")
     }

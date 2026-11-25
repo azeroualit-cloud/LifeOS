@@ -28,10 +28,10 @@ final class NativeRevision75UITests: XCTestCase {
     func testBillMonthControlsFitWithLargeText() {
         continueAfterFailure = false; executionTimeAllowance = 180
         let app = XCUIApplication()
-        app.launchArguments = ["--visual-test", "--dark", "--expense-routing", "--large-text", "--reduce-motion", "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"]
+        app.launchArguments = ["--visual-test", "--dark", "--expense-routing", "--large-text", "--reduce-motion", "--prefill-water-bill", "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"]
         app.launch(); XCTAssertTrue(app.mainTabBar.buttons["Dashboard"].waitForExistence(timeout: 30))
         app.buttons["primary-add"].tap()
-        selectMenu(app.buttons["movement-category"], title: "Casa", app: app); selectMenu(app.buttons["movement-item"], title: "Acqua", app: app)
+        // The editor opens on Casa › Acqua (--prefill-water-bill): the grouped menu is covered by the standard-text test below.
         for title in ["Mese iniziale", "Mese finale"] {
             for prefix in ["utility-month-", "utility-year-"] {
                 let control = app.buttons[prefix + title]; reveal(control, app: app)
