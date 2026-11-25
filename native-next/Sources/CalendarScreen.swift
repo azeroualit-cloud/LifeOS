@@ -245,7 +245,8 @@ struct CalendarScreen: View {
                     ForEach(NativeIslamicDays.events(on: selected), id: \.self) { NativeIslamicTag(title: $0) }
                     Spacer(minLength: NativeDesign.Space.none)
                     Button { privateDay = NativePrivateDay(day: selected) } label: {
-                        Text("Privato").font(.footnote).foregroundStyle(NativeDesign.secondary)
+                        // INCONTRI-2026-11-25: name «Incontri», icon sparkles (user choice no. 6).
+                        Label("Incontri", systemImage: "sparkles").font(.footnote).foregroundStyle(NativeDesign.secondary)
                             .frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle())
                     }
                     .buttonStyle(NativePressStyle())

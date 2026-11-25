@@ -63,7 +63,7 @@ final class NativeScreenTourUITests: XCTestCase {
             shot(prefix + " 03i Statistiche", app)
             app.swipeUp(velocity: .slow); shot(prefix + " 03j Statistiche sotto", app)
             if tap(app.buttons["stats-private-unlock"]) {
-                app.swipeUp(velocity: .slow); shot(prefix + " 03k Statistiche privato", app)
+                app.swipeUp(velocity: .slow); shot(prefix + " 03k Statistiche incontri", app)
             }
             if app.buttons["stats-back"].exists { app.buttons["stats-back"].tap() }
         }
@@ -108,9 +108,9 @@ final class NativeScreenTourUITests: XCTestCase {
         if tap(app.buttons["calendar-view-agenda"]) {
             shot(prefix + " 06 Calendario agenda", app)
             if tap(app.buttons["calendar-private"]) {
-                shot(prefix + " 06c Privato", app)
+                shot(prefix + " 06c Incontri", app)
                 // LIFE-STATS-2026-11-25: the summary opens (no Face ID on the simulator).
-                if tap(app.buttons["private-unlock"]) { app.swipeUp(velocity: .slow); shot(prefix + " 06d Privato riepilogo", app) }
+                if tap(app.buttons["private-unlock"]) { app.swipeUp(velocity: .slow); shot(prefix + " 06d Incontri riepilogo", app) }
                 dismissSheet(app)
             }
         }
@@ -204,17 +204,6 @@ final class NativeScreenTourUITests: XCTestCase {
         }
     }
 
-    func testIconGallery() {
-        for theme in ["--dark", "--light"] {
-            let app = XCUIApplication()
-            app.launchArguments = ["--visual-test", "--icon-gallery", theme, "-AppleLanguages", "(it)", "-AppleLocale", "it_IT"]
-            app.launch()
-            _ = app.otherElements["icon-1"].waitForExistence(timeout: 20)
-            shot("00 Icone " + (theme == "--dark" ? "Scuro" : "Chiaro"), app)
-            app.swipeUp(velocity: .slow); shot("00 Icone sotto " + (theme == "--dark" ? "Scuro" : "Chiaro"), app)
-            app.terminate()
-        }
-    }
     func testTourDark() { tour("--dark", "Scuro") }
     func testTourLight() { tour("--light", "Chiaro") }
 }

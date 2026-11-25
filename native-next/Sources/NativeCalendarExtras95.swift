@@ -193,7 +193,7 @@ struct NativePrivateDaySheet: View {
                 Section { Text("Visibile solo a te. Nel calendario non compare nessun testo.").font(.footnote).foregroundStyle(NativeDesign.secondary) }
             }
             .modifier(NativeListAppearance())
-            .navigationTitle("Privato").navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("Incontri").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .cancellationAction) { NativeSheetCancel { dismiss() } } }
             .task { await load() }
         }
@@ -227,7 +227,7 @@ struct NativePrivateDaySheet: View {
         let context = LAContext()
         var error: NSError?
         guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) else { unlocked = true; return }
-        context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "Mostra il riepilogo privato") { ok, _ in
+        context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "Mostra il riepilogo degli incontri") { ok, _ in
             Task { @MainActor in unlocked = ok }
         }
     }

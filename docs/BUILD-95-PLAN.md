@@ -152,3 +152,4 @@ Mancano o sono diversi:
 109. Agenda app (25/11, sì dell'utente): «Privato» e le etichette Ramadan/Eid sulla stessa riga del turno, niente spazio vuoto sopra l'elenco; dati demo con due eventi con orario oggi per vedere la linea della timeline nel tour.
 110. LIFE-STATS (25/11): Statistiche nell'app (Dashboard, schermata a tutto schermo con periodo 3/6/12 mesi) e sul sito; Privato mostrato nel calendario dell'app come anello neutro sotto il giorno (come il punto del sito); dati demo con nomi neutri per il tour.
 111. Sito 96c447d: vista Statistiche (stesse regole dell'app), privato dietro «Mostra»; verificata nel banco di prova con dati di test neutri.
+112. INCONTRI-NAME (25/11): «Privato» diventa «Incontri» con icona sparkles nell'app (riga del turno, foglio, Statistiche, Guida) e sul sito c49c56f (verificato nel banco di prova).

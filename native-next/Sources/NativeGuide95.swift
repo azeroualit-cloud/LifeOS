@@ -34,7 +34,7 @@ struct NativeGuideTopic: Identifiable {
         .init(id: "calendario", title: "Calendario", lead: "Turni, eventi, orari del mese e date importanti nello stesso posto.", tint: NativeDesign.calendarAccent,
               steps: [("Dipingi turni", "Tocca il pennello, scegli il turno e tocca i giorni."),
                       ("Orari del mese", "Dashboard › prossimo orario › «Calendario degli orari», con Ramadan ed Eid segnati."),
-                      ("Privato", "Nel giorno scelto: una nota che nel calendario non mostra testo; il riepilogo si apre con Face ID.")]),
+                      ("Incontri", "Nel giorno scelto: una nota che nel calendario non mostra testo; il riepilogo si apre con Face ID.")]),
         .init(id: "nutrizione", title: "Nutrizione", lead: "Calorie nel range consigliato, macro, fibre e micronutrienti a colpo d’occhio.", tint: NativeDesign.nutritionTitle,
               steps: [("Obiettivi", "Calorie, proteine, grassi e fibre in Obiettivi; valgono anche sul sito."),
                       ("Alimento", "Aggiungi dal pulsante Alimento: arco e barre si aggiornano subito."),

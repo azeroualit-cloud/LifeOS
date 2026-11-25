@@ -51,7 +51,7 @@ struct DashboardScreen: View {
             Button { showingStats = true } label: {
                 VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
                     LOCardHeader(title: "Statistiche", systemImage: "chart.bar.xaxis", section: .calendar, showsChevron: true)
-                    Text("Turni, spese, calorie e privato degli stessi giorni, messi a confronto.").font(.footnote).foregroundStyle(NativeDesign.secondary)
+                    Text("Turni, spese, calorie e incontri degli stessi giorni, messi a confronto.").font(.footnote).foregroundStyle(NativeDesign.secondary)
                 }.contentShape(Rectangle())
             }.buttonStyle(NativePressStyle()).accessibilityIdentifier("home-stats")
         }

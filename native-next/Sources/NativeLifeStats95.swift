@@ -76,7 +76,7 @@ enum NativeLifeStats {
             let count = groups.reduce(0) { $0 + $1.privateCount }
             let rate = Double(count) / Double(total)
             if count >= 3, let top = solid.max(by: { $0.privateRate < $1.privateRate }), top.privateRate >= rate * 1.3 {
-                out.append("Privato: più spesso nei giorni di " + title(top.kind) + " (" + per10(top.privateRate) + " ogni 10 giorni, in media " + per10(rate) + ").")
+                out.append("Incontri: più spesso nei giorni di " + title(top.kind) + " (" + per10(top.privateRate) + " ogni 10 giorni, in media " + per10(rate) + ").")
             }
         }
         return out
@@ -231,7 +231,7 @@ struct NativeLifeStatsScreen: View {
     }
 
     private func privateCard(_ groups: [NativeLifeStats.Group], privateDays: [String: Int]) -> some View {
-        card("Privato", unlocked ? "Note private del periodo." : "Nascosto finché non lo apri con Face ID o codice.", id: "stats-private") {
+        card("Incontri", unlocked ? "Incontri del periodo." : "Nascosto finché non lo apri con Face ID o codice.", id: "stats-private") {
             if unlocked {
                 let inPeriod = privateEntries.filter { privateDays[$0.text("day")] != nil }
                 let perMonth = months.map { month in (month, inPeriod.filter { $0.text("day").hasPrefix(month) }.count) }

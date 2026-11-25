@@ -1593,6 +1593,16 @@
       "original_quote": "i want the statistics i told u about",
       "rule": "Una sezione Statistiche mette a confronto, per tipo di giornata (turno), spese, calorie e note private degli stessi giorni, con conteggio dei turni per mese e frasi brevi sulle differenze più nette. La parte privata resta nascosta finché non si apre con Face ID/codice. Le frasi descrivono cosa va insieme, mai una causa.",
       "relation": "Sezione nuova accanto ad Avvisi: non sostituisce Avvisi né SITE-ALERTS-ONLY-AVVISI. Nessun dettaglio privato nel repository pubblico (dati demo con nomi neutri)."
+    },
+    {
+      "id": "INCONTRI-NAME-2026-11-25",
+      "status": "ACTIVE",
+      "scope": "App e sito: pulsante del giorno nel calendario, foglio, scheda Statistiche e Guida (ex «Privato»)",
+      "recorded_on": "2026-11-25",
+      "provenance": "Messaggi utente in chat Claude del 25/11/2026 dopo proposte di nomi e una pagina con 30 icone",
+      "original_quote": "Incontri ma con un altra icona / flame is the best but too direct like hearts / scelgo 6",
+      "rule": "La voce si chiama «Incontri» con l'icona sparkles (SF Symbol; sul sito un disegno equivalente). Niente cuori o fiamme.",
+      "relation": "Cambia solo nome e icona di CALENDAR-PRIVATE-ENTRY-2026-11-24 (testo nascosto, riepilogo dietro Face ID restano)."
     }
   ],
   "pending_confirmations": [
