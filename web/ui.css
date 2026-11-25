@@ -1853,3 +1853,6 @@ main:has(#calendar.active){--section:var(--cal-accent)}
 .st-people{display:grid;gap:6px}.st-people div{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line)}.st-people b{font-variant-numeric:tabular-nums}
 .st-hide{justify-self:start}
 .st-note{color:var(--ink-2);font-size:13px;margin-top:16px;max-width:70ch}
+
+/* INCONTRI-2026-11-25 */
+.os-private-open{display:inline-flex;align-items:center;gap:5px}.os-spark{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}
