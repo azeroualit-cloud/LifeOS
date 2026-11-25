@@ -140,6 +140,21 @@ async function listFoodChanges(env, since) {
   const stamp = [from, ...rows.map((r) => r.updated_at), ...gone.map((g) => g.at)].sort().pop();
   return { full: false, foods: rows.map((r) => ({ ...nbFoodRow(r), app: extras.get(r.id) || {} })), deleted: gone.map((g) => g.id), stamp };
 }
+/** FOOD-DB-RESET-2026-11-25: copia di sicurezza degli alimenti prima dell'azzeramento. Crea le tabelle di backup
+ *  una sola volta (mai sovrascritte) e restituisce i conteggi. Non cancella nulla. */
+async function archiveFoods(env) {
+  await nbTables(env);
+  await env.DB.batch([
+    env.DB.prepare("CREATE TABLE IF NOT EXISTS web_foods_backup_20261125 AS SELECT * FROM web_foods"),
+    env.DB.prepare("CREATE TABLE IF NOT EXISTS web_foods_app_backup_20261125 AS SELECT * FROM web_foods_app"),
+  ]);
+  const n = async (sql) => (await env.DB.prepare(sql).first())?.n ?? 0;
+  return {
+    backup: await n("SELECT COUNT(*) AS n FROM web_foods_backup_20261125"),
+    backupSupplements: await n("SELECT COUNT(*) AS n FROM web_foods_backup_20261125 WHERE family = 'supplement'"),
+    current: await n("SELECT COUNT(*) AS n FROM web_foods"),
+  };
+}
 async function saveFood(env, input) {
   await nbTables(env);
   const fromApp = input && input.calories !== undefined;
@@ -431,6 +446,7 @@ async function listAlertLog(env, limit) {
 const BLOOM_FOODS_METHODS = {
   listFoods: (env) => listFoods(env),
   listFoodChanges: (env, a) => listFoodChanges(env, a[0]),
+  archiveFoods: (env) => archiveFoods(env),
   saveFood: (env, a) => saveFood(env, a[0]),
   deleteFood: (env, a) => deleteFood(env, a[0]),
   importFoods: (env, a) => importFoods(env, a[0]),

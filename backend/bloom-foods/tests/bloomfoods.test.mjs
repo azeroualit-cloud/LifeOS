@@ -148,3 +148,13 @@ test('app-layout setting is accepted by the app gateway', async () => {
   const r = await bloomFoodsAction(e, 'saveSettings', ['app-layout', { tabSlot: 'bloom' }, Date.now()]);
   assert.equal(r.doc.tabSlot, 'bloom');
 });
+
+test('archiveFoods copies the list once and never overwrites the backup', async () => {
+  const e = env();
+  await bloomFoodsAction(e, 'importFoods', [[{ id: 'a', name: 'Skyr', calories: 63, protein: 11, carbohydrate: 4, fat: 0.2 }, { id: 's', name: 'Magnesio', family: 'supplement', calories: 0, protein: 0, carbohydrate: 0, fat: 0 }]]);
+  const first = await bloomFoodsAction(e, 'archiveFoods', []);
+  assert.equal(first.backup, 2); assert.equal(first.backupSupplements, 1);
+  await bloomFoodsAction(e, 'deleteFood', ['a']);
+  const again = await bloomFoodsAction(e, 'archiveFoods', []);
+  assert.equal(again.backup, 2, 'backup kept as it was'); assert.equal(again.current, 1);
+});
