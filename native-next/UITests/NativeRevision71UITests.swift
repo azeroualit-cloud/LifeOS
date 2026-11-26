@@ -240,6 +240,7 @@ final class NativeRevision71UITests: XCTestCase {
         XCTAssertFalse(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "A Empoli,")).firstMatch.exists)
         XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "dashboard-day-")).count, 7)
         app.mainTabBar.buttons["Salute"].tap()
+        app.openHealthStats() // SALUTE-SINGLE-ENTRY-2026-11-26
         let health = app.buttons["health-summary-weight"]
         XCTAssertTrue(health.waitForExistence(timeout: 10))
         // Build 93: the weight card is in Andamento, below the day (HEALTH-TREND-93-2026-11-21).

@@ -55,6 +55,7 @@ final class NativeRevision78UITests: XCTestCase {
     func testHealthUniformRowsAndCompactActions() {
         let app = launch()
         app.mainTabBar.buttons["Salute"].tap()
+        app.openHealthStats() // SALUTE-SINGLE-ENTRY-2026-11-26
         let rows = ["tdee", "weight", "calories", "simulation"].map { app.buttons["health-summary-" + $0] }
         for row in rows { XCTAssertTrue(row.waitForExistence(timeout: 10)) }
         XCTAssertTrue(rows[0].label.contains("TDEE")); XCTAssertTrue(rows[0].label.contains("giorni"))
@@ -97,12 +98,15 @@ final class NativeRevision78UITests: XCTestCase {
     func testHealthAccessibleRowsRemainEqualAndActionsStayCompact() {
         let app = launch(["--large-text"])
         app.mainTabBar.buttons["Salute"].tap()
+        app.openHealthStats() // SALUTE-SINGLE-ENTRY-2026-11-26
         let rows = ["tdee", "weight", "calories", "simulation"].map { app.buttons["health-summary-" + $0] }
         for row in rows { XCTAssertTrue(row.waitForExistence(timeout: 10)) }
         // HEALTH-TREND-93-2026-11-21, one column with large text: Peso, TDEE, simulation, calories.
         let ordered = [rows[1], rows[0], rows[3], rows[2]]
         for pair in zip(ordered, ordered.dropFirst()) { XCTAssertLessThan(pair.0.frame.midY, pair.1.frame.midY) }
         capture("78-health-accessibility-top", app)
+        app.navigationBars.buttons.firstMatch.tap() // back to Salute: Peso, Alimento and the nutrients are there
+        XCTAssertTrue(app.buttons["health-add-weight"].waitForExistence(timeout: 10))
         capture("health-accessible-actions-above-navigation", app)
         for id in ["health-add-weight", "health-add-nutrition"] {
             let button = app.buttons[id]

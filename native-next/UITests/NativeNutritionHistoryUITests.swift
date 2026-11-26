@@ -45,7 +45,9 @@ final class NativeNutritionHistoryUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Nessun alimento registrato per questo giorno"].waitForExistence(timeout: 10))
         XCTAssertFalse(meal.exists)
         let history = app.buttons["health-nutrition-history"]
-        for _ in 0..<4 where !history.isHittable { scroll.swipeDown(velocity: .slow) }
+        // SALUTE-SINGLE-ENTRY-2026-11-26: Cronologia is in «Sezioni», below the diary.
+        let bottomBar = app.buttons["health-add-nutrition"]
+        for _ in 0..<8 where !history.isHittable || (bottomBar.exists && history.frame.maxY > bottomBar.frame.minY - 4) { scroll.swipeUp(velocity: .slow) }
         XCTAssertTrue(history.isHittable)
         history.tap()
         XCTAssertTrue(app.navigationBars["Cronologia"].waitForExistence(timeout: 10))

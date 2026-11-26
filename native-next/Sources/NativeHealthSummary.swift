@@ -39,7 +39,7 @@ enum NativeHealthMetric: String, CaseIterable, Identifiable {
     }
     private static let nutritionSymbol = "lifeos.nutrition.apple"
     var color: Color {
-        switch self { case .tdee: return .orange; case .weight: return NativeDesign.healthWeight; case .calories: return .green; case .simulation: return .blue; case .weeklyCalories: return .green; case .weeklyProtein: return NativeDesign.nutritionTitle }
+        NativeDesign.nutritionTitle // SALUTE-REDESIGN-2026-11-26: one green for all of Salute
     }
     var unit: String {
         switch self { case .weight, .simulation: return "kg"; case .tdee: return "kcal/giorno"; case .calories: return "kcal"; case .weeklyCalories: return "kcal/giorno"; case .weeklyProtein: return "g/giorno" }
@@ -67,6 +67,7 @@ struct NativeHealthDetail: View {
 
     @State private var period: NativeHealthTrendPeriod = .three
     @State private var editingGoals = false
+    @State private var showingStats = false
 
     var body: some View {
         ScrollView {
@@ -79,7 +80,8 @@ struct NativeHealthDetail: View {
                     nutrients
                 }
                 diary
-                trendSection
+                // SALUTE-SINGLE-ENTRY-2026-11-26: one door per section (Obiettivi e statistiche, Cronologia).
+                sectionsCard
                 if nutrition.entries.contains(where: { !$0.confirmed || $0.deletionPending == true }) {
                     Text("Registrazioni LifeOS in sospeso: consultale nella cronologia.")
                         .font(.footnote).foregroundStyle(NativeDesign.secondary)
@@ -97,6 +99,7 @@ struct NativeHealthDetail: View {
                 NativeMicronutrientScreen(nutrition: nutrition, selectedDate: selectedDate)
             }
             .navigationDestination(isPresented: $showingHistory) { NativeNutritionScreen() }
+            .navigationDestination(isPresented: $showingStats) { statsScreen }
             .navigationDestination(item: $openedMetric) { metric in
                 switch metric {
                 case .tdee: NativeTDEEScreen(health: health)
@@ -161,7 +164,7 @@ struct NativeHealthDetail: View {
         let goal: Double? = health.goalTargets?.calories
         let calories: Double? = health.calories(on: selectedDate)
         let kcal: String = calories.map(whole) ?? "—"
-        return Button { editingGoals = true } label: {
+        return Button { showingStats = true } label: {
             VStack(spacing: NativeDesign.Space.none) {
                 Text("kcal").font(.footnote).foregroundStyle(NativeDesign.secondary)
                 HStack(alignment: .firstTextBaseline, spacing: NativeDesign.Space.xs) {
@@ -191,8 +194,8 @@ struct NativeHealthDetail: View {
             : AnyLayout(HStackLayout(alignment: .top, spacing: NativeDesign.Space.medium))
         return layout {
             macro("Proteine", values[.dietaryProtein], targets?.protein, NativeDesign.macroProtein, .dietaryProtein, centered)
-            macro("Carboidrati", values[.dietaryCarbohydrates], targets?.carbohydrate, NativeDesign.macroCarbohydrate, .dietaryCarbohydrates, centered)
-            macro("Grassi", values[.dietaryFatTotal], targets?.fat, NativeDesign.macroFat, .dietaryFatTotal, centered)
+            macro("Carboidrati", values[.dietaryCarbohydrates], targets?.carbohydrate, NativeDesign.nutritionTitle.opacity(0.75), .dietaryCarbohydrates, centered)
+            macro("Grassi", values[.dietaryFatTotal], targets?.fat, NativeDesign.nutritionTitle.opacity(0.55), .dietaryFatTotal, centered)
         }
     }
     private func macro(_ title: String, _ value: Double?, _ goal: Double?, _ fallback: Color,
@@ -204,6 +207,78 @@ struct NativeHealthDetail: View {
     /// Macro bar colour carries the meaning when there is a goal: green in range, amber under, orange over.
     private func macroColor(_ value: Double?, _ goal: Double?, _ fallback: Color) -> Color {
         NativeCalorieBand.macroColor(value, goal: goal, base: fallback, limit: fallback == NativeDesign.macroProtein ? NativeNutritionLimits.protein : NativeNutritionLimits.macro)
+    }
+
+    /// The two doors of Salute below the day (SALUTE-SINGLE-ENTRY-2026-11-26).
+    private var sectionsCard: some View {
+        VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+            LOSectionLabel(title: "Sezioni")
+            LOListCard {
+                sectionRow("Obiettivi e statistiche", detail: "peso e simulazione · TDEE · calorie · obiettivi", symbol: "chart.xyaxis.line",
+                           identifier: "health-open-stats", isLast: false) { showingStats = true }
+                sectionRow("Cronologia", detail: "tutti i giorni registrati", symbol: "list.bullet.rectangle",
+                           identifier: "health-nutrition-history", isLast: true) { showingHistory = true }
+            }
+        }
+    }
+    private func sectionRow(_ title: String, detail: String, symbol: String, identifier: String, isLast: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            LOListRow(isLast: isLast) {
+                Label { VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
+                    Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(.primary)
+                    Text(detail).font(.footnote).foregroundStyle(NativeDesign.secondary).lineLimit(2)
+                } } icon: { Image(systemName: symbol).foregroundStyle(NativeDesign.nutritionTitle) }
+                Spacer(minLength: NativeDesign.Space.small)
+                NativeDisclosureIndicator()
+            }.contentShape(Rectangle())
+        }
+        .buttonStyle(NativePressStyle())
+        .accessibilityLabel(title)
+        .accessibilityIdentifier(identifier)
+    }
+
+    /// Obiettivi e statistiche: everything about goals, weight, simulation, TDEE and calories in one place.
+    private var statsScreen: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: NativeDesign.Space.section) {
+                goalsCard
+                trendSection
+            }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.vertical, NativeDesign.Space.large)
+        }
+        .background(NativeDesign.healthCanvas)
+        // Same identifier as the Salute page: a pushed screen replaces it in the hierarchy, so UI tests keep one scroll.
+        .accessibilityIdentifier("health-detail-scroll")
+        .navigationTitle("Obiettivi e statistiche")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.visible, for: .navigationBar)
+    }
+    private var goalsCard: some View {
+        let targets = health.goalTargets
+        let fibre = NativeHub95.shared.fibreGoal ?? NativeHub95.defaultFibre
+        return NativeCard {
+            LOCardHeader(title: "Obiettivi", systemImage: "target", section: .nutrition)
+            if let targets {
+                VStack(spacing: NativeDesign.Space.xs) {
+                    goalRow("Calorie", whole(targets.calories) + " kcal")
+                    goalRow("Proteine", whole(targets.protein) + " g")
+                    goalRow("Carboidrati", whole(targets.carbohydrate) + " g")
+                    goalRow("Grassi", whole(targets.fat) + " g")
+                    goalRow("Fibre", whole(fibre) + " g")
+                }
+            } else {
+                Text("Nessun obiettivo impostato").font(.subheadline).foregroundStyle(NativeDesign.secondary)
+            }
+            Button("Modifica obiettivi") { editingGoals = true }
+                .buttonStyle(LOGlassButtonStyle(fillsWidth: true))
+                .accessibilityIdentifier("health-edit-goals")
+        }
+    }
+    private func goalRow(_ title: String, _ value: String) -> some View {
+        HStack {
+            Text(title).font(.subheadline)
+            Spacer(minLength: NativeDesign.Space.small)
+            Text(value).font(.subheadline.weight(.semibold)).monospacedDigit()
+        }.accessibilityElement(children: .combine)
     }
 
     /// Andamento: period, four values, weight with forecast, calories of the week.
@@ -230,10 +305,10 @@ struct NativeHealthDetail: View {
                 identifierPrefix: "health-period-")
             rowLayout {
                 LOStatCard(title: "Peso", value: latest ?? "—", unit: "kg",
-                    caption: summary.latestWeightDate.map { $0.formatted(.dateTime.day().month(.abbreviated)) }, color: NativeDesign.healthWeight,
+                    caption: summary.latestWeightDate.map { $0.formatted(.dateTime.day().month(.abbreviated)) }, color: NativeDesign.nutritionTitle,
                     identifier: "health-summary-weight", action: { openedMetric = .weight })
                 LOStatCard(title: "TDEE", value: value(.tdee), unit: "kcal", caption: health.estimate.map { "ultimi \($0.days) giorni" },
-                    color: NativeDesign.macroCarbohydrate, identifier: "health-summary-tdee", action: { openedMetric = .tdee })
+                    color: NativeDesign.nutritionTitle, identifier: "health-summary-tdee", action: { openedMetric = .tdee })
             }
             rowLayout {
                 LOStatCard(title: "Media calorie", value: summary.averageCalories.map(whole) ?? "—", unit: "kcal",
@@ -242,13 +317,13 @@ struct NativeHealthDetail: View {
                     caption: period.title, color: NativeDesign.macroProtein, identifier: "health-summary-weeklyProtein")
             }
             LOLinkCard(title: "Peso e simulazione", trailing: latest.map { $0 + " kg" },
-                color: NativeDesign.healthWeight, identifier: "health-summary-simulation",
+                color: NativeDesign.nutritionTitle, identifier: "health-summary-simulation",
                 accessibilityLabel: simulationLabel, action: { openedMetric = .simulation }) {
                 NativeWeightTrendChart(days: health.days, forecast: forecast, start: start)
                 HStack {
                     if let change { Text(change).font(.footnote).foregroundStyle(NativeDesign.secondary) }
                     Spacer()
-                    if let expected { Text(expected).font(.footnote).foregroundStyle(NativeDesign.estimate) }
+                    if let expected { Text(expected).font(.footnote).foregroundStyle(NativeDesign.nutritionTitle) }
                 }.monospacedDigit()
             }
             LOLinkCard(title: "Calorie per giorno", trailing: weekMean.map { "media " + whole($0) },
@@ -292,8 +367,6 @@ struct NativeHealthDetail: View {
                 NativeIconButton(symbol: "chevron.right", label: "Settimana successiva") { moveWeek(1) }
                     .accessibilityIdentifier("health-week-next")
                     .disabled(days.contains(today))
-                NativeIconButton(symbol: "chart.bar.xaxis", label: "Cronologia nutrizione") { showingHistory = true }
-                    .accessibilityIdentifier("health-nutrition-history")
             }
             HStack(spacing: NativeDesign.Space.xxs) {
                 ForEach(days, id: \.self) { day in
@@ -367,7 +440,7 @@ struct NativeHealthDetail: View {
     /// Liquid Glass actions above the tab bar: Peso left, Alimento right, as in the Dashboard.
     @ViewBuilder private var nutritionActions: some View {
         Button { addingWeight = true } label: {
-            LOActionLabel(title: "Peso", systemImage: NativeHealthMetric.weight.symbol, section: .weight)
+            LOActionLabel(title: "Peso", systemImage: NativeHealthMetric.weight.symbol, section: .nutrition)
         }.buttonStyle(LOGlassButtonStyle(fillsWidth: true)).accessibilityLabel("Aggiungi peso").accessibilityIdentifier("health-add-weight")
         Button { showingNutrition = true } label: {
             LOActionLabel(title: "Alimento", systemImage: NativeHealthMetric.calories.symbol, section: .nutrition)

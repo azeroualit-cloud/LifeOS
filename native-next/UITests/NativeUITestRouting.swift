@@ -68,3 +68,17 @@ extension XCUIElementQuery {
         return all.first(where: { $0.exists && $0.isHittable }) ?? all.last ?? matches.firstMatch
     }
 }
+
+extension XCUIApplication {
+    /// SALUTE-SINGLE-ENTRY-2026-11-26: weight, TDEE, simulation and calories live in «Obiettivi e statistiche».
+    /// Opens it from the Salute page; does nothing when it is already open.
+    func openHealthStats() {
+        if navigationBars["Obiettivi e statistiche"].exists { return }
+        let entry = buttons["health-open-stats"]
+        guard entry.waitForExistence(timeout: 10) else { return }
+        let scroll = scrollViews["health-detail-scroll"]
+        for _ in 0..<10 where !entry.isHittable || entry.frame.maxY > mainTabBar.frame.minY - 60 { scroll.swipeUp(velocity: .slow) }
+        entry.tap()
+        _ = navigationBars["Obiettivi e statistiche"].waitForExistence(timeout: 10)
+    }
+}

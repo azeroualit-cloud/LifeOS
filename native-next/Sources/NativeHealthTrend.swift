@@ -37,43 +37,85 @@ struct NativeHealthTrendSummary: Equatable {
     }
 }
 
-/// Weigh-ins, 7-day trend and the dashed forecast, without axes (Andamento card).
+/// Weigh-ins, 7-day trend and the dashed forecast (SALUTE-REDESIGN-2026-11-26): one green, kilo scale on the
+/// right with light grid lines, months, a soft area under the trend, «Oggi», the last value highlighted and
+/// touch to read a day (Swift Charts).
 struct NativeWeightTrendChart: View {
     let days: [HealthDay]
     let forecast: [HealthPoint]
     let start: Date
-    var height: CGFloat = NativeDesign.Layout.healthChartHeight * 0.6
+    var height: CGFloat = NativeDesign.Layout.healthChartHeight
+    /// Touch to read a day; off when the chart sits inside a tappable card (the tap opens the detail).
+    var selectable = false
+    @State private var selected: Date?
 
     var body: some View {
         let today = Calendar.current.startOfDay(for: .now)
         let weighed = days.filter { $0.date >= start && ($0.weight ?? 0) > 0 }
         let trend = NativeHealthMath.trend(days.filter { $0.date <= .now }).filter { $0.date >= start }
         let values = weighed.compactMap(\.weight) + trend.map(\.value) + forecast.map(\.value)
-        let domain = ((values.min() ?? 70) - 0.5)...((values.max() ?? 80) + 0.5)
+        let low = ((values.min() ?? 70) - 0.5).rounded(.down), high = ((values.max() ?? 80) + 0.5).rounded(.up)
         let end = max(forecast.last?.date ?? today, today)
+        let green = NativeDesign.nutritionTitle
+        let point = selected.flatMap { day in trend.min { abs($0.date.timeIntervalSince(day)) < abs($1.date.timeIntervalSince(day)) } }
         Chart {
+            ForEach(trend) { p in
+                AreaMark(x: .value("Data", p.date), yStart: .value("Base", low), yEnd: .value("Peso", p.value))
+                    .foregroundStyle(LinearGradient(colors: [green.opacity(0.22), green.opacity(0)], startPoint: .top, endPoint: .bottom))
+                    .interpolationMethod(.catmullRom)
+            }
             ForEach(weighed) { day in
                 PointMark(x: .value("Data", day.date), y: .value("Peso", day.weight!))
-                    .foregroundStyle(NativeDesign.healthWeight.opacity(0.45)).symbolSize(14)
+                    .foregroundStyle(green.opacity(0.35)).symbolSize(12)
             }
-            ForEach(trend) { point in
-                LineMark(x: .value("Data", point.date), y: .value("Peso", point.value), series: .value("Serie", "Tendenza"))
-                    .foregroundStyle(NativeDesign.healthWeight)
-                    .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
+            ForEach(trend) { p in
+                LineMark(x: .value("Data", p.date), y: .value("Peso", p.value), series: .value("Serie", "Tendenza"))
+                    .foregroundStyle(green).interpolationMethod(.catmullRom)
+                    .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
             }
-            ForEach(forecast) { point in
-                LineMark(x: .value("Data", point.date), y: .value("Peso", point.value), series: .value("Serie", "Previsione"))
-                    .foregroundStyle(NativeDesign.estimate)
+            ForEach(forecast) { p in
+                LineMark(x: .value("Data", p.date), y: .value("Peso", p.value), series: .value("Serie", "Previsione"))
+                    .foregroundStyle(green.opacity(0.6))
                     .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round, dash: [5, 5]))
             }
-            RuleMark(x: .value("Oggi", today)).foregroundStyle(NativeDesign.secondary.opacity(0.5))
+            RuleMark(x: .value("Oggi", today))
+                .foregroundStyle(NativeDesign.secondary.opacity(0.5)).lineStyle(StrokeStyle(lineWidth: 1, dash: [2, 3]))
+                .annotation(position: .top, spacing: NativeDesign.Space.xxs) { Text("Oggi").font(.caption2).foregroundStyle(NativeDesign.secondary) }
+            if let last = trend.last, point == nil {
+                PointMark(x: .value("Data", last.date), y: .value("Peso", last.value))
+                    .foregroundStyle(green).symbolSize(60)
+            }
+            if let point {
+                RuleMark(x: .value("Selezione", point.date)).foregroundStyle(NativeDesign.secondary.opacity(0.4))
+                PointMark(x: .value("Data", point.date), y: .value("Peso", point.value))
+                    .foregroundStyle(green).symbolSize(60)
+                    .annotation(position: .top, overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
+                        Text(point.value.formatted(.number.precision(.fractionLength(1))) + " kg · " + point.date.formatted(.dateTime.day().month(.abbreviated)))
+                            .font(.caption2.weight(.semibold)).monospacedDigit()
+                    }
+            }
         }
         .chartXScale(domain: start...end)
-        .chartYScale(domain: domain)
+        .chartYScale(domain: low...high)
+        .modifier(NativeOptionalXSelection(enabled: selectable, selection: $selected))
         .chartXAxis { AxisMarks(values: .automatic(desiredCount: 4)) { _ in AxisValueLabel(format: .dateTime.month(.abbreviated)) } }
-        .chartYAxis(.hidden).chartLegend(.hidden)
+        .chartYAxis {
+            AxisMarks(position: .trailing, values: .automatic(desiredCount: 4)) { value in
+                AxisGridLine().foregroundStyle(NativeDesign.secondary.opacity(0.25))
+                AxisValueLabel { if let kg = value.as(Double.self) { Text(kg.formatted(.number.precision(.fractionLength(0)))) } }
+            }
+        }
+        .chartLegend(.hidden)
         .frame(height: height)
         .accessibilityHidden(true)
+    }
+}
+
+private struct NativeOptionalXSelection: ViewModifier {
+    let enabled: Bool
+    @Binding var selection: Date?
+    func body(content: Content) -> some View {
+        if enabled { content.chartXSelection(value: $selection) } else { content }
     }
 }
 
@@ -90,7 +132,7 @@ struct NativeWeekCaloriesChart: View {
         Chart {
             ForEach(Array(week.enumerated()), id: \.offset) { index, day in
                 let value = values[index]
-                let over = goal.map { value > $0 } ?? false
+                let over = goal.map { value > $0 * NativeNutritionLimits.calories } ?? false // NUTRITION-TOLERANT: orange only well over
                 BarMark(x: .value("Giorno", day, unit: .day), y: .value("Calorie", value))
                     .foregroundStyle(over ? NativeDesign.overGoal : NativeDesign.macroProtein)
                     .opacity(Calendar.current.isDate(day, inSameDayAs: selected) ? 1 : 0.62)

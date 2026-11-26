@@ -170,6 +170,7 @@ final class NativeInterfaceTests: XCTestCase {
         let app = launch(["--dark"])
         capture("dashboard-weekly-structure-dark")
         app.mainTabBar.buttons["Salute"].tap()
+        app.openHealthStats() // SALUTE-SINGLE-ENTRY-2026-11-26
         let health = app.buttons["health-summary-weight"]
         XCTAssertTrue(health.waitForExistence(timeout: 10))
         // Build 93: the weight card is in Andamento, below the day (HEALTH-TREND-93-2026-11-21).
@@ -238,7 +239,7 @@ final class NativeInterfaceTests: XCTestCase {
             for name in ["Dashboard", "Attività", "Salute", "Bloom"] {
                 app.openMainTab(name)
                 XCTAssertTrue(app.isMainTabSelected(name))
-                if name == "Salute" { XCTAssertTrue(app.buttons["health-summary-tdee"].waitForExistence(timeout: 10)) }
+                if name == "Salute" { XCTAssertTrue(app.buttons["health-open-stats"].waitForExistence(timeout: 10)) }
                 if name == "Dashboard" || name == "Attività" { XCTAssertTrue(app.buttons["primary-add"].isHittable) }
             }
             app.openOtherDestination("Calendario")
@@ -322,6 +323,7 @@ final class NativeInterfaceTests: XCTestCase {
         for arguments in [["--dark"], [], ["--dark", "--large-text"]] {
             let app = launch(arguments)
             app.mainTabBar.buttons["Salute"].tap()
+            app.openHealthStats()
             let detail = app.buttons["health-summary-weight"]
             XCTAssertTrue(detail.waitForExistence(timeout: 10))
             let scroll = app.scrollViews["health-detail-scroll"]
@@ -349,7 +351,7 @@ final class NativeInterfaceTests: XCTestCase {
         for name in ["Dashboard", "Attività", "Salute", "Bloom"] {
             app.openMainTab(name); XCTAssertTrue(app.isMainTabSelected(name))
             if name == "Salute" {
-                XCTAssertTrue(app.buttons["health-summary-tdee"].waitForExistence(timeout: 10))
+                XCTAssertTrue(app.buttons["health-open-stats"].waitForExistence(timeout: 10))
                 capture((dark ? "dark-" : "light-") + "Salute")
             }
             if name == "Bloom" {
@@ -559,9 +561,10 @@ final class NativeInterfaceTests: XCTestCase {
             waitForExpectations(timeout: 10)
             XCTAssertFalse(app.staticTexts["home-todos-heading"].exists)
             app.mainTabBar.buttons["Salute"].tap()
+            XCTAssertTrue(app.buttons["health-add-weight"].waitForExistence(timeout: 10)); XCTAssertFalse(app.buttons["health-connect"].exists)
+            app.openHealthStats()
             let weight = app.buttons["health-summary-weight"]
-            XCTAssertTrue(weight.waitForExistence(timeout: 10)); XCTAssertFalse(app.buttons["health-connect"].exists)
-            XCTAssertTrue(app.buttons["health-add-weight"].exists)
+            XCTAssertTrue(weight.waitForExistence(timeout: 10))
             let simulation = app.buttons["health-summary-simulation"]
             for _ in 0..<8 where !simulation.isHittable { app.scrollViews["health-detail-scroll"].swipeUp() }
             XCTAssertTrue(simulation.isHittable); simulation.tap()
@@ -583,7 +586,7 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Abitudini"].waitForExistence(timeout: 10))
         app.buttons["Fine"].tap()
         app.mainTabBar.buttons["Salute"].tap()
-        XCTAssertTrue(app.buttons["health-summary-tdee"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["health-open-stats"].waitForExistence(timeout: 10))
         XCTAssertFalse(app.buttons["health-connect"].exists)
         app.openMainTab("Attività")
         XCTAssertTrue(app.navigationBars["Attività"].waitForExistence(timeout: 10))
@@ -603,16 +606,20 @@ final class NativeInterfaceTests: XCTestCase {
         let field = app.textFields["health-new-weight"]
         field.tap(); field.typeText("83,4")
         XCTAssertTrue(save.isEnabled); save.tap()
+        app.openHealthStats()
         let detail = app.buttons["health-summary-weight"]
         for _ in 0..<8 where !detail.isHittable { app.scrollViews["health-detail-scroll"].swipeUp() }
         XCTAssertTrue(detail.waitForExistence(timeout: 10)); XCTAssertTrue(detail.label.contains("83,4"))
         XCTAssertEqual(app.mainTabBar.buttons.count, 5)
-        add.tap(); app.buttons["Annulla"].tap()
+        app.navigationBars.buttons.firstMatch.tap() // back to Salute, where Peso is
+        XCTAssertTrue(add.waitForExistence(timeout: 10)); add.tap(); app.buttons["Annulla"].tap()
+        app.openHealthStats()
         XCTAssertTrue(detail.waitForExistence(timeout: 10)); XCTAssertTrue(detail.label.contains("83,4"))
     }
     func testHealthSummaryAndFinanceMonthRoundTrip() {
         let app = launch(["--dark"])
         app.mainTabBar.buttons["Salute"].tap()
+        app.openHealthStats()
         XCTAssertTrue(app.buttons["health-summary-simulation"].waitForExistence(timeout: 10))
         capture("health-forecast-summary")
         app.openOtherDestination("Finanza")
@@ -629,6 +636,7 @@ final class NativeInterfaceTests: XCTestCase {
     func testHealthScenarioCanBeEditedWithoutAddingNavigationTab() {
         let app = launch(["--dark"])
         app.mainTabBar.buttons["Salute"].tap()
+        app.openHealthStats()
         let calories = app.buttons["health-summary-calories"]
         XCTAssertTrue(calories.waitForExistence(timeout: 10)); calories.tap()
         XCTAssertTrue(app.navigationBars["Calorie"].waitForExistence(timeout: 10))

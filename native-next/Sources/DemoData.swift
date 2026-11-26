@@ -72,6 +72,15 @@ enum DemoActions {
             replace("health", rows.sorted { $0.text("day") < $1.text("day") })
         case "saveFinancePlan", "recordFinancePlanPayment", "stopFinancePlan", "editFinancePlan", "deleteFinancePlanPayment":
             try NativePlanDemo.apply(method, payload: payload, state: &state)
+        case "renameFinancePlan":
+            // RENAME-EVERYWHERE-2026-11-26: same checks as the server method.
+            let planID = args?.first?.string ?? "", name = (args?.dropFirst().first?.string ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !planID.isEmpty, !name.isEmpty, name.count <= 120 else { throw Message(text: "Nome non valido.") }
+            var data = state.finance.record("plansV2"), plans = data.records("plans")
+            guard let index = plans.firstIndex(where: { $0.text("id") == planID }) else { throw Message(text: "Piano non trovato.") }
+            guard !plans.contains(where: { $0.text("id") != planID && $0.text("name").lowercased() == name.lowercased() && !["closed", "cancelled", "stopped"].contains($0.text("status")) }) else { throw Message(text: "Esiste già un piano con questo nome.") }
+            plans[index]["name"] = .string(name)
+            data["plans"] = .array(plans.map(JSONValue.object)); state.finance["plansV2"] = .object(data)
         case "saveTask":
             var rows = state.life.records("tasks"), p = payload
             p["title"] = .string(try checkedTitle())

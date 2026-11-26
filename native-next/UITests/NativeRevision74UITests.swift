@@ -45,6 +45,7 @@ final class NativeRevision74UITests: XCTestCase {
         let app = launch()
         app.mainTabBar.buttons["Salute"].tap()
         XCTAssertTrue(app.buttons["health-nutrition-history"].waitForExistence(timeout: 10)) // REVIEW-95: no navigation bar on the Salute root
+        app.openHealthStats() // SALUTE-SINGLE-ENTRY-2026-11-26
         let health = app.buttons["health-summary-weight"]
         XCTAssertTrue(health.waitForExistence(timeout: 10))
         // Build 93: the weight card is in Andamento, below the day (HEALTH-TREND-93-2026-11-21).
