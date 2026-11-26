@@ -1790,6 +1790,16 @@
       "original_quote": "no ipa yet",
       "rule": "Nessuna IPA della 96 finché l'utente non la chiede.",
       "relation": "Conferma la regola: IPA solo su approvazione esplicita."
+    },
+    {
+      "id": "CATEGORY-TOOLS-96-2026-11-26",
+      "status": "ACTIVE",
+      "scope": "Sito, Admin > Categorie della Finanza; Worker lifeos",
+      "recorded_on": "2026-11-26",
+      "provenance": "Messaggi utente in chat Claude, 26/11/2026",
+      "original_quote": "also on the website i tried the categoria della finanza. Spoiler, it doesnt work and also [Alert] D1 daily operation limit 91% reached / the thing is it also doesnt work, i tried to press the \"Sposta in x - Sposta\" e nulla è stato spostato ecco perché l'ho pigiato 6 volte",
+      "rule": "«Cerca nei movimenti» usa una sola lettura sul server (getFinanceCategoryUsage) e «Sposta» un solo spostamento per categoria (moveFinanceCategory) che dice quanti movimenti sono passati e quanti restano. Niente più 36 letture complete dei mesi né una richiesta per movimento.",
+      "relation": "Deploy del solo Worker lifeos coperto da DEPLOY-WORKERS-93. Causa del picco D1: ~700.000 righe per ricerca (audit lifeos-d1-usage-audit96)."
     }
   ],
   "pending_confirmations": [

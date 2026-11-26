@@ -10,6 +10,9 @@ Voci decise per la 96 (registro: docs/USER-DECISIONS.md). Nessuna IPA senza appr
 6. Analisi del sito più ricca (ANALYSIS-SITE-FREEHAND-2026-11-25).
 7. Ricerca alimenti del sito con varianti (mockup non ancora approvato).
 
+Sito e server (senza IPA):
+- CATEGORY-TOOLS-96-2026-11-26: Admin > Categorie della Finanza. Audit D1 (lifeos-d1-usage-audit96): il 26/11 4,59 M righe lette su 5 M, quasi tutte tra 01:00 e 02:00 UTC in picchi da 0,5-0,9 M; ogni «Cerca nei movimenti» chiedeva getFinanceData per 36 mesi (ogni mese rilegge tutti i ~2.800 movimenti più volte) e «Sposta» faceva una classifyMovement per movimento, ciascuna seguita da una riconciliazione completa. Ora due metodi nel Worker lifeos (`scripts/deploy-category-tools-96.py`): getFinanceCategoryUsage (una query raggruppata) e moveFinanceCategory (un UPDATE con [Categoria manuale], poi una riconciliazione; risponde spostati/rimasti). Pagina del sito 2f9813e. Workflow `lifeos-category-tools96.yml`. SQL provato su SQLite in memoria; da provare dall'utente sul sito.
+
 Verifica: compilazione e test unitari superati su 81f396c (run 45736287109), voci 1 e 2 comprese. Nessuna prova sull'iPhone.
 
 

@@ -505,3 +505,5 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 
 - **SALUTE-REDESIGN-2026-11-26 — ACTIVE, da fare.** «add it to the things to do but no ipa yet»: Salute in un solo verde di Apple Salute nello stile dell'app, scheda calorie simmetrica, curva del peso con Swift Charts completa (scala, griglia, area, Oggi, lettura al tocco). Mockup https://claude.ai/artifact/XcdUUjRgZQtNwvvgPjmSmz (v5).
 - **IPA-HOLD-2026-11-26 — ACTIVE.** «no ipa yet»: nessuna IPA della 96 finché l'utente non la chiede.
+
+- **CATEGORY-TOOLS-96-2026-11-26 — ACTIVE.** «it doesnt work [...] D1 daily operation limit 91%» / «Sposta [...] nulla è stato spostato»: ricerca delle categorie in uso con una sola lettura sul server e spostamento di una categoria in un colpo solo, con il numero di movimenti spostati e rimasti. Causa del limite D1: ogni «Cerca nei movimenti» leggeva 36 mesi interi (~700.000 righe).
