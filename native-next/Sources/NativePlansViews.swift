@@ -350,9 +350,6 @@ struct NativePlanDetail: View {
                     }
                 }
             }
-            // PLAN-DETAIL-RICH-2026-11-26: fund and forecast, month by month, linked movements.
-            NativePlanRichSections(plan: plan, payments: payments)
-            NativePlanLinkedMovements(payments: payments)
             Section("Pagamenti") {
                 if payments.isEmpty { Text("Nessun pagamento registrato").foregroundStyle(NativeDesign.secondary) }
                 ForEach(Array(payments.enumerated()), id: \.element.textID) { _, payment in
@@ -377,6 +374,10 @@ struct NativePlanDetail: View {
                     Button(plan.text("kind") == "advance" ? "Annulla l’intero anticipo" : "Interrompi le quote future", role: .destructive) { stopping = true }.disabled(working)
                 }
             }
+            // PLAN-DETAIL-RICH-2026-11-26: fund and forecast, month by month, linked movements, below the
+            // status and the actions so those stay at the top.
+            NativePlanRichSections(plan: plan, payments: payments)
+            NativePlanLinkedMovements(payments: payments)
             if let error { Section { NativeInlineMessage(text: error) } }
         }.modifier(NativeListAppearance()).navigationTitle("Dettagli piano").navigationBarTitleDisplayMode(.inline)
             .onAppear { router.financeSection = "Budget" }
