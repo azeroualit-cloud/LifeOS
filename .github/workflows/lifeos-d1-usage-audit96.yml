@@ -2,7 +2,7 @@ name: LifeOS D1 usage audit (read-only)
 # APP-LAG / D1 limit 26/11/2026 («D1 daily operation limit 91% reached»): which queries use the daily
 # rows read/written. Reads Cloudflare analytics only; writes nothing. Logs SQL statements (no parameters),
 # counts and rows; no records, names or amounts.
-# Attempt 1
+# Attempt 2: hour by hour and by 5 minutes
 on:
   push:
     branches: ['codex/build93']
@@ -34,6 +34,16 @@ jobs:
           if daily.get('errors'): print('DAILY_ERRORS', json.dumps(daily['errors'])[:800])
           for g in (((daily.get('data') or {}).get('viewer') or {}).get('accounts') or [{}])[0].get('d1AnalyticsAdaptiveGroups', []) or []:
               print('DAY', g['dimensions']['date'], json.dumps(g['sum']))
+          hs = (now - datetime.timedelta(hours=30)).strftime('%Y-%m-%dT%H:%M:%SZ'); he = now.strftime('%Y-%m-%dT%H:%M:%SZ')
+          hourly = gql('''query($a:String!,$db:String!,$s:Time!,$u:Time!){viewer{accounts(filter:{accountTag:$a}){d1AnalyticsAdaptiveGroups(limit:100,filter:{datetimeHour_geq:$s,datetimeHour_leq:$u,databaseId:$db},orderBy:[datetimeHour_ASC]){sum{readQueries rowsRead} dimensions{datetimeHour}}}}}''', {'a': ACCOUNT, 'db': DB, 's': hs, 'u': he})
+          if hourly.get('errors'): print('HOURLY_ERRORS', json.dumps(hourly['errors'])[:600])
+          for g in (((hourly.get('data') or {}).get('viewer') or {}).get('accounts') or [{}])[0].get('d1AnalyticsAdaptiveGroups', []) or []:
+              print('HOUR', g['dimensions']['datetimeHour'], g['sum']['readQueries'], g['sum']['rowsRead'])
+          ms = (now - datetime.timedelta(minutes=90)).strftime('%Y-%m-%dT%H:%M:%SZ')
+          mins = gql('''query($a:String!,$db:String!,$s:Time!,$u:Time!){viewer{accounts(filter:{accountTag:$a}){d1AnalyticsAdaptiveGroups(limit:100,filter:{datetimeFiveMinutes_geq:$s,datetimeFiveMinutes_leq:$u,databaseId:$db},orderBy:[datetimeFiveMinutes_ASC]){sum{readQueries rowsRead} dimensions{datetimeFiveMinutes}}}}}''', {'a': ACCOUNT, 'db': DB, 's': ms, 'u': he})
+          if mins.get('errors'): print('MIN_ERRORS', json.dumps(mins['errors'])[:600])
+          for g in (((mins.get('data') or {}).get('viewer') or {}).get('accounts') or [{}])[0].get('d1AnalyticsAdaptiveGroups', []) or []:
+              print('FIVE', g['dimensions']['datetimeFiveMinutes'], g['sum']['readQueries'], g['sum']['rowsRead'])
           since = (now - datetime.timedelta(hours=24)).strftime('%Y-%m-%dT%H:%M:%SZ'); until = now.strftime('%Y-%m-%dT%H:%M:%SZ')
           q = gql('''query($a:String!,$db:String!,$s:Time!,$u:Time!){viewer{accounts(filter:{accountTag:$a}){d1QueriesAdaptiveGroups(limit:40,filter:{datetime_geq:$s,datetime_leq:$u,databaseId:$db},orderBy:[sum_rowsRead_DESC]){count sum{rowsRead rowsWritten} dimensions{query}}}}}''',
               {'a': ACCOUNT, 'db': DB, 's': since, 'u': until})
