@@ -2,7 +2,7 @@ name: LifeOS category move audit (read-only)
 # 26/11/2026: «ho provato a premere Sposta in x - Sposta e nulla è stato spostato». Did the moves reach the
 # movements, and which category does each one show? Only SELECT; logs category labels and counts, no movement
 # names, dates or amounts. About 3 scans of the movements table (~10k rows of the daily D1 budget).
-# Attempt 2: the D1 query API answers 403 to this token; check the live Worker code instead (fragment counts only)
+# Attempt 3: after CATEGORY-TOOLS-96. Attempt 2: the D1 query API answers 403 to this token; check the live Worker code instead (fragment counts only)
 on:
   push:
     branches: ['codex/build93']

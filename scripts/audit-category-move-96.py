@@ -23,6 +23,11 @@ FRAGMENTS = {
     'site_cat_move': 'classifyMovement", [row, to]',
     'site_cat_scan': 'getFinanceData", [y, m]',
     'fingerprint_fn': 'function movementCategoryFingerprint(',
+    'tools_marker': '// LIFEOS_CATEGORY_TOOLS_96',
+    'route_usage': 'method === "getFinanceCategoryUsage"',
+    'route_move': 'method === "moveFinanceCategory"',
+    'page_usage': 'workerRequest("getFinanceCategoryUsage"',
+    'page_old_scan': 'getFinanceData", [y, m]',
 }
 for name in helpers.WORKERS:
     entry, parts = helpers.modules(*api('/workers/scripts/' + name + '/content/v2'))
