@@ -502,3 +502,6 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 - **SALARY-MAP-PLAN-KIND-2026-11-26 — ACTIVE.** «sul sito assicurazione è messo da parte (giustamente). Sull'app invece va negli impegni del mese» → «Yes, align it»: nel grafico dello stipendio l'app classifica le quote dei piani come il sito (ogni mese → Impegni; ripartite su più mesi, obiettivi e fondi → Messo da parte). Build 96.
 
 - **APP-LAG-2026-11-26 — ACTIVE.** «tutta l'app lagga [...] verifica da cos'è causato, se la sincronizzazione o cosa»: causa individuata nella sincronizzazione ogni 30 s (scarica tutto, decodifica sul thread principale, riscrive l'archivio e ridisegna anche senza cambiamenti, rilegge tutta la libreria Bloom). Correzione nella 96: ogni 2 minuti, decodifica in background, niente salvataggi né ridisegni se i dati sono uguali, Bloom ogni 5 minuti salvo modifiche. Non misurata sul telefono.
+
+- **SALUTE-REDESIGN-2026-11-26 — ACTIVE, da fare.** «add it to the things to do but no ipa yet»: Salute in un solo verde di Apple Salute nello stile dell'app, scheda calorie simmetrica, curva del peso con Swift Charts completa (scala, griglia, area, Oggi, lettura al tocco). Mockup https://claude.ai/artifact/XcdUUjRgZQtNwvvgPjmSmz (v5).
+- **IPA-HOLD-2026-11-26 — ACTIVE.** «no ipa yet»: nessuna IPA della 96 finché l'utente non la chiede.

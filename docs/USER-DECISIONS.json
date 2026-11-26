@@ -1770,6 +1770,26 @@
       "original_quote": "poi tutta l'app lagga, lagga tutta tantissimo, verifica da cos'è causato, se la sincronizzazione o cosa, perché da troppo fastidio",
       "rule": "L'app non deve rallentare per la sincronizzazione: aggiornamento periodico ogni 2 minuti (non 30 s), risposte decodificate fuori dal thread principale, dati identici non salvati né ridisegnati, libreria Bloom riletta al massimo ogni 5 minuti salvo modifiche. Apertura dell'app, modifiche e aggiornamento manuale restano immediati.",
       "relation": "Build 96. Causa individuata leggendo il codice, non misurata sul telefono."
+    },
+    {
+      "id": "SALUTE-REDESIGN-2026-11-26",
+      "status": "ACTIVE",
+      "scope": "Schermata Salute nell'app",
+      "recorded_on": "2026-11-26",
+      "provenance": "Messaggi utente in chat Claude, 26/11/2026",
+      "original_quote": "i dont like how basic the render of the curve and its accessories is, and i hate the multiple colors there [...] why doesnt it have the feel of finanza / i want the apple health green, also its not symmetric, theres not micros and cronologia etc / no non segue il dna dell'app / to draw the chart can u use apple api? / add it to the things to do but no ipa yet",
+      "rule": "Da fare (build 96, nessuna IPA per ora): Salute in un solo verde di Apple Salute nello stile dell'app (schede 21 con l'ombra solita, testate con icona e titolo verdi, selezione neutra, niente bagliori o sfumature decorative); scheda calorie simmetrica; curva del peso con Swift Charts: scala a destra con griglia, mesi, area sfumata, curva morbida, Oggi, ultimo valore evidenziato, previsione nello stesso verde, lettura al tocco; arancio solo come avviso (NUTRITION-TOLERANT). Mockup: https://claude.ai/artifact/XcdUUjRgZQtNwvvgPjmSmz (versione 5).",
+      "relation": "Rispetta UI-LOOK-92, DESIGN-PASS-94 e NUTRITION-TOLERANT-2026-11-24. Non ancora implementato."
+    },
+    {
+      "id": "IPA-HOLD-2026-11-26",
+      "status": "ACTIVE",
+      "scope": "Build 96",
+      "recorded_on": "2026-11-26",
+      "provenance": "Messaggio utente in chat Claude, 26/11/2026",
+      "original_quote": "no ipa yet",
+      "rule": "Nessuna IPA della 96 finché l'utente non la chiede.",
+      "relation": "Conferma la regola: IPA solo su approvazione esplicita."
     }
   ],
   "pending_confirmations": [
