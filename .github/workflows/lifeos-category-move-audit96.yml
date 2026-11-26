@@ -2,7 +2,7 @@ name: LifeOS category move audit (read-only)
 # 26/11/2026: «ho provato a premere Sposta in x - Sposta e nulla è stato spostato». Did the moves reach the
 # movements, and which category does each one show? Only SELECT; logs category labels and counts, no movement
 # names, dates or amounts. About 3 scans of the movements table (~10k rows of the daily D1 budget).
-# Attempt 1
+# Attempt 2: the D1 query API answers 403 to this token; check the live Worker code instead (fragment counts only)
 on:
   push:
     branches: ['codex/build93']
@@ -16,6 +16,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Manual categories and what they resolve to
+        continue-on-error: true
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
@@ -40,3 +41,8 @@ jobs:
               except Exception as e: out = 'ERR ' + type(e).__name__
               print('==', key); print(json.dumps(out, ensure_ascii=False))
           PY
+      - uses: actions/checkout@v5
+      - name: Live Worker code for the category move (counts only)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: python3 scripts/audit-category-move-96.py
