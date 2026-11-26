@@ -57,16 +57,7 @@ final class NativeScreenTourUITests: XCTestCase {
         shot(prefix + " 01 Dashboard", app)
         scroll(app, prefix + " 02 Dashboard sotto")
         scroll(app, prefix + " 03 Dashboard fondo")
-        // LIFE-STATS-2026-11-25: Statistiche at the bottom of the Dashboard.
-        for _ in 0..<3 where !(app.buttons["home-stats"].exists && app.buttons["home-stats"].isHittable) { app.swipeUp(velocity: .slow) }
-        if tap(app.buttons["home-stats"]) {
-            shot(prefix + " 03i Statistiche", app)
-            app.swipeUp(velocity: .slow); shot(prefix + " 03j Statistiche sotto", app)
-            if tap(app.buttons["stats-private-unlock"]) {
-                app.swipeUp(velocity: .slow); shot(prefix + " 03k Statistiche incontri", app)
-            }
-            if app.buttons["stats-back"].exists { app.buttons["stats-back"].tap() }
-        }
+        // LIFE-STATS-2026-11-26: Statistiche only on the site, no longer in the app.
         // Avvisi: always reachable from Impostazioni, also when every alert was ignored.
         app.swipeDown(velocity: .fast); app.swipeDown(velocity: .fast)
         // REVIEW-95E: the next time opens its sheet, then the month of times.

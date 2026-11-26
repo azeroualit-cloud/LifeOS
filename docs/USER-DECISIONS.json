@@ -1286,7 +1286,7 @@
     },
     {
       "id": "DASHBOARD-93-2026-11-21",
-      "status": "ACTIVE",
+      "status": "SUPERSEDED",
       "scope": "Dashboard build 93",
       "recorded_on": "2026-11-21",
       "provenance": "Risposta diretta utente in chat Claude alla domanda META-01 durante la fase 2 della build 93",
@@ -1295,7 +1295,9 @@
       "supersedes": [
         "DASHBOARD-ORDER-92"
       ],
-      "conflict_check": "Conflitto con DASHBOARD-ORDER-92 (Finanza compatta) segnalato e confermato (META-01)."
+      "conflict_check": "Conflitto con DASHBOARD-ORDER-92 (Finanza compatta) segnalato e confermato (META-01).",
+      "superseded_by": "DASHBOARD-93-2026-11-26",
+      "superseded_on": "2026-11-26"
     },
     {
       "id": "IPA-COMPLETE-ONLY-93-2026-11-22",
@@ -1643,13 +1645,15 @@
     },
     {
       "id": "LIFE-STATS-2026-11-25",
-      "status": "ACTIVE",
+      "status": "SUPERSEDED",
       "scope": "App (Dashboard › Statistiche) e sito (vista Statistiche)",
       "recorded_on": "2026-11-25",
       "provenance": "Messaggi utente in chat Claude del 24/11/2026 (idea di una sezione di analisi dati generale con correlazioni tra turni, nutrizione e dati privati; parafrasi sanificata) e del 25/11/2026",
       "original_quote": "i want the statistics i told u about",
       "rule": "Una sezione Statistiche mette a confronto, per tipo di giornata (turno), spese, calorie e note private degli stessi giorni, con conteggio dei turni per mese e frasi brevi sulle differenze più nette. La parte privata resta nascosta finché non si apre con Face ID/codice. Le frasi descrivono cosa va insieme, mai una causa.",
-      "relation": "Sezione nuova accanto ad Avvisi: non sostituisce Avvisi né SITE-ALERTS-ONLY-AVVISI. Nessun dettaglio privato nel repository pubblico (dati demo con nomi neutri)."
+      "relation": "Sezione nuova accanto ad Avvisi: non sostituisce Avvisi né SITE-ALERTS-ONLY-AVVISI. Nessun dettaglio privato nel repository pubblico (dati demo con nomi neutri).",
+      "superseded_by": "LIFE-STATS-2026-11-26",
+      "superseded_on": "2026-11-26"
     },
     {
       "id": "INCONTRI-NAME-2026-11-25",
@@ -1800,6 +1804,77 @@
       "original_quote": "also on the website i tried the categoria della finanza. Spoiler, it doesnt work and also [Alert] D1 daily operation limit 91% reached / the thing is it also doesnt work, i tried to press the \"Sposta in x - Sposta\" e nulla è stato spostato ecco perché l'ho pigiato 6 volte",
       "rule": "«Cerca nei movimenti» usa una sola lettura sul server (getFinanceCategoryUsage) e «Sposta» un solo spostamento per categoria (moveFinanceCategory) che dice quanti movimenti sono passati e quanti restano. Niente più 36 letture complete dei mesi né una richiesta per movimento.",
       "relation": "Deploy del solo Worker lifeos coperto da DEPLOY-WORKERS-93. Causa del picco D1: ~700.000 righe per ricerca (audit lifeos-d1-usage-audit96)."
+    },
+    {
+      "recorded_on": "2026-11-26",
+      "provenance": "Messaggio utente in chat Claude, 26/11/2026",
+      "original_quote": "da app dashboard va tolto statistiche e prossimi appntamenti. LA SEZIONE SALUTE DELL'APP deve avere un unico punto di ingresso per ogni sezione, tipo cronologia, statistiche (peso/simulazione, grafico calorie), tdee, insomma, non voglio poter fare tutto da posti diversi ma cercare di non pensare, quando voglio una statistica o una simulazione o un impostazione di simulazione trovo tutto li dentro. poi devi vedere di farmi rinominare le varie variabili a giro tipo i nomi dei piani o delle spese ecc in tutta l'app sta cosa di poter editare altrimenti come cazzo faccio. E poi nei dettagli piano devo poter avere molti più dati riguardo a quel piano, i suoi movimenti ecc",
+      "id": "DASHBOARD-TRIM-2026-11-26",
+      "status": "ACTIVE",
+      "scope": "Dashboard dell'app",
+      "rule": "Togliere dalla Dashboard le schede Statistiche e Prossimi appuntamenti.",
+      "conflicts_with": [
+        "DASHBOARD-93-2026-11-21 (Dashboard con Prossimi appuntamenti)",
+        "LIFE-STATS-2026-11-25 (Statistiche nell'app, ingresso dalla Dashboard)"
+      ],
+      "note": "Domanda META-01 posta il 26/11/2026; nessuna modifica finché l'utente non risponde.",
+      "confirmation": "Risposte utente alle domande META-01 del 26/11/2026 (AskUserQuestion): «Yes, remove it» per Prossimi appuntamenti, «Site only» per Statistiche."
+    },
+    {
+      "recorded_on": "2026-11-26",
+      "provenance": "Messaggio utente in chat Claude, 26/11/2026",
+      "original_quote": "da app dashboard va tolto statistiche e prossimi appntamenti. LA SEZIONE SALUTE DELL'APP deve avere un unico punto di ingresso per ogni sezione, tipo cronologia, statistiche (peso/simulazione, grafico calorie), tdee, insomma, non voglio poter fare tutto da posti diversi ma cercare di non pensare, quando voglio una statistica o una simulazione o un impostazione di simulazione trovo tutto li dentro. poi devi vedere di farmi rinominare le varie variabili a giro tipo i nomi dei piani o delle spese ecc in tutta l'app sta cosa di poter editare altrimenti come cazzo faccio. E poi nei dettagli piano devo poter avere molti più dati riguardo a quel piano, i suoi movimenti ecc",
+      "id": "SALUTE-SINGLE-ENTRY-2026-11-26",
+      "status": "ACTIVE",
+      "scope": "Sezione Salute dell'app",
+      "rule": "Un solo punto di ingresso per ogni sezione di Salute (Cronologia; Statistiche con peso e simulazione, grafico calorie, TDEE e impostazioni della simulazione): niente più strade diverse per la stessa cosa.",
+      "relation": "Precisa SALUTE-REDESIGN-2026-11-26 (stesso aspetto, ingressi riorganizzati). Da progettare con un mockup."
+    },
+    {
+      "recorded_on": "2026-11-26",
+      "provenance": "Messaggio utente in chat Claude, 26/11/2026",
+      "original_quote": "da app dashboard va tolto statistiche e prossimi appntamenti. LA SEZIONE SALUTE DELL'APP deve avere un unico punto di ingresso per ogni sezione, tipo cronologia, statistiche (peso/simulazione, grafico calorie), tdee, insomma, non voglio poter fare tutto da posti diversi ma cercare di non pensare, quando voglio una statistica o una simulazione o un impostazione di simulazione trovo tutto li dentro. poi devi vedere di farmi rinominare le varie variabili a giro tipo i nomi dei piani o delle spese ecc in tutta l'app sta cosa di poter editare altrimenti come cazzo faccio. E poi nei dettagli piano devo poter avere molti più dati riguardo a quel piano, i suoi movimenti ecc",
+      "id": "RENAME-EVERYWHERE-2026-11-26",
+      "status": "ACTIVE",
+      "scope": "App (e sito dove serve)",
+      "rule": "Si rinomina dall'app, dove lo si vede, tutto ciò che ha un nome scelto dall'utente: piani, spese e movimenti, categorie della Finanza, attività, routine, raccolte Bloom, alimenti personali, gruppi di integratori.",
+      "relation": "Ambito confermato: «Plans, Expenses and movements, Finance categories, Everything with a name»."
+    },
+    {
+      "recorded_on": "2026-11-26",
+      "provenance": "Messaggio utente in chat Claude, 26/11/2026",
+      "original_quote": "da app dashboard va tolto statistiche e prossimi appntamenti. LA SEZIONE SALUTE DELL'APP deve avere un unico punto di ingresso per ogni sezione, tipo cronologia, statistiche (peso/simulazione, grafico calorie), tdee, insomma, non voglio poter fare tutto da posti diversi ma cercare di non pensare, quando voglio una statistica o una simulazione o un impostazione di simulazione trovo tutto li dentro. poi devi vedere di farmi rinominare le varie variabili a giro tipo i nomi dei piani o delle spese ecc in tutta l'app sta cosa di poter editare altrimenti come cazzo faccio. E poi nei dettagli piano devo poter avere molti più dati riguardo a quel piano, i suoi movimenti ecc",
+      "id": "PLAN-DETAIL-RICH-2026-11-26",
+      "status": "ACTIVE",
+      "scope": "Dettagli piano nell'app",
+      "rule": "Dettagli piano con: tutti i movimenti collegati (apribili e rinominabili), storico mese per mese (quota, accantonato, pagato), grafico del fondo con previsione.",
+      "relation": "Contenuti confermati: «All linked movements, Month-by-month history, Fund chart and forecast». Mockup prima dell'implementazione."
+    },
+    {
+      "id": "DASHBOARD-93-2026-11-26",
+      "status": "ACTIVE",
+      "scope": "Dashboard dell'app",
+      "recorded_on": "2026-11-26",
+      "provenance": "Risposte utente alle domande META-01 del 26/11/2026 (AskUserQuestion)",
+      "original_quote": "Yes, remove it",
+      "rule": "Dashboard come nell'anteprima approvata ma senza Prossimi appuntamenti e senza Statistiche: Settimana (con prossimo turno), Cose da fare, Nutrizione, Finanza come scheda intera, stato di connessione. Gli eventi futuri restano nel Calendario.",
+      "supersedes": [
+        "DASHBOARD-93-2026-11-21"
+      ],
+      "conflict_check": "Conflitto con DASHBOARD-93-2026-11-21 segnalato e confermato (META-01)."
+    },
+    {
+      "id": "LIFE-STATS-2026-11-26",
+      "status": "ACTIVE",
+      "scope": "Sito (vista Statistiche)",
+      "recorded_on": "2026-11-26",
+      "provenance": "Risposte utente alle domande META-01 del 26/11/2026 (AskUserQuestion)",
+      "original_quote": "Site only",
+      "rule": "La sezione Statistiche (confronto per tipo di giornata di spese, calorie e note private, conteggio turni, frasi brevi) resta solo sul sito; nell'app non c'è più. La parte privata resta nascosta finché non si sblocca; le frasi descrivono cosa va insieme, mai una causa.",
+      "supersedes": [
+        "LIFE-STATS-2026-11-25"
+      ],
+      "conflict_check": "Conflitto con LIFE-STATS-2026-11-25 (ingresso dalla Dashboard) segnalato e confermato (META-01)."
     }
   ],
   "pending_confirmations": [

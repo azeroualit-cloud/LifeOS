@@ -507,3 +507,10 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 - **IPA-HOLD-2026-11-26 — ACTIVE.** «no ipa yet»: nessuna IPA della 96 finché l'utente non la chiede.
 
 - **CATEGORY-TOOLS-96-2026-11-26 — ACTIVE.** «it doesnt work [...] D1 daily operation limit 91%» / «Sposta [...] nulla è stato spostato»: ricerca delle categorie in uso con una sola lettura sul server e spostamento di una categoria in un colpo solo, con il numero di movimenti spostati e rimasti. Causa del limite D1: ogni «Cerca nei movimenti» leggeva 36 mesi interi (~700.000 righe).
+
+- **DASHBOARD-TRIM-2026-11-26 — PENDING_CONFIRMATION.** «da app dashboard va tolto statistiche e prossimi appntamenti»: in conflitto con DASHBOARD-93-2026-11-21 (Prossimi appuntamenti) e LIFE-STATS-2026-11-25 (Statistiche nell'app dalla Dashboard). Domanda META-01 posta.
+- **SALUTE-SINGLE-ENTRY-2026-11-26 — ACTIVE.** Un solo ingresso per ogni sezione di Salute (Cronologia; Statistiche con peso/simulazione, calorie, TDEE e impostazioni della simulazione). Precisa SALUTE-REDESIGN.
+- **RENAME-EVERYWHERE-2026-11-26 — ACTIVE.** «farmi rinominare [...] i nomi dei piani o delle spese ecc in tutta l'app»: si rinomina dove lo si vede. Ambito da confermare.
+- **PLAN-DETAIL-RICH-2026-11-26 — ACTIVE.** «nei dettagli piano [...] molti più dati [...] i suoi movimenti»: contenuti da confermare, mockup prima.
+
+- **Risposte META-01 del 26/11/2026.** DASHBOARD-93-2026-11-21 → SUPERSEDED da **DASHBOARD-93-2026-11-26** (senza Prossimi appuntamenti e Statistiche, «Yes, remove it»). LIFE-STATS-2026-11-25 → SUPERSEDED da **LIFE-STATS-2026-11-26** (Statistiche solo sul sito, «Site only»). DASHBOARD-TRIM ora ACTIVE. RENAME-EVERYWHERE: piani, spese e movimenti, categorie, tutto ciò che ha un nome. PLAN-DETAIL-RICH: movimenti collegati, storico mese per mese, grafico del fondo con previsione.

@@ -7,7 +7,6 @@ struct DashboardScreen: View {
     @State private var routineBusy: Int?
     @State private var routineFeedback = false
     @State private var showingTimes = false
-    @State private var showingStats = false
     @EnvironmentObject private var health: NativeHealthStore
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.nativeReduceMotion) private var reduceMotion
@@ -20,14 +19,12 @@ struct DashboardScreen: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: NativeDesign.Space.section) {
                     heading(today: today, now: now)
-                    // DASHBOARD-93-2026-11-21: week, things to do, nutrition, finance, appointments.
+                    // DASHBOARD-93-2026-11-26: week, things to do, nutrition, finance; no appointments, no Statistiche.
                     rollingCalendar(today, now: now)
                     checklist(today: today)
                     NativeNutritionQuickEntry()
                     financeOverview
                     if !layout.inBar(.bloom) { bloomCard }
-                    upcomingAppointments(today: today)
-                    statsCard
                     NativeConnectionBadge()
                     if let notice = store.notice { Text(notice).font(.footnote).foregroundStyle(NativeDesign.secondary) }
                 }.padding(.horizontal, NativeDesign.Layout.screenInset).padding(.top, NativeDesign.Space.small).padding(.bottom, NativeDesign.Layout.scrollClearance)
@@ -57,19 +54,6 @@ struct DashboardScreen: View {
                 }.contentShape(Rectangle())
             }.buttonStyle(NativePressStyle()).accessibilityIdentifier("home-bloom")
         }
-    }
-
-    /// LIFE-STATS-2026-11-25: shifts, spending, calories and the private log of the same days.
-    private var statsCard: some View {
-        NativeCard(density: .compact) {
-            Button { showingStats = true } label: {
-                VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
-                    LOCardHeader(title: "Statistiche", systemImage: "chart.bar.xaxis", section: .calendar, showsChevron: true)
-                    Text("Turni, spese, calorie e incontri degli stessi giorni, messi a confronto.").font(.footnote).foregroundStyle(NativeDesign.secondary)
-                }.contentShape(Rectangle())
-            }.buttonStyle(NativePressStyle()).accessibilityIdentifier("home-stats")
-        }
-        .fullScreenCover(isPresented: $showingStats) { NativeLifeStatsScreen().environmentObject(store) }
     }
 
     private func rollingCalendar(_ today: String, now: Date) -> some View {
@@ -325,46 +309,6 @@ struct DashboardScreen: View {
             }
             .accessibilityElement(children: .combine)
             .accessibilityIdentifier("home-budget-label")
-        }
-    }
-    private func upcomingLabel(_ event: Record) -> String {
-        var parts: [String] = [event.text("title", fallback: "Appuntamento"), CivilDate.label(event.text("day"))]
-        if !event.text("start_time").isEmpty { parts.append(event.text("start_time")) }
-        return parts.joined(separator: ", ")
-    }
-    /// Events after the checklist window, at most three (preview "Prossimi appuntamenti").
-    @ViewBuilder private func upcomingAppointments(today: String) -> some View {
-        let source = store.isDemo ? store.events : store.life.records("upcomingEvents") + store.events
-        let rows = NativeDashboard93.upcoming(events: source, today: today)
-        if !rows.isEmpty {
-            VStack(alignment: .leading, spacing: NativeDesign.Space.medium) {
-                Text("Prossimi appuntamenti").font(.title.bold()).accessibilityAddTraits(.isHeader)
-                LOListCard {
-                    ForEach(rows, id: \.agendaIdentity) { event in
-                        Button { router.sheet = .event(event) } label: {
-                            LOListRow(isLast: event.agendaIdentity == rows.last?.agendaIdentity, leadingInset: NativeDesign.Space.large + NativeDesign.Layout.touchTarget) {
-                                let date = CivilDate.date(event.text("day"))
-                                VStack(spacing: NativeDesign.Space.none) {
-                                    Text(date.formatted(.dateTime.day())).font(.subheadline.weight(.bold)).monospacedDigit()
-                                    Text(date.formatted(.dateTime.month(.abbreviated).locale(Locale(identifier: "it_IT")))).font(.caption2).foregroundStyle(NativeDesign.secondary)
-                                }
-                                .frame(width: NativeDesign.Layout.touchTarget)
-                                VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
-                                    Text(event.text("title", fallback: "Appuntamento")).font(.subheadline).foregroundStyle(.primary).lineLimit(2)
-                                    let detail = event.text("start_time")
-                                    if !detail.isEmpty { Text(detail).font(.footnote).foregroundStyle(NativeDesign.secondary) }
-                                }
-                                Spacer(minLength: NativeDesign.Space.small)
-                                NativeDisclosureIndicator()
-                            }
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(NativePressStyle())
-                        .accessibilityLabel(upcomingLabel(event))
-                        .accessibilityIdentifier("home-upcoming-" + event.agendaIdentity)
-                    }
-                }
-            }
         }
     }
     private func checkRoutine(_ record: Record) {
