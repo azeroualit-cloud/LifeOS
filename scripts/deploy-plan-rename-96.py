@@ -8,11 +8,12 @@ come back as a duplicate in the budget). Every fragment must appear exactly once
 anything else: nothing is written. Upload verified with rollback (shared helper). Never logs source.
 """
 from pathlib import Path
-import importlib.util
+import importlib.util, re
 
 MARKER = '// LIFEOS_PLAN_RENAME_96'
-ROUTE_AFTER = 'if (method === "importBloom") return response(await importBloom(env, args[0]));'
-ROUTE = '\n      if (method === "renameFinancePlan") return response(await renameFinancePlan(env, args[0], args[1]));'
+ROUTE = 'if (method === "renameFinancePlan") return response(await renameFinancePlan(env, args[0], args[1]));'
+# The app Worker has no Bloom route in the plans module: the route goes right before the general write dispatch.
+DISPATCH = re.compile(r'(?:const|let|var)\s+result\s*=\s*await writeAction\(env, method, args\);')
 ANCHOR = 'async function ensureFinanceCategories(env) {'
 MATCHES = (
     ('p.legacy?.type === "recurring" && view.month >= p.legacy.fromMonth).map((p) => p.name)',
@@ -54,19 +55,23 @@ def transform(source):
             print('PLAN_RENAME_CHECK already=1')
             return source
         raise RuntimeError('Rinomina dei piani incompleta; nessuna scrittura.')
-    counts = [source.count(ROUTE_AFTER), source.count(ANCHOR)] + [source.count(old) for old, _ in MATCHES]
-    print('PLAN_RENAME_CHECK route=%d anchor=%d m1=%d m2=%d m3=%d' % tuple(counts))
-    if any(c != 1 for c in counts):
+    dispatch = list(DISPATCH.finditer(source))
+    counts = [len(dispatch), source.count(ANCHOR)] + [source.count(old) for old, _ in MATCHES]
+    print('PLAN_RENAME_CHECK dispatch=%d anchor=%d m1=%d m2=%d m3=%d' % tuple(counts))
+    if any(c != 1 for c in counts) or 'return response(await' not in source[dispatch[0].start() - 4000:dispatch[0].start()]:
         raise RuntimeError('Modulo dei piani non riconosciuto; nessuna scrittura.')
+    at = dispatch[0].start()
+    source = source[:at] + ROUTE + '\n      ' + source[at:]
     for old, new in MATCHES:
         source = source.replace(old, new, 1)
-    source = source.replace(ROUTE_AFTER, ROUTE_AFTER + ROUTE, 1)
     return source.replace(ANCHOR, BLOCK + ANCHOR, 1)
 
 
 def plan_module(entry, parts):
-    holders = [name for name, kind, data in parts
-               if 'source-map' not in kind and not name.endswith('.map') and ROUTE_AFTER in data.decode('utf-8', 'ignore')]
+    def has(data):
+        text = data.decode('utf-8', 'ignore')
+        return MATCHES[0][0] in text or MATCHES[0][1] in text
+    holders = [name for name, kind, data in parts if 'source-map' not in kind and not name.endswith('.map') and has(data)]
     print('PLAN_RENAME_MODULES count=%d' % len(holders))
     if len(holders) != 1:
         raise RuntimeError('Modulo delle rotte non univoco (%d); nessuna scrittura.' % len(holders))

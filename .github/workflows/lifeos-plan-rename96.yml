@@ -2,7 +2,7 @@ name: LifeOS plan rename 96 (audit, deploy)
 # RENAME-EVERYWHERE-2026-11-26: renameFinancePlan on both Workers (DEPLOY-WORKERS-93), legacy recurring plans keep
 # their original name for matching. Starts from the live modules; nothing is written unless every fragment is found
 # exactly once; upload verified with rollback. A push that changes this file is the deliberate start.
-# Attempt 1
+# Attempt 2: route before the write dispatch (the app Worker has no Bloom route in the plans module)
 on:
   push:
     branches: ['codex/build93']
