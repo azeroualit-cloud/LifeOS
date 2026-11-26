@@ -19,6 +19,9 @@ import Foundation
 
     private var reader: Reader?
     private var again = false
+    /// APP-LAG-2026-11-26: the whole Bloom library is read back at most every 5 minutes, or right after sending changes.
+    private var lastBloomRead = Date.distantPast
+    var bloomReadInterval: TimeInterval = 300
     private let defaults: UserDefaults
     private let bloom: NativeBloomStore
 
@@ -272,8 +275,13 @@ import Foundation
             archive.lifeosPendingCollections = []; archive.lifeosDeletedCollections = []
             try bloom.applyServer(archive)
         }
+        let current = bloom.archive
+        let hadChanges = [current.lifeosPendingItems, current.lifeosDeletedItems, current.lifeosPendingCollections, current.lifeosDeletedCollections]
+            .contains { !($0 ?? []).isEmpty }
         try await sendBloomChanges(read)
+        guard hadChanges || Date().timeIntervalSince(lastBloomRead) >= bloomReadInterval else { return }
         try await readBloom(read)
+        lastBloomRead = Date()
     }
 
     private func sendBloomChanges(_ read: Reader) async throws {

@@ -162,6 +162,18 @@ private final class MockAPI: URLProtocol {
         XCTAssertFalse(MockAPI.calls.contains("getFinanceData"))
         XCTAssertFalse(MockAPI.calls.contains("getExtraPlan"))
     }
+    /// APP-LAG-2026-11-26: an identical answer is neither saved again nor republished to the screens.
+    func testIdenticalRefreshDoesNotRewriteTheArchive() async throws {
+        let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
+        let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)
+        try store.configure("https://lifeos-test.invalid")
+        await store.sync()
+        let saved = store.state.refreshedAt, generation = store.financeGeneration
+        XCTAssertNotNil(saved)
+        await store.sync()
+        XCTAssertEqual(store.state.refreshedAt, saved)
+        XCTAssertEqual(store.financeGeneration, generation)
+    }
     func testLifeMutationDoesNotFetchFinanceOrAnalytics() async throws {
         let (directory, session) = try setup(); defer { try? FileManager.default.removeItem(at: directory); session.invalidateAndCancel() }
         let store = NativeStore(directory: directory, session: session, migrateLegacy: false, automaticallySyncsWrites: false)

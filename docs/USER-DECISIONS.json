@@ -1760,6 +1760,16 @@
       "original_quote": "la logica tra app e sito è diversa tipo per il coloramento del grafico, sul sito assicurazione è messo da parte (giustamente). Sull'app invece va negli impegni del mese, come mai? → «Yes, align it»",
       "rule": "L'app usa la regola del sito: quota di un piano tra gli Impegni del mese se pagata ogni mese (stima, anticipo, recupero, spesa fissa non ripartita); altrimenti Messo da parte (es. assicurazione annuale, obiettivi, fondi). Righe senza piano per nome; differenza non spiegata come «Altri impegni del mese».",
       "relation": "Build 96. Allinea l'app al sito, nessun conflitto."
+    },
+    {
+      "id": "APP-LAG-2026-11-26",
+      "status": "ACTIVE",
+      "scope": "Prestazioni dell'app",
+      "recorded_on": "2026-11-26",
+      "provenance": "Messaggio utente in chat Claude, 26/11/2026",
+      "original_quote": "poi tutta l'app lagga, lagga tutta tantissimo, verifica da cos'è causato, se la sincronizzazione o cosa, perché da troppo fastidio",
+      "rule": "L'app non deve rallentare per la sincronizzazione: aggiornamento periodico ogni 2 minuti (non 30 s), risposte decodificate fuori dal thread principale, dati identici non salvati né ridisegnati, libreria Bloom riletta al massimo ogni 5 minuti salvo modifiche. Apertura dell'app, modifiche e aggiornamento manuale restano immediati.",
+      "relation": "Build 96. Causa individuata leggendo il codice, non misurata sul telefono."
     }
   ],
   "pending_confirmations": [

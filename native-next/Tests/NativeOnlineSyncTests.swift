@@ -139,6 +139,7 @@ import XCTest
         defer { try? FileManager.default.removeItem(at: root) }
         let gone = note("Da togliere"); try bloom.save(gone)
         await sync.run()
+        sync.bloomReadInterval = 0 // read the site copy again right away
         server.items.removeValue(forKey: gone.text("id"))
         server.collections["tag-1"] = ["id": .string("tag-1"), "name": .string("Ristoranti"), "doc": .object([:])]
         server.items["site-1"] = ["id": .string("site-1"), "kind": .string("note"), "title": .string("Dal sito"), "url": .string(""), "body": .string("x"), "bodyLength": .int(1), "notes": .string(""), "tags": .array([.string("tag-1")]), "place": .null, "archived": .bool(false), "trashedAt": .null, "modifiedAt": .number(2_100_000_000), "app": .object([:])]
@@ -149,6 +150,20 @@ import XCTest
         // A site note can be edited and saved on the device.
         var edit = try XCTUnwrap(bloom.archive.items.first); edit["title"] = .string("Modificata")
         XCTAssertNoThrow(try bloom.save(edit))
+    }
+
+    /// APP-LAG-2026-11-26: without local changes the Bloom library is not read again before the interval.
+    func testBloomIsNotReadAgainBeforeTheIntervalWithoutChanges() async throws {
+        let (sync, bloom, server, _, root) = try setup()
+        defer { try? FileManager.default.removeItem(at: root) }
+        try bloom.save(note("Prima"))
+        await sync.run()
+        server.calls = []
+        await sync.run()
+        XCTAssertFalse(server.calls.contains("getBloom"), "no local change: no full read 30 s later")
+        var edit = try XCTUnwrap(bloom.archive.items.first); edit["title"] = .string("Cambiata"); try bloom.save(edit)
+        await sync.run()
+        XCTAssertTrue(server.calls.contains("getBloom"), "a local change is followed by a read")
     }
 
     /// FOOD-SYNC-DELTA-2026-11-25: one full read, then only changes, and no check before the interval.

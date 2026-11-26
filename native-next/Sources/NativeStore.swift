@@ -384,8 +384,8 @@ import SwiftUI
             throw NativeRequestRejected(status: http.statusCode, message: text.isEmpty ? "Operazione rifiutata (\(http.statusCode))." : NativePlanRules.serverError(text, status: http.statusCode, method: method))
         }
         guard http.mimeType == "application/json" else { throw Message(text: "Il server non ha restituito JSON. Verifica l’accesso a Life OS.") }
-        let result = try JSONDecoder().decode(JSONValue.self, from: data)
-        return result
+        // APP-LAG-2026-11-26: large answers (finance, Bloom) are decoded away from the main thread.
+        return try await Task.detached(priority: .userInitiated) { try JSONDecoder().decode(JSONValue.self, from: data) }.value
     }
     private func fetchPart(_ method: String, args: [JSONValue], needed: Bool) async -> Result<JSONValue, Error>? {
         guard needed else { return nil }
@@ -404,10 +404,15 @@ import SwiftUI
                 let value = try l.get().object
                 guard case .array? = value["tasks"] else { throw Message(text: "Elenco attività non compatibile.") }
                 let legacy = next.life.records("health")
-                next.life = value
-                if !legacy.isEmpty { next.life["health"] = .array(legacy.map(JSONValue.object)) }
-                for write in next.pending where write.method != "saveHealthEntry" && (write.method != "saveActivity" || !write.accepted) && LocalLifeMutation.supports(write.method) { try LocalLifeMutation.apply(write.method, write.payload, to: &next.life) }
-                next.calendarMonth = cm; next.lifeRefreshedAt = Date(); changed = true
+                var life = value
+                if !legacy.isEmpty { life["health"] = .array(legacy.map(JSONValue.object)) }
+                for write in next.pending where write.method != "saveHealthEntry" && (write.method != "saveActivity" || !write.accepted) && LocalLifeMutation.supports(write.method) { try LocalLifeMutation.apply(write.method, write.payload, to: &life) }
+                // APP-LAG-2026-11-26: identical data is not saved again nor redrawn.
+                if life != next.life || next.calendarMonth != cm {
+                    next.life = life; next.calendarMonth = cm; next.lifeRefreshedAt = Date(); changed = true
+                } else if next.lifeRefreshedAt.map({ Date().timeIntervalSince($0) > 3600 || !Calendar.current.isDateInToday($0) }) ?? true {
+                    next.lifeRefreshedAt = Date(); changed = true // the widget must not look stale (6 h)
+                }
             } catch { failure = error }
         }
         if let f {
@@ -418,10 +423,13 @@ import SwiftUI
                 // Preserve cached charts for this month until the optional analysis refresh finishes.
                 var merged = state.financeMonth == fm ? next.finance : [:]
                 merged.merge(value) { _, new in new }
-                next.finance = merged; next.plan = value.record("extraPlan"); next.financeMonth = fm; next.financeRefreshedAt = Date()
-                changed = true; financeChanged = true
+                if merged != next.finance || next.financeMonth != fm {
+                    next.finance = merged; next.plan = value.record("extraPlan"); next.financeMonth = fm; next.financeRefreshedAt = Date()
+                    changed = true; financeChanged = true
+                }
             } catch { failure = failure ?? error }
         }
+        if next.imported && (l != nil || f != nil) && failure == nil { changed = true } // a fresh read replaces an imported file
         if changed { next.refreshedAt = Date(); next.imported = false; try save(next) }
         if financeChanged { financeGeneration += 1 }
         if let failure { throw failure }

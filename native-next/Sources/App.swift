@@ -135,6 +135,8 @@ struct NativeRoot: View {
     @AppStorage("native-theme") private var theme = "system"
     @State private var currentDay = CivilDate.day()
     @State private var returnedFromBackground = false
+    /// APP-LAG-2026-11-26: the 30 s clock still checks the day, the background refresh runs every 4th tick (2 min).
+    @State private var periodicTicks = 0
     @EnvironmentObject private var health: NativeHealthStore
     @AppStorage("native-reminders-enabled") private var remindersEnabled = false
     @ObservedObject private var layout = NativeAppLayout.shared
@@ -201,7 +203,10 @@ struct NativeRoot: View {
             if day != currentDay {
                 currentDay = day; store.rollover()
                 Task { await store.sync(automatic: true) }
-            } else if scenePhase == .active { Task { await store.sync(automatic: true) } }
+            } else if scenePhase == .active {
+                periodicTicks += 1
+                if periodicTicks % 4 == 0 { Task { await store.sync(automatic: true) } }
+            }
         }
     }
     private func updateReminders() { NativeNotifications.shared.update(life: store.life, enabled: remindersEnabled && !store.isDemo) }
