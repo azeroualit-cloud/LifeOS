@@ -28,6 +28,16 @@ FRAGMENTS = {
     'route_move': 'method === "moveFinanceCategory"',
     'page_usage': 'workerRequest("getFinanceCategoryUsage"',
     'page_old_scan': 'getFinanceData", [y, m]',
+    'r_importBloom_if': 'method === "importBloom")',
+    'r_importBloom_case': 'case "importBloom"',
+    'r_importBloom_any': '"importBloom"',
+    'r_listFoods_if': 'if (method === "listFoods")',
+    'r_writeAction': 'await writeAction(env, method, args)',
+    'r_getSettings': '"getSettings"',
+    'm1': 'p.legacy?.type === "recurring" && view.month >= p.legacy.fromMonth).map((p) => p.name)',
+    'm2': 'currentView.plans.filter((p) => p.legacy?.type === "recurring").map((p) => p.name)',
+    'm3': 'p.legacy?.type === "recurring" && p.name === args[0]',
+    'anchor_ensure': 'async function ensureFinanceCategories(env) {',
 }
 for name in helpers.WORKERS:
     entry, parts = helpers.modules(*api('/workers/scripts/' + name + '/content/v2'))
@@ -35,6 +45,8 @@ for name in helpers.WORKERS:
     for filename, kind, data in parts:
         if 'source-map' in kind or filename.endswith('.map'): continue
         text = data.decode('utf-8', 'ignore')
+        per = {k: text.count(f) for k, f in FRAGMENTS.items() if text.count(f)}
+        print('MODULE', name, len(text), json.dumps(per))
         for k, f in FRAGMENTS.items():
             total[k] += text.count(f) + text.count(f.replace('"', '\\"'))
     print('LIVE', name, json.dumps(total))
