@@ -1056,7 +1056,10 @@ final class NativeInterfaceTests: XCTestCase {
         app.buttons["Fine"].tap(); app.buttons["plan-edit-save"].tap()
         XCTAssertTrue(app.navigationBars["Dettagli piano"].waitForExistence(timeout: 10))
         // FINANCE-ENTRY-SIMPLIFY: «Paga con Nuova spesa» opens Nuova spesa with the plan; «Già registrata?» links a movement.
-        let pay = app.buttons["plan-record-payment"]; reveal(pay, in: app); pay.tap()
+        // PLAN-DETAIL-RICH-2026-11-26: the list stays scrolled after the edit; back to the top, where Paga is.
+        let pay = app.buttons["plan-record-payment"]
+        for _ in 0..<6 where !pay.exists { app.collectionViews.firstMatch.swipeDown(velocity: .fast) }
+        reveal(pay, in: app); pay.tap()
         XCTAssertTrue(app.navigationBars["Nuovo movimento"].waitForExistence(timeout: 10))
         let payAmount = app.textFields["movement-amount"]
         XCTAssertTrue(payAmount.waitForExistence(timeout: 10)); payAmount.tap(); payAmount.typeText("40")

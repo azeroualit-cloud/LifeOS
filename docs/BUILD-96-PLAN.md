@@ -24,3 +24,4 @@ Verifica: compilazione e test unitari superati su 81f396c (run 45736287109), voc
 IPA 96: richiesta dall'utente (IPA-DELIVERY-96-2026-11-26). Candidato `lifeos-candidate96.yml` / `scripts/verify-candidate96.py`, versione 0.10.34 build 96, avvio 1.
 Avvio 1 del candidato 96 fallito in compilazione (due espressioni troppo lente da verificare: Dettagli piano e grafico del fondo); spezzate in viste piccole. Avvio 2.
 Avvio 2: tutto passato tranne due test (anche nel controllo iniziale): dai dettagli di Salute aperti da Obiettivi e statistiche il tasto indietro tornava alla pagina principale (destinazioni spostate nella schermata delle statistiche) e il test del piano non sapeva scorrere la lista di Dettagli piano (reveal corretto). Avvio 3.
+Avvio 3: falliti solo due test (Rev78 controllava Peso/Alimento dentro Obiettivi e statistiche; nel test del piano la lista restava scorsa e «Paga con Nuova spesa» non era disegnato). Test corretti. Avvio 4.

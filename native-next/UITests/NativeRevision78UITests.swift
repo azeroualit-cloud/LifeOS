@@ -68,6 +68,8 @@ final class NativeRevision78UITests: XCTestCase {
         XCTAssertLessThan(rows[0].frame.midY, rows[3].frame.midY)
         XCTAssertLessThan(rows[3].frame.midY, rows[2].frame.midY)
         capture("78-health-summary", app)
+        app.navigationBars.buttons.firstMatch.tap() // SALUTE-SINGLE-ENTRY: Peso and Alimento sit on the Salute page
+        XCTAssertTrue(app.buttons["health-add-weight"].waitForExistence(timeout: 10))
         let surface = app.scrollViews["health-detail-scroll"]
         let food = app.buttons["health-add-nutrition"]
         for (id, title) in [("health-add-weight", "Aggiungi peso"), ("health-add-nutrition", "Aggiungi alimento")] {
@@ -88,6 +90,7 @@ final class NativeRevision78UITests: XCTestCase {
         surface.swipeUp()
         XCTAssertEqual(weight.frame.minY, initialWeightFrame.minY, accuracy: 1)
         XCTAssertEqual(food.frame.minY, initialFoodFrame.minY, accuracy: 1)
+        app.openHealthStats() // back into Obiettivi e statistiche for the simulation
         for _ in 0..<8 where !rows[3].isHittable { surface.swipeUp() }
         rows[3].tap()
         let caloriesMode = app.buttons["simulation-mode-calories"]
