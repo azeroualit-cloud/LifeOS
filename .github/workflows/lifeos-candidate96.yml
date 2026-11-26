@@ -1,5 +1,5 @@
 name: LifeOS candidate 96 validation and authorized IPA
-# Start 1 for IPA-DELIVERY-96-2026-11-26 («e veloce che voglio l'ipa»): same pipeline as candidate 95 (targeted check, six shards and the Release launches at once, packaging after every gate; a shard without a runner can be re-run alone).
+# Start 2 (start 1: two expressions too slow to type-check, plan detail and fund chart) for IPA-DELIVERY-96-2026-11-26 («e veloce che voglio l'ipa»): same pipeline as candidate 95 (targeted check, six shards and the Release launches at once, packaging after every gate; a shard without a runner can be re-run alone).
 # targeted check, six test shards and the Release launches all start at once; packaging waits for every gate.
 on:
   workflow_dispatch:

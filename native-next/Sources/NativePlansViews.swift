@@ -320,12 +320,7 @@ struct NativePlanDetail: View {
         List {
             Section {
                 // RENAME-EVERYWHERE-2026-11-26: the name is changed where it is shown.
-                HStack(alignment: .firstTextBaseline) {
-                    Text(plan.text("name")).font(NativeDesign.heading)
-                    Spacer(minLength: NativeDesign.Space.small)
-                    Button { renaming = true } label: { Label("Rinomina", systemImage: "pencil") }
-                        .font(.subheadline).accessibilityIdentifier("plan-rename")
-                }
+                NativePlanNameHeader(name: plan.text("name")) { renaming = true }
                 LabeledContent("Tipo", value: NativePlanKind(rawValue: plan.text("kind"))?.title ?? "Piano")
                 LabeledContent("Stato") { Text(NativePlanRules.stateTitle(plan.text("status"))).accessibilityIdentifier("plan-status") }
                 LabeledContent("Primo mese", value: CivilDate.monthTitle(plan.text("startMonth")))
@@ -356,28 +351,7 @@ struct NativePlanDetail: View {
                 }
             }
             // PLAN-DETAIL-RICH-2026-11-26: fund and forecast, month by month, linked movements.
-            let history = NativePlanHistory.months(plan: plan, payments: payments)
-            if !history.isEmpty {
-                Section("Fondo e previsione") {
-                    NativePlanFundChart(history: history, forecast: NativePlanHistory.forecast(plan: plan, from: history),
-                                        dueCents: ["goal", "fixed"].contains(plan.text("kind")) ? plan.integer("amountCents") : nil)
-                }
-                Section("Mese per mese") {
-                    ForEach(history.reversed()) { m in
-                        HStack {
-                            Text(CivilDate.monthTitle(m.month)).font(.subheadline)
-                            Spacer(minLength: NativeDesign.Space.small)
-                            VStack(alignment: .trailing, spacing: NativeDesign.Space.xxs) {
-                                Text("quota " + (Double(m.quotaCents) / 100).euro + (m.paidCents > 0 ? " · pagato " + (Double(m.paidCents) / 100).euro : "")).font(.footnote).foregroundStyle(NativeDesign.secondary)
-                                Text("nel fondo " + (Double(m.fundCents) / 100).euro).font(.subheadline.weight(.semibold))
-                            }.monospacedDigit()
-                        }
-                        .accessibilityElement(children: .combine)
-                        .accessibilityIdentifier("plan-month-" + m.month)
-                    }
-                    Text("Stima dalle quote e dai pagamenti del piano.").font(.footnote).foregroundStyle(NativeDesign.secondary)
-                }
-            }
+            NativePlanRichSections(plan: plan, payments: payments)
             NativePlanLinkedMovements(payments: payments)
             Section("Pagamenti") {
                 if payments.isEmpty { Text("Nessun pagamento registrato").foregroundStyle(NativeDesign.secondary) }

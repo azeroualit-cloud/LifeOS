@@ -22,3 +22,4 @@ Verifica: compilazione e test unitari superati su 81f396c (run 45736287109), voc
 
 
 IPA 96: richiesta dall'utente (IPA-DELIVERY-96-2026-11-26). Candidato `lifeos-candidate96.yml` / `scripts/verify-candidate96.py`, versione 0.10.34 build 96, avvio 1.
+Avvio 1 del candidato 96 fallito in compilazione (due espressioni troppo lente da verificare: Dettagli piano e grafico del fondo); spezzate in viste piccole. Avvio 2.

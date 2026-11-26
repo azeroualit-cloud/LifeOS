@@ -44,6 +44,20 @@ enum NativePlanHistory {
     }
 }
 
+/// Plan name with its ✎ Rinomina button.
+struct NativePlanNameHeader: View {
+    let name: String
+    let onRename: () -> Void
+    var body: some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text(name).font(NativeDesign.heading)
+            Spacer(minLength: NativeDesign.Space.small)
+            Button(action: onRename) { Label("Rinomina", systemImage: "pencil") }
+                .font(.subheadline).accessibilityIdentifier("plan-rename")
+        }
+    }
+}
+
 struct NativePlanRenameSheet: View {
     @EnvironmentObject var store: NativeStore
     @Environment(\.dismiss) private var dismiss
@@ -93,47 +107,99 @@ struct NativePlanRenameSheet: View {
     }
 }
 
+/// Fund and forecast, then month by month (small views keep the type checker fast).
+struct NativePlanRichSections: View {
+    let plan: Record
+    let payments: [Record]
+    var body: some View {
+        let history = NativePlanHistory.months(plan: plan, payments: payments)
+        if !history.isEmpty {
+            Section("Fondo e previsione") {
+                NativePlanFundChart(history: history, forecast: NativePlanHistory.forecast(plan: plan, from: history),
+                                    dueCents: ["goal", "fixed"].contains(plan.text("kind")) ? plan.integer("amountCents") : nil)
+            }
+            Section("Mese per mese") {
+                ForEach(history.reversed()) { m in NativePlanMonthRow(month: m) }
+                Text("Stima dalle quote e dai pagamenti del piano.").font(.footnote).foregroundStyle(NativeDesign.secondary)
+            }
+        }
+    }
+}
+
+private struct NativePlanMonthRow: View {
+    let month: NativePlanHistory.Month
+    private func euro(_ cents: Int) -> String { (Double(cents) / 100).euro }
+    var body: some View {
+        let detail: String = "quota " + euro(month.quotaCents) + (month.paidCents > 0 ? " · pagato " + euro(month.paidCents) : "")
+        let fund: String = "nel fondo " + euro(month.fundCents)
+        return HStack {
+            Text(CivilDate.monthTitle(month.month)).font(.subheadline)
+            Spacer(minLength: NativeDesign.Space.small)
+            VStack(alignment: .trailing, spacing: NativeDesign.Space.xxs) {
+                Text(detail).font(.footnote).foregroundStyle(NativeDesign.secondary)
+                Text(fund).font(.subheadline.weight(.semibold))
+            }.monospacedDigit()
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("plan-month-" + month.month)
+    }
+}
+
 /// Fund at the end of each month, then the dashed forecast; the amount due as a dashed rule.
 struct NativePlanFundChart: View {
     let history: [NativePlanHistory.Month]
     let forecast: [NativePlanHistory.Month]
     let dueCents: Int?
 
+    private struct Point: Identifiable { let date: Date; let euro: Double; var id: Date { date } }
+    private func points(_ months: [NativePlanHistory.Month]) -> [Point] {
+        months.map { Point(date: CivilDate.date($0.month + "-01"), euro: Double($0.fundCents) / 100) }
+    }
+    private var green: Color { NativeDesign.financialGreen }
+    private var spoken: String {
+        let now: String = history.last.map { (Double($0.fundCents) / 100).euro } ?? "—"
+        let later: String = forecast.last.map { ", previsto " + (Double($0.fundCents) / 100).euro + " a " + CivilDate.monthTitle($0.month) } ?? ""
+        return "Fondo del piano: " + now + later
+    }
+
     var body: some View {
-        let green = NativeDesign.financialGreen
-        let date = { (month: String) in CivilDate.date(month + "-01") }
-        Chart {
-            ForEach(history) { m in
-                AreaMark(x: .value("Mese", date(m.month)), y: .value("Fondo", Double(m.fundCents) / 100))
+        let past: [Point] = points(history)
+        let future: [Point] = points(history.suffix(1) + forecast)
+        return Chart {
+            ForEach(past) { p in
+                AreaMark(x: .value("Mese", p.date), y: .value("Fondo", p.euro))
                     .foregroundStyle(LinearGradient(colors: [green.opacity(0.2), green.opacity(0)], startPoint: .top, endPoint: .bottom))
-                LineMark(x: .value("Mese", date(m.month)), y: .value("Fondo", Double(m.fundCents) / 100), series: .value("Serie", "Fondo"))
+            }
+            ForEach(past) { p in
+                LineMark(x: .value("Mese", p.date), y: .value("Fondo", p.euro), series: .value("Serie", "Fondo"))
                     .foregroundStyle(green).lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
             }
-            if let last = history.last {
-                ForEach([last] + forecast) { m in
-                    LineMark(x: .value("Mese", date(m.month)), y: .value("Fondo", Double(m.fundCents) / 100), series: .value("Serie", "Previsione"))
-                        .foregroundStyle(green.opacity(0.6)).lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round, dash: [5, 5]))
-                }
-                PointMark(x: .value("Mese", date(last.month)), y: .value("Fondo", Double(last.fundCents) / 100)).foregroundStyle(green).symbolSize(50)
+            ForEach(future) { p in
+                LineMark(x: .value("Mese", p.date), y: .value("Fondo", p.euro), series: .value("Serie", "Previsione"))
+                    .foregroundStyle(green.opacity(0.6)).lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round, dash: [5, 5]))
             }
-            if let dueCents, dueCents > 0 {
-                RuleMark(y: .value("Da coprire", Double(dueCents) / 100))
-                    .foregroundStyle(NativeDesign.secondary.opacity(0.6)).lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
-                    .annotation(position: .top, alignment: .leading) { Text("da coprire " + (Double(dueCents) / 100).euro).font(.caption2).foregroundStyle(NativeDesign.secondary) }
+            if let last = past.last {
+                PointMark(x: .value("Mese", last.date), y: .value("Fondo", last.euro)).foregroundStyle(green).symbolSize(50)
             }
+            if let dueCents, dueCents > 0 { dueRule(Double(dueCents) / 100) }
         }
         .chartXAxis { AxisMarks(values: .automatic(desiredCount: 4)) { _ in AxisValueLabel(format: .dateTime.month(.abbreviated)) } }
-        .chartYAxis {
-            AxisMarks(position: .trailing, values: .automatic(desiredCount: 4)) { value in
-                AxisGridLine().foregroundStyle(NativeDesign.secondary.opacity(0.25))
-                AxisValueLabel { if let euro = value.as(Double.self) { Text(euro.formatted(.number.precision(.fractionLength(0))) + " €") } }
-            }
-        }
+        .chartYAxis { AxisMarks(position: .trailing, values: .automatic(desiredCount: 4)) { value in axisMark(value) } }
         .chartLegend(.hidden)
         .frame(height: NativeDesign.Layout.healthChartHeight * 0.8)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Fondo del piano: " + (history.last.map { (Double($0.fundCents) / 100).euro } ?? "—") + (forecast.last.map { ", previsto " + (Double($0.fundCents) / 100).euro + " a " + CivilDate.monthTitle($0.month) } ?? ""))
+        .accessibilityLabel(spoken)
         .accessibilityIdentifier("plan-fund-chart")
+    }
+
+    private func dueRule(_ euro: Double) -> some ChartContent {
+        RuleMark(y: .value("Da coprire", euro))
+            .foregroundStyle(NativeDesign.secondary.opacity(0.6)).lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
+            .annotation(position: .top, alignment: .leading) { Text("da coprire " + euro.euro).font(.caption2).foregroundStyle(NativeDesign.secondary) }
+    }
+    @AxisMarkBuilder private func axisMark(_ value: AxisValue) -> some AxisMark {
+        AxisGridLine().foregroundStyle(NativeDesign.secondary.opacity(0.25))
+        AxisValueLabel { if let euro = value.as(Double.self) { Text(euro.formatted(.number.precision(.fractionLength(0))) + " €") } }
     }
 }
 
