@@ -442,8 +442,9 @@ final class NativeInterfaceTests: XCTestCase {
         capture("navigation-selection-after-repeated-changes")
     }
     private func reveal(_ element: XCUIElement, in app: XCUIApplication) {
-        let detailScroll = app.scrollViews["health-detail-scroll"]
-        let scroll = detailScroll.exists ? detailScroll : app.scrollViews["dashboard-scroll"]
+        // PLAN-DETAIL-RICH-2026-11-26: lists (Dettagli piano) scroll too.
+        let scroll = [app.scrollViews["health-detail-scroll"], app.scrollViews["dashboard-scroll"], app.collectionViews.firstMatch, app.scrollViews.firstMatch]
+            .first { $0.exists } ?? app.windows.firstMatch
         for _ in 0..<12 {
             if element.isHittable { return }
             let above = element.exists && element.frame.midY < scroll.frame.minY

@@ -100,13 +100,6 @@ struct NativeHealthDetail: View {
             }
             .navigationDestination(isPresented: $showingHistory) { NativeNutritionScreen() }
             .navigationDestination(isPresented: $showingStats) { statsScreen }
-            .navigationDestination(item: $openedMetric) { metric in
-                switch metric {
-                case .tdee: NativeTDEEScreen(health: health)
-                case .simulation: NativeWeightSimulationScreen(health: health)
-                default: NativeHealthMetricDetail(metric: metric, health: health, demo: demo)
-                }
-            }
             .background(NativeDesign.healthCanvas)
             .navigationTitle("Salute")
             .navigationBarTitleDisplayMode(.inline)
@@ -251,6 +244,14 @@ struct NativeHealthDetail: View {
         .navigationTitle("Obiettivi e statistiche")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.visible, for: .navigationBar)
+        // The details open from here, so going back returns to Obiettivi e statistiche.
+        .navigationDestination(item: $openedMetric) { metric in
+            switch metric {
+            case .tdee: NativeTDEEScreen(health: health)
+            case .simulation: NativeWeightSimulationScreen(health: health)
+            default: NativeHealthMetricDetail(metric: metric, health: health, demo: demo)
+            }
+        }
     }
     private var goalsCard: some View {
         let targets = health.goalTargets
