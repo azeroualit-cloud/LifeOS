@@ -1,0 +1,46 @@
+name: LifeOS D1 usage audit (read-only)
+# APP-LAG / D1 limit 26/11/2026 («D1 daily operation limit 91% reached»): which queries use the daily
+# rows read/written. Reads Cloudflare analytics only; writes nothing. Logs SQL statements (no parameters),
+# counts and rows; no records, names or amounts.
+# Attempt 1
+on:
+  push:
+    branches: ['codex/build93']
+    paths: ['.github/workflows/lifeos-d1-usage-audit96.yml']
+permissions:
+  contents: read
+jobs:
+  audit:
+    if: github.repository == 'azeroualit-cloud/LifeOS'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: D1 usage by day and by query
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import os, json, urllib.request, datetime
+          ACCOUNT = '1728c3b1b852eb6285646842db7256de'; DB = 'a90a8c6d-d6eb-4dc6-8fdb-382e4ad4485a'
+          def gql(query, variables):
+              body = json.dumps({'query': query, 'variables': variables}).encode()
+              r = urllib.request.Request('https://api.cloudflare.com/client/v4/graphql', data=body, method='POST',
+                  headers={'Authorization': 'Bearer ' + os.environ['CLOUDFLARE_API_TOKEN'], 'Content-Type': 'application/json'})
+              with urllib.request.urlopen(r, timeout=60) as resp: return json.loads(resp.read())
+          now = datetime.datetime.now(datetime.timezone.utc)
+          start = (now - datetime.timedelta(days=3)).strftime('%Y-%m-%d')
+          daily = gql('''query($a:String!,$db:String!,$s:Date!){viewer{accounts(filter:{accountTag:$a}){d1AnalyticsAdaptiveGroups(limit:10,filter:{date_geq:$s,databaseId:$db},orderBy:[date_ASC]){sum{readQueries writeQueries rowsRead rowsWritten} dimensions{date}}}}}''',
+              {'a': ACCOUNT, 'db': DB, 's': start})
+          if daily.get('errors'): print('DAILY_ERRORS', json.dumps(daily['errors'])[:800])
+          for g in (((daily.get('data') or {}).get('viewer') or {}).get('accounts') or [{}])[0].get('d1AnalyticsAdaptiveGroups', []) or []:
+              print('DAY', g['dimensions']['date'], json.dumps(g['sum']))
+          since = (now - datetime.timedelta(hours=24)).strftime('%Y-%m-%dT%H:%M:%SZ'); until = now.strftime('%Y-%m-%dT%H:%M:%SZ')
+          q = gql('''query($a:String!,$db:String!,$s:Time!,$u:Time!){viewer{accounts(filter:{accountTag:$a}){d1QueriesAdaptiveGroups(limit:40,filter:{datetime_geq:$s,datetime_leq:$u,databaseId:$db},orderBy:[sum_rowsRead_DESC]){count sum{rowsRead rowsWritten} dimensions{query}}}}}''',
+              {'a': ACCOUNT, 'db': DB, 's': since, 'u': until})
+          if q.get('errors'): print('QUERY_ERRORS', json.dumps(q['errors'])[:800])
+          rows = (((q.get('data') or {}).get('viewer') or {}).get('accounts') or [{}])[0].get('d1QueriesAdaptiveGroups', []) or []
+          total = sum(g['sum']['rowsRead'] for g in rows) or 1
+          for g in rows:
+              sql = ' '.join(g['dimensions']['query'].split())[:220]
+              print('Q|calls=%d|rowsRead=%d (%.1f%%)|rowsWritten=%d|%s' % (g['count'], g['sum']['rowsRead'], 100 * g['sum']['rowsRead'] / total, g['sum']['rowsWritten'], sql))
+          PY
