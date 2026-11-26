@@ -8,3 +8,5 @@ Voci decise per la 96 (registro: docs/USER-DECISIONS.md). Nessuna IPA senza appr
 4. Layout della Dashboard dal sito (SITE-LAYOUT-CONFIG-2026-11-25).
 5. Analisi del sito più ricca (ANALYSIS-SITE-FREEHAND-2026-11-25).
 6. Ricerca alimenti del sito con varianti (mockup non ancora approvato).
+
+Verifica: compilazione e test unitari superati su 81f396c (run 45736287109), voci 1 e 2 comprese. Nessuna prova sull'iPhone.
