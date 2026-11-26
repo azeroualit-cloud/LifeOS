@@ -514,3 +514,5 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 - **PLAN-DETAIL-RICH-2026-11-26 — ACTIVE.** «nei dettagli piano [...] molti più dati [...] i suoi movimenti»: contenuti da confermare, mockup prima.
 
 - **Risposte META-01 del 26/11/2026.** DASHBOARD-93-2026-11-21 → SUPERSEDED da **DASHBOARD-93-2026-11-26** (senza Prossimi appuntamenti e Statistiche, «Yes, remove it»). LIFE-STATS-2026-11-25 → SUPERSEDED da **LIFE-STATS-2026-11-26** (Statistiche solo sul sito, «Site only»). DASHBOARD-TRIM ora ACTIVE. RENAME-EVERYWHERE: piani, spese e movimenti, categorie, tutto ciò che ha un nome. PLAN-DETAIL-RICH: movimenti collegati, storico mese per mese, grafico del fondo con previsione.
+
+- **IPA-DELIVERY-96-2026-11-26 — ACTIVE.** «e veloce che voglio l'ipa»: IPA 96 appena pronte le voci della 96; sostituisce IPA-HOLD-2026-11-26. Precisazione SALUTE-SINGLE-ENTRY: Micronutrienti visibili nella pagina di Salute, Obiettivi dentro «Obiettivi e statistiche»; ingressi: Obiettivi e statistiche, Cronologia.

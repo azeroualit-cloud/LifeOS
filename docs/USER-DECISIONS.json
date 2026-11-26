@@ -1787,13 +1787,15 @@
     },
     {
       "id": "IPA-HOLD-2026-11-26",
-      "status": "ACTIVE",
+      "status": "SUPERSEDED",
       "scope": "Build 96",
       "recorded_on": "2026-11-26",
       "provenance": "Messaggio utente in chat Claude, 26/11/2026",
       "original_quote": "no ipa yet",
       "rule": "Nessuna IPA della 96 finché l'utente non la chiede.",
-      "relation": "Conferma la regola: IPA solo su approvazione esplicita."
+      "relation": "Conferma la regola: IPA solo su approvazione esplicita.",
+      "superseded_by": "IPA-DELIVERY-96-2026-11-26",
+      "superseded_on": "2026-11-26"
     },
     {
       "id": "CATEGORY-TOOLS-96-2026-11-26",
@@ -1827,8 +1829,9 @@
       "id": "SALUTE-SINGLE-ENTRY-2026-11-26",
       "status": "ACTIVE",
       "scope": "Sezione Salute dell'app",
-      "rule": "Un solo punto di ingresso per ogni sezione di Salute (Cronologia; Statistiche con peso e simulazione, grafico calorie, TDEE e impostazioni della simulazione): niente più strade diverse per la stessa cosa.",
-      "relation": "Precisa SALUTE-REDESIGN-2026-11-26 (stesso aspetto, ingressi riorganizzati). Da progettare con un mockup."
+      "rule": "Un solo punto di ingresso per ogni sezione di Salute (Cronologia; Statistiche con peso e simulazione, grafico calorie, TDEE e impostazioni della simulazione): niente più strade diverse per la stessa cosa. Precisazione 26/11: i Micronutrienti restano visibili nella pagina principale di Salute (parafrasi di «micronutrienti nella dashboard», intesa come la pagina di Salute); gli Obiettivi stanno dentro la sezione statistiche, chiamata «Obiettivi e statistiche». Ingressi: Obiettivi e statistiche, Cronologia.",
+      "relation": "Precisa SALUTE-REDESIGN-2026-11-26 (stesso aspetto, ingressi riorganizzati). Da progettare con un mockup.",
+      "mockup": "https://claude.ai/artifact/QJRYZC7cdtF91T7tHHxu5K (con le precisazioni)"
     },
     {
       "recorded_on": "2026-11-26",
@@ -1875,6 +1878,18 @@
         "LIFE-STATS-2026-11-25"
       ],
       "conflict_check": "Conflitto con LIFE-STATS-2026-11-25 (ingresso dalla Dashboard) segnalato e confermato (META-01)."
+    },
+    {
+      "id": "IPA-DELIVERY-96-2026-11-26",
+      "status": "ACTIVE",
+      "scope": "Build 96",
+      "recorded_on": "2026-11-26",
+      "provenance": "Messaggio utente in chat Claude, 26/11/2026",
+      "original_quote": "micronutrienti nella dashboard, obiettivi dentro statistiche (cambia il nome in Obiettivi e Statistiche or sum like that), e veloce che voglio l'ipa",
+      "rule": "Produrre l'IPA 96 il prima possibile con le voci della 96 pronte (Salute nuova, Dashboard ridotta, sincronizzazione leggera, grafico dello stipendio, Dettagli piano e Rinomina). Accettazione solo dell'utente.",
+      "supersedes": [
+        "IPA-HOLD-2026-11-26"
+      ]
     }
   ],
   "pending_confirmations": [
