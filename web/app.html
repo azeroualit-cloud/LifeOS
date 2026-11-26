@@ -10016,14 +10016,14 @@ function catHtml() {
 }
 function catInactiveHtml(doc) {
   if (!cat.scan) return `<p class="hint">Legge i movimenti degli ultimi 3 anni (resta tutto qui, non cambia niente finché non sposti).</p>`;
-  const active = new Set(catAll(doc)), rows = [...cat.scan.entries()].filter(([name]) => !active.has(name)).sort((a, b) => b[1].rows.size - a[1].rows.size);
+  const active = new Set(catAll(doc)), rows = [...cat.scan.entries()].filter(([name]) => !active.has(name)).sort((a, b) => b[1].count - a[1].count);
   if (!rows.length) return `<p class="empty">Nessuna categoria non attiva: tutti i movimenti usano categorie dell'elenco.</p>`;
   const options = (sel) => doc.groups.map((g) => `<optgroup label="${catE(g.name)}">${g.items.map((i) => `<option ${i === sel ? "selected" : ""}>${catE(i)}</option>`).join("")}</optgroup>`).join("") + `<optgroup label="Entrate">${(doc.income || []).map((i) => `<option>${catE(i)}</option>`).join("")}</optgroup>`;
   return `<div class="cat-inactive-list">${rows.map(([name, v]) => { const busy = cat.moving && cat.moving.from === name;
-    return `<div class="cat-row"><span><b>${catE(name)}</b><small>${v.rows.size} movimenti · ${catE(v.first)} – ${catE(v.last)} · ${catE([...v.types].join(", "))}</small></span>
+    return `<div class="cat-row"><span><b>${catE(name)}</b><small>${v.count} ${v.count === 1 ? "movimento" : "movimenti"} · ${catE(v.first)} – ${catE(v.last)} · ${catE([...v.types].join(", "))}</small></span>
       <label class="cat-to">Sposta in<select data-cat-target="${catE(name)}">${options(catSuggest(name, doc))}</select></label>
       <button type="button" class="save" data-cat-move="${catE(name)}" ${cat.moving ? "disabled" : ""}>${busy ? catE(cat.moving.text) : "Sposta"}</button></div>`; }).join("")}</div>
-    <p class="hint">«Sposta» cambia la categoria dei movimenti uno per uno e la segna come scelta a mano: le regole automatiche non la cambiano più. Per tenere una categoria, aggiungila come voce in un gruppo.</p>`;
+    <p class="hint">«Sposta» cambia insieme la categoria di tutti questi movimenti e la segna come scelta a mano: le regole automatiche non la cambiano più. Per tenere una categoria, aggiungila come voce in un gruppo.</p>`;
 }
 /* Suggerimento iniziale: la stessa voce, o la più vicina della proposta. */
 function catSuggest(name, doc) {
@@ -10031,38 +10031,39 @@ function catSuggest(name, doc) {
   const all = catAll(doc), want = map[name];
   return want && all.includes(want) ? want : all.includes("Altro") ? "Altro" : all[0];
 }
+/* CATEGORY-TOOLS-96 (26/11/2026: «Sposta ... nulla è stato spostato», D1 al 91 %): una sola lettura sul server per
+   contare i movimenti per categoria e un solo spostamento per categoria, che dice quanti movimenti sono passati
+   e quanti restano. Prima: 36 letture complete dei mesi per cercare e una richiesta per ogni movimento. */
 async function catScan() {
-  const found = new Map(), now = new Date(), seen = new Set();
-  for (let back = 35; back >= 0; back--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - back, 1), y = d.getFullYear(), m = d.getMonth() + 1;
-    cat.scanning = `Lettura ${String(m).padStart(2, "0")}/${y}…`; catRender();
-    let data = null;
-    for (let attempt = 0; attempt < 3 && !data; attempt++) { try { data = await workerRequest("getFinanceData", [y, m]); } catch (e) { await new Promise((r) => setTimeout(r, 1500 * (attempt + 1))); } }
-    for (const t of (data && data.transactions) || []) {
-      const key = String(t.row) + "|" + t.date; if (seen.has(key) || !t.row) continue; seen.add(key);
-      const names = new Set([t.category, t.displayCategory].filter(Boolean).map(String));
-      for (const name of names) {
-        const v = found.get(name) || { rows: new Map(), types: new Set(), first: t.date, last: t.date };
-        v.rows.set(Number(t.row), t.category); v.types.add(t.type || ""); if (t.date < v.first) v.first = t.date; if (t.date > v.last) v.last = t.date;
+  cat.scanning = "Lettura dei movimenti…"; cat.error = ""; catRender();
+  try {
+    const r = await workerRequest("getFinanceCategoryUsage", []);
+    const found = new Map();
+    for (const x of (r && r.rows) || []) {
+      for (const name of new Set([x.shown, x.raw].filter(Boolean).map(String))) {
+        const v = found.get(name) || { count: 0, types: new Set(), first: x.first || "", last: x.last || "" };
+        v.count += Number(x.n) || 0; if (x.type) v.types.add(x.type);
+        if (x.first && (!v.first || x.first < v.first)) v.first = x.first;
+        if (x.last && x.last > v.last) v.last = x.last;
         found.set(name, v);
       }
     }
-  }
-  cat.scan = found; cat.scanning = ""; catRender();
+    cat.scan = found;
+  } catch (e) { cat.error = "Ricerca non riuscita: " + String(e.message || e); }
+  cat.scanning = ""; catRender();
 }
 async function catMove(from, to) {
-  const v = cat.scan && cat.scan.get(from); if (!v || !to) return;
-  const rows = [...v.rows.keys()]; let done = 0, failed = 0;
-  cat.moving = { from, text: "0/" + rows.length }; cat.error = ""; catRender();
-  for (const row of rows) {
-    try { await workerRequest("classifyMovement", [row, to]); done++; } catch (e) { failed++; }
-    cat.moving.text = done + failed + "/" + rows.length; catRender();
-  }
-  cat.moving = null;
-  cat.msg = `${from} → ${to}: ${done} movimenti spostati${failed ? `, ${failed} non riusciti (riprova)` : ""}.`;
-  for (const row of rows) { const t = cat.scan.get(to) || { rows: new Map(), types: new Set(v.types), first: v.first, last: v.last }; t.rows.set(row, to); cat.scan.set(to, t); }
-  if (!failed) cat.scan.delete(from);
-  catRender();
+  if (!cat.scan || !cat.scan.get(from) || !to) return;
+  cat.moving = { from, text: "Sposto…" }; cat.error = ""; cat.msg = ""; catRender();
+  try {
+    const r = await workerRequest("moveFinanceCategory", [from, to]);
+    const moved = Number(r && r.moved) || 0, left = Number(r && r.remaining) || 0;
+    cat.moving = null;
+    cat.msg = `${from} → ${to}: ${moved} ${moved === 1 ? "movimento spostato" : "movimenti spostati"}` + (left ? `; ${left} ancora in «${from}», riprova o controlla le regole` : "") + ".";
+    await catScan();
+    return;
+  } catch (e) { cat.error = "Spostamento non riuscito: " + String(e.message || e); }
+  cat.moving = null; catRender();
 }
 function catRender() {
   const host = document.getElementById("cat95");
@@ -10104,7 +10105,7 @@ document.addEventListener("click", async (e) => {
   if (mv) {
     const from = mv.dataset.catMove, to = document.querySelector(`[data-cat-target="${CSS.escape(from)}"]`)?.value;
     if (!to || to === from) return;
-    if (!confirm(`Spostare ${cat.scan.get(from)?.rows.size || 0} movimenti da «${from}» a «${to}»?`)) return;
+    if (!confirm(`Spostare ${cat.scan.get(from)?.count || 0} movimenti da «${from}» a «${to}»?`)) return;
     catMove(from, to); return;
   }
 });
