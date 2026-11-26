@@ -20,14 +20,36 @@ enum NativeSalaryMap {
         return savingWords.contains { lower.contains($0) }
     }
 
-    /// Commitments and savings come from the monthly breakdown, spending from the month's
-    /// categories (largest four, the rest as "Altro"), the free part from the remaining budget.
-    static func items(summary: Record, categories: [Record]) -> [NativeSalaryItem] {
+    /// SALARY-MAP-PLAN-KIND-2026-11-26 (same rule as the site): a plan's monthly quota is a commitment
+    /// when it is paid every month (estimate, advance, recovery, or a fixed cost not spread over months),
+    /// otherwise it is set aside (a yearly insurance, a goal, a fund).
+    static func isMonthlyCommitment(_ plan: Record) -> Bool {
+        let kind = plan.text("kind")
+        return ["estimated", "advance", "recovery"].contains(kind) || (kind == "fixed" && plan.integer("intervalMonths") <= 1)
+    }
+
+    /// Commitments and savings come from the plans' quotas of the month and the breakdown rows without a plan,
+    /// spending from the month's categories (largest four, the rest as "Altro"), the free part from the remaining budget.
+    static func items(summary: Record, categories: [Record], plans: [Record] = []) -> [NativeSalaryItem] {
         var result: [NativeSalaryItem] = []
+        for plan in plans {
+            let value = Double(plan.integer("contributionCents")) / 100, name = plan.text("name")
+            guard value > 0, !name.isEmpty else { continue }
+            result.append(NativeSalaryItem(name: name, group: isMonthlyCommitment(plan) ? 0 : 1, value: value))
+        }
         for row in summary.records("monthlyBudgetBreakdown") {
             let value = row.amount("amount"), name = row.text("name")
             guard value > 0, !name.isEmpty else { continue }
+            // With the plans known, a row tied to a plan is already counted above.
+            if !plans.isEmpty, !row.text("planId").isEmpty || row.integer("planId") != 0 { continue }
             result.append(NativeSalaryItem(name: name, group: isSaving(name) ? 1 : 0, value: value))
+        }
+        if !plans.isEmpty {
+            // As on the site: what the budget committed but no single plan explains.
+            let salary = summary.amount("monthlySalary"), spentNow = max(0, summary.amount("monthlySpent"))
+            let committedTotal = max(0, salary - spentNow - summary.amount("monthlyRemaining"))
+            let difference = committedTotal - result.reduce(0) { $0 + $1.value }
+            if salary > 0, difference > 0.5 { result.append(NativeSalaryItem(name: "Altri impegni del mese", group: 0, value: difference)) }
         }
         // A commitment (rent, bills) paid this month also appears among the categories:
         // count it once, as a commitment (build 95, «Affitto» was shown twice).
@@ -266,11 +288,12 @@ struct NativeBudgetHero93: View {
 struct NativeSalaryMapCard: View {
     let summary: Record
     let categories: [Record]
+    var plans: [Record] = []
     let hidden: Bool
     @State private var openGroup: Int?
     @ScaledMetric(relativeTo: .body) private var mapHeight: CGFloat = 200
 
-    private var items: [NativeSalaryItem] { NativeSalaryMap.items(summary: summary, categories: categories) }
+    private var items: [NativeSalaryItem] { NativeSalaryMap.items(summary: summary, categories: categories, plans: plans) }
     var body: some View {
         let items = items
         let salary = NativeSalaryMap.salary(summary: summary, items: items)

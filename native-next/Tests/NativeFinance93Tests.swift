@@ -22,6 +22,26 @@ final class NativeFinance93Tests: XCTestCase {
         XCTAssertEqual(NativeSalaryMap.percent(30, of: 1850).replacingOccurrences(of: ",", with: "."), "1.6%")
     }
 
+    /// SALARY-MAP-PLAN-KIND-2026-11-26: same rule as the site; a yearly insurance is set aside, not a commitment.
+    func testSalaryMapSortsPlansByKindLikeTheSite() {
+        func plan(_ name: String, _ kind: String, _ cents: Int, every months: Int = 1) -> Record {
+            ["name": .string(name), "kind": .string(kind), "contributionCents": .number(Double(cents)), "intervalMonths": .number(Double(months))]
+        }
+        let plans = [plan("Affitto", "fixed", 60000), plan("Assicurazione auto", "fixed", 5000, every: 12),
+                     plan("Vacanze", "goal", 15000), plan("Luce", "estimated", 10000)]
+        let summary: Record = ["monthlySalary": .number(2000), "monthlySpent": .number(400), "monthlyRemaining": .number(600),
+                               "monthlyBudgetBreakdown": .array([.object(["name": .string("Affitto"), "amount": .number(600), "planId": .string("p1")]),
+                                                                 .object(row("Abbonamento palestra", 40))])]
+        let items = NativeSalaryMap.items(summary: summary, categories: [row("Spesa", 400)], plans: plans)
+        let group = { (name: String) in items.first { $0.name == name }?.group }
+        XCTAssertEqual(group("Assicurazione auto"), 1, "spread over 12 months: set aside")
+        XCTAssertEqual(group("Vacanze"), 1)
+        XCTAssertEqual(group("Affitto"), 0); XCTAssertEqual(group("Luce"), 0); XCTAssertEqual(group("Abbonamento palestra"), 0)
+        XCTAssertEqual(items.filter { $0.name == "Affitto" }.count, 1, "the breakdown row of a plan is not counted twice")
+        XCTAssertEqual(items.first { $0.name == "Altri impegni del mese" }?.value ?? 0, 60, accuracy: 0.001)
+        XCTAssertEqual(items.reduce(0) { $0 + $1.value }, 2000, accuracy: 0.001, "the map still adds up to the salary")
+    }
+
     func testSalaryMapCountsARentPaymentOnceAndCapsSpending() {
         let summary: Record = ["monthlySalary": .number(1749), "monthlyRemaining": .number(62), "monthlySpent": .number(445),
                                "monthlyBudgetBreakdown": .array([.object(row("Affitto", 550))])]

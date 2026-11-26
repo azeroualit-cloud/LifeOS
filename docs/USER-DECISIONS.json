@@ -1750,6 +1750,16 @@
       "original_quote": "Sì, correggi il sito",
       "rule": "Eccezione limitata a FINAL-CANDIDATE-2026-11-12 (nessun deploy backend): solo questa patch del modulo web, via lifeos-routing-explicit-deploy95.yml. Nessun'altra modifica backend autorizzata.",
       "relation": "Eccezione d'ambito approvata dall'utente; FINAL-CANDIDATE resta ACTIVE per il resto."
+    },
+    {
+      "id": "SALARY-MAP-PLAN-KIND-2026-11-26",
+      "status": "ACTIVE",
+      "scope": "Grafico «Dove va lo stipendio» nell'app",
+      "recorded_on": "2026-11-26",
+      "provenance": "Messaggio utente in chat Claude, 26/11/2026",
+      "original_quote": "la logica tra app e sito è diversa tipo per il coloramento del grafico, sul sito assicurazione è messo da parte (giustamente). Sull'app invece va negli impegni del mese, come mai? → «Yes, align it»",
+      "rule": "L'app usa la regola del sito: quota di un piano tra gli Impegni del mese se pagata ogni mese (stima, anticipo, recupero, spesa fissa non ripartita); altrimenti Messo da parte (es. assicurazione annuale, obiettivi, fondi). Righe senza piano per nome; differenza non spiegata come «Altri impegni del mese».",
+      "relation": "Build 96. Allinea l'app al sito, nessun conflitto."
     }
   ],
   "pending_confirmations": [

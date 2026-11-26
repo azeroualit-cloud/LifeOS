@@ -29,7 +29,7 @@ struct FinanceScreen: View {
                 accountCard
                 actions
                 recentMovements
-                NativeSalaryMapCard(summary: store.summary, categories: monthCategories, hidden: hidden)
+                NativeSalaryMapCard(summary: store.summary, categories: monthCategories, plans: store.finance.record("plansV2").records("plans"), hidden: hidden)
                 if !store.financialPending.isEmpty {
                     VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
                         Label("\(store.financialPending.count) movimenti salvati sul dispositivo", systemImage: "icloud.and.arrow.up").font(.subheadline)
