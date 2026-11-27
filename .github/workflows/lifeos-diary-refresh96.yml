@@ -1,0 +1,25 @@
+name: LifeOS diary refresh 96 (meals of the last 4 days)
+# DIARY-MICRO-2026-11-27, user request «delete and readd all the meals of the last 3 days and today to be sure
+# micronutrients carry over». Re-adds each meal of today and the 3 days before with its micronutrients, then
+# soft-deletes the old copy (it stays as a tombstone). Logs only counts. A push that changes this file is the start.
+# Attempt 1
+on:
+  push:
+    branches: ['codex/build93']
+    paths: ['.github/workflows/lifeos-diary-refresh96.yml']
+concurrency:
+  group: lifeos-diary-refresh96
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  refresh:
+    if: github.repository == 'azeroualit-cloud/LifeOS' && github.ref == 'refs/heads/codex/build93'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Re-add the meals with their micronutrients
+        env:
+          LIFEOS_TEST_PASSWORD: ${{ secrets.LIFEOS_TEST_PASSWORD }}
+        run: python3 scripts/diary-refresh-micro-96.py
