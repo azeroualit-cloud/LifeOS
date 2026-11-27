@@ -518,3 +518,5 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 - **IPA-DELIVERY-96-2026-11-26 — ACTIVE.** «e veloce che voglio l'ipa»: IPA 96 appena pronte le voci della 96; sostituisce IPA-HOLD-2026-11-26. Precisazione SALUTE-SINGLE-ENTRY: Micronutrienti visibili nella pagina di Salute, Obiettivi dentro «Obiettivi e statistiche»; ingressi: Obiettivi e statistiche, Cronologia.
 
 - **DIARY-MICRO-2026-11-27 — ACTIVE.** «siamo sicuri che epa e dha [...] sono salvati correttamente dal sito?»: gli alimenti sì (stesse chiavi e unità fra sito, server e app); i pasti registrati dal sito no, salvavano solo energia e macro. Ora il sito scrive anche la voce completa per l'app con i micronutrienti scalati sulla quantità (sito f1ea455).
+
+- **SUPPLEMENT-UNIT-2026-11-27 — ACTIVE.** «it still shows Omega-3 Fish Oil 5,5 mg [...] its one capsule»: il sito trattava un integratore senza unità «per 100 g» mentre l'app lo legge per dose, quindi i valori per capsula finivano 100 volte più piccoli (550 mg di EPA+DHA mostrati come 5,5). Sito corretto; Omega-3 e i suoi pasti degli ultimi 30 giorni moltiplicati per 100.

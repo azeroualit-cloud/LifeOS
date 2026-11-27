@@ -1,0 +1,21 @@
+name: LifeOS supplement per-dose repair 96
+# SUPPLEMENT-UNIT-2026-11-27: Omega-3 saved per capsule as if per 100 g (100 times too small). One-off repair of the
+# food and of its meals of the last 30 days. Logs only counts. A push that changes this file is the start.
+# Attempt 1
+on:
+  push:
+    branches: ['codex/build93']
+    paths: ['.github/workflows/lifeos-supplement-fix96.yml']
+permissions:
+  contents: read
+jobs:
+  fix:
+    if: github.repository == 'azeroualit-cloud/LifeOS' && github.ref == 'refs/heads/codex/build93'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Repair the Omega-3 supplement and its meals
+        env:
+          LIFEOS_TEST_PASSWORD: ${{ secrets.LIFEOS_TEST_PASSWORD }}
+        run: python3 scripts/fix-supplement-per-dose-96.py

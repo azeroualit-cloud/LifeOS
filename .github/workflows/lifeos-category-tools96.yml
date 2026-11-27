@@ -4,7 +4,7 @@ name: LifeOS site category tools 96 (audit, deploy)
 # commit, one after the other in the same job so the two uploads never overwrite each other. Both start from the
 # live module, write nothing if their anchors are not found exactly once, verify the upload and roll back on failure.
 # A push that changes this file is the deliberate start.
-# Attempt 2: site page with DIARY-MICRO-2026-11-27 (category tools already live, left as they are)
+# Attempt 3: site page with SUPPLEMENT-UNIT-2026-11-27 (category tools already live)
 on:
   push:
     branches: ['codex/build93']
@@ -15,7 +15,7 @@ concurrency:
 permissions:
   contents: read
 env:
-  SITE_COMMIT: f1ea455f1abcd224c00460d8b5a72d5f0c342c16
+  SITE_COMMIT: e35fcffa137d7043fb91a456f488cb27f5a422fc
 jobs:
   deploy:
     if: github.repository == 'azeroualit-cloud/LifeOS' && github.ref == 'refs/heads/codex/build93'

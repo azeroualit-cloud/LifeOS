@@ -1900,6 +1900,16 @@
       "original_quote": "siamo sicuri che epa e dha e cmq tutti i micronutrienti sono salvati correttamente dal sito?",
       "rule": "Un pasto registrato sul sito scegliendo un alimento conserva i micronutrienti dell'alimento (EPA, DHA e gli altri), scalati sulla quantità, fino all'app e ad Apple Salute.",
       "relation": "Correzione di un difetto: prima il sito salvava solo energia e macro. Gli alimenti stessi erano salvati correttamente (stesse chiavi e unità fra sito, server e app)."
+    },
+    {
+      "id": "SUPPLEMENT-UNIT-2026-11-27",
+      "status": "ACTIVE",
+      "scope": "Integratori: sito, server, app",
+      "recorded_on": "2026-11-27",
+      "provenance": "Messaggio utente in chat Claude, 27/11/2026",
+      "original_quote": "it still shows Omega-3 Fish Oil 5,5 mg 6%, but actually u know its one capsule with how much (marca weight world)",
+      "rule": "Un integratore senza unità salvata vale per dose (come nell'app) anche sul sito: i valori inseriti per capsula sono salvati per 100 dosi. L'Omega-3 salvato 100 volte troppo piccolo viene corretto, con i pasti degli ultimi 30 giorni.",
+      "relation": "Correzione di un difetto del sito (trattava questi integratori «per 100 g»)."
     }
   ],
   "pending_confirmations": [
