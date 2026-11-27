@@ -2522,7 +2522,9 @@ function renderNutrition() {
 /** Integratori a capsule/compresse: l'app conserva i valori riferiti a 100 unità (calcolo interno).
  *  Il sito li mostra e li modifica per 1 unità (bug omega 3: 30.000 mg invece di 300). */
 const NB_UNIT = { capsule: ["capsula", "capsule"], tablet: ["compressa", "compresse"], legacyServing: ["dose", "dosi"] };
-function nbPerUnit(f) { return f && f.family === "supplement" && NB_UNIT[f.app?.supplementUnit] ? NB_UNIT[f.app.supplementUnit] : null; }
+/* SUPPLEMENT-UNIT-2026-11-27: like the app, a supplement without a unit counts per dose (legacyServing), never per 100 g:
+   otherwise per-capsule values were saved 100 times too small (Omega-3 showed 5,5 mg instead of 550 mg). */
+function nbPerUnit(f) { if (!f || f.family !== "supplement") return null; const unit = f.app?.supplementUnit || "legacyServing"; return NB_UNIT[unit] || null; }
 function nbView(f) {
   if (!nbPerUnit(f)) return f;
   const d = (v) => v == null || v === "" ? v : Math.round(Number(v) / 100 * 10000) / 10000;
