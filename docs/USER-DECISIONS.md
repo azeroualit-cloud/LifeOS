@@ -543,3 +543,7 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 - **SHIFT-BAR-97 — ACTIVE.** Barra del turno più lunga, divisa in 4 sezioni da 2 ore; entrando durante il turno le sezioni completate hanno una minuscola animazione di completamento; la quarta anche entrando entro 15 minuti dalla fine.
 - **USER-INSIGHTS-97 — ACTIVE.** L'utente chiede cosa ho capito di lui e delle sue richieste ricorrenti, con consigli; e dopo l'implementazione proposte e cosa manca.
 - Conferme META-01 del 28/11: CALENDAR-TAP-SELECT-97 sostituisce il punto 2 di REVIEW-95-FEEDBACK; CALORIE-CARD-FITIA-97 sostituisce i colori di SALUTE-REDESIGN; DASHBOARD-TODO-BUTTONS-97 sostituisce Cose da fare di DASHBOARD-93-2026-11-26. PLAN-KINDS-TWO-97 in attesa (l'utente ha chiesto quali sono i sei tipi).
+
+- **PLAN-KINDS-97 — ACTIVE.** Anticipa budget com'è; Fondo = fondo senza scadenza + obiettivo, scadenza facoltativa e modificabile nei due sensi (attuali e futuri); Utenza stimata a sé; Rateizza com'è. In attesa di conferma: Spesa ricorrente fissa = Fondo con scadenza che si ripete.
+- **SALARY-FROM-MOVEMENTS-97 — ACTIVE.** Stipendi per competenza anche dai movimenti con categoria Stipendio (la tabella Cedolini è ferma ad agosto); 6 mesi di base.
+- **WORKFLOW-ADVICE-97 — ACTIVE.** Mockup unico prima del codice; pagina Controllo dati sul sito; build meno frequenti e più grandi; sito come pannello impostazioni.

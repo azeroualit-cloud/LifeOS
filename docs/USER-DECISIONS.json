@@ -1966,7 +1966,7 @@
     },
     {
       "id": "PLAN-KINDS-TWO-97",
-      "status": "PENDING_CONFIRMATION",
+      "status": "SUPERSEDED",
       "scope": "Finanza > Piani",
       "recorded_on": "2026-11-28",
       "provenance": "Messaggio utente in chat Claude, 28/11/2026 (elenco per l'IPA 97, con screenshot Fitia di riferimento)",
@@ -1976,7 +1976,9 @@
         "BILL-PAST-MONTHS-2026-11-24 (Ricorrente stimato)",
         "EXPENSE-ROUTING-EXPLICIT-2026-11-25 (fissa/stimata)"
       ],
-      "note": "L'utente ha chiesto quali sono i sei tipi attuali prima di decidere."
+      "note": "L'utente ha chiesto quali sono i sei tipi attuali prima di decidere.",
+      "superseded_by": "PLAN-KINDS-97",
+      "superseded_on": "2026-11-28"
     },
     {
       "id": "BUDGET-MAP-97",
@@ -2087,6 +2089,35 @@
       "recorded_on": "2026-11-28",
       "provenance": "Messaggio utente in chat Claude, 28/11/2026 (elenco per l'IPA 97, con screenshot Fitia di riferimento)",
       "rule": "L'utente chiede cosa ho capito di lui e delle sue richieste ricorrenti, con consigli; e dopo l'implementazione proposte e cosa manca."
+    },
+    {
+      "id": "PLAN-KINDS-97",
+      "status": "ACTIVE",
+      "scope": "Finanza > Piani",
+      "recorded_on": "2026-11-28",
+      "provenance": "Messaggio utente in chat Claude, 28/11/2026",
+      "original_quote": "lasciamo anticipa budget, facciamo fondo che comprenderà sia fondo senza scadenza che obiettivo finito (sarò quindi solo fondo, con possibilità di scadenza), però cmq posso editare quelli attuali e futuri da scadenza a senza scadenza e contrario(valuta se è logicamente fattibile. Spesa ricorrente fissa è letteralmente un fondo senza scadenza no? e utenza con quota stimata secondo me si può lasciare da se. e rateizza lascialo com'è. oppure vuoi proporre altri modi?",
+      "rule": "Tipi di piano: Anticipa budget (com'è); Fondo, che unisce fondo senza scadenza e obiettivo finito, con scadenza facoltativa e modificabile in entrambi i sensi sui piani attuali e futuri (i mesi passati non cambiano); Utenza con quota stimata (a sé); Rateizza una spesa (com'è). Proposta dell'assistente in attesa di conferma: la Spesa ricorrente fissa diventa un Fondo con scadenza che si ripete (non senza scadenza, perché paga a ogni scadenza).",
+      "relation": "Sostituisce PLAN-KINDS-TWO-97. Precisa PLANS-SCREEN-97. Le regole delle bollette (BILL-PAST-MONTHS) restano sulle Utenze stimate."
+    },
+    {
+      "id": "SALARY-FROM-MOVEMENTS-97",
+      "status": "ACTIVE",
+      "scope": "Finanza > Analisi, Stipendi per competenza",
+      "recorded_on": "2026-11-28",
+      "provenance": "Messaggio utente in chat Claude, 28/11/2026",
+      "original_quote": "io ho aggiunto gli stipendi con categoria stipendio, cosa non va? e poi si mostrami 6 mesi di base.",
+      "rule": "Stipendi per competenza usa anche i movimenti con categoria Stipendio (non solo la vecchia tabella Cedolini, ferma ad agosto); 6 mesi visibili di base.",
+      "note": "Causa: il server legge solo il foglio Cedolini importato."
+    },
+    {
+      "id": "WORKFLOW-ADVICE-97",
+      "status": "ACTIVE",
+      "scope": "Modo di lavorare",
+      "recorded_on": "2026-11-28",
+      "provenance": "Messaggio utente in chat Claude, 28/11/2026",
+      "original_quote": "accetto e approvo tutto quello che hai detto nel my advice",
+      "rule": "1) Un mockup condiviso di tutte le schermate della build, approvato prima di scrivere il codice. 2) Una pagina «Controllo dati» sul sito che segnala valori sospetti (integratori troppo bassi, cedolini mancanti, categorie senza gruppo). 3) Build meno frequenti e più grandi: un elenco, un mockup, una IPA. 4) Il sito come pannello impostazioni (categorie, layout Dashboard, colori, obiettivi) per cambiare senza IPA."
     }
   ],
   "pending_confirmations": [

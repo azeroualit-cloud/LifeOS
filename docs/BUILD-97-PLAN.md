@@ -7,4 +7,6 @@ Diagnosi già fatte:
 - Stipendi per competenza: il grafico mostra al massimo gli ultimi 6 cedolini del periodo (`rows.suffix(6)`); da verificare se mancano i cedolini dopo agosto.
 - Sito, categorie: ricerca ~5.600 righe e spostamento in blocco (CATEGORY-TOOLS-96): sicuri rispetto al limite D1 di 5 M righe/giorno.
 
-In attesa: PLAN-KINDS-TWO-97 (l'utente ha chiesto quali sono i sei tipi attuali).
+Piani (PLAN-KINDS-97): Anticipa budget, Fondo (scadenza nessuna / una data / ripetuta, convertibile nei due sensi sui mesi futuri), Utenza stimata, Rateizza. Da confermare: Spesa ricorrente fissa → Fondo con scadenza ripetuta.
+Stipendi (SALARY-FROM-MOVEMENTS-97): il server legge solo il foglio Cedolini (fermo ad agosto); aggiungere i movimenti Stipendio.
+Modo di lavorare (WORKFLOW-ADVICE-97): un mockup unico di tutta la 97 prima del codice; pagina Controllo dati sul sito.
