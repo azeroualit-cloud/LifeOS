@@ -2429,6 +2429,17 @@ function fdFromFood(form) {
   for (const [field, key] of [["kcal", "kcal"], ["protein", "protein"], ["carbs", "carbs"], ["fat", "fat"], ["fibre", "fibre"]]) form.elements[field].value = f[key] == null ? "" : Math.round(Number(f[key]) * k * 10) / 10;
   if (!form.elements.name.value) form.elements.name.value = f.name;
 }
+/** App entry for a meal logged from a food on the site (same JSON as the iPhone app: dates in seconds from 2001). */
+function fdAppEntry(food, grams, nums, previous) {
+  const k = grams / 100, round = (v) => Math.round(v * 10000) / 10000;
+  const nutrientValues = {};
+  for (const [key, value] of Object.entries(food.micro || {})) {
+    const n = Number(value);
+    if (Number.isFinite(n) && n >= 0) nutrientValues[key] = { amount: round(n * k), estimateSource: null };
+  }
+  const base = previous && typeof previous === "object" ? previous : {};
+  return { ...base, nutrientValues, foodID: food.id, foodName: food.name, ...(food.basis === "ml" ? { portionMillilitres: grams } : { portionGrams: grams }) };
+}
 async function fdSave(form) {
   const err = form.querySelector("[data-fd-err]"), val = (k) => form.elements[k].value === "" ? null : Number(form.elements[k].value);
   const old = fd.editing, grams = val("grams"), nums = { kcal: val("kcal"), protein: val("protein"), carbs: val("carbs"), fat: val("fat"), fibre: val("fibre") };
@@ -2443,7 +2454,15 @@ async function fdSave(form) {
     if (typeof app.alcoholGrams === "number") app.alcoholGrams = Math.round(app.alcoholGrams * k * 1000) / 1000;
   }
   const day = old ? fdRomeDay(new Date(old.at)) : fd.day;
+  // DIARY-MICRO-2026-11-27: a meal logged from a food keeps its micronutrients (EPA, DHA and the others).
+  // The app rebuilds a site meal from `app` (a whole app entry), so the site writes one with the food's values.
+  const food = (nb.foods || []).find((x) => x.id === form.elements.food?.value);
+  const fromFood = !!(food && grams > 0 && !(app && app.nutrientValues && Object.keys(app.nutrientValues).length));
+  if (fromFood) app = fdAppEntry(food, grams, nums, app);
   const entry = { id: old?.id || crypto.randomUUID().toUpperCase(), at: fdRomeIso(day, form.elements.time.value), name: form.elements.name.value.trim(), grams: old?.ml ? null : grams, ml: old?.ml ? grams : null, ...nums, revision: old ? Number(old.revision) || 0 : 0, modified: Date.now(), app };
+  // The app reads `app` only as a whole entry: same id, its date and macros (macros from the row win anyway).
+  if (fromFood) entry.app = { ...entry.app, id: entry.id, revision: entry.revision, date: Date.parse(entry.at) / 1000 - 978307200, confirmed: false,
+    protein: nums.protein || 0, carbohydrate: nums.carbs || 0, fat: nums.fat || 0, ...(nums.fibre != null ? { fibre: nums.fibre } : {}), ...(nums.kcal != null ? { labelCalories: nums.kcal } : {}) };
   try {
     const r = await workerRequest("saveFoodDiaryEntry", [entry]);
     if (!r.saved) err.textContent = "Il pasto è stato cambiato su un altro dispositivo: ricarico la versione più recente.";
