@@ -547,3 +547,6 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 - **PLAN-KINDS-97 — ACTIVE.** Anticipa budget com'è; Fondo = fondo senza scadenza + obiettivo, scadenza facoltativa e modificabile nei due sensi (attuali e futuri); Utenza stimata a sé; Rateizza com'è. In attesa di conferma: Spesa ricorrente fissa = Fondo con scadenza che si ripete.
 - **SALARY-FROM-MOVEMENTS-97 — ACTIVE.** Stipendi per competenza anche dai movimenti con categoria Stipendio (la tabella Cedolini è ferma ad agosto); 6 mesi di base.
 - **WORKFLOW-ADVICE-97 — ACTIVE.** Mockup unico prima del codice; pagina Controllo dati sul sito; build meno frequenti e più grandi; sito come pannello impostazioni.
+
+- **PLAN-KINDS-97 (precisata).** Quattro tipi: Anticipa budget, Fondo (fine facoltativa, nessuna copertura, paga dai risparmi), Utenza stimata, Rateizza; le Spese ricorrenti fisse diventano Fondi senza fine.
+- **FUNDS-PAY-FROM-SAVINGS-97 — ACTIVE** (conferma META-01 «yes»): i pagamenti con un Fondo escono tutti dai risparmi; sostituisce FUNDING-BLOCK-2026-11-21 solo per i fondi.

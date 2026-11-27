@@ -1238,7 +1238,8 @@
         "by": "BILL-PAST-MONTHS-2026-11-24",
         "clause": "«Cambiare il periodo di competenza ricalcola i mesi toccati»: ora i mesi passati non cambiano; il periodo serve per la media e per l'Analisi.",
         "on": "2026-11-24"
-      }
+      },
+      "funds_part_superseded_by": "FUNDS-PAY-FROM-SAVINGS-97"
     },
     {
       "id": "FINANCE-PALETTE-2026-11-21",
@@ -2096,8 +2097,8 @@
       "scope": "Finanza > Piani",
       "recorded_on": "2026-11-28",
       "provenance": "Messaggio utente in chat Claude, 28/11/2026",
-      "original_quote": "lasciamo anticipa budget, facciamo fondo che comprenderà sia fondo senza scadenza che obiettivo finito (sarò quindi solo fondo, con possibilità di scadenza), però cmq posso editare quelli attuali e futuri da scadenza a senza scadenza e contrario(valuta se è logicamente fattibile. Spesa ricorrente fissa è letteralmente un fondo senza scadenza no? e utenza con quota stimata secondo me si può lasciare da se. e rateizza lascialo com'è. oppure vuoi proporre altri modi?",
-      "rule": "Tipi di piano: Anticipa budget (com'è); Fondo, che unisce fondo senza scadenza e obiettivo finito, con scadenza facoltativa e modificabile in entrambi i sensi sui piani attuali e futuri (i mesi passati non cambiano); Utenza con quota stimata (a sé); Rateizza una spesa (com'è). Proposta dell'assistente in attesa di conferma: la Spesa ricorrente fissa diventa un Fondo con scadenza che si ripete (non senza scadenza, perché paga a ogni scadenza).",
+      "original_quote": "lasciamo anticipa budget, facciamo fondo che comprenderà sia fondo senza scadenza che obiettivo finito (sarò quindi solo fondo, con possibilità di scadenza), però cmq posso editare quelli attuali e futuri da scadenza a senza scadenza e contrario(valuta se è logicamente fattibile. Spesa ricorrente fissa è letteralmente un fondo senza scadenza no? e utenza con quota stimata secondo me si può lasciare da se. e rateizza lascialo com'è. oppure vuoi proporre altri modi? / ma anche il concetto di fondo e copertura in realtà regge solo per le utenze con quota stimata, anche perché i fondi tecnicamente pagano tutto da risparmi a prescindere perché il concetto è metto da parte su risparmi",
+      "rule": "Quattro tipi di piano: Anticipa budget (com'è); Fondo (quota mensile messa da parte nei risparmi; fine facoltativa, solo per fermare la quota o calcolarla da importo e data, modificabile nei due sensi sui mesi futuri; nessuna scadenza né copertura; il pagamento esce sempre dai risparmi); Utenza con quota stimata (copertura e media come oggi); Rateizza una spesa (com'è). Le Spese ricorrenti fisse esistenti diventano Fondi senza fine con la stessa quota.",
       "relation": "Sostituisce PLAN-KINDS-TWO-97. Precisa PLANS-SCREEN-97. Le regole delle bollette (BILL-PAST-MONTHS) restano sulle Utenze stimate."
     },
     {
@@ -2118,6 +2119,18 @@
       "provenance": "Messaggio utente in chat Claude, 28/11/2026",
       "original_quote": "accetto e approvo tutto quello che hai detto nel my advice",
       "rule": "1) Un mockup condiviso di tutte le schermate della build, approvato prima di scrivere il codice. 2) Una pagina «Controllo dati» sul sito che segnala valori sospetti (integratori troppo bassi, cedolini mancanti, categorie senza gruppo). 3) Build meno frequenti e più grandi: un elenco, un mockup, una IPA. 4) Il sito come pannello impostazioni (categorie, layout Dashboard, colori, obiettivi) per cambiare senza IPA."
+    },
+    {
+      "id": "FUNDS-PAY-FROM-SAVINGS-97",
+      "status": "ACTIVE",
+      "scope": "Pagamenti con un Fondo",
+      "recorded_on": "2026-11-28",
+      "provenance": "Messaggi utente in chat Claude, 28/11/2026 (conferma META-01: «yes»)",
+      "original_quote": "yes",
+      "rule": "Un pagamento con un Fondo esce sempre tutto dai risparmi: per i fondi non c'è più la scelta di dividere l'eccedenza tra risparmi e budget. Per Utenze stimate, Rateizza e Anticipa resta il blocco «Da dove arrivano i soldi».",
+      "supersedes": [
+        "FUNDING-BLOCK-2026-11-21 (solo per i fondi)"
+      ]
     }
   ],
   "pending_confirmations": [
