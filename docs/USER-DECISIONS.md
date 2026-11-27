@@ -520,3 +520,26 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 - **DIARY-MICRO-2026-11-27 — ACTIVE.** «siamo sicuri che epa e dha [...] sono salvati correttamente dal sito?»: gli alimenti sì (stesse chiavi e unità fra sito, server e app); i pasti registrati dal sito no, salvavano solo energia e macro. Ora il sito scrive anche la voce completa per l'app con i micronutrienti scalati sulla quantità (sito f1ea455).
 
 - **SUPPLEMENT-UNIT-2026-11-27 — ACTIVE.** «it still shows Omega-3 Fish Oil 5,5 mg [...] its one capsule»: il sito trattava un integratore senza unità «per 100 g» mentre l'app lo legge per dose, quindi i valori per capsula finivano 100 volte più piccoli (550 mg di EPA+DHA mostrati come 5,5). Sito corretto; Omega-3 e i suoi pasti degli ultimi 30 giorni moltiplicati per 100.
+
+## 28/11/2026 — elenco per l'IPA 97
+
+- **MICRO-VIEW-97 — ACTIVE.** Visualizzazione migliore dei micronutrienti: niente elenco di righe da leggere.
+- **FINANCE-MONTH-ONE-TAP-97 — ACTIVE.** Mese con un tocco: a destra il mese successivo, a sinistra il precedente; toccando il centro si apre il menu per un mese preciso.
+- **TRADE-REPUBLIC-HIDDEN-97 — ACTIVE.** Trade Republic nascosto per impostazione predefinita, con un pulsante Mostra accanto solo per quel conto.
+- **ANALYSIS-CLARITY-97 — ACTIVE.** «5 mesi» e «in un mese tipo di 3925,66» non sono chiari e i mesi sembrano sbagliati: da verificare i dati e riscrivere in modo comprensibile.
+- **SALARY-COMPETENCE-RANGE-97 — ACTIVE.** Stipendi per competenza mostra solo da marzo ad agosto: da verificare e correggere.
+- **PLANS-SCREEN-97 — ACTIVE.** «Nuovo piano» diventa «Piani»: elenco dei piani, dettagli al tocco, da lì si aggiunge un nuovo piano. Poco ingombro visivo ma tutte le informazioni e funzioni utili. Funzione per cambiare un piano attivo tipo obiettivo (es. assicurazione) in un fondo senza scadenza.
+- **PLAN-KINDS-TWO-97 — PENDING_CONFIRMATION.** Solo due tipi di piano: fondo senza scadenza oppure spesa rateizzata.
+- **BUDGET-MAP-97 — ACTIVE.** Budget come mappa a rettangoli proporzionali all'importo in tre sezioni: spese a rate, piani, spese del mese non coperte dai piani; sotto il budget finale.
+- **SAVINGS-GOALS-97 — ACTIVE.** Meno numeri, più senso e più personalizzazione (mesi, ecc.).
+- **HISTORY-REDESIGN-97 — ACTIVE.** Cronologia comprensibile: intervallo di tempo scelto dall'utente, giorni riconoscibili, visualizzazione personalizzabile invece di un elenco infinito.
+- **SECTIONS-ICONS-97 — ACTIVE.** Icone allineate.
+- **CALORIE-CARD-FITIA-97 — ACTIVE.** Scheda calorie come gli screenshot Fitia: barra quasi dritta e sottile con estremi arrotondati senza bordo grosso, limiti del range consigliato sulla barra con i valori sotto, segno di range migliore, tutti i verdi del cibo uguali (prova il verde di Fitia), peso viola/blu sempre uguale, parti non completate col grigio di Fitia, macro con totale/obiettivo e barra sotto.
+- **CALENDAR-TAP-SELECT-97 — ACTIVE.** Toccare un giorno lo seleziona soltanto (niente agenda); cambiando scheda o riaprendo l'app torna a oggi.
+- **INCONTRI-EASY-ADD-97 — ACTIVE.** Aggiungere un incontro deve essere facile come aggiungere un turno.
+- **TASKS-SWIPE-97 — ACTIVE.** Swipe sull'attività per azioni veloci: metti in attesa, elimina, riattiva dall'attesa.
+- **DASHBOARD-TODO-BUTTONS-97 — ACTIVE.** Cose da fare diventa due pulsanti, Attività e Abitudini (il calendario c'è già sopra); la scheda Finanza non mostra gli ultimi movimenti.
+- **DASHBOARD-NUTRITION-97 — ACTIVE.** Rivedere la scheda Nutrizione della Dashboard: com'è ora non convince.
+- **SHIFT-BAR-97 — ACTIVE.** Barra del turno più lunga, divisa in 4 sezioni da 2 ore; entrando durante il turno le sezioni completate hanno una minuscola animazione di completamento; la quarta anche entrando entro 15 minuti dalla fine.
+- **USER-INSIGHTS-97 — ACTIVE.** L'utente chiede cosa ho capito di lui e delle sue richieste ricorrenti, con consigli; e dopo l'implementazione proposte e cosa manca.
+- Conferme META-01 del 28/11: CALENDAR-TAP-SELECT-97 sostituisce il punto 2 di REVIEW-95-FEEDBACK; CALORIE-CARD-FITIA-97 sostituisce i colori di SALUTE-REDESIGN; DASHBOARD-TODO-BUTTONS-97 sostituisce Cose da fare di DASHBOARD-93-2026-11-26. PLAN-KINDS-TWO-97 in attesa (l'utente ha chiesto quali sono i sei tipi).

@@ -1401,7 +1401,8 @@
       "recorded_on": "2026-11-23",
       "provenance": "PDF di revisione dell'utente (Documento senza titolo.pdf), parafrasi",
       "rule": "1) Pillole/filtri non sottili (Attività, Movimenti, chip mese/Analisi): altezza visibile 34. 2) Calendario: «Oggi» simmetrico; toccare un giorno senza eventi apre comunque l'agenda. 3) Salute: niente spazio vuoto in alto. 4) Dove va lo stipendio: toccando un riquadro si apre la mappa della categoria (come sul sito); colori e resa devono far capire la suddivisione a colpo d'occhio. 5) Budget: controllo del mese più piccolo. 6) Analisi: niente spazio sprecato (scelta del mese vicino al titolo). 7) Spese per categoria: scegliere mesi e categorie (o tutte). 8) Movimenti: ricerca e filtri senza margini eccessivi. 9) Nuova spesa: scegliere quanta parte della spesa va dal budget, quanta si rateizza e quanta dai risparmi (come FUNDING-BLOCK).",
-      "original_quote": "da dove scelgo i mesi di competenza e la categorie o tutte le categorie da valutare … è dov'è il metodo che abbiamo detto che posso scegliere quale parte della spesa posso sceglierla dal budget e quale da rateizzare e quale dei risparmi ecc? … cant you find a way to stop these errors MULTIPLE TIMES IN A ROW."
+      "original_quote": "da dove scelgo i mesi di competenza e la categorie o tutte le categorie da valutare … è dov'è il metodo che abbiamo detto che posso scegliere quale parte della spesa posso sceglierla dal budget e quale da rateizzare e quale dei risparmi ecc? … cant you find a way to stop these errors MULTIPLE TIMES IN A ROW.",
+      "item2_superseded_by": "CALENDAR-TAP-SELECT-97"
     },
     {
       "id": "SALARY-MAP-COLORS-2026-11-23",
@@ -1783,7 +1784,8 @@
       "provenance": "Messaggi utente in chat Claude, 26/11/2026",
       "original_quote": "i dont like how basic the render of the curve and its accessories is, and i hate the multiple colors there [...] why doesnt it have the feel of finanza / i want the apple health green, also its not symmetric, theres not micros and cronologia etc / no non segue il dna dell'app / to draw the chart can u use apple api? / add it to the things to do but no ipa yet",
       "rule": "Da fare (build 96, nessuna IPA per ora): Salute in un solo verde di Apple Salute nello stile dell'app (schede 21 con l'ombra solita, testate con icona e titolo verdi, selezione neutra, niente bagliori o sfumature decorative); scheda calorie simmetrica; curva del peso con Swift Charts: scala a destra con griglia, mesi, area sfumata, curva morbida, Oggi, ultimo valore evidenziato, previsione nello stesso verde, lettura al tocco; arancio solo come avviso (NUTRITION-TOLERANT). Mockup: https://claude.ai/artifact/XcdUUjRgZQtNwvvgPjmSmz (versione 5).",
-      "relation": "Rispetta UI-LOOK-92, DESIGN-PASS-94 e NUTRITION-TOLERANT-2026-11-24. Non ancora implementato."
+      "relation": "Rispetta UI-LOOK-92, DESIGN-PASS-94 e NUTRITION-TOLERANT-2026-11-24. Non ancora implementato.",
+      "colour_part_superseded_by": "CALORIE-CARD-FITIA-97"
     },
     {
       "id": "IPA-HOLD-2026-11-26",
@@ -1864,7 +1866,8 @@
       "supersedes": [
         "DASHBOARD-93-2026-11-21"
       ],
-      "conflict_check": "Conflitto con DASHBOARD-93-2026-11-21 segnalato e confermato (META-01)."
+      "conflict_check": "Conflitto con DASHBOARD-93-2026-11-21 segnalato e confermato (META-01).",
+      "todo_part_superseded_by": "DASHBOARD-TODO-BUTTONS-97"
     },
     {
       "id": "LIFE-STATS-2026-11-26",
@@ -1910,6 +1913,180 @@
       "original_quote": "it still shows Omega-3 Fish Oil 5,5 mg 6%, but actually u know its one capsule with how much (marca weight world)",
       "rule": "Un integratore senza unità salvata vale per dose (come nell'app) anche sul sito: i valori inseriti per capsula sono salvati per 100 dosi. L'Omega-3 salvato 100 volte troppo piccolo viene corretto, con i pasti degli ultimi 30 giorni.",
       "relation": "Correzione di un difetto del sito (trattava questi integratori «per 100 g»)."
+    },
+    {
+      "id": "MICRO-VIEW-97",
+      "status": "ACTIVE",
+      "scope": "Salute, micronutrienti",
+      "recorded_on": "2026-11-28",
+      "provenance": "Messaggio utente in chat Claude, 28/11/2026 (elenco per l'IPA 97, con screenshot Fitia di riferimento)",
+      "rule": "Visualizzazione migliore dei micronutrienti: niente elenco di righe da leggere.",
+      "note": "Parafrasi di «leggere tutte quelle righe mi fa schifo». Mockup prima."
+    },
+    {
+      "id": "FINANCE-MONTH-ONE-TAP-97",
+      "status": "ACTIVE",
+      "scope": "Finanza, scelta del mese",
+      "recorded_on": "2026-11-28",
+      "provenance": "Messaggio utente in chat Claude, 28/11/2026 (elenco per l'IPA 97, con screenshot Fitia di riferimento)",
+      "rule": "Mese con un tocco: a destra il mese successivo, a sinistra il precedente; toccando il centro si apre il menu per un mese preciso."
+    },
+    {
+      "id": "TRADE-REPUBLIC-HIDDEN-97",
+      "status": "ACTIVE",
+      "scope": "Finanza, conti",
+      "recorded_on": "2026-11-28",
+      "provenance": "Messaggio utente in chat Claude, 28/11/2026 (elenco per l'IPA 97, con screenshot Fitia di riferimento)",
+      "rule": "Trade Republic nascosto per impostazione predefinita, con un pulsante Mostra accanto solo per quel conto."
+    },
+    {
+      "id": "ANALYSIS-CLARITY-97",
+      "status": "ACTIVE",
+      "scope": "Finanza > Analisi",
+      "recorded_on": "2026-11-28",
+      "provenance": "Messaggio utente in chat Claude, 28/11/2026 (elenco per l'IPA 97, con screenshot Fitia di riferimento)",
+      "rule": "«5 mesi» e «in un mese tipo di 3925,66» non sono chiari e i mesi sembrano sbagliati: da verificare i dati e riscrivere in modo comprensibile."
+    },
+    {
+      "id": "SALARY-COMPETENCE-RANGE-97",
+      "status": "ACTIVE",
+      "scope": "Finanza, stipendi per competenza",
+      "recorded_on": "2026-11-28",
+      "provenance": "Messaggio utente in chat Claude, 28/11/2026 (elenco per l'IPA 97, con screenshot Fitia di riferimento)",
+      "rule": "Stipendi per competenza mostra solo da marzo ad agosto: da verificare e correggere."
+    },
+    {
+      "id": "PLANS-SCREEN-97",
+      "status": "ACTIVE",
+      "scope": "Finanza > Piani",
+      "recorded_on": "2026-11-28",
+      "provenance": "Messaggio utente in chat Claude, 28/11/2026 (elenco per l'IPA 97, con screenshot Fitia di riferimento)",
+      "rule": "«Nuovo piano» diventa «Piani»: elenco dei piani, dettagli al tocco, da lì si aggiunge un nuovo piano. Poco ingombro visivo ma tutte le informazioni e funzioni utili. Funzione per cambiare un piano attivo tipo obiettivo (es. assicurazione) in un fondo senza scadenza.",
+      "note": "Il pulsante delle quattro azioni di FINANCE-SCREEN-REDESIGN-2026-11-16 cambia nome; da confermare insieme a PLAN-KINDS-TWO-97."
+    },
+    {
+      "id": "PLAN-KINDS-TWO-97",
+      "status": "PENDING_CONFIRMATION",
+      "scope": "Finanza > Piani",
+      "recorded_on": "2026-11-28",
+      "provenance": "Messaggio utente in chat Claude, 28/11/2026 (elenco per l'IPA 97, con screenshot Fitia di riferimento)",
+      "rule": "Solo due tipi di piano: fondo senza scadenza oppure spesa rateizzata.",
+      "conflicts_with": [
+        "FINANCE-SCREEN-REDESIGN-2026-11-16",
+        "BILL-PAST-MONTHS-2026-11-24 (Ricorrente stimato)",
+        "EXPENSE-ROUTING-EXPLICIT-2026-11-25 (fissa/stimata)"
+      ],
+      "note": "L'utente ha chiesto quali sono i sei tipi attuali prima di decidere."
+    },
+    {
+      "id": "BUDGET-MAP-97",
+      "status": "ACTIVE",
+      "scope": "Finanza > Budget",
+      "recorded_on": "2026-11-28",
+      "provenance": "Messaggio utente in chat Claude, 28/11/2026 (elenco per l'IPA 97, con screenshot Fitia di riferimento)",
+      "rule": "Budget come mappa a rettangoli proporzionali all'importo in tre sezioni: spese a rate, piani, spese del mese non coperte dai piani; sotto il budget finale."
+    },
+    {
+      "id": "SAVINGS-GOALS-97",
+      "status": "ACTIVE",
+      "scope": "Finanza > Budget > Obiettivi risparmio",
+      "recorded_on": "2026-11-28",
+      "provenance": "Messaggio utente in chat Claude, 28/11/2026 (elenco per l'IPA 97, con screenshot Fitia di riferimento)",
+      "rule": "Meno numeri, più senso e più personalizzazione (mesi, ecc.)."
+    },
+    {
+      "id": "HISTORY-REDESIGN-97",
+      "status": "ACTIVE",
+      "scope": "Salute > Cronologia",
+      "recorded_on": "2026-11-28",
+      "provenance": "Messaggio utente in chat Claude, 28/11/2026 (elenco per l'IPA 97, con screenshot Fitia di riferimento)",
+      "rule": "Cronologia comprensibile: intervallo di tempo scelto dall'utente, giorni riconoscibili, visualizzazione personalizzabile invece di un elenco infinito.",
+      "relation": "Sviluppa REVIEW-95B-2026-11-24 (colonne per macro giorni/settimane/mesi/trimestri)."
+    },
+    {
+      "id": "SECTIONS-ICONS-97",
+      "status": "ACTIVE",
+      "scope": "Salute > Sezioni",
+      "recorded_on": "2026-11-28",
+      "provenance": "Messaggio utente in chat Claude, 28/11/2026 (elenco per l'IPA 97, con screenshot Fitia di riferimento)",
+      "rule": "Icone allineate."
+    },
+    {
+      "id": "CALORIE-CARD-FITIA-97",
+      "status": "ACTIVE",
+      "scope": "Salute, scheda calorie",
+      "recorded_on": "2026-11-28",
+      "provenance": "Messaggio utente in chat Claude, 28/11/2026 (elenco per l'IPA 97, con screenshot Fitia di riferimento)",
+      "rule": "Scheda calorie come gli screenshot Fitia: barra quasi dritta e sottile con estremi arrotondati senza bordo grosso, limiti del range consigliato sulla barra con i valori sotto, segno di range migliore, tutti i verdi del cibo uguali (prova il verde di Fitia), peso viola/blu sempre uguale, parti non completate col grigio di Fitia, macro con totale/obiettivo e barra sotto.",
+      "confirmation": "Risposte META-01 del 28/11/2026 (AskUserQuestion): «Yes, Fitia style»",
+      "supersedes": [
+        "SALUTE-REDESIGN-2026-11-26 (solo per i colori: un solo verde Apple per tutta Salute)"
+      ]
+    },
+    {
+      "id": "CALENDAR-TAP-SELECT-97",
+      "status": "ACTIVE",
+      "scope": "Calendario",
+      "recorded_on": "2026-11-28",
+      "provenance": "Messaggio utente in chat Claude, 28/11/2026 (elenco per l'IPA 97, con screenshot Fitia di riferimento)",
+      "rule": "Toccare un giorno lo seleziona soltanto (niente agenda); cambiando scheda o riaprendo l'app torna a oggi.",
+      "confirmation": "Risposte META-01 del 28/11/2026 (AskUserQuestion): «Yes, select only»",
+      "supersedes": [
+        "REVIEW-95-FEEDBACK-2026-11-23 punto 2 (giorno senza eventi apre l'agenda)"
+      ]
+    },
+    {
+      "id": "INCONTRI-EASY-ADD-97",
+      "status": "ACTIVE",
+      "scope": "Calendario, Incontri",
+      "recorded_on": "2026-11-28",
+      "provenance": "Messaggio utente in chat Claude, 28/11/2026 (elenco per l'IPA 97, con screenshot Fitia di riferimento)",
+      "rule": "Aggiungere un incontro deve essere facile come aggiungere un turno."
+    },
+    {
+      "id": "TASKS-SWIPE-97",
+      "status": "ACTIVE",
+      "scope": "Attività",
+      "recorded_on": "2026-11-28",
+      "provenance": "Messaggio utente in chat Claude, 28/11/2026 (elenco per l'IPA 97, con screenshot Fitia di riferimento)",
+      "rule": "Swipe sull'attività per azioni veloci: metti in attesa, elimina, riattiva dall'attesa."
+    },
+    {
+      "id": "DASHBOARD-TODO-BUTTONS-97",
+      "status": "ACTIVE",
+      "scope": "Dashboard",
+      "recorded_on": "2026-11-28",
+      "provenance": "Messaggio utente in chat Claude, 28/11/2026 (elenco per l'IPA 97, con screenshot Fitia di riferimento)",
+      "rule": "Cose da fare diventa due pulsanti, Attività e Abitudini (il calendario c'è già sopra); la scheda Finanza non mostra gli ultimi movimenti.",
+      "confirmation": "Risposte META-01 del 28/11/2026 (AskUserQuestion): «Yes, two buttons»",
+      "supersedes": [
+        "DASHBOARD-93-2026-11-26 (solo il contenuto di Cose da fare)"
+      ]
+    },
+    {
+      "id": "DASHBOARD-NUTRITION-97",
+      "status": "ACTIVE",
+      "scope": "Dashboard, Nutrizione",
+      "recorded_on": "2026-11-28",
+      "provenance": "Messaggio utente in chat Claude, 28/11/2026 (elenco per l'IPA 97, con screenshot Fitia di riferimento)",
+      "rule": "Rivedere la scheda Nutrizione della Dashboard: com'è ora non convince.",
+      "note": "Proposta con mockup."
+    },
+    {
+      "id": "SHIFT-BAR-97",
+      "status": "ACTIVE",
+      "scope": "Dashboard, barra del turno",
+      "recorded_on": "2026-11-28",
+      "provenance": "Messaggio utente in chat Claude, 28/11/2026 (elenco per l'IPA 97, con screenshot Fitia di riferimento)",
+      "rule": "Barra del turno più lunga, divisa in 4 sezioni da 2 ore; entrando durante il turno le sezioni completate hanno una minuscola animazione di completamento; la quarta anche entrando entro 15 minuti dalla fine."
+    },
+    {
+      "id": "USER-INSIGHTS-97",
+      "status": "ACTIVE",
+      "scope": "Collaborazione",
+      "recorded_on": "2026-11-28",
+      "provenance": "Messaggio utente in chat Claude, 28/11/2026 (elenco per l'IPA 97, con screenshot Fitia di riferimento)",
+      "rule": "L'utente chiede cosa ho capito di lui e delle sue richieste ricorrenti, con consigli; e dopo l'implementazione proposte e cosa manca."
     }
   ],
   "pending_confirmations": [
