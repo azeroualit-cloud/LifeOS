@@ -1890,6 +1890,16 @@
       "supersedes": [
         "IPA-HOLD-2026-11-26"
       ]
+    },
+    {
+      "id": "DIARY-MICRO-2026-11-27",
+      "status": "ACTIVE",
+      "scope": "Diario alimenti: pasti registrati dal sito",
+      "recorded_on": "2026-11-27",
+      "provenance": "Messaggio utente in chat Claude, 27/11/2026",
+      "original_quote": "siamo sicuri che epa e dha e cmq tutti i micronutrienti sono salvati correttamente dal sito?",
+      "rule": "Un pasto registrato sul sito scegliendo un alimento conserva i micronutrienti dell'alimento (EPA, DHA e gli altri), scalati sulla quantità, fino all'app e ad Apple Salute.",
+      "relation": "Correzione di un difetto: prima il sito salvava solo energia e macro. Gli alimenti stessi erano salvati correttamente (stesse chiavi e unità fra sito, server e app)."
     }
   ],
   "pending_confirmations": [

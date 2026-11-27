@@ -150,4 +150,26 @@ import XCTest
         XCTAssertEqual(oldStore.entries.count, 1)
         XCTAssertEqual(oldSync.pending.count, 1, "kept until a Worker with the diary answers")
     }
+
+    /// DIARY-MICRO-2026-11-27: a meal logged on the site from a food carries the food's micronutrients in `app`,
+    /// written exactly like this by the site page (dates in seconds from 2001, decimal numbers).
+    func testSiteMealFromFoodKeepsEpaDhaAndMicronutrients() throws {
+        let id = UUID()
+        let json = """
+        {"id":"\(id.uuidString)","at":"2026-11-27T12:30:00.000Z","name":"Salmone","grams":150,"ml":null,"kcal":312,"protein":30,"carbs":0,"fat":21,"fibre":0,
+         "revision":0,"modified":1795700000000,"deleted":false,
+         "app":{"id":"\(id.uuidString)","revision":0,"date":817475400,"confirmed":false,"protein":30,"carbohydrate":0,"fat":21,"fibre":0,"labelCalories":312,
+                "foodID":"base-salmon","foodName":"Salmone","portionGrams":150,
+                "nutrientValues":{"epa":{"amount":1290,"estimateSource":null},"dha":{"amount":2205,"estimateSource":null},"vitaminD":{"amount":16.5,"estimateSource":null}}}}
+        """
+        let row = try JSONDecoder().decode(JSONValue.self, from: Data(json.utf8)).object
+        let entry = try XCTUnwrap(NativeFoodDiarySync.entry(row))
+        XCTAssertEqual(entry.id, id)
+        XCTAssertEqual(entry.foodID, "base-salmon")
+        XCTAssertEqual(entry.nutrientValues?["epa"]?.amount, 1290)
+        XCTAssertEqual(entry.nutrientValues?["dha"]?.amount, 2205)
+        XCTAssertEqual(entry.nutrientValues?["vitaminD"]?.amount, Decimal(string: "16.5"))
+        XCTAssertEqual(entry.portionGrams, 150)
+        XCTAssertEqual(entry.protein, 30)
+    }
 }
