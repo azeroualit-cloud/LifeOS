@@ -362,7 +362,7 @@ struct NativeNutritionQuickSheet: View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.xs) {
             ForEach(NativeTrackedNutrient.micronutrients + [.ala, .epa, .dha]) { nutrient in
                 let key = nutrient == .folate ? "folateMass" : nutrient.rawValue
-                if let value = entry.nutrientValues?[key] {
+                if let value = entry.nutrientValues?[key] ?? (nutrient == .folate ? entry.nutrientValues?["folate"] : nil) {
                     Text(nutrient.title + ": " + NSDecimalNumber(decimal: value.amount).doubleValue.formatted(.number.precision(.fractionLength(0...2))) + " " + nutrient.unit)
                         .font(.footnote).foregroundStyle(.secondary)
                         .accessibilityIdentifier("quick-nutrition-nutrient-" + nutrient.rawValue)

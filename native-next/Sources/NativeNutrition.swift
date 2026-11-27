@@ -150,6 +150,8 @@ extension NativeNutritionWriting {
 
     private static func additionalValues(for entry: NativeNutritionEntry) -> [String: NativeNutrientAmount] {
         var values = entry.nutrientValues ?? [:]
+        // FOLATE-KEY-2026-11-27: meals made from server foods may carry «folate»; Apple Health folate is «folateMass».
+        if let folate = values.removeValue(forKey: "folate"), values[folateKey] == nil { values[folateKey] = folate }
         if let k1 = values["vitaminK1"], let k2 = values["vitaminK2"] {
             let sources = [k1.estimateSource, k2.estimateSource].compactMap { $0 }
             values[vitaminKKey] = .init(amount: k1.amount + k2.amount,

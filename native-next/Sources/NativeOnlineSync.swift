@@ -189,11 +189,15 @@ import Foundation
         json["aliases"] = .array(row["aliases"]?.array ?? [])
         json["dataNote"] = row.text("note").isEmpty ? json["dataNote"] ?? .null : .string(row.text("note"))
         var nutrients = json.record("nutrientValues")
-        for (key, value) in row.record("micro") {
+        // FOLATE-KEY-2026-11-27: the server calls folate «folate», the app (editor, Apple Health) «folateMass».
+        var micro: Record = [:]
+        for (key, value) in row.record("micro") { micro[key == "folate" ? "folateMass" : key] = value }
+        nutrients.removeValue(forKey: "folate")
+        for (key, value) in micro {
             let previous = nutrients[key]?.object ?? [:]
             nutrients[key] = .object(["amount": .number(value.number), "estimateSource": previous["estimateSource"] ?? .null])
         }
-        for key in nutrients.keys where row.record("micro")[key] == nil { nutrients.removeValue(forKey: key) }
+        for key in nutrients.keys where micro[key] == nil { nutrients.removeValue(forKey: key) }
         json["nutrientValues"] = nutrients.isEmpty ? .null : .object(nutrients)
         guard let data = try? JSONEncoder().encode(JSONValue.object(json)) else { return nil }
         return try? JSONDecoder().decode(NativeGenericFood.self, from: data)

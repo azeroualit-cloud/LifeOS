@@ -87,6 +87,17 @@ import XCTest
         ["id": .string(UUID().uuidString), "kind": .string("text"), "title": .string(title), "text": .string("testo"), "urlString": .string(""), "archived": .bool(false), "capturedAt": .number(700_000_000), "noteVersion": .int(1)]
     }
 
+    /// FOLATE-KEY-2026-11-27: the server's «folate» becomes the app's «folateMass» (editor and Apple Health), once.
+    func testServerFolateBecomesTheAppFolateKey() throws {
+        let food = try XCTUnwrap(NativeOnlineSync.food(["id": .string("base-spinach"), "name": .string("Spinaci"), "family": .string("vegetable"),
+            "kcal": .number(23), "protein": .number(2.9), "carbs": .number(3.6), "fat": .number(0.4),
+            "micro": .object(["folate": .number(194), "epa": .number(0)]),
+            "app": .object(["nutrientValues": .object(["folate": .object(["amount": .number(1), "estimateSource": .null])])])]))
+        XCTAssertEqual(food.nutrientValues?["folateMass"]?.amount, 194)
+        XCTAssertNil(food.nutrientValues?["folate"])
+        XCTAssertEqual(food.nutrientValues?["epa"]?.amount, 0)
+    }
+
     func testServerFoodKeepsAppOnlyFieldsAndSiteEdits() {
         let row: Record = ["id": .string("personal-1"), "name": .string("Uova bio"), "family": .string("egg"), "basis": .string("g"), "kcal": .number(143), "protein": .number(12.6), "carbs": .number(0.7), "fat": .number(9.9), "fibre": .null, "micro": .object(["calcium": .number(50)]), "aliases": .array([]), "note": .string(""), "app": .object(["pieces": .array([.object(["name": .string("Uovo"), "grams": .number(50)])])])]
         let food = NativeOnlineSync.food(row)

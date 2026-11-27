@@ -42,7 +42,7 @@ struct NativePersonalFoodEditor: View {
         var values: [NativeTrackedNutrient: String] = [:]
         for nutrient in NativeTrackedNutrient.micronutrients + [.ala, .epa, .dha] {
             let key = nutrient == .folate ? "folateMass" : nutrient.rawValue
-            if let amount = original.nutrientValues?[key]?.amount { values[nutrient] = text(amount) }
+            if let amount = (original.nutrientValues?[key] ?? (nutrient == .folate ? original.nutrientValues?["folate"] : nil))?.amount { values[nutrient] = text(amount) }
         }
         _micronutrients = State(initialValue: values)
         _caffeine = State(initialValue: original.nutrientValues?["caffeine"].map { text($0.amount) } ?? "")
@@ -154,7 +154,8 @@ struct NativePersonalFoodEditor: View {
             && original?.protein == protein && original?.carbohydrate == carbs && original?.fat == fat
         guard unknown || verifiedZero || calories > 0 || (protein == 0 && carbs == 0 && fat == 0 && fibreValue == 0) else { return nil }
         let editableKeys = Set((NativeTrackedNutrient.micronutrients + [.ala, .epa, .dha]).map { $0 == .folate ? "folateMass" : $0.rawValue })
-        var nutrients = (original?.nutrientValues ?? [:]).filter { !editableKeys.contains($0.key) }
+        // FOLATE-KEY-2026-11-27: «folate» from the server is the same value as «folateMass»: never keep both.
+        var nutrients = (original?.nutrientValues ?? [:]).filter { !editableKeys.contains($0.key) && $0.key != "folate" }
         let factor: Decimal = family == .supplement && !unit.isMassOrVolume ? 100 : 1
         if family == .supplement { nutrients.removeValue(forKey: "caffeine") }
         if family == .supplement, !caffeine.isEmpty {
