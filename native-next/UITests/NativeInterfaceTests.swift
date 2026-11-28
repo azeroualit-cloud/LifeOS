@@ -103,64 +103,8 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(cell.frame.minY, surface.frame.minY)
         XCTAssertLessThanOrEqual(cell.frame.maxY, surface.frame.maxY)
     }
-    func testUnifiedActivityEditorPreservesDescriptionWhenAddingAndRemovingDate() {
-        let app = launch(["--dark"])
-        app.openMainTab("Attività")
-        app.buttons["primary-add"].tap()
-        let title = app.textFields["activity-title"]
-        XCTAssertTrue(title.waitForExistence(timeout: 10))
-        title.tap(); title.typeText("Attività unificata test")
-        let notes = app.textViews["Descrizione"]
-        notes.tap(); notes.typeText("Descrizione persistente")
-        app.buttons["Salva"].tap()
-        let activity = app.buttons["Attività unificata test"]
-        revealChecklistButton(activity, in: app); activity.tap()
-        XCTAssertTrue(app.textFields["activity-title"].waitForExistence(timeout: 10))
-        XCTAssertEqual(app.textViews["Descrizione"].value as? String, "Descrizione persistente")
-        app.buttons["activity-date-Inizio"].tap(); app.buttons["Fine"].tap()
-        capture("unified-activity-editor-dark")
-        app.buttons["Salva"].tap()
-        app.mainTabBar.buttons["Dashboard"].tap()
-        let event = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-agenda-")).matching(NSPredicate(format: "label CONTAINS %@", "Attività unificata test")).firstMatch
-        reveal(event, in: app)
-        XCTAssertTrue(event.isHittable); event.tap()
-        XCTAssertTrue(app.textViews["Descrizione"].waitForExistence(timeout: 10))
-        XCTAssertEqual(app.textViews["Descrizione"].value as? String, "Descrizione persistente")
-        app.buttons["Rimuovi inizio"].tap(); app.buttons["Salva"].tap()
-        app.openMainTab("Attività")
-        let restored = app.buttons["Cambia completamento Attività unificata test"]
-        revealChecklistButton(restored, in: app)
-        XCTAssertEqual(app.buttons.matching(identifier: "Cambia completamento Attività unificata test").count, 1)
-        let collapsed = app.buttons["Attività unificata test"]
-        if collapsed.exists { collapsed.tap() }
-        XCTAssertTrue(app.textViews["Descrizione"].waitForExistence(timeout: 10))
-        XCTAssertEqual(app.textViews["Descrizione"].value as? String, "Descrizione persistente")
-    }
-    func testDashboardEventsAndRoutinesOrderAndCompletion() {
-        let app = launch(["--busy-home", "--dark"])
-        XCTAssertTrue(app.staticTexts["home-checklist-heading"].waitForExistence(timeout: 10))
-        let events = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-agenda-"))
-        XCTAssertEqual(events.count, 8, "Only today and the next two civil dates belong in Dashboard")
-        let row = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-agenda-5-")).firstMatch
-        let check = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-event-check-5-")).firstMatch
-        let routine = app.buttons["Completa abitudine Abitudine con un nome molto lungo da leggere senza sovrapposizioni"]
-        let upcoming = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-agenda-1-")).firstMatch
-        XCTAssertTrue(row.exists); XCTAssertTrue(routine.exists); XCTAssertTrue(upcoming.exists)
-        XCTAssertLessThan(row.frame.minY, routine.frame.minY, "Today's events precede today's habits")
-        XCTAssertLessThan(routine.frame.minY, upcoming.frame.minY, "Upcoming events follow today's habits")
-        reveal(check, in: app); assertMinimumTouchTarget(check); assertMinimumTouchTarget(row)
-        XCTAssertEqual(check.value as? String, "Da completare")
-        capture("dashboard-events-and-routines-dark")
-        check.tap()
-        expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: check)
-        waitForExpectations(timeout: 10)
-        XCTAssertTrue(app.navigationBars["Dashboard"].exists)
-        XCTAssertFalse(app.navigationBars["Modifica attività"].exists)
-        XCTAssertEqual(events.count, 7)
-        let remaining = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-agenda-10-")).firstMatch
-        reveal(remaining, in: app); remaining.tap()
-        XCTAssertTrue(app.navigationBars["Modifica attività"].waitForExistence(timeout: 10))
-    }
+    // testUnifiedActivityEditorPreservesDescriptionWhenAddingAndRemovingDate retired: DASHBOARD-TODO-BUTTONS-97 removed the Dashboard list it tested.
+    // testDashboardEventsAndRoutinesOrderAndCompletion retired: DASHBOARD-TODO-BUTTONS-97 removed the Dashboard list it tested.
     private static func today() -> String {
         let formatter = DateFormatter(); formatter.calendar = Calendar(identifier: .gregorian)
         formatter.timeZone = TimeZone(identifier: "Europe/Rome"); formatter.dateFormat = "yyyy-MM-dd"
@@ -265,7 +209,7 @@ final class NativeInterfaceTests: XCTestCase {
     func testOffDayHabitIsHiddenButRemainsManageable() {
         let app = launch(["--dark", "--off-day-habit"])
         XCTAssertFalse(app.buttons["Completa abitudine Abitudine di domani"].exists)
-        app.buttons["Gestisci"].tap(); app.buttons["Abitudini"].tap()
+        app.buttons["home-routines"].tap() // DASHBOARD-TODO-BUTTONS-97
         let habit = app.buttons["routine-edit-999"]
         let form = app.collectionViews.firstMatch
         for _ in 0..<8 { if habit.isHittable { break }; form.swipeUp() }
@@ -294,7 +238,7 @@ final class NativeInterfaceTests: XCTestCase {
             }
             XCTAssertTrue(element.isHittable)
         }
-        app.buttons["Gestisci"].tap(); app.buttons["Abitudini"].tap()
+        app.buttons["home-routines"].tap() // DASHBOARD-TODO-BUTTONS-97
         XCTAssertTrue(app.navigationBars["Abitudini"].waitForExistence(timeout: 10))
         let name = app.textFields["routine-name"]; show(name); name.tap(); name.typeText("Allenamento programmato")
         let keyboard = app.keyboards.firstMatch
@@ -453,20 +397,7 @@ final class NativeInterfaceTests: XCTestCase {
             from.press(forDuration: 0.1, thenDragTo: to)
         }
     }
-    func testDashboardFocusTimelineOpensEventWithoutDuplicateSummary() {
-        let app = launch(["--dark", "--active-shift"])
-        let focus = app.buttons["home-focus"]
-        XCTAssertTrue(focus.waitForExistence(timeout: 10))
-        assertMinimumTouchTarget(focus)
-        XCTAssertFalse(app.staticTexts["home-summary"].exists)
-        let event = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-agenda-")).firstMatch
-        reveal(event, in: app)
-        XCTAssertTrue(event.isHittable); assertMinimumTouchTarget(event)
-        capture("dashboard-focus-timeline-dark")
-        event.tap()
-        XCTAssertTrue(app.navigationBars["Modifica attività"].waitForExistence(timeout: 10))
-        capture("dashboard-timeline-event-editor")
-    }
+    // testDashboardFocusTimelineOpensEventWithoutDuplicateSummary retired: DASHBOARD-TODO-BUTTONS-97 removed the Dashboard list it tested.
 
     private func revealExpenseFormElement(_ element: XCUIElement, in app: XCUIApplication) {
         let list = app.collectionViews.firstMatch
@@ -549,17 +480,14 @@ final class NativeInterfaceTests: XCTestCase {
             let app = launch(dark ? ["--dark"] : [])
             let summary = app.staticTexts["home-today"]
             XCTAssertTrue(summary.waitForExistence(timeout: 10))
-            XCTAssertTrue(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-agenda-")).firstMatch.exists)
+            XCTAssertTrue(app.buttons["home-tasks"].exists); XCTAssertTrue(app.buttons["home-routines"].exists) // DASHBOARD-TODO-BUTTONS-97
             XCTAssertFalse(summary.label.contains("dalle")); XCTAssertFalse(app.otherElements["today-condition"].exists)
             let days = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "dashboard-day-"))
             XCTAssertEqual(days.count, 7); XCTAssertTrue(days.element(boundBy: 3).isSelected)
             XCTAssertEqual(days.element(boundBy: 3).frame.midX, app.frame.midX, accuracy: 1)
             capture(dark ? "home-editorial-dark" : "home-editorial-light")
-            let routine = app.buttons["Completa abitudine Leggere"]
-            reveal(routine, in: app); XCTAssertTrue(routine.isHittable); assertMinimumTouchTarget(routine)
-            let before = routine.value as? String; routine.tap()
-            expectation(for: NSPredicate(format: "value != %@", before ?? ""), evaluatedWith: routine)
-            waitForExpectations(timeout: 10)
+            let routines = app.buttons["home-routines"]
+            reveal(routines, in: app); XCTAssertTrue(routines.isHittable); assertMinimumTouchTarget(routines)
             XCTAssertFalse(app.staticTexts["home-todos-heading"].exists)
             app.mainTabBar.buttons["Salute"].tap()
             XCTAssertTrue(app.buttons["health-add-weight"].waitForExistence(timeout: 10)); XCTAssertFalse(app.buttons["health-connect"].exists)
@@ -582,8 +510,8 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertTrue(app.staticTexts["home-today"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.staticTexts["Nessun impegno da mostrare"].exists)
         XCTAssertFalse(app.buttons["home-focus"].exists)
-        let manage = app.buttons["Gestisci"]
-        XCTAssertTrue(manage.isHittable); manage.tap(); app.buttons["Abitudini"].tap()
+        let manage = app.buttons["home-routines"] // DASHBOARD-TODO-BUTTONS-97
+        reveal(manage, in: app); XCTAssertTrue(manage.isHittable); manage.tap()
         XCTAssertTrue(app.navigationBars["Abitudini"].waitForExistence(timeout: 10))
         app.buttons["Fine"].tap()
         app.mainTabBar.buttons["Salute"].tap()
@@ -628,9 +556,9 @@ final class NativeInterfaceTests: XCTestCase {
         let month = app.buttons["finance-month"]
         XCTAssertTrue(month.waitForExistence(timeout: 10))
         let current = month.label
-        for _ in 0..<3 { month.tap(); app.buttons["Mese successivo"].tap() }
+        for _ in 0..<3 { app.buttons["finance-month-next"].tap() } // FINANCE-MONTH-ONE-TAP-97
         XCTAssertNotEqual(month.label, current)
-        for _ in 0..<3 { month.tap(); app.buttons["Mese precedente"].tap() }
+        for _ in 0..<3 { app.buttons["finance-month-previous"].tap() }
         XCTAssertEqual(month.label, current)
         capture("finance-returned-to-current-month")
     }
@@ -668,24 +596,7 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertEqual(app.mainTabBar.buttons.count, 5)
         capture("health-scenario-2100")
     }
-    func testHomeManyEventsAndTasksStayBoundedAndReachable() {
-        let app = launch(["--busy-home", "--stress-content", "--dark"])
-        XCTAssertTrue(app.staticTexts["home-today"].waitForExistence(timeout: 10))
-        let events = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-agenda-"))
-        XCTAssertEqual(events.count, 8, "Show events today and in the next two dates only")
-        XCTAssertFalse(app.staticTexts["home-summary"].exists)
-        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-todo-")).count, 0)
-        let routines = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Completa abitudine "))
-        XCTAssertEqual(routines.count, 8)
-        for id in [3, 4, 8, 9] {
-            XCTAssertFalse(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-agenda-\(id)-")).firstMatch.exists)
-        }
-        let first = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "home-agenda-5-")).firstMatch
-        reveal(first, in: app); XCTAssertTrue(first.isHittable); assertMinimumTouchTarget(first)
-        XCTAssertEqual(first.label, "Appuntamento 5")
-        capture("home-many-events-agenda")
-        first.tap(); XCTAssertTrue(app.navigationBars["Modifica attività"].waitForExistence(timeout: 10))
-    }
+    // testHomeManyEventsAndTasksStayBoundedAndReachable retired: DASHBOARD-TODO-BUTTONS-97 removed the Dashboard list it tested.
     func testKeyboardAndLocalMovementFlow() {
         let app = launch()
         app.openOtherDestination("Finanza")
@@ -904,6 +815,7 @@ final class NativeInterfaceTests: XCTestCase {
         let app = launch(["--stress-money", "--dark"])
         app.openOtherDestination("Finanza")
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "1.234,56")).firstMatch.waitForExistence(timeout: 10))
+        if app.buttons["finance-trade-republic-toggle"].label.contains("Mostra") { app.buttons["finance-trade-republic-toggle"].tap() } // TRADE-REPUBLIC-HIDDEN-97
         XCTAssertTrue(app.staticTexts["finance-current-balance"].label.contains("12.345,67"))
         capture("negative-budget-and-grouped-amounts")
     }
@@ -918,9 +830,9 @@ final class NativeInterfaceTests: XCTestCase {
         // Build 95: the month is a chip in the title row; its menu moves back and forward.
         let month = app.buttons["finance-month"]
         XCTAssertTrue(month.waitForExistence(timeout: 10))
-        month.tap(); app.buttons["Mese precedente"].tap()
+        app.buttons["finance-month-previous"].tap()
         XCTAssertTrue(month.label.contains(previous) || app.staticTexts[previous].waitForExistence(timeout: 10), month.label)
-        month.tap(); app.buttons["Mese successivo"].tap()
+        app.buttons["finance-month-next"].tap()
         XCTAssertTrue(month.label.contains(current) || app.staticTexts[current].waitForExistence(timeout: 10), month.label)
         capture("extra-month-navigation")
     }
@@ -988,6 +900,7 @@ final class NativeInterfaceTests: XCTestCase {
         capture("extra-closed-with-actual-payment")
         XCTAssertTrue(app.navigationBars["Budget"].waitForExistence(timeout: 10))
         selectFinanceSection("Panoramica", in: app)
+        if app.buttons["finance-trade-republic-toggle"].label.contains("Mostra") { app.buttons["finance-trade-republic-toggle"].tap() } // TRADE-REPUBLIC-HIDDEN-97
         XCTAssertTrue(app.staticTexts["finance-current-balance"].label.contains("11.795,66"))
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "1.234,56")).firstMatch.exists)
     }

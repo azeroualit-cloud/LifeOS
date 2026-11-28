@@ -53,6 +53,11 @@ struct NativePlansScreen: View {
                     }
                 }
             }
+            // BUDGET-MAP-97: the month at a glance first (map and final budget); the rows stay below for detail.
+            Section {
+                NativeBudgetMapCard(flow: flow, month: store.financeMonth, plans: plans, categories: store.finance.records("categories"), hidden: hidden)
+                    .listRowInsets(EdgeInsets()).listRowBackground(Color.clear)
+            }
             // Build 93 Budget: salary, plans and commitments, budget of the month; then the plans.
             Section {
                 LabeledContent("Stipendio", value: money(flow.salaryCents)).monospacedDigit().accessibilityIdentifier("budget-salary-reference")

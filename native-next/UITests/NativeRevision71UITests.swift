@@ -226,8 +226,10 @@ final class NativeRevision71UITests: XCTestCase {
         app.buttons["finance-analysis-back"].tap() // REVIEW-95: Analisi has its own back button, no navigation bar
         reveal(budget, in: surface, app: app); budget.tap(); XCTAssertTrue(app.navigationBars["Budget"].waitForExistence(timeout: 10))
         app.navigationBars.buttons.element(boundBy: 0).tap()
-        app.buttons["finance-new-plan"].tap()
+        app.buttons["finance-new-plan"].tap() // PLANS-SCREEN-97: Piani, then + for a new plan
+        XCTAssertTrue(app.navigationBars["Piani"].waitForExistence(timeout: 10)); app.buttons["plans-map-add"].tap()
         XCTAssertTrue(app.navigationBars["Nuovo piano"].waitForExistence(timeout: 10)); app.buttons["Annulla"].tap()
+        app.navigationBars.buttons.element(boundBy: 0).tap()
         app.buttons["primary-add"].tap()
         XCTAssertTrue(app.navigationBars["Nuovo movimento"].waitForExistence(timeout: 10))
         app.buttons["Annulla"].tap()

@@ -11,6 +11,8 @@ struct FinanceScreen: View {
     @State private var account = "Tutti"
     @State private var movementCategory = "Tutte"
     @AppStorage("native-hide-money") private var hidden = false
+    /// TRADE-REPUBLIC-HIDDEN-97: Trade Republic starts hidden, with its own Mostra/Nascondi.
+    @AppStorage("native-hide-trade-republic") private var hideTradeRepublic = true
     var body: some View {
         VStack(spacing: NativeDesign.Space.none) {
             HStack {
@@ -66,8 +68,8 @@ struct FinanceScreen: View {
         VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
             LOSectionLabel(title: "Conto principale")
             ViewThatFits(in: .horizontal) {
-                HStack(alignment: .firstTextBaseline) { accountName; Spacer(minLength: NativeDesign.Space.small); accountBalance }
-                VStack(alignment: .leading, spacing: NativeDesign.Space.small) { accountName; accountBalance }
+                HStack(alignment: .firstTextBaseline) { accountName; Spacer(minLength: NativeDesign.Space.small); accountBalance; accountToggle }
+                VStack(alignment: .leading, spacing: NativeDesign.Space.small) { accountName; HStack { accountBalance; accountToggle } }
             }
             .padding(.horizontal, NativeDesign.Layout.compactCardInset).padding(.vertical, NativeDesign.Layout.cardInsetVertical)
             .loCardSurface()
@@ -77,8 +79,18 @@ struct FinanceScreen: View {
         }
     }
     private var accountName: some View { Text(store.summary.text("account", fallback: "Trade Republic")).font(.headline) }
+    private var isTradeRepublic: Bool { store.summary.text("account", fallback: "Trade Republic") == "Trade Republic" }
+    @ViewBuilder private var accountToggle: some View {
+        if isTradeRepublic && !hidden {
+            Button(hideTradeRepublic ? "Mostra" : "Nascondi", systemImage: hideTradeRepublic ? "eye" : "eye.slash") { hideTradeRepublic.toggle() }
+                .labelStyle(.iconOnly).font(.subheadline).foregroundStyle(NativeDesign.financeGroups[0])
+                .frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget)
+                .accessibilityLabel(hideTradeRepublic ? "Mostra Trade Republic" : "Nascondi Trade Republic")
+                .accessibilityIdentifier("finance-trade-republic-toggle")
+        }
+    }
     private var accountBalance: some View {
-        Text(hidden ? "•••• €" : presentation.balance.map(\.euro) ?? "Da aggiornare")
+        Text(hidden || (isTradeRepublic && hideTradeRepublic) ? "•••• €" : presentation.balance.map(\.euro) ?? "Da aggiornare")
             .font(.headline).monospacedDigit().accessibilityIdentifier("finance-current-balance")
     }
     private var presentation: NativeFinanceOverview { NativeFinanceOverview(summary: store.summary, month: store.financeMonth) }
@@ -89,7 +101,8 @@ struct FinanceScreen: View {
         let spacing = NativeDesign.Space.small
         let budget = NavigationLink { NativePlansScreen().toolbar(.visible, for: .navigationBar) } label: { financeTile("Budget", symbol: "wallet.bifold") }.accessibilityIdentifier("finance-budget")
         let analysis = NavigationLink { FinanceAnalysisScreen() } label: { financeTile("Analisi", symbol: "chart.xyaxis.line") }.accessibilityIdentifier("finance-analysis")
-        let plan = Button { router.sheet = .financePlan } label: { financeTile("Nuovo piano", symbol: "folder.badge.plus") }.accessibilityIdentifier("finance-new-plan")
+        // PLANS-SCREEN-97: «Piani» opens the plans map; a new plan is added from there.
+        let plan = NavigationLink { NativePlansMapScreen() } label: { financeTile("Piani", symbol: "square.grid.2x2") }.accessibilityIdentifier("finance-new-plan")
         let all = NavigationLink {
             List { movements }.modifier(NativeListAppearance()).navigationTitle("Movimenti").navigationBarTitleDisplayMode(.inline).toolbar(.visible, for: .navigationBar)
         } label: { financeTile("Movimenti", symbol: "list.bullet") }
@@ -500,25 +513,45 @@ struct MovementEditor: View {
 /// Month of Finanza as a glass chip in the title row; the menu moves one month back or forward.
 struct NativeFinanceMonthChip: View {
     @EnvironmentObject var store: NativeStore
+    /// FINANCE-MONTH-ONE-TAP-97: ‹ and › change month with one tap; the name opens a menu to pick a precise month.
+    private var choices: [String] { (-12...6).map { String(CivilDate.adding($0, to: CivilDate.month() + "-01", component: .month).prefix(7)) } }
+    private func distance(to month: String) -> Int {
+        let a = Int(store.financeMonth.prefix(4))! * 12 + Int(store.financeMonth.suffix(2))!
+        let b = Int(month.prefix(4))! * 12 + Int(month.suffix(2))!
+        return b - a
+    }
     var body: some View {
-        Menu {
-            Button("Mese precedente", systemImage: "chevron.left") { Task { await store.changeMonth(-1, finance: true) } }
-            Button("Mese successivo", systemImage: "chevron.right") { Task { await store.changeMonth(1, finance: true) } }
-        } label: {
-            HStack(spacing: NativeDesign.Space.xs) {
+        HStack(spacing: NativeDesign.Space.none) {
+            arrow("chevron.left", label: "Finanza, mese precedente", identifier: "finance-month-previous") { Task { await store.changeMonth(-1, finance: true) } }
+            Menu {
+                ForEach(choices.reversed(), id: \.self) { month in
+                    Button(CivilDate.monthTitle(month)) { Task { await store.changeMonth(distance(to: month), finance: true) } }
+                }
+            } label: {
                 Text(Self.label(store.financeMonth)).font(.subheadline.weight(.semibold)).lineLimit(1).fixedSize()
-                Image(systemName: "chevron.up.chevron.down").font(.caption2.weight(.semibold)).foregroundStyle(NativeDesign.secondary)
+                    .foregroundStyle(Color.primary)
+                    .frame(minHeight: NativeDesign.Layout.touchTarget)
+                    .contentShape(Rectangle())
             }
-            .foregroundStyle(Color.primary)
-            .padding(.horizontal, NativeDesign.Space.medium)
-            .frame(minHeight: NativeDesign.Layout.compactControl)
-            .modifier(NativeGlass())
-            .frame(minHeight: NativeDesign.Layout.touchTarget)
-            .contentShape(Rectangle())
+            .accessibilityLabel("Mese: " + CivilDate.monthTitle(store.financeMonth))
+            .accessibilityHint("Scegli un mese preciso")
+            .accessibilityIdentifier("finance-month")
+            arrow("chevron.right", label: "Finanza, mese successivo", identifier: "finance-month-next") { Task { await store.changeMonth(1, finance: true) } }
         }
+        .frame(minHeight: NativeDesign.Layout.compactControl)
+        .modifier(NativeGlass())
+        .frame(minHeight: NativeDesign.Layout.touchTarget)
         .disabled(store.busy)
-        .accessibilityLabel("Mese: " + CivilDate.monthTitle(store.financeMonth))
-        .accessibilityIdentifier("finance-month")
+    }
+    private func arrow(_ symbol: String, label: String, identifier: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: symbol).font(.footnote.weight(.semibold)).foregroundStyle(NativeDesign.financeGroups[0])
+                .frame(width: NativeDesign.Layout.touchTarget * 0.75, height: NativeDesign.Layout.touchTarget)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(NativePressStyle())
+        .accessibilityLabel(label)
+        .accessibilityIdentifier(identifier)
     }
     /// Short month (year only when it is not this year) so the chip never truncates next to the title.
     static func label(_ month: String) -> String {

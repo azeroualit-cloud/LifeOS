@@ -552,3 +552,5 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 - **FUNDS-PAY-FROM-SAVINGS-97 — ACTIVE** (conferma META-01 «yes»): i pagamenti con un Fondo escono tutti dai risparmi; sostituisce FUNDING-BLOCK-2026-11-21 solo per i fondi.
 
 - **IPA-DELIVERY-97-2026-11-28 — ACTIVE.** «Yes, build it» / «spero di avere l'ipa pronto e il sito aggiornato entro domani mattina»: IPA 97 e sito aggiornati entro la mattina, con il mockup approvato; ciò che non è pronto in sicurezza va nella 98, dichiarato.
+
+- **IPA-DELIVERY-97 (precisata 28/11).** «no ma quale ipa 98, voglio tutto nella 97»: tutte le voci del mockup nella 97, compresi i tipi di piano.
