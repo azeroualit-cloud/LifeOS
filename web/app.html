@@ -10155,6 +10155,68 @@ renderAdmin = async function () {
 };
 </script>
 
+<script id="lifeos-datacheck97">
+/* WORKFLOW-ADVICE-97: «Controllo dati» in Admin. Segnala valori sospetti senza cambiare nulla: integratori contati
+   per dose con valori da 100 g (come l'Omega-3 del 27/11), mesi senza stipendio (cedolino o movimento Stipendio),
+   categorie usate dai movimenti ma senza gruppo. Quattro letture leggere, solo quando si apre o si preme «Controlla». */
+const dc97 = { loading: false, done: false, error: "", foods: [], salary: [], categories: [] };
+const dc97E = (v) => (typeof hubE === "function" ? hubE(v) : String(v ?? ""));
+async function dc97Run() {
+  if (dc97.loading) return; dc97.loading = true; dc97.error = ""; dc97Render();
+  try {
+    const now = new Date(), y = now.getFullYear(), m = now.getMonth() + 1;
+    const [foods, finance, cats, usage] = await Promise.all([
+      workerRequest("listFoods", []).catch(() => ({ foods: [] })),
+      workerRequest("getFinanceData", [y, m]).catch(() => null),
+      workerRequest("getSettings", ["finance-categories"]).catch(() => null),
+      workerRequest("getFinanceCategoryUsage", []).catch(() => ({ rows: [] }))]);
+    dc97.foods = ((foods && foods.foods) || []).filter((f) => {
+      if (f.family !== "supplement") return false;
+      const unit = f.app && f.app.supplementUnit; if (unit === "gram" || unit === "millilitre") return false;
+      const micro = f.micro || {}, omega = Number(micro.epa || 0) + Number(micro.dha || 0);
+      const values = Object.values(micro).map(Number).filter((v) => v > 0);
+      const tiny = omega > 0 ? omega / 100 < 50 : values.length > 0 && Math.max(...values) / 100 < 0.5;
+      return tiny && Number(f.kcal || 0) / 100 < 1;
+    }).map((f) => f.name);
+    const salary = (finance && finance.lifetime && finance.lifetime.salaryHistory) || [];
+    const have = new Set(salary.map((r) => r.month)), months = [];
+    for (let back = 6; back >= 1; back--) { const d = new Date(y, m - 1 - back, 1); months.push(d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0")); }
+    dc97.salary = salary.length ? months.filter((x) => !have.has(x)) : months;
+    const doc = cats && cats.doc && Array.isArray(cats.doc.groups) ? cats.doc : (window.lifeosFinanceCategories ? window.lifeosFinanceCategories() : { groups: [], income: [] });
+    const known = new Set([...(doc.groups || []).flatMap((g) => g.items || []), ...(doc.income || [])]);
+    const counts = new Map();
+    for (const r of (usage && usage.rows) || []) { const name = String(r.shown || r.raw || ""); if (name && !known.has(name)) counts.set(name, (counts.get(name) || 0) + (Number(r.n) || 0)); }
+    dc97.categories = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+    dc97.done = true;
+  } catch (e) { dc97.error = "Controllo non riuscito: " + String(e.message || e); }
+  dc97.loading = false; dc97Render();
+}
+function dc97Month(x) { const [yy, mm] = x.split("-").map(Number); return new Date(yy, mm - 1, 1).toLocaleDateString("it-IT", { month: "long", year: "numeric" }); }
+function dc97Html() {
+  if (!dc97.done && !dc97.loading && !dc97.error) setTimeout(dc97Run, 0);
+  const row = (ok, title, detail) => `<div class="cat-row"><span><b>${ok ? "✓" : "!"} ${dc97E(title)}</b><small>${detail}</small></span></div>`;
+  const body = !dc97.done ? `<p class="empty">${dc97.loading ? "Controllo in corso…" : ""}</p>` : [
+    row(!dc97.foods.length, dc97.foods.length ? dc97.foods.length + (dc97.foods.length === 1 ? " integratore sospetto" : " integratori sospetti") : "Integratori in ordine",
+      dc97.foods.length ? "Valori molto bassi per dose, forse inseriti per 100 g: " + dc97.foods.map(dc97E).join(", ") + ". Aprili in Alimenti e controlla l'unità." : "Nessun integratore per dose con valori da 100 g."),
+    row(!dc97.salary.length, dc97.salary.length ? (dc97.salary.length === 1 ? "1 mese senza stipendio" : dc97.salary.length + " mesi senza stipendio") : "Stipendi completi",
+      dc97.salary.length ? "Nessun cedolino né movimento con categoria Stipendio per: " + dc97.salary.map(dc97Month).map(dc97E).join(", ") + "." : "Gli ultimi 6 mesi hanno tutti uno stipendio."),
+    row(!dc97.categories.length, dc97.categories.length ? dc97.categories.length + (dc97.categories.length === 1 ? " categoria senza gruppo" : " categorie senza gruppo") : "Categorie in ordine",
+      dc97.categories.length ? dc97.categories.slice(0, 12).map(([n, c]) => dc97E(n) + " (" + c + ")").join(", ") + ". Aggiungile a un gruppo o spostale qui sotto, in Categorie della Finanza." : "Ogni categoria usata è in un gruppo."),
+  ].join("");
+  return `<section class="card pad adm-wide" id="dc97"><div class="card-title"><div><h2>Controllo dati</h2><small>Segnala valori sospetti; non modifica nulla</small></div>
+    <button type="button" data-dc97-run ${dc97.loading ? "disabled" : ""}>${dc97.loading ? "Controllo…" : "Controlla di nuovo"}</button></div>
+    ${dc97.error ? `<div class="errorbox">${dc97E(dc97.error)}</div>` : ""}${body}</section>`;
+}
+function dc97Render() { const host = document.getElementById("dc97"); if (host) host.outerHTML = dc97Html(); }
+document.addEventListener("click", (e) => { if (e.target.closest && e.target.closest("[data-dc97-run]")) { dc97.done = false; dc97Run(); } });
+const renderAdminDc97 = renderAdmin;
+renderAdmin = async function () {
+  await renderAdminDc97();
+  const grid = document.querySelector("#admin .adm-grid");
+  if (grid && !document.getElementById("dc97")) grid.insertAdjacentHTML("afterbegin", dc97Html());
+};
+</script>
+
 <script id="lifeos-applayout95">
 /* NAV-E-SLOT-2026-11-25: barra dell'iPhone Dashboard · Attività · Calendario · Salute · quinto tab.
    Il quinto tab (Finanza o Bloom) si sceglie qui; l'app lo legge senza aggiornarla. L'altro resta nella Dashboard. */
