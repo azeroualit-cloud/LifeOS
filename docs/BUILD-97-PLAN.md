@@ -33,3 +33,8 @@ Server (entrambi i Worker, run verificati con rollback):
 Sito (`codex/revision77`, deploy verificato): Admin → «Controllo dati» (integratori per dose con valori da 100 g, mesi senza stipendio negli ultimi 6, categorie senza gruppo). Non modifica nulla.
 
 Non fatto in questa build: il sito offre ancora «Spesa ricorrente fissa» nel suo editor dei piani (l'app no); prove fisiche e accettazione dell'utente aperte.
+
+
+## Consegna 28/11 mattina
+
+IPA 0.10.35 build 97 pubblicata dal run 46101555287 (secondo avvio, dopo l'aggiornamento di 13 test UI alle nuove schermate). Checksum verificato dopo il download.
