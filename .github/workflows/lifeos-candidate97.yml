@@ -1,5 +1,5 @@
 name: LifeOS candidate 97 validation and authorized IPA
-# Start 1 (IPA-DELIVERY-97-2026-11-28: everything from the approved mockup in build 97).
+# Start 2 (start 1: Agenda tap matched two elements; tests still expected the old Dashboard list, «Giorno per giorno», Nuovo piano from Finanza and one «Fondo prova»; Cronologia below the ring grid).
 # targeted check, six test shards and the Release launches all start at once; packaging waits for every gate.
 on:
   workflow_dispatch:

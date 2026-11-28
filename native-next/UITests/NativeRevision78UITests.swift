@@ -134,7 +134,8 @@ final class NativeRevision78UITests: XCTestCase {
         app.buttons["quick-nutrition-close"].tap(); if app.buttons["Fine"].waitForExistence(timeout: 3) { app.buttons["Fine"].tap() } // FOOD-QUICK-ADD: back from the macros, then close the search
         let history = app.buttons["health-nutrition-history"]
         let surface = app.scrollViews["health-detail-scroll"]
-        for _ in 0..<6 where !history.isHittable { surface.swipeUp() }
+        // MICRO-VIEW-97: the ring grid makes Salute longer; Cronologia must also clear the floating Peso/Alimento bar.
+        for _ in 0..<12 where !history.isHittable || (add.exists && history.frame.maxY > add.frame.minY - 4) { surface.swipeUp(velocity: .slow) }
         XCTAssertTrue(history.isHittable); history.tap()
         XCTAssertTrue(app.navigationBars["Cronologia"].waitForExistence(timeout: 10))
         app.navigationBars.buttons.firstMatch.tap()

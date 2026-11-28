@@ -508,7 +508,7 @@ final class NativeInterfaceTests: XCTestCase {
     func testHomeEmptyStatesRemainActionable() {
         let app = launch(["--empty-home", "--dark"])
         XCTAssertTrue(app.staticTexts["home-today"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.staticTexts["Nessun impegno da mostrare"].exists)
+        XCTAssertTrue(app.buttons["home-tasks"].exists) // DASHBOARD-TODO-BUTTONS-97: the empty list became the Attività button
         XCTAssertFalse(app.buttons["home-focus"].exists)
         let manage = app.buttons["home-routines"] // DASHBOARD-TODO-BUTTONS-97
         reveal(manage, in: app); XCTAssertTrue(manage.isHittable); manage.tap()
@@ -960,7 +960,7 @@ final class NativeInterfaceTests: XCTestCase {
         let name = app.textFields["plan-name"]; name.tap(); name.typeText("Fondo prova")
         let amount = app.textFields["plan-amount"]; amount.tap(); amount.typeText("50")
         app.buttons["Fine"].tap(); app.buttons["plan-save"].tap()
-        XCTAssertTrue(app.navigationBars["Budget"].waitForExistence(timeout: 10)); app.staticTexts["Fondo prova"].tap()
+        XCTAssertTrue(app.navigationBars["Budget"].waitForExistence(timeout: 10)); app.buttons.containing(.staticText, identifier: "Fondo prova").firstMatch.tap() // BUDGET-MAP-97: the map also shows the name
         let edit = app.buttons["plan-edit"]; reveal(edit, in: app); edit.tap()
         XCTAssertTrue(app.navigationBars["Modifica piano"].waitForExistence(timeout: 10))
         let quota = app.textFields["plan-edit-amount"]; quota.tap()
@@ -1028,7 +1028,7 @@ final class NativeInterfaceTests: XCTestCase {
             XCTAssertTrue(app.descendants(matching: .any)["finance-category-average"].waitForExistence(timeout: 10) || app.staticTexts["Nessuna spesa nel periodo"].exists)
             capture("category-period-" + period)
         }
-        for title in ["Entrate e uscite", "Stipendi per competenza", "Giorno per giorno", "Patrimonio"] {
+        for title in ["Entrate e uscite", "Stipendi per competenza", "Spese di un mese normale", "Patrimonio"] { // ANALYSIS-CLARITY-97
             let heading = app.staticTexts[title]
             for _ in 0..<10 { if heading.isHittable { break }; app.scrollViews.firstMatch.swipeUp() }
             XCTAssertTrue(heading.exists, title)
@@ -1067,8 +1067,12 @@ final class NativeInterfaceTests: XCTestCase {
         // One compact row (build 92): adjacent shortcuts may share an edge.
         XCTAssertGreaterThanOrEqual(analysis.frame.minX, budget.frame.maxX - 1)
         XCTAssertFalse(app.buttons["finance-more"].exists, "No hidden overflow menu")
-        more.tap()
+        more.tap() // PLANS-SCREEN-97: the tile opens Piani, «+» opens Nuovo piano
+        XCTAssertTrue(app.navigationBars["Piani"].waitForExistence(timeout: 10))
+        app.buttons["plans-map-add"].tap()
         XCTAssertTrue(app.navigationBars["Nuovo piano"].waitForExistence(timeout: 10)); app.buttons["Annulla"].tap()
+        XCTAssertTrue(app.navigationBars["Piani"].waitForExistence(timeout: 10)); app.navigationBars["Piani"].buttons.firstMatch.tap()
+        XCTAssertTrue(app.buttons["primary-add"].waitForExistence(timeout: 10))
         app.buttons["primary-add"].tap()
         XCTAssertTrue(app.navigationBars["Nuovo movimento"].waitForExistence(timeout: 10)); app.buttons["Annulla"].tap()
         let all = app.buttons["all-movements"]
@@ -1104,7 +1108,9 @@ final class NativeInterfaceTests: XCTestCase {
         let scroll = app.scrollViews["finance-scroll"]
         for _ in 0..<18 {
             let visible = scroll.frame.intersection(app.frame)
-            let top = max(visible.minY, app.navigationBars.firstMatch.exists ? app.navigationBars.firstMatch.frame.maxY : visible.minY)
+            // The bar can disappear between exists and frame while scrolling (snapshot error, candidate 97).
+            let bars = app.navigationBars.allElementsBoundByIndex
+            let top = max(visible.minY, bars.isEmpty ? visible.minY : bars[0].frame.maxY)
             // Finance pins Add expense above the tab bar; content behind it is not reachable.
             let pinned = app.buttons["primary-add"]
             let pinnedTop = pinned.exists && pinned.frame.minY > visible.midY && pinned.frame != element.frame ? pinned.frame.minY : visible.maxY

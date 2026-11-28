@@ -87,7 +87,7 @@ extension XCUIApplication {
     /// CALENDAR-TAP-SELECT-97: tapping a day only selects it; the day list opens from «Agenda».
     func openCalendarAgenda() {
         if scrollViews["calendar-day-pane"].exists { return }
-        let agenda = buttons["Agenda"]
+        let agenda = buttons["calendar-view-agenda"] // the Mese/Agenda switch; «Agenda» can also be a title
         if agenda.waitForExistence(timeout: 5) { agenda.tap() }
         _ = scrollViews["calendar-day-pane"].waitForExistence(timeout: 10)
     }
