@@ -239,6 +239,18 @@ struct NativePrivateDaySheet: View {
         if store.isDemo { return demo() }
         return (try? await store.read("getSettings", args: [.string("private-log")]).object.record("doc").records("entries")) ?? []
     }
+    /// INCONTRI-EASY-ADD-97: the whole log with its revision, for painting meetings on days.
+    static func read(_ store: NativeStore) async throws -> (entries: [Record], modified: Double) {
+        if store.isDemo { return (demo(), 0) }
+        let r = try await store.read("getSettings", args: [.string("private-log")]).object
+        return (r.record("doc").records("entries"), r.amount("modified"))
+    }
+    static func save(_ store: NativeStore, _ list: [Record], after modified: Double) async throws -> (entries: [Record], modified: Double) {
+        if store.isDemo { return (list, modified) }
+        let when = max(Date().timeIntervalSince1970 * 1000, modified + 1)
+        let r = try await store.read("saveSettings", args: [.string("private-log"), .object(["entries": .array(list.map(JSONValue.object))]), .number(when)]).object
+        return (r.record("doc").records("entries"), r.amount("modified"))
+    }
     /// Demo only: neutral names, a few entries in the last months (tour and screenshots).
     static func demo(today: String = CivilDate.day()) -> [Record] {
         let offsets: [(Int, String)] = [(0, "Persona A"), (-2, "Persona A"), (-5, "Persona B"), (-9, "Persona A"), (-12, "Persona A"),

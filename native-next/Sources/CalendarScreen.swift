@@ -26,6 +26,13 @@ struct CalendarScreen: View {
         nonmutating set { router.calendarBrush = newValue }
     }
     @State private var lastShift: (String, String)?
+    /// INCONTRI-EASY-ADD-97: the paint panel also paints meetings («Incontri» tab), one person as the brush.
+    @State private var paintMeetings = false
+    @State private var meetings: [Record] = []
+    @State private var meetingsModified: Double = 0
+    @State private var meetingPerson = ""
+    @State private var lastMeetings: [Record]?
+    @State private var meetingsBusy = false
     @State private var months: [String] = []
     @State private var visibleMonth: String?
     @State private var jumpMonth: String?
@@ -590,7 +597,8 @@ struct CalendarScreen: View {
                                     monthReturnDay = item.day
                                     showingDay = true
                                 }
-                                if painting {
+                                if painting && paintMeetings { toggleMeeting(item.day) }
+                                else if painting {
                                     let old = item.shift?.rawValue ?? "erase", kind = brush
                                     Task {
                                         do {
@@ -605,7 +613,7 @@ struct CalendarScreen: View {
                                     .padding(.vertical, (NativeDesign.Layout.calendarMonthDayHeight - NativeDesign.Layout.calendarDayHeight) / 2)
                                     .contentShape(Rectangle())
                             }
-                                .buttonStyle(NativePressStyle()).disabled(painting && (store.busy || (!store.isDemo && monthData[month] == nil)))
+                                .buttonStyle(NativePressStyle()).disabled(painting && (paintMeetings ? meetingsBusy : (store.busy || (!store.isDemo && monthData[month] == nil))))
                                 .id(item.day).accessibilityIdentifier("calendar-day-" + item.day)
                                 .accessibilityLabel(item.label + ", " + (item.shift?.title ?? "nessun turno"))
                                 .accessibilityValue(item.eventCount == 1 ? "1 evento" : "\(item.eventCount) eventi")
@@ -624,6 +632,53 @@ struct CalendarScreen: View {
                 if value == "Agenda", !showingDay { monthReturnDay = selected; showingDay = true }
                 else if value == "Mese", showingDay { returnToMonth() }
             }), identifierPrefix: "calendar-view-")
+    }
+    private var meetingPeople: [String] { Array(Set(meetings.map { $0.text("person") }.filter { !$0.isEmpty })).sorted() }
+    private var meetingBrush: some View {
+        VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+            ScrollView(.horizontal) {
+                HStack(spacing: NativeDesign.Space.small) {
+                    ForEach(meetingPeople, id: \.self) { name in
+                        Button { meetingPerson = name } label: {
+                            Text(name).font(.footnote.weight(.semibold)).lineLimit(1)
+                                .padding(.horizontal, NativeDesign.Space.small)
+                                .frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget)
+                                .fixedSize(horizontal: true, vertical: false)
+                                .contentShape(Rectangle())
+                        }.buttonStyle(NativeGlassButtonStyle())
+                            .overlay(Capsule().strokeBorder(meetingPerson == name ? Color.primary : .clear, lineWidth: NativeDesign.Layout.selectionLine))
+                            .accessibilityAddTraits(meetingPerson == name ? .isSelected : [])
+                            .accessibilityHint("Tocca i giorni per aggiungere o togliere un incontro")
+                    }
+                }.padding(.vertical, NativeDesign.Space.xs)
+            }.fixedSize(horizontal: false, vertical: true)
+            TextField("Con chi", text: $meetingPerson).textInputAutocapitalization(.words)
+                .accessibilityIdentifier("paint-meeting-person")
+            Text(meetingPerson.trimmingCharacters(in: .whitespaces).isEmpty ? "Scegli o scrivi con chi, poi tocca i giorni." : "Tocca un giorno per aggiungere o togliere l'incontro.")
+                .font(.footnote).foregroundStyle(NativeDesign.secondary)
+        }.accessibilityIdentifier("paint-meetings")
+    }
+    private func loadMeetings() async {
+        do { let r = try await NativePrivateLog.read(store); meetings = r.entries; meetingsModified = r.modified }
+        catch { store.error = "Incontri non disponibili: aggiorna il server." }
+    }
+    private func toggleMeeting(_ day: String) {
+        let person = meetingPerson.trimmingCharacters(in: .whitespaces)
+        guard !person.isEmpty, !meetingsBusy else { return }
+        var list = meetings
+        if let index = list.firstIndex(where: { $0.text("day") == day && $0.text("person") == person }) { list.remove(at: index) }
+        else { list.append(["id": .string(UUID().uuidString), "day": .string(day), "person": .string(person)]) }
+        let before = meetings
+        Task { if await saveMeetings(list) { lastMeetings = before } }
+    }
+    @discardableResult private func saveMeetings(_ list: [Record]) async -> Bool {
+        meetingsBusy = true; defer { meetingsBusy = false }
+        do {
+            let r = try await NativePrivateLog.save(store, list, after: meetingsModified)
+            meetings = r.entries; meetingsModified = r.modified
+            privateDays = Set(meetings.map { $0.text("day") })
+            return true
+        } catch { store.error = error.localizedDescription; return false }
     }
     private var painting: Bool {
         get { router.calendarPainting }
@@ -661,11 +716,18 @@ struct CalendarScreen: View {
                 }
                 Button { withAnimation(reduceMotion || typeSize.isAccessibilitySize ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration)) { painting.toggle(); brush = painting ? "morning" : "consult" } } label: { Label(painting ? "Fine" : "Dipingi turni", systemImage: painting ? "checkmark" : "calendar.badge.clock").labelStyle(.iconOnly).frame(minWidth: NativeDesign.Layout.touchTarget, minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle()) }.accessibilityIdentifier("toggle-shift-paint")
                 Spacer()
-                if let lastShift { Button("Annulla") { Task { await store.run("paintShift", ["day": .string(lastShift.0), "kind": .string(lastShift.1)]); if store.error == nil { self.lastShift = nil } } }.disabled(store.busy) }
+                if paintMeetings, painting, let lastMeetings { Button("Annulla") { Task { await saveMeetings(lastMeetings); self.lastMeetings = nil } }.disabled(meetingsBusy) }
+                else if let lastShift { Button("Annulla") { Task { await store.run("paintShift", ["day": .string(lastShift.0), "kind": .string(lastShift.1)]); if store.error == nil { self.lastShift = nil } } }.disabled(store.busy) }
                 NativeIconButton(symbol: "chevron.left", label: "Mese precedente") { jumpMonth = NativeCalendarWindow.offset(focusMonth, by: -1) }.disabled(store.busy)
                 NativeIconButton(symbol: "chevron.right", label: "Mese successivo") { jumpMonth = NativeCalendarWindow.offset(focusMonth, by: 1) }.disabled(store.busy)
             }.font(.subheadline).frame(minHeight: NativeDesign.Layout.touchTarget)
             if painting {
+                LOSegmented(options: [("Turni", "shifts"), ("Incontri", "meetings")], selection: Binding(
+                    get: { paintMeetings ? "Incontri" : "Turni" },
+                    set: { value in paintMeetings = value == "Incontri"; if paintMeetings { Task { await loadMeetings() } } }), identifierPrefix: "paint-target-")
+            }
+            if painting && paintMeetings { meetingBrush }
+            else if painting {
                 ScrollView(.horizontal) {
                     HStack(spacing: NativeDesign.Space.small) {
                         ForEach(ShiftKind.allCases) { kind in
