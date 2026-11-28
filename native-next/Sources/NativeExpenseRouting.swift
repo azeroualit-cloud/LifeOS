@@ -21,7 +21,8 @@ struct NativeExpenseRouteSection: View {
     @State private var billSavingsSupported = false
     private var offersBillSplit: Bool { billSavingsSupported && bill.enabled && movementID == 0 && amount > 1 }
     private var uncovered: Int { chosen.map { NativeExpenseRouting.split(amount: amount, plan: $0).savings } ?? 0 }
-    private var offersPlanSplit: Bool { (bill.enabled ? billSavingsSupported : planSplitSupported) && movementID == 0 && chosen != nil && chosen?.flag("retained") == false && uncovered > 0 }
+    /// FUNDS-PAY-FROM-SAVINGS-97: a Fondo pays everything from savings (its own part, then the other savings); no budget months.
+    private var offersPlanSplit: Bool { (bill.enabled ? billSavingsSupported : planSplitSupported) && movementID == 0 && chosen != nil && chosen?.flag("retained") == false && uncovered > 0 && chosen?.text("kind") != "fund" }
     private var offersSplit: Bool { splitSupported && movementID == 0 && !bill.enabled && amount > 1 }
     @State private var loading = false
     @State private var issue: String?

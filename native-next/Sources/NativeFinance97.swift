@@ -244,3 +244,59 @@ struct NativeNormalMonthCard: View {
         }
     }
 }
+
+/// PLAN-KINDS-97: add, move or remove the end of a Fondo. Only the current month and the next ones change.
+struct NativeFundEndSheet: View {
+    @EnvironmentObject var store: NativeStore
+    @Environment(\.dismiss) private var dismiss
+    let planID: String
+    let start: String
+    let current: String
+    @State private var hasEnd: Bool
+    @State private var end: String
+    @State private var saving = false
+    @State private var error: String?
+
+    init(planID: String, start: String, current: String) {
+        self.planID = planID; self.start = start; self.current = current
+        _hasEnd = State(initialValue: !current.isEmpty)
+        _end = State(initialValue: current.isEmpty ? max(start, CivilDate.month()) : current)
+    }
+    private var earliest: String { max(start, CivilDate.month()) }
+    private var valid: Bool { !hasEnd || end >= earliest }
+    private var unchanged: Bool { hasEnd ? end == current : current.isEmpty }
+
+    var body: some View {
+        Form {
+            Section {
+                Toggle("Con una fine", isOn: $hasEnd).accessibilityIdentifier("fund-end-toggle")
+                if hasEnd { NativeMonthPicker(title: "Ultimo mese", selection: $end) }
+            }
+            Section {
+                Text(valid ? "Le quote cambiano dal mese corrente in poi; i mesi passati restano come sono." : "Scegli il mese corrente o uno successivo.")
+                    .font(.footnote).foregroundStyle(valid ? NativeDesign.secondary : NativeDesign.danger)
+            }
+            if let error { Section { NativeInlineMessage(text: error) } }
+        }
+        .modifier(NativeListAppearance())
+        .navigationTitle("Fine del fondo").navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) { NativeSheetCancel { dismiss() }.disabled(saving) }
+            ToolbarItem(placement: .confirmationAction) {
+                NativeSheetConfirm(retry: false) { Task { await save() } }
+                    .disabled(saving || !valid || unchanged)
+                    .accessibilityIdentifier("fund-end-save")
+            }
+        }
+        .interactiveDismissDisabled(saving)
+    }
+
+    private func save() async {
+        saving = true; defer { saving = false }
+        do {
+            try await store.perform("setFinanceFundEnd", [:], args: [.string(planID), hasEnd ? .string(end) : .null])
+            await store.loadFinancePlans()
+            dismiss()
+        } catch { self.error = error.localizedDescription }
+    }
+}

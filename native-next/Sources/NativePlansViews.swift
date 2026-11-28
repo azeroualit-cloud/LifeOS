@@ -176,6 +176,8 @@ struct NativePlanEditor: View {
     @FocusState private var editing: Bool
     /// REFERENCE-GAPS-95 «Da dove arrivano le quote»: part of a goal paid from savings; the budget quotes cover the rest.
     @State private var fromSavings = 0
+    /// PLAN-KINDS-97: a Fondo may end; the end can be moved later from the plan detail.
+    @State private var fundHasEnd = false
     private var totalCents: Int { Input.cents(draft.amount) ?? 0 }
     private var offersSavings: Bool { draft.kind == .goal && totalCents > 0 }
     /// The draft the server receives: the amount covered by the budget quotes.
@@ -190,16 +192,15 @@ struct NativePlanEditor: View {
     }
     var body: some View {
         Form {
-            // FINANCE-ENTRY-SIMPLIFY-2026-11-24: three kinds only. Obiettivo is gone (a Fondo closed later does the same);
-            // instalments are made from Nuova spesa; «Ricorrente» covers fixed and estimated amounts.
+            // PLAN-KINDS-97: four kinds. Anticipa budget, Fondo (optional end, pays from savings), Utenza stimata, Rateizza.
             Section("Cosa vuoi fare?") {
-                ForEach([NativePlanKind.advance, .fund, .fixed]) { kind in
-                    let selected = kind == .fixed ? [.fixed, .estimated].contains(draft.kind) : draft.kind == kind
-                    Button { if !(kind == .fixed && selected) { draft.kind = kind } } label: {
+                ForEach([NativePlanKind.advance, .fund, .estimated, .recovery]) { kind in
+                    let selected = draft.kind == kind
+                    Button { draft.kind = kind } label: {
                         HStack(spacing: NativeDesign.Space.medium) {
                             VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
-                                Text(kind == .fixed ? "Ricorrente" : kind.title).font(.subheadline.weight(.semibold)).foregroundStyle(Color.primary)
-                                Text(kind == .fixed ? "Una spesa che torna: affitto, assicurazione, bollette" : NativePlanKindText.detail(kind)).font(.footnote).foregroundStyle(NativeDesign.secondary)
+                                Text(NativePlanKindText.title(kind.rawValue)).font(.subheadline.weight(.semibold)).foregroundStyle(Color.primary)
+                                Text(NativePlanKindText.detail(kind)).font(.footnote).foregroundStyle(NativeDesign.secondary)
                             }
                             Spacer(minLength: NativeDesign.Space.small)
                             if selected { Image(systemName: "checkmark").font(.subheadline.weight(.semibold)).foregroundStyle(NativeDesign.financeTitle) }
@@ -208,16 +209,12 @@ struct NativePlanEditor: View {
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel((kind == .fixed ? "Ricorrente" : kind.title) + ", " + NativePlanKindText.detail(kind))
+                    .accessibilityLabel(NativePlanKindText.title(kind.rawValue) + ", " + NativePlanKindText.detail(kind))
                     .accessibilityAddTraits(selected ? .isSelected : [])
                     .accessibilityIdentifier("plan-kind-" + kind.rawValue)
                 }
             }.disabled(submitted)
             Section("Dettagli") {
-                if [.fixed, .estimated].contains(draft.kind) {
-                    Picker("Importo", selection: $draft.kind) { Text("Importo fisso").tag(NativePlanKind.fixed); Text("Stimato").tag(NativePlanKind.estimated) }
-                        .pickerStyle(.segmented).accessibilityIdentifier("plan-recurring-amount")
-                }
                 LabeledContent("Nome") {
                     TextField("es. Bolletta luce", text: $draft.name).multilineTextAlignment(.trailing).focused($editing).accessibilityIdentifier("plan-name")
                 }
@@ -231,7 +228,13 @@ struct NativePlanEditor: View {
             Section("Mesi del piano") {
                 if draft.kind == .advance { NativeMonthPicker(title: "Mese beneficiario", selection: $draft.beneficiaryMonth) }
                 NativeMonthPicker(title: draft.kind == .advance ? "Recupera da" : "Primo mese", selection: $draft.startMonth)
-                if draft.kind.finite { NativeMonthPicker(title: "Ultimo mese", selection: $draft.endMonth) }
+                if draft.kind == .fund {
+                    Toggle("Con una fine", isOn: $fundHasEnd).accessibilityIdentifier("plan-fund-has-end")
+                    if fundHasEnd { NativeMonthPicker(title: "Ultimo mese", selection: $draft.endMonth) }
+                    Text(fundHasEnd ? "Puoi spostare o togliere la fine dai dettagli del piano: cambiano solo il mese corrente e i successivi." : "Senza scadenza · continua finché interrompi il piano. Una fine si può aggiungere dopo.")
+                        .font(.footnote).foregroundStyle(NativeDesign.secondary)
+                }
+                else if draft.kind.finite { NativeMonthPicker(title: "Ultimo mese", selection: $draft.endMonth) }
                 else { Text("Senza scadenza · continua finché interrompi il piano").font(.footnote).foregroundStyle(NativeDesign.secondary) }
                 if draft.kind == .fixed { Stepper("Pagamento ogni \(draft.intervalMonths) mesi", value: $draft.intervalMonths, in: 1...12) }
                 if draft.kind == .estimated { Text("La quota verrà aggiornata dai pagamenti e dai mesi coperti, a partire dal mese successivo. Le quote passate restano invariate.").font(.footnote).foregroundStyle(NativeDesign.secondary) }
@@ -290,7 +293,7 @@ struct NativePlanEditor: View {
                 if let value { draft.amount = String(format: "%.2f", Double(value.integer("amountCents")) / 100); draft.paymentDate = value.text("date") }
             }
             .interactiveDismissDisabled(saving)
-            .onAppear { if [.goal, .recovery].contains(draft.kind) { draft.kind = .fund } }
+            .onAppear { if draft.kind == .goal { draft.kind = .fund } }
     }
     private var paymentDate: Binding<Date> { Binding(get: { CivilDate.date(draft.paymentDate) }, set: { draft.paymentDate = CivilDate.day($0) }) }
     private func save() async {
@@ -301,6 +304,7 @@ struct NativePlanEditor: View {
                 guard let movement else { throw Message(text: "Scegli il movimento già registrato.") }
                 payload["movementId"] = movement["row"]
             }
+            if draft.kind == .fund, fundHasEnd { payload["endMonth"] = .string(draft.endMonth) }
             submitted = true // Preserve the same operation after a timeout; never create a second payment.
             try await store.perform("saveFinancePlan", payload)
             await store.loadFinancePlans(); dismiss()
@@ -315,6 +319,7 @@ struct NativePlanDetail: View {
     @State private var paying = false
     @State private var editingPlan = false
     @State private var renaming = false
+    @State private var editingEnd = false
     @State private var stopping = false
     @State private var working = false
     @State private var error: String?
@@ -326,7 +331,7 @@ struct NativePlanDetail: View {
             Section {
                 // RENAME-EVERYWHERE-2026-11-26: the name is changed where it is shown.
                 NativePlanNameHeader(name: plan.text("name")) { renaming = true }
-                LabeledContent("Tipo", value: NativePlanKind(rawValue: plan.text("kind"))?.title ?? "Piano")
+                LabeledContent("Tipo", value: NativePlanKindText.title(plan.text("kind")))
                 LabeledContent("Stato") { Text(NativePlanRules.stateTitle(plan.text("status"))).accessibilityIdentifier("plan-status") }
                 LabeledContent("Primo mese", value: CivilDate.monthTitle(plan.text("startMonth")))
                 if !plan.text("endMonth").isEmpty { LabeledContent("Ultimo mese", value: CivilDate.monthTitle(plan.text("endMonth"))) }
@@ -376,6 +381,7 @@ struct NativePlanDetail: View {
             if plan.text("status") == "active" {
                 Section {
                     if !["advance", "recovery"].contains(plan.text("kind")) { Button("Modifica le quote future") { editingPlan = true }.accessibilityIdentifier("plan-edit") }
+                    if plan.text("kind") == "fund" { Button(plan.text("endMonth").isEmpty ? "Aggiungi una fine" : "Cambia la fine") { editingEnd = true }.accessibilityIdentifier("plan-fund-end") }
                     Button(plan.text("kind") == "advance" ? "Annulla l’intero anticipo" : "Interrompi le quote future", role: .destructive) { stopping = true }.disabled(working)
                 }
             }
@@ -388,6 +394,7 @@ struct NativePlanDetail: View {
             .onAppear { router.financeSection = "Budget" }
             .sheet(isPresented: $editingPlan) { NavigationStack { NativePlanQuotaEditor(plan: plan) } }
             .sheet(isPresented: $renaming) { NavigationStack { NativePlanRenameSheet(planID: planID, current: plan.text("name")) } }
+            .sheet(isPresented: $editingEnd) { NavigationStack { NativeFundEndSheet(planID: planID, start: plan.text("startMonth"), current: plan.text("endMonth")) } }
             .sheet(isPresented: $paying) { NavigationStack { NativePlanPaymentEditor(plan: plan) } }
             .confirmationDialog("Interrompere il piano? Le quote già maturate e i pagamenti rimangono nello storico. Un anticipo già usato in un mese chiuso non può essere cancellato.", isPresented: $stopping, titleVisibility: .visible) {
                 Button("Conferma", role: .destructive) { Task { await run("stopFinancePlan", ["requestId": .string(stopID), "planId": .string(planID)]) } }
@@ -631,11 +638,22 @@ private struct NativePlanQuotaEditor: View {
 
 /// One line under each kind of plan, as in the build 93 preview.
 enum NativePlanKindText {
+    /// PLAN-KINDS-97: the four names the user chose (a Fondo can have an end, so no «senza scadenza»).
+    static func title(_ kind: String) -> String {
+        switch kind {
+        case "advance": return "Anticipa budget"
+        case "fund", "goal": return "Fondo"
+        case "estimated": return "Utenza stimata"
+        case "recovery": return "Rateizza"
+        case "fixed": return "Spesa fissa"
+        default: return "Piano"
+        }
+    }
     static func detail(_ kind: NativePlanKind) -> String {
         switch kind {
         case .fixed: return "Affitto e utenze: importo fisso a ogni scadenza"
-        case .estimated: return "Bollette: quota stimata, divisa su più mesi"
-        case .fund: return "Metti da parte ogni mese, per esempio per l'auto"
+        case .estimated: return "Bollette: quota stimata, la copertura segue le bollette"
+        case .fund: return "Metti da parte ogni mese, con o senza fine; paga dai risparmi"
         case .goal: return "Una cifra da raggiungere entro una data"
         case .advance: return "Usa ora il budget di un mese futuro"
         case .recovery: return "Una spesa già fatta, recuperata nei mesi"

@@ -159,7 +159,7 @@ final class NativeScreenTourUITests: XCTestCase {
         if tap(app.buttons["finance-new-plan"]) {
             shot(prefix + " 20 Nuovo piano", app)
             // FINANCE-ENTRY-SIMPLIFY: three kinds; «Ricorrente» with fixed or estimated amount. A fund is paid with Nuova spesa.
-            if tap(app.buttons["plan-kind-fixed"]) { shot(prefix + " 20b Piano ricorrente", app) }
+            if tap(app.buttons["plan-kind-estimated"]) { shot(prefix + " 20b Utenza stimata", app) }
             _ = tap(app.buttons["plan-kind-fund"])
             type(app.textFields["plan-name"], "Vacanza", app)
             type(app.textFields["plan-amount"], "50", app)

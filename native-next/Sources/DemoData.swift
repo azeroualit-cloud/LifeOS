@@ -72,6 +72,14 @@ enum DemoActions {
             replace("health", rows.sorted { $0.text("day") < $1.text("day") })
         case "saveFinancePlan", "recordFinancePlanPayment", "stopFinancePlan", "editFinancePlan", "deleteFinancePlanPayment":
             try NativePlanDemo.apply(method, payload: payload, state: &state)
+        case "setFinanceFundEnd":
+            // PLAN-KINDS-97: same checks as the server method (current or future month, past never changes).
+            let planID = args?.first?.string ?? "", end = args?.dropFirst().first?.string ?? ""
+            var data = state.finance.record("plansV2"), plans = data.records("plans")
+            guard let index = plans.firstIndex(where: { $0.text("id") == planID }), plans[index].text("kind") == "fund", plans[index].text("status") == "active" else { throw Message(text: "Solo un fondo attivo ha una fine modificabile.") }
+            guard end.isEmpty || end >= CivilDate.month() else { throw Message(text: "La fine può essere il mese corrente o uno futuro: i mesi passati non cambiano.") }
+            plans[index]["endMonth"] = end.isEmpty ? .null : .string(end)
+            data["plans"] = .array(plans.map(JSONValue.object)); state.finance["plansV2"] = .object(data)
         case "renameFinancePlan":
             // RENAME-EVERYWHERE-2026-11-26: same checks as the server method.
             let planID = args?.first?.string ?? "", name = (args?.dropFirst().first?.string ?? "").trimmingCharacters(in: .whitespacesAndNewlines)

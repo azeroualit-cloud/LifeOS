@@ -19,6 +19,7 @@ enum NativePlanDemo {
             draft.startMonth = payload.text("startMonth"); draft.endMonth = payload.text("endMonth"); draft.beneficiaryMonth = payload.text("beneficiaryMonth"); draft.paymentDate = payload.text("paymentDate"); draft.intervalMonths = max(1, payload.integer("intervalMonths"))
             var plan = try draft.payload(requestID: id, today: today)
             plan["id"] = .string(id); plan["status"] = .string("active"); plan["rateChanges"] = .array([])
+            if kind == .fund, !payload.text("endMonth").isEmpty { plan["endMonth"] = payload["endMonth"] } // PLAN-KINDS-97
             if kind == .recovery {
                 let row = try recordCash(name: draft.name, category: draft.category, cents: payload.integer("amountCents"), day: draft.paymentDate, requestID: id, existing: payload.integer("movementId"), state: &next)
                 payments.append(["id": .string(id), "planId": .string(id), "date": .string(draft.paymentDate), "amountCents": payload["amountCents"]!, "status": .string("posted"), "movementId": .int(row), "settlementKey": .string("once")])

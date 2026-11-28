@@ -938,21 +938,20 @@ final class NativeInterfaceTests: XCTestCase {
         XCTAssertFalse(app.buttons["plan-record-payment"].exists)
         capture("plans-advance-detail")
     }
-    /// FINANCE-ENTRY-SIMPLIFY-2026-11-24 (replaces the goal payment test): only Anticipo, Fondo and Ricorrente.
-    func testNewPlanOffersThreeKindsAndRecurringHasFixedOrEstimated() {
+    /// PLAN-KINDS-97: Anticipa budget, Fondo (optional end), Utenza stimata, Rateizza; no fixed or goal.
+    func testNewPlanOffersFourKindsAndFundCanHaveAnEnd() {
         let app = launch(["--dark"])
         app.openOtherDestination("Finanza"); app.buttons["finance-budget"].tap()
         app.buttons["plans-add"].tap()
         XCTAssertTrue(app.buttons["plan-kind-fund"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.buttons["plan-kind-advance"].exists); XCTAssertTrue(app.buttons["plan-kind-fixed"].exists)
-        XCTAssertFalse(app.buttons["plan-kind-goal"].exists); XCTAssertFalse(app.buttons["plan-kind-recovery"].exists)
-        XCTAssertFalse(app.buttons["plan-kind-estimated"].exists, "fixed and estimated are one kind, «Ricorrente»")
-        app.buttons["plan-kind-fixed"].tap()
-        let amount = app.segmentedControls["plan-recurring-amount"]
-        XCTAssertTrue(amount.waitForExistence(timeout: 5))
-        amount.buttons["Stimato"].tap()
-        XCTAssertTrue(app.buttons["plan-kind-fixed"].isSelected, "«Ricorrente» stays selected for an estimated amount")
-        capture("plans-three-kinds")
+        XCTAssertTrue(app.buttons["plan-kind-advance"].exists); XCTAssertTrue(app.buttons["plan-kind-estimated"].exists)
+        XCTAssertTrue(app.buttons["plan-kind-recovery"].exists)
+        XCTAssertFalse(app.buttons["plan-kind-goal"].exists); XCTAssertFalse(app.buttons["plan-kind-fixed"].exists)
+        app.buttons["plan-kind-fund"].tap()
+        let end = app.switches["plan-fund-has-end"]
+        XCTAssertTrue(end.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["plan-kind-fund"].isSelected)
+        capture("plans-four-kinds")
     }
     func testPlansFundCanEditFutureQuotaAndLinkAnExistingMovement() {
         let app = launch(["--dark"])
