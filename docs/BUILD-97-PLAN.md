@@ -10,3 +10,5 @@ Diagnosi già fatte:
 Piani (PLAN-KINDS-97): Anticipa budget, Fondo (scadenza nessuna / una data / ripetuta, convertibile nei due sensi sui mesi futuri), Utenza stimata, Rateizza. Da confermare: Spesa ricorrente fissa → Fondo con scadenza ripetuta.
 Stipendi (SALARY-FROM-MOVEMENTS-97): il server legge solo il foglio Cedolini (fermo ad agosto); aggiungere i movimenti Stipendio.
 Modo di lavorare (WORKFLOW-ADVICE-97): un mockup unico di tutta la 97 prima del codice; pagina Controllo dati sul sito.
+
+Mockup unico della 97 (WORKFLOW-ADVICE-97): https://claude.ai/artifact/7KVhGbnW6UeiU8D5akXz5n — in attesa di approvazione.
