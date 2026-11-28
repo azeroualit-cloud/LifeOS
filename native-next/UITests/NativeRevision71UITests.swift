@@ -57,7 +57,7 @@ final class NativeRevision71UITests: XCTestCase {
         XCTAssertFalse(app.scrollViews["calendar-day-pane"].exists)
         XCTAssertFalse(app.buttons["Esporta turni su Apple (facoltativo)"].exists)
         let today = app.buttons["calendar-day-" + day()]
-        reveal(today, in: months, app: app); today.tap()
+        reveal(today, in: months, app: app); today.tap(); app.openCalendarAgenda()
         XCTAssertTrue(exists(app.scrollViews["calendar-day-pane"], app: app))
         XCTAssertTrue(app.staticTexts["calendar-day-heading"].exists)
         XCTAssertFalse(months.isHittable)
@@ -94,13 +94,15 @@ final class NativeRevision71UITests: XCTestCase {
         let heading = app.staticTexts.matching(NSPredicate(format: "identifier BEGINSWITH %@", "calendar-month-heading-")).firstMatch
         let browsedMonth = heading.label
         XCUIDevice.shared.press(.home); app.activate()
-        XCTAssertEqual(heading.label, browsedMonth, "Background resume must preserve the calendar being consulted")
+        // CALENDAR-TAP-SELECT-97: coming back to the app returns the calendar to today.
+        XCTAssertTrue(today.waitForExistence(timeout: 10)); XCTAssertTrue(today.isSelected)
+        _ = browsedMonth
     }
     func testAllDayEventsUseCompactChipsWithinTheDayScroll() {
         let app = launch(["--activity-agenda"])
         app.openOtherDestination("Calendario")
         let today = app.buttons["calendar-day-" + day()]
-        reveal(today, in: app.scrollViews["calendar-scroll"], app: app); today.tap()
+        reveal(today, in: app.scrollViews["calendar-scroll"], app: app); today.tap(); app.openCalendarAgenda()
         // Build 95 day list: an all-day event is a row with «Giornata» as its time (no separate strip).
         XCTAssertFalse(app.scrollViews["calendar-all-day-strip"].exists)
         let event = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "calendar-timeline-event:", "Evento oggi")).firstMatch
@@ -266,7 +268,7 @@ final class NativeRevision71UITests: XCTestCase {
         reveal(complete, in: app.collectionViews.firstMatch, app: app); complete.tap()
         app.openOtherDestination("Calendario")
         let today = app.buttons["calendar-day-" + day()]
-        reveal(today, in: app.scrollViews["calendar-scroll"], app: app); today.tap()
+        reveal(today, in: app.scrollViews["calendar-scroll"], app: app); today.tap(); app.openCalendarAgenda()
         let slot = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "calendar-timeline-event:", "Slot completato test")).firstMatch
         // The build 95 day list shows the activity at its time; completion is kept in Attività (checked above).
         XCTAssertTrue(exists(slot, app: app)); XCTAssertTrue(slot.label.contains("Slot completato test"))

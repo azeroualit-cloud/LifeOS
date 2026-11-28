@@ -9,6 +9,9 @@ struct NativeDashboardFocus {
     let interval: DateInterval?
     let workInterval: DateInterval?
     let countdownLabel: String
+    /// SHIFT-BAR-97: within 15 minutes after the end the badge stays, full, so the last part can complete too.
+    var justEnded = false
+    static let endGrace: TimeInterval = 15 * 60
 
     var remainingText: String {
         guard let interval else { return "" }
@@ -47,6 +50,7 @@ struct NativeDashboardFocus {
             phase = "Adesso"; interval = DateInterval(start: now, end: end); countdownLabel = "alla fine del turno"; detail = ""
         } else {
             phase = "Oggi"; interval = nil; countdownLabel = ""; detail = "Turno terminato · " + (shift?.time ?? "")
+            justEnded = now < end.addingTimeInterval(Self.endGrace)
         }
     }
 }

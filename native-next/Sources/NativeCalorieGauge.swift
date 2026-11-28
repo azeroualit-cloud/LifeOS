@@ -16,19 +16,20 @@ enum NativeCalorieBand: Equatable {
         if value > goal * NativeNutritionLimits.calories { return .over }
         return .within
     }
-    /// Two colours only (user, 23/11/2026): green inside the range, warm below it or well above it.
+    /// CALORIE-CARD-FITIA-97: Fitia's green inside the range, Fitia's yellow while still below it, orange only far above.
     var color: Color {
         switch self {
-        case .none: NativeDesign.emptyMark
-        case .within: NativeDesign.goalMet
-        case .under: NativeDesign.nutritionTitle // still filling up during the day: no warning
+        case .none: NativeDesign.nutritionTrack
+        case .within: NativeDesign.nutritionFill
+        case .under: NativeDesign.nutritionUnder
         case .over: NativeDesign.overGoal
         }
     }
-    /// Macros (NUTRITION-TOLERANT-2026-11-24): their own colour, the warning only when really excessive.
+    /// Macros: green when reached, yellow while below, orange only when really excessive (NUTRITION-TOLERANT).
     static func macroColor(_ value: Double?, goal: Double?, base: Color, limit: Double = NativeNutritionLimits.macro) -> Color {
         guard let goal, goal > 0, let value, value > 0 else { return base }
-        return value > goal * limit ? NativeDesign.overGoal : base
+        if value > goal * limit { return NativeDesign.overGoal }
+        return value < goal * low ? NativeDesign.nutritionUnder : NativeDesign.nutritionFill
     }
     /// The arc runs to twice the goal, so the recommended range sits in the middle.
     static let scale = 2.0
@@ -40,7 +41,7 @@ enum NativeCalorieBand: Equatable {
     static func range(goal: Double) -> ClosedRange<Double> { (goal * low)...(goal * high) }
 }
 
-/// Wide, shallow arc whose top touches the frame's top edge.
+/// Almost straight arc (CALORIE-CARD-FITIA-97): the middle rises a little above the ends.
 private struct NativeCalorieArcShape: Shape {
     func path(in rect: CGRect) -> Path {
         var path = Path()
@@ -50,36 +51,36 @@ private struct NativeCalorieArcShape: Shape {
     }
 }
 
-/// Fitia-like gauge: thin grey track, solid progress in the meaning colour ending in a knob
-/// (check inside the range), two range ticks with the recommended limits underneath.
+/// Fitia-like gauge: thin grey track without borders, the progress in Fitia's green or yellow ending in a solid
+/// knob (white check inside the range), the two range limits on the bar with their values right under them.
 struct NativeCalorieGauge: View {
     let calories: Double?
     let goal: Double?
-    private let lineWidth: CGFloat = 6
+    private let lineWidth: CGFloat = 8
     private let knob: CGFloat = 20
 
     var body: some View {
         let band = NativeCalorieBand.of(calories, goal: goal)
         let value = goal.map { NativeCalorieBand.fraction(calories ?? 0, goal: $0) } ?? 0
-        VStack(spacing: NativeDesign.Space.xxs) {
-            GeometryReader { proxy in
-                let rect = CGRect(x: knob / 2, y: knob / 2, width: proxy.size.width - knob, height: proxy.size.height - knob)
-                ZStack(alignment: .topLeading) {
-                    arc(rect).stroke(Color(uiColor: .tertiarySystemFill), style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
-                    if value > 0 {
-                        arc(rect, to: value).stroke(band.color, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
-                    }
-                    if let goal, goal > 0 {
-                        tick(at: point(NativeCalorieBand.fraction(goal * NativeCalorieBand.low, goal: goal), in: rect), filled: true)
-                        tick(at: point(NativeCalorieBand.fraction(goal * NativeCalorieBand.high, goal: goal), in: rect), filled: false)
-                    }
-                    if value > 0 { knobView(band).position(point(value, in: rect)) }
+        GeometryReader { proxy in
+            let rect = CGRect(x: knob / 2, y: knob / 2, width: proxy.size.width - knob, height: NativeDesign.Space.large)
+            ZStack(alignment: .topLeading) {
+                arc(rect).stroke(NativeDesign.nutritionTrack, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                if value > 0 {
+                    arc(rect, to: value).stroke(band.color, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 }
+                if let goal, goal > 0 {
+                    let low = point(NativeCalorieBand.fraction(goal * NativeCalorieBand.low, goal: goal), in: rect)
+                    let high = point(NativeCalorieBand.fraction(goal * NativeCalorieBand.high, goal: goal), in: rect)
+                    tick(at: low, color: Color.primary)
+                    tick(at: high, color: NativeDesign.secondary)
+                    limit(goal * NativeCalorieBand.low).position(x: low.x, y: low.y + NativeDesign.Space.large)
+                    limit(goal * NativeCalorieBand.high).position(x: high.x, y: high.y + NativeDesign.Space.large)
+                }
+                if value > 0 { knobView(band).position(point(value, in: rect)) }
             }
-            // A taller frame makes a rounder arc, closer to Fitia's.
-            .frame(height: NativeDesign.Space.bottom + NativeDesign.Space.xLarge + NativeDesign.Space.small)
-            if let goal, goal > 0 { rangeLabels(goal) }
         }
+        .frame(height: NativeDesign.Space.large * 2 + knob)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(goal.map { goal -> String in
             let range = NativeCalorieBand.range(goal: goal)
@@ -88,7 +89,9 @@ struct NativeCalorieGauge: View {
     }
 
     private func whole(_ value: Double) -> String { value.formatted(.number.precision(.fractionLength(0))) }
-
+    private func limit(_ value: Double) -> some View {
+        Text(whole(value)).font(.caption2.weight(.medium)).foregroundStyle(NativeDesign.secondary).monospacedDigit().fixedSize()
+    }
     private func arc(_ rect: CGRect, to: Double = 1) -> some Shape {
         NativeCalorieArcShape().trim(from: 0, to: to).offset(x: rect.minX, y: rect.minY).size(width: rect.width, height: rect.height)
     }
@@ -98,28 +101,19 @@ struct NativeCalorieGauge: View {
             .trimmedPath(from: 0, to: max(fraction, 0.0001)).currentPoint ?? .zero
         return CGPoint(x: local.x + rect.minX, y: local.y + rect.minY)
     }
-    private func tick(at point: CGPoint, filled: Bool) -> some View {
-        Capsule()
-            .fill(filled ? Color.primary : Color(uiColor: .systemGray3))
-            .overlay(Capsule().strokeBorder(Color(uiColor: .secondarySystemGroupedBackground), lineWidth: 2))
-            .frame(width: NativeDesign.Space.small - 1, height: NativeDesign.Space.medium + NativeDesign.Space.xs)
+    private func tick(at point: CGPoint, color: Color) -> some View {
+        Capsule().fill(color)
+            .frame(width: NativeDesign.Space.xs - 1, height: NativeDesign.Space.medium + NativeDesign.Space.xs)
             .position(point)
     }
     private func knobView(_ band: NativeCalorieBand) -> some View {
         ZStack {
             Circle().fill(band.color)
-            Circle().strokeBorder(Color(uiColor: .secondarySystemGroupedBackground), lineWidth: 2)
             if band == .within {
-                Image(systemName: "checkmark").font(.caption2.weight(.heavy)).imageScale(.small).foregroundStyle(Color(uiColor: .systemBackground))
+                Image(systemName: "checkmark").font(.caption2.weight(.heavy)).imageScale(.small).foregroundStyle(.white)
             }
         }
         .frame(width: knob, height: knob)
-    }
-    /// The recommended range, centred under the arc (the two ticks are too close for separate labels).
-    private func rangeLabels(_ goal: Double) -> some View {
-        Text("Consigliate " + whole(goal * NativeCalorieBand.low) + "–" + whole(goal * NativeCalorieBand.high))
-            .font(.caption2.weight(.medium)).foregroundStyle(NativeDesign.secondary).monospacedDigit()
-            .frame(maxWidth: .infinity)
     }
 }
 

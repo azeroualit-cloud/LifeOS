@@ -15,8 +15,8 @@ enum NativeShiftProgress {
             return NativeShiftSlot(index: index, duration: duration, fraction: min(1, max(0, now.timeIntervalSince(interval.start) - offset) / duration))
         }
     }
-    static func latestCompleted(interval: DateInterval, now: Date) -> Int? {
-        guard now >= interval.start && now < interval.end else { return nil }
+    static func latestCompleted(interval: DateInterval, now: Date, grace: TimeInterval = 0) -> Int? {
+        guard now >= interval.start && now < interval.end.addingTimeInterval(grace) else { return nil }
         return slots(interval: interval, now: now).last(where: { $0.fraction >= 1 })?.index
     }
 }
@@ -30,7 +30,7 @@ enum NativeShiftProgress {
         guard lastActivation != activation else { return nil }
         lastActivation = activation
         guard now.timeIntervalSince(activation) >= 0, now.timeIntervalSince(activation) < 20,
-              let index = NativeShiftProgress.latestCompleted(interval: interval, now: activation) else { return nil }
+              let index = NativeShiftProgress.latestCompleted(interval: interval, now: activation, grace: NativeDashboardFocus.endGrace) else { return nil }
         let key = "\(Int(interval.start.timeIntervalSince1970)):\(index)"
         var seen = defaults.stringArray(forKey: "lifeos-shift-bursts-v1") ?? []
         guard !seen.contains(key) else { return nil }

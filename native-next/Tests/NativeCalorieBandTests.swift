@@ -13,13 +13,19 @@ final class NativeCalorieBandTests: XCTestCase {
         XCTAssertEqual(NativeCalorieBand.of(2501, goal: 2000), .over)
         XCTAssertEqual(NativeCalorieBand.of(1500, goal: nil), .within)
     }
-    func testMacroColourKeepsItsOwnColourUnlessFarAboveTheGoal() {
-        // NUTRITION-TOLERANT-2026-11-24: one gram over (127/126) or under the goal never changes the colour.
-        XCTAssertEqual(NativeCalorieBand.macroColor(90, goal: 100, base: NativeDesign.macroFat), NativeDesign.macroFat)
-        XCTAssertEqual(NativeCalorieBand.macroColor(127, goal: 126, base: NativeDesign.macroFat), NativeDesign.macroFat)
-        XCTAssertEqual(NativeCalorieBand.macroColor(150, goal: 100, base: NativeDesign.macroFat), NativeDesign.macroFat)
-        XCTAssertEqual(NativeCalorieBand.macroColor(151, goal: 100, base: NativeDesign.macroFat), NativeDesign.overGoal)
-        XCTAssertEqual(NativeCalorieBand.macroColor(190, goal: 100, base: NativeDesign.macroProtein, limit: NativeNutritionLimits.protein), NativeDesign.macroProtein)
+    func testMacroColourIsFitiaGreenYellowAndOrangeOnlyFarAbove() {
+        // CALORIE-CARD-FITIA-97: yellow while below the range, green once reached (a gram over changes nothing),
+        // orange only far above (NUTRITION-TOLERANT limits kept).
+        let base = NativeDesign.nutritionFill
+        XCTAssertEqual(NativeCalorieBand.macroColor(80, goal: 100, base: base), NativeDesign.nutritionUnder)
+        XCTAssertEqual(NativeCalorieBand.macroColor(90, goal: 100, base: base), NativeDesign.nutritionFill)
+        XCTAssertEqual(NativeCalorieBand.macroColor(127, goal: 126, base: base), NativeDesign.nutritionFill)
+        XCTAssertEqual(NativeCalorieBand.macroColor(150, goal: 100, base: base), NativeDesign.nutritionFill)
+        XCTAssertEqual(NativeCalorieBand.macroColor(151, goal: 100, base: base), NativeDesign.overGoal)
+        XCTAssertEqual(NativeCalorieBand.macroColor(190, goal: 100, base: base, limit: NativeNutritionLimits.protein), NativeDesign.nutritionFill)
+        XCTAssertEqual(NativeCalorieBand.macroColor(50, goal: nil, base: base), base)
+        XCTAssertEqual(NativeCalorieBand.within.color, NativeDesign.nutritionFill)
+        XCTAssertEqual(NativeCalorieBand.under.color, NativeDesign.nutritionUnder)
     }
     func testGaugeFractionIsClamped() {
         // The arc runs to twice the goal: the goal sits in the middle (build 95).

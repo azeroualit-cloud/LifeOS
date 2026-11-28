@@ -238,6 +238,60 @@ struct NativePinnedNutrients: View {
     }
 }
 
+/// MICRO-VIEW-97: micronutrients at a glance as rings (Fitia green when reached, yellow before), four per row;
+/// the value and the foods behind it open on tap. Fibre first, then the starred ones.
+struct NativeNutrientRing: View {
+    let title: String
+    let fraction: Double
+    let detail: String
+    var body: some View {
+        VStack(spacing: NativeDesign.Space.xxs) {
+            ZStack {
+                Circle().stroke(NativeDesign.nutritionTrack, lineWidth: NativeDesign.Space.xs)
+                Circle().trim(from: 0, to: max(0, min(fraction, 1)))
+                    .stroke(fraction >= 0.8 ? NativeDesign.nutritionFill : NativeDesign.nutritionUnder, style: StrokeStyle(lineWidth: NativeDesign.Space.xs, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                Text(String(Int((min(fraction, 9.99) * 100).rounded())) + "%").font(.caption2.weight(.semibold)).monospacedDigit()
+            }
+            .frame(width: NativeDesign.Layout.touchTarget, height: NativeDesign.Layout.touchTarget)
+            Text(title).font(.caption2).foregroundStyle(NativeDesign.secondary).lineLimit(1).minimumScaleFactor(0.7)
+        }
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(title + ", " + detail)
+    }
+}
+
+struct NativePinnedNutrientRings: View {
+    @AppStorage(NativeNutrientOrdering.storageKey) private var favorites = NativeNutrientOrdering.defaultFavorites
+    let entries: [NativeNutritionEntry]
+    var date = Date()
+    let fibre: Double?
+    let fibreGoal: Double
+    @State private var sources: NativeTrackedNutrient?
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: NativeDesign.Space.small), count: 4)
+
+    var body: some View {
+        let days = NativeNutrientPeriod.recordedDays(entries, count: 1, now: date)
+        LazyVGrid(columns: columns, spacing: NativeDesign.Space.medium) {
+            NativeNutrientRing(title: "Fibre", fraction: (fibre ?? 0) / max(1, fibreGoal),
+                               detail: (fibre.map { $0.formatted(.number.precision(.fractionLength(0...1))) } ?? "—") + " di " + fibreGoal.formatted(.number.precision(.fractionLength(0))) + " g")
+                .accessibilityIdentifier("health-nutrient-" + "HKQuantityTypeIdentifierDietaryFiber")
+            ForEach(NativeNutrientOrdering.keys(favorites)) { nutrient in
+                let period = NativeNutrientPeriod(nutrient, days: days)
+                Button { sources = nutrient } label: {
+                    NativeNutrientRing(title: nutrient.title, fraction: period.progress(toward: nutrient.dailyReference),
+                                       detail: (period.amount.map { NSDecimalNumber(decimal: $0).doubleValue.formatted(.number.precision(.fractionLength(0...1))) } ?? "—") + " di " + NSDecimalNumber(decimal: nutrient.dailyReference).stringValue + " " + nutrient.unit)
+                }
+                .buttonStyle(NativePressStyle())
+                .accessibilityHint("Mostra da quali alimenti arriva")
+                .accessibilityIdentifier("health-progress-" + nutrient.rawValue)
+            }
+        }
+        .sheet(item: $sources) { nutrient in NativeNutrientSourcesSheet(nutrient: nutrient, entries: entries, day: date) }
+    }
+}
+
 struct NativeMicronutrientScreen: View {
     @Environment(\.nativeReduceMotion) private var reduceMotion
     @ObservedObject var nutrition: NativeNutritionStore

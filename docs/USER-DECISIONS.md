@@ -550,3 +550,5 @@ Registrate sul ramo `codex/perf-efficiency-01`, non ancora su `codex/revision77`
 
 - **PLAN-KINDS-97 (precisata).** Quattro tipi: Anticipa budget, Fondo (fine facoltativa, nessuna copertura, paga dai risparmi), Utenza stimata, Rateizza; le Spese ricorrenti fisse diventano Fondi senza fine.
 - **FUNDS-PAY-FROM-SAVINGS-97 — ACTIVE** (conferma META-01 «yes»): i pagamenti con un Fondo escono tutti dai risparmi; sostituisce FUNDING-BLOCK-2026-11-21 solo per i fondi.
+
+- **IPA-DELIVERY-97-2026-11-28 — ACTIVE.** «Yes, build it» / «spero di avere l'ipa pronto e il sito aggiornato entro domani mattina»: IPA 97 e sito aggiornati entro la mattina, con il mockup approvato; ciò che non è pronto in sicurezza va nella 98, dichiarato.

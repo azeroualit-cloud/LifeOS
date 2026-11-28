@@ -2131,6 +2131,15 @@
       "supersedes": [
         "FUNDING-BLOCK-2026-11-21 (solo per i fondi)"
       ]
+    },
+    {
+      "id": "IPA-DELIVERY-97-2026-11-28",
+      "status": "ACTIVE",
+      "scope": "Build 97",
+      "recorded_on": "2026-11-28",
+      "provenance": "Messaggi utente in chat Claude, 28/11/2026",
+      "original_quote": "Yes, build it / io vado a dormire è l'una di notte, spero di avere l'ipa pronto e il sito aggiornato entro domani mattina",
+      "rule": "Produrre l'IPA 97 (0.10.35 build 97) e aggiornare il sito entro la mattina del 28/11 con le voci del mockup approvato https://claude.ai/artifact/7KVhGbnW6UeiU8D5akXz5n; quanto non pronto in sicurezza resta per la 98 e viene detto. Accettazione solo dell'utente."
     }
   ],
   "pending_confirmations": [

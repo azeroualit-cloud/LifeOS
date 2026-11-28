@@ -845,7 +845,7 @@ final class NativeInterfaceTests: XCTestCase {
         app.buttons["Salva"].tap()
         app.buttons["calendar-today"].tap()
         revealCalendarDay(selectedDay, in: app)
-        app.buttons["calendar-day-" + selectedDay].tap()
+        app.buttons["calendar-day-" + selectedDay].tap(); app.openCalendarAgenda()
         // Build 95 day list: the all-day event is a row of the selected day.
         let event = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "calendar-timeline-event:", "Evento dopo scorrimento")).firstMatch
         let found = event.waitForExistence(timeout: 10)
@@ -878,7 +878,7 @@ final class NativeInterfaceTests: XCTestCase {
             let day = month + String(format: "-%02d", index + 1)
             let cell = app.buttons["calendar-day-" + day]
             revealCalendarDay(day, in: app)
-            cell.tap()
+            cell.tap(); XCTAssertTrue(cell.isSelected); app.openCalendarAgenda()
             XCTAssertTrue(app.scrollViews["calendar-day-pane"].waitForExistence(timeout: 10))
             XCTAssertTrue(app.staticTexts["calendar-day-heading"].isHittable)
             app.buttons["calendar-back-month"].tap()

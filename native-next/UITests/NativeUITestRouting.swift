@@ -82,3 +82,13 @@ extension XCUIApplication {
         _ = navigationBars["Obiettivi e statistiche"].waitForExistence(timeout: 10)
     }
 }
+
+extension XCUIApplication {
+    /// CALENDAR-TAP-SELECT-97: tapping a day only selects it; the day list opens from «Agenda».
+    func openCalendarAgenda() {
+        if scrollViews["calendar-day-pane"].exists { return }
+        let agenda = buttons["Agenda"]
+        if agenda.waitForExistence(timeout: 5) { agenda.tap() }
+        _ = scrollViews["calendar-day-pane"].waitForExistence(timeout: 10)
+    }
+}

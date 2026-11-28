@@ -126,7 +126,7 @@ final class NativeRevision74UITests: XCTestCase {
         let cell = app.buttons["calendar-day-" + today]
         XCTAssertTrue(surface.waitForExistence(timeout: 10))
         for _ in 0..<12 { if cell.isHittable { break }; surface.swipeUp(velocity: .slow) }
-        XCTAssertTrue(cell.isHittable); cell.tap()
+        XCTAssertTrue(cell.isHittable); cell.tap(); app.openCalendarAgenda()
         XCTAssertTrue(app.scrollViews["calendar-day-pane"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.staticTexts["calendar-day-heading"].exists)
         XCTAssertFalse(surface.isHittable)

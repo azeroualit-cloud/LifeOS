@@ -126,9 +126,11 @@ struct DashboardScreen: View {
         let focusNow = focusDate(now)
         let model = NativeDashboardFocus(now: focusNow, todayShift: store.shift(today), previousShift: store.shift(CivilDate.adding(-1, to: today)))
         ZStack(alignment: .trailing) {
-        if model.phase == "Adesso" {
+        if model.phase == "Adesso" || model.justEnded {
             Button { openCalendar(today) } label: {
+                // SHIFT-BAR-97: same height as before, longer, so the four parts are readable.
                 Text(model.title).font(.subheadline.weight(.semibold))
+                    .frame(minWidth: NativeDesign.Layout.touchTarget * 4)
                     .padding(.horizontal, NativeDesign.Space.medium)
                     .padding(.vertical, NativeDesign.Space.xs)
                     .background {
@@ -137,46 +139,37 @@ struct DashboardScreen: View {
                     .clipShape(Capsule())
                     .frame(minHeight: NativeDesign.Layout.touchTarget).contentShape(Rectangle())
             }.buttonStyle(NativePressStyle()).accessibilityIdentifier("home-focus")
-                .accessibilityLabel(model.title + ", " + model.remainingText + " alla fine")
+                .accessibilityLabel(model.title + (model.justEnded ? ", turno appena terminato" : ", " + model.remainingText + " alla fine"))
                 .accessibilityHint("Apre il calendario completo")
                 .transition(reduceMotion ? .identity : .opacity.combined(with: .scale(scale: NativeDesign.Motion.pressedScale)))
         }
         }.animation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration), value: model.phase)
     }
+    /// DASHBOARD-TODO-BUTTONS-97: «Cose da fare» is two buttons, Attività and Abitudini (the calendar is right above).
     private func checklist(today: String) -> some View {
-        let items = NativeHomeChecklist.rows(events: store.dashboardEvents, routines: store.todayRoutines, today: today)
-        return VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-            HStack(spacing: NativeDesign.Space.medium) {
-                Text("Cose da fare").font(.headline).accessibilityAddTraits(.isHeader)
-                    .accessibilityIdentifier("home-checklist-heading")
-                Spacer(minLength: NativeDesign.Space.small)
-                Menu {
-                    Button("Attività") { router.tab = .tasks }
-                    Button("Abitudini") { router.sheet = .routines }
-                    Button("Calendario") { openCalendar(today) }
-                } label: {
-                    Text("Gestisci").font(.subheadline.weight(.semibold)).foregroundStyle(Color.primary)
-                        .padding(.horizontal, NativeDesign.Space.medium)
-                        .frame(minHeight: NativeDesign.Layout.compactControl)
-                        .modifier(NativeGlass())
-                        .frame(minHeight: NativeDesign.Layout.touchTarget)
-                }
-            }
-            if items.isEmpty {
-                Text("Nessun impegno da mostrare").font(.subheadline).foregroundStyle(NativeDesign.secondary)
-            } else {
-                LOListCard {
-                    ForEach(items) { item in
-                        checklistRow(item)
-                            .padding(.leading, NativeDesign.Space.xs)
-                            .padding(.trailing, NativeDesign.Space.large)
-                            .padding(.vertical, NativeDesign.Space.small)
-                            .frame(minHeight: NativeDesign.Layout.rowHeight)
-                            .loRowSeparator(hidden: item.id == items.last?.id, leadingInset: NativeDesign.Layout.touchTarget + NativeDesign.Space.small)
-                    }
-                }
-            }
+        let open = store.tasks.filter { $0.text("status") != "done" && $0.text("status") != "waiting" && ($0.text("scheduled_date").isEmpty || $0.text("scheduled_date") <= today) }.count
+        let routines = store.todayRoutines, done = routines.filter { $0.flag("checked") }.count
+        return HStack(spacing: NativeDesign.Space.medium) {
+            todoButton("Attività", detail: open == 1 ? "1 da fare" : String(open) + " da fare", symbol: "checklist", identifier: "home-tasks") { router.tab = .tasks }
+            todoButton("Abitudini", detail: routines.isEmpty ? "nessuna oggi" : String(done) + " di " + String(routines.count) + " fatte", symbol: "repeat", identifier: "home-routines") { router.sheet = .routines }
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("home-checklist")
+    }
+    private func todoButton(_ title: String, detail: String, symbol: String, identifier: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
+                Label(title, systemImage: symbol).font(.headline).foregroundStyle(.primary)
+                Text(detail).font(.footnote).foregroundStyle(NativeDesign.secondary).monospacedDigit()
+            }
+            .frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget, alignment: .leading)
+            .padding(.horizontal, NativeDesign.Layout.compactCardInset).padding(.vertical, NativeDesign.Layout.cardInsetVertical)
+            .loCardSurface()
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(NativePressStyle())
+        .accessibilityLabel(title + ", " + detail)
+        .accessibilityIdentifier(identifier)
     }
     @ViewBuilder private func checklistRow(_ item: NativeHomeChecklistItem) -> some View {
         let record = item.record
@@ -244,13 +237,13 @@ struct DashboardScreen: View {
                     }
                 }
                 if let fraction, !hiddenMoney {
-                    LOSplitBar(segments: [LOSegment(id: "spent", value: fraction, color: NativeDesign.financialRed),
-                                          LOSegment(id: "left", value: 1 - fraction, color: NativeDesign.financialGreen)],
+                    // DASHBOARD-TODO-BUTTONS-97: one bar in the Finanza blue (spent on the track), no recent movements.
+                    LOSplitBar(segments: [LOSegment(id: "spent", value: fraction, color: NativeDesign.financeGroups[0]),
+                                          LOSegment(id: "left", value: 1 - fraction, color: NativeDesign.barTrack)],
                                scale: 1, height: NativeDesign.Space.small,
                                accessibilityText: "Speso \(Int((fraction * 100).rounded())) per cento, rimane \(Int(((1 - fraction) * 100).rounded())) per cento")
                     financeLegend(spent: spent, remaining: overview.remaining, days: overview.days)
                 }
-                financeRecent
             }
             .padding(.horizontal, NativeDesign.Layout.cardInset).padding(.vertical, NativeDesign.Layout.cardInsetVertical)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -264,7 +257,7 @@ struct DashboardScreen: View {
     /// Spent and month budget under the bar, with the days left.
     private func financeLegend(spent: Double, remaining: Double?, days: Int) -> some View {
         HStack(spacing: NativeDesign.Space.xs) {
-            Circle().fill(NativeDesign.financialRed).frame(width: NativeDesign.Space.small, height: NativeDesign.Space.small)
+            Circle().fill(NativeDesign.financeGroups[0]).frame(width: NativeDesign.Space.small, height: NativeDesign.Space.small)
             Text("Speso " + spent.euro).monospacedDigit()
             Spacer(minLength: NativeDesign.Space.small)
             if let remaining { Text("Budget " + (spent + remaining).euro + (days > 0 ? " · \(days) gg" : "")).monospacedDigit() }

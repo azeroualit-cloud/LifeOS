@@ -12,3 +12,5 @@ Stipendi (SALARY-FROM-MOVEMENTS-97): il server legge solo il foglio Cedolini (fe
 Modo di lavorare (WORKFLOW-ADVICE-97): un mockup unico di tutta la 97 prima del codice; pagina Controllo dati sul sito.
 
 Mockup unico della 97 (WORKFLOW-ADVICE-97): https://claude.ai/artifact/7KVhGbnW6UeiU8D5akXz5n — in attesa di approvazione.
+
+Avanzamento notte 28/11 (non ancora compilato in CI): Dashboard (badge turno lungo in 4 parti con riempimento progressivo e 15 min dopo la fine, Cose da fare = Attività/Abitudini, Finanza senza movimenti e barra blu, Nutrizione coi colori Fitia), Salute (arco calorie Fitia, verde/giallo/grigio Fitia, micronutrienti ad anelli, icone Sezioni allineate), Calendario (tocco seleziona, torna a oggi; test aggiornati), Attività (swipe In attesa/Riattiva/Elimina con conferma). Da fare: test Dashboard (Gestisci, elenco), Finanza (mese a un tocco, Trade Republic, Piani e Budget a mappa, obiettivi risparmio), Analisi e stipendi, Cronologia, Incontri come turni, tipi di piano (98), Controllo dati sul sito, candidato 97.

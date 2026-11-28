@@ -11,6 +11,7 @@ struct TasksScreen: View {
     @State private var editMode: EditMode = .inactive
     @Environment(\.nativeReduceMotion) private var reduceMotion
     @State private var completedExpanded = false
+    @State private var deletingTask: Record?
     private static let all = "all"
     private var categoryKeys: [String] { store.categories.map { $0.text("key") } }
     private var selectedKeys: [String] { category == Self.all ? categoryKeys : [category] }
@@ -177,6 +178,13 @@ struct TasksScreen: View {
     var body: some View {
         checklist
         .modifier(NativeChecklistListAppearance())
+        .confirmationDialog("Eliminare questa attività?", isPresented: Binding(get: { deletingTask != nil }, set: { if !$0 { deletingTask = nil } })) {
+            Button("Elimina", role: .destructive) {
+                if let r = deletingTask { Task { await store.run("deleteTask", args: [.int(r.integer("id"))]) } }
+                deletingTask = nil
+            }
+            Button("Annulla", role: .cancel) { deletingTask = nil }
+        }
         .environment(\.editMode, $editMode)
         .scrollDismissesKeyboard(.interactively)
         .animation(reduceMotion ? nil : .easeInOut(duration: NativeDesign.Motion.layoutDuration), value: store.tasks)
@@ -222,6 +230,18 @@ struct TasksScreen: View {
             Task { await store.run("setTaskStatus", ["id": .int(r.integer("id")), "status": .string(NativeTaskList.completionStatus(r))]) }
         }, onOpen: { router.sheet = .task(r) })
         .modifier(NativeChecklistListRow(first: first, last: last)).disabled(store.busy)
+        // TASKS-SWIPE-97: quick actions with a swipe; deleting asks first.
+        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+            Button("Elimina", role: .destructive) { deletingTask = r }
+                .accessibilityIdentifier("task-swipe-delete-" + String(r.integer("id")))
+            if r.text("status") == "waiting" {
+                Button("Riattiva") { Task { await store.run("setTaskStatus", ["id": .int(r.integer("id")), "status": .string("todo")]) } }
+                    .tint(NativeDesign.goalMet).accessibilityIdentifier("task-swipe-resume-" + String(r.integer("id")))
+            } else if r.text("status") != "done" {
+                Button("In attesa") { Task { await store.run("setTaskStatus", ["id": .int(r.integer("id")), "status": .string("waiting")]) } }
+                    .tint(NativeDesign.overGoal).accessibilityIdentifier("task-swipe-wait-" + String(r.integer("id")))
+            }
+        }
     }
 }
 

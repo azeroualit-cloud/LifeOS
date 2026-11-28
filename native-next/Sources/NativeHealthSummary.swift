@@ -186,20 +186,20 @@ struct NativeHealthDetail: View {
             ? AnyLayout(VStackLayout(alignment: .leading, spacing: NativeDesign.Space.small))
             : AnyLayout(HStackLayout(alignment: .top, spacing: NativeDesign.Space.medium))
         return layout {
-            macro("Proteine", values[.dietaryProtein], targets?.protein, NativeDesign.macroProtein, .dietaryProtein, centered)
-            macro("Carboidrati", values[.dietaryCarbohydrates], targets?.carbohydrate, NativeDesign.nutritionTitle.opacity(0.75), .dietaryCarbohydrates, centered)
-            macro("Grassi", values[.dietaryFatTotal], targets?.fat, NativeDesign.nutritionTitle.opacity(0.55), .dietaryFatTotal, centered)
+            macro("Proteine", values[.dietaryProtein], targets?.protein, NativeDesign.nutritionFill, .dietaryProtein, centered)
+            macro("Carboidrati", values[.dietaryCarbohydrates], targets?.carbohydrate, NativeDesign.nutritionFill, .dietaryCarbohydrates, centered)
+            macro("Grassi", values[.dietaryFatTotal], targets?.fat, NativeDesign.nutritionFill, .dietaryFatTotal, centered)
         }
     }
     private func macro(_ title: String, _ value: Double?, _ goal: Double?, _ fallback: Color,
                        _ type: HKQuantityTypeIdentifier, _ centered: Bool) -> LOMacroValue {
-        LOMacroValue(title: title, value: value, goal: goal, unit: "g", color: macroColor(value, goal, fallback),
+        LOMacroValue(title: title, value: value, goal: goal, unit: "g", color: macroColor(value, goal, fallback, protein: type == .dietaryProtein),
                      identifier: "health-nutrient-" + type.rawValue, centered: centered)
     }
 
     /// Macro bar colour carries the meaning when there is a goal: green in range, amber under, orange over.
-    private func macroColor(_ value: Double?, _ goal: Double?, _ fallback: Color) -> Color {
-        NativeCalorieBand.macroColor(value, goal: goal, base: fallback, limit: fallback == NativeDesign.macroProtein ? NativeNutritionLimits.protein : NativeNutritionLimits.macro)
+    private func macroColor(_ value: Double?, _ goal: Double?, _ fallback: Color, protein: Bool) -> Color {
+        NativeCalorieBand.macroColor(value, goal: goal, base: fallback, limit: protein ? NativeNutritionLimits.protein : NativeNutritionLimits.macro)
     }
 
     /// The two doors of Salute below the day (SALUTE-SINGLE-ENTRY-2026-11-26).
@@ -220,7 +220,11 @@ struct NativeHealthDetail: View {
                 Label { VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
                     Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(.primary)
                     Text(detail).font(.footnote).foregroundStyle(NativeDesign.secondary).lineLimit(2)
-                } } icon: { Image(systemName: symbol).foregroundStyle(NativeDesign.nutritionTitle) }
+                } } icon: {
+                    // SECTIONS-ICONS-97: one fixed column, so symbols of different widths line up.
+                    Image(systemName: symbol).font(.headline).foregroundStyle(NativeDesign.nutritionFill)
+                        .frame(width: NativeDesign.Layout.touchTarget * 0.6)
+                }
                 Spacer(minLength: NativeDesign.Space.small)
                 NativeDisclosureIndicator()
             }.contentShape(Rectangle())
@@ -424,18 +428,7 @@ struct NativeHealthDetail: View {
             .accessibilityIdentifier("health-micronutrients")
             // FIBRE-GOAL-2026-11-24: fibre against its goal, with a bar like the other nutrients.
             let fibreGoal = NativeHub95.shared.fibreGoal ?? NativeHub95.defaultFibre
-            VStack(alignment: .leading, spacing: NativeDesign.Space.xxs) {
-                HStack(spacing: NativeDesign.Space.small) {
-                    Text("Fibre").font(.footnote.weight(.semibold))
-                    Spacer(minLength: 0)
-                    Text((fibre.map { $0.formatted(.number.precision(.fractionLength(0...1))) } ?? "—") + " / " + fibreGoal.formatted(.number.precision(.fractionLength(0))) + " g")
-                        .font(.footnote).monospacedDigit().foregroundStyle(.secondary)
-                }
-                ProgressView(value: min(1, (fibre ?? 0) / max(1, fibreGoal))).tint(NativeDesign.nutritionTitle).accessibilityHidden(true)
-            }
-            .accessibilityElement(children: .combine)
-            .accessibilityIdentifier("health-nutrient-" + HKQuantityTypeIdentifier.dietaryFiber.rawValue)
-            NativePinnedNutrients(entries: nutrition.entries, date: selectedDate)
+            NativePinnedNutrientRings(entries: nutrition.entries, date: selectedDate, fibre: fibre, fibreGoal: fibreGoal)
         }
     }
     /// Liquid Glass actions above the tab bar: Peso left, Alimento right, as in the Dashboard.

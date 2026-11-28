@@ -30,11 +30,12 @@ struct NativeNutritionQuickEntry: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Nutrizione, calorie di oggi " + (kcal == nil ? "nessun dato" : kcalText) + (targets.map { " di " + $0.calories.formatted(.number.precision(.fractionLength(0))) } ?? ""))
             .accessibilityIdentifier("home-nutrition")
-            LOProgressBar(value: kcal ?? 0, total: targets?.calories, color: NativeDesign.nutritionTitle, warnAbove: NativeNutritionLimits.calories)
+            // CALORIE-CARD-FITIA-97: same Fitia colours as Salute (green reached, yellow still below).
+            LOProgressBar(value: kcal ?? 0, total: targets?.calories, color: NativeCalorieBand.of(kcal, goal: targets?.calories).color, warnAbove: NativeNutritionLimits.calories)
             macroLayout {
-                LOMacroValue(title: "Proteine", value: values[.dietaryProtein], goal: targets?.protein, unit: "g", color: NativeDesign.macroProtein, identifier: "home-nutrient-protein")
-                LOMacroValue(title: "Carbo", value: values[.dietaryCarbohydrates], goal: targets?.carbohydrate, unit: "g", color: NativeDesign.macroCarbohydrate, identifier: "home-nutrient-carbohydrate")
-                LOMacroValue(title: "Grassi", value: values[.dietaryFatTotal], goal: targets?.fat, unit: "g", color: NativeDesign.macroFat, identifier: "home-nutrient-fat")
+                LOMacroValue(title: "Proteine", value: values[.dietaryProtein], goal: targets?.protein, unit: "g", color: NativeCalorieBand.macroColor(values[.dietaryProtein], goal: targets?.protein, base: NativeDesign.nutritionFill, limit: NativeNutritionLimits.protein), identifier: "home-nutrient-protein")
+                LOMacroValue(title: "Carbo", value: values[.dietaryCarbohydrates], goal: targets?.carbohydrate, unit: "g", color: NativeCalorieBand.macroColor(values[.dietaryCarbohydrates], goal: targets?.carbohydrate, base: NativeDesign.nutritionFill), identifier: "home-nutrient-carbohydrate")
+                LOMacroValue(title: "Grassi", value: values[.dietaryFatTotal], goal: targets?.fat, unit: "g", color: NativeCalorieBand.macroColor(values[.dietaryFatTotal], goal: targets?.fat, base: NativeDesign.nutritionFill), identifier: "home-nutrient-fat")
             }
             let actions = typeSize.isAccessibilitySize
                 ? AnyLayout(VStackLayout(spacing: NativeDesign.Space.small))

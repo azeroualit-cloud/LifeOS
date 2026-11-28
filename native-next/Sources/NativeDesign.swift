@@ -64,6 +64,11 @@ enum NativeDesign {
     /// Over a goal: orange like the preview, never red (red is for outflows).
     static let overGoal = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? .systemOrange : UIColor(red: 0.62, green: 0.29, blue: 0.0, alpha: 1) })
     /// Goal reached / inside the recommended range; readable on white (4.5:1) and on black.
+    /// CALORIE-CARD-FITIA-97: food fills in Fitia's green, what is not yet completed in Fitia's yellow, empty track in
+    /// Fitia's grey. Text titles keep `nutritionTitle` (darker, readable on white).
+    static let nutritionFill = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor(red: 0.20, green: 0.80, blue: 0.42, alpha: 1) : UIColor(red: 0.13, green: 0.72, blue: 0.38, alpha: 1) })
+    static let nutritionUnder = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor(red: 1.0, green: 0.76, blue: 0.10, alpha: 1) : UIColor(red: 0.96, green: 0.70, blue: 0.0, alpha: 1) })
+    static let nutritionTrack = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor(white: 0.26, alpha: 1) : UIColor(white: 0.91, alpha: 1) })
     static let goalMet = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? .systemGreen : UIColor(red: 0.10, green: 0.47, blue: 0.22, alpha: 1) })
     /// Dots and tracks with nothing logged: at least 3:1 on the card.
     static let emptyMark = Color(uiColor: UIColor { UIColor(white: $0.userInterfaceStyle == .dark ? 0.47 : 0.50, alpha: 1) })

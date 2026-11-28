@@ -6,6 +6,7 @@ struct CalendarScreen: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.nativeReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.scenePhase) private var scenePhase
     /// The Calendar reserves the floating tab bar inside its own content. Any
     /// safe-area modifier around this screen (safeAreaInset or safeAreaPadding)
     /// makes SwiftUI measure every lazy week on each animation frame and the
@@ -83,6 +84,11 @@ struct CalendarScreen: View {
             showingDay = router.calendarOpensDay
         }
         .onChange(of: visibleMonth) { _, month in if let month { ensureWindow(around: month) } }
+        // CALENDAR-TAP-SELECT-97: leaving the tab or coming back to the app returns to today.
+        .onDisappear { if !months.isEmpty { showingDay = false; monthReturnDay = nil; goToToday() } }
+        .onChange(of: scenePhase) { old, phase in
+            if phase == .active && old == .background && !months.isEmpty { showingDay = false; monthReturnDay = nil; goToToday() }
+        }
         .onChange(of: NativeCalendarSource(life: store.life, demo: store.isDemo, origin: store.server?.absoluteString)) { old, new in
             if let changes = new.shiftChanges(from: old) { patchShifts(changes) }
             else { monthData = [:]; seedSnapshot(); rebuildMonth(); reload += 1 }
@@ -578,7 +584,9 @@ struct CalendarScreen: View {
                             Button {
                                 if !store.busy { store.calendarMonth = String(item.day.prefix(7)) }
                                 selected = item.day
-                                if !painting {
+                                // CALENDAR-TAP-SELECT-97: a tap only selects the day; the agenda opens from «Agenda».
+                                // Accessibility sizes have no Mese/Agenda switch, so there the day still opens it.
+                                if !painting && typeSize.isAccessibilitySize {
                                     monthReturnDay = item.day
                                     showingDay = true
                                 }

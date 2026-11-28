@@ -26,7 +26,7 @@ final class NativeRevision73UITests: XCTestCase {
         XCTAssertEqual(today.value as? String, "5 eventi")
         capture("calendar-month-event-dots")
         let origin = today.frame.midY
-        today.tap()
+        today.tap(); XCTAssertTrue(today.isSelected); app.openCalendarAgenda()
 
         let agenda = app.scrollViews["calendar-day-pane"]
         XCTAssertTrue(agenda.waitForExistence(timeout: 10))
