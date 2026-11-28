@@ -265,19 +265,53 @@ struct NativeSavingsSection: View {
     @EnvironmentObject var store: NativeStore
     @EnvironmentObject var router: NativeRouter
     @AppStorage("native-hide-money") private var hidden = false
+    /// SAVINGS-GOALS-97: the months to count are chosen here (end month and months to skip); kept on this iPhone.
+    @AppStorage("native-savings-end") private var endMonth = ""
+    @AppStorage("native-savings-skip") private var skipped = ""
+    private var end: String { endMonth.isEmpty ? String(CivilDate.month().prefix(4)) + "-12" : endMonth }
+    private var skipSet: Set<String> { Set(skipped.split(separator: ",").map(String.init)) }
+    private var counted: [String] {
+        let start = CivilDate.month()
+        guard end >= start, let months = try? NativePlanRules.months(start, end) else { return [start] }
+        let kept = months.filter { !skipSet.contains($0) }
+        return kept.isEmpty ? [start] : kept
+    }
     var body: some View {
         Section("Obiettivo di risparmio") {
             let progress = NativeSavingsProgress(summary: store.summary, planning: store.finance.record("planning"))
-            LabeledContent("Patrimonio totale", value: hidden ? "••••" : progress.assets.euro).accessibilityIdentifier("finance-total-assets")
-            LabeledContent("Fondo emergenza", value: hidden ? "••••" : progress.emergency.euro)
-            LabeledContent("Fondo emergenza coperto", value: hidden ? "••••" : progress.reserved.euro)
-            LabeledContent("Altri risparmi", value: hidden ? "••••" : progress.other.euro)
-            LabeledContent("Prossimo traguardo", value: hidden ? "••••" : progress.target.euro)
-            LabeledContent("Manca", value: hidden ? "••••" : progress.missing.euro)
-            LabeledContent("Da risparmiare al mese", value: hidden ? "••••" : progress.monthly.euro)
-            Text("Cifra mancante divisa per \(progress.months) mesi fino a dicembre, incluso quello corrente.").font(.footnote).foregroundStyle(NativeDesign.secondary)
+            let months = counted, monthly = progress.missing / Double(months.count)
+            VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text(hidden ? "••••" : progress.assets.euro).font(.title.bold()).monospacedDigit()
+                    Text(hidden ? "" : "di " + progress.target.euro).font(.subheadline).foregroundStyle(NativeDesign.secondary).monospacedDigit()
+                }
+                LOProgressBar(value: progress.assets, total: progress.target, color: NativeDesign.financialGreen, warnAbove: 10)
+                Text(hidden ? "Importi nascosti" : progress.missing <= 0 ? "Obiettivo raggiunto." :
+                        "Mancano " + progress.missing.euro + " in " + (months.count == 1 ? "1 mese" : String(months.count) + " mesi") + ": " + monthly.euro + " al mese.")
+                    .font(.subheadline).accessibilityIdentifier("savings-monthly")
+            }
+            .accessibilityElement(children: .combine)
+            .accessibilityIdentifier("finance-total-assets")
+            NativeMonthPicker(title: "Fino a", selection: Binding(get: { end }, set: { endMonth = $0 }))
+            Menu {
+                ForEach((try? NativePlanRules.months(CivilDate.month(), max(CivilDate.month(), end))) ?? [], id: \.self) { month in
+                    Button { toggle(month) } label: {
+                        Label(CivilDate.monthTitle(month), systemImage: skipSet.contains(month) ? "xmark.circle" : "checkmark.circle")
+                    }
+                }
+            } label: {
+                LabeledContent("Mesi esclusi", value: skipSet.isEmpty ? "nessuno" : skipSet.sorted().map { CivilDate.monthAbbreviation($0) }.joined(separator: ", "))
+            }
+            .accessibilityIdentifier("savings-skip-months")
+            Text("Di cui fondo emergenza " + (hidden ? "••••" : progress.reserved.euro + " di " + progress.emergency.euro) + ".")
+                .font(.footnote).foregroundStyle(NativeDesign.secondary)
             Button("Obiettivo e fondo emergenza") { router.sheet = .planning }
         }
+    }
+    private func toggle(_ month: String) {
+        var set = skipSet
+        if set.contains(month) { set.remove(month) } else { set.insert(month) }
+        skipped = set.sorted().joined(separator: ",")
     }
 }
 

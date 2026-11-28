@@ -67,8 +67,9 @@ struct FinanceAnalysisScreen: View {
                 categories
                 incomeAndSpending(flows)
                 salary
-                NativeDailySpendCard(typical: NativeFinanceAnalysis93.typicalDaily(dailyByMonth), monthCount: dailyByMonth.count, loading: dailyLoading, hidden: hidden)
-                    .task(id: analysisStart + "|" + sourceScope + "|" + String(store.financeGeneration)) { await loadDaily() }
+                // ANALYSIS-CLARITY-97: «Giorno per giorno» (a sum of daily averages of every outflow, one whole read of the
+                // finance data per month) becomes the spending of a normal month, from the category totals already loaded.
+                NativeNormalMonthCard(rows: categoryRows, months: categoryRange, loading: categoryLoading, hidden: hidden)
                 wealth
             }
             .padding(.horizontal, NativeDesign.Layout.screenInset)

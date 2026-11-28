@@ -209,3 +209,38 @@ struct NativeBudgetMapCard: View {
         }
     }
 }
+
+/// ANALYSIS-CLARITY-97: what a normal month costs, from the spending categories of the chosen months, without
+/// transfers, investments and savings moves; the three biggest categories per month underneath.
+struct NativeNormalMonthCard: View {
+    let rows: [Record]
+    let months: Int
+    let loading: Bool
+    let hidden: Bool
+    static let excluded = ["trasferim", "investiment", "risparmi", "giroconto", "accantonament"]
+    static func spending(_ rows: [Record]) -> [(name: String, amount: Double)] {
+        rows.map { (name: $0.text("name", fallback: "Altro"), amount: $0.amount("amount")) }
+            .filter { row in row.amount > 0 && !excluded.contains { row.name.lowercased().contains($0) } }
+            .sorted { $0.amount > $1.amount }
+    }
+    var body: some View {
+        let spending = Self.spending(rows), count = Double(max(1, months))
+        let perMonth = spending.reduce(0) { $0 + $1.amount } / count
+        LOAnalysisCard(title: "Spese di un mese normale", trailing: months == 1 ? "ultimo mese" : "ultimi " + String(months) + " mesi", identifier: "finance-normal-month") {
+            if loading && rows.isEmpty { ProgressView().frame(maxWidth: .infinity, minHeight: NativeDesign.Layout.touchTarget) }
+            else if spending.isEmpty { Text("Nessuna spesa nel periodo").font(.subheadline).foregroundStyle(NativeDesign.secondary) }
+            else {
+                Text(hidden ? "•••• €" : perMonth.euro).font(.title.bold()).monospacedDigit()
+                Text("Media al mese delle spese del budget, senza trasferimenti, investimenti e soldi messi da parte.")
+                    .font(.footnote).foregroundStyle(NativeDesign.secondary)
+                ForEach(Array(spending.prefix(3).enumerated()), id: \.offset) { _, row in
+                    HStack {
+                        Text(row.name).font(.subheadline)
+                        Spacer(minLength: NativeDesign.Space.small)
+                        Text(hidden ? "••••" : (row.amount / count).euro + " al mese").font(.subheadline).monospacedDigit().foregroundStyle(NativeDesign.secondary)
+                    }
+                }
+            }
+        }
+    }
+}
