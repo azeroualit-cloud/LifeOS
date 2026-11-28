@@ -4,7 +4,7 @@ name: LifeOS site category tools 96 (audit, deploy)
 # commit, one after the other in the same job so the two uploads never overwrite each other. Both start from the
 # live module, write nothing if their anchors are not found exactly once, verify the upload and roll back on failure.
 # A push that changes this file is the deliberate start.
-# Attempt 3: site page with SUPPLEMENT-UNIT-2026-11-27 (category tools already live)
+# Attempt 4: site page with Controllo dati (WORKFLOW-ADVICE-97)
 on:
   push:
     branches: ['codex/build93']
@@ -15,7 +15,7 @@ concurrency:
 permissions:
   contents: read
 env:
-  SITE_COMMIT: e35fcffa137d7043fb91a456f488cb27f5a422fc
+  SITE_COMMIT: 920bc7eab9c540f0cb4a3a50fca65b43f6929aca
 jobs:
   deploy:
     if: github.repository == 'azeroualit-cloud/LifeOS' && github.ref == 'refs/heads/codex/build93'
@@ -39,7 +39,7 @@ jobs:
           python3 - <<'PY'
           import re, pathlib
           html = pathlib.Path('site/app.html').read_text(encoding='utf-8')
-          assert 'getFinanceCategoryUsage' in html and 'moveFinanceCategory' in html and 'fdAppEntry' in html
+          assert 'lifeos-datacheck97' in html and 'getFinanceCategoryUsage' in html and 'moveFinanceCategory' in html and 'fdAppEntry' in html
           for i, script in enumerate(re.findall(r'<script[^>]*>(.*?)</script>', html, re.S)):
               pathlib.Path(f'/tmp/ui-{i}.js').write_text(script, encoding='utf-8')
           PY
