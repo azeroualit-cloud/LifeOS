@@ -4,7 +4,7 @@ name: LifeOS site category tools 96 (audit, deploy)
 # commit, one after the other in the same job so the two uploads never overwrite each other. Both start from the
 # live module, write nothing if their anchors are not found exactly once, verify the upload and roll back on failure.
 # A push that changes this file is the deliberate start.
-# Attempt 4: site page with Controllo dati (WORKFLOW-ADVICE-97)
+# Attempt 5: site page with Controllo dati and the four plan kinds (PLAN-KINDS-97)
 on:
   push:
     branches: ['codex/build93']
@@ -15,7 +15,7 @@ concurrency:
 permissions:
   contents: read
 env:
-  SITE_COMMIT: 920bc7eab9c540f0cb4a3a50fca65b43f6929aca
+  SITE_COMMIT: ead6de2ebd6b6b1edeb58f1fb9fe1fa201ced906
 jobs:
   deploy:
     if: github.repository == 'azeroualit-cloud/LifeOS' && github.ref == 'refs/heads/codex/build93'
