@@ -278,35 +278,55 @@ struct NativeSavingsSection: View {
     }
     var body: some View {
         Section("Obiettivo di risparmio") {
-            let progress = NativeSavingsProgress(summary: store.summary, planning: store.finance.record("planning"))
-            let months = counted, monthly = progress.missing / Double(months.count)
-            VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
-                HStack(alignment: .firstTextBaseline) {
-                    Text(hidden ? "••••" : progress.assets.euro).font(.title.bold()).monospacedDigit()
-                    Text(hidden ? "" : "di " + progress.target.euro).font(.subheadline).foregroundStyle(NativeDesign.secondary).monospacedDigit()
-                }
-                LOProgressBar(value: progress.assets, total: progress.target, color: NativeDesign.financialGreen, warnAbove: 10)
-                Text(hidden ? "Importi nascosti" : progress.missing <= 0 ? "Obiettivo raggiunto." :
-                        "Mancano " + progress.missing.euro + " in " + (months.count == 1 ? "1 mese" : String(months.count) + " mesi") + ": " + monthly.euro + " al mese.")
-                    .font(.subheadline).accessibilityIdentifier("savings-monthly")
-            }
-            .accessibilityElement(children: .combine)
-            .accessibilityIdentifier("finance-total-assets")
+            summaryCard(NativeSavingsProgress(summary: store.summary, planning: store.finance.record("planning")))
             NativeMonthPicker(title: "Fino a", selection: Binding(get: { end }, set: { endMonth = $0 }))
-            Menu {
-                ForEach((try? NativePlanRules.months(CivilDate.month(), max(CivilDate.month(), end))) ?? [], id: \.self) { month in
-                    Button { toggle(month) } label: {
-                        Label(CivilDate.monthTitle(month), systemImage: skipSet.contains(month) ? "xmark.circle" : "checkmark.circle")
-                    }
-                }
-            } label: {
-                LabeledContent("Mesi esclusi", value: skipSet.isEmpty ? "nessuno" : skipSet.sorted().map { CivilDate.monthAbbreviation($0) }.joined(separator: ", "))
-            }
-            .accessibilityIdentifier("savings-skip-months")
-            Text("Di cui fondo emergenza " + (hidden ? "••••" : progress.reserved.euro + " di " + progress.emergency.euro) + ".")
+            skipMenu
+            Text(emergencyText(NativeSavingsProgress(summary: store.summary, planning: store.finance.record("planning"))))
                 .font(.footnote).foregroundStyle(NativeDesign.secondary)
             Button("Obiettivo e fondo emergenza") { router.sheet = .planning }
         }
+    }
+    private func goalText(_ progress: NativeSavingsProgress) -> String {
+        if hidden { return "Importi nascosti" }
+        if progress.missing <= 0 { return "Obiettivo raggiunto." }
+        let count = counted.count
+        let monthly: Double = progress.missing / Double(count)
+        let span: String = count == 1 ? "1 mese" : String(count) + " mesi"
+        return "Mancano " + progress.missing.euro + " in " + span + ": " + monthly.euro + " al mese."
+    }
+    private func emergencyText(_ progress: NativeSavingsProgress) -> String {
+        let value: String = hidden ? "••••" : progress.reserved.euro + " di " + progress.emergency.euro
+        return "Di cui fondo emergenza " + value + "."
+    }
+    private func summaryCard(_ progress: NativeSavingsProgress) -> some View {
+        VStack(alignment: .leading, spacing: NativeDesign.Space.small) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(hidden ? "••••" : progress.assets.euro).font(.title.bold()).monospacedDigit()
+                Text(hidden ? "" : "di " + progress.target.euro).font(.subheadline).foregroundStyle(NativeDesign.secondary).monospacedDigit()
+            }
+            LOProgressBar(value: progress.assets, total: progress.target, color: NativeDesign.financialGreen, warnAbove: 10)
+            Text(goalText(progress)).font(.subheadline).accessibilityIdentifier("savings-monthly")
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("finance-total-assets")
+    }
+    private var skipLabel: String {
+        skipSet.isEmpty ? "nessuno" : skipSet.sorted().map { CivilDate.monthAbbreviation($0) }.joined(separator: ", ")
+    }
+    private var selectableMonths: [String] {
+        (try? NativePlanRules.months(CivilDate.month(), max(CivilDate.month(), end))) ?? []
+    }
+    private var skipMenu: some View {
+        Menu {
+            ForEach(selectableMonths, id: \.self) { month in
+                Button { toggle(month) } label: {
+                    Label(CivilDate.monthTitle(month), systemImage: skipSet.contains(month) ? "xmark.circle" : "checkmark.circle")
+                }
+            }
+        } label: {
+            LabeledContent("Mesi esclusi", value: skipLabel)
+        }
+        .accessibilityIdentifier("savings-skip-months")
     }
     private func toggle(_ month: String) {
         var set = skipSet
