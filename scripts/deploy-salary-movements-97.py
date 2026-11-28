@@ -7,7 +7,7 @@ totals that use the payslips' gross do not change. Starts from the live modules 
 exactly once: nothing is written. Upload verified with rollback (shared helper). Never logs source.
 """
 from pathlib import Path
-import importlib.util
+import importlib.util, posixpath, re
 
 MARKER = '/* LIFEOS_SALARY_MOVEMENTS_97 */'
 ANCHOR = 'const payrollGross = salaryHistory.reduce((n, r) => n + r.gross, 0);'
@@ -40,9 +40,20 @@ def transform(source):
 
 
 def salary_module(entry, parts):
-    holders = [name for name, kind, data in parts
-               if 'source-map' not in kind and not name.endswith('.map') and (ANCHOR in data.decode('utf-8', 'ignore') or MARKER in data.decode('utf-8', 'ignore'))]
-    print('SALARY_MOVEMENTS_MODULES count=%d' % len(holders))
+    """The module holding the salary code that the entry actually imports (closest one); stale copies are ignored."""
+    sources = {name: data.decode('utf-8', 'ignore') for name, kind, data in parts if 'source-map' not in kind and not name.endswith('.map')}
+    distances, queue = {entry: 0}, [entry]
+    while queue:
+        name = queue.pop(0)
+        for target in re.findall(r'''(?:from\s*|import\s*)['"]([^'"]+)['"]''', sources.get(name, '')):
+            resolved = posixpath.normpath(posixpath.join(posixpath.dirname(name), target)) if target.startswith('.') else target
+            if resolved in sources and resolved not in distances:
+                distances[resolved] = distances[name] + 1; queue.append(resolved)
+    holders = [name for name in distances if ANCHOR in sources.get(name, '') or MARKER in sources.get(name, '')]
+    print('SALARY_MOVEMENTS_MODULES all=%d reachable=%d' % (sum(ANCHOR in d or MARKER in d for d in sources.values()), len(holders)))
+    if holders:
+        closest = min(distances[name] for name in holders)
+        holders = [name for name in holders if distances[name] == closest]
     if len(holders) != 1:
         raise RuntimeError('Modulo degli stipendi non univoco (%d); nessuna scrittura.' % len(holders))
     return holders[0]

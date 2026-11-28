@@ -1,6 +1,7 @@
 name: LifeOS salary movements 97 (audit, deploy)
 # SALARY-FROM-MOVEMENTS-97: salary history also from Stipendio movements for months without a payslip, on both Workers
 # (DEPLOY-WORKERS-93). Live modules, anchors exactly once, verified upload with rollback. A push changing this file starts it.
+# Attempt 2: the site Worker has a stale copy of the module; patch only the one the entry imports.
 on:
   push:
     branches: ['codex/build93']

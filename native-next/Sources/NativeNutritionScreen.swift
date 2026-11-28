@@ -20,50 +20,90 @@ struct NativeNutritionScreen: View {
         return .direct(id: editing ?? draftID, date: date, protein: p, carbohydrate: c, fat: f, fibre: fi, preserving: nutrition.entries.first { $0.id == editing })
     }
 
-    @State private var grouping: NativeNutritionGrouping = .days
-    @State private var selectedBar: String?
+    @State private var range: NativeHistoryRange = .month
+    @State private var customFrom = Calendar.current.date(byAdding: .day, value: -13, to: .now) ?? .now
+    @State private var customTo = Date.now
+    @State private var selectedDay: Date?
+    @State private var selectedWeek: String?
 
-    private var bars: [NativeNutritionBar] {
-        let macros = health.nutrientsByDay.mapValues { NativeMacroDay(protein: $0[.dietaryProtein] ?? 0, carbohydrate: $0[.dietaryCarbohydrates] ?? 0, fat: $0[.dietaryFatTotal] ?? 0) }
-        return NativeNutritionBars.bars(macros, grouping: grouping)
+    private var macros: [Date: NativeMacroDay] {
+        var out: [Date: NativeMacroDay] = [:]
+        for (day, values) in health.nutrientsByDay {
+            out[NativeHealthWeek.calendar.startOfDay(for: day)] = NativeMacroDay(protein: values[.dietaryProtein] ?? 0, carbohydrate: values[.dietaryCarbohydrates] ?? 0, fat: values[.dietaryFatTotal] ?? 0)
+        }
+        return out
     }
     private func whole(_ value: Double) -> String { value.formatted(.number.precision(.fractionLength(0))) }
     private func key(_ bar: NativeNutritionBar) -> String { String(Int(bar.start.timeIntervalSince1970)) }
+    /// Today when it has data, otherwise the most recent day with food or macros.
+    private func defaultDay(_ macros: [Date: NativeMacroDay], start: Date, end: Date) -> Date {
+        let calendar = NativeHealthWeek.calendar
+        let fromMacros = macros.filter { $0.value.calories > 0 }.map(\.key)
+        let fromFoods = nutrition.entries.filter(\.confirmed).map { calendar.startOfDay(for: $0.date) }
+        return Set(fromMacros + fromFoods).filter { $0 >= start && $0 <= end }.max() ?? end
+    }
 
-    /// Cronologia (build 93 preview): grouping, stacked columns, selected detail,
-    /// entries to complete; the day-grouped list keeps edit and delete.
+    /// HISTORY-REDESIGN-97: interval chips, coloured calendar, selected day with its meals,
+    /// averages and one column per week; meals keep edit and delete.
     var body: some View {
-        let bars = self.bars
+        let macros = self.macros
         let targets = health.goalTargets
-        let todayBar = grouping == .days ? bars.first { Calendar.current.isDateInToday($0.start) } : nil
-        let selected = bars.first { key($0) == selectedBar } ?? todayBar ?? bars.last
+        let span = NativeHistoryDays.span(range, from: customFrom, to: customTo)
+        let day = selectedDay.map { min(max($0, span.start), span.end) } ?? defaultDay(macros, start: span.start, end: span.end)
+        let dayBar = NativeHistoryDays.average(macros, start: day, end: day, name: NativeHistoryDays.dayName(day))
+        let mean = NativeHistoryDays.average(macros, start: span.start, end: span.end, name: "Media al giorno")
+        let weeks = NativeHistoryDays.weeks(macros, start: span.start, end: span.end)
+        let meals = NativeNutritionHistory.days(nutrition.entries).filter { NativeHealthWeek.calendar.isDate($0.date, inSameDayAs: day) }
         let pending = nutrition.entries.filter { !$0.confirmed && $0.deletionPending != true }
         Form {
             Section {
-                LOSegmented(options: NativeNutritionGrouping.allCases.map { (title: $0.title, id: String($0.rawValue)) }, selection: Binding(
-                    get: { grouping.title }, set: { title in grouping = NativeNutritionGrouping.allCases.first { $0.title == title } ?? .days; selectedBar = nil }),
-                    identifierPrefix: "nutrition-grouping-")
+                LOSegmented(options: NativeHistoryRange.allCases.map { (title: $0.title, id: String($0.rawValue)) }, selection: Binding(
+                    get: { range.title }, set: { title in range = NativeHistoryRange.allCases.first { $0.title == title } ?? .month; selectedDay = nil; selectedWeek = nil }),
+                    identifierPrefix: "nutrition-range-")
                     .listRowBackground(Color.clear)
                     .listRowInsets(EdgeInsets())
             }
+            if range == .custom {
+                Section {
+                    DatePicker("Dal", selection: $customFrom, in: ...Date.now, displayedComponents: .date)
+                    DatePicker("Al", selection: $customTo, in: ...Date.now, displayedComponents: .date)
+                }
+            }
+            Section {
+                NativeNutritionCalendar(start: span.start, end: span.end, macros: macros, goal: targets?.calories,
+                                        selected: Binding(get: { day }, set: { selectedDay = $0 }))
+                    .padding(.vertical, NativeDesign.Space.small)
+            }
+            Section {
+                detail(dayBar, targets: targets)
+                Text(mealCount(meals))
+                    .font(.footnote).foregroundStyle(NativeDesign.secondary)
+            }
+            ForEach(meals) { group in
+                Section {
+                    ForEach(group.entries) { entry in mealRow(entry) }
+                } header: {
+                    Text(group.date.formatted(date: .complete, time: .omitted))
+                        .accessibilityIdentifier("nutrition-history-day-" + CivilDate.day(group.date))
+                }
+            }
+            Section {
+                detail(mean, targets: targets)
+                Text("Giorni registrati " + String(mean.days) + " di " + String(NativeHistoryDays.days(span.start, span.end).count))
+                    .font(.footnote).foregroundStyle(NativeDesign.secondary)
+                    .accessibilityIdentifier("nutrition-range-days")
+            }
             Section {
                 HStack {
-                    Text("Media al giorno").font(.headline)
+                    Text("Media per settimana").font(.headline)
                     Spacer()
                     legend("P", NativeDesign.macroProtein)
                     legend("C", NativeDesign.macroCarbohydrate)
                     legend("G", NativeDesign.macroFat)
                 }
-                LOStackedColumns(columns: bars.map { bar in
-                    LOStackedColumn(id: key(bar), label: bar.label, segments: [
-                        LOSegment(id: "p", value: bar.protein * 4, color: NativeDesign.macroProtein),
-                        LOSegment(id: "c", value: bar.carbohydrate * 4, color: NativeDesign.macroCarbohydrate),
-                        LOSegment(id: "f", value: bar.fat * 9, color: NativeDesign.macroFat)],
-                        accessibilityLabel: bar.name + ": " + (bar.days == 0 ? "nessun dato" : whole(bar.calories) + " kcal"))
-                }, goal: targets?.calories, selection: Binding(get: { selected.map(key) }, set: { selectedBar = $0 }),
-                identifierPrefix: "nutrition-bar-")
-                .padding(.vertical, NativeDesign.Space.small)
-                if let selected { detail(selected, targets: targets) }
+                LOStackedColumns(columns: weeks.map(column), goal: targets?.calories, selection: $selectedWeek, identifierPrefix: "nutrition-week-")
+                    .padding(.vertical, NativeDesign.Space.small)
+                if let week = weeks.first(where: { key($0) == selectedWeek }) { detail(week, targets: targets) }
             }
             if !pending.isEmpty {
                 Section("Da completare") {
@@ -112,33 +152,6 @@ struct NativeNutritionScreen: View {
                     if let error = nutrition.error { Text(error).foregroundStyle(NativeDesign.danger) }
                 }
             }
-            ForEach(NativeNutritionHistory.days(nutrition.entries)) { day in
-                Section {
-                    ForEach(day.entries) { entry in
-                        if entry.deletionPending == true {
-                            VStack(alignment: .leading) {
-                                Text("Eliminazione da completare")
-                                Text(entry.date.formatted(date: .abbreviated, time: .omitted)).font(.footnote)
-                                Button("Riprova eliminazione") { remove(entry.id) }.disabled(nutrition.busy)
-                            }
-                        } else if entry.confirmed {
-                            Button { load(entry) } label: {
-                                VStack(alignment: .leading) {
-                                    if let name = entry.foodName { Text(name) }
-                                    Text(entry.date.formatted(date: .abbreviated, time: .omitted))
-                                    if let quantity = entry.quantityDescription { Text(quantity).font(.footnote).foregroundStyle(.secondary) }
-                                    Text(entry.nutritionSummary).font(.footnote).foregroundStyle(.secondary)
-                                }
-                            }
-                            .swipeActions { Button("Elimina", role: .destructive) { deleting = entry.id }.disabled(nutrition.busy) }
-                            .contextMenu { Button("Elimina registrazione", role: .destructive) { deleting = entry.id }.disabled(nutrition.busy) }
-                        }
-                    }
-                } header: {
-                    Text(day.date.formatted(date: .complete, time: .omitted))
-                        .accessibilityIdentifier("nutrition-history-day-" + CivilDate.day(day.date))
-                }
-            }
         }.modifier(NativeListAppearance()).navigationTitle("Cronologia").navigationBarTitleDisplayMode(.inline)
             .confirmationDialog("Eliminare questa registrazione e i suoi campioni LifeOS da Apple Salute?", isPresented: Binding(get: { deleting != nil }, set: { if !$0 { deleting = nil } })) {
                 Button("Elimina da LifeOS e Apple Salute", role: .destructive) { if let id = deleting { remove(id) }; deleting = nil }
@@ -150,6 +163,36 @@ struct NativeNutritionScreen: View {
                     Button("Avanti") { self.focusedField = fields[index + 1] }
                 }
                 Button("Fine") { focusedField = nil }.accessibilityIdentifier("nutrition-keyboard-done") } }
+    }
+    private func mealCount(_ meals: [NativeNutritionHistory.Day]) -> String {
+        let count = meals.first?.entries.filter(\.confirmed).count ?? 0
+        return count == 0 ? "Nessun pasto registrato" : "Pasti " + String(count)
+    }
+    private func column(_ bar: NativeNutritionBar) -> LOStackedColumn {
+        LOStackedColumn(id: key(bar), label: bar.label, segments: [
+            LOSegment(id: "p", value: bar.protein * 4, color: NativeDesign.macroProtein),
+            LOSegment(id: "c", value: bar.carbohydrate * 4, color: NativeDesign.macroCarbohydrate),
+            LOSegment(id: "f", value: bar.fat * 9, color: NativeDesign.macroFat)],
+            accessibilityLabel: bar.name + ": " + (bar.days == 0 ? "nessun dato" : whole(bar.calories) + " kcal"))
+    }
+    @ViewBuilder private func mealRow(_ entry: NativeNutritionEntry) -> some View {
+        if entry.deletionPending == true {
+            VStack(alignment: .leading) {
+                Text("Eliminazione da completare")
+                Text(entry.date.formatted(date: .abbreviated, time: .omitted)).font(.footnote)
+                Button("Riprova eliminazione") { remove(entry.id) }.disabled(nutrition.busy)
+            }
+        } else if entry.confirmed {
+            Button { load(entry) } label: {
+                VStack(alignment: .leading) {
+                    if let name = entry.foodName { Text(name) }
+                    if let quantity = entry.quantityDescription { Text(quantity).font(.footnote).foregroundStyle(.secondary) }
+                    Text(entry.nutritionSummary).font(.footnote).foregroundStyle(.secondary)
+                }
+            }
+            .swipeActions { Button("Elimina", role: .destructive) { deleting = entry.id }.disabled(nutrition.busy) }
+            .contextMenu { Button("Elimina registrazione", role: .destructive) { deleting = entry.id }.disabled(nutrition.busy) }
+        }
     }
     private func retry(_ entry: NativeNutritionEntry) {
         Task { if await nutrition.save(entry, retry: true) { if editing == entry.id { clear() }; await health.refresh() } }
